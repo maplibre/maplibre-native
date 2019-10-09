@@ -1,0 +1,337 @@
+version: 2.1
+
+workflows:
+  version: 2
+  mapbox-gl-native-android:
+    jobs:
+      - android-arm-template:
+          name: android-debug-arm-v8
+      - android-release:
+          filters:
+            tags:
+              only: /android-v.*/
+
+commands:
+  npm-install:
+    steps:
+      - run:
+          name: npm install
+          command: npm install --ignore-scripts
+  prepare-ccache:
+    steps:
+      - run:
+          name: Prepare ccache
+          command: |
+            # CircleCI doesn't have any way to embed arbitrary environment variables or command output
+            # into cache keys, so we're using the workaround of writing the desired content to a file,
+            # and then using `{{ checksum "filename" }}` in the cache key.
+            echo "$CIRCLE_BRANCH"
+            echo "$CIRCLE_BRANCH" > .circle-branch
+            echo "$CIRCLE_SHA1"
+            echo "$CIRCLE_SHA1" > .circle-sha1
+            echo "$CIRCLE_TARGET_BRANCH"
+            echo "${CIRCLE_TARGET_BRANCH:master}" > .circle-target-branch
+            echo "$CIRCLE_MERGE_BASE"
+            echo "${CIRCLE_MERGE_BASE:master}" > .circle-merge-base
+            ccache --clear
+  reset-ccache-stats:
+    steps:
+      - run:
+          name: Clear ccache statistics
+          command: |
+            ccache --zero-stats
+            ccache --max-size=2G
+            ccache --show-stats
+  show-ccache-stats:
+    steps:
+      - run:
+          name: Show ccache statistics
+          command: ccache --show-stats
+  save-node_modules-cache:
+    steps:
+      - save_cache:
+          name: Save node_modules cache
+          key: 'node_modules/v1/{{ arch }}/{{ checksum "package.json" }}'
+          paths: [ "node_modules" ]
+  restore-node_modules-cache:
+    steps:
+      - restore_cache:
+          name: Restore node_modules cache
+          keys:
+            - 'node_modules/v1/{{ arch }}/{{ checksum "package.json" }}'
+            - 'node_modules/v1/{{ arch }}'
+  save-ccache:
+    steps:
+      - save_cache:
+          name: Save ccache
+          key: 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}/{{ checksum ".circle-branch" }}/{{ checksum ".circle-sha1" }}'
+          paths: [ "~/.ccache" ]
+  restore-ccache:
+    steps:
+      - restore_cache:
+          name: Restore ccache
+          keys:
+            - 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}/{{ checksum ".circle-branch" }}/{{ checksum ".circle-sha1" }}'
+            - 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}/{{ checksum ".circle-branch" }}'
+            - 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}/{{ checksum ".circle-target-branch" }}/{{ checksum ".circle-merge-base" }}'
+            - 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}/{{ checksum ".circle-target-branch" }}'
+            - 'ccache/v1/{{ arch }}/{{ .Environment.CIRCLE_JOB }}'
+  save-gradle-cache:
+    steps:
+      - save_cache:
+          name: Save gradle cache
+          key: 'gradle/v1/{{ checksum "gradle/dependencies.gradle" }}/{{ checksum "build.gradle" }}/{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}'
+          paths: [ "/root/.gradle" ]
+  restore-gradle-cache:
+    steps:
+      - restore_cache:
+          name: Restore gradle cache
+          keys:
+            - 'gradle/v1/{{ checksum "gradle/dependencies.gradle" }}/{{ checksum "build.gradle" }}/{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}'
+            - 'gradle/v1'
+  install-dependencies:
+    parameters:
+      node_modules:
+        type: boolean
+        default: true
+      ccache:
+        type: boolean
+        default: true
+      gradle:
+        type: boolean
+        default: false
+    steps:
+      - checkout
+      - when:
+          condition: << parameters.node_modules >>
+          steps: [ restore-node_modules-cache, npm-install ]
+      - when:
+          condition: << parameters.ccache >>
+          steps: [ prepare-ccache, restore-ccache, reset-ccache-stats ]
+      - when:
+          condition: << parameters.gradle >>
+          steps: [ restore-gradle-cache ]
+  save-dependencies:
+    parameters:
+      node_modules:
+        type: boolean
+        default: true
+      ccache:
+        type: boolean
+        default: true
+      gradle:
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition: << parameters.node_modules >>
+          steps: [ save-node_modules-cache ]
+      - when:
+          condition: << parameters.ccache >>
+          steps: [ save-ccache, show-ccache-stats ]
+      - when:
+          condition: << parameters.gradle >>
+          steps: [ save-gradle-cache ]
+  setup-llvm-symbolizer:
+    steps:
+      - run:
+          name: Environment Setup
+          command: |
+            # LLVM has a hard check for "llvm-symbolizer" and doesn't support suffixed executables
+            ln -s /usr/bin/llvm-symbolizer-* /usr/bin/llvm-symbolizer
+            # We'll use tee to redirect stderr to a file so we can check for sanitiziation
+            # https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/1059947
+            sed -i 's/"$@" 2>&1/"$@"/' /usr/bin/xvfb-run
+  configure-cmake:
+    steps:
+      - run:
+          name: CMake configuration step
+          command: |
+            mkdir -p build
+            cd build
+            cmake -DWITH_COVERAGE=${WITH_COVERAGE:0} -DWITH_OSMESA=${WITH_OSMESA:0} -DWITH_EGL=${WITH_EGL:0} ..
+            cd ..
+  login-google-cloud-platform:
+    steps:
+      - run:
+          name: Log in to Google Cloud Platform
+          command: |
+            if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+              echo "${GLCLOUD_SERVICE_JSON}" > secret.json
+              gcloud auth activate-service-account --key-file secret.json --project mapbox-gl-native-android
+              rm secret.json
+            fi
+
+jobs:
+  # ------------------------------------------------------------------------------
+  android-arm-template:
+    parameters:
+      stl:
+        type: string
+        default: "c++_static"
+      image:
+        type: string
+        default: android-ndk-r20:7b7c4b42cf
+      firebase_device_id:
+        type: string
+        default: sailfish
+      firebase_device_os:
+        type: string
+        default: "26"
+      abi:
+        type: string
+        default: "arm-v8"
+    docker:
+      - image: mbgl/<< parameters.image >>
+    resource_class: xlarge
+    working_directory: /src
+    environment:
+      LIBSYSCONFCPUS: 8
+      JOBS: 8
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
+      MBGL_ANDROID_STL: << parameters.stl >>
+    steps:
+      - install-dependencies: { gradle: true }
+      - run:
+          name: Initialize vendor submodules
+          command: git submodule update --init --recursive vendor
+      - run:
+          name: Check code style
+          command: make android-check
+      - run:
+          name: Run Android unit tests
+          command: make run-android-unit-test
+      - run:
+          name: Build libmapbox-gl.so for << parameters.abi >>
+          command: make android-lib-<< parameters.abi >>
+      - run:
+          name: Generate Espresso sanity tests
+          command: make test-code-android
+      - run:
+          name: Build Test APK
+          command: |
+            if [ -n "${MAPBOX_DEVELOPER_CONFIG_XML}" ]; then
+              echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+              make android-ui-test-<< parameters.abi >>
+            fi
+      - save-dependencies: { gradle: true }
+      - login-google-cloud-platform
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 20m
+          command: |
+            if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+              gcloud firebase test android models list
+              gcloud firebase test android run --type instrumentation \
+                --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
+                --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
+                --device-ids  << parameters.firebase_device_id >> --os-version-ids << parameters.firebase_device_os >> --locales en --orientations portrait --timeout 20m \
+                --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir mapbox-android-sdk-${CIRCLE_BUILD_NUM}
+            fi
+      - store_artifacts:
+          path: MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
+          destination: .
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/reports/lint-results.html
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/reports/lint-results.xml
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/lint-baseline.xml
+      - store_artifacts:
+          path: MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
+      - store_artifacts:
+          path: MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
+      - store_artifacts:
+          path: MapboxGLAndroidSDKTestApp/lint-baseline.xml
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+
+  # ------------------------------------------------------------------------------
+  android-release:
+    docker:
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
+    resource_class: xlarge
+    working_directory: /src
+    environment:
+      LIBSYSCONFCPUS: 8
+      JOBS: 8
+      BUILDTYPE: Release
+      IS_LOCAL_DEVELOPMENT: false
+    steps:
+      - install-dependencies: { gradle: true }
+      - run:
+          name: Initialize vendor submodules
+          command: git submodule update --init --recursive vendor
+      - run:
+          name: Android nitpick
+          command: make run-android-nitpick
+      - run:
+          name: Trigger core benchmark run
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u $MOBILE_METRICS_TOKEN -d build_parameters[CIRCLE_JOB]=android-core-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+      - run:
+          name: Trigger android benchmark run
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u $MOBILE_METRICS_TOKEN -d build_parameters[CIRCLE_JOB]=android-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+      - run:
+          name: Generate Maven credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - run:
+          name: Update version name
+          command: |
+            if [[ $CIRCLE_TAG == android-v* ]]; then
+              sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${CIRCLE_TAG:9}/" MapboxGLAndroidSDK/gradle.properties
+            fi
+      - run:
+          name: Build package
+          command: make apackage
+      - run:
+          name: Build release Test App
+          command: make android
+      - run:
+          name: Generate javadoc
+          command: make android-javadoc
+      - save-dependencies: { gradle: true }
+      - run:
+          name: gzip debugable .so files
+          command: |
+            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/arm64-v8a/libmapbox-gl.so && \
+            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/armeabi-v7a/libmapbox-gl.so && \
+            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86/libmapbox-gl.so && \
+            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86_64/libmapbox-gl.so
+      - store_artifacts:
+          path: MapboxGLAndroidSDKTestApp/build/outputs/apk/release
+          destination: .
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/arm64-v8a/libmapbox-gl.so.gz
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/armeabi-v7a/libmapbox-gl.so.gz
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86/libmapbox-gl.so.gz
+      - store_artifacts:
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86_64/libmapbox-gl.so.gz
+      - deploy:
+          name: Publish to Bintray
+          command: |
+            if [[ $CIRCLE_BRANCH == master ]] || [[ $CIRCLE_BRANCH == release-* ]] || [[ $CIRCLE_TAG == android-v* ]]; then
+              version=$(cat MapboxGLAndroidSDK/gradle.properties | grep "VERSION_NAME")
+              if [[ $version != *"SNAPSHOT"* ]]; then
+                make run-android-upload-to-bintray
+              else
+                make run-android-upload-to-artifactory
+              fi
+            fi

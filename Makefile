@@ -1,3 +1,25 @@
+export BUILDTYPE ?= Debug
+export IS_LOCAL_DEVELOPMENT ?= true
+export TARGET_BRANCH ?= master
+
+CMAKE ?= cmake
+
+
+ifeq ($(BUILDTYPE), Release)
+else ifeq ($(BUILDTYPE), RelWithDebInfo)
+else ifeq ($(BUILDTYPE), Sanitize)
+else ifeq ($(BUILDTYPE), Debug)
+else
+  $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
+endif
+
+buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
+
+HOST_PLATFORM = linux
+HOST_PLATFORM_VERSION = $(shell uname -m)
+export NINJA = platform/linux/ninja
+export JOBS ?= $(shell grep --count processor /proc/cpuinfo)
+
 #### Android targets ###########################################################
 
 MBGL_ANDROID_ABIS  = arm-v7;armeabi-v7a

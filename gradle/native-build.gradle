@@ -46,6 +46,9 @@ ext.nativeBuild = { nativeTargets ->
                             arguments "-DANDROID_CCACHE=/usr/bin/ccache"
                         }
 
+                        cFlags "-Qunused-arguments"
+                        cppFlags "-Qunused-arguments"
+
                         for (target in nativeTargets) {
                             targets target
                         }
