@@ -51,7 +51,7 @@ private def verifyVendorSubmodulePin(def dir, def prefix, def version) {
         throw new IllegalStateException("${dir} vendor repository is not checked out on the consumed binary's tag.\n" +
                 "Expected commit: " + expectedCommit + "(${prefix + version} tag).\n" +
                 "Actual commit: " + actualCommit + ".\n" +
-                "If you've updated the version in the dependencies.gradle file, make sure to bump the submodule pin in the platform/android/vendor/ directory to match the release tag.\n" +
+                "If you've updated the version in the dependencies.gradle file, make sure to bump the submodule pin in the /vendor directory to match the release tag.\n" +
                 "If you've bumped the pin, make sure to verify the version tag prefix in the android-nitpick.gradle file.")
     }
     output.close()

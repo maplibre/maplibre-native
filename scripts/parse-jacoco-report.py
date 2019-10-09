@@ -4,7 +4,7 @@ import os
 import re
 from io import open
 
-reportPath = os.getcwd() + "/platform/android/MapboxGLAndroidSDK/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+reportPath = os.getcwd() + "/MapboxGLAndroidSDK/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
 with open(reportPath, 'r', encoding='utf-8') as jacocoReport:
     line = jacocoReport.readline().strip()
 

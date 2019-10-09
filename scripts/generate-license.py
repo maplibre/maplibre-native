@@ -3,11 +3,11 @@
 import os
 import json
 
-path = os.getcwd() + "/platform/android/"
-with open(path + "LICENSE.md", 'w') as licenseFile:
+path = os.getcwd()
+with open(path + "/LICENSE.md", 'w') as licenseFile:
     licenseFile.write("<!-- This file was generated. Use `make android-license` to update. -->  \n")
     licenseFile.write("## Additional Mapbox GL licenses  \n")
-    with open(path + "MapboxGLAndroidSDK/build/reports/licenses/licenseReleaseReport.json", 'r') as dataFile:
+    with open(path + "/MapboxGLAndroidSDK/build/reports/licenses/licenseReleaseReport.json", 'r') as dataFile:
         data = json.load(dataFile)
 
         gradleLicensePlugin ="""

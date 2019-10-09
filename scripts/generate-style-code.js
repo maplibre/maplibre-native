@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const ejs = require('ejs');
-const spec = require('../../../scripts/style-spec');
+const spec = require('../vendor/mapbox-gl-native/scripts/style-spec');
 const _ = require('lodash');
 
 // FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
@@ -11,7 +11,7 @@ delete spec.layout_circle["circle-sort-key"]
 delete spec.layout_line["line-sort-key"]
 delete spec.layout_fill["fill-sort-key"]
 
-require('../../../scripts/style-code');
+require('../vendor/mapbox-gl-native/scripts/style-code');
 
 // Specification parsing //
 const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
@@ -361,34 +361,34 @@ global.supportsPropertyFunction = function (property) {
 // Template processing //
 
 // Java + JNI Light (Peer model)
-const lightJava = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/light.java.ejs', 'utf8'), {strict: true});
-const lightJavaUnitTests = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/light.junit.ejs', 'utf8'), {strict: true});
-writeIfModified(`platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/Light.java`, lightJava({properties: lightProperties}));
-writeIfModified(`platform/android/MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
+const lightJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/light.java.ejs', 'utf8'), {strict: true});
+const lightJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/light.junit.ejs', 'utf8'), {strict: true});
+writeIfModified(`MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/Light.java`, lightJava({properties: lightProperties}));
+writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
 
 // Java + JNI Layers (Peer model)
-const layerHpp = ejs.compile(fs.readFileSync('platform/android/src/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync('platform/android/src/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
-const layerJava = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/layer.java.ejs', 'utf8'), {strict: true});
-const layerJavaUnitTests = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
+const layerHpp = ejs.compile(fs.readFileSync('src/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
+const layerCpp = ejs.compile(fs.readFileSync('src/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
+const layerJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/layer.java.ejs', 'utf8'), {strict: true});
+const layerJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
 
 for (const layer of layers) {
-  writeIfModified(`platform/android/src/style/layers/${layer.type.replace('-', '_')}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`platform/android/src/style/layers/${layer.type.replace('-', '_')}_layer.cpp`, layerCpp(layer));
-  writeIfModified(`platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/${camelize(layer.type)}Layer.java`, layerJava(layer));
-  writeIfModified(`platform/android/MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/${camelize(layer.type)}LayerTest.java`, layerJavaUnitTests(layer));
+  writeIfModified(`src/style/layers/${layer.type.replace('-', '_')}_layer.hpp`, layerHpp(layer));
+  writeIfModified(`src/style/layers/${layer.type.replace('-', '_')}_layer.cpp`, layerCpp(layer));
+  writeIfModified(`MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/${camelize(layer.type)}Layer.java`, layerJava(layer));
+  writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/${camelize(layer.type)}LayerTest.java`, layerJavaUnitTests(layer));
 }
 
 // Java PropertyFactory
-const propertiesTemplate = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property_factory.java.ejs', 'utf8'), {strict: true});
+const propertiesTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property_factory.java.ejs', 'utf8'), {strict: true});
 writeIfModified(
-    `platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/PropertyFactory.java`,
+    `MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/PropertyFactory.java`,
     propertiesTemplate({layoutProperties: layoutProperties, paintProperties: paintProperties})
 );
 
 // Java Property
-const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync('platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property.java.ejs', 'utf8'), {strict: true});
+const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property.java.ejs', 'utf8'), {strict: true});
 writeIfModified(
-    `platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/Property.java`,
+    `MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/Property.java`,
     enumPropertyJavaTemplate({properties: enumProperties})
 );

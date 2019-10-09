@@ -64,7 +64,7 @@ make aproj
 
 #### linux
 
-run `make android-configuration` in the root folder of the project and open the Android Studio project in `/platform/android`.
+run `make android-configuration` in the root folder of the project and open in Android Studio.
 
 If you are using Arch Linux, install [ncurses5-compat-libs](https://aur.archlinux.org/packages/ncurses5-compat-libs).
 
@@ -88,7 +88,7 @@ With the first gradle invocation, gradle will take the value of the `MAPBOX_ACCE
 
 Run the configuration for the `MapboxGLAndroidSDKTestApp` module and select a device or emulator to deploy on. Based on the selected device, the c++ code will be compiled for the related processor architecture. You can see the project compiling in the `View > Tool Windows > Gradle Console`.
 
-More information about building and distributing this project in [DISTRIBUTE.md](https://github.com/mapbox/mapbox-gl-native/blob/master/platform/android/DISTRIBUTE.md).
+More information about building and distributing this project in [DISTRIBUTE.md](DISTRIBUTE.md).
 
 ### Additional resources
 

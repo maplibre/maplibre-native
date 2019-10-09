@@ -33,3 +33,6 @@ MapboxGLAndroidSDKTestApp/src/main/assets/integration/
 
 # Local AS configuration file
 gradle.properties
+
+# Node modules
+node_modules
