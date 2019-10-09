@@ -7,7 +7,7 @@
 namespace mbgl {
 namespace android {
 
-MBGL_PUBLIC void registerNatives(JavaVM* vm);
+MBGL_EXPORT void registerNatives(JavaVM* vm);
 
 } // namespace android
 } // namespace mbgl
