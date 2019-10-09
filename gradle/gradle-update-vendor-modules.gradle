@@ -1,0 +1,8 @@
+task updateVendorSubmodules {
+    doLast {
+        exec {
+            workingDir = "${rootDir}"
+            commandLine "git", "submodule", "update", "--init", "vendor"
+        }
+    }
+}

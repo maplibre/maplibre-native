@@ -1,0 +1,34 @@
+buildscript {
+    apply from: "${rootDir}/gradle/dependencies.gradle"
+
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath dependenciesList.licensesPlugin
+        classpath dependenciesList.kotlinPlugin
+        classpath dependenciesList.bintrayPlugin
+        classpath dependenciesList.artifactoryPlugin
+        classpath dependenciesList.androidPublishPlugin
+        classpath dependenciesList.jacocoPlugin
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        google()
+        jcenter()
+        // For publishing Maps SDK files to Bintray
+        maven { url 'https://mapbox.bintray.com/mapbox' }
+        // Snapshot repository
+        // maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    }
+    apply from: "${rootDir}/gradle/ktlint.gradle"
+}
+
+subprojects {
+    apply from: "${rootDir}/gradle/dependencies.gradle"
+}
