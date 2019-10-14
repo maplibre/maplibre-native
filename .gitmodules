@@ -13,3 +13,6 @@
 [submodule "platform/darwin/docs/theme"]
 	path = platform/darwin/docs/theme
 	url = https://github.com/mapbox/jazzy-theme.git
+[submodule "vendor/mapbox-gl-native"]
+	path = vendor/mapbox-gl-native
+	url = https://github.com/mapbox/mapbox-gl-native.git
