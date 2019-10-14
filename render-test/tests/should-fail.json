@@ -1,6 +1,0 @@
-{
-  "tests/file-size/fail-size-is-over": "Should fail, size is bigger than expected.",
-  "tests/file-size/fail-size-is-under": "Should fail, size is smaller than expected.",
-  "tests/file-size/fail-file-doesnt-match": "Should fail, doesn't match the expectation.",
-  "tests/file-size/fail-file-not-found": "Should fail, file not found."
-}

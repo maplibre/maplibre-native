@@ -1,2 +1,0 @@
-include/sqlite3.h
-src/sqlite3.c
