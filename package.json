@@ -14,7 +14,7 @@
   "dependencies": {},
   "devDependencies": {
     "ejs": "^2.5.7",
-    "esm": "~3.0.84",
+    "esm": "~3.1.0",
     "lodash": "^4.16.4",
     "pixelmatch": "^4.0.2"
   },
