@@ -4,7 +4,7 @@
 
 [![](https://www.mapbox.com/android-docs/assets/overview-map-sdk-322-9abe118316efb5910b6101e222a2e57c.png)](https://docs.mapbox.com/android/maps/overview/)
 
-The Mapbox Maps SDK for Android is a library based on [Mapbox GL Native](../../README.md) for embedding interactive map views with scalable, customizable vector maps onto Android devices.
+The Mapbox Maps SDK for Android is a library based on [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native/) for embedding interactive map views with scalable, customizable vector maps onto Android devices.
 
 ## Getting Started
 
@@ -22,10 +22,11 @@ These instructions are for developers interested in making code-level contributi
 
 #### Getting the source
 
-Clone the git repository
+Clone the git repository and pull in submodules:
 
 ```bash
-git clone git@github.com:mapbox/mapbox-gl-native.git && cd mapbox-gl-native
+git clone git@github.com:mapbox/mapbox-gl-native-android.git && cd mapbox-gl-native-android
+git submodule update --init --recursive
 ```
 
 #### Installing dependencies
@@ -73,7 +74,7 @@ If you are using Arch Linux, install [ncurses5-compat-libs](https://aur.archlinu
 #### Setup Checkstyle
 
 Mapbox uses specific IDE settings related to code and check style.
-See [checkstyle guide](https://github.com/mapbox/mapbox-gl-native/wiki/Setting-up-Mapbox-checkstyle) for configuration details.
+See [checkstyle guide](https://github.com/mapbox/mapbox-gl-native-android/wiki/Setting-up-Mapbox-checkstyle) for configuration details.
 
 #### Resolving duplicate file entries
 With buck build support, Android Studio can complain about duplicate source files. To remove this warning, open `MapboxGLAndroidSDK.iml` find the list of `excludeFolder` entries and add `<excludeFolder url="file://$MODULE_DIR$/../../../misc/" />` line.
@@ -98,7 +99,7 @@ Instead of using the latest stable release of the Maps SDK for Android, you can 
 
 ```java
 // Mapbox SDK dependency
-implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:7.3.0-SNAPSHOT'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.5.0-SNAPSHOT'
 ```
 
 You also need to have the section below in your build.gradle root folder to be able to resolve the SNAPSHOT dependencies:
@@ -115,4 +116,4 @@ allprojects {
 #### Symbolicating native crashes
 
 When hitting native crashes you can use ndk-stack to symbolicate crashes.
-More information in [this](https://github.com/mapbox/mapbox-gl-native/wiki/Getting-line-numbers-from-an-Android-crash-with-ndk-stack) guide.
+More information in [this](https://github.com/mapbox/mapbox-gl-native-android/wiki/Getting-line-numbers-from-an-Android-crash-with-ndk-stack) guide.
