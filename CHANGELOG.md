@@ -2,6 +2,16 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 8.5.0-alpha.3 - October 18, 2019
+
+### Bug fixes
+ - Fix runtime exceptions that occurred when a manually built camera object without padding was serialized [#15788](https://github.com/mapbox/mapbox-gl-native/pull/15788)
+ - Fix icon-text-fit to take in account the additional 1px texture padding when scaling [#15634](https://github.com/mapbox/mapbox-gl-native/pull/15634)
+ - Fix occasional crashes during downloading thousands of offline region tiles [#15818](https://github.com/mapbox/mapbox-gl-native/pull/15818)
+
+### Project
+ - Moved project location from `mapbox-gl-native` to `mapbox-gl-native-android`
+
 ## 8.5.0-alpha.2 - October 10, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.5.0-alpha.1...android-v8.5.0-alpha.2) since [Mapbox Maps SDK for Android v8.5.0-alpha.1](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.5.0-alpha.1):
 
