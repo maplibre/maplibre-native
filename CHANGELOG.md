@@ -2,10 +2,18 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
-## master
+## 8.5.0-alpha.2 - October 10, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.5.0-alpha.1...android-v8.5.0-alpha.2) since [Mapbox Maps SDK for Android v8.5.0-alpha.1](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.5.0-alpha.1):
+
+### Features
+ - Expose pre-fetching zoom delta, allows to granular control the delta on which we prefetch tiles [#15769](https://github.com/mapbox/mapbox-gl-native/pull/15769)
 
 ### Performance improvements
  - Improved rendering performance for the styles with multiple sources [#15756](https://github.com/mapbox/mapbox-gl-native/pull/15756)
+
+### Bug fixes
+ - Fixed runtime exceptions that occurred when a manually built camera object without padding was serialized. [#15788](https://github.com/mapbox/mapbox-gl-native/pull/15788)
+ - Keep Mapbox when obfuscating code with proguard [#15762](https://github.com/mapbox/mapbox-gl-native/pull/15762)
 
 ## 8.5.0-alpha.1 - October 3, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.4.0...android-v8.5.0-alpha.1) since [Mapbox Maps SDK for Android v8.4.0](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.4.0):
@@ -13,6 +21,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
  - Suppress network requests for expired tiles update, if these tiles are invisible. [#15741](https://github.com/mapbox/mapbox-gl-native/pull/15741)
  - Fixed opacity interpolation for composition expressions [#15738](https://github.com/mapbox/mapbox-gl-native/pull/15738)
  - Fixed an issue where `Projection#getMetersPerPixelAtLatitude` returned a value incorrectly divided by the pixel ratio. This also fixes an issue where `LocationComponent` accuracy circle's radius was artificially increased. [#15742](https://github.com/mapbox/mapbox-gl-native/pull/15742)
+ - Coalesce requests to the client for the same missing image [#15778](https://github.com/mapbox/mapbox-gl-native/pull/15778)
 
 ## 8.4.0 - September 25, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.4.0-beta.1...android-v8.4.0) since [Mapbox Maps SDK for Android v8.4.0-beta.1](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.4.0-beta.1): 
