@@ -5,6 +5,6 @@
       location = "group:ios.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../../build/ios/mbgl.xcodeproj">
+      location = "group:../../build/ios/Mapbox GL Native.xcodeproj">
    </FileRef>
 </Workspace>

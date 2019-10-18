@@ -135,10 +135,8 @@ endif
 
 $(IOS_PROJ_PATH): $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEPS)
 	mkdir -p $(IOS_OUTPUT_PATH)
-	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../.. \
-		-DCMAKE_TOOLCHAIN_FILE=../../platform/ios/toolchain.cmake \
-		-DMBGL_PLATFORM=ios \
-		-DMASON_PLATFORM=ios)
+	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native/next \
+		-DCMAKE_SYSTEM_NAME=iOS )
 
 $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettings.xcsettings
 	mkdir -p "$(IOS_USER_DATA_PATH)"
