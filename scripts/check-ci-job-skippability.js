@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+console.log("DISABLED — https://github.com/mapbox/mapbox-gl-native-ios/issues/19")
+process.exit(0)
+
 /*
 This script takes two parameters or three environment variables:
 
