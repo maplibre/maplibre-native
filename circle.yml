@@ -51,6 +51,11 @@ commands:
     - run:
         name: Prepare environment
         command: touch "$BASH_ENV" && ./scripts/environment.js | tee -a "$BASH_ENV"
+  prepare-submodules:
+    steps:
+    - run:
+        name: Prepare submodules
+        command: git submodule sync && git submodule update --init --recursive
   prepare-ccache:
     steps:
     - run:
@@ -124,6 +129,7 @@ commands:
         default: true
     steps:
       - checkout
+      - prepare-submodules
       - when:
           condition: << parameters.node_modules >>
           steps: [ restore-node_modules-cache, npm-install ]
