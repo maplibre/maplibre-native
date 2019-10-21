@@ -66,7 +66,7 @@ BUILD_DOCS ?= true
 ifeq ($(HOST_PLATFORM), macos)
 
 IOS_OUTPUT_PATH = build/ios
-IOS_PROJ_PATH = $(IOS_OUTPUT_PATH)/mbgl.xcodeproj
+IOS_PROJ_PATH = '$(IOS_OUTPUT_PATH)/Mapbox GL Native.xcodeproj'
 IOS_WORK_PATH = platform/ios/ios.xcworkspace
 IOS_USER_DATA_PATH = $(IOS_WORK_PATH)/xcuserdata/$(USER).xcuserdatad
 

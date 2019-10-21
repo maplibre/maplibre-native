@@ -59,7 +59,7 @@
                BlueprintIdentifier = "9771D7F76DA54F52A89268C6"
                BuildableName = "mbgl-test"
                BlueprintName = "mbgl-test"
-               ReferencedContainer = "container:../../build/macos/mbgl.xcodeproj">
+               ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -73,7 +73,7 @@
                BlueprintIdentifier = "D87DA13F4A80489CB4508EBD"
                BuildableName = "mbgl-benchmark"
                BlueprintName = "mbgl-benchmark"
-               ReferencedContainer = "container:../../build/macos/mbgl.xcodeproj">
+               ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
