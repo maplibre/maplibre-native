@@ -168,7 +168,7 @@ commands:
     - run:
         name: Build ios-test
         command: make ios-test
-        no_output_timeout: 2m
+        no_output_timeout: 5m
   build-ios-integration-test:
     steps:
     - run:
@@ -179,7 +179,7 @@ commands:
     - run:
         name: Build and run macOS tests
         command: make run-test
-        no_output_timeout: 2m
+        no_output_timeout: 5m
 
 
   check-public-symbols:
