@@ -4,7 +4,7 @@ This document explains how to build a development version of the Mapbox Maps SDK
 
 ### Requirements
 
-The Mapbox Maps SDK for macOS requires the macOS 10.11.0 SDK (or above) and Xcode 9.0 (or above). To use this SDK with Xcode 7.3.1, download and use a symbols build from the [releases](https://github.com/mapbox/mapbox-gl-native/releases) page.
+The Mapbox Maps SDK for macOS requires the macOS 10.11.0 SDK (or above) and Xcode 9.0 (or above). To use this SDK with Xcode 7.3.1, download and use a symbols build from the [releases](https://github.com/mapbox/mapbox-gl-native-ios/releases) page.
 
 Before building, follow these steps to install prerequisites:
 
@@ -30,7 +30,7 @@ To build the SDK from source:
 
 1. Clone the git repository:
    ```
-   git clone https://github.com/mapbox/mapbox-gl-native.git
+   git clone https://github.com/mapbox/mapbox-gl-native-ios.git
    cd mapbox-gl-native
    ```
    Note that this repository uses Git submodules. They'll be automatically checked out when you first run a `make` command,

@@ -1,4 +1,4 @@
-# [Mapbox Maps SDK for macOS](https://github.com/mapbox/mapbox-gl-native/tree/master/platform/macos/)
+# [Mapbox Maps SDK for macOS](https://github.com/mapbox/mapbox-gl-native-ios/tree/master/platform/macos/)
 
 Put interactive, scalable world maps into your native Cocoa application with the open-source Mapbox Maps SDK for macOS.
 
@@ -18,7 +18,7 @@ There are three ways to install the Mapbox Maps SDK for macOS:
 
 ### Manually
 
-1. Download the [latest Mapbox Maps SDK for macOS release](https://github.com/mapbox/mapbox-gl-native/releases/) from GitHub – look for a release that begins with “macos-”.
+1. Download the [latest Mapbox Maps SDK for macOS release](https://github.com/mapbox/mapbox-gl-native-ios/releases/) from GitHub – look for a release that begins with “macos-”.
 
 1. Open the project editor, select your application target, then go to the General tab. Drag Mapbox.framework into the “Embedded Binaries” section. (Don’t drag it into the “Linked Frameworks and Libraries” section; Xcode will add it there automatically.) In the sheet that appears, make sure “Copy items if needed” is checked, then click Finish.
 
@@ -27,7 +27,7 @@ There are three ways to install the Mapbox Maps SDK for macOS:
 The Mapbox Maps SDK for macOS is a binary-only dependency, so you’ll need Carthage 0.19 or above. In your [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#binary-only-frameworks), specify this dependency (plus an optional version requirement):
 
 ```
-binary "https://mapbox.github.io/mapbox-gl-native/macos/Mapbox-macOS-SDK.json"
+binary "https://mapbox.github.io/mapbox-gl-native-ios/macos/Mapbox-macOS-SDK.json"
 ```
 
 After running `carthage update`, you’ll find Mapbox.framework in the Carthage/Build/ folder. Follow [these instructions](https://github.com/Carthage/Carthage#if-youre-building-for-os-x) to integrate it into your project.
@@ -95,4 +95,4 @@ end script
 
 Full API documentation is included in this package, within the `documentation` folder, and [online](https://mapbox.github.io/mapbox-gl-native/macos/). The [Mapbox Maps SDK for iOS](https://docs.mapbox.com/ios/maps/) has [API documentation](https://docs.mapbox.com/ios/api/maps/) and [online examples](https://docs.mapbox.com/ios/maps/examples/) that apply to the Mapbox Maps SDK for macOS with few differences, mostly around unimplemented features like user location tracking.
 
-Mapbox does not officially support the macOS SDK to the same extent as the iOS SDK; however, [bug reports and pull requests](https://github.com/mapbox/mapbox-gl-native/issues/) are certainly welcome.
+Mapbox does not officially support the macOS SDK to the same extent as the iOS SDK; however, [bug reports and pull requests](https://github.com/mapbox/mapbox-gl-native-ios/issues/) are certainly welcome.

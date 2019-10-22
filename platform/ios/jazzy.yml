@@ -1,9 +1,9 @@
 module: Mapbox
 author: Mapbox
 author_url: https://www.mapbox.com/
-github_url: https://github.com/mapbox/mapbox-gl-native
+github_url: https://github.com/mapbox/mapbox-gl-native-ios
 dash_url: https://docs.mapbox.com/ios/docsets/Mapbox.xml
-copyright: '© 2014–2019 [Mapbox](https://www.mapbox.com/). See [license](https://github.com/mapbox/mapbox-gl-native/blob/master/LICENSE.md) for more details.'
+copyright: '© 2014–2019 [Mapbox](https://www.mapbox.com/). See [license](https://github.com/mapbox/mapbox-gl-native-ios/blob/master/LICENSE.md) for more details.'
 
 head: |
   <link rel='shortcut icon' href='https://www.mapbox.com/img/favicon.ico' type='image/x-icon' />

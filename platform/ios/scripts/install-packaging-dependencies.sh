@@ -54,7 +54,7 @@ if [[ -z `which jazzy` || $(jazzy -v) != "jazzy version: ${JAZZY_VERSION}" ]]; t
     fi
 
     if [ -z `which jazzy` ]; then
-        echo "Unable to install jazzy ($JAZZY_VERSION). See https://github.com/mapbox/mapbox-gl-native/blob/master/platform/ios/INSTALL.md"
+        echo "Unable to install jazzy ($JAZZY_VERSION). See https://github.com/mapbox/mapbox-gl-native-ios/blob/master/platform/ios/INSTALL.md"
         exit 1
     fi
 else

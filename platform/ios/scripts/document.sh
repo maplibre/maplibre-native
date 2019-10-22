@@ -38,7 +38,7 @@ step "Generating jazzy docs for ${SHORT_VERSION}…"
 jazzy \
     --config platform/ios/jazzy.yml \
     --sdk iphonesimulator \
-    --github-file-prefix https://github.com/mapbox/mapbox-gl-native/tree/${BRANCH} \
+    --github-file-prefix https://github.com/mapbox/mapbox-gl-native-ios/tree/${BRANCH} \
     --module-version ${SHORT_VERSION} \
     --readme ${README} \
     --documentation="platform/{darwin,ios}/docs/guides/*.md" \
