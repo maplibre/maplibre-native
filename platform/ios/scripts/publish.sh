@@ -46,10 +46,13 @@ if [ -n "${CI:-}" ]; then
     PROGRESS="--no-progress"
 fi
 
+
+
 step "Uploading ${ZIP_FILENAME} to s3…"
-aws s3 cp ${ZIP_FILENAME} s3://mapbox/${GITHUB_REPO}/ios/builds/ --acl public-read ${PROGRESS}
-S3_URL=https://mapbox.s3.amazonaws.com/${GITHUB_REPO}/ios/builds/${ZIP_FILENAME}
+aws s3 cp ${ZIP_FILENAME} s3://mapbox/mapbox-gl-native/ios/builds/ --acl public-read ${PROGRESS}
+S3_URL=https://mapbox.s3.amazonaws.com/mapbox-gl-native/ios/builds/${ZIP_FILENAME}
 echo "URL: ${S3_URL}"
+echo "mapbox-gl-native is currently hardcoded"
 
 #
 # upload & update snapshot
@@ -58,8 +61,8 @@ if [[ ${PUBLISH_VERSION} =~ "snapshot" ]]; then
     step "Updating ${PUBLISH_VERSION} to ${PUBLISH_STYLE}…"
     GENERIC_ZIP_FILENAME="mapbox-ios-sdk-${PUBLISH_VERSION}.zip"
     aws s3 cp \
-        s3://mapbox/$GITHUB_REPO/ios/builds/${ZIP_FILENAME} \
-        s3://mapbox/$GITHUB_REPO/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS}
+        s3://mapbox/mapbox-gl-native/ios/builds/${ZIP_FILENAME} \
+        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS}
 fi
 
 #
