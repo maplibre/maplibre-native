@@ -233,8 +233,10 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
       return;
     }
 
-    String styleUrl = Style.DARK.equals(mapboxMap.getStyle().getUri()) ? Style.LIGHT : Style.DARK;
-    mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
+    mapboxMap.getStyle(style -> {
+      String styleUrl = Style.DARK.equals(style.getUri()) ? Style.LIGHT : Style.DARK;
+      mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
+    });
   }
 
   private void disableGesturesManagement() {

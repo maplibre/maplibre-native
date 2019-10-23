@@ -387,6 +387,23 @@ class LocationComponentTest {
   }
 
   @Test
+  fun compass_notAddListenerWhenLayerNotReady() {
+    locationComponent.activateLocationComponent(context, mock(Style::class.java), locationEngine, locationEngineRequest, locationComponentOptions)
+    locationComponent.onStart()
+    locationComponent.isLocationComponentEnabled = true
+    `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+    `when`(locationLayerController.isConsumingCompass).thenReturn(true)
+    locationComponent.renderMode = RenderMode.COMPASS
+
+    verify(compassEngine, times(1)).addCompassListener(any(CompassListener::class.java))
+
+    locationComponent.onStartLoadingMap()
+    // Layer should be disabled at this point
+    locationComponent.setCameraMode(CameraMode.TRACKING_COMPASS)
+    verify(compassEngine, times(1)).addCompassListener(any(CompassListener::class.java))
+  }
+
+  @Test
   fun developerAnimationCalled() {
     locationComponent.activateLocationComponent(context, mock(Style::class.java), locationEngine, locationEngineRequest, locationComponentOptions)
     locationComponent.isLocationComponentEnabled = true

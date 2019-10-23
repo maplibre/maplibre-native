@@ -1289,7 +1289,7 @@ public final class LocationComponent {
         return;
       }
 
-      if (!isComponentInitialized || !isComponentStarted || !isEnabled) {
+      if (!isComponentInitialized || !isComponentStarted || !isEnabled || !isLayerReady) {
         return;
       }
 
