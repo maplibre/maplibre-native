@@ -2,7 +2,7 @@
 
 const template = {
   AWSTemplateFormatVersion: '2010-09-09',
-  Description: 'mapbox-gl-native travis resources',
+  Description: 'mapbox-gl-native-ios circleci resources',
   Resources: {
     BuildUser: {
       Type: 'AWS::IAM::User',
