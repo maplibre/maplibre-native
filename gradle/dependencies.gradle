@@ -31,7 +31,7 @@ ext {
             androidPublish  : '3.6.2',
             lint            : '26.4.2',
             gms             : '16.0.0',
-            soLoader        : '0.6.1',
+            soLoader        : '0.8.0',
             jacoco          : '0.8.4',
             appcenter       : '1.4',
             ktlint          : '0.34.0',
