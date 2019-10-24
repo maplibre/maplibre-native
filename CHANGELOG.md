@@ -2,6 +2,15 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 8.5.0-alpha.4 - October 24, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-alpha.3...android-v8.5.0-alpha.4) since [Mapbox Maps SDK for Android v8.5.0-alpha.3](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-alpha.3):
+### Bug fixes
+ - Add isLayerReady check in LocationComponent before updating compass listener. [#19](https://github.com/mapbox/mapbox-gl-native-android/pull/19)
+ - Update soLoader to version 0.8.0. [#23](https://github.com/mapbox/mapbox-gl-native-android/pull/23)
+ - Enable incremental vacuum for Offline DB [#15837](https://github.com/mapbox/mapbox-gl-native/pull/15837)
+ - Revert coalescing requests to the client for missing images [#15852](https://github.com/mapbox/mapbox-gl-native/pull/15852)
+ - Avoid edges for labels that use text-variable-anchors [#15854](https://github.com/mapbox/mapbox-gl-native/pull/15854)
+
 ## 8.5.0-alpha.3 - October 18, 2019
 
 ### Bug fixes
