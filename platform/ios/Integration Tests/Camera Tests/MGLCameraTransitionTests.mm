@@ -1,6 +1,6 @@
 #import "MGLMapViewIntegrationTest.h"
 #import "MGLTestUtility.h"
-#import "../../darwin/src/MGLGeometry_Private.h"
+#import "../../../darwin/src/MGLGeometry_Private.h"
 
 @interface MGLCameraTransitionTests : MGLMapViewIntegrationTest
 @end
