@@ -14,9 +14,14 @@ import com.mapbox.mapboxsdk.R;
 
 /**
  * Bubble View for Android with custom stroke width and color, arrow size, position and direction.
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   Mapbox Annotation Plugin</a> instead
+ * This class has been deprecated as of the 7.0.0 version of the Maps SDK for Android.
+ * However, even though the Maps SDK for Android team hasn't continued work on this class,
+ * the class is still completely fine to use. This class can be used to create a custom
+ * {@link android.view.View}, which is then turned into a {@link android.graphics.Bitmap}.
+ * After the bitmap is added to the {@link com.mapbox.mapboxsdk.maps.Style} object, a
+ * {@link com.mapbox.mapboxsdk.style.layers.SymbolLayer} or the
+ * <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+ *   Mapbox Annotation Plugin</a> can reference the image ID.
  */
 @Deprecated
 public class BubbleLayout extends LinearLayout {
