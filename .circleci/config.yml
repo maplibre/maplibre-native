@@ -4,6 +4,7 @@ workflows:
   version: 2
   mapbox-gl-native-android:
     jobs:
+      - android-debug-arm-v7-buck
       - android-arm-template:
           name: android-debug-arm-v8
       - android-release:
@@ -17,6 +18,11 @@ commands:
       - run:
           name: npm install
           command: npm install --ignore-scripts
+  npm-install-vendor:
+    steps:
+      - run:
+          name: npm install
+          command: cd vendor/mapbox-gl-native && npm install --ignore-scripts
   prepare-ccache:
     steps:
       - run:
@@ -89,6 +95,11 @@ commands:
           keys:
             - 'gradle/v1/{{ checksum "gradle/dependencies.gradle" }}/{{ checksum "build.gradle" }}/{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}'
             - 'gradle/v1'
+  prepare-environment:
+    steps:
+      - run:
+          name: Prepare environment
+          command: touch "$BASH_ENV" && ./vendor/mapbox-gl-native/scripts/environment.js | tee -a "$BASH_ENV"
   install-dependencies:
     parameters:
       node_modules:
@@ -335,3 +346,29 @@ jobs:
                 make run-android-upload-to-artifactory
               fi
             fi
+
+  # ------------------------------------------------------------------------------
+  android-debug-arm-v7-buck:
+    docker:
+      - image: mbgl/android-ndk-r17c-buck:07c5ef2e71
+    working_directory: /src
+    environment:
+      LIBSYSCONFCPUS: 2
+      JOBS: 2
+      BUILDTYPE: Debug
+      ANDROID_NDK: /android/sdk/ndk-bundle
+    steps:
+      - checkout
+      - npm-install
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule update --init --recursive
+      - npm-install-vendor
+      - prepare-environment
+      - run:
+          name: Build Android library
+          command: |
+            cd vendor/mapbox-gl-native/misc/buck
+            buck build mapbox-gl-native:android-core
+  # ------------------------------------------------------------------------------
