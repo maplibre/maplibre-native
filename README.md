@@ -1,6 +1,7 @@
 # [Mapbox Maps SDK for Android](https://www.mapbox.com/android-sdk/)
 
-[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native/tree/master)
+[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native-android/tree/master.svg?style=shield)](https://circleci.com/gh/mapbox/mapbox-gl-native-android/tree/master)
+
 
 [![](https://www.mapbox.com/android-docs/assets/overview-map-sdk-322-9abe118316efb5910b6101e222a2e57c.png)](https://docs.mapbox.com/android/maps/overview/)
 
