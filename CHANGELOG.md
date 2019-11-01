@@ -13,6 +13,11 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 ### Performance improvements
 - Convert GeoJSON features to tiles for the loaded source description in a background thread and thus unblock the UI thread [#15885](https://github.com/mapbox/mapbox-gl-native/pull/15885)
 
+## 8.5.0-beta.1 - November 1, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-alpha.4...android-v8.5.0-beta.1) since [Mapbox Maps SDK for Android v8.5.0-alpha.4](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-alpha.4):
+### Performance improvements
+ - Convert GeoJSON features to tiles in a background thread and thus unblock the UI thread on updating the GeoJsonSource [#15871](https://github.com/mapbox/mapbox-gl-native/pull/15871)
+
 ## 8.5.0-alpha.4 - October 24, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-alpha.3...android-v8.5.0-alpha.4) since [Mapbox Maps SDK for Android v8.5.0-alpha.3](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-alpha.3):
 ### Bug fixes
