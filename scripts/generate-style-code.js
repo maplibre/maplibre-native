@@ -374,15 +374,11 @@ const lightJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestAp
 writeIfModified(`MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/Light.java`, lightJava({properties: lightProperties}));
 writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
 
-// Java + JNI Layers (Peer model)
-const layerHpp = ejs.compile(fs.readFileSync('src/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync('src/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
+// Java
 const layerJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/layer.java.ejs', 'utf8'), {strict: true});
 const layerJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
 
 for (const layer of layers) {
-  writeIfModified(`src/style/layers/${layer.type.replace('-', '_')}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`src/style/layers/${layer.type.replace('-', '_')}_layer.cpp`, layerCpp(layer));
   writeIfModified(`MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/${camelize(layer.type)}Layer.java`, layerJava(layer));
   writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/${camelize(layer.type)}LayerTest.java`, layerJavaUnitTests(layer));
 }
