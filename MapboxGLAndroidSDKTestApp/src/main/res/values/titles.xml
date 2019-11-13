@@ -34,6 +34,7 @@
     <string name="activity_gradient_line">Gradient line layer</string>
     <string name="activity_data_driven_style">Data Driven Style</string>
     <string name="activity_circle_layer">Circle layer</string>
+    <string name="activity_collection_style_change">Collection updates on style changes</string>
     <string name="activity_style_file">Local Style file</string>
     <string name="activity_geojson_clustering">GeoJson Clustering</string>
     <string name="activity_geojson_realtime">Add live realtime data</string>
