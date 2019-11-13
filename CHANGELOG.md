@@ -2,6 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## master
+### Features
+- Added support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image) in core library. Runtime APIs for image expression will be implemented separately. [#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877)
+- Introduce `OfflineManager#packDatabase` and `OfflineRegion#deleteAndSkipPackDatabase` API in order to decouple offline storage vacuum and delete region operations and thus to gain performance benefits e.g. when several regions should be deleted in a row [#15899](https://github.com/mapbox/mapbox-gl-native/pull/15899)
+
+### Bugs
+- Fixed Geo JSON source flickering on style transition [#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907)
+
+### Performance improvements
+- Convert GeoJSON features to tiles for the loaded source description in a background thread and thus unblock the UI thread [#15885](https://github.com/mapbox/mapbox-gl-native/pull/15885)
+
 ## 8.5.0-alpha.4 - October 24, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-alpha.3...android-v8.5.0-alpha.4) since [Mapbox Maps SDK for Android v8.5.0-alpha.3](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-alpha.3):
 ### Bug fixes

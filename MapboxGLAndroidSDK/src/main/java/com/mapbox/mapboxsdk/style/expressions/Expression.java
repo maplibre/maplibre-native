@@ -5,6 +5,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -3150,7 +3151,7 @@ public class Expression {
    * If set, the min-fraction-digits and max-fraction-digits arguments specify the minimum and maximum number
    * of fractional digits to include.
    *
-   * @param number number expression
+   * @param number  number expression
    * @param options number formatting options
    * @return expression
    */
@@ -3169,7 +3170,7 @@ public class Expression {
    * If set, the min-fraction-digits and max-fraction-digits arguments specify the minimum and maximum number
    * of fractional digits to include.
    *
-   * @param number number expression
+   * @param number  number expression
    * @param options number formatting options
    * @return expression
    */
@@ -3407,6 +3408,49 @@ public class Expression {
    */
   public static FormatEntry formatEntry(@NonNull String text) {
     return new FormatEntry(literal(text), null);
+  }
+
+  /**
+   * Returns image expression for use in '*-pattern' and 'icon-image' layer properties. Compared to
+   * string literals that can be used to represent an image, image expression allows to determine an
+   * image's availability at runtime, thus, can be used in conditional <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-coalesce">coalesce operator</a>.
+   *
+   * <p>
+   * Example usage:
+   * </p>
+   * <pre>
+   * {@code
+   * SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
+   * symbolLayer.setProperties(
+   *     iconImage(image(get("key-to-feature")))
+   * );
+   * }
+   * </pre>
+   *
+   * <p>
+   * Example usage with coalesce operator:
+   * </p>
+   * <pre>
+   * {@code
+   * SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
+   * symbolLayer.setProperties(
+   *     iconImage(
+   *         coalesce(
+   *             image(literal("maki-11")),
+   *             image(literal("bicycle-15")),
+   *             image(literal("default-icon"))
+   *         )
+   *     )
+   * );
+   * }
+   * </pre>
+   *
+   * @param input expression input
+   * @return expression
+   * @see <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image">Image expression</a>
+   */
+  public static Expression image(@NonNull Expression input) {
+    return new Expression("image", input);
   }
 
   /**
@@ -4430,7 +4474,7 @@ public class Expression {
     /**
      * Create an option option entry that is encapsulated as a json object member for an expression.
      *
-     * @param type json object member name
+     * @param type  json object member name
      * @param value json object member value
      */
     Option(@NonNull String type, @NonNull Expression value) {
