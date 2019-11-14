@@ -2,7 +2,8 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
-## master
+## 8.6.0-alpha.1 - November 14, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0...android-v8.6.0-alpha.1) since [Mapbox Maps SDK for Android v8.5.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0):
 ### Features
 - Added support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image) in core library. Runtime APIs for image expression will be implemented separately. [#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877)
 - Introduce `OfflineManager#packDatabase` and `OfflineRegion#deleteAndSkipPackDatabase` API in order to decouple offline storage vacuum and delete region operations and thus to gain performance benefits e.g. when several regions should be deleted in a row [#15899](https://github.com/mapbox/mapbox-gl-native/pull/15899)
