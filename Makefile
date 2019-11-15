@@ -15,10 +15,19 @@ endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
 
-HOST_PLATFORM = linux
-HOST_PLATFORM_VERSION = $(shell uname -m)
-export NINJA = platform/linux/ninja
-export JOBS ?= $(shell grep --count processor /proc/cpuinfo)
+ifeq ($(shell uname -s), Darwin)
+  HOST_PLATFORM = macos
+  HOST_PLATFORM_VERSION = $(shell uname -m)
+  export NINJA = platform/macos/ninja
+  export JOBS ?= $(shell sysctl -n hw.ncpu)
+else ifeq ($(shell uname -s), Linux)
+  HOST_PLATFORM = linux
+  HOST_PLATFORM_VERSION = $(shell uname -m)
+  export NINJA = platform/linux/ninja
+  export JOBS ?= $(shell grep --count processor /proc/cpuinfo)
+else
+  $(error Cannot determine host platform)
+endif
 
 #### Android targets ###########################################################
 
