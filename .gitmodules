@@ -1,12 +1,12 @@
 [submodule "vendor/mapbox-gl-native"]
 	path = vendor/mapbox-gl-native
-	url = git@github.com:mapbox/mapbox-gl-native.git
+	url = https://github.com/mapbox/mapbox-gl-native.git
 [submodule "vendor/mapbox-events-android"]
 	path = vendor/mapbox-events-android
-	url = git@github.com:mapbox/mapbox-events-android.git
+	url = https://github.com/mapbox/mapbox-events-android.git
 [submodule "vendor/mapbox-java"]
 	path = vendor/mapbox-java
-	url = git@github.com:mapbox/mapbox-java.git
+	url = https://github.com/mapbox/mapbox-java.git
 [submodule "vendor/mapbox-gestures-android"]
 	path = vendor/mapbox-gestures-android
-	url = git@github.com:mapbox/mapbox-gestures-android.git
+	url = https://github.com/mapbox/mapbox-gestures-android.git
