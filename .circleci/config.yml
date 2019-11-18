@@ -172,6 +172,15 @@ commands:
               gcloud auth activate-service-account --key-file secret.json --project mapbox-gl-native-android
               rm secret.json
             fi
+  generate-api-javadoc:
+    steps:
+      - run:
+          name: Generate Maps SDK API javadoc and transfer to `/android-docs`
+          command: |
+            export VERSION_TAG=${CIRCLE_TAG}
+            export GITHUB_TOKEN=${DANGER_GITHUB_API_TOKEN}
+            export DOCS_REPO="android-docs"
+            bash scripts/trigger-maps-documentation-deploy-steps.sh        
 
 jobs:
   # ------------------------------------------------------------------------------
@@ -346,7 +355,7 @@ jobs:
                 make run-android-upload-to-artifactory
               fi
             fi
-
+      - generate-api-javadoc
   # ------------------------------------------------------------------------------
   android-debug-arm-v7-buck:
     docker:
