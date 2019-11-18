@@ -5,7 +5,7 @@ import com.mapbox.mapboxsdk.log.Logger;
 /**
  * Loads the mapbox-gl shared library
  * <p>
- * By default uses the {@link System#loadLibrary(String)},
+ * By default uses SoLoader from https://github.com/facebook/SoLoader
  * use {@link #setLibraryLoader(LibraryLoader)} to provide an alternative library loading hook.
  * </p>
  */
@@ -36,7 +36,7 @@ public abstract class LibraryLoader {
    * Catches UnsatisfiedLinkErrors and prints a warning to logcat.
    * </p>
    */
-  public static void load() {
+  public static synchronized void load() {
     try {
       if (!loaded) {
         loaded = true;

@@ -12,7 +12,7 @@ import static com.facebook.soloader.SoLoader.loadLibrary;
 /**
  * Concrete implementation of a native library loader.
  * <p>
- * Uses ReLinker from https://github.com/KeepSafe/ReLinker.
+ * Uses SoLoader from https://github.com/facebook/SoLoader.
  * </p>
  */
 public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
@@ -28,7 +28,7 @@ public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
   }
 
   /**
-   * Concrete implementation of a LibraryLoader using ReLinker.
+   * Concrete implementation of a LibraryLoader using SoLoader.
    */
   private static class SoLibraryLoader extends LibraryLoader {
 
@@ -43,6 +43,7 @@ public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
       } catch (MapboxConfigurationException exception) {
         Logger.e(TAG, "Couldn't load so file with relinker, application context missing, "
           + "call Mapbox.getInstance(Context context, String accessToken) first");
+        throw new UnsatisfiedLinkError(exception.getMessage());
       }
     }
   }

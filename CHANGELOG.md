@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## Master
+### Bugs
+ - Synchronise LibaryLoader#loadLibrary to avoid race conditions resulting in UnsatisfiedLinkError [#58](https://github.com/mapbox/mapbox-gl-native-android/pull/58)
+
 ## 8.6.0-alpha.1 - November 14, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0...android-v8.6.0-alpha.1) since [Mapbox Maps SDK for Android v8.5.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0):
 ### Features
