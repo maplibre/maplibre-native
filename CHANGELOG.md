@@ -6,6 +6,12 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 ### Bugs
  - Synchronise LibaryLoader#loadLibrary to avoid race conditions resulting in UnsatisfiedLinkError [#58](https://github.com/mapbox/mapbox-gl-native-android/pull/58)
 
+## 8.5.1 - November 20, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0...android-v8.5.1) since [Mapbox Maps SDK for Android v8.5.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0):
+### Bugs
+- Fixed Geo JSON source flickering on style transition [#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907)
+- Fixed flickering caused by unnecessary removing and re-adding of the render sources when the order of their corresponding style objects was changed in the updated style [#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941)
+
 ## 8.6.0-alpha.1 - November 14, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0...android-v8.6.0-alpha.1) since [Mapbox Maps SDK for Android v8.5.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0):
 ### Features
@@ -19,7 +25,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 - Convert GeoJSON features to tiles for the loaded source description in a background thread and thus unblock the UI thread [#15885](https://github.com/mapbox/mapbox-gl-native/pull/15885)
 
 ## 8.5.0 - November 8, 2019
-[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-beta.1...android-v8.5.0) since [Mapbox Maps SDK for Android v8.5.0-alpha.4](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-beta.1):
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.5.0-beta.1...android-v8.5.0) since [Mapbox Maps SDK for Android v8.5.0-beta.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.5.0-beta.1):
 ### Bug fixes
  - Fixed the rendering bug caused by redundant pending requests for already requested images [#15864](https://github.com/mapbox/mapbox-gl-native/pull/15864)
  - Use individual textures for line dash patterns [#15862](https://github.com/mapbox/mapbox-gl-native/pull/15862)
