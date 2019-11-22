@@ -604,8 +604,8 @@ public class OfflineManager {
                                   @NonNull final CreateOfflineRegionCallback callback) {
     if (!isValidOfflineRegionDefinition(definition)) {
       callback.onError(
-        String.format(context.getString(R.string.mapbox_offline_error_region_definition_invalid),
-          definition.getBounds())
+              String.format(context.getString(R.string.mapbox_offline_error_region_definition_invalid),
+                      definition.getBounds())
       );
       return;
     }
