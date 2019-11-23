@@ -140,7 +140,7 @@ private: // Private utilities for converting from mgl to mbgl values
     class = typename std::enable_if<!std::is_enum<MBGLEnum>::value>::type,
     typename MGLEnum = ObjCEnum,
     class = typename std::enable_if<!std::is_enum<MGLEnum>::value>::type>
-    NSObject* toRawStyleSpecValue(NSObject *rawMGLValue, MBGLEnum &mbglValue) {
+    NSObject* toRawStyleSpecValue(NSObject *rawMGLValue, MBGLEnum &) {
         if ([rawMGLValue isKindOfClass:[NSValue class]]) {
             const auto rawNSValue = (NSValue *)rawMGLValue;
             if (strcmp([rawNSValue objCType], @encode(CGVector)) == 0) {
@@ -157,13 +157,13 @@ private: // Private utilities for converting from mgl to mbgl values
     class = typename std::enable_if<std::is_enum<MBGLEnum>::value>::type,
     typename MGLEnum = ObjCEnum,
     class = typename std::enable_if<std::is_enum<MGLEnum>::value>::type>
-    NSString* toRawStyleSpecValue(ObjCType rawValue, MBGLEnum &mbglValue) {
+    NSString* toRawStyleSpecValue(ObjCType rawValue, MBGLEnum &) {
         MGLEnum mglEnum;
         [rawValue getValue:&mglEnum];
         return @(mbgl::Enum<MGLEnum>::toString(mglEnum));
     }
 
-    NSObject* toRawStyleSpecValue(MGLColor *color, MBGLType &mbglValue) {
+    NSObject* toRawStyleSpecValue(MGLColor *color, MBGLType &) {
         return @(color.mgl_color.stringify().c_str());
     }
 
@@ -215,6 +215,11 @@ private: // Private utilities for converting from mgl to mbgl values
     // Color
     void getMBGLValue(MGLColor *rawValue, mbgl::Color &mbglValue) {
         mbglValue = rawValue.mgl_color;
+    }
+
+    // Image
+    void getMBGLValue(NSString *rawValue, mbgl::style::expression::Image &mbglValue) {
+        mbglValue = mbgl::style::expression::Image(rawValue.UTF8String);
     }
 
     // Array
@@ -293,6 +298,11 @@ private: // Private utilities for converting from mbgl to mgl values
     // Color
     static MGLColor *toMGLRawStyleValue(const mbgl::Color mbglStopValue) {
         return [MGLColor mgl_colorWithColor:mbglStopValue];
+    }
+
+    // Image
+    static NSString *toMGLRawStyleValue(const mbgl::style::expression::Image &mbglImageValue) {
+        return @(mbglImageValue.id().c_str());
     }
 
     // Array

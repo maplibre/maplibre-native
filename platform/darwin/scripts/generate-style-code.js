@@ -158,8 +158,11 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return layerType === 'string' ?
                 `@"'${_.startCase(propertyName)}'"` :
                 `@"${_.startCase(propertyName)}"`;
+        case 'resolvedImage':
+            return layerType === 'string' ?
+                `@"${_.startCase(propertyName)}"` :
+                `@"MGL_FUNCTION('image', '${_.startCase(propertyName)}')"`;
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
             return `@"'${_.startCase(propertyName)}'"`;
         case 'enum':
             return `@"'${_.last(_.keys(property.values))}'"`;
@@ -209,7 +212,7 @@ global.mbglTestValue = function (property, layerType) {
             return '1.0';
         case 'formatted':
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
+        case 'resolvedImage':
             return `"${_.startCase(propertyName)}"`;
         case 'enum': {
             let type = camelize(originalPropertyName(property));
@@ -296,7 +299,7 @@ global.testHelperMessage = function (property, layerType, isFunction) {
             return 'testNumber' + fnSuffix;
         case 'formatted':
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
+        case 'resolvedImage':
             return 'testString' + fnSuffix;
         case 'enum':
             let objCType = global.objCType(layerType, property.name);
@@ -477,7 +480,7 @@ global.describeType = function (property) {
             return 'numeric';
         case 'formatted':
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
+        case 'resolvedImage':
             return 'string';
         case 'enum':
             return '`MGL' + camelize(property.name) + '`';
@@ -526,7 +529,7 @@ global.describeValue = function (value, property, layerType) {
             return 'the float ' + '`' + formatNumber(value) + '`';
         case 'formatted':
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
+        case 'resolvedImage':
             if (value === '') {
                 return 'the empty string';
             }
@@ -613,7 +616,7 @@ global.propertyType = function (property) {
             return 'NSNumber *';
         case 'formatted':
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
+        case 'resolvedImage':
             return 'NSString *';
         case 'enum':
             return 'NSValue *';
@@ -646,7 +649,7 @@ global.isInterpolatable = function (property) {
     return type !== 'boolean' &&
         type !== 'enum' &&
         type !== 'string' &&
-        type !== 'image' &&
+        type !== 'resolvedImage' &&
         type !== 'formatted';
 };
 
@@ -659,8 +662,9 @@ global.valueTransformerArguments = function (property) {
             return ['float', objCType];
         case 'formatted':
             return ['mbgl::style::expression::Formatted', objCType];
+        case 'resolvedImage':
+            return ['mbgl::style::expression::Image', objCType];
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
             return ['std::string', objCType];
         case 'enum':
             return [mbglType(property), 'NSValue *', mbglType(property), `MGL${camelize(property.name)}`];
@@ -699,8 +703,9 @@ global.mbglType = function(property) {
             return 'float';
         case 'formatted':
             return 'mbgl::style::expression::Formatted';
+        case 'resolvedImage':
+            return 'mbgl::style::expression::Image';
         case 'string':
-        case 'image': // TODO: replace once we implement image expressions
             return 'std::string';
         case 'enum': {
             let type = camelize(originalPropertyName(property));
