@@ -256,7 +256,7 @@ commands:
 jobs:
   ios-debug:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -304,7 +304,7 @@ jobs:
 # ------------------------------------------------------------------------------
   ios-sanitize-nightly:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -331,7 +331,7 @@ jobs:
 # ------------------------------------------------------------------------------
   ios-sanitize-address-nightly:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -351,7 +351,7 @@ jobs:
 # ------------------------------------------------------------------------------
   ios-static-analyzer-nightly:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -391,7 +391,7 @@ jobs:
 # ------------------------------------------------------------------------------
   ios-release-template:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     shell: /bin/bash --login -eo pipefail
     environment:
       BUILDTYPE: Release
@@ -443,7 +443,7 @@ jobs:
 # ------------------------------------------------------------------------------
   ios-release-tag:
     macos:
-      xcode: "11.0.0"
+      xcode: "11.2.1"
     shell: /bin/bash --login -eo pipefail
     environment:
       BUILDTYPE: Release
