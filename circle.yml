@@ -168,7 +168,7 @@ commands:
     - run:
         name: Build ios-test
         command: make ios-test
-        no_output_timeout: 5m
+        no_output_timeout: 20m
   build-ios-integration-test:
     steps:
     - run:
@@ -270,9 +270,6 @@ jobs:
           command: make ios-lint
       - check-if-this-job-can-be-skipped
       - build-ios-test
-      - run:
-          name: Check symbol namespacing for mapbox-events-ios
-          command: make ios-check-events-symbols
       - save-dependencies
       - collect-xcode-build-logs
       - upload-xcode-build-logs
@@ -294,9 +291,6 @@ jobs:
           command: make ios-lint
       - check-if-this-job-can-be-skipped
       - build-ios-test
-      - run:
-          name: Check symbol namespacing for mapbox-events-ios
-          command: make ios-check-events-symbols
       - save-dependencies
       - collect-xcode-build-logs
       - upload-xcode-build-logs
@@ -406,7 +400,7 @@ jobs:
       - run:
           name: Build dynamic framework for device and simulator
           command: make iframework
-          no_output_timeout: 5m
+          no_output_timeout: 20m
       - deploy:
           name: Upload snapshot build to s3
           command: |

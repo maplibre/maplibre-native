@@ -41,15 +41,19 @@ du -sch pkg/dynamic/*
 #
 # upload
 #
+DRYRUN=""
+if [[ ${SKIP_S3} ]]; then
+    DRYRUN="--dryrun"
+fi
+
 PROGRESS=""
 if [ -n "${CI:-}" ]; then
     PROGRESS="--no-progress"
 fi
 
+step "Uploading ${ZIP_FILENAME} to s3… ${DRYRUN}"
 
-
-step "Uploading ${ZIP_FILENAME} to s3…"
-aws s3 cp ${ZIP_FILENAME} s3://mapbox/mapbox-gl-native/ios/builds/ --acl public-read ${PROGRESS}
+aws s3 cp ${ZIP_FILENAME} s3://mapbox/mapbox-gl-native/ios/builds/ --acl public-read ${PROGRESS} ${DRYRUN}
 S3_URL=https://mapbox.s3.amazonaws.com/mapbox-gl-native/ios/builds/${ZIP_FILENAME}
 echo "URL: ${S3_URL}"
 echo "mapbox-gl-native is currently hardcoded"
@@ -62,7 +66,7 @@ if [[ ${PUBLISH_VERSION} =~ "snapshot" ]]; then
     GENERIC_ZIP_FILENAME="mapbox-ios-sdk-${PUBLISH_VERSION}.zip"
     aws s3 cp \
         s3://mapbox/mapbox-gl-native/ios/builds/${ZIP_FILENAME} \
-        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS}
+        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS} {DRYRUN}
 fi
 
 #
@@ -70,13 +74,16 @@ fi
 #
 
 step "Validating local and remote checksums…"
-curl --output remote-${ZIP_FILENAME} ${S3_URL}
-LOCAL_CHECKSUM=$( shasum -a 256 -b ${ZIP_FILENAME} | cut -d ' ' -f 1 )
-REMOTE_CHECKSUM=$( shasum -a 256 -b remote-${ZIP_FILENAME} | cut -d ' ' -f 1 )
 
-if [ "${LOCAL_CHECKSUM}" == "${REMOTE_CHECKSUM}" ]; then
-    echo "Checksums match: ${LOCAL_CHECKSUM}"
-else
-    echo "Checksums did not match: ${LOCAL_CHECKSUM} != ${REMOTE_CHECKSUM}"
-    exit 1
+if [[ ! ${SKIP_S3} ]]; then
+    curl --output remote-${ZIP_FILENAME} ${S3_URL}
+    LOCAL_CHECKSUM=$( shasum -a 256 -b ${ZIP_FILENAME} | cut -d ' ' -f 1 )
+    REMOTE_CHECKSUM=$( shasum -a 256 -b remote-${ZIP_FILENAME} | cut -d ' ' -f 1 )
+
+    if [ "${LOCAL_CHECKSUM}" == "${REMOTE_CHECKSUM}" ]; then
+        echo "Checksums match: ${LOCAL_CHECKSUM}"
+    else
+        echo "Checksums did not match: ${LOCAL_CHECKSUM} != ${REMOTE_CHECKSUM}"
+        exit 1
+    fi
 fi

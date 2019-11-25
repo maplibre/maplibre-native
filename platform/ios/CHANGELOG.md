@@ -2,7 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) to get started.
 
-## master
+## 5.6.0
+
+### Packaging
+* Integrates [`MapboxMobileEvents`](https://github.com/mapbox/mapbox-events-ios) as a dependency. ([#60](https://github.com/mapbox/mapbox-gl-native-ios/pull/60))
+    - CocoaPods: no change.
+    - Carthage: as an interim measure, please specify `github "mapbox/mapbox-events-ios" == 0.10.1-alpha` in your Cartfile.
+    - Manual installation: New Github release artifact (`mapbox-ios-sdk-5.6.0-alpha.1-dynamic-with-events.zip`) contains the `MapboxMobileEvents.framework`; please install this along with `Mapbox.framework`
 
 ### Networking and storage
 * Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))

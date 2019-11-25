@@ -23,7 +23,7 @@ buildPackageStyle() {
         style="$2"
     fi
     step "Building: make ${package} ${style}"
-    make ${package}
+    FORMAT=${style} make ${package} 
     step "Publishing ${package} with ${style}"
     local file_name=""
     if [ -z ${style} ]
@@ -40,6 +40,8 @@ buildPackageStyle() {
             --tag "ios-v${PUBLISH_VERSION}" \
             --name ${file_name} \
             --file "${BINARY_DIRECTORY}/${file_name}" > /dev/null
+    else
+        step "CREATED ${file_name} - skipping upload to Github"
     fi
 }
 
@@ -66,6 +68,10 @@ if [[ ${GITHUB_RELEASE} = "true" ]]; then
     GITHUB_RELEASE=true # Assign bool, not just a string
 fi
 
+if [[ ${GITHUB_RELEASE} = "false" ]]; then
+    GITHUB_RELEASE=false # Assign bool, not just a string
+fi
+
 if [[ -z ${VERSION_TAG} ]]; then
     step "Determining version number from most recent relevant git tag…"
     VERSION_TAG=$( git describe --tags --match=ios-v*.*.* --abbrev=0 )
@@ -75,19 +81,27 @@ fi
 if [[ $( echo ${VERSION_TAG} | grep --invert-match ios-v ) ]]; then
     echo "Error: ${VERSION_TAG} is not a valid iOS version tag"
     echo "VERSION_TAG should be in format: ios-vX.X.X-pre.X"
-    exit 1
+    if [[ "${GITHUB_RELEASE}" == true ]]; then
+        exit 1
+    fi
 fi
 
 if github-release info --tag ${VERSION_TAG} | grep --quiet "draft: ✗"; then
     echo "Error: ${VERSION_TAG} has already been published on GitHub"
     echo "See: https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/tag/${VERSION_TAG}"
-    exit 1
+    if [[ "${GITHUB_RELEASE}" == true ]]; then
+        exit 1
+    fi
 fi
 
-PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^ios-v//' )
-git checkout ${VERSION_TAG}
-
-step "Deploying version ${PUBLISH_VERSION}…"
+if [[ "${GITHUB_RELEASE}" == true ]]; then
+    PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^ios-v//' )
+    git checkout ${VERSION_TAG}
+    step "Deploying version ${PUBLISH_VERSION}…"
+else
+    PUBLISH_VERSION=${VERSION_TAG}
+    step "Building packages for version ${PUBLISH_VERSION} (Not deploying to Github)"
+fi
 
 npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
@@ -105,6 +119,10 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
         --description "${RELEASE_NOTES}"
 fi
 
+# Used for binary release on Github - includes events SDK
+buildPackageStyle "iframework" "dynamic-with-events"
+
+# Used for Cocoapods/Carthage
 buildPackageStyle "iframework" "dynamic"
 buildPackageStyle "iframework SYMBOLS=NO" "stripped-dynamic"
 

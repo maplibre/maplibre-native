@@ -14,23 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4E8A9455A3A23B7FD2A8FC52"
-               BuildableName = "All"
-               BlueprintName = "All"
-               ReferencedContainer = "container:../../build/ios/platform/ios/platform.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-               BuildableName = "Mapbox GL.app"
-               BlueprintName = "iosapp"
+               BlueprintIdentifier = "DA8847D11CBAF91600AB86E3"
+               BuildableName = "Mapbox.framework"
+               BlueprintName = "dynamic"
                ReferencedContainer = "container:ios.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -54,11 +40,18 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "NO"
       language = "en"
       region = "US"
       codeCoverageEnabled = "YES"
-      onlyGenerateCoverageForSpecifiedTargets = "YES"
-      shouldUseLaunchSchemeArgsEnv = "NO">
+      onlyGenerateCoverageForSpecifiedTargets = "YES">
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "MAPBOX_RUN_PENDING_TESTS"
+            value = "YES"
+            isEnabled = "NO">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
       <CodeCoverageTargets>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -80,24 +73,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
-            BlueprintName = "iosapp"
-            ReferencedContainer = "container:ios.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "MAPBOX_RUN_PENDING_TESTS"
-            value = "YES"
-            isEnabled = "NO">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -109,17 +84,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
-            BlueprintName = "iosapp"
-            ReferencedContainer = "container:ios.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -127,16 +91,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
-            BlueprintName = "iosapp"
+            BlueprintIdentifier = "DA8847D11CBAF91600AB86E3"
+            BuildableName = "Mapbox.framework"
+            BlueprintName = "dynamic"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

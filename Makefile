@@ -185,10 +185,6 @@ ios-install-simulators:
 	xcversion simulators --install="iOS 10.3.1" || true
 	xcversion simulators --install="iOS 9.3" || true
 
-.PHONY: ios-check-events-symbols
-ios-check-events-symbols:
-	./platform/ios/scripts/check-events-symbols.sh
-
 .PHONY: ipackage
 ipackage: ipackage*
 ipackage%:
