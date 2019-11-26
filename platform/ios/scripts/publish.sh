@@ -66,7 +66,7 @@ if [[ ${PUBLISH_VERSION} =~ "snapshot" ]]; then
     GENERIC_ZIP_FILENAME="mapbox-ios-sdk-${PUBLISH_VERSION}.zip"
     aws s3 cp \
         s3://mapbox/mapbox-gl-native/ios/builds/${ZIP_FILENAME} \
-        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS} {DRYRUN}
+        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS} ${DRYRUN}
 fi
 
 #
