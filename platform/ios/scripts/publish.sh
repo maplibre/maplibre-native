@@ -42,7 +42,7 @@ du -sch pkg/dynamic/*
 # upload
 #
 DRYRUN=""
-if [[ ${SKIP_S3} ]]; then
+if [[ ${SKIP_S3-} ]]; then
     DRYRUN="--dryrun"
 fi
 
@@ -75,7 +75,7 @@ fi
 
 step "Validating local and remote checksums…"
 
-if [[ ! ${SKIP_S3} ]]; then
+if [[ ! ${SKIP_S3-} ]]; then
     curl --output remote-${ZIP_FILENAME} ${S3_URL}
     LOCAL_CHECKSUM=$( shasum -a 256 -b ${ZIP_FILENAME} | cut -d ' ' -f 1 )
     REMOTE_CHECKSUM=$( shasum -a 256 -b remote-${ZIP_FILENAME} | cut -d ' ' -f 1 )
