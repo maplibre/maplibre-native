@@ -4,6 +4,7 @@
 
 namespace mbgl {
     extern NSURL *resourceURLWithAccountType(const Resource& resource, NSInteger accountType);
+    extern BOOL isValidMapboxEndpoint(NSURL *url);
 }
     
 @interface MGLResourceTests : XCTestCase
@@ -11,12 +12,24 @@ namespace mbgl {
 
 @implementation MGLResourceTests
 
-- (void)testOfflineQueryParameterIsAddedForOfflineResource {
+- (void)testValidEndpoints {
+    using namespace mbgl;
+
+    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.com"]));
+    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.cn"]));
+    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.mapbox.com"]));
+    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.mapbox.cn"]));
+
+    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.com"]));
+    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.cn"]));
+    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://examplemapbox.com"]));
+    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://examplemapbox.cn"]));
+}
+
+- (void)internalTestOfflineQueryParameterIsAddedForOfflineResource:(std::string)testURL {
     
     using namespace mbgl;
-    
-    std::string testURL = "test://mapbox.com/testing_offline_query?a=one&b=two";
-    
+
     // Is our test URL "correct" for subsequent checks?
     {
         NSURL *url = [NSURL URLWithString:@(testURL.c_str())];
@@ -80,6 +93,16 @@ namespace mbgl {
         XCTAssert(foundCount == 2);
 #endif
     }
+}
+
+- (void)testOfflineQueryParameterIsAddedForOfflineResource {
+    std::string testURL = "test://mapbox.com/testing_offline_query?a=one&b=two";
+    [self internalTestOfflineQueryParameterIsAddedForOfflineResource:testURL];
+}
+
+- (void)testOfflineQueryParameterIsAddedForOfflineResourceForChina {
+    std::string testURL = "test://mapbox.cn/testing_offline_query?a=one&b=two";
+    [self internalTestOfflineQueryParameterIsAddedForOfflineResource:testURL];
 }
 
 @end
