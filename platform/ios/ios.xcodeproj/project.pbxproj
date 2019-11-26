@@ -1070,6 +1070,7 @@
 		CAB36C3A2374D11600592F74 /* libMapboxMobileEvents.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libMapboxMobileEvents.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAB36C3D2374D7DE00592F74 /* Mapbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Mapbox.framework; path = ../../build/ios/pkg/static/Mapbox.framework; sourceTree = "<group>"; };
 		CAD9D0A922A86D6F001B25EE /* MGLResourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLResourceTests.mm; path = ../../darwin/test/MGLResourceTests.mm; sourceTree = "<group>"; };
+		CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = common.xcconfig; sourceTree = "<group>"; };
 		CAE7AD5320F46EF5003B6782 /* integration-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "integration-Bridging-Header.h"; sourceTree = "<group>"; };
 		CAE7AD5420F46EF5003B6782 /* MGLMapSnapshotterSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MGLMapSnapshotterSwiftTests.swift; sourceTree = "<group>"; };
 		CAFB3C13234505D500399265 /* MGLMapSnapshotter_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLMapSnapshotter_Private.h; sourceTree = "<group>"; };
@@ -1381,7 +1382,6 @@
 				35BEB5002359BB9600110752 /* libmbgl-core.a in Frameworks */,
 				358B3DB92359E4A0007BEB26 /* libsqlite3.tbd in Frameworks */,
 				96802766226556C5006BA4A1 /* libmbxaccounts.a in Frameworks */,
-				35BEB5002359BB9600110752 /* libmbgl-core.a in Frameworks */,
 				CA94E601237EF4110037AEA0 /* MapboxMobileEvents.framework in Frameworks */,
 				DA27C24E1CBB3811000B0ECD /* GLKit.framework in Frameworks */,
 			);
@@ -1734,6 +1734,7 @@
 		DA1DC9411CB6C1C2006E619F = {
 			isa = PBXGroup;
 			children = (
+				CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */,
 				1F7839A5235E137000D4D606 /* sideload_sat.db */,
 				402E9DE21CD3A56500FD4519 /* Playground */,
 				DA1DC94C1CB6C1C2006E619F /* Demo App */,
@@ -2725,7 +2726,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MBX;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1120;
 				ORGANIZATIONNAME = Mapbox;
 				TargetAttributes = {
 					16376B061FFD9DAF0000563E = {
@@ -3475,6 +3476,7 @@
 /* Begin XCBuildConfiguration section */
 		16376B0E1FFD9DAF0000563E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3519,6 +3521,7 @@
 		};
 		16376B0F1FFD9DAF0000563E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3562,6 +3565,7 @@
 		};
 		16376B431FFDB4B40000563E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3587,6 +3591,7 @@
 		};
 		16376B441FFDB4B40000563E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3613,63 +3618,13 @@
 		96AF1AA321B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
-				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_COMMIT_HASH = deadbeef;
-				CURRENT_SEMANTIC_VERSION = 1.0.0;
-				CURRENT_SHORT_VERSION = 1.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_LABEL = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -3682,6 +3637,7 @@
 		};
 		96AF1AA421B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -3723,6 +3679,7 @@
 		};
 		96AF1AA621B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -3732,46 +3689,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../platform/darwin/include",
-				);
 				INFOPLIST_FILE = framework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
-				);
 				LLVM_LTO = YES;
-				MGL_EVENTS_STATICALLY_LINKED = NO;
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -3782,6 +3703,7 @@
 		};
 		96AF1AA721B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
@@ -3806,17 +3728,6 @@
 					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
 				LLVM_LTO = YES;
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"$(mbgl_core_LINK_LIBRARIES)",
@@ -3842,6 +3753,7 @@
 		};
 		96AF1AA921B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
@@ -3882,6 +3794,7 @@
 		};
 		96AF1AAA21B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3925,6 +3838,7 @@
 		};
 		96AF1AAB21B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3951,67 +3865,16 @@
 		DA1DC95F1CB6C1C2006E619F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
-				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_COMMIT_HASH = deadbeef;
-				CURRENT_SEMANTIC_VERSION = 1.0.0;
-				CURRENT_SHORT_VERSION = 1.0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_LABEL = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4024,63 +3887,13 @@
 		DA1DC9601CB6C1C2006E619F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
-				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
-				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_COMMIT_HASH = deadbeef;
-				CURRENT_SEMANTIC_VERSION = 1.0.0;
-				CURRENT_SHORT_VERSION = 1.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_LABEL = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -4093,6 +3906,7 @@
 		};
 		DA1DC9621CB6C1C2006E619F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -4107,6 +3921,7 @@
 		};
 		DA1DC9631CB6C1C2006E619F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -4121,6 +3936,7 @@
 		};
 		DA2E885A1CC036F400F24E7B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
@@ -4162,6 +3978,7 @@
 		};
 		DA2E885B1CC036F400F24E7B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
@@ -4202,6 +4019,7 @@
 		};
 		DA8847DB1CBAF91600AB86E3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -4210,45 +4028,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../platform/darwin/include",
-				);
 				INFOPLIST_FILE = framework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
-				);
-				MGL_EVENTS_STATICALLY_LINKED = NO;
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -4259,6 +4041,7 @@
 		};
 		DA8847DC1CBAF91600AB86E3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -4269,46 +4052,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../platform/darwin/include",
-				);
 				INFOPLIST_FILE = framework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
-				);
 				LLVM_LTO = YES;
-				MGL_EVENTS_STATICALLY_LINKED = NO;
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -4342,6 +4089,7 @@
 		};
 		DAA4E41A1CBB71D500178DFB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
@@ -4365,17 +4113,6 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"$(mbgl_core_LINK_LIBRARIES)",
@@ -4390,6 +4127,7 @@
 		};
 		DAA4E41B1CBB71D500178DFB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
@@ -4415,17 +4153,6 @@
 					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
 				LLVM_LTO = YES;
-				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"$(sqlite_cflags)",
-					"$(zlib_cflags)",
-					"$(rapidjson_cflags)",
-					"$(variant_cflags)",
-					"$(geometry_cflags)",
-					"$(geojson_cflags)",
-					"-fcxx-modules",
-				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"$(mbgl_core_LINK_LIBRARIES)",

@@ -769,7 +769,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     return [[self settingsTitlesForSection:section] count];
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section;
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     return [[self settingsSectionTitles] objectAtIndex:section];
 }
