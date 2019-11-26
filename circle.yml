@@ -465,7 +465,7 @@ jobs:
           command: |
             export VERSION_TAG=${CIRCLE_TAG}
             platform/ios/scripts/deploy-packages.sh
-            no_output_timeout: 20m
+          no_output_timeout: 20m
       - deploy:
           name: Deploy to CocoaPods
           command: platform/ios/scripts/deploy-to-cocoapods.sh
