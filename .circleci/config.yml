@@ -7,6 +7,13 @@ workflows:
       - android-debug-arm-v7-buck
       - android-arm-template:
           name: android-debug-arm-v8
+      - android-arm-template:
+          name: android-gnustl-arm-v7
+          stl: gnustl_shared
+          firebase_device_id: "flo"
+          firebase_device_os: "21"
+          image: android-ndk-r17c:1d5db0eb34
+          abi: arm-v7
       - android-release:
           filters:
             tags:
