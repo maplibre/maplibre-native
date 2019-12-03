@@ -739,14 +739,15 @@ public final class LocationComponent {
                                 @Nullable MapboxMap.CancelableCallback callback) {
     checkActivationState();
     if (!isLayerReady) {
+      notifyUnsuccessfulCameraOperation(callback, null);
       return;
     } else if (getCameraMode() == CameraMode.NONE) {
-      Logger.e(TAG, String.format("%s%s",
+      notifyUnsuccessfulCameraOperation(callback, String.format("%s%s",
         "LocationComponent#zoomWhileTracking method can only be used",
         " when a camera mode other than CameraMode#NONE is engaged."));
       return;
     } else if (locationCameraController.isTransitioning()) {
-      Logger.e(TAG,
+      notifyUnsuccessfulCameraOperation(callback,
         "LocationComponent#zoomWhileTracking method call is ignored because the camera mode is transitioning");
       return;
     }
@@ -817,14 +818,15 @@ public final class LocationComponent {
                                 @Nullable MapboxMap.CancelableCallback callback) {
     checkActivationState();
     if (!isLayerReady) {
+      notifyUnsuccessfulCameraOperation(callback, null);
       return;
     } else if (getCameraMode() == CameraMode.NONE) {
-      Logger.e(TAG, String.format("%s%s",
+      notifyUnsuccessfulCameraOperation(callback, String.format("%s%s",
         "LocationComponent#tiltWhileTracking method can only be used",
         " when a camera mode other than CameraMode#NONE is engaged."));
       return;
     } else if (locationCameraController.isTransitioning()) {
-      Logger.e(TAG,
+      notifyUnsuccessfulCameraOperation(callback,
         "LocationComponent#tiltWhileTracking method call is ignored because the camera mode is transitioning");
       return;
     }
@@ -1604,6 +1606,17 @@ public final class LocationComponent {
   private void checkActivationState() {
     if (!isComponentInitialized) {
       throw new LocationComponentNotInitializedException();
+    }
+  }
+
+  private void notifyUnsuccessfulCameraOperation(@Nullable MapboxMap.CancelableCallback callback,
+                                                 @Nullable String msg) {
+    if (msg != null) {
+      Logger.e(TAG, msg);
+    }
+
+    if (callback != null) {
+      callback.onCancel();
     }
   }
 
