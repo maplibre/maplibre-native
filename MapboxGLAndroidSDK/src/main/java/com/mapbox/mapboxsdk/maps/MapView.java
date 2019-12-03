@@ -70,6 +70,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private NativeMap nativeMapView;
   @Nullable
   private MapboxMap mapboxMap;
+  private View renderView;
+
   private AttributionClickListener attributionClickListener;
   private MapboxMapOptions mapboxMapOptions;
   private MapRenderer mapRenderer;
@@ -296,6 +298,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       };
 
       addView(textureView, 0);
+      renderView = textureView;
     } else {
       MapboxGLSurfaceView glSurfaceView = new MapboxGLSurfaceView(getContext());
       glSurfaceView.setZOrderMediaOverlay(mapboxMapOptions.getRenderSurfaceOnTop());
@@ -308,6 +311,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       };
 
       addView(glSurfaceView, 0);
+      renderView = glSurfaceView;
     }
 
     boolean crossSourceCollisions = mapboxMapOptions.getCrossSourceCollisions();
@@ -463,6 +467,20 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public boolean isDestroyed() {
     return destroyed;
+  }
+
+  /**
+   * Returns the View used for rendering OpenGL.
+   * <p>
+   * The type of the returned view is either a GLSurfaceView or a TextureView.
+   * </p>
+   *
+   * @return the view used for rendering OpenGL
+   */
+  @NonNull
+  @UiThread
+  public View getRenderView() {
+    return renderView;
   }
 
   @Override
