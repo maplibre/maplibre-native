@@ -3,12 +3,18 @@
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
 ## master
+
+### Features
+- Introduce OfflineManager.runPackDatabaseAutomatically(boolean) and remove the redundant OfflineRegion.deleteAndSkipPackDatabase() method [#78](https://github.com/mapbox/mapbox-gl-native-android/pull/78)
+
 ### Performance improvements
 - Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
 
 ### Bug fixes
 - Fixed a bug where location camera mode transition callback would not get notified if the requested mode was already set. [#80](https://github.com/mapbox/mapbox-gl-native-android/pull/80)
 - Fixed a bug where location tilt/zoom while tracking callback would not get notified if the request was ignored. [#83](https://github.com/mapbox/mapbox-gl-native-android/pull/83)
+- Use -Oz to reduce binary size [#15984](https://github.com/mapbox/mapbox-gl-native/pull/15984)
+- Use icf=all compile flag to reduce binary size [#15987](https://github.com/mapbox/mapbox-gl-native/pull/15987)
 
 ## 8.6.0-alpha.2 - November 22, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.6.0-alpha.1...android-v8.6.0-alpha.2) since [Mapbox Maps SDK for Android v8.6.0-alpha.1](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.6.0-alpha.1):
