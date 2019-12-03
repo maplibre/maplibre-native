@@ -644,6 +644,36 @@ public class LocationCameraControllerTest {
   }
 
   @Test
+  public void transition_duplicateMode() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    Transform transform = mock(Transform.class);
+    when(mapboxMap.getCameraPosition()).thenReturn(CameraPosition.DEFAULT);
+    Projection projection = mock(Projection.class);
+    when(mapboxMap.getProjection()).thenReturn(projection);
+    when(projection.getMetersPerPixelAtLatitude(any(Double.class))).thenReturn(Double.valueOf(1000));
+    LocationCameraController camera = buildCamera(mapboxMap, transform);
+    camera.initializeOptions(mock(LocationComponentOptions.class));
+    final OnLocationCameraTransitionListener listener = mock(OnLocationCameraTransitionListener.class);
+    Location location = mock(Location.class);
+
+    camera.setCameraMode(TRACKING, location, TRANSITION_ANIMATION_DURATION_MS, null, null, null, listener);
+
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        listener.onLocationCameraTransitionFinished(TRACKING);
+        return null;
+      }
+    }).when(transform).animateCamera(eq(mapboxMap), any(CameraUpdate.class), any(Integer.class),
+      any(MapboxMap.CancelableCallback.class));
+    camera.setCameraMode(TRACKING, location, TRANSITION_ANIMATION_DURATION_MS, null, null, null, listener);
+    verify(listener, times(1)).onLocationCameraTransitionFinished(TRACKING);
+    verify(transform, times(1))
+      .animateCamera(eq(mapboxMap), any(CameraUpdate.class), any(Integer.class),
+        any(MapboxMap.CancelableCallback.class));
+  }
+
+  @Test
   public void transition_canceled() {
     MapboxMap mapboxMap = mock(MapboxMap.class);
     Transform transform = mock(Transform.class);

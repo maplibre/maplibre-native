@@ -103,6 +103,9 @@ final class LocationCameraController {
                      @Nullable Double zoom, @Nullable Double bearing, @Nullable Double tilt,
                      @Nullable OnLocationCameraTransitionListener internalTransitionListener) {
     if (this.cameraMode == cameraMode) {
+      if (internalTransitionListener != null) {
+        internalTransitionListener.onLocationCameraTransitionFinished(cameraMode);
+      }
       return;
     }
 
