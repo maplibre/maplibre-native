@@ -2,8 +2,8 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
-## master
-
+## 8.6.0-beta.1 - December 6, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.6.0-alpha.2...android-v8.6.0-beta.1) since [Mapbox Maps SDK for Android v8.6.0-alpha.2](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.6.0-alpha.2):
 ### Features
 - Introduce OfflineManager.runPackDatabaseAutomatically(boolean) and remove the redundant OfflineRegion.deleteAndSkipPackDatabase() method [#78](https://github.com/mapbox/mapbox-gl-native-android/pull/78)
 - Expose getter for the view used for rendering OpenGL content on [#87](https://github.com/mapbox/mapbox-gl-native-android/pull/87)
@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 - Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
 
 ### Bug fixes
+- Fixed a runtime crash of Proguard optimized builds on < API 21 devices by including the missing SoLoader flag. [#71](https://github.com/mapbox/mapbox-gl-native-android/pull/71)
 - Fixed a bug where location camera mode transition callback would not get notified if the requested mode was already set. [#80](https://github.com/mapbox/mapbox-gl-native-android/pull/80)
 - Fixed a bug where location tilt/zoom while tracking callback would not get notified if the request was ignored. [#83](https://github.com/mapbox/mapbox-gl-native-android/pull/83)
 - Use -Oz to reduce binary size [#15984](https://github.com/mapbox/mapbox-gl-native/pull/15984)
