@@ -652,12 +652,27 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output) {
+    if (!checkState("pixelsForLatLngs")) {
+      nativePixelsForLatLngs(input, output, pixelRatio);
+    }
+  }
+
+  @Override
   public LatLng latLngForPixel(@NonNull PointF pixel) {
     if (checkState("latLngForPixel")) {
       return new LatLng();
     }
     return nativeLatLngForPixel(pixel.x / pixelRatio, pixel.y / pixelRatio);
   }
+
+  @Override
+  public void latLngsForPixels(@NonNull double[] input, @NonNull double[] output) {
+    if (!checkState("latLngsForPixels")) {
+      nativeLatLngsForPixels(input, output, pixelRatio);
+    }
+  }
+
 
   @Override
   public double getTopOffsetPixelsForAnnotationSymbol(String symbolName) {
@@ -1275,9 +1290,15 @@ final class NativeMapView implements NativeMap {
   @Keep
   private native PointF nativePixelForLatLng(double lat, double lon);
 
+  @Keep
+  private native void nativePixelsForLatLngs(double[] input, double[] output, float pixelRatio);
+
   @NonNull
   @Keep
   private native LatLng nativeLatLngForPixel(float x, float y);
+
+  @Keep
+  private native void nativeLatLngsForPixels(double[] input, double[] output, float pixelRatio);
 
   @Keep
   private native double nativeGetTopOffsetPixelsForAnnotationSymbol(String symbolName);

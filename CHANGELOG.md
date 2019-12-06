@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 ### Features
 - Introduce OfflineManager.runPackDatabaseAutomatically(boolean) and remove the redundant OfflineRegion.deleteAndSkipPackDatabase() method [#78](https://github.com/mapbox/mapbox-gl-native-android/pull/78)
 - Expose getter for the view used for rendering OpenGL content on [#87](https://github.com/mapbox/mapbox-gl-native-android/pull/87)
+- Bulk conversion of geographic coordinates to screen coordinate using reusable double arrays. [#91](https://github.com/mapbox/mapbox-gl-native-android/pull/91)
 
 ### Performance improvements
 - Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))

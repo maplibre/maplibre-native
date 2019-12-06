@@ -95,6 +95,19 @@ public class Projection {
     return nativeMapView.latLngForPixel(point);
   }
 
+
+  /**
+   * Returns the geographic locations that corresponds to screen locations.
+   * The screen locations are specified in screen pixels (not display pixels) relative to the
+   * top left of the map (not the top left of the whole screen).
+   *
+   * @param input  an array of input values representing screen coordinates
+   * @param output an array of output values representing geographic locations
+   */
+  public void fromScreenLocations(@NonNull double[] input, @NonNull double[] output) {
+    nativeMapView.latLngsForPixels(input, output);
+  }
+
   /**
    * Gets a projection of the viewing frustum for converting between screen coordinates and
    * geo-latitude/longitude coordinates.
@@ -261,6 +274,18 @@ public class Projection {
   @NonNull
   public PointF toScreenLocation(@NonNull LatLng location) {
     return nativeMapView.pixelForLatLng(location);
+  }
+
+  /**
+   * Returns a screen locations that corresponds to a geographical coordinates.
+   * The screen locations are in screen pixels (not display pixels) relative to the top left
+   * of the map (not of the whole screen).
+   *
+   * @param input  an array of input values representing geographic locations
+   * @param output an array of output values representing screen coordinates
+   */
+  public void toScreenLocations(@NonNull double[] input, @NonNull double[] output) {
+    nativeMapView.pixelsForLatLngs(input, output);
   }
 
   float getHeight() {

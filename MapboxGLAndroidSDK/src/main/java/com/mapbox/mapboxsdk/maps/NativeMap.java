@@ -193,7 +193,11 @@ interface NativeMap {
   @NonNull
   PointF pixelForLatLng(@NonNull LatLng latLng);
 
+  void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
+
   LatLng latLngForPixel(@NonNull PointF pixel);
+
+  void latLngsForPixels(@NonNull double[] input, @NonNull double[] output);
 
   //
   // Utils API
