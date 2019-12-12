@@ -14,6 +14,10 @@ static NSString * const MGLTelemetryBaseURLKey = @"MGLTelemetryBaseURL";
 
 static NSString * const MGLAPIClientUserAgentBase = @"mapbox-maps-ios";
 
+static void * MGLMapboxMetricsEnabledKeyContext = &MGLMapboxMetricsEnabledKeyContext;
+static void * MGLMapboxMetricsDebugLoggingEnabledKeyContext = &MGLMapboxMetricsDebugLoggingEnabledKeyContext;
+static void * MGLTelemetryAccessTokenKeyContext = &MGLTelemetryAccessTokenKeyContext;
+
 @interface MGLMapboxEvents ()
 
 @property (nonatomic) MMEEventsManager *eventsManager;
@@ -55,8 +59,6 @@ static NSString * const MGLAPIClientUserAgentBase = @"mapbox-maps-ios";
         _eventsManager = MMEEventsManager.sharedManager;
         _eventsManager.debugLoggingEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:MGLMapboxMetricsDebugLoggingEnabledKey];
 
-        // TODO: What happens if the dev sets MGLMapboxAccountTypeKey prior to using the SDK?
-        // _eventsManager.accountType = [[NSUserDefaults standardUserDefaults] integerForKey:MGLMapboxAccountTypeKey];
         BOOL collectionEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:MGLMapboxMetricsEnabledKey];
         NSUserDefaults.mme_configuration.mme_isCollectionEnabled = collectionEnabled;
 
@@ -74,60 +76,70 @@ static NSString * const MGLAPIClientUserAgentBase = @"mapbox-maps-ios";
             self.baseURL = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] objectForKey:MGLTelemetryBaseURLKey]];
         }
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:nil];
+        // Guard against over calling pause / resume if the values this implementation actually
+        // cares about have not changed. We guard because the pause and resume method checks CoreLocation's
+        // authorization status and that can drag on the main thread if done too many times (e.g. if the host
+        // app heavily uses the user defaults API and this method is called very frequently)
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults addObserver:self
+                   forKeyPath:MGLMapboxMetricsEnabledKey
+                      options:NSKeyValueObservingOptionNew
+                      context:MGLMapboxMetricsEnabledKeyContext];
+        [defaults addObserver:self
+                   forKeyPath:MGLMapboxMetricsDebugLoggingEnabledKey
+                      options:NSKeyValueObservingOptionNew
+                      context:MGLMapboxMetricsDebugLoggingEnabledKeyContext];
+        [defaults addObserver:self
+                   forKeyPath:MGLTelemetryAccessTokenKey
+                      options:NSKeyValueObservingOptionNew
+                      context:MGLTelemetryAccessTokenKeyContext];
     }
     return self;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    @try {
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults removeObserver:self forKeyPath:MGLMapboxMetricsEnabledKey];
+        [defaults removeObserver:self forKeyPath:MGLMapboxMetricsDebugLoggingEnabledKey];
+        [defaults removeObserver:self forKeyPath:MGLTelemetryAccessTokenKey];
+    }
+    @catch (NSException *exception) {
+        [self.eventsManager reportException:exception];
+    } //If the observer is removed by a superclass this may fail since we are removing it twice.
 }
 
-- (void)userDefaultsDidChange:(NSNotification *)notification {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self updateNonDisablingConfigurationValues];
-        [self updateDisablingConfigurationValuesWithNotification:notification];
-    });
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    //KVO callback can happen on any thread. Even two threads concurrently for the same key.
+    if (context == MGLMapboxMetricsEnabledKeyContext) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self updateDisablingConfigurationValues];
+        });
+    } else if (context == MGLMapboxMetricsDebugLoggingEnabledKeyContext) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.eventsManager.debugLoggingEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:MGLMapboxMetricsDebugLoggingEnabledKey];
+        });
+    } else if (context == MGLTelemetryAccessTokenKeyContext) {
+       dispatch_async(dispatch_get_main_queue(), ^{
+           [self updateNonDisablingConfigurationValues];
+       });
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (void)updateNonDisablingConfigurationValues {
-
-    self.eventsManager.debugLoggingEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:MGLMapboxMetricsDebugLoggingEnabledKey];
-
-    // It is possible for the telemetry access token key to have been set yet `userDefaultsDidChange:`
-    // is called before `setupWithAccessToken:` is called.
-    // In that case, setting the access token here will have no effect. In practice, that's fine
-    // because the access token value will be resolved when `setupWithAccessToken:` is called eventually
     if ([[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] containsObject:MGLTelemetryAccessTokenKey]) {
         NSString *telemetryAccessToken = [[NSUserDefaults standardUserDefaults] objectForKey:MGLTelemetryAccessTokenKey];
         NSUserDefaults.mme_configuration.mme_accessToken = telemetryAccessToken;
     }
-
 }
 
-- (void)updateDisablingConfigurationValuesWithNotification:(NSNotification *)notification {
-    // Guard against over calling pause / resume if the values this implementation actually
-    // cares about have not changed. We guard because the pause and resume method checks CoreLocation's
-    // authorization status and that can drag on the main thread if done too many times (e.g. if the host
-    // app heavily uses the user defaults API and this method is called very frequently)
-
-    if ([[notification object] respondsToSelector:@selector(objectForKey:)]) {
-        NSUserDefaults *userDefaults = [notification object];
-
-//        //TODO: Account type changed at runtime
-//        NSInteger accountType = [userDefaults integerForKey:MGLMapboxAccountTypeKey];
-//        if (accountType != self.eventsManager.accountType) {
-//            self.eventsManager.accountType = accountType;
-//        }
-
-        BOOL oldCollectionEnabled = NSUserDefaults.mme_configuration.mme_isCollectionEnabled;
-        BOOL collectionEnabled = [userDefaults boolForKey:MGLMapboxMetricsEnabledKey];
-
-        if (collectionEnabled != oldCollectionEnabled) {
-            NSUserDefaults.mme_configuration.mme_isCollectionEnabled = collectionEnabled;
-            [self.eventsManager pauseOrResumeMetricsCollectionIfRequired];
-        }
-    }
+- (void)updateDisablingConfigurationValues {
+    BOOL collectionEnabled = [NSUserDefaults.standardUserDefaults boolForKey:MGLMapboxMetricsEnabledKey];
+    NSUserDefaults.mme_configuration.mme_isCollectionEnabled = collectionEnabled;
+    
+    [self.eventsManager pauseOrResumeMetricsCollectionIfRequired];
 }
 
 + (void)setupWithAccessToken:(NSString *)accessToken {
@@ -173,7 +185,7 @@ static NSString * const MGLAPIClientUserAgentBase = @"mapbox-maps-ios";
     BOOL metricsEnabledSettingShownInAppFlag = [shownInAppNumber boolValue];
     
     if (!metricsEnabledSettingShownInAppFlag &&
-        [[NSUserDefaults standardUserDefaults] integerForKey:MGLMapboxAccountTypeKey] == 0) {
+        [[NSUserDefaults mme_configuration] integerForKey:MGLMapboxAccountTypeKey] == 0) {
         // Opt-out is not configured in UI, so check for Settings.bundle
         id defaultEnabledValue;
         NSString *appSettingsBundle = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"bundle"];
