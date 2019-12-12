@@ -29,5 +29,5 @@ Pod::Spec.new do |m|
 
   m.preserve_path = '**/*.bcsymbolmap'
 
-  m.dependency "MapboxMobileEvents", "0.10.1"
+  m.dependency "MapboxMobileEvents", "0.10.2"
 end
