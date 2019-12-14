@@ -106,6 +106,8 @@ You can alternatively install the SDK as a static framework:
 
 For instructions on installing stable release versions of the Mapbox Maps SDK for iOS with CocoaPods, see [our website](https://www.mapbox.com/install/ios/cocoapods/).
 
+As of v5.6.0, you must specify `use_frameworks!` in your Podfile.
+
 ##### Testing pre-releases with CocoaPods
 
 To test pre-releases of the dynamic framework, directly specify the version in your `Podfile`:
@@ -162,13 +164,18 @@ Note that these builds lack some debugging information, which could make develop
 
 For instructions on installing stable release versions of the Mapbox Maps SDK for iOS with Carthage, see [our website](https://www.mapbox.com/install/ios/carthage/).
 
+Please note that as of ios-v5.6.0-alpha.2, `--no-use-binaries` has no affect on projects built with the Mapbox framework.
+
 ##### Testing pre-releases with Carthage
 
 To test pre-releases of the dynamic framework, directly specify the version in your Cartfile:
 
 ```json
 binary "https://www.mapbox.com/ios-sdk/Mapbox-iOS-SDK.json" ~> x.x.x-alpha.1
+github "mapbox/mapbox-events-ios" == x.x.x
 ```
+
+Where `x.x.x` is the latest version of the [Mapbox Mobile Events](https://github.com/mapbox/mapbox-events-ios) library.
 
 ##### Testing snapshot releases with Carthage
 
