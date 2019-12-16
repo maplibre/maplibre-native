@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 ## master
 ### Bug fixes
 - Fixed a crash caused by an unintentional minification of the `LocalGlyphRasterizer`. [#102](https://github.com/mapbox/mapbox-gl-native-android/pull/102)
+- Deprecated `MapboxMap#cycleDebugOptions` and fixed an `UnsatisfiedLinkError` when accessed. [#104](https://github.com/mapbox/mapbox-gl-native-android/pull/104)
 
 ## 8.6.0-beta.1 - December 6, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.6.0-alpha.2...android-v8.6.0-beta.1) since [Mapbox Maps SDK for Android v8.6.0-alpha.2](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.6.0-alpha.2):

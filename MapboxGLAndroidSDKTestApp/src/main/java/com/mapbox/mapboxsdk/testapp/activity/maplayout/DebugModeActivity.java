@@ -164,8 +164,8 @@ public class DebugModeActivity extends AppCompatActivity implements OnMapReadyCa
     FloatingActionButton fabDebug = findViewById(R.id.fabDebug);
     fabDebug.setOnClickListener(view -> {
       if (mapboxMap != null) {
+        mapboxMap.setDebugActive(!mapboxMap.isDebugActive());
         Timber.d("Debug FAB: isDebug Active? %s", mapboxMap.isDebugActive());
-        mapboxMap.cycleDebugOptions();
       }
     });
   }

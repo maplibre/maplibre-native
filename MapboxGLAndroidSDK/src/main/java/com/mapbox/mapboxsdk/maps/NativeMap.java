@@ -209,8 +209,6 @@ interface NativeMap {
 
   boolean getDebug();
 
-  void cycleDebugOptions();
-
   void setReachability(boolean status);
 
   void setApiBaseUrl(String baseUrl);

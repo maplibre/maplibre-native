@@ -584,14 +584,6 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public void cycleDebugOptions() {
-    if (checkState("cycleDebugOptions")) {
-      return;
-    }
-    nativeCycleDebugOptions();
-  }
-
-  @Override
   public boolean getDebug() {
     if (checkState("getDebug")) {
       return false;
@@ -1262,9 +1254,6 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetDebug(boolean debug);
-
-  @Keep
-  private native void nativeCycleDebugOptions();
 
   @Keep
   private native boolean nativeGetDebug();

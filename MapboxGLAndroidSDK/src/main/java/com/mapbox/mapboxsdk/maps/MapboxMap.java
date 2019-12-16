@@ -775,10 +775,12 @@ public final class MapboxMap {
    * any map debug options enabled or disabled.
    *
    * @see #isDebugActive()
+   * @deprecated use {@link #setDebugActive(boolean)}
    */
+  @Deprecated
   public void cycleDebugOptions() {
-    nativeMapView.cycleDebugOptions();
-    this.debugActive = nativeMapView.getDebug();
+    this.debugActive = !nativeMapView.getDebug();
+    nativeMapView.setDebug(debugActive);
   }
 
   //
