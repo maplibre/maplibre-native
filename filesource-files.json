@@ -1,0 +1,27 @@
+{
+    "//": "This file can be edited manually and is the canonical source.",
+    "sources": [
+        "vendor-android/mapbox-gl-native/platform/android/src/asset_manager_file_source.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/connectivity_listener.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/file_source.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/http_file_source.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_manager.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_definition.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_error.cpp",
+        "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_status.cpp",
+        "vendor-android/mapbox-gl-native/platform/default/src/mbgl/storage/sqlite3.cpp"
+    ],
+    "public_headers": {},
+    "private_headers": {
+        "asset_manager.hpp": "vendor-android/mapbox-gl-native/platform/android/src/asset_manager.hpp",
+        "asset_manager_file_source.hpp": "vendor-android/mapbox-gl-native/platform/android/src/asset_manager_file_source.hpp",
+        "connectivity_listener.hpp": "vendor-android/mapbox-gl-native/platform/android/src/connectivity_listener.hpp",
+        "file_source.hpp": "vendor-android/mapbox-gl-native/platform/android/src/file_source.hpp",
+        "offline/offline_manager.hpp": "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_manager.hpp",
+        "offline/offline_region.hpp": "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region.hpp",
+        "offline/offline_region_definition.hpp": "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_definition.hpp",
+        "offline/offline_region_error.hpp": "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_error.hpp",
+        "offline/offline_region_status.hpp": "vendor-android/mapbox-gl-native/platform/android/src/offline/offline_region_status.hpp"
+    }
+}

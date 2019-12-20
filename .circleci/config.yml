@@ -377,6 +377,6 @@ jobs:
       - run:
           name: Build Android library
           command: |
-            cd vendor/mapbox-gl-native/misc/buck
+            cd misc/buck
             buck build mapbox-gl-native:android-core
   # ------------------------------------------------------------------------------
