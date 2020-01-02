@@ -28,7 +28,7 @@
         latestVersion = [latestVersion stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if (![currentVersion isEqualToString:latestVersion]) {
             NSString *updateAvailable = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"SDK_UPDATE_AVAILABLE", nil, nil, @"Mapbox Maps SDK for iOS version %@ is now available:", @"Developer-only SDK update notification; {latest version, in format x.x.x}"), latestVersion];
-            NSLog(@"%@ https://github.com/mapbox/mapbox-gl-native/releases/tag/ios-v%@", updateAvailable, latestVersion);
+            NSLog(@"%@ https://github.com/mapbox/mapbox-gl-native-ios/releases/tag/ios-v%@", updateAvailable, latestVersion);
         }
     }] resume];
 #endif
