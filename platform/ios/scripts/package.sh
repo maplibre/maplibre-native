@@ -238,9 +238,9 @@ fi
 
 if [[ ${BUILD_STATIC} == true ]]; then
     step "Copying static library headers…"
-    cp -rv "${PRODUCTS}/${BUILDTYPE}-iphoneos/Headers" "${OUTPUT}/static/${NAME}.framework/Headers"
+    cp -rv "${PRODUCTS}/${BUILDTYPE}-${SDK}/Headers" "${OUTPUT}/static/${NAME}.framework/Headers"
     cat platform/ios/framework/Mapbox-static.h > "${OUTPUT}/static/${NAME}.framework/Headers/Mapbox.h"
-    cat "${PRODUCTS}/${BUILDTYPE}-iphoneos/Headers/Mapbox.h" >> "${OUTPUT}/static/${NAME}.framework/Headers/Mapbox.h"
+    cat "${PRODUCTS}/${BUILDTYPE}-${SDK}/Headers/Mapbox.h" >> "${OUTPUT}/static/${NAME}.framework/Headers/Mapbox.h"
 fi
 
 step "Copying library resources…"
