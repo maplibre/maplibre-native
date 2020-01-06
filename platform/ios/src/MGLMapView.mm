@@ -1023,6 +1023,15 @@ public:
     [self updateUserLocationAnnotationView];
 
     [self updateAttributionAlertView];
+
+    MGLAssert(CGRectContainsRect(self.bounds, self.attributionButton.mgl_frameForIdentifyTransform),
+              @"The attribution is not in the visible area of the mapview. Please check your position and offset settings");
+    MGLAssert(CGRectContainsRect(self.bounds, self.scaleBar.mgl_frameForIdentifyTransform),
+              @"The scaleBar is not in the visible area of the mapview. Please check your position and offset settings");
+    MGLAssert(CGRectContainsRect(self.bounds, self.compassView.mgl_frameForIdentifyTransform),
+              @"The compassView is not in the visible area of the mapview. Please check your position and offset settings");
+    MGLAssert(CGRectContainsRect(self.bounds, self.logoView.mgl_frameForIdentifyTransform),
+              @"The logoView is not in the visible area of the mapview. Please check your position and offset settings");
 }
 
 /// Updates `contentInset` to reflect the current window geometry.
