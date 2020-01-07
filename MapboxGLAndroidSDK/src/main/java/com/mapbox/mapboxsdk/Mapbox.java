@@ -115,7 +115,7 @@ public final class Mapbox {
    * @return the SKU token
    */
   public static String getSkuToken() {
-    if (INSTANCE.accounts == null) {
+    if (!hasInstance() || INSTANCE.accounts == null) {
       throw new MapboxConfigurationException(
         "A valid access token parameter is required when using a Mapbox service."
           + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
@@ -179,7 +179,7 @@ public final class Mapbox {
    */
   @Nullable
   public static TelemetryDefinition getTelemetry() {
-    return INSTANCE.telemetry;
+    return hasInstance() ? INSTANCE.telemetry : null;
   }
 
   /**
