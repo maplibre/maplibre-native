@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.maps
 
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.style.layers.Layer
 import org.junit.runner.RunWith
@@ -16,7 +16,7 @@ abstract class BaseLayerTest : AppCenter() {
     }
 
     fun before() {
-        val context = InstrumentationRegistry.getContext()
+        val context = InstrumentationRegistry.getInstrumentation().context
         nativeMapView = NativeMapView(context, false, null, null, NativeMapViewTest.DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }

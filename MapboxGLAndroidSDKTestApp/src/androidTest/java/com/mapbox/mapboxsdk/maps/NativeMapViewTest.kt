@@ -2,9 +2,9 @@ package com.mapbox.mapboxsdk.maps
 
 import android.content.Context
 import android.graphics.PointF
-import android.support.test.InstrumentationRegistry
-import android.support.test.annotation.UiThreadTest
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.annotation.UiThreadTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -40,7 +40,7 @@ class NativeMapViewTest : AppCenter() {
     @Before
     @UiThreadTest
     fun before() {
-        val context = InstrumentationRegistry.getContext()
+        val context = InstrumentationRegistry.getInstrumentation().context
         nativeMapView = NativeMapView(context, 2.0f, false, null, null, DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }

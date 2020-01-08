@@ -1,8 +1,8 @@
 package com.mapbox.mapboxsdk.testapp.activity.offline
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.log.Logger
 import com.mapbox.mapboxsdk.maps.Style

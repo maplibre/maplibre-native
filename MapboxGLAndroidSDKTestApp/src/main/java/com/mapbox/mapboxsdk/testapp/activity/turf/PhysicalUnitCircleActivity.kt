@@ -2,8 +2,9 @@ package com.mapbox.mapboxsdk.testapp.activity.turf
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import android.os.PersistableBundle
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -116,8 +117,8 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
     mapView.onDestroy()
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
-    super.onSaveInstanceState(outState)
+  override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    super.onSaveInstanceState(outState, outPersistentState)
     outState?.let {
       mapView.onSaveInstanceState(it)
     }

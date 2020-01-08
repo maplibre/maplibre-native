@@ -2,8 +2,9 @@ package com.mapbox.mapboxsdk.testapp.activity.style
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v7.app.AppCompatActivity
+import android.os.PersistableBundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -67,8 +68,8 @@ class NoStyleActivity : AppCompatActivity() {
     mapView.onDestroy()
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
-    super.onSaveInstanceState(outState)
+  override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    super.onSaveInstanceState(outState, outPersistentState)
     outState?.let {
       mapView.onSaveInstanceState(it)
     }

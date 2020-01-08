@@ -3,8 +3,8 @@ package com.mapbox.mapboxsdk.integration
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.support.test.InstrumentationRegistry
-import android.support.test.uiautomator.*
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.*
 import com.mapbox.mapboxsdk.AppCenter
 import org.junit.Before
 
@@ -27,10 +27,10 @@ abstract class BaseIntegrationTest : AppCenter() {
  * <p>
  */
 fun UiDevice.launchActivity(context: Context, clazz: Class<*>) {
-  val applicationPackage = InstrumentationRegistry.getTargetContext().packageName
+  val applicationPackage = InstrumentationRegistry.getInstrumentation().targetContext.packageName
   val intent = Intent(context, clazz)
   intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-  InstrumentationRegistry.getContext().startActivity(intent)
+  InstrumentationRegistry.getInstrumentation().context.startActivity(intent)
   wait(Until.hasObject(By.pkg(applicationPackage).depth(0)), TIMEOUT_UI_SEARCH_WAIT)
 }
 

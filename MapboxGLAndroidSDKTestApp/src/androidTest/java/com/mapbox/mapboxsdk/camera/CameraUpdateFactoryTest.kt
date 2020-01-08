@@ -1,8 +1,8 @@
 package com.mapbox.mapboxsdk.camera
 
 import android.graphics.PointF
-import android.support.test.annotation.UiThreadTest
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.annotation.UiThreadTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.testapp.activity.BaseTest

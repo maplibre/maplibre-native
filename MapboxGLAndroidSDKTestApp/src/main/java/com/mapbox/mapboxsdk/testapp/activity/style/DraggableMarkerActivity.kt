@@ -2,10 +2,11 @@ package com.mapbox.mapboxsdk.testapp.activity.style
 
 import android.graphics.PointF
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
+import android.os.PersistableBundle
 import android.view.MotionEvent
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Feature
@@ -318,8 +319,8 @@ class DraggableMarkerActivity : AppCompatActivity() {
     mapView.onDestroy()
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
-    super.onSaveInstanceState(outState)
+  override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    super.onSaveInstanceState(outState, outPersistentState)
     outState?.let {
       mapView.onSaveInstanceState(it)
     }
