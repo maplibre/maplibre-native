@@ -326,23 +326,14 @@ jobs:
           command: make android-javadoc
       - save-dependencies: { gradle: true }
       - run:
-          name: gzip debugable .so files
+          name: archive debugable objects
           command: |
-            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/arm64-v8a/libmapbox-gl.so && \
-            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/armeabi-v7a/libmapbox-gl.so && \
-            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86/libmapbox-gl.so && \
-            gzip MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86_64/libmapbox-gl.so
+            cd MapboxGLAndroidSDK/build/intermediates/cmake/release && tar -zcvf debuggable-objects.tar.gz obj && cd -
       - store_artifacts:
           path: MapboxGLAndroidSDKTestApp/build/outputs/apk/release
           destination: .
       - store_artifacts:
-          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/arm64-v8a/libmapbox-gl.so.gz
-      - store_artifacts:
-          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/armeabi-v7a/libmapbox-gl.so.gz
-      - store_artifacts:
-          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86/libmapbox-gl.so.gz
-      - store_artifacts:
-          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/obj/x86_64/libmapbox-gl.so.gz
+          path: MapboxGLAndroidSDK/build/intermediates/cmake/release/debuggable-objects.tar.gz
       - deploy:
           name: Publish to Bintray
           command: |
