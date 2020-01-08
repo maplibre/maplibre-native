@@ -2,30 +2,44 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
-## master
+## 9.0.0-alpha.1 - January 8, 2020
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0...android-v9.0.0-alpha.1) since [Mapbox Maps SDK for Android v8.6.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0):
+### Features
+ - Update codebase to androidX. [#129](https://github.com/mapbox/mapbox-gl-native-android/pull/129)
+
 ### Bug fixes
-- Fixed a crash caused by an unintentional minification of the `LocalGlyphRasterizer`. [#102](https://github.com/mapbox/mapbox-gl-native-android/pull/102)
-- Deprecated `MapboxMap#cycleDebugOptions` and fixed an `UnsatisfiedLinkError` when accessed. [#104](https://github.com/mapbox/mapbox-gl-native-android/pull/104)
+ - Deprecated `MapboxMap#cycleDebugOptions` and fixed an `UnsatisfiedLinkError` when accessed. [#104](https://github.com/mapbox/mapbox-gl-native-android/pull/104)
+ - Fixed a null pointer issue on the public static getters of `Mapbox.java`, in case the user hasn't called `Mapbox.getInstance()`. [#128](https://github.com/mapbox/mapbox-gl-native-android/pull/128)
+
+## 8.6.0 - December 20, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0-beta.1...android-v8.6.0) since [Mapbox Maps SDK for Android v8.6.0-beta.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0-beta.1):
+### Bug fixes
+ - Revert of a commit that resulted in a native crash when cycle debug options was invoked, issue was only impacting v8.6.0-beta.1 [#16074](https://github.com/mapbox/mapbox-gl-native/pull/16074)
+ - Fixed a crash caused by an unintentional minification of the `LocalGlyphRasterizer`. The full class definition is now kept when minification is used by end developer [#102](https://github.com/mapbox/mapbox-gl-native-android/pull/102)
+ - Fixed intermittent offline download failures by clearing the batch buffer if a download is interrupted. [#16074](https://github.com/mapbox/mapbox-gl-native/pull/16074)
+ - Fixed error for excessively overscaled lines [#16045](https://github.com/mapbox/mapbox-gl-native/pull/16045)
+ - Fixed signed to unsigned implicit conversion errors in symbol placement. [#16008](https://github.com/mapbox/mapbox-gl-native/pull/16008)
+ - Fixed error that would result when 0.0 was passed into `text-size` [#16080](https://github.com/mapbox/mapbox-gl-native/pull/16080)
 
 ## 8.6.0-beta.1 - December 6, 2019
-[Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.6.0-alpha.2...android-v8.6.0-beta.1) since [Mapbox Maps SDK for Android v8.6.0-alpha.2](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.6.0-alpha.2):
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0-alpha.2...android-v8.6.0-beta.1) since [Mapbox Maps SDK for Android v8.6.0-alpha.2](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0-alpha.2):
 ### Features
-- Introduce OfflineManager.runPackDatabaseAutomatically(boolean) and remove the redundant OfflineRegion.deleteAndSkipPackDatabase() method [#78](https://github.com/mapbox/mapbox-gl-native-android/pull/78)
-- Expose getter for the view used for rendering OpenGL content on [#87](https://github.com/mapbox/mapbox-gl-native-android/pull/87)
-- Bulk conversion of geographic coordinates to screen coordinate using reusable double arrays. [#91](https://github.com/mapbox/mapbox-gl-native-android/pull/91)
+ - Introduce OfflineManager.runPackDatabaseAutomatically(boolean) and remove the redundant OfflineRegion.deleteAndSkipPackDatabase() method [#78](https://github.com/mapbox/mapbox-gl-native-android/pull/78)
+ - Expose getter for the view used for rendering OpenGL content on [#87](https://github.com/mapbox/mapbox-gl-native-android/pull/87)
+ - Bulk conversion of geographic coordinates to screen coordinate using reusable double arrays. [#91](https://github.com/mapbox/mapbox-gl-native-android/pull/91)
 
 ### Performance improvements
-- Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
+ - Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
 
 ### Bug fixes
-- Fixed a runtime crash of Proguard optimized builds on < API 21 devices by including the missing SoLoader flag. [#71](https://github.com/mapbox/mapbox-gl-native-android/pull/71)
-- Fixed a bug where location camera mode transition callback would not get notified if the requested mode was already set. [#80](https://github.com/mapbox/mapbox-gl-native-android/pull/80)
-- Fixed a bug where location tilt/zoom while tracking callback would not get notified if the request was ignored. [#83](https://github.com/mapbox/mapbox-gl-native-android/pull/83)
-- Use -Oz to reduce binary size [#15984](https://github.com/mapbox/mapbox-gl-native/pull/15984)
-- Use icf=all compile flag to reduce binary size [#15987](https://github.com/mapbox/mapbox-gl-native/pull/15987)
+ - Fixed a runtime crash of Proguard optimized builds on < API 21 devices by including the missing SoLoader flag. [#71](https://github.com/mapbox/mapbox-gl-native-android/pull/71)
+ - Fixed a bug where location camera mode transition callback would not get notified if the requested mode was already set. [#80](https://github.com/mapbox/mapbox-gl-native-android/pull/80)
+ - Fixed a bug where location tilt/zoom while tracking callback would not get notified if the request was ignored. [#83](https://github.com/mapbox/mapbox-gl-native-android/pull/83)
+ - Use -Oz to reduce binary size [#15984](https://github.com/mapbox/mapbox-gl-native/pull/15984)
+ - Use icf=all compile flag to reduce binary size [#15987](https://github.com/mapbox/mapbox-gl-native/pull/15987)
 
 ## 8.6.0-alpha.2 - November 22, 2019
-[Changes](https://github.com/mapbox/mapbox-gl-native/compare/android-v8.6.0-alpha.1...android-v8.6.0-alpha.2) since [Mapbox Maps SDK for Android v8.6.0-alpha.1](https://github.com/mapbox/mapbox-gl-native/releases/tag/android-v8.6.0-alpha.1):
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0-alpha.1...android-v8.6.0-alpha.2) since [Mapbox Maps SDK for Android v8.6.0-alpha.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0-alpha.1):
 
 ### Bug fixes
  - Synchronise LibaryLoader#loadLibrary to avoid race conditions resulting in UnsatisfiedLinkError [#58](https://github.com/mapbox/mapbox-gl-native-android/pull/58)
