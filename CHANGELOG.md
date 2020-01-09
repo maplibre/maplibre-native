@@ -2,6 +2,11 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 8.6.1 - January 9, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0...android-v8.6.1) since [Mapbox Maps SDK for Android v8.6.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0):
+### Bug fixes
+ - Fixed native crash when using a GeoJsonSource when destructing the underlying GeoJSONVTData [#16106](https://github.com/mapbox/mapbox-gl-native/pull/16106).
+
 ## 9.0.0-alpha.1 - January 8, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0...android-v9.0.0-alpha.1) since [Mapbox Maps SDK for Android v8.6.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0):
 ### Features
