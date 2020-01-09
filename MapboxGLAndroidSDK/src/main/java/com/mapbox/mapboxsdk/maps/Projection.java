@@ -204,6 +204,19 @@ public class Projection {
   }
 
   /**
+   * Gets a projection of the viewing frustum for converting between screen coordinates and
+   * geo-latitude/longitude coordinate bounds.
+   * <p>
+   * This method ignores the content padding.
+   *
+   * @param bounds an array of 4 output values representing bounds(in the order of latNorth,
+   *               lonEast, latSouth, lonWest).
+   */
+  public void getVisibleCoordinateBounds(@NonNull double[] bounds) {
+    nativeMapView.getVisibleCoordinateBounds(bounds);
+  }
+
+  /**
    * Takes two {@link Point}s and finds the geographic bearing between them.
    *
    * @param latLng1 the first point used for calculating the bearing

@@ -373,7 +373,7 @@ public class LatLngBounds implements Parcelable {
 
   private boolean containsLongitude(final double longitude) {
     return (longitude <= this.longitudeEast)
-      && (longitude >= this.longitudeWest);
+            && (longitude >= this.longitudeWest);
   }
 
   /**

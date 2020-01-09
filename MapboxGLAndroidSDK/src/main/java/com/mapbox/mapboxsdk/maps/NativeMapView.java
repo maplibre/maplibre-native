@@ -651,6 +651,13 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void getVisibleCoordinateBounds(@NonNull double[] output) {
+    if (!checkState("getVisibleCoordinateBounds")) {
+      nativeGetVisibleCoordinateBounds(output);
+    }
+  }
+
+  @Override
   public LatLng latLngForPixel(@NonNull PointF pixel) {
     if (checkState("latLngForPixel")) {
       return new LatLng();
@@ -1281,6 +1288,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativePixelsForLatLngs(double[] input, double[] output, float pixelRatio);
+
+  @Keep
+  private native void nativeGetVisibleCoordinateBounds(double[] output);
 
   @NonNull
   @Keep
