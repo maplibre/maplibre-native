@@ -261,10 +261,10 @@ public class FileSource {
 
   /**
    * Changes the path of the resources cache database.
-   * Note that the external storage setting needs to be activated in the manifest.
    * <p>
    * The callback reference is <b>strongly kept</b> throughout the process,
    * so it needs to be wrapped in a weak reference or released on the client side if necessary.
+   * </p>
    *
    * @param context  the context of the path
    * @param path     the new database path
@@ -280,10 +280,10 @@ public class FileSource {
 
   /**
    * Changes the path of the resources cache database.
-   * Note that the external storage setting needs to be activated in the manifest.
    * <p>
    * The callback reference is <b>strongly kept</b> throughout the process,
    * so it needs to be wrapped in a weak reference or released on the client side if necessary.
+   * </p>
    *
    * @param path     the new database path
    * @param callback the callback to obtain the result
