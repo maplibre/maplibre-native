@@ -2,7 +2,7 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) to get started.
 
-## master
+## 5.7.0
 
 ### Other changes
 * Added new property `MGLMapView.panScrollingMode`, which allows you to limit the horizontal or vertical direction a user may pan on the map view. ([#108](https://github.com/mapbox/mapbox-gl-native-ios/pull/108))
