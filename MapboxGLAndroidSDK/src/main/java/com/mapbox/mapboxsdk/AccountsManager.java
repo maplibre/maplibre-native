@@ -38,6 +38,7 @@ class AccountsManager {
   private static final String PREFERENCE_TIMESTAMP = "com.mapbox.mapboxsdk.accounts.timestamp";
 
   private SharedPreferences sharedPreferences;
+  private String userId;
   private String skuToken;
   private long timestamp;
   private boolean isManaged;
@@ -57,8 +58,7 @@ class AccountsManager {
   private void initialize() {
     retrieveSkuTokenAndTimestamp();
     if (isManaged) {
-      String userId = validateUserId();
-      validateRotation(userId);
+      validateRotation();
     }
   }
 
@@ -92,22 +92,9 @@ class AccountsManager {
     timestamp = sharedPreferences.getLong(PREFERENCE_TIMESTAMP, 0L);
   }
 
-  private String validateUserId() {
-    SharedPreferences sharedPreferences = getSharedPreferences();
-    String userId = sharedPreferences.getString(PREFERENCE_USER_ID, "");
-    if (TextUtils.isEmpty(userId)) {
-      userId = generateUserId();
-      SharedPreferences.Editor editor = getSharedPreferences().edit();
-      editor.putString(PREFERENCE_USER_ID, userId);
-      editor.apply();
-    }
-
-    return userId;
-  }
-
-  private void validateRotation(String userId) {
+  private void validateRotation() {
     if (TextUtils.isEmpty(skuToken) || timestamp == 0L) {
-      skuToken = generateSkuToken(userId);
+      skuToken = generateSkuToken(getUserId());
       timestamp = persistRotation(skuToken);
     }
   }
@@ -115,9 +102,7 @@ class AccountsManager {
   String getSkuToken() {
     if (isManaged) {
       if (isExpired()) {
-        SharedPreferences sharedPreferences = getSharedPreferences();
-        String userId = sharedPreferences.getString(PREFERENCE_USER_ID, "");
-        skuToken = generateSkuToken(userId);
+        skuToken = generateSkuToken(getUserId());
         timestamp = persistRotation(skuToken);
       }
     } else {
@@ -156,6 +141,26 @@ class AccountsManager {
 
   static long getNow() {
     return System.currentTimeMillis();
+  }
+
+  private synchronized String getUserId() {
+    if (!TextUtils.isEmpty(userId)) {
+      return userId;
+    }
+
+    SharedPreferences sharedPreferences = getSharedPreferences();
+    userId = sharedPreferences.getString(PREFERENCE_USER_ID, "");
+
+    if (TextUtils.isEmpty(userId)) {
+      userId = generateUserId();
+      SharedPreferences.Editor editor = getSharedPreferences().edit();
+      editor.putString(PREFERENCE_USER_ID, userId);
+      if (!editor.commit()) {
+        Logger.e(TAG, "Failed to save user id.");
+      }
+    }
+
+    return userId;
   }
 
   @NonNull

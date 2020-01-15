@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.text.format.DateUtils;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static com.mapbox.mapboxsdk.constants.MapboxConstants.KEY_PREFERENCE_SKU_TOKEN;
 import static org.junit.Assert.assertEquals;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(RobolectricTestRunner.class)
 public class AccountsManagerTest {
   @Test
   public void testIsExpired() {
