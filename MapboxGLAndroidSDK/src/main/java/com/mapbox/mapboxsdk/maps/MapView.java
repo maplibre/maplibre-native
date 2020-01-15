@@ -542,7 +542,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
   }
 
-  private float getPixelRatio() {
+  /**
+   * Returns the map pixel ratio, by default it returns the device pixel ratio.
+   * Can be overwritten using {@link MapboxMapOptions#pixelRatio(float)}.
+   *
+   * @return the current map pixel ratio
+   */
+  public float getPixelRatio() {
     // check is user defined his own pixel ratio value
     float pixelRatio = mapboxMapOptions.getPixelRatio();
     if (pixelRatio == 0) {
