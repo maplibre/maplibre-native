@@ -6,6 +6,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 
 public class HttpRequestUrl {
 
+  private static final StringBuilder requestBuilder = new StringBuilder();
+
   private HttpRequestUrl() {
   }
 
@@ -22,20 +24,20 @@ public class HttpRequestUrl {
    * @return the adapted resource url
    */
   public static String buildResourceUrl(@NonNull String host, String resourceUrl, int querySize, boolean offline) {
+    requestBuilder.setLength(0); // clear previous builder
+    requestBuilder.append(resourceUrl);
     if (isValidMapboxEndpoint(host)) {
       if (querySize == 0) {
-        resourceUrl = resourceUrl + "?";
+        requestBuilder.append("?");
       } else {
-        resourceUrl = resourceUrl + "&";
+        requestBuilder.append("&");
       }
-      // Only add SKU token to requests not tagged as "offline" usage.
       if (offline) {
-        resourceUrl = resourceUrl + "offline=true";
-      } else {
-        resourceUrl = resourceUrl + "sku=" + Mapbox.getSkuToken();
+        requestBuilder.append("offline=true&");
       }
+      requestBuilder.append("sku=").append(Mapbox.getSkuToken());
     }
-    return resourceUrl;
+    return requestBuilder.toString();
   }
 
   /**
