@@ -19,6 +19,9 @@
         android:id="@+id/menu_gesture_scroll"
         android:title="Toggle scroll enabled" />
     <item
+        android:id="@+id/menu_gesture_scroll_horizontal"
+        android:title="Toggle horizontal scroll enabled" />
+    <item
         android:id="@+id/menu_gesture_double_tap"
         android:title="Toggle double tap enabled" />
     <item

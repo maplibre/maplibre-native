@@ -31,6 +31,7 @@
     <!--Gestures-->
     <public name="mapbox_uiZoomGestures" type="attr" />
     <public name="mapbox_uiScrollGestures" type="attr" />
+    <public name="mapbox_uiHorizontalScrollGestures" type="attr" />
     <public name="mapbox_uiRotateGestures" type="attr" />
     <public name="mapbox_uiTiltGestures" type="attr" />
     <public name="mapbox_uiDoubleTapGestures" type="attr" />

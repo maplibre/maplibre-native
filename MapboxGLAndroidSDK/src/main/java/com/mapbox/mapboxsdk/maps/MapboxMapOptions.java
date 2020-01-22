@@ -7,12 +7,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.res.ResourcesCompat;
+
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -65,6 +67,7 @@ public class MapboxMapOptions implements Parcelable {
 
   private boolean rotateGesturesEnabled = true;
   private boolean scrollGesturesEnabled = true;
+  private boolean horizontalScrollGesturesEnabled = true;
   private boolean tiltGesturesEnabled = true;
   private boolean zoomGesturesEnabled = true;
   private boolean doubleTapGesturesEnabled = true;
@@ -127,6 +130,7 @@ public class MapboxMapOptions implements Parcelable {
 
     rotateGesturesEnabled = in.readByte() != 0;
     scrollGesturesEnabled = in.readByte() != 0;
+    horizontalScrollGesturesEnabled = in.readByte() != 0;
     tiltGesturesEnabled = in.readByte() != 0;
     zoomGesturesEnabled = in.readByte() != 0;
     doubleTapGesturesEnabled = in.readByte() != 0;
@@ -191,6 +195,8 @@ public class MapboxMapOptions implements Parcelable {
         typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_uiZoomGestures, true));
       mapboxMapOptions.scrollGesturesEnabled(
         typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_uiScrollGestures, true));
+      mapboxMapOptions.horizontalScrollGesturesEnabled(
+        typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_uiHorizontalScrollGestures, true));
       mapboxMapOptions.rotateGesturesEnabled(
         typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_uiRotateGestures, true));
       mapboxMapOptions.tiltGesturesEnabled(
@@ -261,7 +267,7 @@ public class MapboxMapOptions implements Parcelable {
       mapboxMapOptions.setPrefetchesTiles(
         typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_enableTilePrefetch, true));
       mapboxMapOptions.setPrefetchZoomDelta(
-              typedArray.getInt(R.styleable.mapbox_MapView_mapbox_prefetchZoomDelta, 4));
+        typedArray.getInt(R.styleable.mapbox_MapView_mapbox_prefetchZoomDelta, 4));
       mapboxMapOptions.renderSurfaceOnTop(
         typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_enableZMediaOverlay, false));
 
@@ -547,6 +553,18 @@ public class MapboxMapOptions implements Parcelable {
   }
 
   /**
+   * Specifies if the horizontal scroll gesture is enabled for a map view.
+   *
+   * @param enabled True and gesture will be enabled
+   * @return This
+   */
+  @NonNull
+  public MapboxMapOptions horizontalScrollGesturesEnabled(boolean enabled) {
+    horizontalScrollGesturesEnabled = enabled;
+    return this;
+  }
+
+  /**
    * Specifies if the tilt gesture is enabled for a map view.
    *
    * @param enabled True and gesture will be enabled
@@ -652,7 +670,7 @@ public class MapboxMapOptions implements Parcelable {
    * tile at the (current_zoom_level - delta) is rendered as soon as possible at the
    * expense of a little bandwidth.
    * Note: This operation will override the MapboxMapOptions#setPrefetchesTiles(boolean)
-   *       Setting zoom delta to 0 will disable pre-fetching.
+   * Setting zoom delta to 0 will disable pre-fetching.
    * Default zoom delta is 4.
    *
    * @param delta zoom delta
@@ -927,6 +945,15 @@ public class MapboxMapOptions implements Parcelable {
   }
 
   /**
+   * Get the current configured horizontal scroll gesture state for a map view.
+   *
+   * @return True indicates horizontal scroll gesture is enabled
+   */
+  public boolean getHorizontalScrollGesturesEnabled() {
+    return horizontalScrollGesturesEnabled;
+  }
+
+  /**
    * Get the current configured tilt gesture state for a map view.
    *
    * @return True indicates gesture is enabled
@@ -1108,6 +1135,7 @@ public class MapboxMapOptions implements Parcelable {
 
     dest.writeByte((byte) (rotateGesturesEnabled ? 1 : 0));
     dest.writeByte((byte) (scrollGesturesEnabled ? 1 : 0));
+    dest.writeByte((byte) (horizontalScrollGesturesEnabled ? 1 : 0));
     dest.writeByte((byte) (tiltGesturesEnabled ? 1 : 0));
     dest.writeByte((byte) (zoomGesturesEnabled ? 1 : 0));
     dest.writeByte((byte) (doubleTapGesturesEnabled ? 1 : 0));
@@ -1180,6 +1208,9 @@ public class MapboxMapOptions implements Parcelable {
       return false;
     }
     if (scrollGesturesEnabled != options.scrollGesturesEnabled) {
+      return false;
+    }
+    if (horizontalScrollGesturesEnabled != options.horizontalScrollGesturesEnabled) {
       return false;
     }
     if (tiltGesturesEnabled != options.tiltGesturesEnabled) {
@@ -1263,6 +1294,7 @@ public class MapboxMapOptions implements Parcelable {
     result = 31 * result + (int) (temp ^ (temp >>> 32));
     result = 31 * result + (rotateGesturesEnabled ? 1 : 0);
     result = 31 * result + (scrollGesturesEnabled ? 1 : 0);
+    result = 31 * result + (horizontalScrollGesturesEnabled ? 1 : 0);
     result = 31 * result + (tiltGesturesEnabled ? 1 : 0);
     result = 31 * result + (zoomGesturesEnabled ? 1 : 0);
     result = 31 * result + (doubleTapGesturesEnabled ? 1 : 0);

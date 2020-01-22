@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.animation.DecelerateInterpolator;
@@ -423,9 +425,6 @@ final class MapGestureDetector {
         return false;
       }
 
-      transform.cancelTransitions();
-      cameraChangeDispatcher.onCameraMoveStarted(REASON_API_GESTURE);
-
       // tilt results in a bigger translation, limiting input for #5281
       double tilt = transform.getTilt();
       double tiltFactor = 1.5 + ((tilt != 0) ? (tilt / 10) : 0);
@@ -434,6 +433,17 @@ final class MapGestureDetector {
 
       // calculate animation time based on displacement
       long animationTime = (long) (velocityXY / 7 / tiltFactor + MapboxConstants.ANIMATION_DURATION_FLING_BASE);
+      if (!uiSettings.isHorizontalScrollGesturesEnabled()) {
+        // determine if angle of fling is valid for performing a vertical fling
+        double angle = Math.abs(Math.toDegrees(Math.atan(offsetX / offsetY)));
+        if (angle > MapboxConstants.ANGLE_THRESHOLD_IGNORE_VERTICAL_FLING) {
+          return false;
+        }
+        offsetX = 0.0;
+      }
+
+      transform.cancelTransitions();
+      cameraChangeDispatcher.onCameraMoveStarted(REASON_API_GESTURE);
 
       // update transformation
       transform.moveBy(offsetX, offsetY, animationTime);
@@ -475,6 +485,11 @@ final class MapGestureDetector {
       if (distanceX != 0 || distanceY != 0) {
         // dispatching camera start event only when the movement actually occurred
         cameraChangeDispatcher.onCameraMoveStarted(CameraChangeDispatcher.REASON_API_GESTURE);
+
+        // Disable scrolling horizontal if not allowed
+        if (!uiSettings.isHorizontalScrollGesturesEnabled()) {
+          distanceX = 0;
+        }
 
         // Scroll the map
         transform.moveBy(-distanceX, -distanceY, 0 /*no duration*/);

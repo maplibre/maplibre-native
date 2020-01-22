@@ -58,6 +58,8 @@ public final class UiSettings {
 
   private boolean scrollGesturesEnabled = true;
 
+  private boolean horizontalScrollGesturesEnabled = true;
+
   private boolean doubleTapGesturesEnabled = true;
 
   private boolean quickZoomGesturesEnabled = true;
@@ -117,6 +119,7 @@ public final class UiSettings {
   private void initialiseGestures(MapboxMapOptions options) {
     setZoomGesturesEnabled(options.getZoomGesturesEnabled());
     setScrollGesturesEnabled(options.getScrollGesturesEnabled());
+    setHorizontalScrollGesturesEnabled(options.getHorizontalScrollGesturesEnabled());
     setRotateGesturesEnabled(options.getRotateGesturesEnabled());
     setTiltGesturesEnabled(options.getTiltGesturesEnabled());
     setDoubleTapGesturesEnabled(options.getDoubleTapGesturesEnabled());
@@ -124,6 +127,7 @@ public final class UiSettings {
   }
 
   private void saveGestures(Bundle outState) {
+    outState.putBoolean(MapboxConstants.STATE_HORIZONAL_SCROLL_ENABLED, isHorizontalScrollGesturesEnabled());
     outState.putBoolean(MapboxConstants.STATE_ZOOM_ENABLED, isZoomGesturesEnabled());
     outState.putBoolean(MapboxConstants.STATE_SCROLL_ENABLED, isScrollGesturesEnabled());
     outState.putBoolean(MapboxConstants.STATE_ROTATE_ENABLED, isRotateGesturesEnabled());
@@ -140,6 +144,7 @@ public final class UiSettings {
   }
 
   private void restoreGestures(Bundle savedInstanceState) {
+    setHorizontalScrollGesturesEnabled(savedInstanceState.getBoolean(MapboxConstants.STATE_HORIZONAL_SCROLL_ENABLED));
     setZoomGesturesEnabled(savedInstanceState.getBoolean(MapboxConstants.STATE_ZOOM_ENABLED));
     setScrollGesturesEnabled(savedInstanceState.getBoolean(MapboxConstants.STATE_SCROLL_ENABLED));
     setRotateGesturesEnabled(savedInstanceState.getBoolean(MapboxConstants.STATE_ROTATE_ENABLED));
@@ -847,6 +852,31 @@ public final class UiSettings {
    */
   public boolean isScrollGesturesEnabled() {
     return scrollGesturesEnabled;
+  }
+
+  /**
+   * <p>
+   * Changes whether the user may scroll horizontally around the map.
+   * </p>
+   * <p>
+   * This setting controls only user interactions with the map. If you set the value to false,
+   * you may still change the map location programmatically.
+   * </p>
+   * The default value is true.
+   *
+   * @param horizontalScrollGesturesEnabled If true, scrolling horizontally is enabled.
+   */
+  public void setHorizontalScrollGesturesEnabled(boolean horizontalScrollGesturesEnabled) {
+    this.horizontalScrollGesturesEnabled = horizontalScrollGesturesEnabled;
+  }
+
+  /**
+   * Returns whether the user may scroll horizontally around the map.
+   *
+   * @return If true, scrolling horizontally is enabled.
+   */
+  public boolean isHorizontalScrollGesturesEnabled() {
+    return horizontalScrollGesturesEnabled;
   }
 
   /**

@@ -282,6 +282,19 @@ public class UiSettingsTest {
     assertEquals("Scroll gesture should be disabled", false, uiSettings.isScrollGesturesEnabled());
   }
 
+
+  @Test
+  public void testHorizontalScrollGesturesEnabled() {
+    uiSettings.setHorizontalScrollGesturesEnabled(true);
+    assertEquals("Scroll gesture should be enabled", true, uiSettings.isHorizontalScrollGesturesEnabled());
+  }
+
+  @Test
+  public void testHorizontalScrollGesturesDisabled() {
+    uiSettings.setHorizontalScrollGesturesEnabled(false);
+    assertEquals("Scroll gesture should be disabled", false, uiSettings.isHorizontalScrollGesturesEnabled());
+  }
+
   @Test
   public void testScrollGestureChangeAllowed() {
     uiSettings.setScrollGesturesEnabled(false);

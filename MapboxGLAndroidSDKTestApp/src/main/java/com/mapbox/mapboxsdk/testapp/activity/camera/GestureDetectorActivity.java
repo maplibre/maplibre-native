@@ -259,6 +259,9 @@ public class GestureDetectorActivity extends AppCompatActivity {
       case R.id.menu_gesture_quick_zoom:
         uiSettings.setQuickZoomGesturesEnabled(!uiSettings.isQuickZoomGesturesEnabled());
         return true;
+      case R.id.menu_gesture_scroll_horizontal:
+        uiSettings.setHorizontalScrollGesturesEnabled(!uiSettings.isHorizontalScrollGesturesEnabled());
+        return true;
     }
     return super.onOptionsItemSelected(item);
   }

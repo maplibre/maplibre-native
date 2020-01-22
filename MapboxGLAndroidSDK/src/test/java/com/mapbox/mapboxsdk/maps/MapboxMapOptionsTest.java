@@ -136,6 +136,13 @@ public class MapboxMapOptionsTest {
   }
 
   @Test
+  public void testHorizontalScrollGesturesEnabled() {
+    assertTrue(new MapboxMapOptions().getHorizontalScrollGesturesEnabled());
+    assertTrue(new MapboxMapOptions().horizontalScrollGesturesEnabled(true).getHorizontalScrollGesturesEnabled());
+    assertFalse(new MapboxMapOptions().horizontalScrollGesturesEnabled(false).getHorizontalScrollGesturesEnabled());
+  }
+
+  @Test
   public void testZoomGesturesEnabled() {
     assertTrue(new MapboxMapOptions().getZoomGesturesEnabled());
     assertTrue(new MapboxMapOptions().zoomGesturesEnabled(true).getZoomGesturesEnabled());

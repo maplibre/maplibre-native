@@ -74,6 +74,11 @@ public class MapboxConstants {
   public static final long VELOCITY_THRESHOLD_IGNORE_FLING = 1000;
 
   /**
+   * Vertical angle threshold for a horizontal disabled fling gesture
+   */
+  public static final long ANGLE_THRESHOLD_IGNORE_VERTICAL_FLING = 75;
+
+  /**
    * Value by which the default rotation threshold will be increased when scaling
    *
    * @deprecated unused, see {@link com.mapbox.mapboxsdk.maps.UiSettings#setDisableRotateWhenScaling(boolean)}
@@ -195,6 +200,7 @@ public class MapboxConstants {
   public static final String STATE_CAMERA_POSITION = "mapbox_cameraPosition";
   public static final String STATE_ZOOM_ENABLED = "mapbox_zoomEnabled";
   public static final String STATE_SCROLL_ENABLED = "mapbox_scrollEnabled";
+  public static final String STATE_HORIZONAL_SCROLL_ENABLED = "mapbox_horizontalScrollEnabled";
   public static final String STATE_ROTATE_ENABLED = "mapbox_rotateEnabled";
   public static final String STATE_TILT_ENABLED = "mapbox_tiltEnabled";
   public static final String STATE_DOUBLE_TAP_ENABLED = "mapbox_doubleTapEnabled";
