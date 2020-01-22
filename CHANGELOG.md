@@ -2,6 +2,12 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 8.6.2 - January 22, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.1...android-v8.6.2) since [Mapbox Maps SDK for Android v8.6.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.1):
+### Bug fixes
+ - Append sku token to offline download requests [#148](https://github.com/mapbox/mapbox-gl-native-android/pull/148)
+ - Write user id synchronously to avoid null entries as part of the URL [#145](https://github.com/mapbox/mapbox-gl-native-android/pull/145)
+
 ## 8.6.1 - January 9, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0...android-v8.6.1) since [Mapbox Maps SDK for Android v8.6.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0):
 ### Bug fixes
