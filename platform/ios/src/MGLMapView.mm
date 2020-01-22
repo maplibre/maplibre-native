@@ -68,6 +68,7 @@
 #import "MGLMapAccessibilityElement.h"
 #import "MGLLocationManager_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
+#import "MGLNetworkConfiguration_Private.h"
 #import <MapboxMobileEvents/MapboxMobileEvents.h>
 
 #include <algorithm>
@@ -452,6 +453,10 @@ public:
     // setup accessibility
     //
 //    self.isAccessibilityElement = YES;
+
+    // Ensure network configuration is set up
+    [MGLNetworkConfiguration setNativeNetworkManagerDelegateToDefault];
+
     self.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"MAP_A11Y_LABEL", nil, nil, @"Map", @"Accessibility label");
     self.accessibilityTraits = UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;
     self.backgroundColor = [UIColor clearColor];
