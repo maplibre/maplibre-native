@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 9.0.0-beta.1 - January 24, 2019
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0-alpha.1...android-v9.0.0-beta.1) since [Mapbox Maps SDK for Android v9.0.0-alpha.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0-alpha.1):
+### Features
+ - Introduce a gesture setting to disable horizontal scrolling [#156](https://github.com/mapbox/mapbox-gl-native-android/pull/156)
+ - Introduce pixel ratio as public API on MapView [#146](https://github.com/mapbox/mapbox-gl-native-android/pull/146)
+ - Introduce getVisibleCoordinateBounds method that allows for object reuse [#109](https://github.com/mapbox/mapbox-gl-native-android/pull/109)
+ - Update Mapbox dependencies to AndroidX [#136](https://github.com/mapbox/mapbox-gl-native-android/pull/136)
+
 ## 8.6.2 - January 22, 2019
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.1...android-v8.6.2) since [Mapbox Maps SDK for Android v8.6.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.1):
 ### Bug fixes
