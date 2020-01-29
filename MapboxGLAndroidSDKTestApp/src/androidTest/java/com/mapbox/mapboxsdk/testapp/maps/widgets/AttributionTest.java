@@ -35,9 +35,11 @@ import static androidx.test.espresso.intent.matcher.IntentMatchers.hasData;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anything;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assume.assumeTrue;
 
@@ -56,10 +58,10 @@ public class AttributionTest extends EspressoTest {
     validateTestSetup();
 
     // Default
-    onView(withId(R.id.attributionView)).check(matches(isDisplayed()));
+    onView(withTagValue(is("attrView"))).check(matches(isDisplayed()));
 
     // Disabled
-    onView(withId(R.id.attributionView))
+    onView(withTagValue(is("attrView")))
       .perform(new DisableAction(mapboxMap))
       .check(matches(not(isDisplayed())));
   }
@@ -73,7 +75,7 @@ public class AttributionTest extends EspressoTest {
     }
 
     // click on View to open dialog
-    onView(withId(R.id.attributionView)).perform(click());
+    onView(withTagValue(is("attrView"))).perform(click());
     onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
@@ -94,7 +96,7 @@ public class AttributionTest extends EspressoTest {
     }
 
     // click on View to open dialog
-    onView(withId(R.id.attributionView)).perform(click());
+    onView(withTagValue(is("attrView"))).perform(click());
     onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
@@ -115,7 +117,7 @@ public class AttributionTest extends EspressoTest {
     }
 
     // click on View to open dialog
-    onView(withId(R.id.attributionView)).perform(click());
+    onView(withTagValue(is("attrView"))).perform(click());
     onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
@@ -137,7 +139,7 @@ public class AttributionTest extends EspressoTest {
     validateTestSetup();
 
     // click on View to open dialog
-    onView(withId(R.id.attributionView)).perform(click());
+    onView(withTagValue(is("attrView"))).perform(click());
     onView(withText(R.string.mapbox_attributionsDialogTitle)).inRoot(isDialog()).check(matches(isDisplayed()));
 
     // click on item to open second dialog

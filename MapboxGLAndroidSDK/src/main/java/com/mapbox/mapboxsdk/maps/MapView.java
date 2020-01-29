@@ -5,19 +5,19 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import androidx.annotation.CallSuper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-import androidx.collection.LongSparseArray;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.collection.LongSparseArray;
 
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.mapboxsdk.MapStrictMode;
@@ -73,14 +73,20 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private View renderView;
 
   private AttributionClickListener attributionClickListener;
-  private MapboxMapOptions mapboxMapOptions;
+  MapboxMapOptions mapboxMapOptions;
   private MapRenderer mapRenderer;
   private boolean destroyed;
 
+  @Nullable
   private CompassView compassView;
   private PointF focalPoint;
-  private ImageView attrView;
-  private ImageView logoView;
+
+  // callback for focal point invalidation
+  private final FocalPointInvalidator focalInvalidator = new FocalPointInvalidator();
+  // callback for registering touch listeners
+  private final GesturesManagerInteractionListener registerTouchListener = new GesturesManagerInteractionListener();
+  // callback for camera change events
+  private final CameraChangeDispatcher cameraDispatcher = new CameraChangeDispatcher();
 
   @Nullable
   private MapGestureDetector mapGestureDetector;
@@ -131,14 +137,6 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     mapboxMapOptions = options;
 
-    // inflate view
-    View view = LayoutInflater.from(context).inflate(R.layout.mapbox_mapview_internal, this);
-    compassView = view.findViewById(R.id.compassView);
-    attrView = view.findViewById(R.id.attributionView);
-    attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_info_bg_selector));
-    logoView = view.findViewById(R.id.logoView);
-    logoView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_logo_icon));
-
     // add accessibility support
     setContentDescription(context.getString(R.string.mapbox_mapActionDescription));
     setWillNotDraw(false);
@@ -149,18 +147,11 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Context context = getContext();
 
     // callback for focal point invalidation
-    final FocalPointInvalidator focalInvalidator = new FocalPointInvalidator();
     focalInvalidator.addListener(createFocalPointChangeListener());
-
-    // callback for registering touch listeners
-    GesturesManagerInteractionListener registerTouchListener = new GesturesManagerInteractionListener();
-
-    // callback for camera change events
-    final CameraChangeDispatcher cameraDispatcher = new CameraChangeDispatcher();
 
     // setup components for MapboxMap creation
     Projection proj = new Projection(nativeMapView, this);
-    UiSettings uiSettings = new UiSettings(proj, focalInvalidator, compassView, attrView, logoView, getPixelRatio());
+    UiSettings uiSettings = new UiSettings(proj, focalInvalidator, getPixelRatio(), this);
     LongSparseArray<Annotation> annotationsArray = new LongSparseArray<>();
     IconManager iconManager = new IconManager(nativeMapView);
     Annotations annotations = new AnnotationContainer(nativeMapView, annotationsArray);
@@ -169,29 +160,22 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Polylines polylines = new PolylineContainer(nativeMapView, annotationsArray);
     ShapeAnnotations shapeAnnotations = new ShapeAnnotationContainer(nativeMapView, annotationsArray);
     AnnotationManager annotationManager = new AnnotationManager(this, annotationsArray, iconManager,
-      annotations, markers, polygons, polylines, shapeAnnotations);
+            annotations, markers, polygons, polylines, shapeAnnotations);
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
     // MapboxMap
     List<MapboxMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     mapboxMap = new MapboxMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
-      developerAnimationListeners);
+            developerAnimationListeners);
     mapboxMap.injectAnnotationManager(annotationManager);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,
-      annotationManager, cameraDispatcher);
+            annotationManager, cameraDispatcher);
     mapKeyListener = new MapKeyListener(transform, uiSettings, mapGestureDetector);
-
-    // compass
-    compassView.injectCompassAnimationListener(createCompassAnimationListener(cameraDispatcher));
-    compassView.setOnClickListener(createCompassClickListener(cameraDispatcher));
 
     // LocationComponent
     mapboxMap.injectLocationComponent(new LocationComponent(mapboxMap, transform, developerAnimationListeners));
-
-    // inject widgets with MapboxMap
-    attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(context, mapboxMap));
 
     // Ensure this view is interactable
     setClickable(true);
@@ -213,6 +197,44 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     mapCallback.initialised();
   }
 
+  protected CompassView initialiseCompassView() {
+    compassView = new CompassView(this.getContext());
+    addView(compassView);
+    compassView.setTag("compassView");
+    compassView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+    compassView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
+    compassView.setContentDescription(getResources().getString(R.string.mapbox_compassContentDescription));
+    compassView.injectCompassAnimationListener(createCompassAnimationListener(cameraDispatcher));
+    compassView.setOnClickListener(createCompassClickListener(cameraDispatcher));
+    return compassView;
+  }
+
+  protected ImageView initialiseAttributionView() {
+    ImageView attrView = new ImageView(this.getContext());
+    addView(attrView);
+    attrView.setTag("attrView");
+    attrView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+    attrView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
+    attrView.setAdjustViewBounds(true);
+    attrView.setClickable(true);
+    attrView.setFocusable(true);
+    attrView.setContentDescription(getResources().getString(R.string.mapbox_attributionsIconContentDescription));
+    attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_info_bg_selector));
+    // inject widgets with MapboxMap
+    attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(getContext(), mapboxMap));
+    return attrView;
+  }
+
+  protected ImageView initialiseLogoView() {
+    ImageView logoView = new ImageView(this.getContext());
+    addView(logoView);
+    logoView.setTag("logoView");
+    logoView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+    logoView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
+    logoView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_logo_icon));
+    return logoView;
+  }
+
   private FocalPointChangeListener createFocalPointChangeListener() {
     return new FocalPointChangeListener() {
       @Override
@@ -223,7 +245,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private MapboxMap.OnCompassAnimationListener createCompassAnimationListener(@NonNull final CameraChangeDispatcher
-                                                                                cameraChangeDispatcher) {
+                                                                                      cameraChangeDispatcher) {
     return new MapboxMap.OnCompassAnimationListener() {
       @Override
       public void onCompassAnimation() {
@@ -232,7 +254,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
       @Override
       public void onCompassAnimationFinished() {
-        compassView.isAnimating(false);
+        if (compassView != null) {
+          compassView.isAnimating(false);
+        }
         cameraChangeDispatcher.onCameraIdle();
       }
     };
@@ -289,7 +313,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       TextureView textureView = new TextureView(getContext());
       boolean translucentSurface = options.getTranslucentTextureSurface();
       mapRenderer = new TextureViewMapRenderer(getContext(),
-        textureView, localFontFamily, translucentSurface) {
+              textureView, localFontFamily, translucentSurface) {
         @Override
         protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
           MapView.this.onSurfaceCreated();
@@ -316,7 +340,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     boolean crossSourceCollisions = mapboxMapOptions.getCrossSourceCollisions();
     nativeMapView = new NativeMapView(
-      getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
+            getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
   }
 
@@ -1225,7 +1249,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     public void setGesturesManager(AndroidGesturesManager gesturesManager, boolean attachDefaultListeners,
                                    boolean setDefaultMutuallyExclusives) {
       mapGestureDetector.setGesturesManager(
-        getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
+              getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
     }
 
     @Override
@@ -1235,8 +1259,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private class MapCallback implements OnDidFinishLoadingStyleListener,
-    OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
-    OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
+          OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
+          OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
 
     private final List<OnMapReadyCallback> onMapReadyCallbackList = new ArrayList<>();
 

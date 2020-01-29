@@ -1,5 +1,7 @@
 package com.mapbox.mapboxsdk.maps;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -21,6 +23,14 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 public class UiSettingsTest {
+  @InjectMocks
+  MapView mapview = mock(MapView.class);
+
+  @InjectMocks
+  Context context = mock(Context.class);
+
+  @InjectMocks
+  Resources resources = mock(Resources.class);
 
   @InjectMocks
   Projection projection = mock(Projection.class);
@@ -32,7 +42,7 @@ public class UiSettingsTest {
   CompassView compassView = mock(CompassView.class);
 
   @InjectMocks
-  ImageView imageView = mock(ImageView.class);
+  ImageView attributionView = mock(ImageView.class);
 
   @InjectMocks
   ImageView logoView = mock(ImageView.class);
@@ -41,10 +51,18 @@ public class UiSettingsTest {
   FrameLayout.LayoutParams layoutParams = mock(FrameLayout.LayoutParams.class);
 
   private UiSettings uiSettings;
+  private MapboxMapOptions mapboxMapOptions;
 
   @Before
   public void beforeTest() {
-    uiSettings = new UiSettings(projection, focalPointChangeListener, compassView, imageView, logoView, 1);
+    uiSettings = new UiSettings(projection, focalPointChangeListener, 1, mapview);
+    uiSettings.compassView = this.compassView;
+    uiSettings.attributionsView = this.attributionView;
+    uiSettings.logoView = this.logoView;
+    when(compassView.getContext()).thenReturn(context);
+    when(attributionView.getContext()).thenReturn(context);
+    when(logoView.getContext()).thenReturn(context);
+    when(context.getResources()).thenReturn(resources);
   }
 
   @Test
@@ -53,10 +71,16 @@ public class UiSettingsTest {
   }
 
   @Test
-  public void testCompassEnabled() {
+  public void testGetCompassEnabled() {
     when(compassView.isEnabled()).thenReturn(true);
-    uiSettings.setCompassEnabled(true);
     assertEquals("Compass should be enabled", true, uiSettings.isCompassEnabled());
+  }
+
+  @Test
+  public void testSetCompassEnabled() {
+    uiSettings.isCompassInitialized = true;
+    uiSettings.setCompassEnabled(true);
+    verify(compassView).setEnabled(true);
   }
 
   @Test
@@ -75,7 +99,7 @@ public class UiSettingsTest {
 
   @Test
   public void testCompassMargins() {
-    when(projection.getContentPadding()).thenReturn(new int[] {0, 0, 0, 0});
+    when(projection.getContentPadding()).thenReturn(new int[]{0, 0, 0, 0});
     when(compassView.getLayoutParams()).thenReturn(layoutParams);
     layoutParams.leftMargin = 1;
     layoutParams.topMargin = 2;
@@ -99,6 +123,7 @@ public class UiSettingsTest {
 
   @Test
   public void testLogoEnabled() {
+    uiSettings.isLogoInitialized = true;
     uiSettings.setLogoEnabled(true);
     assertEquals("Logo should be enabled", true, uiSettings.isLogoEnabled());
   }
@@ -120,7 +145,7 @@ public class UiSettingsTest {
 
   @Test
   public void testLogoMargins() {
-    when(projection.getContentPadding()).thenReturn(new int[] {0, 0, 0, 0});
+    when(projection.getContentPadding()).thenReturn(new int[]{0, 0, 0, 0});
     when(logoView.getLayoutParams()).thenReturn(layoutParams);
     layoutParams.leftMargin = 1;
     layoutParams.topMargin = 2;
@@ -135,21 +160,22 @@ public class UiSettingsTest {
 
   @Test
   public void testAttributionEnabled() {
-    when(imageView.getVisibility()).thenReturn(View.VISIBLE);
+    uiSettings.isAttributionInitialized = true;
+    when(attributionView.getVisibility()).thenReturn(View.VISIBLE);
     uiSettings.setAttributionEnabled(true);
     assertEquals("Attribution should be enabled", true, uiSettings.isAttributionEnabled());
   }
 
   @Test
   public void testAttributionDisabled() {
-    when(imageView.getVisibility()).thenReturn(View.GONE);
+    when(attributionView.getVisibility()).thenReturn(View.GONE);
     uiSettings.setAttributionEnabled(false);
     assertEquals("Attribution should be disabled", false, uiSettings.isAttributionEnabled());
   }
 
   @Test
   public void testAttributionGravity() {
-    when(imageView.getLayoutParams()).thenReturn(layoutParams);
+    when(attributionView.getLayoutParams()).thenReturn(layoutParams);
     layoutParams.gravity = Gravity.END;
     uiSettings.setAttributionGravity(Gravity.END);
     assertEquals("Attribution gravity should be same", Gravity.END, uiSettings.getAttributionGravity());
@@ -157,8 +183,8 @@ public class UiSettingsTest {
 
   @Test
   public void testAttributionMargins() {
-    when(imageView.getLayoutParams()).thenReturn(layoutParams);
-    when(projection.getContentPadding()).thenReturn(new int[] {0, 0, 0, 0});
+    when(attributionView.getLayoutParams()).thenReturn(layoutParams);
+    when(projection.getContentPadding()).thenReturn(new int[]{0, 0, 0, 0});
     layoutParams.leftMargin = 1;
     layoutParams.topMargin = 2;
     layoutParams.rightMargin = 3;
@@ -359,14 +385,14 @@ public class UiSettingsTest {
   public void testDisableRotateWhenScalingEnabled() {
     uiSettings.setDisableRotateWhenScaling(true);
     assertEquals("Rotate disabling should be enabled", true,
-      uiSettings.isDisableRotateWhenScaling());
+            uiSettings.isDisableRotateWhenScaling());
   }
 
   @Test
   public void testDisableRotateWhenScalingDisabled() {
     uiSettings.setDisableRotateWhenScaling(false);
     assertEquals("Rotate disabling should be disabled", false,
-      uiSettings.isDisableRotateWhenScaling());
+            uiSettings.isDisableRotateWhenScaling());
   }
 
   @Test
@@ -379,7 +405,7 @@ public class UiSettingsTest {
   public void testIncreaseScaleThresholdWhenRotatingDisabled() {
     uiSettings.setIncreaseScaleThresholdWhenRotating(false);
     assertEquals("Scale threshold increase should be disabled", false,
-      uiSettings.isIncreaseScaleThresholdWhenRotating());
+            uiSettings.isIncreaseScaleThresholdWhenRotating());
   }
 
   @Test
@@ -404,7 +430,7 @@ public class UiSettingsTest {
   public void testAreAllGesturesEnabled() {
     uiSettings.setAllGesturesEnabled(true);
     assertEquals("All gestures check should return true", true,
-        uiSettings.areAllGesturesEnabled());
+            uiSettings.areAllGesturesEnabled());
   }
 
   @Test
@@ -412,20 +438,20 @@ public class UiSettingsTest {
     uiSettings.setAllGesturesEnabled(true);
     uiSettings.setScrollGesturesEnabled(false);
     assertEquals("All gestures check should return false", false,
-        uiSettings.areAllGesturesEnabled());
+            uiSettings.areAllGesturesEnabled());
   }
 
   @Test
   public void testZoomRateDefaultValue() {
     assertEquals("Default zoom rate should be 1.0f", 1.0f,
-      uiSettings.getZoomRate(), 0);
+            uiSettings.getZoomRate(), 0);
   }
 
   @Test
   public void testZoomRate() {
     uiSettings.setZoomRate(0.83f);
     assertEquals("Zoom rate should be 0.83f", 0.83f,
-      uiSettings.getZoomRate(), 0);
+            uiSettings.getZoomRate(), 0);
   }
 
   @Test
