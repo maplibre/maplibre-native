@@ -56,34 +56,32 @@ class LocationAnimatorCoordinatorTest {
     // workaround https://github.com/mockk/mockk/issues/229#issuecomment-457816131
     registerInstanceFactory { AnimationsValueChangeListener<Float> {} }
     registerInstanceFactory { AnimationsValueChangeListener<LatLng> {} }
-    val previousFloatSlot = slot<Float>()
-    val targetFloatSlot = slot<Float>()
+    val floatsSlot = slot<Array<Float>>()
     val listenerSlot = slot<MapboxAnimator.AnimationsValueChangeListener<*>>()
     val maxFpsSlot = slot<Int>()
     every {
-      animatorProvider.floatAnimator(capture(previousFloatSlot), capture(targetFloatSlot), capture(listenerSlot), capture(maxFpsSlot))
+      animatorProvider.floatAnimator(capture(floatsSlot), capture(listenerSlot), capture(maxFpsSlot))
     } answers {
-      MapboxFloatAnimator(previousFloatSlot.captured, targetFloatSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
+      MapboxFloatAnimator(floatsSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
     }
 
-    val previousLatLngSlot = slot<LatLng>()
-    val targetLatLngSlot = slot<LatLng>()
+    val latLngsSlot = slot<Array<LatLng>>()
     every {
-      animatorProvider.latLngAnimator(capture(previousLatLngSlot), capture(targetLatLngSlot), capture(listenerSlot), capture(maxFpsSlot))
+      animatorProvider.latLngAnimator(capture(latLngsSlot), capture(listenerSlot), capture(maxFpsSlot))
     } answers {
-      MapboxLatLngAnimator(previousLatLngSlot.captured, targetLatLngSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
+      MapboxLatLngAnimator(latLngsSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
     }
 
     val callback = slot<MapboxMap.CancelableCallback>()
     every {
-      animatorProvider.cameraAnimator(capture(previousFloatSlot), capture(targetFloatSlot), capture(listenerSlot), capture(callback))
+      animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), capture(callback))
     } answers {
-      MapboxCameraAnimatorAdapter(previousFloatSlot.captured, targetFloatSlot.captured, listenerSlot.captured, callback.captured)
+      MapboxCameraAnimatorAdapter(floatsSlot.captured, listenerSlot.captured, callback.captured)
     }
     every {
-      animatorProvider.cameraAnimator(capture(previousFloatSlot), capture(targetFloatSlot), capture(listenerSlot), null)
+      animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), null)
     } answers {
-      MapboxCameraAnimatorAdapter(previousFloatSlot.captured, targetFloatSlot.captured, listenerSlot.captured, null)
+      MapboxCameraAnimatorAdapter(floatsSlot.captured, listenerSlot.captured, null)
     }
   }
 
@@ -106,16 +104,112 @@ class LocationAnimatorCoordinatorTest {
     locationAnimatorCoordinator.feedNewLocation(location, cameraPosition, false)
 
     val cameraLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG]?.target as LatLng
-    assertEquals(cameraLatLngTarget.latitude, cameraLatLngTarget.latitude)
+    assertEquals(location.latitude, cameraLatLngTarget.latitude)
+    assertEquals(location.longitude, cameraLatLngTarget.longitude)
 
     val layerLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]?.target as LatLng
-    assertEquals(layerLatLngTarget.latitude, layerLatLngTarget.latitude)
+    assertEquals(location.latitude, layerLatLngTarget.latitude)
+    assertEquals(location.longitude, layerLatLngTarget.longitude)
 
     val cameraBearingTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_GPS_BEARING]?.target as Float
     assertEquals(location.bearing, cameraBearingTarget)
 
     val layerBearingTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_GPS_BEARING]?.target as Float
     assertEquals(location.bearing, layerBearingTarget)
+  }
+
+  @Test
+  fun feedNewLocation_animatorValue_multiplePoints() {
+    val previousLocation = Location("")
+    previousLocation.latitude = 0.0
+    previousLocation.longitude = 0.0
+    previousLocation.bearing = 0f
+
+    val locationInter = Location("")
+    locationInter.latitude = 51.1
+    locationInter.longitude = 17.1
+    locationInter.bearing = 35f
+    val location = Location("")
+    location.latitude = 51.2
+    location.longitude = 17.2
+    location.bearing = 36f
+    locationAnimatorCoordinator.feedNewLocation(arrayOf(locationInter, location), cameraPosition, false, false)
+
+    val cameraLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG]?.target as LatLng
+    assertEquals(location.latitude, cameraLatLngTarget.latitude)
+    assertEquals(location.longitude, cameraLatLngTarget.longitude)
+
+    val layerLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]?.target as LatLng
+    assertEquals(location.latitude, layerLatLngTarget.latitude)
+    assertEquals(location.longitude, layerLatLngTarget.longitude)
+
+    val cameraBearingTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_GPS_BEARING]?.target as Float
+    assertEquals(location.bearing, cameraBearingTarget)
+
+    val layerBearingTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_GPS_BEARING]?.target as Float
+    assertEquals(location.bearing, layerBearingTarget)
+
+    verify {
+      animatorProvider.latLngAnimator(
+        arrayOf(
+          LatLng(previousLocation.latitude, previousLocation.longitude),
+          LatLng(locationInter.latitude, locationInter.longitude),
+          LatLng(location.latitude, location.longitude)
+        ), any(), any()
+      )
+    }
+    verify {
+      animatorProvider.floatAnimator(
+        arrayOf(previousLocation.bearing, locationInter.bearing, location.bearing), any(), any()
+      )
+    }
+  }
+
+  @Test
+  fun feedNewLocation_animatorValue_multiplePoints_animationDuration() {
+    every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10000.0 } // disable snap
+    val locationInter = Location("")
+    locationInter.latitude = 51.1
+    locationInter.longitude = 17.1
+    locationInter.bearing = 35f
+    val location = Location("")
+    location.latitude = 51.2
+    location.longitude = 17.2
+    location.bearing = 36f
+    locationAnimatorCoordinator.feedNewLocation(arrayOf(locationInter, location), cameraPosition, false, false)
+
+    verify {
+      animatorSetProvider.startAnimation(eq(listOf(
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_GPS_BEARING],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_GPS_BEARING]
+      )), any<LinearInterpolator>(), 0)
+    }
+  }
+
+  @Test
+  fun feedNewLocation_animatorValue_multiplePoints_animationDuration_lookAhead() {
+    every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10000.0 } // disable snap
+    val locationInter = Location("")
+    locationInter.latitude = 51.1
+    locationInter.longitude = 17.1
+    locationInter.bearing = 35f
+    val location = Location("")
+    location.latitude = 51.2
+    location.longitude = 17.2
+    location.bearing = 36f
+    location.time = System.currentTimeMillis() + 2000
+    locationAnimatorCoordinator.feedNewLocation(arrayOf(locationInter, location), cameraPosition, false, true)
+
+    verify {
+      animatorSetProvider.startAnimation(eq(listOf(
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_GPS_BEARING],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG],
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_GPS_BEARING]
+      )), any<LinearInterpolator>(), more(1500L))
+    }
   }
 
   @Test
@@ -508,8 +602,8 @@ class LocationAnimatorCoordinatorTest {
   fun maxFps_givenToAnimator() {
     locationAnimatorCoordinator.setMaxAnimationFps(5)
     locationAnimatorCoordinator.feedNewLocation(Location(""), cameraPosition, false)
-    verify { animatorProvider.latLngAnimator(any(), any(), any(), 5) }
-    verify { animatorProvider.floatAnimator(any(), any(), any(), 5) }
+    verify { animatorProvider.latLngAnimator(any(), any(), 5) }
+    verify { animatorProvider.floatAnimator(any(), any(), 5) }
   }
 
   private fun getListenerHoldersSet(vararg animatorTypes: Int): Set<AnimatorListenerHolder> {

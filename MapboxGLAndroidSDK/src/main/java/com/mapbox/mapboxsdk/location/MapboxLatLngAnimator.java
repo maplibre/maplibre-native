@@ -1,15 +1,16 @@
 package com.mapbox.mapboxsdk.location;
 
 import android.animation.TypeEvaluator;
+
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 class MapboxLatLngAnimator extends MapboxAnimator<LatLng> {
 
-  MapboxLatLngAnimator(LatLng previous, LatLng target, AnimationsValueChangeListener updateListener,
+  MapboxLatLngAnimator(@NonNull LatLng[] values, @NonNull AnimationsValueChangeListener updateListener,
                        int maxAnimationFps) {
-    super(previous, target, updateListener, maxAnimationFps);
+    super(values, updateListener, maxAnimationFps);
   }
 
   @NonNull

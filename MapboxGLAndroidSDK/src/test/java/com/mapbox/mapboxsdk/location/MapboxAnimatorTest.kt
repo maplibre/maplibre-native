@@ -17,7 +17,7 @@ class MapboxAnimatorTest {
     every { valueAnimator.animatedValue } answers { 5f }
     val listener = mockk<MapboxAnimator.AnimationsValueChangeListener<Float>>()
     every { listener.onNewAnimationValue(any()) } answers {}
-    val mapboxAnimator = MapboxFloatAnimator(0f, 10f, listener, Int.MAX_VALUE)
+    val mapboxAnimator = MapboxFloatAnimator(floatArrayOf(0f, 10f).toTypedArray(), listener, Int.MAX_VALUE)
 
     for (i in 0 until 5)
       mapboxAnimator.onAnimationUpdate(valueAnimator)
@@ -31,7 +31,7 @@ class MapboxAnimatorTest {
     every { valueAnimator.animatedValue } answers { 5f }
     val listener = mockk<MapboxAnimator.AnimationsValueChangeListener<Float>>()
     every { listener.onNewAnimationValue(any()) } answers {}
-    val mapboxAnimator = MapboxFloatAnimator(0f, 10f, listener, 5)
+    val mapboxAnimator = MapboxFloatAnimator(floatArrayOf(0f, 10f).toTypedArray(), listener, 5)
 
     for (i in 0 until 5) {
       mapboxAnimator.onAnimationUpdate(valueAnimator)

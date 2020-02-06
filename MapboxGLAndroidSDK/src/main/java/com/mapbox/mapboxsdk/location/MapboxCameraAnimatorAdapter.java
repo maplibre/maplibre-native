@@ -2,7 +2,10 @@ package com.mapbox.mapboxsdk.location;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.Size;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
@@ -10,10 +13,10 @@ class MapboxCameraAnimatorAdapter extends MapboxFloatAnimator {
   @Nullable
   private final MapboxMap.CancelableCallback cancelableCallback;
 
-  MapboxCameraAnimatorAdapter(Float previous, Float target,
+  MapboxCameraAnimatorAdapter(@NonNull @Size(min = 2) Float[] values,
                               AnimationsValueChangeListener updateListener,
                               @Nullable MapboxMap.CancelableCallback cancelableCallback) {
-    super(previous, target, updateListener, Integer.MAX_VALUE);
+    super(values, updateListener, Integer.MAX_VALUE);
     this.cancelableCallback = cancelableCallback;
     addListener(new MapboxAnimatorListener());
   }

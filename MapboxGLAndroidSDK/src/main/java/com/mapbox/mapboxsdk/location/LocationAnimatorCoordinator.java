@@ -3,11 +3,13 @@ package com.mapbox.mapboxsdk.location;
 import android.animation.Animator;
 import android.location.Location;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import android.util.SparseArray;
 import android.view.animation.LinearInterpolator;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.VisibleForTesting;
 
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -33,6 +35,8 @@ import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_LATLNG
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_TILT;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_ZOOM;
 import static com.mapbox.mapboxsdk.location.Utils.immediateAnimation;
+import static com.mapbox.mapboxsdk.location.Utils.normalize;
+import static com.mapbox.mapboxsdk.location.Utils.shortestRotation;
 
 final class LocationAnimatorCoordinator {
 
@@ -74,6 +78,12 @@ final class LocationAnimatorCoordinator {
 
   void feedNewLocation(@NonNull Location newLocation, @NonNull CameraPosition currentCameraPosition,
                        boolean isGpsNorth) {
+    feedNewLocation(new Location[] {newLocation}, currentCameraPosition, isGpsNorth, false);
+  }
+
+  void feedNewLocation(@NonNull @Size(min = 1) Location[] newLocations,
+                       @NonNull CameraPosition currentCameraPosition, boolean isGpsNorth, boolean lookAheadUpdate) {
+    Location newLocation = newLocations[newLocations.length - 1];
     if (previousLocation == null) {
       previousLocation = newLocation;
       locationUpdateTimestamp = SystemClock.elapsedRealtime() - TRANSITION_ANIMATION_DURATION_MS;
@@ -82,16 +92,23 @@ final class LocationAnimatorCoordinator {
     LatLng previousLayerLatLng = getPreviousLayerLatLng();
     float previousLayerBearing = getPreviousLayerGpsBearing();
     LatLng previousCameraLatLng = currentCameraPosition.target;
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
+    float previousCameraBearing = normalize((float) currentCameraPosition.bearing);
+
+    // generate targets for layer
+    LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
+    Float[] bearingValues = getBearingValues(previousLayerBearing, newLocations);
+    updateLayerAnimators(latLngValues, bearingValues);
+
+    // replace the animation start with the camera's previous value
+    latLngValues[0] = previousCameraLatLng;
+    if (isGpsNorth) {
+      bearingValues = new Float[] {previousCameraBearing, 0f};
+    } else {
+      bearingValues[0] = previousCameraBearing;
+    }
+    updateCameraAnimators(latLngValues, bearingValues);
 
     LatLng targetLatLng = new LatLng(newLocation);
-    float targetLayerBearing = newLocation.getBearing();
-    float targetCameraBearing = newLocation.getBearing();
-    targetCameraBearing = checkGpsNorth(isGpsNorth, targetCameraBearing);
-
-    updateLayerAnimators(previousLayerLatLng, targetLatLng, previousLayerBearing, targetLayerBearing);
-    updateCameraAnimators(previousCameraLatLng, previousCameraBearing, targetLatLng, targetCameraBearing);
-
     boolean snap = immediateAnimation(projection, previousCameraLatLng, targetLatLng)
       || immediateAnimation(projection, previousLayerLatLng, targetLatLng);
 
@@ -102,6 +119,15 @@ final class LocationAnimatorCoordinator {
 
       if (previousUpdateTimeStamp == 0) {
         animationDuration = 0;
+      } else if (lookAheadUpdate) {
+        long currentTimestamp = System.currentTimeMillis();
+        if (currentTimestamp > newLocation.getTime()) {
+          animationDuration = 0;
+          Logger.e("LocationAnimatorCoordinator",
+            "Lookahead enabled, but the target location's timestamp is smaller than current timestamp");
+        } else {
+          animationDuration = newLocation.getTime() - currentTimestamp;
+        }
       } else {
         animationDuration = (long) ((locationUpdateTimestamp - previousUpdateTimeStamp) * durationMultiplier)
         /* make animation slightly longer with durationMultiplier, defaults to 1.1f */;
@@ -207,23 +233,35 @@ final class LocationAnimatorCoordinator {
     return previousRadius;
   }
 
-  private void updateLayerAnimators(LatLng previousLatLng, LatLng targetLatLng,
-                                    float previousBearing, float targetBearing) {
-    createNewLatLngAnimator(ANIMATOR_LAYER_LATLNG, previousLatLng, targetLatLng);
+  private LatLng[] getLatLngValues(LatLng previousLatLng, Location[] targetLocations) {
+    LatLng[] latLngs = new LatLng[targetLocations.length + 1];
+    latLngs[0] = previousLatLng;
+    for (int i = 1; i < latLngs.length; i++) {
+      latLngs[i] = new LatLng(targetLocations[i - 1]);
+    }
+    return latLngs;
+  }
+
+  private Float[] getBearingValues(Float previousBearing, Location[] targetLocations) {
+    Float[] bearings = new Float[targetLocations.length + 1];
 
     // Because Location bearing values are normalized to [0, 360]
     // we need to do the same for the previous bearing value to determine the shortest path
-    previousBearing = Utils.normalize(previousBearing);
-    float normalizedLayerBearing = Utils.shortestRotation(targetBearing, previousBearing);
-    createNewFloatAnimator(ANIMATOR_LAYER_GPS_BEARING, previousBearing, normalizedLayerBearing);
+    bearings[0] = normalize(previousBearing);
+    for (int i = 1; i < bearings.length; i++) {
+      bearings[i] = shortestRotation(targetLocations[i - 1].getBearing(), bearings[i - 1]);
+    }
+    return bearings;
   }
 
-  private void updateCameraAnimators(LatLng previousCameraLatLng, float previousCameraBearing,
-                                     LatLng targetLatLng, float targetBearing) {
-    createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, previousCameraLatLng, targetLatLng);
+  private void updateLayerAnimators(LatLng[] latLngValues, Float[] bearingValues) {
+    createNewLatLngAnimator(ANIMATOR_LAYER_LATLNG, latLngValues);
+    createNewFloatAnimator(ANIMATOR_LAYER_GPS_BEARING, bearingValues);
+  }
 
-    float normalizedCameraBearing = Utils.shortestRotation(targetBearing, previousCameraBearing);
-    createNewFloatAnimator(ANIMATOR_CAMERA_GPS_BEARING, previousCameraBearing, normalizedCameraBearing);
+  private void updateCameraAnimators(LatLng[] latLngValues, Float[] bearingValues) {
+    createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, latLngValues);
+    createNewFloatAnimator(ANIMATOR_CAMERA_GPS_BEARING, bearingValues);
   }
 
   private void updateCompassAnimators(float targetCompassBearing, float previousLayerBearing,
@@ -241,36 +279,45 @@ final class LocationAnimatorCoordinator {
 
   private void updateZoomAnimator(float targetZoomLevel, float previousZoomLevel,
                                   @Nullable MapboxMap.CancelableCallback cancelableCallback) {
-    createNewCameraAdapterAnimator(ANIMATOR_ZOOM, previousZoomLevel, targetZoomLevel, cancelableCallback);
+    createNewCameraAdapterAnimator(ANIMATOR_ZOOM, new Float[] {previousZoomLevel, targetZoomLevel}, cancelableCallback);
   }
 
   private void updateTiltAnimator(float targetTilt, float previousTiltLevel,
                                   @Nullable MapboxMap.CancelableCallback cancelableCallback) {
-    createNewCameraAdapterAnimator(ANIMATOR_TILT, previousTiltLevel, targetTilt, cancelableCallback);
+    createNewCameraAdapterAnimator(ANIMATOR_TILT, new Float[] {previousTiltLevel, targetTilt}, cancelableCallback);
   }
 
   private void createNewLatLngAnimator(@MapboxAnimator.Type int animatorType, LatLng previous, LatLng target) {
+    createNewLatLngAnimator(animatorType, new LatLng[] {previous, target});
+  }
+
+  private void createNewLatLngAnimator(@MapboxAnimator.Type int animatorType, LatLng[] values) {
     cancelAnimator(animatorType);
     MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
     if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.latLngAnimator(previous, target, listener, maxAnimationFps));
+      animatorArray.put(animatorType, animatorProvider.latLngAnimator(values, listener, maxAnimationFps));
     }
   }
 
   private void createNewFloatAnimator(@MapboxAnimator.Type int animatorType, float previous, float target) {
+    createNewFloatAnimator(animatorType, new Float[] {previous, target});
+  }
+
+  private void createNewFloatAnimator(@MapboxAnimator.Type int animatorType, @NonNull @Size(min = 2) Float[] values) {
     cancelAnimator(animatorType);
     MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
     if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.floatAnimator(previous, target, listener, maxAnimationFps));
+      animatorArray.put(animatorType, animatorProvider.floatAnimator(values, listener, maxAnimationFps));
     }
   }
 
-  private void createNewCameraAdapterAnimator(@MapboxAnimator.Type int animatorType, float previous, float target,
+  private void createNewCameraAdapterAnimator(@MapboxAnimator.Type int animatorType,
+                                              @NonNull @Size(min = 2) Float[] values,
                                               @Nullable MapboxMap.CancelableCallback cancelableCallback) {
     cancelAnimator(animatorType);
     MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
     if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.cameraAnimator(previous, target, listener, cancelableCallback));
+      animatorArray.put(animatorType, animatorProvider.cameraAnimator(values, listener, cancelableCallback));
     }
   }
 

@@ -6,12 +6,13 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.view.WindowManager;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
-import android.view.WindowManager;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
@@ -890,6 +891,32 @@ public final class LocationComponent {
   }
 
   /**
+   * Use to either force a location update or to manually control when the user location gets
+   * updated.
+   * <p>
+   * This method can be used to provide the list of locations where the last one is the target location
+   * and the rest are intermediate points used as the animation path.
+   * The puck and the camera will be animated between each of the points linearly until reaching the target.
+   *
+   * @param locations       where the location icon is placed on the map
+   * @param lookAheadUpdate If set to true, the last location's timestamp has to be greater than current timestamp and
+   *                        should represent the time at which the animation should actually reach this position,
+   *                        cutting out the time interpolation delay.
+   */
+  public void forceLocationUpdate(@Nullable List<Location> locations, boolean lookAheadUpdate) {
+    checkActivationState();
+    if (locations != null && locations.size() >= 1) {
+      updateLocation(
+        locations.get(locations.size() - 1), // target location
+        locations.subList(0, locations.size() - 1), // intermediate locations
+        false,
+        lookAheadUpdate);
+    } else {
+      updateLocation(null, false);
+    }
+  }
+
+  /**
    * Set max FPS at which location animators can output updates. The throttling will only impact the location puck
    * and camera tracking smooth animations.
    * <p>
@@ -1341,6 +1368,11 @@ public final class LocationComponent {
    * @param location the latest user location
    */
   private void updateLocation(@Nullable final Location location, boolean fromLastLocation) {
+    updateLocation(location, null, fromLastLocation, false);
+  }
+
+  private void updateLocation(@Nullable final Location location, @Nullable List<Location> intermediatePoints,
+                              boolean fromLastLocation, boolean lookAheadUpdate) {
     if (location == null) {
       return;
     } else if (!isLayerReady) {
@@ -1362,9 +1394,26 @@ public final class LocationComponent {
     }
     CameraPosition currentCameraPosition = mapboxMap.getCameraPosition();
     boolean isGpsNorth = getCameraMode() == CameraMode.TRACKING_GPS_NORTH;
-    locationAnimatorCoordinator.feedNewLocation(location, currentCameraPosition, isGpsNorth);
+    if (intermediatePoints != null) {
+      locationAnimatorCoordinator.feedNewLocation(
+        getTargetLocationWithIntermediates(location, intermediatePoints),
+        currentCameraPosition,
+        isGpsNorth,
+        lookAheadUpdate);
+    } else {
+      locationAnimatorCoordinator.feedNewLocation(location, currentCameraPosition, isGpsNorth);
+    }
     updateAccuracyRadius(location, false);
     lastLocation = location;
+  }
+
+  private Location[] getTargetLocationWithIntermediates(Location location, List<Location> intermediatePoints) {
+    Location[] locations = new Location[intermediatePoints.size() + 1];
+    locations[locations.length - 1] = location;
+    for (int i = 0; i < intermediatePoints.size(); i++) {
+      locations[i] = intermediatePoints.get(i);
+    }
+    return locations;
   }
 
   private void showLocationLayerIfHidden() {

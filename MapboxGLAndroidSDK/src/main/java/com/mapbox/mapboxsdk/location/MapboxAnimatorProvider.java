@@ -20,21 +20,19 @@ final class MapboxAnimatorProvider {
     return INSTANCE;
   }
 
-  MapboxLatLngAnimator latLngAnimator(LatLng previous, LatLng target,
-                                      MapboxAnimator.AnimationsValueChangeListener updateListener,
+  MapboxLatLngAnimator latLngAnimator(LatLng[] values, MapboxAnimator.AnimationsValueChangeListener updateListener,
                                       int maxAnimationFps) {
-    return new MapboxLatLngAnimator(previous, target, updateListener, maxAnimationFps);
+    return new MapboxLatLngAnimator(values, updateListener, maxAnimationFps);
   }
 
-  MapboxFloatAnimator floatAnimator(Float previous, Float target,
-                                    MapboxAnimator.AnimationsValueChangeListener updateListener,
+  MapboxFloatAnimator floatAnimator(Float[] values, MapboxAnimator.AnimationsValueChangeListener updateListener,
                                     int maxAnimationFps) {
-    return new MapboxFloatAnimator(previous, target, updateListener, maxAnimationFps);
+    return new MapboxFloatAnimator(values, updateListener, maxAnimationFps);
   }
 
-  MapboxCameraAnimatorAdapter cameraAnimator(Float previous, Float target,
+  MapboxCameraAnimatorAdapter cameraAnimator(Float[] values,
                                              MapboxAnimator.AnimationsValueChangeListener updateListener,
                                              @Nullable MapboxMap.CancelableCallback cancelableCallback) {
-    return new MapboxCameraAnimatorAdapter(previous, target, updateListener, cancelableCallback);
+    return new MapboxCameraAnimatorAdapter(values, updateListener, cancelableCallback);
   }
 }

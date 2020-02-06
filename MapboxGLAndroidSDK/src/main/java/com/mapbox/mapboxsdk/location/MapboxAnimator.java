@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Size;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -48,13 +50,13 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
   private final double minUpdateInterval;
   private long timeElapsed;
 
-  MapboxAnimator(@NonNull K previous, @NonNull K target, @NonNull AnimationsValueChangeListener<K> updateListener,
+  MapboxAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
                  int maxAnimationFps) {
     minUpdateInterval = 1E9 / maxAnimationFps;
-    setObjectValues(previous, target);
+    setObjectValues((Object[]) values);
     setEvaluator(provideEvaluator());
     this.updateListener = updateListener;
-    this.target = target;
+    this.target = values[values.length - 1];
     addUpdateListener(this);
     addListener(new AnimatorListener());
   }
