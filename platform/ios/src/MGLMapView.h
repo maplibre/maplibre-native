@@ -355,12 +355,12 @@ MGL_EXPORT
 @property (nonatomic, assign) CGPoint compassViewMargins;
 
 /**
- The Mapbox logo, positioned in the lower-left corner.
+ The Mapbox wordmark, positioned in the lower-left corner.
 
  @note The Mapbox terms of service, which governs the use of Mapbox-hosted
     vector tiles and styles,
     <a href="https://docs.mapbox.com/help/how-mapbox-works/attribution/">requires</a> most Mapbox
-    customers to display the Mapbox logo. If this applies to you, do not
+    customers to display the Mapbox wordmark. If this applies to you, do not
     hide this view or change its contents.
  */
 @property (nonatomic, readonly) UIImageView *logoView;
