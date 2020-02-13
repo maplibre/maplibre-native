@@ -2,7 +2,16 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
-## 9.0.0-beta.1 - January 24, 2019
+## 9.0.0 - February 13, 2020
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0-beta.1...android-v9.0.0) since [Mapbox Maps SDK for Android v9.0.0-beta.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0-beta.1):
+### Features
+ - Introduce lazy loading of view components on MapView [#141](https://github.com/mapbox/mapbox-gl-native-android/pull/141)
+ - Update Mapbox dependencies to AndroidX [#144](https://github.com/mapbox/mapbox-gl-native-android/pull/144) [#155](https://github.com/mapbox/mapbox-gl-native-android/pull/155)
+
+### Bug fixes
+ - Revert a commit that appended sku token to offline download requests [#173](https://github.com/mapbox/mapbox-gl-native-android/pull/173)
+
+## 9.0.0-beta.1 - January 24, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0-alpha.1...android-v9.0.0-beta.1) since [Mapbox Maps SDK for Android v9.0.0-alpha.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0-alpha.1):
 ### Features
  - Introduce a gesture setting to disable horizontal scrolling [#156](https://github.com/mapbox/mapbox-gl-native-android/pull/156)
@@ -10,13 +19,13 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
  - Introduce getVisibleCoordinateBounds method that allows for object reuse [#109](https://github.com/mapbox/mapbox-gl-native-android/pull/109)
  - Update Mapbox dependencies to AndroidX [#136](https://github.com/mapbox/mapbox-gl-native-android/pull/136)
 
-## 8.6.2 - January 22, 2019
+## 8.6.2 - January 22, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.1...android-v8.6.2) since [Mapbox Maps SDK for Android v8.6.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.1):
 ### Bug fixes
  - Append sku token to offline download requests [#148](https://github.com/mapbox/mapbox-gl-native-android/pull/148)
  - Write user id synchronously to avoid null entries as part of the URL [#145](https://github.com/mapbox/mapbox-gl-native-android/pull/145)
 
-## 8.6.1 - January 9, 2019
+## 8.6.1 - January 9, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v8.6.0...android-v8.6.1) since [Mapbox Maps SDK for Android v8.6.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v8.6.0):
 ### Bug fixes
  - Fixed native crash when using a GeoJsonSource when destructing the underlying GeoJSONVTData [#16106](https://github.com/mapbox/mapbox-gl-native/pull/16106).
