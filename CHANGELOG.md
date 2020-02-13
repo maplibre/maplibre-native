@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
  - Update Mapbox dependencies to AndroidX [#144](https://github.com/mapbox/mapbox-gl-native-android/pull/144) [#155](https://github.com/mapbox/mapbox-gl-native-android/pull/155)
 
 ### Bug fixes
+ - Fixed a bug that would cause `symbol-sort-key` not equally sort icon and text [#16023](https://github.com/mapbox/mapbox-gl-native/pull/16023)
  - Revert a commit that appended sku token to offline download requests [#173](https://github.com/mapbox/mapbox-gl-native-android/pull/173)
 
 ## 9.0.0-beta.1 - January 24, 2020
