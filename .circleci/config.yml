@@ -4,16 +4,8 @@ workflows:
   version: 2
   mapbox-gl-native-android:
     jobs:
-      - android-debug-arm-v7-buck
       - android-arm-template:
           name: android-debug-arm-v8
-      - android-arm-template:
-          name: android-gnustl-arm-v7
-          stl: gnustl_shared
-          firebase_device_id: "flo"
-          firebase_device_os: "21"
-          image: android-ndk-r17c:1d5db0eb34
-          abi: arm-v7
       - android-release:
           filters:
             tags:
@@ -346,28 +338,3 @@ jobs:
               fi
             fi
       - generate-api-javadoc
-  # ------------------------------------------------------------------------------
-  android-debug-arm-v7-buck:
-    docker:
-      - image: mbgl/android-ndk-r17c-buck:07c5ef2e71
-    working_directory: /src
-    environment:
-      LIBSYSCONFCPUS: 2
-      JOBS: 2
-      BUILDTYPE: Debug
-      ANDROID_NDK: /android/sdk/ndk-bundle
-    steps:
-      - checkout
-      - npm-install
-      - run:
-          name: Checkout submodules
-          command: |
-            git submodule update --init --recursive
-      - npm-install-vendor
-      - prepare-environment
-      - run:
-          name: Build Android library
-          command: |
-            cd misc/buck
-            buck build mapbox-gl-native:android-core
-  # ------------------------------------------------------------------------------
