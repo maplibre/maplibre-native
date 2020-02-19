@@ -132,7 +132,15 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     // Animated selection takes MGLAnimationDuration (0.3 seconds), so wait a little
     // longer. We don't need to wait as long if we're not animated (but we do
     // want the runloop to tick over)
+
+#if TARGET_OS_SIMULATOR
+    // Something is amiss with dispatch_async & XCTest on simulators in a recent
+    // iOS SDK release.
+    // TODO: Add issue
+    [self waitForExpectations:@[selectionCompleted] timeout:animateSelection ? 0.4: 0.1];
+#else
     [self waitForExpectations:@[selectionCompleted] timeout:animateSelection ? 0.4: 0.05];
+#endif
 
     UIView *annotationViewAfterSelection =  [self.mapView viewForAnnotation:point];
     CLLocationCoordinate2D mapCenterAfterSelection = self.mapView.centerCoordinate;

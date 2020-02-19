@@ -398,13 +398,14 @@
 		CA0FAA07237B3BC600C9F3C9 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
 		CA0FAA08237B3BC600C9F3C9 /* MapboxMobileEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; };
 		CA0FAA09237B3BEA00C9F3C9 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
-		CA0FAA0A237B3BEA00C9F3C9 /* MapboxMobileEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; };
 		CA17464923D81581008B7A43 /* MGLNetworkIntegrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */; };
 		CA17464A23D81587008B7A43 /* MGLNetworkIntegrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */; };
 		CA17464B23D81589008B7A43 /* MGLNetworkIntegrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */; };
 		CA17464C23D81595008B7A43 /* MGLNetworkIntegrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */; };
 		CA17464E23D8A93C008B7A43 /* MGLNetworkConfigurationIntegrationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA17464D23D8A93C008B7A43 /* MGLNetworkConfigurationIntegrationTests.mm */; };
 		CA1B4A512099FB2200EDD491 /* MGLMapSnapshotterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CA1B4A502099FB2200EDD491 /* MGLMapSnapshotterTest.m */; };
+		CA488BAB23FCE6B900AEE226 /* MapboxMobileEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; };
+		CA488BAC23FCE6B900AEE226 /* MapboxMobileEvents.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CA4C54FE2324948100A81659 /* MGLSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4C54FD2324948100A81659 /* MGLSourceTests.swift */; };
 		CA4EB8C720863487006AB465 /* MGLStyleLayerIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CA4EB8C620863487006AB465 /* MGLStyleLayerIntegrationTests.m */; };
 		CA4F3BDE230F74C3008BAFEA /* MGLMapViewPendingBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CA4F3BDD230F74C3008BAFEA /* MGLMapViewPendingBlockTests.m */; };
@@ -739,6 +740,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				CA488BAC23FCE6B900AEE226 /* MapboxMobileEvents.framework in Embed Frameworks */,
 				CAA69DA5206DCD0E007279CD /* Mapbox.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -1354,8 +1356,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA488BAB23FCE6B900AEE226 /* MapboxMobileEvents.framework in Frameworks */,
 				CA0FAA09237B3BEA00C9F3C9 /* Mapbox.framework in Frameworks */,
-				CA0FAA0A237B3BEA00C9F3C9 /* MapboxMobileEvents.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

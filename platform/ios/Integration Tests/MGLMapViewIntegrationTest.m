@@ -168,16 +168,9 @@
 }
 
 - (void)waitForExpectations:(NSArray<XCTestExpectation *> *)expectations timeout:(NSTimeInterval)seconds {
-
     NSTimer *timer;
 
-    if (@available(iOS 10.0, *)) {
-        // We're good.
-    }
-    else if (self.mapView) {
-        // Before iOS 10 it seems that the display link is not called during the
-        // waitForExpectations below
-        
+    if (self.mapView) {
         timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0
                                                  target:self
                                                selector:@selector(updateMapViewDisplayLinkFromTimer:)
@@ -190,7 +183,15 @@
 }
 
 - (void)updateMapViewDisplayLinkFromTimer:(NSTimer *)timer {
-    [self.mapView updateFromDisplayLink:nil];
+    if (@available(iOS 10.0, *)) {
+        // This is required for iOS 13.?, where dispatch blocks were not being
+        // called - after being issued with
+        // dispatch_async(dispatch_get_main_queue(), ...)
+    } else {
+        // Before iOS 10 it seems that the display link is not called during the
+        // waitForExpectations below
+        [self.mapView updateFromDisplayLink:nil];
+    }
 }
 
 - (MGLStyle *)style {
