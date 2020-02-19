@@ -59,6 +59,10 @@
         android:title="@string/apply_filtered_fill"
         mapbox:showAsAction="never" />
     <item
+        android:id="@+id/action_textsize_filter"
+        android:title="@string/apply_textsize_fill"
+        mapbox:showAsAction="never" />
+    <item
         android:id="@+id/action_line_filter"
         android:title="@string/apply_filtered_line"
         mapbox:showAsAction="never" />

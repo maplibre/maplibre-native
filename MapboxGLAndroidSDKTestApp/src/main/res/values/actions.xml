@@ -77,6 +77,7 @@
     <string name="change_the_water_color_on_zoom">Change the water color on zoom</string>
     <string name="custom_tiles">Custom tiles</string>
     <string name="apply_filtered_fill">Apply filtered fill</string>
+    <string name="apply_textsize_fill">Apply text size fill</string>
     <string name="apply_filtered_line">Apply filtered line</string>
     <string name="apply_numeric_fill_filter">Apply numeric fill filter</string>
     <string name="bring_water_to_front">Bring water to front</string>

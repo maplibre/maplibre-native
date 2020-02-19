@@ -1537,6 +1537,42 @@ public class Expression {
   }
 
   /**
+   * Retrieves whether an item exists in an array or a substring exists in a string.
+   *
+   * @param needle     the item expression
+   * @param haystack   the array or string expression
+   * @return true if exists.
+   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   */
+  public static Expression in(@NonNull Expression needle, @NonNull Expression haystack) {
+    return new Expression("in", needle, haystack);
+  }
+
+  /**
+   * Retrieves whether an item exists in an array or a substring exists in a string.
+   *
+   * @param needle     the item expression
+   * @param haystack   the array or string expression
+   * @return true if exists.
+   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   */
+  public static Expression in(@NonNull Number needle, @NonNull Expression haystack) {
+    return new Expression("in", literal(needle), haystack);
+  }
+
+  /**
+   * Retrieves whether an item exists in an array or a substring exists in a string.
+   *
+   * @param needle     the item expression
+   * @param haystack   the array or string expression
+   * @return true if exists.
+   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   */
+  public static Expression in(@NonNull String needle, @NonNull Expression haystack) {
+    return new Expression("in", literal(needle), haystack);
+  }
+
+  /**
    * Retrieves a property value from the current feature's properties,
    * or from another object if a second argument is provided.
    * Returns null if the requested property is missing.

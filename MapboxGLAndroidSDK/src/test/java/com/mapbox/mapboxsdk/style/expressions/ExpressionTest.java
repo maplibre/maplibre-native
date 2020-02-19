@@ -48,6 +48,7 @@ import static com.mapbox.mapboxsdk.style.expressions.Expression.gte;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.has;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.heatmapDensity;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.id;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.in;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.interpolate;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.isSupportedScript;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.length;
@@ -443,6 +444,27 @@ public class ExpressionTest {
   public void testAt() throws Exception {
     Object[] expected = new Object[] {"at", 3f, new Object[] {"literal", new Object[] {"one", "two"}}};
     Object[] actual = at(literal(3), literal(new Object[] {"one", "two"})).toArray();
+    assertTrue("expression should match", Arrays.deepEquals(expected, actual));
+  }
+
+  @Test
+  public void testInString() throws Exception {
+    Object[] expected = new Object[] {"in", "one",  "onetwo"};
+    Object[] actual = in(literal("one"), literal("onetwo")).toArray();
+    assertTrue("expression should match", Arrays.deepEquals(expected, actual));
+  }
+
+  @Test
+  public void testInNumber() throws Exception {
+    Object[] expected = new Object[] {"in", 1f, new Object[] {"literal", new Object[] {1f, 2f}}};
+    Object[] actual = in(literal(1f), literal(new Object[] {1f, 2f})).toArray();
+    assertTrue("expression should match", Arrays.deepEquals(expected, actual));
+  }
+
+  @Test
+  public void testInArray() throws Exception {
+    Object[] expected = new Object[] {"in", "one", new Object[] {"literal", new Object[] {"one", "two"}}};
+    Object[] actual = in(literal("one"), literal(new Object[] {"one", "two"})).toArray();
     assertTrue("expression should match", Arrays.deepEquals(expected, actual));
   }
 

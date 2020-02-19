@@ -43,10 +43,12 @@ import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.gte;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.in;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.interpolate;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.switchCase;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.toNumber;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
 import static com.mapbox.mapboxsdk.style.layers.Property.FILL_TRANSLATE_ANCHOR_MAP;
@@ -65,6 +67,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolPlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
 /**
@@ -197,6 +200,9 @@ public class RuntimeStyleActivity extends AppCompatActivity {
         return true;
       case R.id.action_fill_filter:
         styleFillFilterLayer();
+        return true;
+      case R.id.action_textsize_filter:
+        styleTextSizeFilterLayer();
         return true;
       case R.id.action_line_filter:
         styleLineFilterLayer();
@@ -517,6 +523,34 @@ public class RuntimeStyleActivity extends AppCompatActivity {
         states.setProperties(
           fillColor(Color.RED),
           fillOpacity(0.25f)
+        );
+      } else {
+        Toast.makeText(RuntimeStyleActivity.this, "No states layer in this style", Toast.LENGTH_SHORT).show();
+      }
+    }, 2000);
+  }
+
+  private void styleTextSizeFilterLayer() {
+    mapboxMap.setStyle(new Style.Builder().fromUri("asset://fill_filter_style.json"));
+    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(31, -100), 3));
+
+    Handler handler = new Handler(getMainLooper());
+    handler.postDelayed(() -> {
+      if (mapboxMap == null) {
+        return;
+      }
+
+      Timber.d("Styling text size fill layer");
+      SymbolLayer states = (SymbolLayer) mapboxMap.getStyle().getLayer("state-label-lg");
+
+      if (states != null) {
+        states.setProperties(
+          textSize(switchCase(
+            in(get("name"), literal("Texas")), literal(25.0f),
+            in(get("name"), literal(new Object[] {"California","Illinois"})), literal(25.0f),
+            literal(6.0f) // default value
+            )
+          )
         );
       } else {
         Toast.makeText(RuntimeStyleActivity.this, "No states layer in this style", Toast.LENGTH_SHORT).show();
