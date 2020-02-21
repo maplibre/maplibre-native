@@ -457,7 +457,7 @@
     }
     {
         NSArray *preferences = @[@"zh-Hant"];
-        XCTAssertNil([MGLVectorTileSource preferredMapboxStreetsLanguageForPreferences:preferences]);
+        XCTAssertEqualObjects([MGLVectorTileSource preferredMapboxStreetsLanguageForPreferences:preferences], @"zh-Hant");
     }
     {
         NSArray *preferences = @[@"en", @"fr", @"el"];

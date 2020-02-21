@@ -89,8 +89,8 @@
  https://www.mapbox.com/vector-tiles/mapbox-streets-v8/
  */
 static NSArray * const MGLMapboxStreetsLanguages = @[
-    @"ar", @"de", @"en", @"es", @"fr", @"ja", @"ko", @"pt", @"ru", @"zh",
-    @"zh-Hans",
+    @"ar", @"de", @"en", @"es", @"fr", @"ja", @"ko", @"pt", @"ru", @"vi",
+    @"zh-Hans", @"zh-Hant",
 ];
 
 /**
@@ -98,8 +98,8 @@ static NSArray * const MGLMapboxStreetsLanguages = @[
  `+[NSBundle preferredLocalizationsFromArray:forPreferences:]`.
  */
 static NSArray * const MGLMapboxStreetsAlternativeLanguages = @[
-    @"mul", @"ar", @"de", @"es", @"fr", @"ja", @"ko", @"pt", @"ru", @"zh",
-    @"zh-Hans",
+    @"mul", @"ar", @"de", @"es", @"fr", @"ja", @"ko", @"pt", @"ru", @"vi",
+    @"zh-Hans", @"zh-Hant",
 ];
 
 + (NSSet<NSString *> *)mapboxStreetsLanguages {
