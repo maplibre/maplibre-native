@@ -9,7 +9,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 ## 5.7.0 - February 13, 2020
 
 ### Bug fixes
-* Fixed an issue where `symbolSortKey` could sort text and icons incorrectly. ([#16023](https://github.com/mapbox/mapbox-gl-native/pull/16023))
+* Fixed an issue where `MGLSymbolStyleLayer.symbolSortKey` could sort text and icons incorrectly. ([#16023](https://github.com/mapbox/mapbox-gl-native/pull/16023))
 * Fixed a crash when parsing GeoJSON sources. ([#16106](https://github.com/mapbox/mapbox-gl-native/pull/16106))
 
 ### Other changes
@@ -28,18 +28,22 @@ This release includes a known issue where the binary size has increased. ([#63](
     - Manual installation: New Github release artifact (`mapbox-ios-sdk-5.6.0-beta.1-dynamic-with-events.zip`) contains the `MapboxMobileEvents.framework`; please install this along with `Mapbox.framework`
 
 ### Networking and storage
-* Make network requests for expired resources lower priority than requests for new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
+* Expired resources are now fetched at a lower priority than new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
 
 ### Bug fixes
 * Fixed the rendering bug caused by redundant pending requests for already requested images [#15864](https://github.com/mapbox/mapbox-gl-native/pull/15864)
 * Enable incremental vacuum for the offline database in order to make data removal requests faster and to avoid the excessive disk space usage (creating a backup file on VACUUM call). ([#15837](https://github.com/mapbox/mapbox-gl-native/pull/15837))
 * Fix ornaments' view constraints bug when devices change to bold-text mode. ([#57](https://github.com/mapbox/mapbox-gl-native-ios/pull/57))
-* Fixed `MGLShapeSource` source flickering on style transition. ([#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907))
-* Fixed flickering caused by unnecessary removing and re-adding of the render sources when the order of their corresponding style objects was changed in the updated style ([#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941))
+* Fixed an issue where style layers backed by a shape source could flicker when transitioning between styles. ([#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907), [#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941))
 * Fixed a crash when `MGLSymbolStyleLayer.textFontSize` is set to an expression that evaluates to `0`. ([#16080](https://github.com/mapbox/mapbox-gl-native/pull/16080))
 
 ### Other changes
 * Convert GeoJSON features to tiles for the loaded source description in a background thread and thus unblock the UI thread ([#15885](https://github.com/mapbox/mapbox-gl-native/pull/15885))
+
+## 5.5.1 - February 20, 2020
+
+* Fixed an issue where `MGLSymbolStyleLayer.symbolSortKey` could sort text and icons incorrectly. ([#16023](https://github.com/mapbox/mapbox-gl-native/pull/16023))
+* Fixed an issue where style layers backed by a shape source could flicker when transitioning between styles. ([#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907), [#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941))
 
 ## 5.5.0 - November 5, 2019
 
@@ -87,7 +91,7 @@ This release includes a known issue where the binary size has increased. ([#63](
 ### Other changes
 
 * Fixed a bug where the completion block passed to `-[MGLMapView flyToCamera:completionHandler:]` (and related methods) wouldn't be called. ([#15473](https://github.com/mapbox/mapbox-gl-native/pull/15473))
-* Fixed a crash when offline pack invalidation happened on different threads. ([#15582](https://github.com/mapbox/mapbox-gl-native/pull/15582))
+* Fixed a crash when `-[MGLOfflinePack invalidate]` is called on different threads. ([#15582](https://github.com/mapbox/mapbox-gl-native/pull/15582))
 * Fixed a potential integer overflow at high zoom levels. ([#15560](https://github.com/mapbox/mapbox-gl-native/pull/15560))
 * Fixed a bug with annotation view positions after camera transitions. ([#15122](https://github.com/mapbox/mapbox-gl-native/pull/15122/))
 
@@ -119,7 +123,7 @@ This release changes how offline tile requests are billed — they are now bill
 * Added the `MGLSymbolStyleLayer.textWritingModes` layout property. This property can be set to `MGLTextWritingModeHorizontal` or `MGLTextWritingModeVertical`. ([#14932](https://github.com/mapbox/mapbox-gl-native/pull/14932))
 * Fixed rendering and collision detection issues with using `MGLSymbolStyleLayer.textVariableAnchor` and `MGLSymbolStyleLayer.iconTextFit` properties on the same layer. ([#15367](https://github.com/mapbox/mapbox-gl-native/pull/15367))
 * Fixed symbol overlap when zooming out quickly. ([#15416](https://github.com/mapbox/mapbox-gl-native/pull/15416))
-* Fixed a rendering issue where non-SDF icons would be treated as SDF icons if they are in the same layer. ([#15456](https://github.com/mapbox/mapbox-gl-native/pull/15456))
+* Fixed an issue where non-template images would draw as template images when used in the same style layer. ([#15456](https://github.com/mapbox/mapbox-gl-native/pull/15456))
 
 ### Other changes
 
@@ -227,7 +231,7 @@ This release changes how offline tile requests are billed — they are now bill
 
 * The `-[MGLMapView setCamera:withDuration:animationTimingFunction:edgePadding:completionHandler:]` method now adds the current value of the `MGLMapView.contentInset` property to the `edgePadding` parameter. ([#14813](https://github.com/mapbox/mapbox-gl-native/pull/14813))
 * Setting `MGLMapView.contentInset` now moves the map’s focal point to the center of the content frame after insetting. ([#14664](https://github.com/mapbox/mapbox-gl-native/pull/14664))
-* Fixed a feature querying bug caused by incorrect sort feature index calculation. ([#14884](https://github.com/mapbox/mapbox-gl-native/pull/14884))
+* Fixed an issue where `-[MGLMapView visibleFeaturesInRect:]` and `-[MGLShapeSource featuresMatchingPredicate:]` omitted some features from the return value. ([#14884](https://github.com/mapbox/mapbox-gl-native/pull/14884))
 
 ## 5.0.0 - May 22, 2019
 
