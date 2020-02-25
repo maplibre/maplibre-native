@@ -14,20 +14,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4E8A9455A3A23B7FD2A8FC52"
-               BuildableName = "All"
-               BlueprintName = "All"
-               ReferencedContainer = "container:../../build/macos/platform/macos/platform.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "DA839E911CC2E3400062CAFB"
                BuildableName = "Mapbox GL.app"
                BlueprintName = "macosapp"
@@ -46,34 +32,6 @@
                BuildableName = "test.xctest"
                BlueprintName = "test"
                ReferencedContainer = "container:macos.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6F726EEDB87945EE9D16328C"
-               BuildableName = "libmbgl-test.a"
-               BlueprintName = "mbgl-test"
-               ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "NO"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "30DBC82C69D449CE9F02884B"
-               BuildableName = "libmbgl-benchmark.a"
-               BlueprintName = "mbgl-benchmark"
-               ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

@@ -22,7 +22,7 @@ workflows:
               only: /ios-.*/
             branches:
               ignore: /.*/
-      #- macos-debug
+      - macos-debug
   nightly:
     triggers:
       - schedule:
@@ -177,9 +177,9 @@ commands:
   build-macos-test:
     steps:
     - run:
-        name: Build and run macOS tests
-        command: make run-test
-        no_output_timeout: 5m
+        name: Build macos-test
+        command: make macos-test
+        no_output_timeout: 20m
 
 
   check-public-symbols:
@@ -202,7 +202,7 @@ commands:
     steps:
     - run:
         name: Install macOS dependencies
-        command: brew install cmake ccache
+        command: brew install cmake ccache pkg-config glfw3
 
   collect-xcode-build-logs:
     steps:
@@ -490,7 +490,7 @@ jobs:
 # ------------------------------------------------------------------------------
   macos-debug:
     macos:
-      xcode: "10.1.0"
+      xcode: "11.2.1"
     environment:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
