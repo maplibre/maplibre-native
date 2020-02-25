@@ -56,8 +56,8 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9771D7F76DA54F52A89268C6"
-               BuildableName = "mbgl-test"
+               BlueprintIdentifier = "6F726EEDB87945EE9D16328C"
+               BuildableName = "libmbgl-test.a"
                BlueprintName = "mbgl-test"
                ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
             </BuildableReference>
@@ -70,8 +70,8 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D87DA13F4A80489CB4508EBD"
-               BuildableName = "mbgl-benchmark"
+               BlueprintIdentifier = "30DBC82C69D449CE9F02884B"
+               BuildableName = "libmbgl-benchmark.a"
                BlueprintName = "mbgl-benchmark"
                ReferencedContainer = "container:../../build/macos/Mapbox GL Native.xcodeproj">
             </BuildableReference>

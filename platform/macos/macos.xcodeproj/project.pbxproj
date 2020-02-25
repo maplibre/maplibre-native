@@ -86,8 +86,6 @@
 		40B77E451DB11BC9003DA2FE /* NSArray+MGLAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 40B77E431DB11BB0003DA2FE /* NSArray+MGLAdditions.h */; };
 		40B77E461DB11BCD003DA2FE /* NSArray+MGLAdditions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 40B77E421DB11BB0003DA2FE /* NSArray+MGLAdditions.mm */; };
 		40E1601D1DF217D6005EA6D9 /* MGLStyleLayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 40E1601B1DF216E6005EA6D9 /* MGLStyleLayerTests.m */; };
-		52B5D17F1E5E26DF00BBCB48 /* libmbgl-loop-darwin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5548BE7B1D0ACBBD005DDE81 /* libmbgl-loop-darwin.a */; };
-		52B5D1801E5E26DF00BBCB48 /* libmbgl-loop-darwin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5548BE7B1D0ACBBD005DDE81 /* libmbgl-loop-darwin.a */; };
 		55335DF9212EC542000CE5F8 /* NSImage+MGLAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 405C03961DB0004E001AC280 /* NSImage+MGLAdditions.h */; };
 		5548BE781D09E718005DDE81 /* libmbgl-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3451CC31D1200DB3429 /* libmbgl-core.a */; };
 		556660C61E1BEA0100E2C41B /* MGLFoundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 556660C51E1BEA0100E2C41B /* MGLFoundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -99,8 +97,6 @@
 		55CAF6322294407F00F17770 /* MGLMapView+OpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = 55CAF6312294407F00F17770 /* MGLMapView+OpenGL.h */; };
 		55CAF6342294409B00F17770 /* MGLMapView+OpenGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55CAF6332294409B00F17770 /* MGLMapView+OpenGL.mm */; };
 		55CF7533213EDADF00ED86C4 /* libmbgl-vendor-icu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */; };
-		55D120A31F7906E6004B6D81 /* libmbgl-filesource.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55D120A41F7906E6004B6D81 /* libmbgl-filesource.a */; };
-		55D120A51F790A0C004B6D81 /* libmbgl-filesource.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55D120A41F7906E6004B6D81 /* libmbgl-filesource.a */; };
 		55E2AD111E5B0A6900E8C587 /* MGLOfflineStorageTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E2AD101E5B0A6900E8C587 /* MGLOfflineStorageTests.mm */; };
 		747ABE59219B2BDB00523B67 /* MGLFillExtrusionStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE54219B2BDA00523B67 /* MGLFillExtrusionStyleLayer_Private.h */; };
 		747ABE5A219B2BDB00523B67 /* MGLCircleStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE55219B2BDA00523B67 /* MGLCircleStyleLayer_Private.h */; };
@@ -205,6 +201,8 @@
 		DAA999011E9F5EC5002E6EA6 /* MGLFillExtrusionStyleLayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAA999001E9F5EC5002E6EA6 /* MGLFillExtrusionStyleLayerTests.mm */; };
 		DAC25FCA200FD5E2009BE98E /* NSExpression+MGLPrivateAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = DAC25FC9200FD5E2009BE98E /* NSExpression+MGLPrivateAdditions.h */; };
 		DAC2ABC51CC6D343006D18C4 /* MGLAnnotationImage_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DAC2ABC41CC6D343006D18C4 /* MGLAnnotationImage_Private.h */; };
+		DAC8325F24049D8700A61BF8 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3C61CC3499100DB3429 /* libsqlite3.tbd */; };
+		DAC8326024049D9C00A61BF8 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 55D9B4B01D005D3900C1CCE2 /* libz.tbd */; };
 		DACA8622201920BE00E9693A /* MGLRasterDEMSource.h in Headers */ = {isa = PBXBuildFile; fileRef = DACA8620201920BE00E9693A /* MGLRasterDEMSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DACA8623201920BE00E9693A /* MGLRasterDEMSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = DACA8621201920BE00E9693A /* MGLRasterDEMSource.mm */; };
 		DACB0C391E18DFFD005DDBEA /* MGLStyle+MBXAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DACB0C381E18DFFD005DDBEA /* MGLStyle+MBXAdditions.m */; };
@@ -347,7 +345,7 @@
 		1F7454A11ECFB00300021D39 /* MGLLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLLight.h; sourceTree = "<group>"; };
 		1F7454A21ECFB00300021D39 /* MGLLight.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLLight.mm; sourceTree = "<group>"; };
 		1F7454AA1ED1DDBD00021D39 /* MGLLightTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLLightTest.mm; sourceTree = "<group>"; };
-		1F8A59F921653483004DFE75 /* sideload_sat.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = sideload_sat.db; path = ../../../test/fixtures/offline_database/sideload_sat.db; sourceTree = "<group>"; };
+		1F8A59F921653483004DFE75 /* sideload_sat.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = sideload_sat.db; path = "../../../vendor/mapbox-gl-native/test/fixtures/offline_database/sideload_sat.db"; sourceTree = "<group>"; };
 		1F8A5A01216D4695004DFE75 /* MGLLoggingConfiguration_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLLoggingConfiguration_Private.h; sourceTree = "<group>"; };
 		1F8A5A03216D4696004DFE75 /* MGLLoggingConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLLoggingConfiguration.h; sourceTree = "<group>"; };
 		1F95931A1E6DE2B600D5B294 /* MGLNSDateAdditionsTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLNSDateAdditionsTests.mm; path = ../../darwin/test/MGLNSDateAdditionsTests.mm; sourceTree = "<group>"; };
@@ -425,11 +423,10 @@
 		5591AC692298361600FF9ADF /* MGLMapView+Impl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "MGLMapView+Impl.mm"; sourceTree = "<group>"; };
 		55CAF6312294407F00F17770 /* MGLMapView+OpenGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MGLMapView+OpenGL.h"; sourceTree = "<group>"; };
 		55CAF6332294409B00F17770 /* MGLMapView+OpenGL.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = "MGLMapView+OpenGL.mm"; sourceTree = "<group>"; };
-		55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmbgl-vendor-icu.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-vendor-icu.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		55D120A41F7906E6004B6D81 /* libmbgl-filesource.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-filesource.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		55D9B4B01D005D3900C1CCE2 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		55E2AD101E5B0A6900E8C587 /* MGLOfflineStorageTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLOfflineStorageTests.mm; path = ../../darwin/test/MGLOfflineStorageTests.mm; sourceTree = "<group>"; };
-		55FE0E8D1D100A0900FD240B /* config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = config.xcconfig; path = ../../build/macos/config.xcconfig; sourceTree = "<group>"; };
 		747ABE54219B2BDA00523B67 /* MGLFillExtrusionStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLFillExtrusionStyleLayer_Private.h; sourceTree = "<group>"; };
 		747ABE55219B2BDA00523B67 /* MGLCircleStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLCircleStyleLayer_Private.h; sourceTree = "<group>"; };
 		747ABE56219B2BDB00523B67 /* MGLBackgroundStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLBackgroundStyleLayer_Private.h; sourceTree = "<group>"; };
@@ -603,6 +600,7 @@
 		DAA999001E9F5EC5002E6EA6 /* MGLFillExtrusionStyleLayerTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLFillExtrusionStyleLayerTests.mm; sourceTree = "<group>"; };
 		DAC25FC9200FD5E2009BE98E /* NSExpression+MGLPrivateAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSExpression+MGLPrivateAdditions.h"; sourceTree = "<group>"; };
 		DAC2ABC41CC6D343006D18C4 /* MGLAnnotationImage_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAnnotationImage_Private.h; sourceTree = "<group>"; };
+		DAC8325E240497AC00A61BF8 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = common.xcconfig; sourceTree = "<group>"; };
 		DACA8620201920BE00E9693A /* MGLRasterDEMSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLRasterDEMSource.h; sourceTree = "<group>"; };
 		DACA8621201920BE00E9693A /* MGLRasterDEMSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLRasterDEMSource.mm; sourceTree = "<group>"; };
 		DACB0C371E18DFFD005DDBEA /* MGLStyle+MBXAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MGLStyle+MBXAdditions.h"; sourceTree = "<group>"; };
@@ -741,9 +739,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5548BE781D09E718005DDE81 /* libmbgl-core.a in Frameworks */,
-				55D120A31F7906E6004B6D81 /* libmbgl-filesource.a in Frameworks */,
-				52B5D17F1E5E26DF00BBCB48 /* libmbgl-loop-darwin.a in Frameworks */,
 				55CF7533213EDADF00ED86C4 /* libmbgl-vendor-icu.a in Frameworks */,
+				DAC8325F24049D8700A61BF8 /* libsqlite3.tbd in Frameworks */,
+				DAC8326024049D9C00A61BF8 /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -751,10 +749,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAE0DD7A1D5F015A005A6BB1 /* libmbgl-core.a in Frameworks */,
-				55D120A51F790A0C004B6D81 /* libmbgl-filesource.a in Frameworks */,
 				DAE6C3321CC30DB200DB3429 /* Mapbox.framework in Frameworks */,
-				52B5D1801E5E26DF00BBCB48 /* libmbgl-loop-darwin.a in Frameworks */,
+				DAE0DD7A1D5F015A005A6BB1 /* libmbgl-core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1295,7 +1291,7 @@
 		DAE6C3C41CC31F7800DB3429 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				55FE0E8D1D100A0900FD240B /* config.xcconfig */,
+				DAC8325E240497AC00A61BF8 /* common.xcconfig */,
 			);
 			name = Configuration;
 			sourceTree = "<group>";
@@ -2075,6 +2071,7 @@
 		};
 		DA839EAA1CC2E3400062CAFB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -2091,6 +2088,7 @@
 		};
 		DA839EAB1CC2E3400062CAFB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -2131,7 +2129,7 @@
 		};
 		DAE6C33F1CC30DB200DB3429 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55FE0E8D1D100A0900FD240B /* config.xcconfig */;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2140,18 +2138,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = (
-					"$(mbgl_core_INCLUDE_DIRECTORIES)",
-					"$(mbgl_filesource_INCLUDE_DIRECTORIES)",
-				);
 				INFOPLIST_FILE = "$(SRCROOT)/sdk/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -2162,7 +2152,7 @@
 		};
 		DAE6C3401CC30DB200DB3429 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55FE0E8D1D100A0900FD240B /* config.xcconfig */;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2173,19 +2163,11 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = (
-					"$(mbgl_core_INCLUDE_DIRECTORIES)",
-					"$(mbgl_filesource_INCLUDE_DIRECTORIES)",
-				);
 				INFOPLIST_FILE = "$(SRCROOT)/sdk/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				LLVM_LTO = YES;
 				OTHER_CFLAGS = "-fvisibility=hidden";
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -2197,30 +2179,18 @@
 		};
 		DAE6C3411CC30DB200DB3429 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55FE0E8D1D100A0900FD240B /* config.xcconfig */;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(mbgl_core_INCLUDE_DIRECTORIES)",
-					"$(mbgl_filesource_INCLUDE_DIRECTORIES)",
-				);
 				INFOPLIST_FILE = test/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/cmake/Debug",
-				);
 				OTHER_CFLAGS = "-fvisibility=hidden";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"$(variant_cflags)",
 					"$(geometry_cflags)",
 					"$(geojson_cflags)",
-				);
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
 				);
 				OTHER_SWIFT_FLAGS = "-warnings-as-errors";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.test;
@@ -2233,14 +2203,10 @@
 		};
 		DAE6C3421CC30DB200DB3429 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55FE0E8D1D100A0900FD240B /* config.xcconfig */;
+			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(mbgl_core_INCLUDE_DIRECTORIES)",
-					"$(mbgl_filesource_INCLUDE_DIRECTORIES)",
-				);
 				INFOPLIST_FILE = test/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				OTHER_CFLAGS = "-fvisibility=hidden";
@@ -2249,10 +2215,6 @@
 					"$(variant_cflags)",
 					"$(geometry_cflags)",
 					"$(geojson_cflags)",
-				);
-				OTHER_LDFLAGS = (
-					"$(mbgl_core_LINK_LIBRARIES)",
-					"$(mbgl_filesource_LINK_LIBRARIES)",
 				);
 				OTHER_SWIFT_FLAGS = "-warnings-as-errors";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.test;

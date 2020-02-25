@@ -219,6 +219,73 @@ darwin-check-public-symbols:
 
 endif
 
+#### macOS targets ############################################################
+
+ifeq ($(HOST_PLATFORM), macos)
+
+MACOS_OUTPUT_PATH = build/macos
+MACOS_PROJ_PATH = '$(MACOS_OUTPUT_PATH)/Mapbox GL Native.xcodeproj'
+MACOS_WORK_PATH = platform/macos/macos.xcworkspace
+MACOS_USER_DATA_PATH = $(MACOS_WORK_PATH)/xcuserdata/$(USER).xcuserdatad
+
+MACOS_XCODEBUILD = xcodebuild \
+	-derivedDataPath $(MACOS_OUTPUT_PATH) \
+	-configuration $(BUILDTYPE) \
+	-workspace $(MACOS_WORK_PATH) \
+	-jobs $(JOBS)
+
+ifneq ($(CI),)
+	MACOS_XCODEBUILD += -xcconfig platform/darwin/ci.xcconfig
+endif
+
+$(MACOS_PROJ_PATH): $(MACOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEPS)
+	mkdir -p $(MACOS_OUTPUT_PATH)
+	(cd $(MACOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native/next \
+		-DCMAKE_SYSTEM_NAME=Darwin )
+
+$(MACOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/macos/WorkspaceSettings.xcsettings
+	mkdir -p "$(MACOS_USER_DATA_PATH)"
+	cp platform/macos/WorkspaceSettings.xcsettings "$@"
+
+.PHONY: macos
+macos: $(MACOS_PROJ_PATH)
+	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCPRETTY)
+
+.PHONY: xproj
+xproj: $(MACOS_PROJ_PATH)
+	xed $(MACOS_WORK_PATH)
+
+.PHONY: macos-test
+macos-test: $(MACOS_PROJ_PATH)
+	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
+
+.PHONY: macos-lint
+macos-lint:
+	find platform/macos -type f -name '*.plist' | xargs plutil -lint
+
+.PHONY: xpackage
+xpackage: $(MACOS_PROJ_PATH)
+	SYMBOLS=$(SYMBOLS) ./platform/macos/scripts/package.sh
+
+.PHONY: xdeploy
+xdeploy:
+	caffeinate -i ./platform/macos/scripts/deploy-packages.sh
+
+.PHONY: xdocument
+xdocument:
+	OUTPUT=$(OUTPUT) ./platform/macos/scripts/document.sh
+
+.PHONY: genstrings
+genstrings:
+	genstrings -u -o platform/macos/sdk/Base.lproj platform/darwin/src/*.{m,mm}
+	genstrings -u -o platform/macos/sdk/Base.lproj platform/macos/src/*.{m,mm}
+	genstrings -u -o platform/ios/resources/Base.lproj platform/ios/src/*.{m,mm}
+	-find platform/ios/resources platform/macos/sdk -path '*/Base.lproj/*.strings' -exec \
+		textutil -convert txt -extension strings -inputencoding UTF-16 -encoding UTF-8 {} \;
+	mv platform/macos/sdk/Base.lproj/Foundation.strings platform/darwin/resources/Base.lproj/
+
+endif
+
 #### Miscellaneous targets #####################################################
 
 .PHONY: style-code
