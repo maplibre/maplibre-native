@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ## master
 
+* Added the `MGLLineStyleLayer.lineSortKey` and `MGLFillStyleLayer.fillSortKey` properties. ([#179](https://github.com/mapbox/mapbox-gl-native-ios/pull/179))
 * The `-[MGLStyle localizeLabelsIntoLocale:]` and `-[NSExpression mgl_expressionLocalizedIntoLocale:]` methods can now localize text into Traditional Chinese and Vietnamese. ([#173](https://github.com/mapbox/mapbox-gl-native-ios/pull/173))
 
 ## 5.7.0 - February 13, 2020

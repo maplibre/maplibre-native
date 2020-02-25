@@ -49,6 +49,75 @@
     MGLTransition transitionTest = MGLTransitionMake(5, 4);
 
 
+    // fill-sort-key
+    {
+        XCTAssertTrue(rawLayer->getFillSortKey().isUndefined(),
+                      @"fill-sort-key should be unset initially.");
+        NSExpression *defaultExpression = layer.fillSortKey;
+
+        NSExpression *constantExpression = [NSExpression expressionWithFormat:@"1"];
+        layer.fillSortKey = constantExpression;
+        mbgl::style::PropertyValue<float> propertyValue = { 1.0 };
+        XCTAssertEqual(rawLayer->getFillSortKey(), propertyValue,
+                       @"Setting fillSortKey to a constant value expression should update fill-sort-key.");
+        XCTAssertEqualObjects(layer.fillSortKey, constantExpression,
+                              @"fillSortKey should round-trip constant value expressions.");
+
+        constantExpression = [NSExpression expressionWithFormat:@"1"];
+        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        layer.fillSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                step(zoom(), literal(1.0), 18.0, literal(1.0))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getFillSortKey(), propertyValue,
+                       @"Setting fillSortKey to a camera expression should update fill-sort-key.");
+        XCTAssertEqualObjects(layer.fillSortKey, functionExpression,
+                              @"fillSortKey should round-trip camera expressions.");
+
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(keyName, 'linear', nil, %@)", @{@18: constantExpression}];
+        layer.fillSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                interpolate(linear(), number(get("keyName")), 18.0, literal(1.0))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getFillSortKey(), propertyValue,
+                       @"Setting fillSortKey to a data expression should update fill-sort-key.");
+        NSExpression *pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(CAST(keyName, 'NSNumber'), 'linear', nil, %@)", @{@18: constantExpression}];
+        XCTAssertEqualObjects(layer.fillSortKey, pedanticFunctionExpression,
+                              @"fillSortKey should round-trip data expressions.");
+
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        layer.fillSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                interpolate(linear(), zoom(), 10.0, interpolate(linear(), number(get("keyName")), 18.0, literal(1.0)))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getFillSortKey(), propertyValue,
+                       @"Setting fillSortKey to a camera-data expression should update fill-sort-key.");
+        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        XCTAssertEqualObjects(layer.fillSortKey, pedanticFunctionExpression,
+                              @"fillSortKey should round-trip camera-data expressions.");
+
+        layer.fillSortKey = nil;
+        XCTAssertTrue(rawLayer->getFillSortKey().isUndefined(),
+                      @"Unsetting fillSortKey should return fill-sort-key to the default value.");
+        XCTAssertEqualObjects(layer.fillSortKey, defaultExpression,
+                              @"fillSortKey should return the default value after being unset.");
+    }
+
     // fill-antialias
     {
         XCTAssertTrue(rawLayer->getFillAntialias().isUndefined(),
@@ -470,6 +539,7 @@
 }
 
 - (void)testPropertyNames {
+    [self testPropertyName:@"fill-sort-key" isBoolean:NO];
     [self testPropertyName:@"is-fill-antialiased" isBoolean:YES];
     [self testPropertyName:@"fill-color" isBoolean:NO];
     [self testPropertyName:@"fill-opacity" isBoolean:NO];

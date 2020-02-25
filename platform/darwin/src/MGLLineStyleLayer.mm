@@ -167,6 +167,24 @@ namespace mbgl {
     return MGLStyleValueTransformer<float, NSNumber *>().toExpression(propertyValue);
 }
 
+- (void)setLineSortKey:(NSExpression *)lineSortKey {
+    MGLAssertStyleLayerIsValid();
+    MGLLogDebug(@"Setting lineSortKey: %@", lineSortKey);
+
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue<mbgl::style::PropertyValue<float>>(lineSortKey, true);
+    self.rawLayer->setLineSortKey(mbglValue);
+}
+
+- (NSExpression *)lineSortKey {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getLineSortKey();
+    if (propertyValue.isUndefined()) {
+        propertyValue = self.rawLayer->getDefaultLineSortKey();
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toExpression(propertyValue);
+}
+
 #pragma mark - Accessing the Paint Attributes
 
 - (void)setLineBlur:(NSExpression *)lineBlur {

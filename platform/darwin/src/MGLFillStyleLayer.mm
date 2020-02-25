@@ -81,6 +81,26 @@ namespace mbgl {
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
+#pragma mark - Accessing the Layout Attributes
+
+- (void)setFillSortKey:(NSExpression *)fillSortKey {
+    MGLAssertStyleLayerIsValid();
+    MGLLogDebug(@"Setting fillSortKey: %@", fillSortKey);
+
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue<mbgl::style::PropertyValue<float>>(fillSortKey, true);
+    self.rawLayer->setFillSortKey(mbglValue);
+}
+
+- (NSExpression *)fillSortKey {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getFillSortKey();
+    if (propertyValue.isUndefined()) {
+        propertyValue = self.rawLayer->getDefaultFillSortKey();
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toExpression(propertyValue);
+}
+
 #pragma mark - Accessing the Paint Attributes
 
 - (void)setFillAntialiased:(NSExpression *)fillAntialiased {

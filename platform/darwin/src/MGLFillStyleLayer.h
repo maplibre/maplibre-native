@@ -76,6 +76,23 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
+#pragma mark - Accessing the Layout Attributes
+
+/**
+ Sorts features in ascending order based on this value. Features with a higher
+ sort key will appear above features with a lower sort key.
+ 
+ You can set this property to an expression containing any of the following:
+ 
+ * Constant numeric values
+ * Predefined functions, including mathematical and string operators
+ * Conditional expressions
+ * Variable assignments and references to assigned variables
+ * Interpolation and step functions applied to the `$zoomLevel` variable and/or
+ feature attributes
+ */
+@property (nonatomic, null_resettable) NSExpression *fillSortKey;
+
 #pragma mark - Accessing the Paint Attributes
 
 /**
