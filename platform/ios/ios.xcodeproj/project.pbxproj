@@ -1080,7 +1080,7 @@
 		CAB36C3A2374D11600592F74 /* libMapboxMobileEvents.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libMapboxMobileEvents.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAB36C3D2374D7DE00592F74 /* Mapbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Mapbox.framework; path = ../../build/ios/pkg/static/Mapbox.framework; sourceTree = "<group>"; };
 		CAD9D0A922A86D6F001B25EE /* MGLResourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLResourceTests.mm; path = ../../darwin/test/MGLResourceTests.mm; sourceTree = "<group>"; };
-		CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = common.xcconfig; sourceTree = "<group>"; };
+		CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ios.xcconfig; sourceTree = "<group>"; };
 		CAE7AD5320F46EF5003B6782 /* integration-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "integration-Bridging-Header.h"; sourceTree = "<group>"; };
 		CAE7AD5420F46EF5003B6782 /* MGLMapSnapshotterSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MGLMapSnapshotterSwiftTests.swift; sourceTree = "<group>"; };
 		CAFB3C13234505D500399265 /* MGLMapSnapshotter_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLMapSnapshotter_Private.h; sourceTree = "<group>"; };
@@ -1289,6 +1289,8 @@
 		DABCABC01CB80717000A7C39 /* locations.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = locations.hpp; sourceTree = "<group>"; };
 		DAC25FCB200FD83E009BE98E /* NSExpression+MGLPrivateAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSExpression+MGLPrivateAdditions.h"; sourceTree = "<group>"; };
 		DAC49C621CD07D74009E1AA3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		DAC832642404AF9000A61BF8 /* darwin.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = darwin.xcconfig; path = ../darwin/darwin.xcconfig; sourceTree = "<group>"; };
+		DAC832672404AFBB00A61BF8 /* ci.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = ci.xcconfig; path = ../darwin/ci.xcconfig; sourceTree = "<group>"; };
 		DACA86242019218500E9693A /* MGLRasterDEMSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLRasterDEMSource.h; sourceTree = "<group>"; };
 		DACA86252019218500E9693A /* MGLRasterDEMSource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLRasterDEMSource.mm; sourceTree = "<group>"; };
 		DACBC60B20118ABE00C4D7E2 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1745,7 +1747,6 @@
 		DA1DC9411CB6C1C2006E619F = {
 			isa = PBXGroup;
 			children = (
-				CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */,
 				1F7839A5235E137000D4D606 /* sideload_sat.db */,
 				402E9DE21CD3A56500FD4519 /* Playground */,
 				DA1DC94C1CB6C1C2006E619F /* Demo App */,
@@ -2100,6 +2101,9 @@
 			isa = PBXGroup;
 			children = (
 				9C6E284822A984120056B7BE /* Makefile */,
+				DAC832672404AFBB00A61BF8 /* ci.xcconfig */,
+				DAC832642404AF9000A61BF8 /* darwin.xcconfig */,
+				CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */,
 				DA35A2D11CCAB25200E826B2 /* jazzy.yml */,
 			);
 			name = Configuration;
@@ -3494,7 +3498,7 @@
 /* Begin XCBuildConfiguration section */
 		16376B0E1FFD9DAF0000563E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3524,7 +3528,7 @@
 		};
 		16376B0F1FFD9DAF0000563E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3553,7 +3557,7 @@
 		};
 		16376B431FFDB4B40000563E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3579,7 +3583,7 @@
 		};
 		16376B441FFDB4B40000563E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3625,7 +3629,7 @@
 		};
 		96AF1AA421B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -3667,7 +3671,7 @@
 		};
 		96AF1AA621B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -3691,7 +3695,7 @@
 		};
 		96AF1AA721B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
@@ -3741,7 +3745,7 @@
 		};
 		96AF1AA921B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = test/Info.plist;
@@ -3767,7 +3771,7 @@
 		};
 		96AF1AAA21B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3796,7 +3800,7 @@
 		};
 		96AF1AAB21B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3864,7 +3868,7 @@
 		};
 		DA1DC9621CB6C1C2006E619F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -3879,7 +3883,7 @@
 		};
 		DA1DC9631CB6C1C2006E619F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
@@ -3894,7 +3898,7 @@
 		};
 		DA2E885A1CC036F400F24E7B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = test/Info.plist;
@@ -3921,7 +3925,7 @@
 		};
 		DA2E885B1CC036F400F24E7B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = test/Info.plist;
@@ -3947,7 +3951,7 @@
 		};
 		DA8847DB1CBAF91600AB86E3 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -3969,7 +3973,7 @@
 		};
 		DA8847DC1CBAF91600AB86E3 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -4017,7 +4021,7 @@
 		};
 		DAA4E41A1CBB71D500178DFB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
@@ -4055,7 +4059,7 @@
 		};
 		DAA4E41B1CBB71D500178DFB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* common.xcconfig */;
+			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;

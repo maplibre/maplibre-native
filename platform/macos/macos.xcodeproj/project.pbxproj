@@ -600,7 +600,11 @@
 		DAA999001E9F5EC5002E6EA6 /* MGLFillExtrusionStyleLayerTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLFillExtrusionStyleLayerTests.mm; sourceTree = "<group>"; };
 		DAC25FC9200FD5E2009BE98E /* NSExpression+MGLPrivateAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSExpression+MGLPrivateAdditions.h"; sourceTree = "<group>"; };
 		DAC2ABC41CC6D343006D18C4 /* MGLAnnotationImage_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAnnotationImage_Private.h; sourceTree = "<group>"; };
-		DAC8325E240497AC00A61BF8 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = common.xcconfig; sourceTree = "<group>"; };
+		DAC832622404AF4300A61BF8 /* macos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = macos.xcconfig; sourceTree = "<group>"; };
+		DAC832632404AF7F00A61BF8 /* darwin.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = darwin.xcconfig; path = ../darwin/darwin.xcconfig; sourceTree = "<group>"; };
+		DAC832652404AF9E00A61BF8 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../Makefile; sourceTree = "<group>"; };
+		DAC832662404AFB400A61BF8 /* ci.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = ci.xcconfig; path = ../darwin/ci.xcconfig; sourceTree = "<group>"; };
+		DAC832682404B26400A61BF8 /* jazzy.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = jazzy.yml; sourceTree = "<group>"; };
 		DACA8620201920BE00E9693A /* MGLRasterDEMSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLRasterDEMSource.h; sourceTree = "<group>"; };
 		DACA8621201920BE00E9693A /* MGLRasterDEMSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLRasterDEMSource.mm; sourceTree = "<group>"; };
 		DACB0C371E18DFFD005DDBEA /* MGLStyle+MBXAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MGLStyle+MBXAdditions.h"; sourceTree = "<group>"; };
@@ -1291,7 +1295,11 @@
 		DAE6C3C41CC31F7800DB3429 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				DAC8325E240497AC00A61BF8 /* common.xcconfig */,
+				DAC832652404AF9E00A61BF8 /* Makefile */,
+				DAC832662404AFB400A61BF8 /* ci.xcconfig */,
+				DAC832632404AF7F00A61BF8 /* darwin.xcconfig */,
+				DAC832622404AF4300A61BF8 /* macos.xcconfig */,
+				DAC832682404B26400A61BF8 /* jazzy.yml */,
 			);
 			name = Configuration;
 			sourceTree = "<group>";
@@ -2071,7 +2079,7 @@
 		};
 		DA839EAA1CC2E3400062CAFB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -2088,7 +2096,7 @@
 		};
 		DA839EAB1CC2E3400062CAFB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -2129,7 +2137,7 @@
 		};
 		DAE6C33F1CC30DB200DB3429 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2152,7 +2160,7 @@
 		};
 		DAE6C3401CC30DB200DB3429 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2179,7 +2187,7 @@
 		};
 		DAE6C3411CC30DB200DB3429 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2203,7 +2211,7 @@
 		};
 		DAE6C3421CC30DB200DB3429 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAC8325E240497AC00A61BF8 /* common.xcconfig */;
+			baseConfigurationReference = DAC832622404AF4300A61BF8 /* macos.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;

@@ -1,0 +1,3 @@
+#include "../darwin/darwin.xcconfig"
+
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(PROJECT_DIR)/vendor/mapbox-accounts-ios
