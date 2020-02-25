@@ -15,11 +15,6 @@ const suffix = 'StyleLayer';
 
 let spec = _.merge(require('../../../scripts/style-spec'), require('./style-spec-overrides-v8.json'));
 
-// FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
-delete spec.layout_circle["circle-sort-key"]
-delete spec.layout_line["line-sort-key"]
-delete spec.layout_fill["fill-sort-key"]
-
 class ConventionOverride {
     constructor(val) {
         if (typeof val === 'string') {
