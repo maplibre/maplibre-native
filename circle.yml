@@ -504,9 +504,9 @@ jobs:
       - run:
           name: Lint plist files
           command: make macos-lint
-      - run:
-          name: Nitpick Darwin code generation
-          command: scripts/nitpick/generated-code.js darwin
+      #- run:
+      #    name: Nitpick Darwin code generation
+      #    command: scripts/nitpick/generated-code.js darwin
       - save-dependencies
       - store_artifacts:
           path: test/fixtures
