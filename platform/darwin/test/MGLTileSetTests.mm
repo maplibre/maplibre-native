@@ -69,10 +69,11 @@
 #if TARGET_OS_IPHONE
     UIColor *redColor = [UIColor redColor];
 #else
-    // CSS uses the sRGB color space. In macOS 10.12 Sierra and below,
-    // -[NSColor redColor] is in the calibrated RGB space and has a slightly
-    // different sRGB value than on iOS and macOS 10.13 High Sierra.
-    NSColor *redColor = [NSColor colorWithSRGBRed:1 green:0 blue:0 alpha:1];
+    // CSS uses the sRGB color space.
+    // AppKit incorrectly uses calibrated RGB when exporting HTML, so input
+    // calibrated RGB to ensure round-tripping.
+    // <rdar://problem/46115233> <http://www.openradar.me/46115233>
+    NSColor *redColor = [NSColor colorWithCalibratedRed:1 green:0 blue:0 alpha:1];
 #endif
     NSAttributedString *gl = [[NSAttributedString alloc] initWithString:@"GL" attributes:@{
         NSBackgroundColorAttributeName: redColor,
