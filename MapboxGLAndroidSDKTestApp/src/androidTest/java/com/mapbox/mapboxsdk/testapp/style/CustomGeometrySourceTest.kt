@@ -14,6 +14,7 @@ import com.mapbox.mapboxsdk.testapp.activity.style.GridSourceActivity.ID_GRID_LA
 import com.mapbox.mapboxsdk.testapp.activity.style.GridSourceActivity.ID_GRID_SOURCE
 import com.mapbox.mapboxsdk.testapp.utils.TestingAsyncUtils
 import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Test
 
 class CustomGeometrySourceTest : BaseTest() {
@@ -64,6 +65,22 @@ class CustomGeometrySourceTest : BaseTest() {
         Thread.getAllStackTraces().keys.filter {
           it.name.startsWith(THREAD_PREFIX)
         }.count() == THREAD_POOL_LIMIT)
+    }
+  }
+
+  @Test
+  fun sourceZoomDeltaTest() {
+    validateTestSetup()
+    invoke(mapboxMap) { uiController, mapboxMap ->
+      mapboxMap.prefetchZoomDelta = 3
+      mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        assertNull(it.prefetchZoomDelta)
+        it.prefetchZoomDelta = 5
+        assertNotNull(it.prefetchZoomDelta)
+        assertEquals(5, it.prefetchZoomDelta!!)
+        it.prefetchZoomDelta = null
+        assertNull(it.prefetchZoomDelta)
+      }
     }
   }
 }
