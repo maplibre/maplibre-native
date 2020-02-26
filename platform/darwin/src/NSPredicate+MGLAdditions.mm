@@ -54,6 +54,7 @@ static NSDictionary * const MGLPredicateOperatorTypesByJSONOperator = @{
     @"<=": @(NSLessThanOrEqualToPredicateOperatorType),
     @">": @(NSGreaterThanPredicateOperatorType),
     @">=": @(NSGreaterThanOrEqualToPredicateOperatorType),
+    @"in": @(NSInPredicateOperatorType),
 };
 
 + (instancetype)predicateWithMGLJSONObject:(id)object {

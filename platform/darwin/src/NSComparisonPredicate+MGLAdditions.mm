@@ -115,14 +115,24 @@
             return @[op, leftHandPredicate.mgl_jsonExpressionObject, rightHandPredicate.mgl_jsonExpressionObject];
         }
         case NSInPredicateOperatorType: {
-            
-            NSExpression *matchExpression = [NSExpression expressionForFunction:@"MGL_MATCH"
-                                                                      arguments:@[self.leftExpression,
-                                                                                  self.rightExpression,
-                                                                                  [NSExpression expressionForConstantValue:@YES],
-                                                                                  [NSExpression expressionForConstantValue:@NO]]];
-
-            return matchExpression.mgl_jsonExpressionObject;
+            // An “in” expression comparing two string literals is unfortunately
+            // misinterpreted as a legacy “in” filter due to ambiguity. Wrap one
+            // argument in a “literal” expression to force an expression.
+            // https://github.com/mapbox/mapbox-gl-js/issues/9373#issuecomment-594537077
+            if (self.leftExpression.expressionType == NSConstantValueExpressionType &&
+                self.rightExpression.expressionType == NSConstantValueExpressionType &&
+                [self.leftExpression.constantValue isKindOfClass:[NSString class]] &&
+                [self.rightExpression.constantValue isKindOfClass:[NSString class]]) {
+                NSExpression *rightLiteralExpression = [NSExpression expressionWithFormat:@"MGL_FUNCTION('literal', %@)", self.rightExpression];
+                NSPredicate *literalPredicate = [NSComparisonPredicate predicateWithLeftExpression:self.leftExpression
+                                                                                   rightExpression:rightLiteralExpression
+                                                                                          modifier:NSDirectPredicateModifier
+                                                                                              type:NSInPredicateOperatorType
+                                                                                           options:self.options];
+                return literalPredicate.mgl_jsonExpressionObject;
+            }
+            op = @"in";
+            break;
         }
         case NSContainsPredicateOperatorType: {
             NSPredicate *inPredicate = [NSComparisonPredicate predicateWithLeftExpression:self.rightExpression

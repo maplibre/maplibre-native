@@ -216,76 +216,104 @@
                           mustRoundTrip:NO];
     }
     {
-        NSArray *expected = @[@"match", @[@"id"], @[@6, @5, @4, @3], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"id"], @[@"literal", @[@6, @5, @4, @3]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"$featureIdentifier IN { 6, 5, 4, 3}"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH($featureIdentifier, { 3, 4, 5, 6 }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"to-number", @[@"id"]], @[@3002970001, @3004140052, @3002950027, @3002970033], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"to-number", @[@"id"]], @[@"literal", @[@3002970001, @3004140052, @3002950027, @3002970033]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"CAST($featureIdentifier, 'NSNumber') IN { 3002970001, 3004140052, 3002950027, 3002970033 }"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH(CAST($featureIdentifier, 'NSNumber'), { 3002950027, 3002970001, 3002970033, 3004140052 }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"!", @[@"match", @[@"get", @"x"], @[@6, @5, @4, @3], @YES, @NO]];
+        NSArray *expected = @[@"!", @[@"in", @[@"get", @"x"], @[@"literal", @[@6, @5, @4, @3]]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"NOT x IN { 6, 5, 4, 3}"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"NOT MGL_MATCH(x, { 3, 4, 5, 6 }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"get", @"a"], @[@"b", @"c"], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"get", @"a"], @[@"literal", @[@"b", @"c"]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"a IN { 'b', 'c' }"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH(a, { 'b', 'c' }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"geometry-type"], @[@"LineString", @"Polygon"], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"geometry-type"], @[@"literal", @[@"LineString", @"Polygon"]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%@ IN %@", [NSExpression expressionForVariable:@"geometryType"], @[@"LineString", @"Polygon"]];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH($geometryType, { 'LineString', 'Polygon' }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"%@ IN {'LineString', 'Polygon'}", [NSExpression expressionForVariable:@"geometryType"]];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"get", @"x"], @[@6, @5, @4, @3], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"get", @"x"], @[@"literal", @[@6, @5, @4, @3]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"{ 6, 5, 4, 3 } CONTAINS x"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH(x, { 3, 4, 5, 6 }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"x IN { 6, 5, 4, 3 }"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"geometry-type"], @[@"LineString", @"Polygon"], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"geometry-type"], @[@"literal", @[@"LineString", @"Polygon"]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%@ CONTAINS %@", @[@"LineString", @"Polygon"], [NSExpression expressionForVariable:@"geometryType"]];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH($geometryType, { 'LineString', 'Polygon' }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"%@ IN {'LineString', 'Polygon'}", [NSExpression expressionForVariable:@"geometryType"]];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
     }
     {
-        NSArray *expected = @[@"match", @[@"id"], @[@6, @5, @4, @3], @YES, @NO];
+        NSArray *expected = @[@"in", @[@"id"], @[@"literal", @[@6, @5, @4, @3]]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"{ 6, 5, 4, 3} CONTAINS $featureIdentifier"];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
-        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"MGL_MATCH($featureIdentifier, { 3, 4, 5, 6 }, YES, NO) == YES"];
-        auto forwardFilter = [NSPredicate predicateWithMGLJSONObject:expected].mgl_filter;
-        NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
-        XCTAssertEqualObjects(predicateAfter, forwardPredicateAfter);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"$featureIdentifier IN {6, 5, 4, 3}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
+    }
+    {
+        NSArray *expected = @[@"in", @"📍", @[@"get", @"name"]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"'📍' IN name"];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
+    }
+    {
+        NSArray *expected = @[@"in", @"📍", @[@"get", @"name"]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name CONTAINS '📍'"];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"'📍' IN name"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
+    }
+    {
+        NSArray *expected = @[@"in", @"📍", @[@"literal", @"Pinole"]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"'📍' IN 'Pinole'"];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        XCTAssertEqualObjects([NSPredicate mgl_predicateWithFilter:predicate.mgl_filter], [NSPredicate predicateWithValue:NO]);
+    }
+    {
+        NSArray *expected = @[@"in", @"📍", @[@"literal", @"Pinole"]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"'Pinole' CONTAINS '📍'"];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"'📍' IN 'Pinole'"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        XCTAssertEqualObjects([NSPredicate mgl_predicateWithFilter:predicate.mgl_filter], [NSPredicate predicateWithValue:NO]);
     }
 }
 
