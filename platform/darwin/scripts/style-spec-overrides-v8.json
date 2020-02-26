@@ -67,6 +67,9 @@
       "doc": "Name of a style image to use for drawing an image background.\n\nUse the `+[MGLStyle setImage:forName:]` method to associate an image with a name that you can set this property to.\n\nWithin a constant string value, a feature attribute name enclosed in curly braces (e.g., `{token}`) is replaced with the value of the named attribute. Tokens inside non-constant expressions are ignored; instead, use `mgl_join:` and key path expressions.",
       "examples": "See the <a href=\"https://docs.mapbox.com/ios/maps/examples/clustering-with-images/\">Use images to cluster point data</a> example to learn how to dynamically set your icons with an expression."
     },
+    "symbol-avoid-edges": {
+      "doc": "Whether symbols in this layer avoid colliding with symbols in adjacent tiles.\n\nIf this property is set to `true`, symbols in this layer avoid crossing the edge of a tile. You should set this property to `true` if the backing vector tiles don’t have enough padding to prevent collisions, or if this layer’s `symbolPlacement` property is set to `MGLSymbolPlacementPoint` but this layer is above a symbol layer whose `symbolPlacement` property is set to `MGLSymbolPlacementLine`. You do not need to enable this property to prevent clipped labels at tile boundaries."
+    },
     "text-field": {
       "doc": "Value to use for a text label.\n\nWithin a constant string value, a feature attribute name enclosed in curly braces (e.g., `{token}`) is replaced with the value of the named attribute. Tokens inside non-constant expressions are ignored; instead, use `mgl_join:` and key path expressions.",
       "examples": "See the <a href=\"https://docs.mapbox.com/ios/maps/examples/clustering/\">Cluster point data</a> and <a href=\"https://docs.mapbox.com/ios/maps/examples/clustering-with-images/\">Use images to cluster point data</a> to learn how to use an expression to set this attribute to the number of markers within a cluster."
