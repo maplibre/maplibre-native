@@ -29,7 +29,6 @@
 #import <mbgl/style/style.hpp>
 #import <mbgl/annotation/annotation.hpp>
 #import <mbgl/map/camera.hpp>
-#import <mbgl/storage/reachability.h>
 #import <mbgl/style/image.hpp>
 #import <mbgl/renderer/renderer.hpp>
 #import <mbgl/storage/network_status.hpp>
@@ -57,6 +56,8 @@
 #import "NSImage+MGLAdditions.h"
 #import "NSPredicate+MGLPrivateAdditions.h"
 #import "MGLLoggingConfiguration_Private.h"
+#import "MGLNetworkIntegrationManager.h"
+#import "MGLReachability.h"
 
 class MGLAnnotationContext;
 
@@ -258,6 +259,7 @@ public:
 }
 
 - (void)commonInit {
+    MGLNativeNetworkManager.sharedManager.delegate = MGLNetworkIntegrationManager.sharedManager;
     _isTargetingInterfaceBuilder = NSProcessInfo.processInfo.mgl_isInterfaceBuilderDesignablesAgent;
 
     // Set up cross-platform controllers and resources.

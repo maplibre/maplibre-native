@@ -15,19 +15,19 @@
     return self;
 }
 
-- (nullable instancetype)initWithMGLStyleImage:(const mbgl::style::Image *)styleImage {
-    CGImageRef image = CGImageCreateWithMGLPremultipliedImage(styleImage->getImage().clone());
+- (nullable instancetype)initWithMGLStyleImage:(const mbgl::style::Image &)styleImage {
+    CGImageRef image = CGImageCreateWithMGLPremultipliedImage(styleImage.getImage().clone());
     if (!image) {
         return nil;
     }
 
     NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithCGImage:image];
     CGImageRelease(image);
-    CGFloat w = styleImage->getImage().size.width / styleImage->getPixelRatio();
-    CGFloat h = styleImage->getImage().size.height / styleImage->getPixelRatio();
+    CGFloat w = styleImage.getImage().size.width / styleImage.getPixelRatio();
+    CGFloat h = styleImage.getImage().size.height / styleImage.getPixelRatio();
     if (self = [self initWithSize:NSMakeSize(w, h)]) {
         [self addRepresentation:rep];
-        [self setTemplate:styleImage->isSdf()];
+        [self setTemplate:styleImage.isSdf()];
     }
     return self;
 }

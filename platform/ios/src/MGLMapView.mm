@@ -7,13 +7,12 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/util/platform.hpp>
-#include <mbgl/storage/reachability.h>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/gl/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
 #include <mbgl/util/exception.hpp>
@@ -69,6 +68,8 @@
 #import "MGLLocationManager_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
+#import "MGLNetworkIntegrationManager.h"
+#import "MGLReachability.h"
 #import <MapboxMobileEvents/MapboxMobileEvents.h>
 
 #include <algorithm>
@@ -453,6 +454,7 @@ public:
     // setup accessibility
     //
 //    self.isAccessibilityElement = YES;
+    MGLNativeNetworkManager.sharedManager.delegate = MGLNetworkIntegrationManager.sharedManager;
 
     // Ensure network configuration is set up
     [MGLNetworkConfiguration setNativeNetworkManagerDelegateToDefault];

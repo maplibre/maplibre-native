@@ -1,6 +1,6 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLNetworkIntegrationManager.h"
-#include <mbgl/storage/reachability.h>
+#import "MGLReachability.h"
 
 static NSString * const MGLStartTime = @"start_time";
 static NSString * const MGLResourceType = @"resource_type";

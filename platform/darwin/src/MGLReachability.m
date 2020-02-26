@@ -25,7 +25,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <mbgl/storage/reachability.h>
+#import "MGLReachability.h"
 
 #import <sys/socket.h>
 #import <netinet/in.h>

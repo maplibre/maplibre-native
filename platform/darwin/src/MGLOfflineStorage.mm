@@ -47,7 +47,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
 @property (nonatomic, strong, readwrite) NSMutableArray<MGLOfflinePack *> *packs;
 @property (nonatomic) std::shared_ptr<mbgl::DatabaseFileSource> mbglDatabaseFileSource;
-@property (nonatomic) std::shared_ptr<mbgl::OnlineFileSource> mbglOnlineFileSource;
+@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
 @property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
 @property (nonatomic) std::string mbglCachePath;
 @property (nonatomic, getter=isPaused) BOOL paused;
@@ -241,8 +241,8 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         options.withCachePath(_mbglCachePath)
                .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
         _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, options);
-        _mbglOnlineFileSource = std::static_pointer_cast<mbgl::OnlineFileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options));
-        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options));
+        _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
+        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
 
         // Observe for changes to the API base URL (and find out the current one).
         [[MGLAccountManager sharedManager] addObserver:self

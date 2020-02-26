@@ -10,7 +10,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLResourceNotFoundException
 
 @interface UIImage (MGLAdditions)
 
-- (nullable instancetype)initWithMGLStyleImage:(const mbgl::style::Image *)styleImage;
+- (nullable instancetype)initWithMGLStyleImage:(const mbgl::style::Image &)styleImage;
 
 - (nullable instancetype)initWithMGLPremultipliedImage:(const mbgl::PremultipliedImage&&)mbglImage scale:(CGFloat)scale;
 

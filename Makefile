@@ -56,7 +56,6 @@ endif
 .PHONY: default
 default: test
 
-BUILD_DEPS += ./vendor/mapbox-gl-native/Makefile
 BUILD_DEPS += ./vendor/mapbox-gl-native/CMakeLists.txt
 
 BUILD_DOCS ?= true
@@ -135,7 +134,7 @@ endif
 
 $(IOS_PROJ_PATH): $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEPS)
 	mkdir -p $(IOS_OUTPUT_PATH)
-	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native/next \
+	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native \
 		-DCMAKE_SYSTEM_NAME=iOS )
 
 $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettings.xcsettings
@@ -240,7 +239,7 @@ endif
 
 $(MACOS_PROJ_PATH): $(MACOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEPS)
 	mkdir -p $(MACOS_OUTPUT_PATH)
-	(cd $(MACOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native/next \
+	(cd $(MACOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../vendor/mapbox-gl-native \
 		-DCMAKE_SYSTEM_NAME=Darwin )
 
 $(MACOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/macos/WorkspaceSettings.xcsettings
