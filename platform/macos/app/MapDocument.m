@@ -1012,9 +1012,9 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
     MGLSource *streetsSource = [self.mapView.style sourceWithIdentifier:@"composite"];
     if (streetsSource) {
-    NSImage *image = [NSImage imageNamed:NSImageNameIChatTheaterTemplate];
-    [self.mapView.style setImage:image forName:NSImageNameIChatTheaterTemplate];
-
+        NSImage *image = [NSImage imageNamed:NSImageNameIChatTheaterTemplate];
+        [self.mapView.style setImage:image forName:NSImageNameIChatTheaterTemplate];
+        
         MGLSymbolStyleLayer *theaterLayer = [[MGLSymbolStyleLayer alloc] initWithIdentifier:@"theaters" source:streetsSource];
         theaterLayer.sourceLayerIdentifier = @"poi_label";
         theaterLayer.predicate = [NSPredicate predicateWithFormat:@"maki == 'theatre'"];
@@ -1026,6 +1026,23 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
             @20.0: [NSColor blackColor],
         }];
         [self.mapView.style addLayer:theaterLayer];
+        
+        NSImage *ohio = [NSImage imageNamed:@"ohio"];
+        [self.mapView.style setImage:ohio forName:@"ohio"];
+        
+        MGLSymbolStyleLayer *ohioLayer = [[MGLSymbolStyleLayer alloc] initWithIdentifier:@"ohio" source:streetsSource];
+        ohioLayer.sourceLayerIdentifier = @"road";
+        ohioLayer.predicate = [NSPredicate predicateWithFormat:@"shield = 'circle-white' and iso_3166_2 = 'US-OH'"];
+        ohioLayer.symbolPlacement = [NSExpression expressionForConstantValue:@"line"];
+        ohioLayer.text = [NSExpression expressionForKeyPath:@"ref"];
+        ohioLayer.textFontNames = [NSExpression expressionWithFormat:@"{'DIN Offc Pro Bold', 'Arial Unicode MS Bold'}"];
+        ohioLayer.textFontSize = [NSExpression expressionForConstantValue:@10];
+        ohioLayer.textRotationAlignment = [NSExpression expressionForConstantValue:@"viewport"];
+        ohioLayer.iconImageName = [NSExpression expressionForConstantValue:@"ohio"];
+        ohioLayer.iconTextFit = [NSExpression expressionForConstantValue:@"both"];
+        ohioLayer.iconTextFitPadding = [NSExpression expressionForConstantValue:[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 2, 1, 3)]];
+        ohioLayer.iconRotationAlignment = [NSExpression expressionForConstantValue:@"viewport"];
+        [self.mapView.style addLayer:ohioLayer];
     }
 
     NSURL *imageURL = [NSURL URLWithString:@"https://www.mapbox.com/mapbox-gl-js/assets/radar.gif"];

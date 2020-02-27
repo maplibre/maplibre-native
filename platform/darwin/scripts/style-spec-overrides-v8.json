@@ -57,6 +57,9 @@
         }
       }
     },
+    "icon-text-fit": {
+      "doc": "The directions in which the icon stretches to fit around the text. If the icon image is a resizable image, the resizable areas may be stretched, while the cap insets are always drawn at the original scale."
+    },
     "icon-text-fit-padding": {
       "doc": "Size of the additional area added to dimensions determined by `icon-text-fit`."
     },

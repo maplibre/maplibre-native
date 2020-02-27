@@ -2,6 +2,10 @@
 
 #include <mbgl/util/image+MGLAdditions.hpp>
 
+BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
+    return edgeInsets.left == 0 && edgeInsets.top == 0 && edgeInsets.right == 0 && edgeInsets.bottom == 0;
+}
+
 @implementation NSImage (MGLAdditions)
 
 - (nullable instancetype)initWithMGLPremultipliedImage:(mbgl::PremultipliedImage&&)src {
@@ -35,10 +39,31 @@
 - (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
     mbgl::PremultipliedImage cPremultipliedImage = self.mgl_premultipliedImage;
     auto imageWidth = cPremultipliedImage.size.width;
+    
+    float scale = static_cast<float>(imageWidth) / self.size.width;
+    mbgl::style::ImageStretches stretchX = {{
+        self.capInsets.left * scale, (self.size.width - self.capInsets.right) * scale,
+    }};
+    mbgl::style::ImageStretches stretchY = {{
+        self.capInsets.top * scale, (self.size.height - self.capInsets.bottom) * scale,
+    }};
+    
+    mbgl::optional<mbgl::style::ImageContent> imageContent;
+    if (!MGLEdgeInsetsIsZero(self.capInsets)) {
+        imageContent = (mbgl::style::ImageContent){
+            .left = static_cast<float>(self.capInsets.left * scale),
+            .top = static_cast<float>(self.capInsets.top * scale),
+            .right = static_cast<float>((self.size.width - self.capInsets.right) * scale),
+            .bottom = static_cast<float>((self.size.height - self.capInsets.bottom) * scale),
+        };
+    }
+    
     return std::make_unique<mbgl::style::Image>([identifier UTF8String],
                                                 std::move(cPremultipliedImage),
-                                                (float)(imageWidth / self.size.width),
-                                                [self isTemplate]);
+                                                scale,
+                                                [self isTemplate],
+                                                stretchX, stretchY,
+                                                imageContent);
 }
 
 - (mbgl::PremultipliedImage)mgl_premultipliedImage {

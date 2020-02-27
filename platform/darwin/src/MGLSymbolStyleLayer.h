@@ -102,7 +102,9 @@ typedef NS_ENUM(NSUInteger, MGLIconRotationAlignment) {
 };
 
 /**
- Scales the icon to fit around the associated text.
+ The directions in which the icon stretches to fit around the text. If the icon
+ image is a resizable image, the resizable areas may be stretched, while the cap
+ insets are always drawn at the original scale.
 
  Values of this type are used in the `MGLSymbolStyleLayer.iconTextFit`
  property.
@@ -776,7 +778,9 @@ MGL_EXPORT
 @property (nonatomic, null_resettable) NSExpression *iconSize __attribute__((unavailable("Use iconScale instead.")));
 
 /**
- Scales the icon to fit around the associated text.
+ The directions in which the icon stretches to fit around the text. If the icon
+ image is a resizable image, the resizable areas may be stretched, while the cap
+ insets are always drawn at the original scale.
  
  The default value of this property is an expression that evaluates to `none`.
  Set this property to `nil` to reset it to the default value.

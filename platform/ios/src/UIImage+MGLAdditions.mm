@@ -5,6 +5,10 @@
 
 const MGLExceptionName MGLResourceNotFoundException = @"MGLResourceNotFoundException";
 
+BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
+    return edgeInsets.left == 0 && edgeInsets.top == 0 && edgeInsets.right == 0 && edgeInsets.bottom == 0;
+}
+
 @implementation UIImage (MGLAdditions)
 
 - (nullable instancetype)initWithMGLStyleImage:(const mbgl::style::Image &)styleImage
@@ -39,10 +43,30 @@ const MGLExceptionName MGLResourceNotFoundException = @"MGLResourceNotFoundExcep
 }
 
 - (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
+    mbgl::style::ImageStretches stretchX = {{
+        self.capInsets.left / self.scale, (self.size.width - self.capInsets.right) / self.scale,
+    }};
+    mbgl::style::ImageStretches stretchY = {{
+        self.capInsets.top / self.scale, (self.size.height - self.capInsets.bottom) / self.scale,
+    }};
+    
+    mbgl::optional<mbgl::style::ImageContent> imageContent;
+    if (!MGLEdgeInsetsIsZero(self.capInsets)) {
+        imageContent = (mbgl::style::ImageContent){
+            .left = static_cast<float>(self.capInsets.left * self.scale),
+            .top = static_cast<float>(self.capInsets.top * self.scale),
+            .right = static_cast<float>((self.size.width - self.capInsets.right) * self.scale),
+            .bottom = static_cast<float>((self.size.height - self.capInsets.bottom) * self.scale),
+        };
+    }
+    
     BOOL isTemplate = self.renderingMode == UIImageRenderingModeAlwaysTemplate;
     return std::make_unique<mbgl::style::Image>([identifier UTF8String],
                                                 self.mgl_premultipliedImage,
-                                                float(self.scale), isTemplate);
+                                                static_cast<float>(self.scale),
+                                                isTemplate,
+                                                stretchX, stretchY,
+                                                imageContent);
 }
 
 - (mbgl::PremultipliedImage)mgl_premultipliedImage {
