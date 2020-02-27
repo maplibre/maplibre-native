@@ -4,8 +4,20 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ## master
 
-* Added the `MGLLineStyleLayer.lineSortKey` and `MGLFillStyleLayer.fillSortKey` properties. ([#179](https://github.com/mapbox/mapbox-gl-native-ios/pull/179))
+### Styles and rendering
+
+* Added the `in` expression function for testing whether a value is included in an array expression or whether a string is a substring of another string. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. ([#16162](https://github.com/mapbox/mapbox-gl-native/pull/16162))
+* Added the `within` expression function for testing whether the evaluated feature lies within the given GeoJSON object. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. ([#16157](https://github.com/mapbox/mapbox-gl-native/pull/16157))
+* Added the `MGLLineStyleLayer.lineSortKey` and `MGLFillStyleLayer.fillSortKey` properties. ([#179](https://github.com/mapbox/mapbox-gl-native-ios/pull/179), [#16194](https://github.com/mapbox/mapbox-gl-native/pull/16194), [#16220](https://github.com/mapbox/mapbox-gl-native/pull/16220))
 * The `-[MGLStyle localizeLabelsIntoLocale:]` and `-[NSExpression mgl_expressionLocalizedIntoLocale:]` methods can now localize text into Traditional Chinese and Vietnamese. ([#173](https://github.com/mapbox/mapbox-gl-native-ios/pull/173))
+* Fixed an issue where an `MGLSymbolStyleLayer.lineDashPattern` value of `{1, 0}` resulted in hairline gaps. ([#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202))
+* Improved the performance of loading a style that has many style images. ([#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187))
+
+### Other changes
+
+* Fixed issues where an offline pack would stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
+* When an offline pack encounters an HTTP 404 error, the `MGLOfflinePackUserInfoKeyError` user info key of the `MGLOfflinePackErrorNotification` now indicates the resource that could not be downloaded. ([#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
+* Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))
 
 ## 5.7.0 - February 13, 2020
 
@@ -15,6 +27,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ### Other changes
 * Added new property `MGLMapView.panScrollingMode`, which allows you to limit the horizontal or vertical direction a user may pan on the map view. ([#108](https://github.com/mapbox/mapbox-gl-native-ios/pull/108))
+* Added the `image` expression function for converting an image name into a style image. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. Image expressions are compatible with the `mgl_attributed:` expression function and `MGLAttributedExpression` classes for embedding icons inline in text labels. ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877), [#15937](https://github.com/mapbox/mapbox-gl-native/pull/15937))
 
 ## 5.6.1 - January 9, 2020
 * Fixed a crash that could occur when `MGLShapeSource` destroys its underlying data. ([#16106](https://github.com/mapbox/mapbox-gl-native/pull/16106))
