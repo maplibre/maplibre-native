@@ -23,6 +23,10 @@
         <attr name="mapbox_cameraZoomMax" format="float"/>
         <attr name="mapbox_cameraZoomMin" format="float"/>
 
+        <!--Pitch-->
+        <attr name="mapbox_cameraPitchMax" format="float"/>
+        <attr name="mapbox_cameraPitchMin" format="float"/>
+
         <!--Gestures-->
         <attr name="mapbox_uiZoomGestures" format="boolean"/>
         <attr name="mapbox_uiScrollGestures" format="boolean"/>

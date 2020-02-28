@@ -366,6 +366,66 @@ public final class MapboxMap {
   }
 
   //
+  // MinPitch
+  //
+
+  /**
+   * <p>
+   * Sets the minimum Pitch the map can be displayed at.
+   * </p>
+   *
+   * <p>
+   * The default and lower bound for minPitch Pitch is 0.
+   * </p>
+   * @param minPitch The new minimum Pitch.
+   */
+  public void setMinPitchPreference(
+    @FloatRange(from = MapboxConstants.MINIMUM_PITCH, to = MapboxConstants.MAXIMUM_PITCH) double minPitch) {
+    transform.setMinPitch(minPitch);
+  }
+
+  /**
+   * <p>
+   * Gets the minimum Pitch the map can be displayed at.
+   * </p>
+   *
+   * @return The minimum Pitch.
+   */
+  public double getMinPitch() {
+    return transform.getMinPitch();
+  }
+
+  //
+  // MaxPitch
+  //
+
+  /**
+   * <p>
+   * Sets the maximum Pitch the map can be displayed at.
+   * </p>
+   * <p>
+   * The default and upper bound for maximum Pitch is 60.
+   * </p>
+   *
+   * @param maxPitch The new maximum Pitch.
+   */
+  public void setMaxPitchPreference(@FloatRange(from = MapboxConstants.MINIMUM_PITCH,
+    to = MapboxConstants.MAXIMUM_PITCH) double maxPitch) {
+    transform.setMaxPitch(maxPitch);
+  }
+
+  /**
+   * <p>
+   * Gets the maximum Pitch the map can be displayed at.
+   * </p>
+   *
+   * @return The maximum Pitch.
+   */
+  public double getMaxPitch() {
+    return transform.getMaxPitch();
+  }
+
+  //
   // UiSettings
   //
 

@@ -61,6 +61,8 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     }
     setMinZoom(options.getMinZoomPreference());
     setMaxZoom(options.getMaxZoomPreference());
+    setMinPitch(options.getMinPitchPreference());
+    setMaxPitch(options.getMaxPitchPreference());
   }
 
   //
@@ -337,5 +339,29 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
 
   double getMaxZoom() {
     return nativeMap.getMaxZoom();
+  }
+
+  void setMinPitch(double minPitch) {
+    if ((minPitch < MapboxConstants.MINIMUM_PITCH) || (minPitch > MapboxConstants.MAXIMUM_PITCH)) {
+      Logger.e(TAG, String.format("Not setting minPitchPreference, value is in unsupported range: %s", minPitch));
+      return;
+    }
+    nativeMap.setMinPitch(minPitch);
+  }
+
+  double getMinPitch() {
+    return nativeMap.getMinPitch();
+  }
+
+  void setMaxPitch(double maxPitch) {
+    if ((maxPitch < MapboxConstants.MINIMUM_PITCH) || (maxPitch > MapboxConstants.MAXIMUM_PITCH)) {
+      Logger.e(TAG, String.format("Not setting maxPitchPreference, value is in unsupported range: %s", maxPitch));
+      return;
+    }
+    nativeMap.setMaxPitch(maxPitch);
+  }
+
+  double getMaxPitch() {
+    return nativeMap.getMaxPitch();
   }
 }

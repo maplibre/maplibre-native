@@ -268,6 +268,24 @@ class NativeMapViewTest : AppCenter() {
         assertEquals("Max zoom should match", expected, actual)
     }
 
+  @Test
+  @UiThreadTest
+  fun testSetMinPitch() {
+    val expected = 60.0
+    nativeMapView.minPitch = expected
+    val actual = nativeMapView.minPitch
+    assertEquals("Min Pitch should match", expected, actual, 0.01)
+  }
+
+  @Test
+  @UiThreadTest
+  fun testSetMaxPitch() {
+    val expected = 60.0
+    nativeMapView.maxPitch = expected
+    val actual = nativeMapView.maxPitch
+    assertEquals("Max Pitch should match", expected, actual, 0.01)
+  }
+
     @Test
     @UiThreadTest
     fun testGetProjectedMetersAtLatitude() {

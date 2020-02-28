@@ -5,10 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Handler;
-import androidx.annotation.IntRange;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.mapbox.geojson.Feature;
@@ -39,6 +35,11 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.IntRange;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 // Class that wraps the native methods for convenience
 final class NativeMapView implements NativeMap {
@@ -368,6 +369,38 @@ final class NativeMapView implements NativeMap {
       return 0;
     }
     return nativeGetMaxZoom();
+  }
+
+  @Override
+  public void setMinPitch(double pitch) {
+    if (checkState("setMinPitch")) {
+      return;
+    }
+    nativeSetMinPitch(pitch);
+  }
+
+  @Override
+  public double getMinPitch() {
+    if (checkState("getMinPitch")) {
+      return 0;
+    }
+    return nativeGetMinPitch();
+  }
+
+  @Override
+  public void setMaxPitch(double pitch) {
+    if (checkState("setMaxPitch")) {
+      return;
+    }
+    nativeSetMaxPitch(pitch);
+  }
+
+  @Override
+  public double getMaxPitch() {
+    if (checkState("getMaxPitch")) {
+      return 0;
+    }
+    return nativeGetMaxPitch();
   }
 
   @Override
@@ -1204,6 +1237,18 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native double nativeGetMaxZoom();
+
+  @Keep
+  private native void nativeSetMinPitch(double pitch);
+
+  @Keep
+  private native double nativeGetMinPitch();
+
+  @Keep
+  private native void nativeSetMaxPitch(double pitch);
+
+  @Keep
+  private native double nativeGetMaxPitch();
 
   @Keep
   private native void nativeRotateBy(double sx, double sy, double ex, double ey, long duration);

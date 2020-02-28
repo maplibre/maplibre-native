@@ -64,6 +64,8 @@ public class MapboxMapOptions implements Parcelable {
 
   private double minZoom = MapboxConstants.MINIMUM_ZOOM;
   private double maxZoom = MapboxConstants.MAXIMUM_ZOOM;
+  private double minPitch = MapboxConstants.MINIMUM_PITCH;
+  private double maxPitch = MapboxConstants.MAXIMUM_PITCH;
 
   private boolean rotateGesturesEnabled = true;
   private boolean scrollGesturesEnabled = true;
@@ -127,6 +129,8 @@ public class MapboxMapOptions implements Parcelable {
 
     minZoom = in.readDouble();
     maxZoom = in.readDouble();
+    minPitch = in.readDouble();
+    maxPitch = in.readDouble();
 
     rotateGesturesEnabled = in.readByte() != 0;
     scrollGesturesEnabled = in.readByte() != 0;
@@ -210,6 +214,10 @@ public class MapboxMapOptions implements Parcelable {
         MapboxConstants.MAXIMUM_ZOOM));
       mapboxMapOptions.minZoomPreference(typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraZoomMin,
         MapboxConstants.MINIMUM_ZOOM));
+      mapboxMapOptions.maxPitchPreference(typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraPitchMax,
+        MapboxConstants.MAXIMUM_PITCH));
+      mapboxMapOptions.minPitchPreference(typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraPitchMin,
+        MapboxConstants.MINIMUM_PITCH));
 
       mapboxMapOptions.compassEnabled(typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_uiCompass, true));
       mapboxMapOptions.compassGravity(typedArray.getInt(R.styleable.mapbox_MapView_mapbox_uiCompassGravity,
@@ -375,6 +383,31 @@ public class MapboxMapOptions implements Parcelable {
   @NonNull
   public MapboxMapOptions maxZoomPreference(double maxZoom) {
     this.maxZoom = maxZoom;
+    return this;
+  }
+
+
+  /**
+   * Specifies the used minimum pitch for a map view.
+   *
+   * @param minPitch Pitch to be used
+   * @return This
+   */
+  @NonNull
+  public MapboxMapOptions minPitchPreference(double minPitch) {
+    this.minPitch = minPitch;
+    return this;
+  }
+
+  /**
+   * Specifies the used maximum pitch for a map view.
+   *
+   * @param maxPitch Pitch to be used
+   * @return This
+   */
+  @NonNull
+  public MapboxMapOptions maxPitchPreference(double maxPitch) {
+    this.maxPitch = maxPitch;
     return this;
   }
 
@@ -855,6 +888,24 @@ public class MapboxMapOptions implements Parcelable {
   }
 
   /**
+   * Get the current configured min pitch for a map view.
+   *
+   * @return Mininum pitch to be used.
+   */
+  public double getMinPitchPreference() {
+    return minPitch;
+  }
+
+  /**
+   * Get the current configured maximum pitch for a map view.
+   *
+   * @return Maximum pitch to be used.
+   */
+  public double getMaxPitchPreference() {
+    return maxPitch;
+  }
+
+  /**
    * Get the current configured visibility state for mapbox_compass_icon for a map view.
    *
    * @return Visibility state of the mapbox_compass_icon
@@ -1132,6 +1183,8 @@ public class MapboxMapOptions implements Parcelable {
 
     dest.writeDouble(minZoom);
     dest.writeDouble(maxZoom);
+    dest.writeDouble(minPitch);
+    dest.writeDouble(maxPitch);
 
     dest.writeByte((byte) (rotateGesturesEnabled ? 1 : 0));
     dest.writeByte((byte) (scrollGesturesEnabled ? 1 : 0));
@@ -1202,6 +1255,12 @@ public class MapboxMapOptions implements Parcelable {
       return false;
     }
     if (Double.compare(options.maxZoom, maxZoom) != 0) {
+      return false;
+    }
+    if (Double.compare(options.minPitch, minPitch) != 0) {
+      return false;
+    }
+    if (Double.compare(options.maxPitch, maxPitch) != 0) {
       return false;
     }
     if (rotateGesturesEnabled != options.rotateGesturesEnabled) {
@@ -1291,6 +1350,10 @@ public class MapboxMapOptions implements Parcelable {
     temp = Double.doubleToLongBits(minZoom);
     result = 31 * result + (int) (temp ^ (temp >>> 32));
     temp = Double.doubleToLongBits(maxZoom);
+    result = 31 * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(minPitch);
+    result = 31 * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(maxPitch);
     result = 31 * result + (int) (temp ^ (temp >>> 32));
     result = 31 * result + (rotateGesturesEnabled ? 1 : 0);
     result = 31 * result + (scrollGesturesEnabled ? 1 : 0);

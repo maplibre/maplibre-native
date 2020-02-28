@@ -30,6 +30,8 @@ class TransformTest {
     every { nativeMapView.flyTo(any(), any(), any(), any(), any(), any()) } answers {}
     every { nativeMapView.minZoom = any() } answers {}
     every { nativeMapView.maxZoom = any() } answers {}
+    every { nativeMapView.minPitch = any() } answers {}
+    every { nativeMapView.maxPitch = any() } answers {}
   }
 
   @Test
@@ -155,6 +157,18 @@ class TransformTest {
   fun testMaxZoom() {
     transform.maxZoom = 10.0
     verify { nativeMapView.maxZoom = 10.0 }
+  }
+
+  @Test
+  fun testMinPitch() {
+    transform.minPitch = 10.0
+    verify { nativeMapView.minPitch = 10.0 }
+  }
+
+  @Test
+  fun testMaxPitch() {
+    transform.maxPitch = 10.0
+    verify { nativeMapView.maxPitch = 10.0 }
   }
 
   @Test

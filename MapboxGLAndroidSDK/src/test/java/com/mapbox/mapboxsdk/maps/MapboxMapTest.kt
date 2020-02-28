@@ -114,6 +114,18 @@ class MapboxMapTest {
   }
 
   @Test
+  fun testMinPitch() {
+    mapboxMap.setMinPitchPreference(10.0)
+    verify { transform.minPitch = 10.0 }
+  }
+
+  @Test
+  fun testMaxPitch() {
+    mapboxMap.setMaxPitchPreference(10.0)
+    verify { transform.maxPitch = 10.0 }
+  }
+
+  @Test
   fun testFpsListener() {
     val fpsChangedListener = mockk<MapboxMap.OnFpsChangedListener>()
     mapboxMap.onFpsChangedListener = fpsChangedListener

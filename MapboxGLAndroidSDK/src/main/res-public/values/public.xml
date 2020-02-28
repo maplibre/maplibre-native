@@ -28,6 +28,10 @@
     <public name="mapbox_cameraZoomMax" type="attr" />
     <public name="mapbox_cameraZoomMin" type="attr" />
 
+    <!--Pitch-->
+    <public name="mapbox_cameraPitchMax" type="attr" />
+    <public name="mapbox_cameraPitchMin" type="attr" />
+
     <!--Gestures-->
     <public name="mapbox_uiZoomGestures" type="attr" />
     <public name="mapbox_uiScrollGestures" type="attr" />
