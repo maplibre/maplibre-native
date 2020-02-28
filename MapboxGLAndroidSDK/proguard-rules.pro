@@ -27,6 +27,9 @@
 -keep class com.mapbox.geojson.** { *; }
 -dontwarn com.google.auto.value.**
 
+# config for telemetry events
+-keep class com.mapbox.mapboxsdk.module.telemetry.**
+
 # config for additional notes
 -dontnote org.robolectric.Robolectric
 -dontnote libcore.io.Memory
