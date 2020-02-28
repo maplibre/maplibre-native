@@ -340,6 +340,7 @@ In style specification | Method, function, or predicate type | Format string syn
 `at`                   | `objectFrom:withIndex:` | `array[n]`
 `get`                  | `+[NSExpression expressionForKeyPath:]` | Key path
 `has`                  | `mgl_does:have:` | `mgl_does:have:(self, 'key')`
+`in`                   | `NSInPredicateOperatorType` | `needle IN haystack` or `haystack CONTAINS needle` or `ANY haystack = needle`
 `length`               | `count:` | `count({1, 2, 2, 3, 4, 7, 9})`
 `!`                    | `NSNotPredicateType` | `NOT (p0 OR … OR pn)`
 `!=`                   | `NSNotEqualToPredicateOperatorType` | `key != value`

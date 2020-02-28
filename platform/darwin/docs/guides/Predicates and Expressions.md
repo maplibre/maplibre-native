@@ -55,6 +55,13 @@ The following aggregate operators are supported:
 `NSInPredicateOperatorType`       | `key IN { 'iOS', 'macOS', 'tvOS', 'watchOS' }`
 `NSContainsPredicateOperatorType` | `{ 'iOS', 'macOS', 'tvOS', 'watchOS' } CONTAINS key`
 
+The following combinations of comparison operators and modifiers are supported:
+
+`NSComparisonPredicateModifier` | `NSPredicateOperatorType`           | Format string syntax
+--------------------------------|-------------------------------------|---------------------
+`NSAllPredicateModifier`        | `NSNotEqualToPredicateOperatorType` | `ALL haystack != needle`
+`NSAnyPredicateModifier`        | `NSEqualToPredicateOperatorType`    | `ANY haystack = needle`<br />`SOME haystack = needle`
+
 The following comparison predicate options are supported for comparison and
 aggregate operators that are used in the predicate:
 
@@ -65,7 +72,9 @@ aggregate operators that are used in the predicate:
 
 Other comparison predicate options are unsupported, namely `l`
 (for locale sensitivity) and `n` (for normalization). A comparison is
-locale-sensitive as long as it is case- or diacritic-insensitive.
+locale-sensitive as long as it is case- or diacritic-insensitive. Comparison
+predicate options are not supported in conjunction with comparison modifiers
+like `ALL` and `ANY`.
 
 ### Operands
 
