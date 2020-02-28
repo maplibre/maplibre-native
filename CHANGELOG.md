@@ -2,6 +2,18 @@
 
 Mapbox welcomes participation and contributions from everyone.  If you'd like to do so please see the [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) first to get started.
 
+## 9.1.0-alpha.1 - February 28, 2020
+[Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0...android-v9.1.0-alpha.1) since [Mapbox Maps SDK for Android v9.0.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0):
+### Features
+ - Introduce ability to set prefetching delta for sources, allows to control over tile prefetching on a per source basis [#184](https://github.com/mapbox/mapbox-gl-native-android/pull/184)
+ - Introduce support for `in` expression, determines whether an item exists in an array or a substring exists in a string. [#171](https://github.com/mapbox/mapbox-gl-native-android/pull/171)
+ - Introduce option to pass intermediate points for smooth location component animation [#166](https://github.com/mapbox/mapbox-gl-native-android/pull/166)
+
+### Bug fixes
+ - Fix proguard configuration to prevent obfuscation of telemetry event classes [#195](https://github.com/mapbox/mapbox-gl-native-android/pull/195)
+ - Fix offline region download freezing [#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230)
+ - Update mapbox-events-android to v4.7.3 [#201](https://github.com/mapbox/mapbox-gl-native-android/pull/201)
+
 ## 9.0.0 - February 13, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0-beta.1...android-v9.0.0) since [Mapbox Maps SDK for Android v9.0.0-beta.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0-beta.1):
 ### Features
