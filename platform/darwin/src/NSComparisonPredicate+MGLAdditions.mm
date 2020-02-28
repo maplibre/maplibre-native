@@ -79,6 +79,52 @@
 @implementation NSComparisonPredicate (MGLExpressionAdditions)
 
 - (id)mgl_jsonExpressionObject {
+    switch (self.comparisonPredicateModifier) {
+        case NSDirectPredicateModifier:
+            break;
+            
+        case NSAllPredicateModifier:
+            // “ALL x != y” is logically equivalent to “NOT y IN x”.
+            if (self.predicateOperatorType == NSNotEqualToPredicateOperatorType) {
+                // https://github.com/mapbox/mapbox-gl-js/issues/9339
+                if (self.options) {
+                    [NSException raise:NSInvalidArgumentException format:@"NSComparisonPredicateOptions not supported for “ALL … !=” comparisons."];
+                }
+                
+                NSPredicate *directPredicate = [NSComparisonPredicate predicateWithLeftExpression:self.rightExpression
+                                                                                  rightExpression:self.leftExpression
+                                                                                         modifier:NSDirectPredicateModifier
+                                                                                             type:NSInPredicateOperatorType
+                                                                                          options:self.options];
+                NSPredicate *invertedPredicate = [NSCompoundPredicate notPredicateWithSubpredicate:directPredicate];
+                return invertedPredicate.mgl_jsonExpressionObject;
+            } else {
+                [NSException raise:NSInvalidArgumentException format:@"“ALL” is only supported for the “!=” operator."];
+            }
+            
+        case NSAnyPredicateModifier:
+            // “ANY x = y” is logically equivalent to “y IN x”.
+            if (self.predicateOperatorType == NSEqualToPredicateOperatorType) {
+                // https://github.com/mapbox/mapbox-gl-js/issues/9339
+                if (self.options) {
+                    [NSException raise:NSInvalidArgumentException format:@"NSComparisonPredicateOptions not supported for “ANY … =” comparisons."];
+                }
+                
+                NSPredicate *directPredicate = [NSComparisonPredicate predicateWithLeftExpression:self.rightExpression
+                                                                                  rightExpression:self.leftExpression
+                                                                                         modifier:NSDirectPredicateModifier
+                                                                                             type:NSInPredicateOperatorType
+                                                                                          options:self.options];
+                return directPredicate.mgl_jsonExpressionObject;
+            } else {
+                [NSException raise:NSInvalidArgumentException format:@"“ANY” or “SOME” is only supported for the “=” operator."];
+            }
+            
+        default:
+            [NSException raise:NSInvalidArgumentException
+                        format:@"NSComparisonPredicateModifier:%lu is not supported.", (unsigned long)self.comparisonPredicateModifier];
+    }
+    
     NSString *op;
     switch (self.predicateOperatorType) {
         case NSLessThanPredicateOperatorType:
