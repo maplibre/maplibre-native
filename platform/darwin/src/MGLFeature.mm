@@ -352,19 +352,20 @@ template <typename T>
 class GeometryEvaluator {
 private:
     const mbgl::PropertyMap *shared_properties;
+    const bool is_in_feature;
     
 public:
-    GeometryEvaluator(const mbgl::PropertyMap *properties = nullptr):
-        shared_properties(properties)
+    GeometryEvaluator(const mbgl::PropertyMap *properties = nullptr, const bool isInFeature = false):
+        shared_properties(properties),
+        is_in_feature(isInFeature)
     {}
     
-    MGLShape <MGLFeature> * operator()(const mbgl::EmptyGeometry &) const {
-        MGLEmptyFeature *feature = [[MGLEmptyFeature alloc] init];
-        return feature;
+    MGLShape * operator()(const mbgl::EmptyGeometry &) const {
+        return is_in_feature ? [[MGLEmptyFeature alloc] init] : [[MGLShape alloc] init];
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::Point<T> &geometry) const {
-        Class pointFeatureClass = [MGLPointFeature class];
+    MGLShape * operator()(const mbgl::Point<T> &geometry) const {
+        Class shapeClass = is_in_feature ? [MGLPointFeature class] : [MGLPointAnnotation class];
         
         // If we're dealing with a cluster, we should change the class type.
         // This could be generic and build the subclass at runtime if it turns
@@ -375,32 +376,34 @@ public:
                 auto clusterValue = clusterIt->second;
                 if (clusterValue.template is<bool>()) {
                     if (clusterValue.template get<bool>()) {
-                        pointFeatureClass = [MGLPointFeatureCluster class];
+                        shapeClass = [MGLPointFeatureCluster class];
                     }
                 }
             }
         }
         
-        MGLPointFeature *feature = [[pointFeatureClass alloc] init];
-        feature.coordinate = toLocationCoordinate2D(geometry);
-        return feature;
+        MGLPointAnnotation *shape = [[shapeClass alloc] init];
+        shape.coordinate = toLocationCoordinate2D(geometry);
+        return shape;
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::LineString<T> &geometry) const {
+    MGLShape * operator()(const mbgl::LineString<T> &geometry) const {
         std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(geometry);
-        return [MGLPolylineFeature polylineWithCoordinates:&coordinates[0] count:coordinates.size()];
+        Class shapeClass = is_in_feature ? [MGLPolylineFeature class] : [MGLPolyline class];
+        return [shapeClass polylineWithCoordinates:&coordinates[0] count:coordinates.size()];
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::Polygon<T> &geometry) const {
-        return toShape<MGLPolygonFeature>(geometry);
+    MGLShape * operator()(const mbgl::Polygon<T> &geometry) const {
+        return toShape<MGLPolygon, MGLPolygonFeature>(geometry, is_in_feature);
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::MultiPoint<T> &geometry) const {
+    MGLShape * operator()(const mbgl::MultiPoint<T> &geometry) const {
         std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(geometry);
-        return [[MGLPointCollectionFeature alloc] initWithCoordinates:&coordinates[0] count:coordinates.size()];
+        Class shapeClass = is_in_feature ? [MGLPointCollectionFeature class] : [MGLPointCollection class];
+        return [[shapeClass alloc] initWithCoordinates:&coordinates[0] count:coordinates.size()];
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::MultiLineString<T> &geometry) const {
+    MGLShape * operator()(const mbgl::MultiLineString<T> &geometry) const {
         NSMutableArray *polylines = [NSMutableArray arrayWithCapacity:geometry.size()];
         for (auto &lineString : geometry) {
             std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(lineString);
@@ -408,26 +411,29 @@ public:
             [polylines addObject:polyline];
         }
 
-        return [MGLMultiPolylineFeature multiPolylineWithPolylines:polylines];
+        Class shapeClass = is_in_feature ? [MGLMultiPolylineFeature class] : [MGLMultiPolyline class];
+        return [shapeClass multiPolylineWithPolylines:polylines];
     }
 
-    MGLShape <MGLFeature> * operator()(const mbgl::MultiPolygon<T> &geometry) const {
+    MGLShape * operator()(const mbgl::MultiPolygon<T> &geometry) const {
         NSMutableArray *polygons = [NSMutableArray arrayWithCapacity:geometry.size()];
         for (auto &polygon : geometry) {
-            [polygons addObject:toShape(polygon)];
+            [polygons addObject:toShape(polygon, false)];
         }
 
-        return [MGLMultiPolygonFeature multiPolygonWithPolygons:polygons];
+        Class shapeClass = is_in_feature ? [MGLMultiPolygonFeature class] : [MGLMultiPolygon class];
+        return [shapeClass multiPolygonWithPolygons:polygons];
     }
 
-    MGLShape <MGLFeature> * operator()(const mapbox::geometry::geometry_collection<T> &collection) const {
+    MGLShape * operator()(const mapbox::geometry::geometry_collection<T> &collection) const {
         NSMutableArray *shapes = [NSMutableArray arrayWithCapacity:collection.size()];
         for (auto &geometry : collection) {
             // This is very much like the transformation that happens in MGLFeaturesFromMBGLFeatures(), but these are raw geometries with no associated feature IDs or attributes.
-            MGLShape <MGLFeature> *shape = mapbox::geometry::geometry<T>::visit(geometry, *this);
+            MGLShape *shape = mapbox::geometry::geometry<T>::visit(geometry, *this);
             [shapes addObject:shape];
         }
-        return [MGLShapeCollectionFeature shapeCollectionWithShapes:shapes];
+        Class shapeClass = is_in_feature ? [MGLShapeCollectionFeature class] : [MGLShapeCollection class];
+        return [shapeClass shapeCollectionWithShapes:shapes];
     }
 
 private:
@@ -442,8 +448,8 @@ private:
         return coordinates;
     }
 
-    template<typename U = MGLPolygon>
-    static U *toShape(const mbgl::Polygon<T> &geometry) {
+    template<typename U = MGLPolygon, typename V = MGLPolygonFeature>
+    static U *toShape(const mbgl::Polygon<T> &geometry, const bool isInFeature) {
         auto &linearRing = geometry.front();
         std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(linearRing);
         NSMutableArray *innerPolygons;
@@ -457,16 +463,17 @@ private:
             }
         }
 
-        return [U polygonWithCoordinates:&coordinates[0] count:coordinates.size() interiorPolygons:innerPolygons];
+        Class shapeClass = isInFeature ? [V class] : [U class];
+        return [shapeClass polygonWithCoordinates:&coordinates[0] count:coordinates.size() interiorPolygons:innerPolygons];
     }
 };
 
 template <typename T>
 class GeoJSONEvaluator {
 public:
-    MGLShape <MGLFeature> * operator()(const mbgl::Geometry<T> &geometry) const {
+    MGLShape * operator()(const mbgl::Geometry<T> &geometry) const {
         GeometryEvaluator<T> evaluator;
-        MGLShape <MGLFeature> *shape = mapbox::geometry::geometry<T>::visit(geometry, evaluator);
+        MGLShape *shape = mapbox::geometry::geometry<T>::visit(geometry, evaluator);
         return shape;
     }
 
@@ -507,8 +514,8 @@ id <MGLFeature> MGLFeatureFromMBGLFeature(const mbgl::GeoJSONFeature &feature) {
         ValueEvaluator evaluator;
         attributes[@(pair.first.c_str())] = mbgl::Value::visit(value, evaluator);
     }
-    GeometryEvaluator<double> evaluator(&feature.properties);
-    MGLShape <MGLFeature> *shape = mapbox::geometry::geometry<double>::visit(feature.geometry, evaluator);
+    GeometryEvaluator<double> evaluator(&feature.properties, true);
+    MGLShape <MGLFeature> *shape = (MGLShape <MGLFeature> *)mapbox::geometry::geometry<double>::visit(feature.geometry, evaluator);
     if (!feature.id.is<mapbox::feature::null_value_t>()) {
         shape.identifier = mbgl::FeatureIdentifier::visit(feature.id, ValueEvaluator());
     }
