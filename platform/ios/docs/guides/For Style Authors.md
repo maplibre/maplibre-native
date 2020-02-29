@@ -354,6 +354,7 @@ In style specification | Method, function, or predicate type | Format string syn
 `case`                 | `+[NSExpression expressionForConditional:trueExpression:falseExpression:]` or `MGL_IF` or `+[NSExpression mgl_expressionForConditional:trueExpression:falseExpresssion:]` | `TERNARY(1 = 2, YES, NO)` or `MGL_IF(1 = 2, YES, 2 = 2, YES, NO)`
 `coalesce`             | `mgl_coalesce:` | `mgl_coalesce({x, y, z})`
 `match`                | `MGL_MATCH` or `+[NSExpression mgl_expressionForMatchingExpression:inDictionary:defaultExpression:]` | `MGL_MATCH(x, 0, 'zero match', 1, 'one match', 'two match', 'default')`
+`within`               | `NSInPredicateOperatorType` | `SELF IN %@` or `%@ CONTAINS SELF` where `%@` is an `MGLShape`
 `interpolate`          | `mgl_interpolate:withCurveType:parameters:stops:` or `+[NSExpression mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]` |
 `step`                 | `mgl_step:from:stops:` or `+[NSExpression mgl_expressionForSteppingExpression:fromExpression:stops:]` |
 `let`                  | `mgl_expressionWithContext:` | `MGL_LET('ios', 11, 'macos', 10.13, $ios + $macos)`

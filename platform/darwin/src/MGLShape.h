@@ -29,6 +29,12 @@ NS_ASSUME_NONNULL_BEGIN
  shapes collectively using a concrete instance of `MGLVectorStyleLayer`.
  Alternatively, you can add some kinds of shapes directly to a map view as
  annotations or overlays.
+ 
+ You can filter the features in a `MGLVectorStyleLayer` or vary their layout or
+ paint attributes based on the features’ geographies. Pass an `MGLShape` into an
+ `NSPredicate` with the format `SELF IN %@` or `%@ CONTAINS SELF` and set the
+ `MGLVectorStyleLayer.predicate` property to that predicate, or set a layout or
+ paint attribute to a similarly formatted `NSExpression`.
  */
 MGL_EXPORT
 @interface MGLShape : NSObject <MGLAnnotation, NSSecureCoding>

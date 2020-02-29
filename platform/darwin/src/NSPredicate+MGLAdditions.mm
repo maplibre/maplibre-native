@@ -155,6 +155,14 @@ static NSDictionary * const MGLPredicateOperatorTypesByJSONOperator = @{
         NSArray *subpredicates = MGLSubpredicatesWithJSONObjects([objects subarrayWithRange:NSMakeRange(1, objects.count - 1)]);
         return [NSCompoundPredicate orPredicateWithSubpredicates:subpredicates];
     }
+    if ([op isEqualToString:@"within"]) {
+        NSArray *subexpressions = MGLSubexpressionsWithJSONObjects([objects subarrayWithRange:NSMakeRange(1, objects.count - 1)]);
+        return [NSComparisonPredicate predicateWithLeftExpression:[NSExpression expressionForEvaluatedObject]
+                                                  rightExpression:subexpressions[0]
+                                                         modifier:NSDirectPredicateModifier
+                                                             type:NSInPredicateOperatorType
+                                                          options:0];
+    }
     
     NSExpression *expression = [NSExpression expressionWithMGLJSONObject:object];
     return [NSComparisonPredicate predicateWithLeftExpression:expression

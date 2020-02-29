@@ -4,6 +4,17 @@
 #import "NSPredicate+MGLPrivateAdditions.h"
 #import "MGLValueEvaluator.h"
 
+@implementation NSString (MGLAdditions)
+
+- (NSString *)stringByRemovingPointerAddresses {
+    return [self stringByReplacingOccurrencesOfString:@"\\b0x[0-9a-f]+\\b"
+                                           withString:@"0xdeadbeef"
+                                              options:NSRegularExpressionSearch
+                                                range:NSMakeRange(0, self.length)];
+}
+
+@end
+
 @interface MGLPredicateTests : XCTestCase
 @end
 
@@ -362,6 +373,69 @@
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"ALL {6, 5, 4, 3} < $featureIdentifier"];
         XCTAssertThrowsSpecificNamed(predicate.mgl_jsonExpressionObject, NSException, NSInvalidArgumentException);
     }
+    {
+        NSArray *expected = @[
+            @"within",
+            @{
+                @"type": @"Polygon",
+                @"coordinates": @[
+                    @[
+                        @[@0, @0],
+                        @[@0, @1],
+                        @[@1, @1],
+                        @[@1, @0],
+                    ],
+                ],
+            },
+        ];
+        CLLocationCoordinate2D coordinates[] = {
+            { .latitude = 0, .longitude = 0 },
+            { .latitude = 1, .longitude = 0 },
+            { .latitude = 1, .longitude = 1 },
+            { .latitude = 0, .longitude = 1 },
+        };
+        MGLPolygon *shape = [MGLPolygon polygonWithCoordinates:coordinates count:sizeof(coordinates) / sizeof(coordinates[0])];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF IN %@", shape];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
+    }
+    {
+        NSArray *expected = @[
+            @"within",
+            @{
+                @"type": @"Feature",
+                @"id": @"unit",
+                @"properties": @{},
+                @"geometry": @{
+                    @"type": @"Polygon",
+                    @"coordinates": @[
+                        @[
+                            @[@0, @0],
+                            @[@0, @1],
+                            @[@1, @1],
+                            @[@1, @0],
+                        ],
+                    ],
+                },
+            },
+        ];
+        CLLocationCoordinate2D coordinates[] = {
+            { .latitude = 0, .longitude = 0 },
+            { .latitude = 1, .longitude = 0 },
+            { .latitude = 1, .longitude = 1 },
+            { .latitude = 0, .longitude = 1 },
+        };
+        MGLPolygonFeature *feature = [MGLPolygonFeature polygonWithCoordinates:coordinates count:sizeof(coordinates) / sizeof(coordinates[0])];
+        feature.identifier = @"unit";
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%@ CONTAINS SELF", feature];
+        XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
+        NSPredicate *predicateAfter = [NSPredicate predicateWithFormat:@"SELF IN %@", feature];
+        XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicateAfter);
+        [self testSymmetryWithPredicate:[NSPredicate predicateWithMGLJSONObject:expected]
+                          mustRoundTrip:YES];
+    }
 }
 
 - (void)testComparisonPredicatesWithOptions {
@@ -506,7 +580,7 @@
     if (mustRoundTrip) {
         // A collection of ints may turn into an aggregate of longs, for
         // example, so compare formats instead of the predicates themselves.
-        XCTAssertEqualObjects(forwardPredicate.predicateFormat, forwardPredicateAfter.predicateFormat);
+        XCTAssertEqualObjects(forwardPredicate.predicateFormat.stringByRemovingPointerAddresses, forwardPredicateAfter.predicateFormat.stringByRemovingPointerAddresses);
     } else {
         XCTAssertEqualObjects(forwardPredicate, forwardPredicateAfter);
     }

@@ -55,6 +55,18 @@ The following aggregate operators are supported:
 `NSInPredicateOperatorType`       | `key IN { 'iOS', 'macOS', 'tvOS', 'watchOS' }`
 `NSContainsPredicateOperatorType` | `{ 'iOS', 'macOS', 'tvOS', 'watchOS' } CONTAINS key`
 
+You can use the `IN` and `CONTAINS` operators to test whether a value appears in a collection, whether a string is a substring of a larger string, or whether the evaluated feature (`SELF`) lies within a given `MGLShape` or `MGLFeature`. For example, to show one delicious local chain of sandwich shops, but not similarly named steakhouses and pizzerias:
+
+```objc
+MGLPolygon *cincinnati = [MGLPolygon polygonWithCoordinates:cincinnatiCoordinates count:sizeof(cincinnatiCoordinates) / sizeof(cincinnatiCoordinates[0])];
+deliLayer.predicate = [NSPredicate predicateWithFormat:@"class = 'food_and_drink' AND name CONTAINS 'Izzy' AND SELF IN %@", cincinnati];
+```
+
+```swift
+let cincinnati = MGLPolygon(coordinates: &cincinnatiCoordinates, count: UInt(cincinnatiCoordinates.count))
+deliLayer.predicate = NSPredicate(format: "class = 'food_and_drink' AND name CONTAINS 'Izzy' AND SELF IN %@", cincinnati)
+```
+
 The following combinations of comparison operators and modifiers are supported:
 
 `NSComparisonPredicateModifier` | `NSPredicateOperatorType`           | Format string syntax
