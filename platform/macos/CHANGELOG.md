@@ -6,13 +6,18 @@
 
 * Added the `distance` expression function for calculating the shortest distance between the evaluated feature and a GeoJSON `Point`, `MultiPoint`, `LineString`, or `MultiLineString` geometry that you specify. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. ([mapbox/mapbox-gl-native#16397](https://github.com/mapbox/mapbox-gl-native/pull/16397))
 * Added the `MGLCircleStyleLayer.circleSortKey` property. ([mapbox/mapbox-gl-native#15875](https://github.com/mapbox/mapbox-gl-native/pull/15875))
+* Chinese, Japanese, and Korean characters are now set in the font specified in style JSON or by the `MGLSymbolLayer.textFontNames` property. If the named font is not installed on the device or bundled with the application, the characters are set in a fallback font listed in the `MGLIdeographicFontFamilyName` key in the Info.plist file. ([#189](https://github.com/mapbox/mapbox-gl-native-ios/pull/189))
+* The `MGLIdeographicFontFamilyName` key in the Info.plist file can now specify the fallback fonts for CJK characters by their PostScript names or display names in addition to font family names. For example, you can specify `NotoSansCJKjp-Bold` or `Noto Sans CJK JP Bold`, which ensures that the characters are set in bold. You can alternatively specify these font names in the `MGLIdeographicFontFamilyName` key of `NSUserDefaults.standardUserDefaults`. ([#189](https://github.com/mapbox/mapbox-gl-native-ios/pull/189))
+* CJK characters are now laid out according to the font, so fonts with nonsquare glyphs have the correct kerning. ([#189](https://github.com/mapbox/mapbox-gl-native-ios/pull/189))
+* Fixed an issue where the baseline for CJK characters was too low compared to non-CJK characters. ([#189](https://github.com/mapbox/mapbox-gl-native-ios/pull/189))
 * Fixed a crash when calling the `-[MGLStyle removeImageForName:]` method with the name of a nonexistent image. ([mapbox/mapbox-gl-native#16391](https://github.com/mapbox/mapbox-gl-native/pull/16391))
-* Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
+* Fixed an issue where properties such as `MGLFillStyleLayer.fillColor` and `MGLLineStyleLayer.lineColor` misinterpreted non-opaque `NSColor`s. ([#266](https://github.com/mapbox/mapbox-gl-native-ios/pull/266))
 
 ### Other changes
 
 * Fixed various crashes, including crashes on launch, on macOS 10.11.0 through 10.14._x_. ([mapbox/mapbox-gl-native#16412](https://github.com/mapbox/mapbox-gl-native/pull/16412))
 * Fixed a crash when encountering an invalid polyline. ([mapbox/mapbox-gl-native#16409](https://github.com/mapbox/mapbox-gl-native/pull/16409))
+* Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
 * Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
 * Certain logging statements no longer run on the main thread. ([mapbox/mapbox-gl-native#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
 
@@ -25,9 +30,7 @@
 * The `IN` and `CONTAINS` predicate operators can now test whether a string is a substring of another string or whether the evaluated feature (`SELF`) lies within a given `MGLShape` or `MGLFeature`. ([#183](https://github.com/mapbox/mapbox-gl-native-ios/pull/183), [#184](https://github.com/mapbox/mapbox-gl-native-ios/pull/184))
 * Added the `MGLSymbolStyleLayer.textWritingModes` layout property. This property can be set to `MGLTextWritingModeHorizontal` or `MGLTextWritingModeVertical`. ([#14932](https://github.com/mapbox/mapbox-gl-native/pull/14932))
 * Added the `MGLLineStyleLayer.lineSortKey` and `MGLFillStyleLayer.fillSortKey` properties. ([#179](https://github.com/mapbox/mapbox-gl-native-ios/pull/179))
-* The `MGLIdeographicFontFamilyName` Info.plist key now also accepts an array of font family names, to customize font fallback behavior. It can also be set to a Boolean value of `NO` to force the SDK to typeset CJK characters in a remote font specified by `MGLSymbolStyleLayer.textFontNames`. ([#14862](https://github.com/mapbox/mapbox-gl-native/pull/14862))
 * The `MGLSymbolStyleLayer.iconTextFit` property now respects the cap insets of any nine-part stretchable image passed into the `-[MGLStyle setImage:forName:]` method. You can define the stretchable area in Xcode’s asset catalog or by setting the `NSImage.capInsets` property. ([#182](https://github.com/mapbox/mapbox-gl-native-ios/pull/182))
-* The `-[MGLStyle localizeLabelsIntoLocale:]` and `-[NSExpression mgl_expressionLocalizedIntoLocale:]` methods can now localize text into Traditional Chinese and Vietnamese. ([#173](https://github.com/mapbox/mapbox-gl-native-ios/pull/173))
 * Fixed crashes triggered when `MGLSource` and `MGLStyleLayer` objects are accessed after having been invalidated after a style change. ([#15539](https://github.com/mapbox/mapbox-gl-native/pull/15539))
 * Fixed an issue where fill extrusion layers would be incorrectly rendered above other layers. ([#15065](https://github.com/mapbox/mapbox-gl-native/pull/15065))
 * Fixed rendering and collision detection issues with using `MGLSymbolStyleLayer.textVariableAnchor` and `MGLSymbolStyleLayer.iconTextFit` properties on the same layer. ([#15367](https://github.com/mapbox/mapbox-gl-native/pull/15367))
@@ -39,7 +42,6 @@
 * Fixed an issue where style layers backed by a shape source could flicker when transitioning between styles. ([#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907), [#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941))
 * Improved the performance of loading a style that has many style images. ([#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187))
 * Updated “map ID” to the more accurate term “tileset ID” in documentation; updated “style's Map ID” to the more accurate term “style URL”. ([#15116](https://github.com/mapbox/mapbox-gl-native/pull/15116))
-* Fixed an issue where properties such as `MGLFillStyleLayer.fillColor` and `MGLLineStyleLayer.lineColor` misinterpreted non-opaque `NSColor`s. ([#266](https://github.com/mapbox/mapbox-gl-native-ios/pull/266))
 
 ### Camera
 
@@ -78,6 +80,12 @@
 * Fixed issues where an offline pack would stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * When an offline pack encounters an HTTP 404 error, the `MGLOfflinePackUserInfoKeyError` user info key of the `MGLOfflinePackErrorNotification` now indicates the resource that could not be downloaded. ([#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * Expired resources are now fetched at a lower priority than new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
+
+### Localization and internationalization
+
+* The `MGLIdeographicFontFamilyName` Info.plist key now also accepts an array of font family names, to customize font fallback behavior. It can also be set to a Boolean value of `NO` to force the SDK to typeset CJK characters in a remote font specified by `MGLSymbolStyleLayer.textFontNames`. ([#14862](https://github.com/mapbox/mapbox-gl-native/pull/14862))
+* The `MGLIdeographicFontFamilyName` Info.plist key can now be set to the display names or PostScript names of individual fonts. ([#189](https://github.com/mapbox/mapbox-gl-native-ios/pull/189))
+* The `-[MGLStyle localizeLabelsIntoLocale:]` and `-[NSExpression mgl_expressionLocalizedIntoLocale:]` methods can now localize text into Traditional Chinese and Vietnamese. ([#173](https://github.com/mapbox/mapbox-gl-native-ios/pull/173))
 
 ### Other changes
 

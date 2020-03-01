@@ -480,7 +480,8 @@ public:
     // setup mbgl map
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
-    auto renderer = std::make_unique<mbgl::Renderer>(_mbglView->getRendererBackend(), config.scaleFactor, config.localFontFamilyName);
+    auto localFontFamilyName = config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;
+    auto renderer = std::make_unique<mbgl::Renderer>(_mbglView->getRendererBackend(), config.scaleFactor, localFontFamilyName);
     BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
     _rendererFrontend = std::make_unique<MGLRenderFrontend>(std::move(renderer), self, _mbglView->getRendererBackend());
 

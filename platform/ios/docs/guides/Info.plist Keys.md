@@ -22,15 +22,13 @@ If you have implemented custom opt-out of Mapbox Telemetry within the user inter
 
 ## MGLIdeographicFontFamilyName
 
-The name of the font family to use for client-side text rendering of CJK ideographs.
+This key configures client-side text rendering of Chinese hanzi, Japanese kana, and Korean hangul characters (CJK) that appear in text labels. Client-side text rendering uses less bandwidth than server-side text rendering, especially when viewing regions of the map that feature a wide variety of CJK characters.
 
-Set `MGLIdeographicFontFamilyName` in your containing application's Info.plist to font family name(s) that will be available at run time, such as “PingFang TC” or “Marker Felt”. This plist key accepts:
+By default, the map renders CJK characters using locally installed fonts as specified by the system’s font cascade list, which may vary from device to device, and ignores the `MGLSymbolStyleLayer.textFont` property for these characters. To customize the displayed font, set this key to a string containing a font family name (for example, “PingFang TC”) or an individual font’s display name (“PingFang TC Ultralight”) or PostScript name (“PingFangTC-Ultralight”). The key can name a font that is installed system-wide or bundled with the application.
 
-- A string value of a single font family name.
+In case your preferred font has glyphs for every character that may appear on the map, you can set this key to an array of font or font family names in order from most preferred to least preferred. Each character is rendered in the first font in the list that has a glyph for the character. If the entire font is exhausted, the map uses the system’s font cascade list.
 
-- An array of font family names. Fonts will be used in the defined order, eventually falling back to default system font if none are available.
-
-- A boolean value `NO` to disable client-side rendering of CJK glyphs — remote fonts specified in your style will be used instead.
+To disable client-side rendering of CJK characters, set this key to the Boolean value `NO`. Glyphs from the fonts specified by `MGLSymbolStyleLayer.textFont` will be downloaded and rendered instead.
 
 ## MGLCollisionBehaviorPre4_0
 

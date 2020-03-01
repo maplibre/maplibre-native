@@ -1,8 +1,6 @@
 #import "MGLFoundation.h"
 #import <Foundation/Foundation.h>
 
-#include <mbgl/util/optional.hpp>
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -34,7 +32,9 @@ MGL_EXPORT
  - A boolean value NO to disable client-side rendering of CJK glyphs —
  remote fonts specified in your style will be used instead.
  */
-@property (nonatomic, readonly) mbgl::optional<std::string> localFontFamilyName;
+@property (nonatomic, readonly, nullable) NSString *localFontFamilyName;
+
+- (nullable NSString *)localFontFamilyNameWithInfoDictionaryObject:(nullable id)infoDictionaryObject;
 
 /**
  A Boolean value indicating whether symbol layers may enable per-source symbol
@@ -48,6 +48,8 @@ MGL_EXPORT
  collision detection against other symbol layers that are part of the same source.
  */
 @property (nonatomic, readonly) BOOL perSourceCollisions;
+
+- (BOOL)perSourceCollisionsWithInfoDictionaryObject:(nullable id)infoDictionaryObject;
 
 @end
 
