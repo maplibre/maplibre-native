@@ -5,22 +5,22 @@ Mapbox welcomes participation and contributions from everyone.  If you'd like to
 ## 9.1.0-alpha.1 - February 28, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0...android-v9.1.0-alpha.1) since [Mapbox Maps SDK for Android v9.0.0](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0):
 ### Features
- - Introduce `in` expression for testing whether an item exists in an array or a substring exists in a string. ([#171](https://github.com/mapbox/mapbox-gl-native-android/pull/171))
- - Introduce option to set the minimum and maximum pitch of a map. ([#199](https://github.com/mapbox/mapbox-gl-native-android/pull/199))
- - Introduce ability to configure the zoom level(s) that tiles are prefetched from by `Source`. This overrides the  tile prefetch setting defined by the `Map` instance. ([#184](https://github.com/mapbox/mapbox-gl-native-android/pull/184))
- - Introduce option to pass in intermediate points for a smooth `LocationComponent` animation. ([#166](https://github.com/mapbox/mapbox-gl-native-android/pull/166))
+ - Introduce `in` expression for testing whether an item exists in an array or a substring exists in a string. [#171](https://github.com/mapbox/mapbox-gl-native-android/pull/171)
+ - Introduce option to set the minimum and maximum pitch of a map. [#199](https://github.com/mapbox/mapbox-gl-native-android/pull/199)
+ - Introduce ability to configure the zoom level(s) that tiles are prefetched from by `Source`. This overrides the  tile prefetch setting defined by the `Map` instance. [#184](https://github.com/mapbox/mapbox-gl-native-android/pull/184)
+ - Introduce option to pass in intermediate points for a smooth `LocationComponent` animation. [#166](https://github.com/mapbox/mapbox-gl-native-android/pull/166)
 
 ### Performance improvements
- - Improve the performance of loading a style that has many style images. ([#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187))
- - Fix a memory leak during zooming when `MapboxMapOptions.debugActive` is enabled. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179), fixed by [#15395](https://github.com/mapbox/mapbox-gl-native/pull/15395))
+ - Improve the performance of loading a style that has many style images. [#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187)
+ - Fix a memory leak during zooming when `MapboxMapOptions.debugActive` is enabled. [#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179), fixed by [#15395](https://github.com/mapbox/mapbox-gl-native/pull/15395)
 
 ### Bug fixes
- - Fix issues that would cause an offline pack to stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
- - Fix an issue where a `LineDasharray` value of `[1, 0]` resulted in hairline gaps. ([#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202))
- - Fix Proguard configuration to prevent obfuscation of telemetry event classes. ([#195](https://github.com/mapbox/mapbox-gl-native-android/pull/195))
+ - Fix issues that would cause an offline pack to stop downloading before completion. [#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240)
+ - Fix an issue where a `LineDasharray` value of `[1, 0]` resulted in hairline gaps. [#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202)
+ - Fix Proguard configuration to prevent obfuscation of telemetry event classes. [#195](https://github.com/mapbox/mapbox-gl-native-android/pull/195)
 
 ### Other changes
- - Update mapbox-events-android to v4.7.3. ([#201](https://github.com/mapbox/mapbox-gl-native-android/pull/201))
+ - Update mapbox-events-android to v4.7.3. [#201](https://github.com/mapbox/mapbox-gl-native-android/pull/201)
 
 ## 9.0.0 - February 13, 2020
 [Changes](https://github.com/mapbox/mapbox-gl-native-android/compare/android-v9.0.0-beta.1...android-v9.0.0) since [Mapbox Maps SDK for Android v9.0.0-beta.1](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.0.0-beta.1):
