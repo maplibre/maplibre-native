@@ -3,12 +3,14 @@ package com.mapbox.mapboxsdk.testapp.activity.style;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -30,12 +32,15 @@ import com.mapbox.mapboxsdk.style.sources.TileSet;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils;
-import timber.log.Timber;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
+import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.style.expressions.Expression.all;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
@@ -50,6 +55,7 @@ import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.switchCase;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.toNumber;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.within;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
 import static com.mapbox.mapboxsdk.style.layers.Property.FILL_TRANSLATE_ANCHOR_MAP;
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
@@ -67,6 +73,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolPlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
@@ -78,6 +85,23 @@ public class RuntimeStyleActivity extends AppCompatActivity {
   private MapView mapView;
   private MapboxMap mapboxMap;
   private boolean styleLoaded;
+
+  List<List<Point>> lngLats = Collections.singletonList(
+    Arrays.asList(
+      Point.fromLngLat(-15.468749999999998,
+        41.77131167976407),
+      Point.fromLngLat(15.468749999999998,
+        41.77131167976407),
+      Point.fromLngLat(15.468749999999998,
+        58.26328705248601),
+      Point.fromLngLat(-15.468749999999998,
+        58.26328705248601),
+      Point.fromLngLat(-15.468749999999998,
+        41.77131167976407)
+    )
+  );
+
+  Polygon polygon = Polygon.fromLngLats(lngLats);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -93,13 +117,19 @@ public class RuntimeStyleActivity extends AppCompatActivity {
       mapboxMap = map;
 
       // Center and Zoom (Amsterdam, zoomed to streets)
-      mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.379189, 4.899431), 14));
+      mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.379189, 4.899431), 1));
 
       mapboxMap.setStyle(
         new Style.Builder()
           .fromUri(Style.MAPBOX_STREETS)
           // set custom transition
-          .withTransition(new TransitionOptions(250, 50)), style -> styleLoaded = true
+          .withTransition(new TransitionOptions(250, 50)), style -> {
+          styleLoaded = true;
+          SymbolLayer laber = (SymbolLayer) style.getLayer("country-label");
+          laber.setProperties(
+            textOpacity(switchCase(within(polygon), literal(1.0f), literal(0.5f)))
+          );
+        }
       );
     });
   }
@@ -547,7 +577,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
         states.setProperties(
           textSize(switchCase(
             in(get("name"), literal("Texas")), literal(25.0f),
-            in(get("name"), literal(new Object[] {"California","Illinois"})), literal(25.0f),
+            in(get("name"), literal(new Object[] {"California", "Illinois"})), literal(25.0f),
             literal(6.0f) // default value
             )
           )

@@ -1,10 +1,6 @@
 package com.mapbox.mapboxsdk.style.expressions;
 
 import android.annotation.SuppressLint;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -12,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 
@@ -21,6 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
 
 import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaArray;
 
@@ -1539,8 +1541,8 @@ public class Expression {
   /**
    * Retrieves whether an item exists in an array or a substring exists in a string.
    *
-   * @param needle     the item expression
-   * @param haystack   the array or string expression
+   * @param needle   the item expression
+   * @param haystack the array or string expression
    * @return true if exists.
    * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
    */
@@ -1551,8 +1553,8 @@ public class Expression {
   /**
    * Retrieves whether an item exists in an array or a substring exists in a string.
    *
-   * @param needle     the item expression
-   * @param haystack   the array or string expression
+   * @param needle   the item expression
+   * @param haystack the array or string expression
    * @return true if exists.
    * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
    */
@@ -1563,13 +1565,22 @@ public class Expression {
   /**
    * Retrieves whether an item exists in an array or a substring exists in a string.
    *
-   * @param needle     the item expression
-   * @param haystack   the array or string expression
+   * @param needle   the item expression
+   * @param haystack the array or string expression
    * @return true if exists.
    * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
    */
   public static Expression in(@NonNull String needle, @NonNull Expression haystack) {
     return new Expression("in", literal(needle), haystack);
+  }
+
+  public static Expression within(@NonNull Polygon polygon) {
+    Map<String, Expression> map = new HashMap<>();
+
+    map.put("type", literal(polygon.type()));
+    map.put("json", literal(polygon.toJson()));
+
+    return new Expression("within", new ExpressionMap(map));
   }
 
   /**
