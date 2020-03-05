@@ -439,6 +439,7 @@
 		DA0BDD202407C12600DAA576 /* libmbgl-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F78399D235AA1E600D4D606 /* libmbgl-core.a */; };
 		DA0BDD212407C13000DAA576 /* libmbgl-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F78399D235AA1E600D4D606 /* libmbgl-core.a */; };
 		DA0CD5901CF56F6A00A5F5A5 /* MGLFeatureTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA0CD58F1CF56F6A00A5F5A5 /* MGLFeatureTests.mm */; };
+		DA0E9F3F2411AC9B007C75D4 /* MGLImageTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA0E9F3E2411AC9B007C75D4 /* MGLImageTests.mm */; };
 		DA17BE301CC4BAC300402C41 /* MGLMapView_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DA17BE2F1CC4BAC300402C41 /* MGLMapView_Private.h */; };
 		DA17BE311CC4BDAA00402C41 /* MGLMapView_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DA17BE2F1CC4BAC300402C41 /* MGLMapView_Private.h */; };
 		DA1DC96A1CB6C6B7006E619F /* MBXCustomCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1DC9671CB6C6B7006E619F /* MBXCustomCalloutView.m */; };
@@ -1075,6 +1076,7 @@
 		DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAttributionInfo.h; sourceTree = "<group>"; };
 		DA00FC8D1D5EEB0D009AABC8 /* MGLAttributionInfo.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLAttributionInfo.mm; sourceTree = "<group>"; };
 		DA0CD58F1CF56F6A00A5F5A5 /* MGLFeatureTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLFeatureTests.mm; path = ../../darwin/test/MGLFeatureTests.mm; sourceTree = "<group>"; };
+		DA0E9F3E2411AC9B007C75D4 /* MGLImageTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLImageTests.mm; path = ../../darwin/test/MGLImageTests.mm; sourceTree = "<group>"; };
 		DA17BE2F1CC4BAC300402C41 /* MGLMapView_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLMapView_Private.h; sourceTree = "<group>"; };
 		DA1AC01B1E5B8774006DF1D6 /* lt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = lt; path = lt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DA1AC0201E5B8917006DF1D6 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = uk; path = uk.lproj/Foundation.stringsdict; sourceTree = "<group>"; };
@@ -1858,6 +1860,7 @@
 				DD58A4C51D822BD000E1F038 /* MGLExpressionTests.mm */,
 				DA0CD58F1CF56F6A00A5F5A5 /* MGLFeatureTests.mm */,
 				DA2E885C1CC0382C00F24E7B /* MGLGeometryTests.mm */,
+				DA0E9F3E2411AC9B007C75D4 /* MGLImageTests.mm */,
 				DA5DB1291FABF1EE001C2326 /* MGLMapAccessibilityElementTests.m */,
 				DA695425215B1E75002041A4 /* MGLMapCameraTests.m */,
 				96E6145522CC135200109F14 /* MGLMapViewCompassViewTests.mm */,
@@ -3014,6 +3017,7 @@
 				357579801D501E09000B822E /* MGLFillStyleLayerTests.mm in Sources */,
 				35D9DDE21DA25EEC00DAAD69 /* MGLCodingTests.mm in Sources */,
 				DA1F8F3D1EBD287B00367E42 /* MGLDocumentationGuideTests.swift in Sources */,
+				DA0E9F3F2411AC9B007C75D4 /* MGLImageTests.mm in Sources */,
 				076171C32139C70900668A35 /* MGLMapViewTests.m in Sources */,
 				3598544D1E1D38AA00B29F84 /* MGLDistanceFormatterTests.m in Sources */,
 				071BBB071EE77631001FB02A /* MGLImageSourceTests.m in Sources */,
