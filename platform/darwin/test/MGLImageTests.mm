@@ -40,6 +40,12 @@
         if (styleImage) {
             XCTAssert(!styleImage->getContent());
             XCTAssertFalse(styleImage->isSdf());
+            
+            MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.capInsets.top, 0);
+            XCTAssertEqual(imageAfter.capInsets.left, 0);
+            XCTAssertEqual(imageAfter.capInsets.bottom, 0);
+            XCTAssertEqual(imageAfter.capInsets.right, 0);
         }
     }
     
@@ -53,6 +59,12 @@
         XCTAssert(styleImage);
         if (styleImage) {
             XCTAssert(!styleImage->getContent());
+            
+            MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.capInsets.top, 0);
+            XCTAssertEqual(imageAfter.capInsets.left, 0);
+            XCTAssertEqual(imageAfter.capInsets.bottom, 0);
+            XCTAssertEqual(imageAfter.capInsets.right, 0);
         }
     }
     
@@ -74,6 +86,12 @@
                 XCTAssertEqual(content->bottom, 21 * scale);
                 XCTAssertEqual(content->right, 20 * scale);
             }
+            
+            MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.capInsets.top, 1);
+            XCTAssertEqual(imageAfter.capInsets.left, 2);
+            XCTAssertEqual(imageAfter.capInsets.bottom, 3);
+            XCTAssertEqual(imageAfter.capInsets.right, 4);
         }
     }
 }

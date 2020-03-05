@@ -18,11 +18,21 @@ BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
         return nil;
     }
 
-    if (self = [self initWithCGImage:image scale:styleImage.getPixelRatio() orientation:UIImageOrientationUp])
+    CGFloat scale = styleImage.getPixelRatio();
+    if (self = [self initWithCGImage:image scale:scale orientation:UIImageOrientationUp])
     {
         if (styleImage.isSdf())
         {
             self = [self imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        }
+        
+        if (auto content = styleImage.getContent())
+        {
+            UIEdgeInsets capInsets = UIEdgeInsetsMake(content->top / scale,
+                                                      content->left / scale,
+                                                      self.size.height - content->bottom / scale,
+                                                      self.size.width - content->right / scale);
+            self = [self resizableImageWithCapInsets:capInsets resizingMode:UIImageResizingModeStretch];
         }
     }
     CGImageRelease(image);

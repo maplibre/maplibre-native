@@ -27,11 +27,18 @@ BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
 
     NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithCGImage:image];
     CGImageRelease(image);
-    CGFloat w = styleImage.getImage().size.width / styleImage.getPixelRatio();
-    CGFloat h = styleImage.getImage().size.height / styleImage.getPixelRatio();
-    if (self = [self initWithSize:NSMakeSize(w, h)]) {
+    CGFloat scale = styleImage.getPixelRatio();
+    NSSize size = NSMakeSize(styleImage.getImage().size.width / scale,
+                             styleImage.getImage().size.height / scale);
+    if (self = [self initWithSize:size]) {
         [self addRepresentation:rep];
         [self setTemplate:styleImage.isSdf()];
+        if (auto content = styleImage.getContent()) {
+            self.capInsets = NSEdgeInsetsMake(content->top / scale,
+                                              content->left / scale,
+                                              size.height - content->bottom / scale,
+                                              size.width - content->right / scale);
+        }
     }
     return self;
 }
