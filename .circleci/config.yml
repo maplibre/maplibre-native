@@ -179,7 +179,7 @@ commands:
             export VERSION_TAG=${CIRCLE_TAG}
             export GITHUB_TOKEN=${DANGER_GITHUB_API_TOKEN}
             export DOCS_REPO="android-docs"
-            bash scripts/trigger-maps-documentation-deploy-steps.sh        
+            bash scripts/trigger-maps-documentation-deploy-steps.sh
 
 jobs:
   # ------------------------------------------------------------------------------
@@ -291,6 +291,14 @@ jobs:
             if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
               if [[ $CIRCLE_BRANCH == master ]]; then
                 curl -u $MOBILE_METRICS_TOKEN -d build_parameters[CIRCLE_JOB]=android-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+      - run:
+          name: Trigger android binary size check
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-binary-size-hydrogen https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
               fi
             fi
       - run:
