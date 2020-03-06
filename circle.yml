@@ -303,7 +303,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - install-macos-dependencies
       - install-dependencies
@@ -330,7 +330,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - install-macos-dependencies
       - install-dependencies
@@ -350,7 +350,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - install-macos-dependencies
       - install-dependencies
@@ -370,7 +370,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - install-macos-dependencies
       - install-dependencies
@@ -391,7 +391,7 @@ jobs:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - install-macos-dependencies
       - install-dependencies
@@ -443,7 +443,7 @@ jobs:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      SLACK_CHANNEL: C0ACM9Q2C
+      SLACK_CHANNEL: CU0LHNNJY
     steps:
       - checkout
       - run:
