@@ -1,6 +1,6 @@
 # Changelog for Mapbox Maps SDK for macOS
 
-## master
+## 0.15.0
 
 ### Styles and rendering
 
