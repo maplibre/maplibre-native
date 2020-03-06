@@ -124,7 +124,7 @@ if [[ ${#} -eq 3 &&  $3 == "-g" ]]; then
     GITHUB_RELEASE=true
 fi
 
-make clean && make distclean
+npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
 
 if [[ "${GITHUB_RELEASE}" == true ]]; then
