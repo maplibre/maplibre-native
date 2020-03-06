@@ -10,8 +10,10 @@ import androidx.annotation.UiThread;
 
 import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
 /**
  * A filled circle.

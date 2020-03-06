@@ -166,6 +166,32 @@ public class LineLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testLineSortKeyAsConstant() {
+    Timber.i("line-sort-key");
+    assertNotNull(layer);
+    assertNull(layer.getLineSortKey().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(lineSortKey(propertyValue));
+    assertEquals(layer.getLineSortKey().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testLineSortKeyAsExpression() {
+    Timber.i("line-sort-key-expression");
+    assertNotNull(layer);
+    assertNull(layer.getLineSortKey().getExpression());
+
+    // Set and Get
+    Expression expression = number(Expression.get("undefined"));
+    layer.setProperties(lineSortKey(expression));
+    assertEquals(layer.getLineSortKey().getExpression(), expression);
+  }
+
+  @Test
+  @UiThreadTest
   public void testLineOpacityTransition() {
     Timber.i("line-opacityTransitionOptions");
     assertNotNull(layer);

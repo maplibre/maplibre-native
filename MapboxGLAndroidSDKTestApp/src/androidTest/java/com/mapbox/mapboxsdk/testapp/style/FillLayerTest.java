@@ -101,6 +101,32 @@ public class FillLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testFillSortKeyAsConstant() {
+    Timber.i("fill-sort-key");
+    assertNotNull(layer);
+    assertNull(layer.getFillSortKey().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillSortKey(propertyValue));
+    assertEquals(layer.getFillSortKey().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillSortKeyAsExpression() {
+    Timber.i("fill-sort-key-expression");
+    assertNotNull(layer);
+    assertNull(layer.getFillSortKey().getExpression());
+
+    // Set and Get
+    Expression expression = number(Expression.get("undefined"));
+    layer.setProperties(fillSortKey(expression));
+    assertEquals(layer.getFillSortKey().getExpression(), expression);
+  }
+
+  @Test
+  @UiThreadTest
   public void testFillAntialiasAsConstant() {
     Timber.i("fill-antialias");
     assertNotNull(layer);

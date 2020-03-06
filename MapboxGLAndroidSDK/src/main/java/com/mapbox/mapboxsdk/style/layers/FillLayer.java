@@ -10,8 +10,10 @@ import androidx.annotation.UiThread;
 
 import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
 /**
  * A filled polygon with an optional stroked border.
@@ -140,6 +142,18 @@ public class FillLayer extends Layer {
   }
 
   // Property getters
+
+  /**
+   * Get the FillSortKey property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillSortKey() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-sort-key", nativeGetFillSortKey());
+  }
 
   /**
    * Get the FillAntialias property
@@ -363,6 +377,10 @@ public class FillLayer extends Layer {
     checkThread();
     nativeSetFillPatternTransition(options.getDuration(), options.getDelay());
   }
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillSortKey();
 
   @NonNull
   @Keep

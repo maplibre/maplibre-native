@@ -2,6 +2,7 @@
 
 package com.mapbox.mapboxsdk.testapp.style;
 
+import android.graphics.Color;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 

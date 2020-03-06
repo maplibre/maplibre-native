@@ -10,8 +10,10 @@ import androidx.annotation.UiThread;
 
 import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
 /**
  * A stroked line.
@@ -187,6 +189,18 @@ public class LineLayer extends Layer {
   public PropertyValue<Float> getLineRoundLimit() {
     checkThread();
     return (PropertyValue<Float>) new PropertyValue("line-round-limit", nativeGetLineRoundLimit());
+  }
+
+  /**
+   * Get the LineSortKey property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getLineSortKey() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("line-sort-key", nativeGetLineSortKey());
   }
 
   /**
@@ -559,6 +573,10 @@ public class LineLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetLineRoundLimit();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetLineSortKey();
 
   @NonNull
   @Keep
