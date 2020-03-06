@@ -75,7 +75,7 @@ publish() {
 }
 
 export GITHUB_USER=mapbox
-export GITHUB_REPO=mapbox-gl-native
+export GITHUB_REPO=mapbox-gl-native-ios
 export BUILDTYPE=Release
 
 VERSION_TAG=${VERSION_TAG:-''}

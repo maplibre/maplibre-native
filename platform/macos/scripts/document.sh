@@ -42,7 +42,7 @@ cp -r platform/macos/docs/img "${OUTPUT}"
 jazzy \
     --config platform/macos/jazzy.yml \
     --sdk macosx \
-    --github-file-prefix https://github.com/mapbox/mapbox-gl-native/tree/${BRANCH} \
+    --github-file-prefix https://github.com/mapbox/mapbox-gl-native-ios/tree/${BRANCH} \
     --module-version ${SHORT_VERSION} \
     --readme ${README} \
     --documentation="platform/{darwin,macos}/docs/guides/*.md" \

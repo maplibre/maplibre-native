@@ -18,7 +18,7 @@ else
     PUBLISH_STYLE=""
 fi
 
-GITHUB_REPO=${GITHUB_REPO:-'mapbox-gl-native'}
+GITHUB_REPO=${GITHUB_REPO:-'mapbox-gl-native-ios'}
 
 #
 # zip
