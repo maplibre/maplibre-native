@@ -34,6 +34,11 @@ android {
         buildConfigField "String", "MAPBOX_VERSION_STRING", String.format("\"Mapbox/%s\"", project.VERSION_NAME)
         buildConfigField "String", "MAPBOX_EVENTS_USER_AGENT", String.format("\"mapbox-maps-android/%s\"", project.VERSION_NAME)
         consumerProguardFiles 'proguard-rules.pro'
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_CCACHE=ccache'
+            }
+        }
     }
 
     // build native libraries
