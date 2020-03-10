@@ -19,7 +19,8 @@ ifeq ($(shell uname -s), Darwin)
   HOST_PLATFORM = macos
   HOST_PLATFORM_VERSION = $(shell uname -m)
   export NINJA = platform/macos/ninja
-  export JOBS ?= $(shell sysctl -n hw.ncpu)
+  export NCPU := $(shell sysctl -n hw.ncpu)
+  export JOBS ?= $(shell expr $(NCPU) - 1)
 else ifeq ($(shell uname -s), Linux)
   HOST_PLATFORM = linux
   HOST_PLATFORM_VERSION = $(shell uname -m)
