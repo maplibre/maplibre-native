@@ -3,8 +3,12 @@
 
 #if TARGET_OS_IPHONE
     #import "UIImage+MGLAdditions.h"
+    #define MGLImageResizingModeTile UIImageResizingModeTile
+    #define MGLImageResizingModeStretch UIImageResizingModeStretch
 #else
     #import "NSImage+MGLAdditions.h"
+    #define MGLImageResizingModeTile NSImageResizingModeTile
+    #define MGLImageResizingModeStretch NSImageResizingModeStretch
 #endif
 
 @interface MGLImageTests : XCTestCase
@@ -32,6 +36,7 @@
         NSRectFill(dstRect);
         return YES;
     }];
+    image.resizingMode = NSImageResizingModeTile;
 #endif
     
     {
@@ -40,8 +45,11 @@
         if (styleImage) {
             XCTAssert(!styleImage->getContent());
             XCTAssertFalse(styleImage->isSdf());
+            XCTAssertTrue(styleImage->getStretchX().empty());
+            XCTAssertTrue(styleImage->getStretchY().empty());
             
             MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.resizingMode, MGLImageResizingModeTile);
             XCTAssertEqual(imageAfter.capInsets.top, 0);
             XCTAssertEqual(imageAfter.capInsets.left, 0);
             XCTAssertEqual(imageAfter.capInsets.bottom, 0);
@@ -50,17 +58,31 @@
     }
     
 #if TARGET_OS_IPHONE
-    image = [image resizableImageWithCapInsets:UIEdgeInsetsZero];
+    image = [image resizableImageWithCapInsets:UIEdgeInsetsZero resizingMode:UIImageResizingModeStretch];
 #else
+    image.resizingMode = NSImageResizingModeStretch;
     image.capInsets = NSEdgeInsetsZero;
 #endif
     {
         auto styleImage = [image mgl_styleImageWithIdentifier:@"box"];
         XCTAssert(styleImage);
         if (styleImage) {
+            auto scale = styleImage->getPixelRatio();
             XCTAssert(!styleImage->getContent());
             
+            auto stretchX = styleImage->getStretchX();
+            XCTAssertEqual(stretchX.size(), 1UL);
+            if (!stretchX.empty()) {
+                XCTAssertEqual(stretchX.front(), mbgl::style::ImageStretch(0, 24 * scale));
+            }
+            auto stretchY = styleImage->getStretchY();
+            XCTAssertEqual(stretchY.size(), 1UL);
+            if (!stretchY.empty()) {
+                XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(0, 24 * scale));
+            }
+            
             MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.resizingMode, MGLImageResizingModeStretch);
             XCTAssertEqual(imageAfter.capInsets.top, 0);
             XCTAssertEqual(imageAfter.capInsets.left, 0);
             XCTAssertEqual(imageAfter.capInsets.bottom, 0);
@@ -87,7 +109,19 @@
                 XCTAssertEqual(content->right, 20 * scale);
             }
             
+            auto stretchX = styleImage->getStretchX();
+            XCTAssertEqual(stretchX.size(), 1UL);
+            if (!stretchX.empty()) {
+                XCTAssertEqual(stretchX.front(), mbgl::style::ImageStretch(2 * scale, 20 * scale));
+            }
+            auto stretchY = styleImage->getStretchY();
+            XCTAssertEqual(stretchY.size(), 1UL);
+            if (!stretchY.empty()) {
+                XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(1 * scale, 21 * scale));
+            }
+            
             MGLImage *imageAfter = [[MGLImage alloc] initWithMGLStyleImage:*styleImage];
+            XCTAssertEqual(imageAfter.resizingMode, MGLImageResizingModeStretch);
             XCTAssertEqual(imageAfter.capInsets.top, 1);
             XCTAssertEqual(imageAfter.capInsets.left, 2);
             XCTAssertEqual(imageAfter.capInsets.bottom, 3);

@@ -32,7 +32,16 @@ BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
                                                       content->left / scale,
                                                       self.size.height - content->bottom / scale,
                                                       self.size.width - content->right / scale);
-            self = [self resizableImageWithCapInsets:capInsets resizingMode:UIImageResizingModeStretch];
+            UIImageResizingMode resizingMode = UIImageResizingModeTile;
+            if (!styleImage.getStretchX().empty() || !styleImage.getStretchY().empty())
+            {
+                resizingMode = UIImageResizingModeStretch;
+            }
+            self = [self resizableImageWithCapInsets:capInsets resizingMode:resizingMode];
+        }
+        if (!styleImage.getStretchX().empty() || !styleImage.getStretchY().empty())
+        {
+            self = [self resizableImageWithCapInsets:self.capInsets resizingMode:UIImageResizingModeStretch];
         }
     }
     CGImageRelease(image);
@@ -53,15 +62,20 @@ BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
 }
 
 - (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
-    mbgl::style::ImageStretches stretchX = {{
-        self.capInsets.left / self.scale, (self.size.width - self.capInsets.right) / self.scale,
-    }};
-    mbgl::style::ImageStretches stretchY = {{
-        self.capInsets.top / self.scale, (self.size.height - self.capInsets.bottom) / self.scale,
-    }};
+    mbgl::style::ImageStretches stretchX, stretchY;
+    if (self.resizingMode == UIImageResizingModeStretch)
+    {
+        stretchX.push_back({
+            self.capInsets.left * self.scale, (self.size.width - self.capInsets.right) * self.scale,
+        });
+        stretchY.push_back({
+            self.capInsets.top * self.scale, (self.size.height - self.capInsets.bottom) * self.scale,
+        });
+    }
     
     mbgl::optional<mbgl::style::ImageContent> imageContent;
-    if (!MGLEdgeInsetsIsZero(self.capInsets)) {
+    if (!MGLEdgeInsetsIsZero(self.capInsets))
+    {
         imageContent = (mbgl::style::ImageContent){
             .left = static_cast<float>(self.capInsets.left * self.scale),
             .top = static_cast<float>(self.capInsets.top * self.scale),

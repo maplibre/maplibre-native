@@ -33,6 +33,11 @@ BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
     if (self = [self initWithSize:size]) {
         [self addRepresentation:rep];
         [self setTemplate:styleImage.isSdf()];
+        if (!styleImage.getStretchX().empty() || !styleImage.getStretchY().empty()) {
+            self.resizingMode = NSImageResizingModeStretch;
+        } else {
+            self.resizingMode = NSImageResizingModeTile;
+        }
         if (auto content = styleImage.getContent()) {
             self.capInsets = NSEdgeInsetsMake(content->top / scale,
                                               content->left / scale,
@@ -48,12 +53,15 @@ BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
     auto imageWidth = cPremultipliedImage.size.width;
     
     float scale = static_cast<float>(imageWidth) / self.size.width;
-    mbgl::style::ImageStretches stretchX = {{
-        self.capInsets.left * scale, (self.size.width - self.capInsets.right) * scale,
-    }};
-    mbgl::style::ImageStretches stretchY = {{
-        self.capInsets.top * scale, (self.size.height - self.capInsets.bottom) * scale,
-    }};
+    mbgl::style::ImageStretches stretchX, stretchY;
+    if (self.resizingMode == NSImageResizingModeStretch) {
+        stretchX.push_back({
+            self.capInsets.left * scale, (self.size.width - self.capInsets.right) * scale,
+        });
+        stretchY.push_back({
+            self.capInsets.top * scale, (self.size.height - self.capInsets.bottom) * scale,
+        });
+    }
     
     mbgl::optional<mbgl::style::ImageContent> imageContent;
     if (!MGLEdgeInsetsIsZero(self.capInsets)) {
