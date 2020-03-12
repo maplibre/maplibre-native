@@ -1,3 +1,5 @@
+#import "MGLShape_Private.h"
+
 #include <mbgl/style/conversion_impl.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -124,9 +126,21 @@ public:
         }
     }
 
-    static optional<GeoJSON> toGeoJSON(const Holder&, Error& error) {
-        error = { "toGeoJSON not implemented" };
-        return {};
+    static optional<GeoJSON> toGeoJSON(const Holder& holder, Error& error) {
+        id object = holder.value;
+        if ([object isKindOfClass:[NSDictionary class]]) {
+            NSError *serializationError;
+            NSData *data = [NSJSONSerialization dataWithJSONObject:object options:0 error:&serializationError];
+            if (serializationError) {
+                error = { std::string(serializationError.localizedDescription.UTF8String) };
+                return {};
+            }
+            NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            return mapbox::geojson::parse(string.UTF8String);
+        } else {
+            error = { std::string([NSString stringWithFormat:@"%@ is not a GeoJSON object.", object].UTF8String) };
+            return {};
+        }
     }
 
 private:
