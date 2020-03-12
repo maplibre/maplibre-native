@@ -16,6 +16,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ### Other changes
 
+* Added the `MGLMapView.minimumPitch` and `MGLMapView.maximumPitch` properties to further limit how much the user or your code can tilt the map. ([#208](https://github.com/mapbox/mapbox-gl-native-ios/pull/208))
 * Fixed issues where an offline pack would stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * When an offline pack encounters an HTTP 404 error, the `MGLOfflinePackUserInfoKeyError` user info key of the `MGLOfflinePackErrorNotification` now indicates the resource that could not be downloaded. ([#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))

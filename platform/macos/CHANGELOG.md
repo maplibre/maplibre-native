@@ -33,6 +33,7 @@
   * `-[MGLMapView setVisibleCoordinateBounds:edgePadding:animated:completionHandler:]`
   * `-[MGLMapView setContentInsets:animated:completionHandler:]`
   * `-[MGLMapView showAnnotations:edgePadding:animated:completionHandler:]`
+* Added the `MGLMapView.minimumPitch` and `MGLMapView.maximumPitch` properties to further limit how much the user or your code can tilt the map. ([#208](https://github.com/mapbox/mapbox-gl-native-ios/pull/208))
 * Fixed an issue where it was possible to set the map’s content insets then tilt the map enough to see the horizon, causing performance issues. ([#15195](https://github.com/mapbox/mapbox-gl-native/pull/15195))
 * Fixed an issue where animated camera transitions zoomed in or out too dramatically. ([#15281](https://github.com/mapbox/mapbox-gl-native/pull/15281))
 

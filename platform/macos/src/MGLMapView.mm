@@ -1175,6 +1175,24 @@ public:
     [self setDirection:*_mbglMap->getCameraOptions().bearing + delta animated:animated];
 }
 
+- (CGFloat)minimumPitch {
+    return *_mbglMap->getBounds().minPitch;
+}
+
+- (void)setMinimumPitch:(CGFloat)minimumPitch {
+    MGLLogDebug(@"Setting minimumPitch: %f", minimumPitch);
+    _mbglMap->setBounds(mbgl::BoundOptions().withMinPitch(minimumPitch));
+}
+
+- (CGFloat)maximumPitch {
+    return *_mbglMap->getBounds().maxPitch;
+}
+
+- (void)setMaximumPitch:(CGFloat)maximumPitch {
+    MGLLogDebug(@"Setting maximumPitch: %f", maximumPitch);
+    _mbglMap->setBounds(mbgl::BoundOptions().withMaxPitch(maximumPitch));
+}
+
 + (NSSet<NSString *> *)keyPathsForValuesAffectingCamera {
     return [NSSet setWithObjects:@"latitude", @"longitude", @"centerCoordinate", @"zoomLevel", @"direction", nil];
 }

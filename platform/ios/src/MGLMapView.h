@@ -926,6 +926,29 @@ MGL_EXPORT
 - (void)setDirection:(CLLocationDirection)direction animated:(BOOL)animated;
 
 /**
+ The minimum pitch of the map’s camera toward the horizon measured in degrees.
+
+ If the value of this property is greater than that of the `maximumPitch`
+ property, the behavior is undefined. The pitch may not be less than 0
+ regardless of this property.
+
+ The default value of this property is 0 degrees, allowing the map to appear
+ two-dimensional.
+ */
+@property (nonatomic) CGFloat minimumPitch;
+
+/**
+ The maximum pitch of the map’s camera toward the horizon measured in degrees.
+
+ If the value of this property is smaller than that of the `minimumPitch`
+ property, the behavior is undefined. The pitch may not exceed 60 degrees
+ regardless of this property.
+
+ The default value of this property is 60 degrees.
+ */
+@property (nonatomic) CGFloat maximumPitch;
+
+/**
  Resets the map rotation to a northern heading — a `direction` of `0` degrees.
  */
 - (IBAction)resetNorth;
