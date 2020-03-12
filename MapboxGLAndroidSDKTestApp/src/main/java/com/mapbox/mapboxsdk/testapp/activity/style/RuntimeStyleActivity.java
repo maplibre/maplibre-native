@@ -118,7 +118,6 @@ public class RuntimeStyleActivity extends AppCompatActivity {
 
       // Center and Zoom (Amsterdam, zoomed to streets)
       mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.379189, 4.899431), 1));
-
       mapboxMap.setStyle(
         new Style.Builder()
           .fromUri(Style.MAPBOX_STREETS)
@@ -242,6 +241,9 @@ public class RuntimeStyleActivity extends AppCompatActivity {
         return true;
       case R.id.action_bring_water_to_front:
         bringWaterToFront();
+        return true;
+      case R.id.action_fill_filter_color:
+        styleFillColorLayer();
         return true;
       default:
         return super.onOptionsItemSelected(item);
@@ -530,6 +532,11 @@ public class RuntimeStyleActivity extends AppCompatActivity {
       lineColor(Color.GREEN)
     );
     mapboxMap.getStyle().addLayer(lineLayer);
+  }
+
+  private void styleFillColorLayer() {
+    mapboxMap.setStyle(new Style.Builder().fromUri("asset://fill_color_style.json"));
+    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(31, -100), 3));
   }
 
   private void styleFillFilterLayer() {

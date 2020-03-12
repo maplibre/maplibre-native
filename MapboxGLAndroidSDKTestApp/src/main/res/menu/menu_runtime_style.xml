@@ -59,6 +59,10 @@
         android:title="@string/apply_filtered_fill"
         mapbox:showAsAction="never" />
     <item
+        android:id="@+id/action_fill_filter_color"
+        android:title="@string/apply_filtered_fill_color"
+        mapbox:showAsAction="never" />
+    <item
         android:id="@+id/action_textsize_filter"
         android:title="@string/apply_textsize_fill"
         mapbox:showAsAction="never" />
@@ -74,4 +78,5 @@
         android:id="@+id/action_bring_water_to_front"
         android:title="@string/bring_water_to_front"
         mapbox:showAsAction="never" />
+
 </menu>
