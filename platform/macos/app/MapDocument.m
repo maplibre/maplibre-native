@@ -1055,6 +1055,22 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
     MGLRasterStyleLayer * imageLayer = [[MGLRasterStyleLayer alloc] initWithIdentifier:@"radar-layer" source:imageSource];
     [self.mapView.style addLayer:imageLayer];
+    
+    MGLCircleStyleLayer *ucLayer = [[MGLCircleStyleLayer alloc] initWithIdentifier:@"uc" source:streetsSource];
+    ucLayer.sourceLayerIdentifier = @"poi_label";
+    ucLayer.predicate = [NSPredicate predicateWithFormat:@"$geometryType = 'Point'"];
+    CLLocationCoordinate2D ucCoordinates[] = {
+        { .latitude = 39.1279, .longitude = -84.5209 },
+        { .latitude = 39.1273, .longitude = -84.5112 },
+        { .latitude = 39.1355, .longitude = -84.5102 },
+        { .latitude = 39.1360, .longitude = -84.5212 },
+        { .latitude = 39.1279, .longitude = -84.5209 },
+    };
+    MGLPolygon *uc = [MGLPolygon polygonWithCoordinates:ucCoordinates count:sizeof(ucCoordinates) / sizeof(ucCoordinates[0])];
+    ucLayer.circleOpacity = [NSExpression expressionWithFormat:@"TERNARY(SELF IN %@, 1, 0)", uc];
+    ucLayer.circleRadius = [NSExpression expressionForConstantValue:@5];
+    ucLayer.circleColor = [NSExpression expressionForConstantValue:NSColor.redColor];
+    [self.mapView.style addLayer:ucLayer];
 }
 
 - (IBAction)dropPin:(NSMenuItem *)sender {
