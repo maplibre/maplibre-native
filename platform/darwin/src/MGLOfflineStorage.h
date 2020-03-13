@@ -376,10 +376,10 @@ MGL_EXPORT
  to `0`. Setting the maximum ambient cache size does not impact the maximum size
  of offline packs.
  
- While this method does not limit the space available to offline packs,
- data in offline packs count towards this limit. If the maximum ambient
- cache size is set to 30 MB and 20 MB of offline packs are downloaded,
- there may be only 10 MB reserved for the ambient cache.
+ This method does not limit the space available to offline packs, and data in
+ offline packs does not count towards this limit. If you set the maximum ambient
+ cache size to 30 MB then download 20 MB of offline packs, 30 MB will remain
+ available for the ambient cache.
  
  This method should be called before the map and map style have been loaded.
  
