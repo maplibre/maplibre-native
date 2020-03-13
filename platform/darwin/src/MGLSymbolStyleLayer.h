@@ -1057,10 +1057,12 @@ MGL_EXPORT
 @property (nonatomic, null_resettable) NSExpression *symbolPlacement;
 
 /**
- Sorts features in ascending order based on this value. Features with a higher
- sort key will appear above features with a lower sort key when they overlap.
- Features with a lower sort key will have priority over other features when
- doing placement.
+ Sorts features in ascending order based on this value. Features with lower sort
+ keys are drawn and placed first.  When `iconAllowsOverlap` or
+ `textAllowsOverlap` is `false`, features with a lower sort key will have
+ priority during placement. When `iconAllowsOverlap` or `textAllowsOverlap` is
+ set to `YES`, features with a higher sort key will overlap over features with a
+ lower sort key.
  
  You can set this property to an expression containing any of the following:
  

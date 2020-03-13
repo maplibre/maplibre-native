@@ -327,6 +327,9 @@ global.propertyDoc = function (propertyName, property, layerType, kind) {
     let doc = property.doc.replace(/`([^`]+?)` is set to `([^`]+?)`(?: or `([^`]+?)`)?/g, function (m, peerPropertyName, propertyValue, secondPropertyValue, offset, str) {
         let otherProperty = camelizeWithLeadingLowercase(peerPropertyName);
         let otherValue = objCType(layerType, peerPropertyName) + camelize(propertyValue);
+        if (propertyValue === 'true' || propertyValue === 'false') {
+            otherValue = propertyValue === 'true' ? 'YES' : 'NO';
+        }
         if (property.type == 'array' && kind == 'light') {
             otherValue = propertyValue;
         }
