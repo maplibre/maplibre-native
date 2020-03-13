@@ -43,6 +43,12 @@
 * Fixed an issue where `-[MGLMapView visibleFeaturesInRect:]` and `-[MGLShapeSource featuresMatchingPredicate:]` could return incorrect coordinates at zoom levels 20 and higher. ([#15560](https://github.com/mapbox/mapbox-gl-native/pull/15560))
 * Improved feature querying performance. ([#14930](https://github.com/mapbox/mapbox-gl-native/pull/14930))
 
+### Snapshots
+
+* Added an `-[MGLMapSnapshotter startWithOverlayHandler:completionHandler:]` method to provide the snapshot's current `CGContext` in order to perform custom drawing on `MGLMapSnapshot` objects. ([#15530](https://github.com/mapbox/mapbox-gl-native/pull/15530))
+* The `-[MGLMapSnapshotter cancel]` method no longer calls the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#209](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+* Fixed an issue where the `MGLMapSnapshotter.loading` property always returned `NO`, even while loading a snapshot. ([#209](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+
 ### Networking and storage
 
 * Ideographic glyphs from Chinese, Japanese, and Korean are no longer downloaded by default as part of offline packs; they are instead rendered on-device, saving bandwidth and storage while improving performance. ([#14176](https://github.com/mapbox/mapbox-gl-native/pull/14176))
@@ -55,7 +61,6 @@
 
 ### Other changes
 
-* Added an `-[MGLMapSnapshotter startWithOverlayHandler:completionHandler:]` method to provide the snapshot's current `CGContext` in order to perform custom drawing on `MGLMapSnapshot` objects. ([#15530](https://github.com/mapbox/mapbox-gl-native/pull/15530))
 * Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))
 * `MGLLoggingLevel` has been updated to better match core log levels. You can now use `MGLLoggingConfiguration.loggingLevel` to filter logs from core. ([#15120](https://github.com/mapbox/mapbox-gl-native/pull/15120))
 

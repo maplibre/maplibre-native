@@ -58,7 +58,7 @@ typedef void (^MGLMapSnapshotOverlayHandler)(MGLMapSnapshotOverlay * snapshotOve
  The options to use when creating images with the `MGLMapSnapshotter`.
  */
 MGL_EXPORT
-@interface MGLMapSnapshotOptions : NSObject
+@interface MGLMapSnapshotOptions : NSObject <NSCopying>
 
 /**
  Creates a set of options with the minimum required information.
@@ -252,7 +252,7 @@ MGL_EXPORT
 /**
  Starts the snapshot creation and executes the specified blocks with the result
  on the specified queue. Use this option if you want to add custom drawing on top of the
- resulting `MGLMapSnapShot`.
+ resulting `MGLMapSnapshot`.
  @param overlayHandler The block to handle manipulation of the `MGLMapSnapshotter`'s `CGContext`.
  @param completionHandler The block to handle the result in.
  */

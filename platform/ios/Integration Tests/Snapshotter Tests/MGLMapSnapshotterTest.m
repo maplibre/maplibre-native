@@ -72,6 +72,27 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
+- (void)testSnapshotterWithoutStrongReference🔒 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion handler shouldn’t be called if there’s no strong reference to the snapshotter and the snapshotter goes away."];
+    expectation.inverted = YES;
+    
+    CGSize size = self.mapView.bounds.size;
+    CLLocationCoordinate2D coordinates = CLLocationCoordinate2DMake(30.0, 30.0);
+    __weak MGLMapSnapshotter *weakSnapshotter;
+    @autoreleasepool {
+        MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coordinates, size);
+        weakSnapshotter = snapshotter;
+        [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
+            // This completion block should not be called.
+            [expectation fulfill];
+        }];
+        MGLTestAssertNotNil(self, weakSnapshotter, @"Locally scoped snapshotter should not go away while in scope.");
+    }
+    MGLTestAssertNil(self, weakSnapshotter, @"Snapshotter should go away on its own if there’s no strong reference to it.");
+    
+    [self waitForExpectations:@[expectation] timeout:5];
+}
+
 - (void)testDeallocatingSnapshotterDuringSnapshot🔒 {
     // See also https://github.com/mapbox/mapbox-gl-native/issues/12336
 
@@ -93,20 +114,12 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
 
         dispatch_async(dispatch_get_main_queue(), ^{
             MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
-            __weak MGLMapSnapshotter *weakSnapshotter = snapshotter;
-            
             [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-                // We expect this completion block to be called with an error
+                // This completion block should not be called.
                 __typeof__(self) strongself = weakself;
-
-                MGLTestAssertNil(strongself, snapshot);
-                MGLTestAssert(strongself,
-                              ([error.domain isEqualToString:MGLErrorDomain] && error.code == MGLErrorCodeSnapshotFailed),
-                              @"Should have errored");
-                MGLTestAssertNil(strongself, weakSnapshotter, @"Snapshotter should have been deallocated");
-
-                dispatch_group_leave(dg);
+                MGLTestFail(strongself, @"Completion handler should not be called after snapshotter is deallocated.");
             }];
+            dispatch_group_leave(dg);
         });
 
         dispatch_group_notify(dg, dispatch_get_main_queue(), ^{
@@ -162,10 +175,6 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
 }
 
 - (void)testCancellingSnapshot🔒 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"snapshots"];
-    expectation.assertForOverFulfill = YES;
-    expectation.expectedFulfillmentCount = 1;
-
     CGSize size                    = self.mapView.bounds.size;
     CLLocationCoordinate2D coord   = CLLocationCoordinate2DMake(30.0, 30.0);
 
@@ -174,20 +183,11 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     __weak __typeof__(self) weakself = self;
 
     [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-        // We expect this completion block to be called with an error
         __typeof__(self) strongself = weakself;
-
-        MGLTestAssertNil(strongself, snapshot);
-        MGLTestAssert(strongself,
-                      ([error.domain isEqualToString:MGLErrorDomain] && error.code == MGLErrorCodeSnapshotFailed),
-                      @"Should have been cancelled");
-        MGLTestAssert(strongself, snapshotter.cancelled, @"Should have been cancelled");
-        [expectation fulfill];
+        MGLTestFail(strongself, @"Completion handler should not be called when canceling.");
     }];
 
     [snapshotter cancel];
-
-    [self waitForExpectations:@[expectation] timeout:5.0];
 }
 
 - (void)testAllocatingSnapshotOnBackgroundQueue🔒 {
