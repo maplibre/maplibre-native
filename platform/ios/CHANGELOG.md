@@ -14,6 +14,12 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 * Fixed an issue where an `MGLSymbolStyleLayer.lineDashPattern` value of `{1, 0}` resulted in hairline gaps. ([#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202))
 * Improved the performance of loading a style that has many style images. ([#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187))
 
+### Snapshots
+
+* `MGLMapSnapshotter` no longer keeps itself from being deallocated before its completion handler is called. To ensure that the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]` is called, maintain a strong reference to the snapshotter from a longer-lived class, such as the class where you call `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+* The `-[MGLMapSnapshotter cancel]` method no longer calls the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+* Fixed an issue where the `MGLMapSnapshotter.loading` property always returned `NO`, even while loading a snapshot. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+
 ### Networking and storage
 
 * Downloaded offline packs no longer reduce the storage space available for ambient caching of tiles and other resources. ([#15622](https://github.com/mapbox/mapbox-gl-native/pull/15622))
@@ -23,8 +29,6 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 ### Other changes
 
 * Added the `MGLMapView.minimumPitch` and `MGLMapView.maximumPitch` properties to further limit how much the user or your code can tilt the map. ([#208](https://github.com/mapbox/mapbox-gl-native-ios/pull/208))
-* The `-[MGLMapSnapshotter cancel]` method no longer calls the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#209](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
-* Fixed an issue where the `MGLMapSnapshotter.loading` property always returned `NO`, even while loading a snapshot. ([#209](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
 * Improved performance when continuously animating a tilted map. ([#16287](https://github.com/mapbox/mapbox-gl-native/pull/16287))
 * Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))
 * Added the `-[MGLOfflineStorage preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:]` method for determining when the data is ready to retrieve from the cache. ([#188](https://github.com/mapbox/mapbox-gl-native-ios/pull/188))

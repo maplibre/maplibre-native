@@ -463,13 +463,15 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
             }
         }
 
+        let snapshotter: MGLMapSnapshotter
         //#-example-code
         let camera = MGLMapCamera(lookingAtCenter: CLLocationCoordinate2D(latitude: 37.7184, longitude: -122.4365), altitude: 100, pitch: 20, heading: 0)
 
         let options = MGLMapSnapshotOptions(styleURL: MGLStyle.satelliteStreetsStyleURL, camera: camera, size: CGSize(width: 320, height: 480))
         options.zoomLevel = 10
 
-        let snapshotter = MGLMapSnapshotter(options: options)
+        // The containing class should hold a strong reference to this object.
+        snapshotter = MGLMapSnapshotter(options: options)
         snapshotter.start { (snapshot, error) in
             if let error = error {
                 fatalError(error.localizedDescription)
