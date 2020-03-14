@@ -16,7 +16,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ### Snapshots
 
-* `MGLMapSnapshotter` no longer keeps itself from being deallocated before its completion handler is called. To ensure that the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]` is called, maintain a strong reference to the snapshotter from a longer-lived class, such as the class where you call `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
+* You no longer need to explicitly capture the `MGLMapSnapshotter` object in the completion handler that you specify in `-[MGLMapSnapshotter startWithCompletionHandler:]`. Even if you declare the snapshotter locally without holding a strong reference to it, the snapshotter is only deallocated after the completion handler finishes, and the completion handler generally receives a valid snapshot. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
 * The `-[MGLMapSnapshotter cancel]` method no longer calls the completion handler passed into `-[MGLMapSnapshotter startWithCompletionHandler:]`. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
 * Fixed an issue where the `MGLMapSnapshotter.loading` property always returned `NO`, even while loading a snapshot. ([#210](https://github.com/mapbox/mapbox-gl-native-ios/pull/210))
 

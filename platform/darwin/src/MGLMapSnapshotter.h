@@ -185,11 +185,6 @@ typedef void (^MGLMapSnapshotCompletionHandler)(MGLMapSnapshot* _Nullable snapsh
  snapshot at a time. If you need to generate multiple snapshots concurrently,
  create multiple snapshotter objects.
  
- An `MGLMapSnapshotter` object may be deallocated before the completion handler
- is called. To prevent this object from being deallocated prematurely, maintain
- a strong reference to it, for example by storing it in an instance variable of
- the class where you initialize and start the snapshotter.
- 
  For an interactive map, use the `MGLMapView` class. Both `MGLMapSnapshotter`
  and `MGLMapView` are compatible with offline packs managed by the
  `MGLOfflineStorage` class.
@@ -208,8 +203,7 @@ typedef void (^MGLMapSnapshotCompletionHandler)(MGLMapSnapshot* _Nullable snapsh
  let options = MGLMapSnapshotOptions(styleURL: MGLStyle.satelliteStreetsStyleURL, camera: camera, size: CGSize(width: 320, height: 480))
  options.zoomLevel = 10
  
- // The containing class should hold a strong reference to this object.
- snapshotter = MGLMapSnapshotter(options: options)
+ let snapshotter = MGLMapSnapshotter(options: options)
  snapshotter.start { (snapshot, error) in
      if let error = error {
          fatalError(error.localizedDescription)
@@ -242,11 +236,6 @@ MGL_EXPORT
 /**
  Starts the snapshot creation and executes the specified block with the result.
  
- The snapshotter may be deallocated before the completion handler is called. To
- prevent the snapshotter from being deallocated prematurely, maintain a strong
- reference to it, for example by storing it in an instance variable of the class
- where you call this method.
- 
  @param completionHandler The block to call with a finished snapshot. The block
     is executed on the main queue.
  */
@@ -255,11 +244,6 @@ MGL_EXPORT
 /**
  Starts the snapshot creation and executes the specified block with the result
  on the specified queue.
- 
- The snapshotter may be deallocated before the completion handler is called. To
- prevent the snapshotter from being deallocated prematurely, maintain a strong
- reference to it, for example by storing it in an instance variable of the class
- where you call this method.
  
  @param queue The queue on which to call the block specified in the
     `completionHandler` parameter.
@@ -272,11 +256,6 @@ MGL_EXPORT
  Starts the snapshot creation and executes the specified blocks with the result
  on the specified queue. Use this option if you want to add custom drawing on
  top of the resulting `MGLMapSnapshot`.
- 
- The snapshotter may be deallocated before the completion handler is called. To
- prevent the snapshotter from being deallocated prematurely, maintain a strong
- reference to it, for example by storing it in an instance variable of the class
- where you call this method.
  
  @param overlayHandler The block to call after the base map finishes drawing but
     before certain built-in overlays draw. The block can use Core Graphics to

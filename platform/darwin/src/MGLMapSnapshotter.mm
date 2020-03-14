@@ -261,6 +261,9 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
 
 - (void)startWithQueue:(dispatch_queue_t)queue overlayHandler:(MGLMapSnapshotOverlayHandler)overlayHandler completionHandler:(MGLMapSnapshotCompletionHandler)completion
 {
+    if (!completion) {
+        return;
+    }
     if (!mbgl::Scheduler::GetCurrent()) {
         [NSException raise:NSInvalidArgumentException
                     format:@"startWithQueue:completionHandler: must be called from a thread with an active run loop."];
@@ -282,9 +285,11 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     [self configureWithOptions:options];
     MGLLogDebug(@"Starting with options: %@", self.options);
 
-    // Capture weakSelf to avoid retain cycle if callback is never called (i.e., snapshot canceled).
-    __weak __typeof__(self) weakSelf = self;
-    _mbglMapSnapshotter->snapshot([=](std::exception_ptr mbglError, mbgl::PremultipliedImage image, mbgl::MapSnapshotter::Attributions attributions, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn) {
+    // Temporarily capture the snapshotter until the completion handler finishes executing, to keep standalone local usage of the snapshotter from becoming a no-op.
+    // POSTCONDITION: Only refer to this variable in the final result queue.
+    // POSTCONDITION: It is important to nil out this variable at some point in the future to avoid a leak. In cases where the completion handler gets called, the variable should be nilled out explicitly. If -cancel is called, mbgl releases the snapshot block below, causing the only remaining references to the snapshotter to go out of scope.
+    __block MGLMapSnapshotter *strongSelf = self;
+    _mbglMapSnapshotter->snapshot(^(std::exception_ptr mbglError, mbgl::PremultipliedImage image, mbgl::MapSnapshotter::Attributions attributions, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn) {
         if (mbglError) {
             NSString *description = @(mbgl::util::toString(mbglError).c_str());
             NSDictionary *userInfo = @{NSLocalizedDescriptionKey: description};
@@ -294,8 +299,9 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
 #endif
             // Dispatch to result queue
             dispatch_async(queue, ^{
-                weakSelf.loading = NO;
+                strongSelf.loading = NO;
                 completion(nil, error);
+                strongSelf = nil;
             });
         } else {
 #if TARGET_OS_IPHONE
@@ -315,11 +321,9 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
                 
                 // Dispatch result to result queue
                 dispatch_async(queue, ^{
-                    __typeof__(self) strongSelf = weakSelf;
                     strongSelf.loading = NO;
-                    if (completion) {
-                        completion(snapshot, error);
-                    }
+                    completion(snapshot, error);
+                    strongSelf = nil;
                 });
             });
         }

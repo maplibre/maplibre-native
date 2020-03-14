@@ -73,8 +73,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
 }
 
 - (void)testSnapshotterWithoutStrongReference🔒 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion handler shouldn’t be called if there’s no strong reference to the snapshotter and the snapshotter goes away."];
-    expectation.inverted = YES;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion handler should be called even if there’s no strong reference to the snapshotter."];
     
     CGSize size = self.mapView.bounds.size;
     CLLocationCoordinate2D coordinates = CLLocationCoordinate2DMake(30.0, 30.0);
@@ -82,18 +81,21 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     @autoreleasepool {
         MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coordinates, size);
         weakSnapshotter = snapshotter;
+        __weak __typeof__(self) weakSelf = self;
         [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-            // This completion block should not be called.
+            MGLTestAssertNotNil(weakSelf, weakSnapshotter, @"Snapshotter should not go away until the completion handler finishes executing.");
+            // This completion block should be called.
             [expectation fulfill];
         }];
         MGLTestAssertNotNil(self, weakSnapshotter, @"Locally scoped snapshotter should not go away while in scope.");
     }
-    MGLTestAssertNil(self, weakSnapshotter, @"Snapshotter should go away on its own if there’s no strong reference to it.");
+    MGLTestAssertNotNil(self, weakSnapshotter, @"Snapshotter should remain until it finishes even there’s no strong reference to it.");
     
-    [self waitForExpectations:@[expectation] timeout:5];
+    [self waitForExpectations:@[expectation] timeout:10.0];
+    MGLTestAssertNil(self, weakSnapshotter, @"Completion handler should not leak snapshotter.");
 }
 
-- (void)testDeallocatingSnapshotterDuringSnapshot🔒 {
+- (void)testSnapshotterInBackgroundWithoutStrongReference🔒 {
     // See also https://github.com/mapbox/mapbox-gl-native/issues/12336
 
     NSTimeInterval timeout         = 10.0;
@@ -106,6 +108,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
 //  dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
     __weak __typeof__(self) weakself = self;
+    __block __weak MGLMapSnapshotter *weakSnapshotter;
 
     dispatch_async(backgroundQueue, ^{
 
@@ -113,13 +116,21 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
         dispatch_group_enter(dg);
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
-            [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-                // This completion block should not be called.
-                __typeof__(self) strongself = weakself;
-                MGLTestFail(strongself, @"Completion handler should not be called after snapshotter is deallocated.");
-            }];
-            dispatch_group_leave(dg);
+            @autoreleasepool {
+                MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
+                weakSnapshotter = snapshotter;
+                
+                [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
+                    // We expect this completion block to be called with an error
+                    __typeof__(self) strongself = weakself;
+
+                    MGLTestAssertNotNil(strongself, snapshot);
+                    MGLTestAssertNil(strongself, error, @"Snapshotter should have completed");
+                    MGLTestAssertNotNil(strongself, weakSnapshotter, @"Snapshotter should not have been deallocated yet.");
+
+                    dispatch_group_leave(dg);
+                }];
+            }
         });
 
         dispatch_group_notify(dg, dispatch_get_main_queue(), ^{
@@ -128,6 +139,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     });
 
     [self waitForExpectations:@[expectation] timeout:timeout];
+    MGLTestAssertNil(self, weakSnapshotter, @"Snapshotter should not leak.");
 }
 
 - (void)testSnapshotterUsingNestedDispatchQueues🔒 {
@@ -157,7 +169,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
             __block MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
 
             [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-                // We expect this completion block to be called with an error
+                // We expect this completion block to be called with no error
                 __typeof__(self) strongself = weakself;
                 MGLTestAssertNotNil(strongself, snapshot);
                 MGLTestAssertNil(strongself, error, @"Snapshotter should have completed");
@@ -178,16 +190,20 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     CGSize size                    = self.mapView.bounds.size;
     CLLocationCoordinate2D coord   = CLLocationCoordinate2DMake(30.0, 30.0);
 
-    MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
+    __block __weak MGLMapSnapshotter *weakSnapshotter;
+    @autoreleasepool {
+        MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
+        weakSnapshotter = snapshotter;
+        __weak __typeof__(self) weakself = self;
+        [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
+            __typeof__(self) strongself = weakself;
+            MGLTestFail(strongself, @"Completion handler should not be called when canceling.");
+        }];
+    }
 
-    __weak __typeof__(self) weakself = self;
-
-    [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-        __typeof__(self) strongself = weakself;
-        MGLTestFail(strongself, @"Completion handler should not be called when canceling.");
-    }];
-
-    [snapshotter cancel];
+    MGLTestAssertNotNil(self, weakSnapshotter);
+    [weakSnapshotter cancel];
+    MGLTestAssertNil(self, weakSnapshotter, @"Snapshotter should not leak after being canceled.");
 }
 
 - (void)testAllocatingSnapshotOnBackgroundQueue🔒 {
@@ -290,39 +306,27 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
         float lon = (ratio*120.0) + ((1.0-ratio)*54.0);
         CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(57.0, lon);
 
-        __block MGLMapSnapshotter *snapshotter;
-
-        // Allocate from an autorelease pool here, to avoid having
-        // snapshotter retained for longer than we'd like to test.
         @autoreleasepool {
-            snapshotter = snapshotterWithCoordinates(coord, size);
-            XCTAssertNotNil(snapshotter);
+            MGLMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
+            [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
+                
+                // This should be the main queue
+                __typeof__(self) strongself = weakself;
+                
+                MGLTestAssertNotNil(strongself, strongself);
+                
+                MGLTestAssertNotNil(strongself, snapshot);
+                MGLTestAssertNotNil(strongself, snapshot.image);
+                MGLTestAssertNil(strongself, error, @"Snapshot should not error with: %@", error);
+                
+                // Change this to XCTAttachmentLifetimeKeepAlways to be able to look at the snapshots after running
+                XCTAttachment *attachment = [XCTAttachment attachmentWithImage:snapshot.image];
+                attachment.lifetime = XCTAttachmentLifetimeDeleteOnSuccess;
+                [strongself addAttachment:attachment];
+                
+                [expectation fulfill];
+            }];
         }
-
-        [snapshotter startWithCompletionHandler:^(MGLMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-
-            // This should be the main queue
-            __typeof__(self) strongself = weakself;
-
-            MGLTestAssertNotNil(strongself, strongself);
-
-            MGLTestAssertNotNil(strongself, snapshot);
-            MGLTestAssertNotNil(strongself, snapshot.image);
-            MGLTestAssertNil(strongself, error, @"Snapshot should not error with: %@", error);
-
-            // Change this to XCTAttachmentLifetimeKeepAlways to be able to look at the snapshots after running
-            XCTAttachment *attachment = [XCTAttachment attachmentWithImage:snapshot.image];
-            attachment.lifetime = XCTAttachmentLifetimeDeleteOnSuccess;
-            [strongself addAttachment:attachment];
-
-            // Dealloc the snapshotter (by having this line in the block, we
-            // also retained the snapshotter. Setting to nil should release, as
-            // this block should be the only thing retaining it (since it was
-            // allocated from the above autorelease pool)
-            snapshotter = nil;
-
-            [expectation fulfill];
-        }];
     } // end for loop
 
     [self waitForExpectations:@[expectation] timeout:60.0];
