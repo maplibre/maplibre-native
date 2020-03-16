@@ -80,7 +80,9 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     if (self.isPaused) {
         return;
     }
-    _mbglFileSource->pause();
+
+    _mbglOnlineFileSource->pause();
+    _mbglDatabaseFileSource->pause();
     self.paused = YES;
 }
 
@@ -88,7 +90,9 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     if (!self.isPaused) {
         return;
     }
-    _mbglFileSource->resume();
+
+    _mbglOnlineFileSource->pause();
+    _mbglDatabaseFileSource->pause();
     self.paused = NO;
 }
 #endif
@@ -281,9 +285,9 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLAccountManager sharedManager]) {
         NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
         if ([apiBaseURL isKindOfClass:[NSNull class]]) {
-            _mbglFileSource->setProperty(mbgl::API_BASE_URL_KEY, mbgl::util::API_BASE_URL);
+            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, mbgl::util::API_BASE_URL);
         } else {
-            _mbglFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
+            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -633,6 +637,11 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 }
 
 - (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(nullable NSDate *)modified expirationDate:(nullable NSDate *)expires eTag:(nullable NSString *)eTag mustRevalidate:(BOOL)mustRevalidate {
+    [self preloadData:data forURL:url modificationDate:modified expirationDate:expires eTag:eTag mustRevalidate:mustRevalidate completionHandler:nil];
+}
+
+- (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(nullable NSDate *)modified expirationDate:(nullable NSDate *)expires eTag:(nullable NSString *)eTag mustRevalidate:(BOOL)mustRevalidate
+    completionHandler:(nullable MGLOfflinePreloadDataCompletionHandler)completion {
     mbgl::Resource resource(mbgl::Resource::Kind::Unknown, url.absoluteString.UTF8String);
     mbgl::Response response;
     response.data = std::make_shared<std::string>(static_cast<const char*>(data.bytes), data.length);
@@ -649,8 +658,16 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     if (expires) {
         response.expires = mbgl::Timestamp() + std::chrono::duration_cast<mbgl::Seconds>(MGLDurationFromTimeInterval(expires.timeIntervalSince1970));
     }
-    
-    _mbglDatabaseFileSource->put(resource, response);
+
+    std::function<void()> callback;
+
+    if (completion) {
+        callback = [completion, url] {
+            dispatch_async(dispatch_get_main_queue(), [completion, url] { completion(url, nil); });
+        };
+    }
+
+    _mbglDatabaseFileSource->forward(resource, response, callback);
 }
 
 - (void)putResourceWithUrl:(NSURL *)url data:(NSData *)data modified:(nullable NSDate *)modified expires:(nullable NSDate *)expires etag:(nullable NSString *)etag mustRevalidate:(BOOL)mustRevalidate {

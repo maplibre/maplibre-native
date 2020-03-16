@@ -143,6 +143,15 @@ typedef void (^MGLOfflinePackRemovalCompletionHandler)(NSError * _Nullable error
 typedef void (^MGLBatchedOfflinePackAdditionCompletionHandler)(NSURL *fileURL, NSArray<MGLOfflinePack *> * _Nullable packs, NSError * _Nullable error);
 
 /**
+A block to be called once the data  has been preloaded.
+
+ @param url The URL of the data that was pre-loaded.
+ @param error Contains a pointer to an error object (if any) indicating why the
+ data could not be pre-loaded.
+*/
+typedef void (^MGLOfflinePreloadDataCompletionHandler)(NSURL * url, NSError * _Nullable error);
+
+/**
  The type of resource that is requested.
  */
 typedef NS_ENUM(NSUInteger, MGLResourceKind) {
@@ -434,7 +443,9 @@ MGL_EXPORT
  This method is asynchronous; the data may not be immediately available for
  in-progress requests, though subsequent requests should have access to the
  cached data.
- 
+
+ To find out when the resource is ready to retrieve from the cache, use the -preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler: method.
+
  @param data Response data to store for this resource. The data is expected to
     be uncompressed; internally, the cache will compress data as necessary.
  @param url The URL at which the data can normally be found.
@@ -447,6 +458,30 @@ MGL_EXPORT
 - (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(nullable NSDate *)modified expirationDate:(nullable NSDate *)expires eTag:(nullable NSString *)eTag mustRevalidate:(BOOL)mustRevalidate NS_SWIFT_NAME(preload(_:for:modifiedOn:expiresOn:eTag:mustRevalidate:));
 
 - (void)putResourceWithUrl:(NSURL *)url data:(NSData *)data modified:(nullable NSDate *)modified expires:(nullable NSDate *)expires etag:(nullable NSString *)etag mustRevalidate:(BOOL)mustRevalidate __attribute__((deprecated("", "-preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:")));
+
+/**
+Inserts the provided resource into the ambient cache, calling a completion handler when finished.
+
+This method is asynchronous. The data is available for in-progress requests as
+soon as the completion handler is called.
+
+This method is asynchronous; the data may not be immediately available for
+in-progress requests, though subsequent requests should have access to the
+cached data.
+
+@param data Response data to store for this resource. The data is expected to
+   be uncompressed; internally, the cache will compress data as necessary.
+@param url The URL at which the data can normally be found.
+@param modified The date the resource was last modified.
+@param expires The date after which the resource is no longer valid.
+@param eTag An HTTP entity tag.
+@param mustRevalidate A Boolean value indicating whether the data is still
+   usable past the expiration date.
+@param completion The completion handler to call once the data has been preloaded.
+This handler is executed asynchronously on the main queue.
+*/
+- (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(nullable NSDate *)modified expirationDate:(nullable NSDate *)expires eTag:(nullable NSString *)eTag mustRevalidate:(BOOL)mustRevalidate
+    completionHandler:(nullable MGLOfflinePreloadDataCompletionHandler)completion;
 
 @end
 

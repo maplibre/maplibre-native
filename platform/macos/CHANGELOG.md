@@ -51,6 +51,7 @@
 * Fixed issues where an offline pack would stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * When an offline pack encounters an HTTP 404 error, the `MGLOfflinePackUserInfoKeyError` user info key of the `MGLOfflinePackErrorNotification` now indicates the resource that could not be downloaded. ([#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 * Expired resources are now fetched at a lower priority than new resources. ([#15950](https://github.com/mapbox/mapbox-gl-native/pull/15950))
+* Added the `-[MGLOfflineStorage preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:]` method for determining when the data is ready to retrieve from the cache. ([#188](https://github.com/mapbox/mapbox-gl-native-ios/pull/188))
 
 ### Other changes
 
