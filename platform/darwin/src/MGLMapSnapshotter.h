@@ -247,7 +247,8 @@ MGL_EXPORT
  reference to it, for example by storing it in an instance variable of the class
  where you call this method.
  
- @param completionHandler The block to handle the result in.
+ @param completionHandler The block to call with a finished snapshot. The block
+    is executed on the main queue.
  */
 - (void)startWithCompletionHandler:(MGLMapSnapshotCompletionHandler)completionHandler;
 
@@ -260,23 +261,29 @@ MGL_EXPORT
  reference to it, for example by storing it in an instance variable of the class
  where you call this method.
  
- @param queue The queue to handle the result on.
- @param completionHandler The block to handle the result in.
+ @param queue The queue on which to call the block specified in the
+    `completionHandler` parameter.
+ @param completionHandler The block to call with a finished snapshot. The block
+     is executed on the queue specified in the `queue` parameter.
  */
 - (void)startWithQueue:(dispatch_queue_t)queue completionHandler:(MGLMapSnapshotCompletionHandler)completionHandler;
 
 /**
  Starts the snapshot creation and executes the specified blocks with the result
- on the specified queue. Use this option if you want to add custom drawing on top of the
- resulting `MGLMapSnapshot`.
+ on the specified queue. Use this option if you want to add custom drawing on
+ top of the resulting `MGLMapSnapshot`.
  
  The snapshotter may be deallocated before the completion handler is called. To
  prevent the snapshotter from being deallocated prematurely, maintain a strong
  reference to it, for example by storing it in an instance variable of the class
  where you call this method.
  
- @param overlayHandler The block to handle manipulation of the `MGLMapSnapshotter`'s `CGContext`.
- @param completionHandler The block to handle the result in.
+ @param overlayHandler The block to call after the base map finishes drawing but
+    before certain built-in overlays draw. The block can use Core Graphics to
+    draw custom content directly over the base map. The block is executed on a
+    background queue.
+ @param completionHandler The block to call with a finished snapshot. The block
+     is executed on the main queue.
  */
 - (void)startWithOverlayHandler:(MGLMapSnapshotOverlayHandler)overlayHandler completionHandler:(MGLMapSnapshotCompletionHandler)completionHandler;
 
