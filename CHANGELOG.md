@@ -23,6 +23,7 @@ This beta release includes a feature with a known issue: the `within` expression
  - Fixed issues that would cause an offline region to stop downloading before completion. ([#16230](https://github.com/mapbox/mapbox-gl-native/pull/16230), [#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
  - Fixed an issue where a `LineDasharray` value of `[1, 0]` resulted in hairline gaps. ([#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202))
  - Fixed Proguard configuration to prevent obfuscation of telemetry event classes. ([#195](https://github.com/mapbox/mapbox-gl-native-android/pull/195))
+ - Fixed a crash that might occur during EGL window surface creation. ([#278](https://github.com/mapbox/mapbox-gl-native-android/pull/278))
 
 ### Other changes
  - Updated mapbox-events-android to v4.7.3. ([#201](https://github.com/mapbox/mapbox-gl-native-android/pull/201))

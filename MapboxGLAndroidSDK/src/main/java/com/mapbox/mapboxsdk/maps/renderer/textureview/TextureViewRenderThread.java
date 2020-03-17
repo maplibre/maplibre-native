@@ -1,9 +1,11 @@
 package com.mapbox.mapboxsdk.maps.renderer.textureview;
 
 import android.graphics.SurfaceTexture;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+
 import android.view.TextureView;
 
 import com.mapbox.mapboxsdk.log.Logger;
@@ -390,7 +392,7 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
 
       // Create an EGL surface we can render into.
       TextureView view = textureViewWeakRef.get();
-      if (view != null) {
+      if (view != null && view.getSurfaceTexture() != null) {
         int[] surfaceAttribs = {EGL10.EGL_NONE};
         eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfig, view.getSurfaceTexture(), surfaceAttribs);
       } else {
