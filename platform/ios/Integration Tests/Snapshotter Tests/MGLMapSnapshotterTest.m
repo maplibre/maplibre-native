@@ -104,8 +104,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     CLLocationCoordinate2D coord   = CLLocationCoordinate2DMake(30.0, 30.0);
 
     // Test triggering to main queue
-    dispatch_queue_t backgroundQueue = dispatch_get_main_queue();
-//  dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
     __weak __typeof__(self) weakself = self;
     __block __weak MGLMapSnapshotter *weakSnapshotter;
@@ -154,8 +153,7 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
     CLLocationCoordinate2D coord   = CLLocationCoordinate2DMake(30.0, 30.0);
 
     // Test triggering to main queue
-    dispatch_queue_t backgroundQueue = dispatch_get_main_queue();
-    //  dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
     __weak __typeof__(self) weakself = self;
 
