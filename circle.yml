@@ -421,10 +421,15 @@ jobs:
               #platform/ios/scripts/metrics.sh
       - run:
           name: Trigger metrics
-          command: |
+          command: >
             if [[ $CIRCLE_BRANCH == master ]]; then
               if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=ios-maps-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+                curl 
+                  -u ${CIRCLE_CI_TOKEN}: 
+                  -X POST 
+                  --header "Content-Type: application/json" 
+                  --data '{"parameters": {"run_ios_maps_benchmark": true, "ci_ref" : $CIRCLE_BUILD_NUM }, "branch": "master"}' 
+                  https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline
               else
                 echo "MOBILE_METRICS_TOKEN not provided"
               fi
