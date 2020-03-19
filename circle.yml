@@ -16,6 +16,12 @@ workflows:
       - ios-debug-xcode10
       - ios-release-template:
           name: ios-release
+      - ios-trigger-metrics:
+          requires: 
+            - ios-release
+          filters:
+            branches:
+              only: master
       - ios-release-tag:
           filters:
             tags:
@@ -203,6 +209,17 @@ commands:
     - run:
         name: Install macOS dependencies
         command: brew install cmake ccache pkg-config glfw3
+
+  trigger-metrics:
+    steps:
+      - run:
+          name: Trigger metrics
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              bash -c "curl -X POST --header \"Content-Type: application/json\" --data '{\"parameters\": {\"run_ios_maps_benchmark\": true, \"ci_ref\": $CIRCLE_BUILD_NUM }, \"branch\": \"master\" }' https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline?circle-token=${MOBILE_METRICS_TOKEN}"
+            else
+              echo "MOBILE_METRICS_TOKEN not provided"
+            fi
 
   collect-xcode-build-logs:
     steps:
@@ -419,16 +436,6 @@ jobs:
               echo "Skipping Record size step"
               # Skipping due to https://github.com/mapbox/mapbox-gl-native/issues/15751
               #platform/ios/scripts/metrics.sh
-      - run:
-          name: Trigger metrics
-          command: |
-            if [[ $CIRCLE_BRANCH == master ]]; then
-              if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-                curl -u ${CIRCLE_CI_TOKEN}: -X POST --header "Content-Type: application/json" --data '{"parameters": {"run_ios_maps_benchmark": true, "ci_ref" : $CIRCLE_BUILD_NUM }, "branch": "master"}' https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline
-              else
-                echo "MOBILE_METRICS_TOKEN not provided"
-              fi
-            fi
       - save-dependencies
       - collect-xcode-build-logs
       - upload-xcode-build-logs
@@ -486,6 +493,13 @@ jobs:
             export SLACK_MESSAGE="<$CIRCLE_BUILD_URL|Release build for \`$CIRCLE_TAG\` succeeded.>"
             export SLACK_COLOR="good"
             scripts/notify-slack.sh
+
+# ------------------------------------------------------------------------------
+  ios-trigger-metrics:
+    macos:
+      xcode: "11.2.1"
+    steps:
+      - trigger-metrics
 
 # ------------------------------------------------------------------------------
   macos-debug:
