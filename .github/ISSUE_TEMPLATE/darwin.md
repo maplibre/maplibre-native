@@ -1,7 +1,7 @@
 ---
 name: iOS or macOS
 about: Mapbox Maps SDK for iOS or macOS
-
+labels: "status: triage"
 ---
 <!--
 Hello and thanks for contributing to the Mapbox Maps SDKs for iOS and macOS! To help us diagnose your problem quickly, please:

@@ -1,7 +1,7 @@
 ---
 name: Other
 about: CI or other non-platform specific issues
-
+labels: "status: triage"
 ---
 <!--
 Hello and thanks for contributing to the Mapbox Maps SDK! To help us diagnose your problem quickly, please:
