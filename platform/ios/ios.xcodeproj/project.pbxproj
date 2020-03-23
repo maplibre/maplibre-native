@@ -577,6 +577,7 @@
 		DA8963391CC549A100684375 /* styles in Resources */ = {isa = PBXBuildFile; fileRef = DA8963351CC549A100684375 /* styles */; };
 		DA89633A1CC549A100684375 /* tiles in Resources */ = {isa = PBXBuildFile; fileRef = DA8963361CC549A100684375 /* tiles */; };
 		DAA32CC31E4C6B65006F8D24 /* MGLDistanceFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3557F7AF1E1D27D300CCA5E6 /* MGLDistanceFormatter.m */; };
+		DAA4227E2429771D008457DB /* MGLMapSnapshotterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DAA4227D2429771D008457DB /* MGLMapSnapshotterTests.m */; };
 		DAA4E4081CBB6C9500178DFB /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
 		DAA4E4091CBB6C9500178DFB /* Mapbox.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DAA4E41C1CBB730400178DFB /* MGLAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DA8848001CBAFA6200AB86E3 /* MGLAccountManager.m */; };
@@ -1261,6 +1262,7 @@
 		DAA32CB71E4C4ED8006F8D24 /* sv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAA32CBC1E4C4F5D006F8D24 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAA32CBD1E4C4F62006F8D24 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Foundation.strings; sourceTree = "<group>"; };
+		DAA4227D2429771D008457DB /* MGLMapSnapshotterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MGLMapSnapshotterTests.m; path = ../../darwin/test/MGLMapSnapshotterTests.m; sourceTree = "<group>"; };
 		DAA4E4131CBB71D400178DFB /* libMapbox.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMapbox.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAAE9B1C213A636B00F7D722 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ar; path = ar.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		DAAF72291DA903C700312FA4 /* MGLStyleValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLStyleValue.h; sourceTree = "<group>"; };
@@ -1863,6 +1865,7 @@
 				DA0E9F3E2411AC9B007C75D4 /* MGLImageTests.mm */,
 				DA5DB1291FABF1EE001C2326 /* MGLMapAccessibilityElementTests.m */,
 				DA695425215B1E75002041A4 /* MGLMapCameraTests.m */,
+				DAA4227D2429771D008457DB /* MGLMapSnapshotterTests.m */,
 				96E6145522CC135200109F14 /* MGLMapViewCompassViewTests.mm */,
 				1F0196A923174B0700F5C819 /* MGLMapViewContentInsetTests.m */,
 				96ED34DD22374C0900E9FCA9 /* MGLMapViewDirectionTests.mm */,
@@ -3010,6 +3013,7 @@
 				6407D6701E0085FD00F6A9C3 /* MGLDocumentationExampleTests.swift in Sources */,
 				DA2E88631CC0382C00F24E7B /* MGLOfflineRegionTests.m in Sources */,
 				409F43FD1E9E781C0048729D /* MGLMapViewDelegateIntegrationTests.swift in Sources */,
+				DAA4227E2429771D008457DB /* MGLMapSnapshotterTests.m in Sources */,
 				DA2E88651CC0382C00F24E7B /* MGLStyleTests.mm in Sources */,
 				DA2E88611CC0382C00F24E7B /* MGLGeometryTests.mm in Sources */,
 				170C437D2029D97900863DF0 /* MGLHeatmapStyleLayerTests.mm in Sources */,
