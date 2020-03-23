@@ -447,6 +447,8 @@ MGLImage *MGLAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     
     [sourceImageRep drawInRect: targetFrame];
     
+    overlayHandler();
+    
     NSGraphicsContext *currentContext = [NSGraphicsContext currentContext];
     if (!currentContext) {
         // If the current context has been corrupted by the user,
