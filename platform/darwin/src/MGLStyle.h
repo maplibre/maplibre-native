@@ -539,4 +539,24 @@ MGL_EXPORT
 
 @end
 
+/**
+ An object whose contents are represented by an `MGLStyle` object that you
+ configure.
+ */
+@protocol MGLStylable <NSObject>
+
+/**
+ The style currently displayed in the receiver.
+
+ @note The default styles provided by Mapbox contain sources and layers with
+    identifiers that will change over time. Applications that use APIs that
+    manipulate a style’s sources and layers must first set the style URL to an
+    explicitly versioned style using a convenience method like
+    `+[MGLStyle outdoorsStyleURLWithVersion:]` or a manually constructed
+     `NSURL`.
+ */
+@property (nonatomic, readonly, nullable) MGLStyle *style;
+
+@end
+
 NS_ASSUME_NONNULL_END

@@ -19,9 +19,9 @@ namespace mbgl {
 
 @interface MGLStyle (Private)
 
-- (instancetype)initWithRawStyle:(mbgl::style::Style *)rawStyle mapView:(MGLMapView *)mapView;
+- (instancetype)initWithRawStyle:(mbgl::style::Style *)rawStyle stylable:(id <MGLStylable>)stylable;
 
-@property (nonatomic, readonly, weak) MGLMapView *mapView;
+@property (nonatomic, readonly, weak) id <MGLStylable> stylable;
 @property (nonatomic, readonly) mbgl::style::Style *rawStyle;
 
 - (nullable NSArray<MGLAttributionInfo *> *)attributionInfosWithFontSize:(CGFloat)fontSize linkColor:(nullable MGLColor *)linkColor;

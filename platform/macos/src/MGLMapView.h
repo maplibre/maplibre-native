@@ -4,12 +4,12 @@
 #import "MGLFoundation.h"
 #import "MGLTypes.h"
 #import "MGLGeometry.h"
+#import "MGLStyle.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class MGLAnnotationImage;
 @class MGLMapCamera;
-@class MGLStyle;
 @class MGLShape;
 
 @protocol MGLAnnotation;
@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
     ensuring that your use adheres to the relevant terms of use.
  */
 MGL_EXPORT IB_DESIGNABLE
-@interface MGLMapView : NSView
+@interface MGLMapView : NSView <MGLStylable>
 
 #pragma mark Creating Instances
 

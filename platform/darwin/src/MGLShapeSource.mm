@@ -243,8 +243,9 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
     }
     
     std::vector<mbgl::Feature> features;
-    if (self.mapView) {
-        features = self.mapView.renderer->querySourceFeatures(self.rawSource->getID(), { {}, optionalFilter });
+    if ([self.stylable isKindOfClass:[MGLMapView class]]) {
+        MGLMapView *mapView = (MGLMapView *)self.stylable;
+        features = mapView.renderer->querySourceFeatures(self.rawSource->getID(), { {}, optionalFilter });
     }
     return MGLFeaturesFromMBGLFeatures(features);
 }
@@ -256,7 +257,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
     mbgl::optional<mbgl::FeatureExtensionValue> extensionValue;
     
     // Check parameters
-    if (!self.rawSource || !self.mapView || !cluster) {
+    if (!self.rawSource || !self.stylable || !cluster) {
         return extensionValue;
     }
 
@@ -269,11 +270,14 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
     
     auto clusterFeature = geoJSON.get<mbgl::GeoJSONFeature>();
     
-    extensionValue = self.mapView.renderer->queryFeatureExtensions(self.rawSource->getID(),
-                                                                   clusterFeature,
-                                                                   "supercluster",
-                                                                   extension,
-                                                                   options);
+    if ([self.stylable isKindOfClass:[MGLMapView class]]) {
+        MGLMapView *mapView = (MGLMapView *)self.stylable;
+        extensionValue = mapView.renderer->queryFeatureExtensions(self.rawSource->getID(),
+                                                                  clusterFeature,
+                                                                  "supercluster",
+                                                                  extension,
+                                                                  options);
+    }
     return extensionValue;
 }
 

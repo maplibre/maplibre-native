@@ -5,6 +5,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol MGLStylable;
+
 namespace mbgl {
     namespace style {
         class Source;
@@ -41,7 +43,7 @@ do { \
  Initializes and returns a source with a raw pointer to the backing store,
  associated with a style.
  */
-- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource mapView:(nullable MGLMapView *)mapView;
+- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource stylable:(nullable id <MGLStylable>)stylable;
 
 /**
  Initializes and returns a source with an owning pointer to the backing store,
@@ -59,11 +61,12 @@ do { \
 @property (nonatomic, readonly) mbgl::style::Source *rawSource;
 
 /**
- The map view whose style currently contains the source.
- If the source is not currently part of any map view’s style, this property is
- set to `nil`.
+ The stylable object whose style currently contains the source.
+ 
+ If the source is not currently part of any stylable object’s style, this
+ property is set to `nil`.
  */
-@property (nonatomic, readonly, weak) MGLMapView *mapView;
+@property (nonatomic, readonly, weak) id <MGLStylable> stylable;
 
 /**
  Adds the mbgl source that this object represents to the mbgl map.
@@ -74,7 +77,7 @@ do { \
  is added back to the map via `-[MGLStyle addSource:]` and styled with a
  `MGLLayer`.
  */
-- (void)addToMapView:(MGLMapView *)mapView;
+- (void)addToStylable:(id <MGLStylable>)mapView;
 
 /**
  Removes the mbgl source that this object represents from the mbgl map.
@@ -82,7 +85,7 @@ do { \
  to the `MGLSource` instance and the unique_ptr reference is valid again. It is
  safe to add the source back to the style after it is removed.
  */
-- (BOOL)removeFromMapView:(MGLMapView *)mapView error:(NSError * __nullable * __nullable)outError;
+- (BOOL)removeFromStylable:(id <MGLStylable>)mapView error:(NSError * __nullable * __nullable)outError;
 
 @end
 

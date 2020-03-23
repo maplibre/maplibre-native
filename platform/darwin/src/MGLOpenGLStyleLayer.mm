@@ -9,48 +9,7 @@
 #include <mbgl/gl/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
 
-class MGLOpenGLLayerHost : public mbgl::style::CustomLayerHost {
-public:
-    MGLOpenGLLayerHost(MGLOpenGLStyleLayer *styleLayer) {
-        layerRef = styleLayer;
-        layer = nil;
-    }
-
-    void initialize() {
-        if (layerRef == nil) return;
-        else if (layer == nil) layer = layerRef;
-
-        [layer didMoveToMapView:layer.style.mapView];
-    }
-
-    void render(const mbgl::style::CustomLayerRenderParameters &params) {
-        if(!layer) return;
-
-        MGLStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(params.width, params.height),
-            .centerCoordinate = CLLocationCoordinate2DMake(params.latitude, params.longitude),
-            .zoomLevel = params.zoom,
-            .direction = mbgl::util::wrap(params.bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(params.pitch),
-            .fieldOfView = static_cast<CGFloat>(params.fieldOfView),
-            .projectionMatrix = MGLMatrix4Make(params.projectionMatrix)
-        };
-        [layer drawInMapView:layer.style.mapView withContext:drawingContext];
-    }
-
-    void contextLost() {}
-
-    void deinitialize() {
-        if (layer == nil) return;
-
-        [layer willMoveFromMapView:layer.style.mapView];
-        layerRef = layer;
-        layer = nil;
-    }
-private:
-    __weak MGLOpenGLStyleLayer * layerRef;
-    MGLOpenGLStyleLayer * layer = nil;
-};
+class MGLOpenGLLayerHost;
 
 /**
  An `MGLOpenGLStyleLayer` is a style layer that is rendered by OpenGL code that
@@ -73,6 +32,8 @@ private:
 @interface MGLOpenGLStyleLayer ()
 
 @property (nonatomic, readonly) mbgl::style::CustomLayer *rawLayer;
+
+@property (nonatomic, readonly, nullable) MGLMapView *mapView;
 
 /**
  The style currently containing the layer.
@@ -107,13 +68,20 @@ private:
     return (mbgl::style::CustomLayer *)super.rawLayer;
 }
 
+- (MGLMapView *)mapView {
+    if ([self.style.stylable isKindOfClass:[MGLMapView class]]) {
+        return (MGLMapView *)self.style.stylable;
+    }
+    return nil;
+}
+
 #if TARGET_OS_IPHONE
 - (EAGLContext *)context {
-    return self.style.mapView.context;
+    return self.mapView.context;
 }
 #else
 - (CGLContextObj)context {
-    return self.style.mapView.context;
+    return self.mapView.context;
 }
 #endif
 
@@ -191,10 +159,59 @@ private:
  causing the `-drawInMapView:withContext:` method to be called.
  */
 - (void)setNeedsDisplay {
-    [self.style.mapView setNeedsRerender];
+    [self.mapView setNeedsRerender];
 }
 
 @end
+
+class MGLOpenGLLayerHost : public mbgl::style::CustomLayerHost {
+public:
+    MGLOpenGLLayerHost(MGLOpenGLStyleLayer *styleLayer) {
+        layerRef = styleLayer;
+        layer = nil;
+    }
+
+    void initialize() {
+        if (layerRef == nil) return;
+        else if (layer == nil) layer = layerRef;
+
+        if (layer.mapView) {
+            [layer didMoveToMapView:layer.mapView];
+        }
+    }
+
+    void render(const mbgl::style::CustomLayerRenderParameters &params) {
+        if(!layer) return;
+
+        MGLStyleLayerDrawingContext drawingContext = {
+            .size = CGSizeMake(params.width, params.height),
+            .centerCoordinate = CLLocationCoordinate2DMake(params.latitude, params.longitude),
+            .zoomLevel = params.zoom,
+            .direction = mbgl::util::wrap(params.bearing, 0., 360.),
+            .pitch = static_cast<CGFloat>(params.pitch),
+            .fieldOfView = static_cast<CGFloat>(params.fieldOfView),
+            .projectionMatrix = MGLMatrix4Make(params.projectionMatrix)
+        };
+        if (layer.mapView) {
+            [layer drawInMapView:layer.mapView withContext:drawingContext];
+        }
+    }
+
+    void contextLost() {}
+
+    void deinitialize() {
+        if (layer == nil) return;
+
+        if (layer.mapView) {
+            [layer willMoveFromMapView:layer.mapView];
+        }
+        layerRef = layer;
+        layer = nil;
+    }
+private:
+    __weak MGLOpenGLStyleLayer * layerRef;
+    MGLOpenGLStyleLayer * layer = nil;
+};
 
 namespace mbgl {
 

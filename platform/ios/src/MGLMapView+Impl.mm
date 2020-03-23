@@ -50,7 +50,7 @@ void MGLMapViewImpl::onDidFailLoadingMap(mbgl::MapLoadError mapError, const std:
             break;
         case mbgl::MapLoadError::StyleLoadError:
             code = MGLErrorCodeLoadStyleFailed;
-            description = NSLocalizedStringWithDefaultValue(@"LOAD_STYLE_FAILED_DESC", nil, nil, @"The map failed to load because the style can't be loaded.", @"User-friendly error description");
+            description = NSLocalizedStringWithDefaultValue(@"LOAD_STYLE_FAILED_DESC", nil, nil, @"The map failed to load because the style can’t be loaded.", @"User-friendly error description");
             break;
         case mbgl::MapLoadError::NotFoundError:
             code = MGLErrorCodeNotFound;

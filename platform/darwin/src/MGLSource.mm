@@ -19,7 +19,7 @@ const MGLExceptionName MGLInvalidStyleSourceException = @"MGLInvalidStyleSourceE
 // special internal source types like mbgl::AnnotationSource.
 @property (nonatomic, readonly) mbgl::style::Source *rawSource;
 
-@property (nonatomic, readonly, weak) MGLMapView *mapView;
+@property (nonatomic, readonly, weak) id <MGLStylable> stylable;
 
 @end
 
@@ -37,12 +37,12 @@ const MGLExceptionName MGLInvalidStyleSourceException = @"MGLInvalidStyleSourceE
     return self;
 }
 
-- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource mapView:(MGLMapView *)mapView {
+- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource stylable:(id <MGLStylable>)stylable {
     NSString *identifier = @(rawSource->getID().c_str());
     if (self = [self initWithIdentifier:identifier]) {
         _weakSource = rawSource->makeWeakPtr();
         rawSource->peer = SourceWrapper { self };
-        _mapView = mapView;
+        _stylable = stylable;
     }
     return self;
 }
@@ -53,24 +53,24 @@ const MGLExceptionName MGLInvalidStyleSourceException = @"MGLInvalidStyleSourceE
 }
 
 - (instancetype)initWithPendingSource:(std::unique_ptr<mbgl::style::Source>)pendingSource {
-    if (self = [self initWithRawSource:pendingSource.get() mapView:nil]) {
+    if (self = [self initWithRawSource:pendingSource.get() stylable:nil]) {
         _pendingSource = std::move(pendingSource);
     }
     return self;
 }
 
-- (void)addToMapView:(MGLMapView *)mapView {
+- (void)addToStylable:(id <MGLStylable>)stylable {
     if (_pendingSource == nullptr) {
         [NSException raise:MGLRedundantSourceException
                     format:@"This instance %@ was already added to %@. Adding the same source instance " \
-         "to the style more than once is invalid.", self, mapView.style];
+         "to the style more than once is invalid.", self, stylable.style];
     }
     
-    _mapView = mapView;
-    _mapView.style.rawStyle->addSource(std::move(_pendingSource));
+    _stylable = stylable;
+    _stylable.style.rawStyle->addSource(std::move(_pendingSource));
 }
 
-- (BOOL)removeFromMapView:(MGLMapView *)mapView error:(NSError * __nullable * __nullable)outError {
+- (BOOL)removeFromStylable:(id <MGLStylable>)mapView error:(NSError * __nullable * __nullable)outError {
     MGLAssertStyleSourceIsValid();
     BOOL removed = NO;
     
@@ -81,7 +81,7 @@ const MGLExceptionName MGLInvalidStyleSourceException = @"MGLInvalidStyleSourceE
         if (removedSource) {
             removed = YES;
             _pendingSource = std::move(removedSource);
-            _mapView = nil;
+            _stylable = nil;
         } else if (outError) {
             NSString *localizedDescription = [NSString stringWithFormat:
                                               NSLocalizedStringWithDefaultValue(@"REMOVE_SRC_FAIL_IN_USE_FMT", @"Foundation", nil, @"The source “%@” can’t be removed while it is in use.", @"User-friendly error description; first placeholder is the source’s identifier"),

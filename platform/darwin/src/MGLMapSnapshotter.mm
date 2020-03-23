@@ -11,8 +11,7 @@
 
 #import "MGLOfflineStorage_Private.h"
 #import "MGLGeometry_Private.h"
-#import "NSBundle+MGLAdditions.h"
-#import "MGLStyle.h"
+#import "MGLStyle_Private.h"
 #import "MGLAttributionInfo_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLRendererConfiguration.h"
@@ -30,12 +29,49 @@
 #import <QuartzCore/QuartzCore.h>
 #endif
 
+#import "NSBundle+MGLAdditions.h"
+
 const CGPoint MGLLogoImagePosition = CGPointMake(8, 8);
 const CGFloat MGLSnapshotterMinimumPixelSize = 64;
 
 MGLImage *MGLAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions, MGLImage *mglImage, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn, MGLMapSnapshotOptions *options, MGLMapSnapshotOverlayHandler overlayHandler);
 MGLMapSnapshot *MGLSnapshotWithDecoratedImage(MGLImage *mglImage, MGLMapSnapshotOptions *options, mbgl::MapSnapshotter::Attributions attributions, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn, MGLMapSnapshotOverlayHandler overlayHandler, NSError * _Nullable *outError);
 NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnapshotter::Attributions attributions);
+
+class MGLMapSnapshotterDelegateHost: public mbgl::MapSnapshotterObserver {
+public:
+    MGLMapSnapshotterDelegateHost(MGLMapSnapshotter *snapshotter_) : snapshotter(snapshotter_) {}
+    
+    void onDidFailLoadingStyle(const std::string& errorMessage) {
+        MGLMapSnapshotter *strongSnapshotter = snapshotter;
+        if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotterDidFail:withError:)]) {
+            NSString *description = @(errorMessage.c_str());
+            NSDictionary *userInfo = @{
+                NSLocalizedDescriptionKey: NSLocalizedStringWithDefaultValue(@"SNAPSHOT_LOAD_STYLE_FAILED_DESC", nil, nil, @"The snapshot failed because the style can’t be loaded.", @"User-friendly error description"),
+                NSLocalizedFailureReasonErrorKey: description,
+            };
+            NSError *error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeLoadStyleFailed userInfo:userInfo];
+            [strongSnapshotter.delegate mapSnapshotterDidFail:snapshotter withError:error];
+        }
+    }
+    
+    void onDidFinishLoadingStyle() {
+        MGLMapSnapshotter *strongSnapshotter = snapshotter;
+        if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotter:didFinishLoadingStyle:)]) {
+            [strongSnapshotter.delegate mapSnapshotter:snapshotter didFinishLoadingStyle:snapshotter.style];
+        }
+    }
+    
+    void onStyleImageMissing(const std::string& imageName) {
+        MGLMapSnapshotter *strongSnapshotter = snapshotter;
+        if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotter:didFailLoadingImageNamed:)]) {
+            [strongSnapshotter.delegate mapSnapshotter:snapshotter didFailLoadingImageNamed:@(imageName.c_str())];
+        }
+    }
+    
+private:
+    __weak MGLMapSnapshotter *snapshotter;
+};
 
 @interface MGLMapSnapshotOverlay() <MGLMapSnapshotProtocol>
 @property (nonatomic, assign) CGFloat scale;
@@ -208,6 +244,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
 
 @implementation MGLMapSnapshotter {
     std::unique_ptr<mbgl::MapSnapshotter> _mbglMapSnapshotter;
+    std::unique_ptr<MGLMapSnapshotterDelegateHost> _delegateHost;
 }
 
 - (void)dealloc {
@@ -660,6 +697,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
         _mbglMapSnapshotter->cancel();
     }
     _mbglMapSnapshotter.reset();
+    _delegateHost.reset();
 }
 
 - (void)configureWithOptions:(MGLMapSnapshotOptions *)options {
@@ -682,8 +720,9 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
                    .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
 
     // Create the snapshotter
+    _delegateHost = std::make_unique<MGLMapSnapshotterDelegateHost>(self);
     _mbglMapSnapshotter = std::make_unique<mbgl::MapSnapshotter>(
-                                                                 size, pixelRatio, resourceOptions, mbgl::MapSnapshotterObserver::nullObserver(), config.localFontFamilyName);
+                                                                 size, pixelRatio, resourceOptions, *_delegateHost, config.localFontFamilyName);
     
     _mbglMapSnapshotter->setStyleURL(std::string(options.styleURL.absoluteString.UTF8String));
     
@@ -701,6 +740,13 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     if (!MGLCoordinateBoundsIsEmpty(options.coordinateBounds)) {
         _mbglMapSnapshotter->setRegion(MGLLatLngBoundsFromCoordinateBounds(options.coordinateBounds));
     }
+}
+
+- (MGLStyle *)style {
+    if (!_mbglMapSnapshotter) {
+        return nil;
+    }
+    return [[MGLStyle alloc] initWithRawStyle:&_mbglMapSnapshotter->getStyle() stylable:self];
 }
 
 @end

@@ -72,8 +72,9 @@
     }
     
     std::vector<mbgl::Feature> features;
-    if (self.mapView) {
-        features = self.mapView.renderer->querySourceFeatures(self.rawSource->getID(), { optionalSourceLayerIDs, optionalFilter });
+    if ([self.stylable isKindOfClass:[MGLMapView class]]) {
+        MGLMapView *mapView = (MGLMapView *)self.stylable;
+        features = mapView.renderer->querySourceFeatures(self.rawSource->getID(), { optionalSourceLayerIDs, optionalFilter });
     }
     return MGLFeaturesFromMBGLFeatures(features);
 }

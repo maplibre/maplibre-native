@@ -5,6 +5,7 @@
 #import "MGLGeometry.h"
 #import "MGLMapCamera.h"
 #import "MGLTypes.h"
+#import "MGLStyle.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class MGLPolyline;
 @class MGLPolygon;
 @class MGLShape;
-@class MGLStyle;
 
 @protocol MGLMapViewDelegate;
 @protocol MGLAnnotation;
@@ -188,7 +188,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLUserLocationAnnotationTyp
  Simple map view</a> example to learn how to initialize a basic `MGLMapView`.
  */
 MGL_EXPORT
-@interface MGLMapView : UIView
+@interface MGLMapView : UIView <MGLStylable>
 
 #pragma mark Creating Instances
 
