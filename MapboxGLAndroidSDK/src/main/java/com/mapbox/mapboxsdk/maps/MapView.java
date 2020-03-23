@@ -160,18 +160,18 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Polylines polylines = new PolylineContainer(nativeMapView, annotationsArray);
     ShapeAnnotations shapeAnnotations = new ShapeAnnotationContainer(nativeMapView, annotationsArray);
     AnnotationManager annotationManager = new AnnotationManager(this, annotationsArray, iconManager,
-            annotations, markers, polygons, polylines, shapeAnnotations);
+      annotations, markers, polygons, polylines, shapeAnnotations);
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
     // MapboxMap
     List<MapboxMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     mapboxMap = new MapboxMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
-            developerAnimationListeners);
+      developerAnimationListeners);
     mapboxMap.injectAnnotationManager(annotationManager);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,
-            annotationManager, cameraDispatcher);
+      annotationManager, cameraDispatcher);
     mapKeyListener = new MapKeyListener(transform, uiSettings, mapGestureDetector);
 
     // LocationComponent
@@ -245,7 +245,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private MapboxMap.OnCompassAnimationListener createCompassAnimationListener(@NonNull final CameraChangeDispatcher
-                                                                                      cameraChangeDispatcher) {
+                                                                                cameraChangeDispatcher) {
     return new MapboxMap.OnCompassAnimationListener() {
       @Override
       public void onCompassAnimation() {
@@ -313,7 +313,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       TextureView textureView = new TextureView(getContext());
       boolean translucentSurface = options.getTranslucentTextureSurface();
       mapRenderer = new TextureViewMapRenderer(getContext(),
-              textureView, localFontFamily, translucentSurface) {
+        textureView, localFontFamily, translucentSurface) {
         @Override
         protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
           MapView.this.onSurfaceCreated();
@@ -340,7 +340,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     boolean crossSourceCollisions = mapboxMapOptions.getCrossSourceCollisions();
     nativeMapView = new NativeMapView(
-            getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
+      getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
   }
 
@@ -464,6 +464,18 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     if (mapRenderer != null) {
       mapRenderer.onDestroy();
     }
+  }
+
+  /**
+   * Queue a runnable to be executed on the map renderer thread.
+   *
+   * @param runnable the runnable to queue
+   */
+  public void queueEvent(@NonNull Runnable runnable) {
+    if (mapRenderer == null) {
+      throw new IllegalStateException("Calling MapView#queueEvent before mapRenderer is created.");
+    }
+    mapRenderer.queueEvent(runnable);
   }
 
   /**
@@ -1249,7 +1261,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     public void setGesturesManager(AndroidGesturesManager gesturesManager, boolean attachDefaultListeners,
                                    boolean setDefaultMutuallyExclusives) {
       mapGestureDetector.setGesturesManager(
-              getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
+        getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
     }
 
     @Override
@@ -1259,8 +1271,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private class MapCallback implements OnDidFinishLoadingStyleListener,
-          OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
-          OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
+    OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
+    OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
 
     private final List<OnMapReadyCallback> onMapReadyCallbackList = new ArrayList<>();
 
