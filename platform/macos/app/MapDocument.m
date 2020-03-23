@@ -70,7 +70,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 @end
 
-@interface MapDocument () <NSWindowDelegate, NSSharingServicePickerDelegate, NSMenuDelegate, NSSplitViewDelegate, MGLMapViewDelegate, MGLComputedShapeSourceDataSource>
+@interface MapDocument () <NSWindowDelegate, NSSharingServicePickerDelegate, NSMenuDelegate, NSSplitViewDelegate, MGLMapViewDelegate, MGLMapSnapshotterDelegate, MGLComputedShapeSourceDataSource>
 
 @property (weak) IBOutlet NSArrayController *styleLayersArrayController;
 @property (weak) IBOutlet NSTableView *styleLayersTableView;
@@ -254,6 +254,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     // Create and start the snapshotter
     __weak __typeof__(self) weakSelf = self;
     _snapshotter = [[MGLMapSnapshotter alloc] initWithOptions:options];
+    _snapshotter.delegate = self;
     [_snapshotter startWithCompletionHandler:^(MGLMapSnapshot *snapshot, NSError *error) {
         __typeof__(self) strongSelf = weakSelf;
         if (!strongSelf) {
@@ -1476,6 +1477,27 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(MGLShape *)annotation {
     return 0.8;
+}
+
+#pragma mark MGLMapSnapshotterDelegate methods
+
+- (void)mapSnapshotter:(MGLMapSnapshotter *)snapshotter didFinishLoadingStyle:(MGLStyle *)style {
+    [style localizeLabelsIntoLocale:_isLocalizingLabels ? nil : [NSLocale localeWithLocaleIdentifier:@"mul"]];
+    
+    // Layers hidden in the sidebar should be hidden in the snapshot too.
+    NSMutableArray<NSString *> *hiddenLayerIdentifiers = [NSMutableArray array];
+    for (MGLStyleLayer *layer in self.mapView.style.layers) {
+        if (!layer.visible) {
+            [hiddenLayerIdentifiers addObject:layer.identifier];
+        }
+    }
+    
+    NSSet <NSString *> *hiddenLayerIdentifierSet = [NSSet setWithArray:hiddenLayerIdentifiers];
+    for (MGLStyleLayer *layer in style.layers) {
+        if ([hiddenLayerIdentifierSet containsObject:layer.identifier]) {
+            layer.visible = NO;
+        }
+    }
 }
 
 #pragma mark - MGLComputedShapeSourceDataSource
