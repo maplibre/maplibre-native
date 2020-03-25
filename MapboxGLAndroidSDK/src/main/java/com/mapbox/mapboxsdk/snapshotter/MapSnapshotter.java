@@ -7,11 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Handler;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-import androidx.core.content.res.ResourcesCompat;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -28,11 +23,22 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.log.Logger;
+import com.mapbox.mapboxsdk.maps.Image;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.TelemetryDefinition;
 import com.mapbox.mapboxsdk.storage.FileSource;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.utils.FontUtils;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
+
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.core.content.res.ResourcesCompat;
+
+import static com.mapbox.mapboxsdk.maps.Style.toImage;
 
 /**
  * The map snapshotter creates a large of the map, rendered
@@ -43,6 +49,21 @@ import com.mapbox.mapboxsdk.utils.ThreadUtils;
 public class MapSnapshotter {
 
   private static final String TAG = "Mbgl-MapSnapshotter";
+
+  private static final int LOGO_MARGIN_DP = 4;
+
+  // Holds the pointer to JNI NativeMapView
+  @Keep
+  private long nativePtr = 0;
+
+  private final Context context;
+  private boolean fullyLoaded = false;
+  private Options options;
+
+  @Nullable
+  private SnapshotReadyCallback callback;
+  @Nullable
+  private ErrorHandler errorHandler;
 
   /**
    * Get notified on snapshot completion.
@@ -57,7 +78,6 @@ public class MapSnapshotter {
      * @param snapshot the snapshot
      */
     void onSnapshotReady(MapSnapshot snapshot);
-
   }
 
   /**
@@ -77,18 +97,6 @@ public class MapSnapshotter {
     void onError(String error);
   }
 
-  private static final int LOGO_MARGIN_DP = 4;
-
-  // Holds the pointer to JNI NativeMapView
-  @Keep
-  private long nativePtr = 0;
-
-  private final Context context;
-  @Nullable
-  private SnapshotReadyCallback callback;
-  @Nullable
-  private ErrorHandler errorHandler;
-
   /**
    * MapSnapshotter options
    */
@@ -96,13 +104,12 @@ public class MapSnapshotter {
     private float pixelRatio = 1;
     private int width;
     private int height;
-    private String styleUri = Style.MAPBOX_STREETS;
-    private String styleJson;
     private LatLngBounds region;
     private CameraPosition cameraPosition;
     private boolean showLogo = true;
     private String localIdeographFontFamily = MapboxConstants.DEFAULT_FONT;
     private String apiBaseUrl;
+    private Style.Builder builder;
 
     /**
      * @param width  the width of the image
@@ -117,22 +124,41 @@ public class MapSnapshotter {
     }
 
     /**
-     * @param uri The style URI to use
+     * Set a style builder to snapshotter, the contents in builder like layers/sources/images will be applied
+     * to snapshotter.
+     *
+     * @param builder The builder will applied to snapshotter
      * @return the mutated {@link Options}
      */
     @NonNull
+    public Options withStyleBuilder(Style.Builder builder) {
+      this.builder = builder;
+      return this;
+    }
+
+    public Style.Builder getBuilder() {
+      return builder;
+    }
+
+    /**
+     * @param uri The style URI to use
+     * @return the mutated {@link Options}
+     * @deprecated use {@link  #withStyleBuilder(Style.Builder)} instead
+     */
+    @NonNull
     public Options withStyle(String uri) {
-      this.styleUri = uri;
+      withStyleBuilder(new Style.Builder().fromUri(uri));
       return this;
     }
 
     /**
      * @param styleJson The style json to use
      * @return the mutated {@link Options}
+     * @deprecated use {@link  #withStyleBuilder(Style.Builder)} instead
      */
     @NonNull
     public Options withStyleJson(String styleJson) {
-      this.styleJson = styleJson;
+      withStyleBuilder(new Style.Builder().fromJson(styleJson));
       return this;
     }
 
@@ -187,6 +213,7 @@ public class MapSnapshotter {
      * Default system fonts are defined in &#x27;/system/etc/fonts.xml&#x27;
      * Default font for local ideograph font family is {@link MapboxConstants#DEFAULT_FONT}.
      * </p>
+     *
      * @param fontFamily font family for local ideograph generation.
      * @return the mutated {@link Options}
      */
@@ -204,6 +231,7 @@ public class MapSnapshotter {
      * &#x27;/system/etc/fonts.xml&#x27;. Default font for local ideograph font family is
      * {@link MapboxConstants#DEFAULT_FONT}.
      * </p>
+     *
      * @param fontFamilies font families for local ideograph generation.
      * @return the mutated {@link Options}
      */
@@ -274,14 +302,22 @@ public class MapSnapshotter {
      */
     @Deprecated
     public String getStyleUrl() {
-      return styleUri;
+      return builder == null ? Style.MAPBOX_STREETS : builder.getUri();
     }
 
     /**
      * @return the style uri
      */
     public String getStyleUri() {
-      return styleUri;
+      return builder == null ? Style.MAPBOX_STREETS : builder.getUri();
+    }
+
+    /**
+     * @return the style json
+     */
+    @Nullable
+    public String getStyleJson() {
+      return builder == null ? null : builder.getJson();
     }
 
     /**
@@ -329,6 +365,7 @@ public class MapSnapshotter {
   public MapSnapshotter(@NonNull Context context, @NonNull Options options) {
     checkThread();
     this.context = context.getApplicationContext();
+    this.options = options;
     TelemetryDefinition telemetry = Mapbox.getTelemetry();
     if (telemetry != null) {
       telemetry.onAppUserTurnstileEvent();
@@ -340,9 +377,10 @@ public class MapSnapshotter {
     }
 
     nativeInitialize(this, fileSource, options.pixelRatio, options.width,
-      options.height, options.styleUri, options.styleJson, options.region, options.cameraPosition,
+      options.height, options.getStyleUri(), options.getStyleJson(), options.region, options.cameraPosition,
       options.showLogo, options.localIdeographFontFamily);
   }
+
 
   /**
    * Starts loading and rendering the snapshot. The callback will be fired
@@ -411,6 +449,57 @@ public class MapSnapshotter {
    */
   @Keep
   public native void setStyleJson(String styleJson);
+
+  /**
+   * Adds the layer to the map. The layer must be newly created and not added to the snapshotter before
+   *
+   * @param layer the layer to add
+   * @param below the layer id to add this layer before
+   */
+  private void addLayerBelow(Layer layer, String below) {
+    nativeAddLayerBelow(layer.getNativePtr(), below);
+  }
+
+  /**
+   * Adds the layer to the map. The layer must be newly created and not added to the snapshotter before
+   *
+   * @param layer the layer to add
+   * @param above the layer id to add this layer above
+   */
+  private void addLayerAbove(@NonNull Layer layer, @NonNull String above) {
+    nativeAddLayerAbove(layer.getNativePtr(), above);
+  }
+
+  /**
+   * Adds the layer to the snapshotter at the specified index. The layer must be newly
+   * created and not added to the snapshotter before
+   *
+   * @param layer the layer to add
+   * @param index the index to insert the layer at
+   */
+  private void addLayerAt(Layer layer, int index) {
+    nativeAddLayerAt(layer.getNativePtr(), index);
+  }
+
+  /**
+   * Adds the source to the map. The source must be newly created and not added to the map before
+   *
+   * @param source the source to add
+   */
+  private void addSource(Source source) {
+    nativeAddSource(source, source.getNativePtr());
+  }
+
+  /**
+   * Adds an image to be used in the snapshotter's style
+   *
+   * @param name   the name of the image
+   * @param bitmap the pre-multiplied Bitmap
+   * @param sdf    the flag indicating image is an SDF or template image
+   */
+  private void addImage(@NonNull final String name, @NonNull Bitmap bitmap, boolean sdf) {
+    nativeAddImages(new Image[] {toImage(new Style.Builder.ImageWrapper(name, bitmap, sdf))});
+  }
 
   /**
    * Must be called in on the thread
@@ -609,6 +698,54 @@ public class MapSnapshotter {
     }
   }
 
+  /**
+   * Called by JNI peer when snapshot style is ready.
+   */
+  @Keep
+  protected void onDidFailLoadingStyle(String reason) {
+    onSnapshotFailed(reason);
+  }
+
+  /**
+   * Called by JNI peer when snapshot style is loaded.
+   */
+  @Keep
+  protected void onDidFinishLoadingStyle() {
+    if (!fullyLoaded) {
+      fullyLoaded = true;
+      Style.Builder builder = options.getBuilder();
+      if (builder != null) {
+        for (Source source : builder.getSources()) {
+          nativeAddSource(source, source.getNativePtr());
+        }
+
+        for (Style.Builder.LayerWrapper layerWrapper : builder.getLayers()) {
+          if (layerWrapper instanceof Style.Builder.LayerAtWrapper) {
+            addLayerAt(layerWrapper.getLayer(), ((Style.Builder.LayerAtWrapper) layerWrapper).getIndex());
+          } else if (layerWrapper instanceof Style.Builder.LayerAboveWrapper) {
+            addLayerAbove(layerWrapper.getLayer(), ((Style.Builder.LayerAboveWrapper) layerWrapper).getAboveLayer());
+          } else if (layerWrapper instanceof Style.Builder.LayerBelowWrapper) {
+            addLayerBelow(layerWrapper.getLayer(), ((Style.Builder.LayerBelowWrapper) layerWrapper).getBelowLayer());
+          } else {
+            addLayerBelow(layerWrapper.getLayer(), MapboxConstants.LAYER_ID_ANNOTATIONS);
+          }
+        }
+
+        for (Style.Builder.ImageWrapper image : builder.getImages()) {
+          addImage(image.getId(), image.getBitmap(), image.isSdf());
+        }
+      }
+    }
+  }
+
+  /**
+   * Called by JNI peer when snapshot style image is missing.
+   */
+  @Keep
+  protected void onStyleImageMissing(String imageName) {
+    onSnapshotFailed("style image is missing: " + imageName);
+  }
+
   private void checkThread() {
     ThreadUtils.checkThread(TAG);
   }
@@ -631,6 +768,21 @@ public class MapSnapshotter {
   @Keep
   protected native void nativeCancel();
 
+  @Keep
+  private native void nativeAddLayerBelow(long layerPtr, String below);
+
+  @Keep
+  private native void nativeAddLayerAbove(long layerPtr, String above);
+
+  @Keep
+  private native void nativeAddLayerAt(long layerPtr, int index);
+
+  @Keep
+  private native void nativeAddSource(Source source, long sourcePtr);
+
+  @Keep
+  private native void nativeAddImages(Image[] images);
+
   @Override
   @Keep
   protected native void finalize() throws Throwable;
@@ -640,7 +792,7 @@ public class MapSnapshotter {
     private Bitmap small;
     private float scale;
 
-    public Logo(Bitmap large, Bitmap small, float scale) {
+    Logo(Bitmap large, Bitmap small, float scale) {
       this.large = large;
       this.small = small;
       this.scale = scale;

@@ -68,8 +68,8 @@ public class CustomLayerActivity extends AppCompatActivity {
   }
 
   private void updateLayer() {
-    if (customLayer != null) {
-      customLayer.update();
+    if (mapboxMap != null) {
+      mapboxMap.triggerRepaint();
     }
   }
 

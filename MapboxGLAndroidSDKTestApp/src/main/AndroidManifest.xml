@@ -363,9 +363,21 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-            android:name=".activity.snapshot.MapSnapshotterMarkerActivity"
-            android:description="@string/description_map_snapshotter_marker"
-            android:label="@string/activity_map_snapshotter_marker">
+            android:name=".activity.snapshot.MapSnapshotterBitMapOverlayActivity"
+            android:description="@string/description_map_snapshotter_bitmap_overlay"
+            android:label="@string/activity_map_snapshotter_bitmap_overlay">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterHeatMapActivity"
+            android:description="@string/description_map_snapshotter_heatmap_layer"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter_heatmap_layer">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_imagegenerator" />

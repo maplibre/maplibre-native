@@ -15,20 +15,23 @@ public class CustomLayer extends Layer {
     initialize(id, host);
   }
 
+  /**
+   * Triggers map re-paint.
+   *
+   * @deprecated Use {@link MapboxMap#triggerRepaint()} instead.
+   */
+  @Deprecated
+  @Keep
+  public void update() {
+  }
+
   @Keep
   CustomLayer(long nativePtr) {
     super(nativePtr);
   }
 
-  public void update() {
-    nativeUpdate();
-  }
-
   @Keep
   protected native void initialize(String id, long host);
-
-  @Keep
-  protected native void nativeUpdate();
 
   @Override
   @Keep

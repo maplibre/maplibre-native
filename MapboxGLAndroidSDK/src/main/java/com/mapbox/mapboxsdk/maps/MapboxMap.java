@@ -5,12 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-import androidx.annotation.UiThread;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -43,6 +37,13 @@ import com.mapbox.mapboxsdk.style.expressions.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.UiThread;
 
 /**
  * The general class to interact with in the Android Mapbox SDK. It exposes the entry point for all
@@ -91,6 +92,13 @@ public final class MapboxMap {
     this.onGesturesManagerInteractionListener = listener;
     this.cameraChangeDispatcher = cameraChangeDispatcher;
     this.developerAnimationStartedListeners = developerAnimationStartedListeners;
+  }
+
+  /**
+   * Trigger the mapview to repaint.
+   */
+  public void triggerRepaint() {
+    nativeMapView.triggerRepaint();
   }
 
   void initialise(@NonNull Context context, @NonNull MapboxMapOptions options) {

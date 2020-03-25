@@ -1,5 +1,6 @@
 package com.mapbox.mapboxsdk.testapp.activity.render;
 
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter;
 
 public class RenderTestDefinition {
@@ -75,7 +76,7 @@ public class RenderTestDefinition {
   public MapSnapshotter.Options toOptions() {
     return new MapSnapshotter
       .Options(getWidth(), getHeight())
-      .withStyleJson(styleJson)
+      .withStyleBuilder(new Style.Builder().fromJson(styleJson))
       .withPixelRatio(getPixelRatio())
       .withLogo(false);
   }

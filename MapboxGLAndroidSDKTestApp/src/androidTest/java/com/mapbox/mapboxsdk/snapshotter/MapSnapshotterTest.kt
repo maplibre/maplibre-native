@@ -5,13 +5,14 @@ import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import junit.framework.Assert.assertNotNull
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +21,6 @@ import org.junit.runner.RunWith
  * Integration test that validates if a snapshotter creation
  */
 @RunWith(AndroidJUnit4::class)
-@Ignore("Ignored until https://github.com/mapbox/mapbox-gl-native/issues/11669 is resolved.")
 class MapSnapshotterTest {
 
   @Rule
@@ -31,18 +31,22 @@ class MapSnapshotterTest {
 
   @Test
   fun mapSnapshotter() {
+    var mapSnapshotter: MapSnapshotter?
     rule.activity.runOnUiThread {
+      val bg = BackgroundLayer("rand_tint")
+      bg.setProperties(PropertyFactory.backgroundColor("rgba(255,128,0,0.7)"))
       val options = MapSnapshotter.Options(512, 512)
         .withPixelRatio(1.0f)
-        .withStyle(Style.SATELLITE_STREETS)
+        .withStyleBuilder(Style.Builder().fromUri(Style.SATELLITE_STREETS)
+          .withLayerAbove(bg, "country-label"))
         .withCameraPosition(
           CameraPosition.Builder()
             .zoom(12.0)
             .target(LatLng(51.145495, 5.742234))
             .build()
         )
-      val mapSnapshotter = MapSnapshotter(rule.activity, options)
-      mapSnapshotter.start({
+      mapSnapshotter = MapSnapshotter(rule.activity, options)
+      mapSnapshotter!!.start({
         assertNotNull(it)
         assertNotNull(it.bitmap)
         countDownLatch.countDown()

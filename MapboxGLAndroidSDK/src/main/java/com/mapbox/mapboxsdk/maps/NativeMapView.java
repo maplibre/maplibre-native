@@ -1003,6 +1003,11 @@ final class NativeMapView implements NativeMap {
     return pixelRatio;
   }
 
+  @Override
+  public void triggerRepaint() {
+    nativeTriggerRepaint();
+  }
+
   @NonNull
   @Override
   public RectF getDensityDependantRectangle(final RectF rectangle) {
@@ -1475,6 +1480,9 @@ final class NativeMapView implements NativeMap {
   public long getNativePtr() {
     return nativePtr;
   }
+
+  @Keep
+  private native void nativeTriggerRepaint();
 
   //
   // Snapshot

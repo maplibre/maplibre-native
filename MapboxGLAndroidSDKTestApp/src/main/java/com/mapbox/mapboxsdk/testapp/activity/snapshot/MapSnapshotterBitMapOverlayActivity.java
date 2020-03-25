@@ -6,26 +6,29 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+
 import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshot;
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter;
 import com.mapbox.mapboxsdk.testapp.R;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AppCompatActivity;
 import timber.log.Timber;
 
 /**
  * Test activity showing how to use a the {@link MapSnapshotter} and overlay
  * {@link android.graphics.Bitmap}s on top.
  */
-public class MapSnapshotterMarkerActivity extends AppCompatActivity implements MapSnapshotter.SnapshotReadyCallback {
+public class MapSnapshotterBitMapOverlayActivity extends AppCompatActivity
+  implements MapSnapshotter.SnapshotReadyCallback {
 
   private MapSnapshotter mapSnapshotter;
   private MapSnapshot mapSnapshot;
@@ -49,10 +52,10 @@ public class MapSnapshotterMarkerActivity extends AppCompatActivity implements M
             getApplicationContext(),
             new MapSnapshotter
               .Options(Math.min(container.getMeasuredWidth(), 1024), Math.min(container.getMeasuredHeight(), 1024))
-              .withStyle(Style.OUTDOORS)
+              .withStyleBuilder(new Style.Builder().fromUri(Style.OUTDOORS))
               .withCameraPosition(new CameraPosition.Builder().target(new LatLng(52.090737, 5.121420)).zoom(15).build())
           );
-          mapSnapshotter.start(MapSnapshotterMarkerActivity.this);
+          mapSnapshotter.start(MapSnapshotterBitMapOverlayActivity.this);
         }
       });
   }

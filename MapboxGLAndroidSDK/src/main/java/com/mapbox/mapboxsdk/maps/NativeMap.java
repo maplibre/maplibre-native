@@ -237,6 +237,8 @@ interface NativeMap {
 
   float getPixelRatio();
 
+  void triggerRepaint();
+
   //
   // Deprecated Annotations API
   //

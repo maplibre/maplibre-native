@@ -340,7 +340,7 @@ public class Style {
    */
   public void addImage(@NonNull final String name, @NonNull Bitmap bitmap, boolean sdf) {
     validateState("addImage");
-    nativeMap.addImages(new Image[]{toImage(new Builder.ImageWrapper(name, bitmap, sdf))});
+    nativeMap.addImages(new Image[] {toImage(new Builder.ImageWrapper(name, bitmap, sdf))});
   }
 
   /**
@@ -932,23 +932,23 @@ public class Style {
       return this;
     }
 
-    String getUri() {
+    public String getUri() {
       return styleUri;
     }
 
-    String getJson() {
+    public String getJson() {
       return styleJson;
     }
 
-    List<Source> getSources() {
+    public List<Source> getSources() {
       return sources;
     }
 
-    List<LayerWrapper> getLayers() {
+    public List<LayerWrapper> getLayers() {
       return layers;
     }
 
-    List<ImageWrapper> getImages() {
+    public List<ImageWrapper> getImages() {
       return images;
     }
 
@@ -963,18 +963,30 @@ public class Style {
       return new Style(this, nativeMap);
     }
 
-    static class ImageWrapper {
+    public static class ImageWrapper {
       Bitmap bitmap;
       String id;
       boolean sdf;
 
-      ImageWrapper(String id, Bitmap bitmap, boolean sdf) {
+      public ImageWrapper(String id, Bitmap bitmap, boolean sdf) {
         this.id = id;
         this.bitmap = bitmap;
         this.sdf = sdf;
       }
 
-      static ImageWrapper[] convertToImageArray(HashMap<String, Bitmap> bitmapHashMap, boolean sdf) {
+      public Bitmap getBitmap() {
+        return bitmap;
+      }
+
+      public String getId() {
+        return id;
+      }
+
+      public boolean isSdf() {
+        return sdf;
+      }
+
+      public static ImageWrapper[] convertToImageArray(HashMap<String, Bitmap> bitmapHashMap, boolean sdf) {
         ImageWrapper[] images = new ImageWrapper[bitmapHashMap.size()];
         List<String> keyList = new ArrayList<>(bitmapHashMap.keySet());
         for (int i = 0; i < bitmapHashMap.size(); i++) {
@@ -985,43 +997,59 @@ public class Style {
       }
     }
 
-    class LayerWrapper {
+    public class LayerWrapper {
       Layer layer;
 
       LayerWrapper(Layer layer) {
         this.layer = layer;
       }
+
+      public Layer getLayer() {
+        return layer;
+      }
     }
 
-    class LayerAboveWrapper extends LayerWrapper {
+    public class LayerAboveWrapper extends LayerWrapper {
       String aboveLayer;
 
       LayerAboveWrapper(Layer layer, String aboveLayer) {
         super(layer);
         this.aboveLayer = aboveLayer;
       }
+
+      public String getAboveLayer() {
+        return aboveLayer;
+      }
     }
 
-    class LayerBelowWrapper extends LayerWrapper {
+    public class LayerBelowWrapper extends LayerWrapper {
       String belowLayer;
 
       LayerBelowWrapper(Layer layer, String belowLayer) {
         super(layer);
         this.belowLayer = belowLayer;
       }
+
+      public String getBelowLayer() {
+        return belowLayer;
+      }
     }
 
-    class LayerAtWrapper extends LayerWrapper {
+    public class LayerAtWrapper extends LayerWrapper {
       int index;
 
       LayerAtWrapper(Layer layer, int index) {
         super(layer);
         this.index = index;
       }
+
+      public int getIndex() {
+        return index;
+      }
     }
   }
 
-  private static Image toImage(Builder.ImageWrapper imageWrapper) {
+  public static Image toImage(Builder.ImageWrapper imageWrapper) {
     Bitmap bitmap = imageWrapper.bitmap;
     if (bitmap.getConfig() != Bitmap.Config.ARGB_8888) {
       bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);

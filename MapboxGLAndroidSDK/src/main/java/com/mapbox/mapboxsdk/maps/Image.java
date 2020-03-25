@@ -3,7 +3,7 @@ package com.mapbox.mapboxsdk.maps;
 import androidx.annotation.Keep;
 
 @Keep
-class Image {
+public class Image {
   private final byte[] buffer;
   private final float pixelRatio;
   private final String name;
