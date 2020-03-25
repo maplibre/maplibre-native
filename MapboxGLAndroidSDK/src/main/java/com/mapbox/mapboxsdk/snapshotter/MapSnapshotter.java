@@ -64,6 +64,8 @@ public class MapSnapshotter {
   private SnapshotReadyCallback callback;
   @Nullable
   private ErrorHandler errorHandler;
+  @Nullable
+  private Observer observer;
 
   /**
    * Get notified on snapshot completion.
@@ -95,6 +97,20 @@ public class MapSnapshotter {
      * @param error the error message
      */
     void onError(String error);
+  }
+
+  /**
+   * Can be used to get notified on snapshotter style loading
+   * completion.
+   *
+   * @see MapSnapshotter#setObserver(Observer)
+   */
+  public interface Observer {
+
+    /**
+     * Called when snapshotter finishes loading it's style.
+     */
+    void onDidFinishLoadingStyle();
   }
 
   /**
@@ -512,6 +528,16 @@ public class MapSnapshotter {
   }
 
   /**
+   * Sets observer for a snapshotter
+   *
+   * @param observer an Observer object
+   */
+  public void setObserver(@Nullable Observer observer) {
+    checkThread();
+    this.observer = observer;
+  }
+
+  /**
    * Draw an overlay on the map snapshot.
    *
    * @param mapSnapshot the map snapshot to draw the overlay on
@@ -736,6 +762,34 @@ public class MapSnapshotter {
         }
       }
     }
+
+    if (observer != null) {
+      observer.onDidFinishLoadingStyle();
+    }
+  }
+
+  /**
+   * Returns Layer of a style that is used by a snapshotter
+   *
+   * @param layerId the id of a Layer
+   * @return the Layer object if Layer with layerId exists, null otherwise
+   */
+  @Nullable
+  public Layer getLayer(@NonNull String layerId) {
+    checkThread();
+    return fullyLoaded ? nativeGetLayer(layerId) : null;
+  }
+
+  /**
+   * Returns Source of a style that is used by a snapshotter
+   *
+   * @param sourceId the id of a Source
+   * @return the Source object if a Source with sourceId exists, null otherwise
+   */
+  @Nullable
+  public Source getSource(@NonNull String sourceId) {
+    checkThread();
+    return fullyLoaded ? nativeGetSource(sourceId) : null;
   }
 
   /**
@@ -782,6 +836,14 @@ public class MapSnapshotter {
 
   @Keep
   private native void nativeAddImages(Image[] images);
+
+  @NonNull
+  @Keep
+  private native Layer nativeGetLayer(String layerId);
+
+  @NonNull
+  @Keep
+  private native Source nativeGetSource(String sourceId);
 
   @Override
   @Keep

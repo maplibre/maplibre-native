@@ -397,6 +397,17 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.turf.MapSnapshotterWithinExpression"
+            android:description="@string/description_snapshot_within"
+            android:label="@string/activity_snapshot_within">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
             android:name=".activity.maplayout.DoubleMapActivity"
             android:description="@string/description_doublemap"
             android:label="@string/activity_double_map">

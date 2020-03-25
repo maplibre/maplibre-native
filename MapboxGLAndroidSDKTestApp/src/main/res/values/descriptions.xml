@@ -28,6 +28,7 @@
     <string name="description_polygon">Add a polygon to a map</string>
     <string name="description_scroll_by">Scroll with pixels in x,y direction</string>
     <string name="description_snapshot">Example to make a snapshot of the map</string>
+    <string name="description_snapshot_within">Example of snapshotter with within expression</string>
     <string name="description_doublemap">2 maps in a view hierarchy</string>
     <string name="description_dynamic_info_window_adapter">Learn how to create a dynamic custom InfoWindow</string>
     <string name="description_viewpager">Use SupportMapFragments in a ViewPager</string>
