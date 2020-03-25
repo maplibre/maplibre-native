@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -52,7 +51,7 @@ public class LocalGlyphRasterizer {
   @WorkerThread
   protected Bitmap drawGlyphBitmap(String fontFamily, boolean bold, char glyphID) {
     paint.setTypeface(Typeface.create(fontFamily, bold ? Typeface.BOLD : Typeface.NORMAL));
-    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+    canvas.drawColor(Color.WHITE);
     canvas.drawText(String.valueOf(glyphID), 0, 20, paint);
     return bitmap;
   }
