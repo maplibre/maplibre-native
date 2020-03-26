@@ -91,8 +91,8 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         return;
     }
 
-    _mbglOnlineFileSource->pause();
-    _mbglDatabaseFileSource->pause();
+    _mbglOnlineFileSource->resume();
+    _mbglDatabaseFileSource->resume();
     self.paused = NO;
 }
 #endif
