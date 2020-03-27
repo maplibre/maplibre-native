@@ -290,8 +290,6 @@
 		DAE6C3D41CC34C9900DB3429 /* MGLOfflineRegionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C3CA1CC34BD800DB3429 /* MGLOfflineRegionTests.m */; };
 		DAE6C3D61CC34C9900DB3429 /* MGLStyleTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C3CC1CC34BD800DB3429 /* MGLStyleTests.mm */; };
 		DAE7DEC41E24549F007505A6 /* MGLNSStringAdditionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DAE7DEC31E24549F007505A6 /* MGLNSStringAdditionsTests.m */; };
-		DAEC2FB624087D360090E94E /* MGLNetworkIntegrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DAEC2FB424087D360090E94E /* MGLNetworkIntegrationManager.m */; };
-		DAEC2FB724087D360090E94E /* MGLNetworkIntegrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = DAEC2FB524087D360090E94E /* MGLNetworkIntegrationManager.h */; };
 		DAED385F1D62CED700D7640F /* NSURL+MGLAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = DAED385D1D62CED700D7640F /* NSURL+MGLAdditions.h */; };
 		DAED38601D62CED700D7640F /* NSURL+MGLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DAED385E1D62CED700D7640F /* NSURL+MGLAdditions.m */; };
 		DAEDC4321D6033F1000224FF /* MGLAttributionInfoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DAEDC4311D6033F1000224FF /* MGLAttributionInfoTests.m */; };
@@ -721,8 +719,6 @@
 		DAE9ED54223897ED00C01291 /* gl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = gl; path = gl.lproj/Foundation.strings; sourceTree = "<group>"; };
 		DAE9ED55223898B200C01291 /* gl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = gl; path = gl.lproj/Foundation.stringsdict; sourceTree = "<group>"; };
 		DAE9ED56223898CF00C01291 /* gl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = gl; path = gl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		DAEC2FB424087D360090E94E /* MGLNetworkIntegrationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLNetworkIntegrationManager.m; sourceTree = "<group>"; };
-		DAEC2FB524087D360090E94E /* MGLNetworkIntegrationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLNetworkIntegrationManager.h; sourceTree = "<group>"; };
 		DAED385D1D62CED700D7640F /* NSURL+MGLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+MGLAdditions.h"; sourceTree = "<group>"; };
 		DAED385E1D62CED700D7640F /* NSURL+MGLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+MGLAdditions.m"; sourceTree = "<group>"; };
 		DAEDC4311D6033F1000224FF /* MGLAttributionInfoTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MGLAttributionInfoTests.m; path = ../../darwin/test/MGLAttributionInfoTests.m; sourceTree = "<group>"; };
@@ -1263,8 +1259,6 @@
 				DD0902B01DB1AC6400C5BDCE /* MGLNetworkConfiguration.h */,
 				1F2B94C2221E22E500210640 /* MGLNetworkConfiguration_Private.h */,
 				DD0902AF1DB1AC6400C5BDCE /* MGLNetworkConfiguration.m */,
-				DAEC2FB524087D360090E94E /* MGLNetworkIntegrationManager.h */,
-				DAEC2FB424087D360090E94E /* MGLNetworkIntegrationManager.m */,
 				DA35D9C4240916370013ECB0 /* MGLReachability.h */,
 				DA35D9C5240916380013ECB0 /* MGLReachability.m */,
 				3EA9369A4C46957566058822 /* MGLRendererConfiguration.h */,
@@ -1380,7 +1374,6 @@
 				DA7DC9811DED5F5C0027472F /* MGLVectorTileSource_Private.h in Headers */,
 				DAE6C3861CC31E2A00DB3429 /* MGLGeometry_Private.h in Headers */,
 				DAE6C3841CC31E2A00DB3429 /* MGLAccountManager_Private.h in Headers */,
-				DAEC2FB724087D360090E94E /* MGLNetworkIntegrationManager.h in Headers */,
 				DACA8622201920BE00E9693A /* MGLRasterDEMSource.h in Headers */,
 				DAE6C3691CC31E0400DB3429 /* MGLTypes.h in Headers */,
 				07D9474D1F67441B00E37934 /* MGLComputedShapeSource_Private.h in Headers */,
@@ -1714,7 +1707,6 @@
 				408AA86A1DAEEE5D00022900 /* NSDictionary+MGLAdditions.mm in Sources */,
 				DA8F25881D51C9E10010E6B5 /* MGLBackgroundStyleLayer.mm in Sources */,
 				DA551B841DB496AC0009AFAF /* MGLTileSource.mm in Sources */,
-				DAEC2FB624087D360090E94E /* MGLNetworkIntegrationManager.m in Sources */,
 				DAE6C3B81CC31EF300DB3429 /* MGLMapView+IBAdditions.mm in Sources */,
 				DA35A2D01CCAAED300E826B2 /* NSValue+MGLAdditions.m in Sources */,
 				3538AA241D542685008EC33D /* MGLStyleLayer.mm in Sources */,

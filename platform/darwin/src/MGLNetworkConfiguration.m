@@ -1,14 +1,17 @@
 #import "MGLNetworkConfiguration_Private.h"
-#import "MGLNetworkIntegrationManager.h"
+#import "MGLLoggingConfiguration_Private.h"
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+#import "MGLAccountManager_Private.h"
+#endif
+
 #import "MGLReachability.h"
 
 static NSString * const MGLStartTime = @"start_time";
 static NSString * const MGLResourceType = @"resource_type";
 NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 
-@interface MGLNetworkConfiguration ()
+@interface MGLNetworkConfiguration () <MGLNativeNetworkDelegate>
 
-@property (strong) NSURLSessionConfiguration *sessionConfig;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSDictionary*> *events;
 @property (nonatomic, weak) id<MGLNetworkConfigurationMetricsDelegate> metricsDelegate;
 @property (nonatomic) dispatch_queue_t eventsQueue;
@@ -16,6 +19,9 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 @end
 
 @implementation MGLNetworkConfiguration
+{
+    NSURLSessionConfiguration *_sessionConfig;
+}
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -34,26 +40,51 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
         _sharedManager = [[self alloc] init];
     });
 
-    [self setNativeNetworkManagerDelegateToDefault];
+    // Notice, this is reset for each call. This is primarily for testing purposes.
+    // TODO: Consider only calling this for testing?
+    [_sharedManager resetNativeNetworkManagerDelegate];
 
     return _sharedManager;
 }
 
-+ (void)setNativeNetworkManagerDelegateToDefault {
+- (void)resetNativeNetworkManagerDelegate {
     // Tell core about our network integration. `delegate` here is not (yet)
     // intended to be set to nil, except for testing.
-    [MGLNativeNetworkManager sharedManager].delegate =
-        MGLNetworkIntegrationManager.sharedManager;
+    [MGLNativeNetworkManager sharedManager].delegate = self;
 }
 
-- (void)setSessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration {
-    @synchronized (self) {
-        if (sessionConfiguration == nil) {
-            _sessionConfig = [self defaultSessionConfiguration];
-        } else {
-            _sessionConfig = sessionConfiguration;
-        }
++ (NSURLSessionConfiguration *)defaultSessionConfiguration {
+    NSURLSessionConfiguration* sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+
+    sessionConfiguration.timeoutIntervalForResource = 30;
+    sessionConfiguration.HTTPMaximumConnectionsPerHost = 8;
+    sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    sessionConfiguration.URLCache = nil;
+
+    return sessionConfiguration;
+}
+
+#pragma mark - MGLNativeNetworkDelegate
+
+- (NSURLSession *)sessionForNetworkManager:(MGLNativeNetworkManager *)networkManager {
+    // Note: this method is NOT called on the main thread.
+    NSURLSession *session;
+    if ([self.delegate respondsToSelector:@selector(sessionForNetworkConfiguration:)]) {
+        session = [self.delegate sessionForNetworkConfiguration:self];
     }
+
+    // Check for a background session; string checking is fragile, but this is not
+    // a deal breaker as we're only doing this to provide more clarity to the
+    // developer
+    NSAssert(![session isKindOfClass:NSClassFromString(@"__NSURLBackgroundSession")],
+             @"Background NSURLSessions are not yet supported");
+
+    if (session.delegate) {
+        NSAssert(![session.delegate conformsToProtocol:@protocol(NSURLSessionDataDelegate)],
+                 @"Session delegates conforming to NSURLSessionDataDelegate are not yet supported");
+    }
+
+    return session;
 }
 
 - (NSURLSessionConfiguration *)sessionConfiguration {
@@ -64,21 +95,27 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     return sessionConfig;
 }
 
-- (NSURLSessionConfiguration *)defaultSessionConfiguration {
-    NSURLSessionConfiguration* sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    
-    sessionConfiguration.timeoutIntervalForResource = 30;
-    sessionConfiguration.HTTPMaximumConnectionsPerHost = 8;
-    sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
-    sessionConfiguration.URLCache = nil;
-    
-    return sessionConfiguration;
+- (void)setSessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration {
+    @synchronized (self) {
+        if (sessionConfiguration == nil) {
+            _sessionConfig = [MGLNetworkConfiguration defaultSessionConfiguration];
+        } else {
+            _sessionConfig = sessionConfiguration;
+        }
+    }
 }
 
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+- (NSString *)skuToken {
+    return MGLAccountManager.skuToken;
+}
+#endif
+
 - (void)startDownloadEvent:(NSString *)urlString type:(NSString *)resourceType {
-    if (urlString && ![self eventDictionaryForKey:urlString]) {
+    if (urlString && resourceType && ![self eventDictionaryForKey:urlString]) {
         NSDate *startDate = [NSDate date];
-        [self setEventDictionary:@{ MGLStartTime: startDate, MGLResourceType: resourceType } forKey:urlString];
+        [self setEventDictionary:@{ MGLStartTime: startDate, MGLResourceType: resourceType }
+                          forKey:urlString];
     }
 }
 
@@ -89,6 +126,16 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 - (void)cancelDownloadEventForResponse:(NSURLResponse *)response {
     [self sendEventForURLResponse:response withAction:@"cancel"];
 }
+
+- (void)debugLog:(NSString *)format, ... {
+    MGLLogDebug(format);
+}
+
+- (void)errorLog:(NSString *)format, ... {
+    MGLLogError(format);
+}
+
+#pragma mark - Event management
 
 - (void)sendEventForURLResponse:(NSURLResponse *)response withAction:(NSString *)action
 {
@@ -103,7 +150,6 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
             });            
         }
     }
-    
 }
 
 - (NSDictionary *)eventAttributesForURL:(NSURLResponse *)response withAction:(NSString *)action

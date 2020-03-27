@@ -69,8 +69,12 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         [sharedOfflineStorage reloadPacks];
     });
 
-    // Always ensure the network delegate is setup
-    [MGLNetworkConfiguration setNativeNetworkManagerDelegateToDefault];
+    // Always ensure the MGLNativeNetworkManager delegate is setup. Calling
+    // `resetNativeNetworkManagerDelegate` is not necessary here, since the shared
+    // manager already calls it.
+    //
+    // TODO: Consider only calling this for testing?
+    [MGLNetworkConfiguration sharedManager];
 
     return sharedOfflineStorage;
 }
@@ -217,8 +221,9 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
 - (instancetype)init {
     // Ensure network configuration & appropriate delegate prior to starting the
-    // run loop
-    [MGLNetworkConfiguration setNativeNetworkManagerDelegateToDefault];
+    // run loop. Calling `resetNativeNetworkManagerDelegate` is not necessary here,
+    // since the shared manager already calls it.
+    [MGLNetworkConfiguration sharedManager];
 
     MGLInitializeRunLoop();
 

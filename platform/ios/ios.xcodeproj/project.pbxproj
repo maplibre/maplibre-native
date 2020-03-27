@@ -393,10 +393,6 @@
 		CA0FAA07237B3BC600C9F3C9 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
 		CA0FAA08237B3BC600C9F3C9 /* MapboxMobileEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; };
 		CA0FAA09237B3BEA00C9F3C9 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
-		CA17464923D81581008B7A43 /* MGLNetworkIntegrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */; };
-		CA17464A23D81587008B7A43 /* MGLNetworkIntegrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */; };
-		CA17464B23D81589008B7A43 /* MGLNetworkIntegrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */; };
-		CA17464C23D81595008B7A43 /* MGLNetworkIntegrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */; };
 		CA17464E23D8A93C008B7A43 /* MGLNetworkConfigurationIntegrationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA17464D23D8A93C008B7A43 /* MGLNetworkConfigurationIntegrationTests.mm */; };
 		CA1B4A512099FB2200EDD491 /* MGLMapSnapshotterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CA1B4A502099FB2200EDD491 /* MGLMapSnapshotterTest.m */; };
 		CA488BAB23FCE6B900AEE226 /* MapboxMobileEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA96299B23731199004F1330 /* MapboxMobileEvents.framework */; };
@@ -408,6 +404,7 @@
 		CA4F3BE4231077B9008BAFEA /* MGLCameraTransitionFinishTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA4F3BE3231077B9008BAFEA /* MGLCameraTransitionFinishTests.mm */; };
 		CA55CD41202C16AA00CE7095 /* MGLCameraChangeReason.h in Headers */ = {isa = PBXBuildFile; fileRef = CA55CD3E202C16AA00CE7095 /* MGLCameraChangeReason.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CA55CD42202C16AA00CE7095 /* MGLCameraChangeReason.h in Headers */ = {isa = PBXBuildFile; fileRef = CA55CD3E202C16AA00CE7095 /* MGLCameraChangeReason.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CA600149242BD8360041BBEC /* MGLIntegrationTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = CA600148242BD8360041BBEC /* MGLIntegrationTestCase.m */; };
 		CA65C4F821E9BB080068B0D4 /* MGLCluster.h in Headers */ = {isa = PBXBuildFile; fileRef = CA65C4F721E9BB080068B0D4 /* MGLCluster.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CA65C4F921E9BB080068B0D4 /* MGLCluster.h in Headers */ = {isa = PBXBuildFile; fileRef = CA65C4F721E9BB080068B0D4 /* MGLCluster.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CA6914B520E67F50002DB0EE /* MGLAnnotationViewIntegrationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA6914B420E67F50002DB0EE /* MGLAnnotationViewIntegrationTests.mm */; };
@@ -1040,8 +1037,6 @@
 		9C6E286522A9849E0056B7BE /* release-notes-jazzy.md.ejs */ = {isa = PBXFileReference; lastKnownFileType = text; path = "release-notes-jazzy.md.ejs"; sourceTree = "<group>"; };
 		9C6E286622A9849E0056B7BE /* deploy-snapshot.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "deploy-snapshot.sh"; sourceTree = "<group>"; };
 		9C6E286722A9849E0056B7BE /* release-notes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "release-notes.js"; sourceTree = "<group>"; };
-		A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLNetworkIntegrationManager.m; sourceTree = "<group>"; };
-		A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLNetworkIntegrationManager.h; sourceTree = "<group>"; };
 		A4DE3DC823038A07005B3473 /* MGLMockGestureRecognizers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLMockGestureRecognizers.m; sourceTree = "<group>"; };
 		A4DE3DCA23038A7F005B3473 /* MGLMockGestureRecognizers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLMockGestureRecognizers.h; sourceTree = "<group>"; };
 		A4F3FB1C2254865900A30170 /* missing_icon.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = missing_icon.json; sourceTree = "<group>"; };
@@ -1059,6 +1054,8 @@
 		CA4F3BE3231077B9008BAFEA /* MGLCameraTransitionFinishTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLCameraTransitionFinishTests.mm; sourceTree = "<group>"; };
 		CA55CD3E202C16AA00CE7095 /* MGLCameraChangeReason.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLCameraChangeReason.h; sourceTree = "<group>"; };
 		CA5E5042209BDC5F001A8A81 /* MGLTestUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MGLTestUtility.h; path = ../../darwin/test/MGLTestUtility.h; sourceTree = "<group>"; };
+		CA600148242BD8360041BBEC /* MGLIntegrationTestCase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MGLIntegrationTestCase.m; sourceTree = "<group>"; };
+		CA60014A242BD8710041BBEC /* MGLIntegrationTestCase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLIntegrationTestCase.h; sourceTree = "<group>"; };
 		CA65C4F721E9BB080068B0D4 /* MGLCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLCluster.h; sourceTree = "<group>"; };
 		CA6914B420E67F50002DB0EE /* MGLAnnotationViewIntegrationTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLAnnotationViewIntegrationTests.mm; path = "Annotation Tests/MGLAnnotationViewIntegrationTests.mm"; sourceTree = "<group>"; };
 		CA86FF0D22D8D5A0009EB14A /* MGLNetworkConfigurationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MGLNetworkConfigurationTests.m; sourceTree = "<group>"; };
@@ -1437,6 +1434,8 @@
 				CA4F3BDD230F74C3008BAFEA /* MGLMapViewPendingBlockTests.m */,
 				CA4C54FD2324948100A81659 /* MGLSourceTests.swift */,
 				CA17464D23D8A93C008B7A43 /* MGLNetworkConfigurationIntegrationTests.mm */,
+				CA600148242BD8360041BBEC /* MGLIntegrationTestCase.m */,
+				CA60014A242BD8710041BBEC /* MGLIntegrationTestCase.h */,
 			);
 			path = "Integration Tests";
 			sourceTree = "<group>";
@@ -1943,8 +1942,6 @@
 				DD0902A41DB18F1B00C5BDCE /* MGLNetworkConfiguration.h */,
 				1F2B94BF221636D800210640 /* MGLNetworkConfiguration_Private.h */,
 				DD0902A21DB18DE700C5BDCE /* MGLNetworkConfiguration.m */,
-				A490C46C23C688CC009AC158 /* MGLNetworkIntegrationManager.h */,
-				A490C46B23C688CC009AC158 /* MGLNetworkIntegrationManager.m */,
 				DA35D9BF240916290013ECB0 /* MGLReachability.h */,
 				DA35D9BE240916290013ECB0 /* MGLReachability.m */,
 				3EA9337830C7738BF7F5493C /* MGLRendererConfiguration.h */,
@@ -2289,7 +2286,6 @@
 				DA27C24F1CBB4C11000B0ECD /* MGLAccountManager_Private.h in Headers */,
 				DA8847FC1CBAFA5100AB86E3 /* MGLStyle.h in Headers */,
 				DD9BE4F71EB263C50079A3AF /* UIViewController+MGLAdditions.h in Headers */,
-				CA17464A23D81587008B7A43 /* MGLNetworkIntegrationManager.h in Headers */,
 				DAF0D8131DFE0EC500B28378 /* MGLVectorTileSource_Private.h in Headers */,
 				354B83961D2E873E005D9406 /* MGLUserLocationAnnotationView.h in Headers */,
 				74CB5EC3219B282500102936 /* MGLCircleStyleLayer_Private.h in Headers */,
@@ -2454,7 +2450,6 @@
 				1F6A82A92138871900BA5B41 /* MGLLoggingConfiguration_Private.h in Headers */,
 				DABFB8661CBE99E500D62B32 /* MGLPointAnnotation.h in Headers */,
 				96E6145A22CC169000109F14 /* MGLCompassButton.h in Headers */,
-				CA17464B23D81589008B7A43 /* MGLNetworkIntegrationManager.h in Headers */,
 				96E516E42000560B00A02306 /* MGLComputedShapeSource_Private.h in Headers */,
 				96E516E92000560B00A02306 /* MGLAnnotationImage_Private.h in Headers */,
 				96E516E52000560B00A02306 /* MGLOfflinePack_Private.h in Headers */,
@@ -2969,6 +2964,7 @@
 				CA4C54FE2324948100A81659 /* MGLSourceTests.swift in Sources */,
 				CA1B4A512099FB2200EDD491 /* MGLMapSnapshotterTest.m in Sources */,
 				CA4F3BE4231077B9008BAFEA /* MGLCameraTransitionFinishTests.mm in Sources */,
+				CA600149242BD8360041BBEC /* MGLIntegrationTestCase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3084,7 +3080,6 @@
 				DAD165701CF41981001FF4B9 /* MGLFeature.mm in Sources */,
 				30E578191DAA855E0050F07E /* UIImage+MGLAdditions.mm in Sources */,
 				550570C622958FB400228ECF /* MGLMapView+Impl.mm in Sources */,
-				CA17464923D81581008B7A43 /* MGLNetworkIntegrationManager.m in Sources */,
 				40EDA1C11CFE0E0500D9EA68 /* MGLAnnotationContainerView.m in Sources */,
 				DA8848541CBAFB9800AB86E3 /* MGLCompactCalloutView.m in Sources */,
 				DA8848251CBAFA6200AB86E3 /* MGLPointAnnotation.mm in Sources */,
@@ -3185,7 +3180,6 @@
 				DAD165711CF41981001FF4B9 /* MGLFeature.mm in Sources */,
 				30E5781A1DAA855E0050F07E /* UIImage+MGLAdditions.mm in Sources */,
 				40EDA1C21CFE0E0500D9EA68 /* MGLAnnotationContainerView.m in Sources */,
-				CA17464C23D81595008B7A43 /* MGLNetworkIntegrationManager.m in Sources */,
 				550570C722958FB400228ECF /* MGLMapView+Impl.mm in Sources */,
 				DAA4E4291CBB730400178DFB /* NSBundle+MGLAdditions.m in Sources */,
 				35136D3D1D42272500C20EFD /* MGLCircleStyleLayer.mm in Sources */,

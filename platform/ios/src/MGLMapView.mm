@@ -68,7 +68,6 @@
 #import "MGLLocationManager_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
-#import "MGLNetworkIntegrationManager.h"
 #import "MGLReachability.h"
 #import <MapboxMobileEvents/MapboxMobileEvents.h>
 
@@ -452,12 +451,12 @@ public:
     _opaque = NO;
 
     // setup accessibility
-    //
-//    self.isAccessibilityElement = YES;
-    MGLNativeNetworkManager.sharedManager.delegate = MGLNetworkIntegrationManager.sharedManager;
+//  self.isAccessibilityElement = YES;
 
-    // Ensure network configuration is set up
-    [MGLNetworkConfiguration setNativeNetworkManagerDelegateToDefault];
+    // Ensure network configuration is set up (connect gl-native networking to
+    // platform SDK via delegation). Calling `resetNativeNetworkManagerDelegate`
+    // is not necessary here, since the shared manager already calls it.
+    [MGLNetworkConfiguration sharedManager];
 
     self.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"MAP_A11Y_LABEL", nil, nil, @"Map", @"Accessibility label");
     self.accessibilityTraits = UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;

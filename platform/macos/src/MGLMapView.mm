@@ -55,8 +55,8 @@
 #import "NSColor+MGLAdditions.h"
 #import "NSImage+MGLAdditions.h"
 #import "NSPredicate+MGLPrivateAdditions.h"
+#import "MGLNetworkConfiguration_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
-#import "MGLNetworkIntegrationManager.h"
 #import "MGLReachability.h"
 
 class MGLAnnotationContext;
@@ -259,7 +259,8 @@ public:
 }
 
 - (void)commonInit {
-    MGLNativeNetworkManager.sharedManager.delegate = MGLNetworkIntegrationManager.sharedManager;
+    [MGLNetworkConfiguration sharedManager];
+
     _isTargetingInterfaceBuilder = NSProcessInfo.processInfo.mgl_isInterfaceBuilderDesignablesAgent;
 
     // Set up cross-platform controllers and resources.

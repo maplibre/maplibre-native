@@ -1,4 +1,5 @@
 #import "MGLNetworkConfiguration.h"
+#include <mbgl/interface/native_apple_interface.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,7 +17,7 @@ extern NSString * const kMGLDownloadPerformanceEvent;
 @property (nonatomic, strong) NSMutableDictionary<NSString*, NSDictionary*> *events;
 @property (nonatomic, weak) id<MGLNetworkConfigurationMetricsDelegate> metricsDelegate;
 
-+ (void)setNativeNetworkManagerDelegateToDefault;
+- (void)resetNativeNetworkManagerDelegate;
 - (void)startDownloadEvent:(NSString *)urlString type:(NSString *)resourceType;
 - (void)stopDownloadEventForResponse:(NSURLResponse *)response;
 - (void)cancelDownloadEventForResponse:(NSURLResponse *)response;
