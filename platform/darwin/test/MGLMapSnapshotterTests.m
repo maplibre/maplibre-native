@@ -115,7 +115,7 @@ MGLImage *MGLImageFromCurrentContext() {
         }
         [completionExpectation fulfill];
     }];
-    [self waitForExpectations:@[self.styleLoadingExpectation, overlayExpectation, completionExpectation] timeout:2 enforceOrder:YES];
+    [self waitForExpectations:@[self.styleLoadingExpectation, overlayExpectation, completionExpectation] timeout:5 enforceOrder:YES];
 }
 
 - (void)testDelegate {
@@ -138,7 +138,7 @@ MGLImage *MGLImageFromCurrentContext() {
         }
         [completionExpectation fulfill];
     }];
-    [self waitForExpectations:@[self.styleLoadingExpectation, completionExpectation] timeout:2 enforceOrder:YES];
+    [self waitForExpectations:@[self.styleLoadingExpectation, completionExpectation] timeout:5 enforceOrder:YES];
 }
 
 - (void)testRuntimeStyling {
@@ -192,7 +192,7 @@ MGLImage *MGLImageFromCurrentContext() {
         }
         [completionExpectation fulfill];
     }];
-    [self waitForExpectations:@[self.styleLoadingExpectation, overlayExpectation, completionExpectation] timeout:2 enforceOrder:YES];
+    [self waitForExpectations:@[self.styleLoadingExpectation, overlayExpectation, completionExpectation] timeout:5 enforceOrder:YES];
     self.runtimeStylingActions = nil;
 }
 
