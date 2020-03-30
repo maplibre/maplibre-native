@@ -44,6 +44,8 @@ ext.nativeBuild = { nativeTargets ->
                         // Enable ccache if the user has installed it.
                         if (file("/usr/bin/ccache").exists()) {
                             arguments "-DANDROID_CCACHE=/usr/bin/ccache"
+                        } else if (file("/usr/local/bin/ccache").exists()) {
+                            arguments "-DANDROID_CCACHE=/usr/local/bin/ccache"
                         }
 
                         cFlags "-Qunused-arguments"
