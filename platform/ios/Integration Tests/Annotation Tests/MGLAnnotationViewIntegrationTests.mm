@@ -367,7 +367,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
         //  Coord                   showsCallout  impl margins?   moveIntoView    expectMapToPan    calloutOnScreen
         {   {offset, 0.5f},         YES,          YES,            YES,            YES,              YES },
-        {   {1.0 - offset, 0.5f},   YES,          YES,            YES,            YES,              YES },
+        {   {(CGFloat)(1.0 - offset), 0.5f},   YES,          YES,            YES,            YES,              YES },
 
         PAN_TEST_TERMINATOR
     };

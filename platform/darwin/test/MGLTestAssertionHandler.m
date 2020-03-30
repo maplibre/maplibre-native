@@ -35,9 +35,9 @@
                                        );
     }
     else {
-        NSLog(@"Assertion Failure: %@:%lu: %@ - %@",
+        NSLog(@"Assertion Failure: %@:%ld: %@ - %@",
               fileName,
-              line,
+              (long)line,
               condition,
               description);
     }
@@ -66,9 +66,9 @@
                                        description);
     }
     else {
-        NSLog(@"Assertion Failure: %@:%lu: %@ - %@",
+        NSLog(@"Assertion Failure: %@:%ld: %@ - %@",
               fileName,
-              line,
+              (long)line,
               condition,
               description);
     }

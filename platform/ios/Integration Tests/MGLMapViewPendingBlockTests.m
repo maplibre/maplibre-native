@@ -328,7 +328,7 @@
     // Observes changes to pendingCompletionBlocks (including additions)
     self.observation = ^(NSDictionary *change){
 
-        NSLog(@"change = %@ count = %lu", change, myself.mapView.pendingCompletionBlocks.count);
+        NSLog(@"change = %@ count = %lu", change, (unsigned long)myself.mapView.pendingCompletionBlocks.count);
 
         NSArray *value = change[NSKeyValueChangeNewKey];
         
