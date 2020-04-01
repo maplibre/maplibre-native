@@ -280,13 +280,11 @@ public:
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
 
-- (mbgl::Map &)mbglMap;
-
 @end
 
 @implementation MGLMapView
 {
-    mbgl::Map *_mbglMap;
+    std::unique_ptr<mbgl::Map> _mbglMap;
     std::unique_ptr<MGLMapViewImpl> _mbglView;
     std::unique_ptr<MGLRenderFrontend> _rendererFrontend;
     
@@ -499,7 +497,7 @@ public:
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-    _mbglMap = new mbgl::Map(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
 
     // start paused if in IB
     if (background) {
@@ -716,8 +714,7 @@ public:
     
     // Tear down C++ objects, insuring worker threads correctly terminate.
     // Because of how _mbglMap is constructed, we need to destroy it first.
-    delete _mbglMap;
-    _mbglMap = nullptr;
+    _mbglMap.reset();
 
     _mbglView.reset();
 
@@ -2807,12 +2804,12 @@ public:
 
 - (void)setPrefetchesTiles:(BOOL)prefetchesTiles
 {
-    _mbglMap->setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);
+    self.mbglMap.setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);
 }
 
 - (BOOL)prefetchesTiles
 {
-    return _mbglMap->getPrefetchZoomDelta() > 0 ? YES : NO;
+    return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
 #pragma mark - Accessibility -
@@ -3527,24 +3524,24 @@ public:
 
 - (CGFloat)minimumPitch
 {
-    return *_mbglMap->getBounds().minPitch;
+    return *self.mbglMap.getBounds().minPitch;
 }
 
 - (void)setMinimumPitch:(CGFloat)minimumPitch
 {
     MGLLogDebug(@"Setting minimumPitch: %f", minimumPitch);
-    _mbglMap->setBounds(mbgl::BoundOptions().withMinPitch(minimumPitch));
+    self.mbglMap.setBounds(mbgl::BoundOptions().withMinPitch(minimumPitch));
 }
 
 - (CGFloat)maximumPitch
 {
-    return *_mbglMap->getBounds().maxPitch;
+    return *self.mbglMap.getBounds().maxPitch;
 }
 
 - (void)setMaximumPitch:(CGFloat)maximumPitch
 {
     MGLLogDebug(@"Setting maximumPitch: %f", maximumPitch);
-    _mbglMap->setBounds(mbgl::BoundOptions().withMaxPitch(maximumPitch));
+    self.mbglMap.setBounds(mbgl::BoundOptions().withMaxPitch(maximumPitch));
 }
 
 - (MGLCoordinateBounds)visibleCoordinateBounds
@@ -6476,7 +6473,7 @@ public:
         MGLImage *imageToLoad = [self.delegate mapView:self didFailToLoadImage:imageName];
         if (imageToLoad) {
             auto image = [imageToLoad mgl_styleImageWithIdentifier:imageName];
-            _mbglMap->getStyle().addImage(std::move(image));
+            self.mbglMap.getStyle().addImage(std::move(image));
         }
     }
 }

@@ -154,7 +154,7 @@ public:
 
 @implementation MGLMapView {
     /// Cross-platform map view controller.
-    mbgl::Map *_mbglMap;
+    std::unique_ptr<mbgl::Map> _mbglMap;
     std::unique_ptr<MGLMapViewImpl> _mbglView;
     std::unique_ptr<MGLRenderFrontend> _rendererFrontend;
 
@@ -295,7 +295,7 @@ public:
     resourceOptions.withCachePath([[MGLOfflineStorage sharedOfflineStorage] mbglCachePath])
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
 
-    _mbglMap = new mbgl::Map(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
 
     // Notify map object when network reachability status changes.
     _reachability = [MGLReachability reachabilityForInternetConnection];
@@ -539,10 +539,7 @@ public:
     // Removing the annotations unregisters any outstanding KVO observers.
     [self removeAnnotations:self.annotations];
 
-    if (_mbglMap) {
-        delete _mbglMap;
-        _mbglMap = nullptr;
-    }
+    _mbglMap.reset();
     _mbglView.reset();
 }
 
@@ -660,10 +657,6 @@ public:
 - (void)setPrefetchesTiles:(BOOL)prefetchesTiles
 {
     _mbglMap->setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);
-}
-
-- (mbgl::Map *)mbglMap {
-    return _mbglMap;
 }
 
 - (mbgl::Renderer *)renderer {

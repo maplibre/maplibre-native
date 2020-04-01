@@ -55,8 +55,6 @@ namespace mbgl {
 
 - (BOOL)isTargetingInterfaceBuilder;
 
-- (nonnull mbgl::Map *)mbglMap;
-
 - (nonnull mbgl::Renderer *)renderer;
 
 @end
