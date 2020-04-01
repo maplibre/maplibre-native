@@ -4746,7 +4746,9 @@ public class Expression {
 
       final String operator = jsonArray.get(0).getAsString();
       final List<Expression> arguments = new ArrayList<>();
-
+      if (operator.equals("within")) {
+        return within(Polygon.fromJson(jsonArray.get(1).toString()));
+      }
       for (int i = 1; i < jsonArray.size(); i++) {
         JsonElement jsonElement = jsonArray.get(i);
         if (operator.equals("literal") && jsonElement instanceof JsonArray) {
