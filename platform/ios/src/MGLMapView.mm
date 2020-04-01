@@ -4612,7 +4612,12 @@ public:
         }
 
         _isChangingAnnotationLayers = YES;
-        self.mbglMap.removeAnnotation(annotationTag);
+        // If the underlying map is gone, there’s nothing to remove, but still
+        // continue to unregister KVO and other annotation resources.
+        if (_mbglMap)
+        {
+            self.mbglMap.removeAnnotation(annotationTag);
+        }
     }
 
     [self updatePresentsWithTransaction];

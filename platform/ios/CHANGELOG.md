@@ -30,6 +30,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 ### Other changes
 
 * Added the `MGLMapView.minimumPitch` and `MGLMapView.maximumPitch` properties to further limit how much the user or your code can tilt the map. ([#208](https://github.com/mapbox/mapbox-gl-native-ios/pull/208))
+* Fixed a crash while quitting the application after adding an annotation to `MGLMapView`. ([#252](https://github.com/mapbox/mapbox-gl-native-ios/pull/252))
 * Improved performance when continuously animating a tilted map. ([#16287](https://github.com/mapbox/mapbox-gl-native/pull/16287))
 * Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))
 
