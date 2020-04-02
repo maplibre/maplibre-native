@@ -117,6 +117,14 @@ public abstract class Source {
   @Keep
   protected native void nativeSetPrefetchZoomDelta(Integer delta);
 
+  @NonNull
+  @Keep
+  protected native void nativeSetMaxOverscaleFactorForParentTiles(Integer maxOverscaleFactor);
+
+  @NonNull
+  @Keep
+  protected native Integer nativeGetMaxOverscaleFactorForParentTiles();
+
   public void setDetached() {
     detached = true;
   }
