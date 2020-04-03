@@ -75,6 +75,7 @@ open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
       super.onViewAttachedToWindow(holder)
       if (holder is MapHolder) {
         val mapView = holder.mapView
+        mapView.isEnabled = false
         mapView.onStart()
         mapView.onResume()
       }
