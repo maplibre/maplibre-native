@@ -480,6 +480,7 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         //#-end-example-code
         
         wait(for: [expectation], timeout: 5)
+        _ = image
     }
     
     func testMGLCluster() {
