@@ -62,10 +62,6 @@ MGLImage *MGLImageFromCurrentContext() {
     [super setUp];
     
     [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
-    
-    // Initialize file system and run loop before snapshotting.
-    // https://github.com/mapbox/mapbox-gl-native-ios/issues/227
-    (void)[MGLOfflineStorage sharedOfflineStorage];
 }
 
 - (void)tearDown {
