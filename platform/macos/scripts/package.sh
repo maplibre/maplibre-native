@@ -33,8 +33,6 @@ fi
 
 step "Building dynamic framework (build ${PROJ_VERSION}, version ${SEM_VERSION})…"
 xcodebuild \
-    CURRENT_PROJECT_VERSION=${PROJ_VERSION} \
-    CURRENT_SHORT_VERSION=${SHORT_VERSION} \
     CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
     CURRENT_COMMIT_HASH=${HASH} \
     ${CI_XCCONFIG} \
@@ -57,8 +55,6 @@ step "Building and archiving Mapbox GL.app (build ${PROJ_VERSION}, version ${SEM
 if [[ ${BUILDTYPE} == Release ]]; then
     mkdir -p ${APP_OUTPUT}
     xcodebuild \
-        CURRENT_PROJECT_VERSION=${PROJ_VERSION} \
-        CURRENT_SHORT_VERSION=${SHORT_VERSION} \
         CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
         CURRENT_COMMIT_HASH=${HASH} \
         ${CI_XCCONFIG} \
