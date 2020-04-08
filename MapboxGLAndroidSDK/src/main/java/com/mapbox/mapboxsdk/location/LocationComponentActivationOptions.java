@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.location;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -21,13 +22,15 @@ public class LocationComponentActivationOptions {
   private final LocationComponentOptions locationComponentOptions;
   private final int styleRes;
   private final boolean useDefaultLocationEngine;
+  private final boolean useSpecializedLocationLayer;
 
   private LocationComponentActivationOptions(@NonNull Context context, @NonNull Style style,
                                              @Nullable LocationEngine locationEngine,
                                              @Nullable LocationEngineRequest locationEngineRequest,
                                              @Nullable LocationComponentOptions locationComponentOptions,
                                              int styleRes,
-                                             boolean useDefaultLocationEngine) {
+                                             boolean useDefaultLocationEngine,
+                                             boolean useSpecializedLocationLayer) {
     this.context = context;
     this.style = style;
     this.locationEngine = locationEngine;
@@ -35,6 +38,7 @@ public class LocationComponentActivationOptions {
     this.locationComponentOptions = locationComponentOptions;
     this.styleRes = styleRes;
     this.useDefaultLocationEngine = useDefaultLocationEngine;
+    this.useSpecializedLocationLayer = useSpecializedLocationLayer;
   }
 
   /**
@@ -117,6 +121,25 @@ public class LocationComponentActivationOptions {
   }
 
   /**
+   * True if you want to initialize and use the specialized location layer to render the location puck.
+   * <p>
+   * The specialized layer comes with significant performance improvements,
+   * but since it's not based on the runtime styling,
+   * it's not fully compatible with the traditional implementation. The incompatibilities are:
+   * <ul>
+   * <li> Constants like {@link LocationComponentConstants#FOREGROUND_LAYER}
+   * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
+   * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
+   * Use {@link LocationComponentOptions#foregroundDrawable()} instead.
+   * </ul>
+   *
+   * @return whether the default specialized location layer is used
+   */
+  public boolean useSpecializedLocationLayer() {
+    return useSpecializedLocationLayer;
+  }
+
+  /**
    * Builder class for constructing a new instance of {@link LocationComponentActivationOptions}.
    */
   public static class Builder {
@@ -135,6 +158,8 @@ public class LocationComponentActivationOptions {
      * {@link LocationEngine} is set via the builder's `locationEngine()` method.
      */
     private boolean useDefaultLocationEngine = true;
+
+    private boolean useSpecializedLocationLayer = false;
 
     /**
      * Constructor for the {@link LocationComponentActivationOptions} builder class.
@@ -209,6 +234,28 @@ public class LocationComponentActivationOptions {
     }
 
     /**
+     * True if you want to initialize and use the specialized location layer to render the location puck.
+     * <p>
+     * The specialized layer comes with significant performance improvements,
+     * but since it's not based on the runtime styling,
+     * it's not fully compatible with the traditional implementation. The incompatibilities are:
+     * <ul>
+     * <li> Constants like {@link LocationComponentConstants#FOREGROUND_LAYER}
+     * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
+     * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
+     * Use {@link LocationComponentOptions#foregroundDrawable()} instead.
+     * </ul>
+     *
+     * @param useSpecializedLocationLayer true if you want to initialize and use the
+     *                                    specialized location layer. Defaults to false.
+     * @return the {@link Builder} object being constructed
+     */
+    public Builder useSpecializedLocationLayer(boolean useSpecializedLocationLayer) {
+      this.useSpecializedLocationLayer = useSpecializedLocationLayer;
+      return this;
+    }
+
+    /**
      * Method which actually builds the {@link LocationComponentActivationOptions} object while
      * taking the various options into account.
      *
@@ -217,28 +264,29 @@ public class LocationComponentActivationOptions {
     public LocationComponentActivationOptions build() {
       if (styleRes != 0 && locationComponentOptions != null) {
         throw new IllegalArgumentException(
-            "You've provided both a style resource and a LocationComponentOptions object to the "
-                + "LocationComponentActivationOptions builder. You can't use both and "
-                + "you must choose one of the two to style the LocationComponent.");
+          "You've provided both a style resource and a LocationComponentOptions object to the "
+            + "LocationComponentActivationOptions builder. You can't use both and "
+            + "you must choose one of the two to style the LocationComponent.");
       }
       if (context == null) {
         throw new NullPointerException(
-            "Context in LocationComponentActivationOptions is null.");
+          "Context in LocationComponentActivationOptions is null.");
       }
       if (style == null) {
         throw new NullPointerException(
-            "Style in LocationComponentActivationOptions is null. Make sure the "
-                + "Style object isn't null. Wait for the map to fully load before passing "
-                + "the Style object to LocationComponentActivationOptions.");
+          "Style in LocationComponentActivationOptions is null. Make sure the "
+            + "Style object isn't null. Wait for the map to fully load before passing "
+            + "the Style object to LocationComponentActivationOptions.");
       }
       if (!style.isFullyLoaded()) {
         throw new IllegalArgumentException(
-            "Style in LocationComponentActivationOptions isn't fully loaded. Wait for the "
-                + "map to fully load before passing the Style object to "
-                + "LocationComponentActivationOptions.");
+          "Style in LocationComponentActivationOptions isn't fully loaded. Wait for the "
+            + "map to fully load before passing the Style object to "
+            + "LocationComponentActivationOptions.");
       }
       return new LocationComponentActivationOptions(context, style, locationEngine,
-          locationEngineRequest, locationComponentOptions, styleRes, useDefaultLocationEngine);
+        locationEngineRequest, locationComponentOptions, styleRes, useDefaultLocationEngine,
+        useSpecializedLocationLayer);
     }
   }
 }

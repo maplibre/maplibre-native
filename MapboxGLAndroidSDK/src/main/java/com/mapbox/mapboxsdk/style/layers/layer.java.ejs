@@ -42,7 +42,7 @@ public class <%- camelize(type) %>Layer extends Layer {
     super(nativePtr);
   }
 
-<% if (type === 'background') { -%>
+<% if (type === 'background' || type === 'location-indicator') { -%>
   /**
    * Creates a <%- camelize(type) %>Layer.
    *

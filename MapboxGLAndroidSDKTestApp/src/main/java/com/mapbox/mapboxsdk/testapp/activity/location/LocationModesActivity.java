@@ -129,6 +129,7 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
       locationComponent.activateLocationComponent(
         LocationComponentActivationOptions
           .builder(this, style)
+          .useSpecializedLocationLayer(true)
           .useDefaultLocationEngine(true)
           .locationEngineRequest(new LocationEngineRequest.Builder(750)
             .setFastestInterval(750)

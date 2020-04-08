@@ -156,6 +156,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/style/layers/raster_layer.hpp
     ${PROJECT_SOURCE_DIR}/style/layers/symbol_layer.cpp
     ${PROJECT_SOURCE_DIR}/style/layers/symbol_layer.hpp
+    ${PROJECT_SOURCE_DIR}/style/layers/location_indicator_layer.cpp
+    ${PROJECT_SOURCE_DIR}/style/layers/location_indicator_layer.hpp
     ${PROJECT_SOURCE_DIR}/style/light.cpp
     ${PROJECT_SOURCE_DIR}/style/light.hpp
     ${PROJECT_SOURCE_DIR}/style/position.cpp

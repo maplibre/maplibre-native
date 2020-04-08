@@ -87,6 +87,7 @@ public final class LocationComponentConstants {
   static final String BACKGROUND_STALE_ICON = "mapbox-location-background-stale-icon";
   static final String SHADOW_ICON = "mapbox-location-shadow-icon";
   static final String BEARING_ICON = "mapbox-location-bearing-icon";
+  static final String BEARING_STALE_ICON = "mapbox-location-bearing-stale-icon";
 
   private LocationComponentConstants() {
     // Class should not be initialized

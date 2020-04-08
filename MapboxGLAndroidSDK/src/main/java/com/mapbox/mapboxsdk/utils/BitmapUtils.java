@@ -53,10 +53,23 @@ public class BitmapUtils {
    * @return the merged bitmap
    */
   public static Bitmap mergeBitmap(@NonNull Bitmap background, @NonNull Bitmap foreground) {
+    return mergeBitmap(background, foreground, 10f, 10f);
+  }
+
+  /**
+   * Create a bitmap from a background and a foreground bitmap
+   *
+   * @param background The bitmap placed in the background
+   * @param foreground The bitmap placed in the foreground
+   * @param left position of the left side of the foreground bitmap
+   * @param top position of the top side of the foreground bitmap
+   * @return the merged bitmap
+   */
+  public static Bitmap mergeBitmap(@NonNull Bitmap background, @NonNull Bitmap foreground, float left, float top) {
     Bitmap result = Bitmap.createBitmap(background.getWidth(), background.getHeight(), background.getConfig());
     Canvas canvas = new Canvas(result);
     canvas.drawBitmap(background, 0f, 0f, null);
-    canvas.drawBitmap(foreground, 10, 10, null);
+    canvas.drawBitmap(foreground, left, top, null);
     return result;
   }
 

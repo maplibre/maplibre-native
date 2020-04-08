@@ -5,16 +5,6 @@
 
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/filter.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer.hpp>
-#include <mbgl/style/layers/heatmap_layer.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/util/logging.hpp>
 
 // Java -> C++ conversion

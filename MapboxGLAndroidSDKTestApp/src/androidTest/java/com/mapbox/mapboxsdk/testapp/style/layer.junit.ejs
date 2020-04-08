@@ -43,7 +43,7 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
   @UiThreadTest
   public void beforeTest(){
     super.before();
-<% if (type === 'background') { -%>
+<% if (type === 'background' || type === 'location-indicator') { -%>
     layer = new <%- camelize(type) %>Layer("my-layer");
 <% } else { -%>
     layer = new <%- camelize(type) %>Layer("my-layer", "composite");
@@ -51,7 +51,7 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
 <% } -%>
     setupLayer(layer);
   }
-<% if (type !== 'background') { -%>
+<% if (type !== 'background' && type !== 'location-indicator') { -%>
 
   @Test
   @UiThreadTest
@@ -75,7 +75,7 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
     layer.setProperties(visibility(NONE));
     assertEquals(layer.getVisibility().getValue(), NONE);
   }
-<% if (!(type === 'background' || type === 'raster' || type === 'hillshade')) { -%>
+<% if (!(type === 'background' || type === 'location-indicator' || type === 'raster' || type === 'hillshade')) { -%>
 
   @Test
   @UiThreadTest

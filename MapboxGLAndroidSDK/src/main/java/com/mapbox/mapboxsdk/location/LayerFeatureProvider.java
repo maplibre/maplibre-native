@@ -13,14 +13,14 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_
 class LayerFeatureProvider {
 
   @NonNull
-  Feature generateLocationFeature(@Nullable Feature locationFeature, @NonNull LocationComponentOptions options) {
+  Feature generateLocationFeature(@Nullable Feature locationFeature, boolean isStale) {
     if (locationFeature != null) {
       return locationFeature;
     }
     locationFeature = Feature.fromGeometry(Point.fromLngLat(0.0, 0.0));
     locationFeature.addNumberProperty(PROPERTY_GPS_BEARING, 0f);
     locationFeature.addNumberProperty(PROPERTY_COMPASS_BEARING, 0f);
-    locationFeature.addBooleanProperty(PROPERTY_LOCATION_STALE, options.enableStaleState());
+    locationFeature.addBooleanProperty(PROPERTY_LOCATION_STALE, isStale);
     return locationFeature;
   }
 }

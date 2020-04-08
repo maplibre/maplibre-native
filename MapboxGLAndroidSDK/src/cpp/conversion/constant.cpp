@@ -52,9 +52,23 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, std::vect
     return result;
 }
 
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, std::vector<double>>::operator()(jni::JNIEnv& env, const std::vector<double>& value) const {
+    auto result = jni::Array<jni::Double>::New(env, value.size());
+
+    for (std::size_t i = 0; i < value.size(); i++) {
+        result.Set(env, i, jni::Box(env, value.at(i)));
+    }
+
+    return result;
+}
+
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Image>::operator()(
     jni::JNIEnv& env, const style::expression::Image& value) const {
     return jni::Make<jni::String>(env, value.id());
+}
+
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, mbgl::style::Rotation>::operator()(jni::JNIEnv& env, const mbgl::style::Rotation& value) const {
+    return jni::Box(env, value.getAngle());
 }
 
 } // namespace conversion

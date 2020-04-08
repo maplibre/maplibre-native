@@ -68,7 +68,12 @@ global.propertyType = function propertyType(property) {
       case 'boolean':
         return 'Boolean';
       case 'number':
-        return 'Float';
+        if (/bearing$/.test(property.name) &&
+            property.period == 360 &&
+            property.units =='degrees') {
+          return 'Double';
+        }
+        return /location$/.test(property.name) ? 'Double' : 'Float';
       case 'formatted':
         return 'Formatted';
       case 'string':
@@ -79,7 +84,7 @@ global.propertyType = function propertyType(property) {
       case 'color':
         return 'String';
       case 'array':
-        return `${propertyType({type:property.value})}[]`;
+        return `${propertyType({type:property.value, name: property.name})}[]`;
       default:
         throw new Error(`unknown type for ${property.name}`);
   }
@@ -205,6 +210,11 @@ global.defaultValueJava = function(property) {
       case 'boolean':
         return 'true';
       case 'number':
+        if (/bearing$/.test(property.name) &&
+            property.period == 360 &&
+            property.units =='degrees') {
+          return '0.3';
+        }
         return '0.3f';
       case 'formatted':
         return 'new Formatted(new FormattedSection("default"))'
@@ -225,14 +235,16 @@ global.defaultValueJava = function(property) {
                     return 'new String[0]';
                 }
               case 'number':
-                var result ='new Float[] {';
+                var isDouble = /location$/.test(property.name)
+                console.log(isDouble)
+                var result = 'new ' + (isDouble ? 'Double' : 'Float') + '[] {';
                 for (var i = 0; i < property.length; i++) {
-                    result += "0f";
+                    result += isDouble ? '0.0' : '0f';
                     if (i +1 != property.length) {
-                        result += ", ";
+                        result += ', ';
                     }
                 }
-                return result + "}";
+                return result + '}';
              }
       default: throw new Error(`unknown type for ${property.name}`)
       }
