@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(../../../vendor/mapbox-gl-native ../../../vendor/mapbox-gl-native)
+add_subdirectory(../../../vendor/mapbox-gl-native ../../../vendor/mapbox-gl-native/${ANDROID_ABI})
 
 add_library(
   mapbox-gl SHARED
