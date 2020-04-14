@@ -5,9 +5,7 @@ import androidx.annotation.NonNull;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.style.layers.CircleLayer;
 import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.LocationIndicatorLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
@@ -122,8 +120,8 @@ class LayerSourceProvider {
   LocationIndicatorLayer generateLocationComponentLayer() {
     LocationIndicatorLayer layer = new LocationIndicatorLayer(FOREGROUND_LAYER);
     layer.setProperties(
-      PropertyFactory.perspectiveCompensation(0.9f),
-      PropertyFactory.imageTiltDisplacement(4f)
+      LocationPropertyFactory.perspectiveCompensation(0.9f),
+      LocationPropertyFactory.imageTiltDisplacement(4f)
     );
     return layer;
   }

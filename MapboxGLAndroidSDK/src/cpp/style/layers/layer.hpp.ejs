@@ -2,7 +2,7 @@
   const type = locals.type;
   const properties = locals.properties;
 -%>
-// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
 #pragma once
 
@@ -18,7 +18,11 @@ namespace android {
 class <%- camelize(type) %>Layer : public Layer {
 public:
     using SuperTag = Layer;
+<% if (type === 'location-indicator') { -%>
+    static constexpr auto Name() { return "com/mapbox/mapboxsdk/location/<%- camelize(type) %>Layer"; };
+<% } else { -%>
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/<%- camelize(type) %>Layer"; };
+<% } -%>
 
 <% if (type === 'background' || type === 'location-indicator') { -%>
     <%- camelize(type) %>Layer(jni::JNIEnv&, jni::String&);

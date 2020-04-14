@@ -8,8 +8,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.LocationIndicatorLayer;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
@@ -23,7 +21,6 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.SHADOW_IC
 import static com.mapbox.mapboxsdk.style.expressions.Expression.rgba;
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
 import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
 class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
 
@@ -84,8 +81,8 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
     colorArray[3] = accuracyAlpha;
     Expression rgbaExpression = rgba(colorArray[0], colorArray[1], colorArray[2], colorArray[3]);
     layer.setProperties(
-      PropertyFactory.accuracyRadiusColor(rgbaExpression),
-      PropertyFactory.accuracyRadiusBorderColor(rgbaExpression)
+      LocationPropertyFactory.accuracyRadiusColor(rgbaExpression),
+      LocationPropertyFactory.accuracyRadiusBorderColor(rgbaExpression)
     );
   }
 
@@ -107,16 +104,16 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
   @Override
   public void setAccuracyRadius(Float accuracy) {
     layer.setProperties(
-      PropertyFactory.accuracyRadius(accuracy)
+      LocationPropertyFactory.accuracyRadius(accuracy)
     );
   }
 
   @Override
   public void styleScaling(Expression scaleExpression) {
     layer.setProperties(
-      PropertyFactory.shadowImageSize(scaleExpression),
-      PropertyFactory.bearingImageSize(scaleExpression),
-      PropertyFactory.topImageSize(scaleExpression)
+      LocationPropertyFactory.shadowImageSize(scaleExpression),
+      LocationPropertyFactory.bearingImageSize(scaleExpression),
+      LocationPropertyFactory.topImageSize(scaleExpression)
     );
   }
 
@@ -160,7 +157,7 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
   }
 
   private void setLayerVisibility(boolean visible) {
-    layer.setProperties(visibility(visible ? VISIBLE : NONE));
+    layer.setProperties(LocationPropertyFactory.visibility(visible ? VISIBLE : NONE));
   }
 
   private void setLayerLocation(@Nullable LatLng latLng) {
@@ -168,14 +165,14 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
     if (latLng != null) {
       Double[] values = new Double[] {latLng.getLatitude(), latLng.getLongitude(), 0d};
       layer.setProperties(
-        PropertyFactory.location(values)
+        LocationPropertyFactory.location(values)
       );
     }
   }
 
   private void setLayerBearing(double bearing) {
     layer.setProperties(
-      PropertyFactory.bearing(bearing)
+      LocationPropertyFactory.bearing(bearing)
     );
   }
 
@@ -203,9 +200,9 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
         break;
     }
     layer.setProperties(
-      PropertyFactory.topImage(topImage),
-      PropertyFactory.bearingImage(bearingImage),
-      PropertyFactory.shadowImage(shadowImage)
+      LocationPropertyFactory.topImage(topImage),
+      LocationPropertyFactory.bearingImage(bearingImage),
+      LocationPropertyFactory.shadowImage(shadowImage)
     );
   }
 }

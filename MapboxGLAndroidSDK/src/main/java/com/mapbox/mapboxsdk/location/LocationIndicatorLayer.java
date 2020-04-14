@@ -1,6 +1,6 @@
-// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package com.mapbox.mapboxsdk.style.layers;
+package com.mapbox.mapboxsdk.location;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Keep;
@@ -14,6 +14,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 
 /**
  * 
@@ -21,7 +23,7 @@ import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
  * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-location-indicator">The online documentation</a>
  */
 @UiThread
-public class LocationIndicatorLayer extends Layer {
+class LocationIndicatorLayer extends Layer {
 
   /**
    * Creates a LocationIndicatorLayer.
@@ -45,66 +47,6 @@ public class LocationIndicatorLayer extends Layer {
 
   @Keep
   protected native void initialize(String layerId);
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public LocationIndicatorLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
-    }
-  }
 
   /**
    * Set a property or properties.

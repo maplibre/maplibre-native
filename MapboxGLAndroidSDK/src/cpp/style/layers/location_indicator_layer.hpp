@@ -1,4 +1,4 @@
-// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
 #pragma once
 
@@ -14,7 +14,7 @@ namespace android {
 class LocationIndicatorLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/LocationIndicatorLayer"; };
+    static constexpr auto Name() { return "com/mapbox/mapboxsdk/location/LocationIndicatorLayer"; };
 
     LocationIndicatorLayer(jni::JNIEnv&, jni::String&);
 

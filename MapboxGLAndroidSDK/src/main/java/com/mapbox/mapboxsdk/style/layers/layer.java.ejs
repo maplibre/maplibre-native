@@ -3,9 +3,13 @@
   const properties = locals.properties;
   const doc = locals.doc;
 -%>
-// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
+<% if (type === 'location-indicator') { -%>
+package com.mapbox.mapboxsdk.location;
+<% } else { -%>
 package com.mapbox.mapboxsdk.style.layers;
+<% } -%>
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Keep;
@@ -23,6 +27,10 @@ import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import com.mapbox.mapboxsdk.style.types.Formatted;
 import com.mapbox.mapboxsdk.style.types.FormattedSection;
 <% } -%>
+<% if (type === 'location-indicator') { -%>
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
+<% } -%>
 
 /**
  * <%- doc %>
@@ -30,7 +38,11 @@ import com.mapbox.mapboxsdk.style.types.FormattedSection;
  * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-<%- type %>">The online documentation</a>
  */
 @UiThread
+<% if (type === 'location-indicator') { -%>
+class <%- camelize(type) %>Layer extends Layer {
+<% } else { -%>
 public class <%- camelize(type) %>Layer extends Layer {
+<% } -%>
 
   /**
    * Creates a <%- camelize(type) %>Layer.
@@ -94,7 +106,7 @@ public class <%- camelize(type) %>Layer extends Layer {
   }
 
 <% } -%>
-<% if (type !== 'background' && type !== 'custom') { -%>
+<% if (type !== 'background' && type !== 'location-indicator' && type !== 'custom') { -%>
   /**
    * Get the source id.
    *
@@ -107,7 +119,7 @@ public class <%- camelize(type) %>Layer extends Layer {
   }
 
 <% } -%>
-<% if (type !== 'background' && type !== 'raster' && type !== 'hillshade') { -%>
+<% if (type !== 'background' && type !== 'location-indicator' && type !== 'raster' && type !== 'hillshade') { -%>
   /**
    * Get the source layer.
    *

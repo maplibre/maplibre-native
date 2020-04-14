@@ -1,6 +1,6 @@
-// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package com.mapbox.mapboxsdk.testapp.style;
+package com.mapbox.mapboxsdk.location;
 
 import android.graphics.Color;
 import androidx.test.annotation.UiThreadTest;
@@ -11,7 +11,6 @@ import org.junit.Before;
 import timber.log.Timber;
 
 import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.LocationIndicatorLayer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +18,7 @@ import org.junit.runner.RunWith;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
 import static org.junit.Assert.*;
 import static com.mapbox.mapboxsdk.style.layers.Property.*;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.*;
 
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
