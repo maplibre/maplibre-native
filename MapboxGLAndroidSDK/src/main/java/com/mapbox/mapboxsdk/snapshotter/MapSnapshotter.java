@@ -108,9 +108,18 @@ public class MapSnapshotter {
   public interface Observer {
 
     /**
-     * Called when snapshotter finishes loading it's style.
+     * Called when snapshotter finishes loading its style.
      */
     void onDidFinishLoadingStyle();
+
+    /**
+     * Called when the map is missing an icon.The icon should be added synchronously with
+     * {@link MapSnapshotter#addImage(String, Bitmap, boolean)} to be rendered on the current zoom level.
+     * When loading icons asynchronously, you can load a placeholder image and replace it when you icon has loaded.
+     *
+     * @param imageName the id of the icon that is missing
+     */
+    void onStyleImageMissing(String imageName);
   }
 
   /**
@@ -513,7 +522,7 @@ public class MapSnapshotter {
    * @param bitmap the pre-multiplied Bitmap
    * @param sdf    the flag indicating image is an SDF or template image
    */
-  private void addImage(@NonNull final String name, @NonNull Bitmap bitmap, boolean sdf) {
+  public void addImage(@NonNull final String name, @NonNull Bitmap bitmap, boolean sdf) {
     nativeAddImages(new Image[] {toImage(new Style.Builder.ImageWrapper(name, bitmap, sdf))});
   }
 
@@ -797,7 +806,9 @@ public class MapSnapshotter {
    */
   @Keep
   protected void onStyleImageMissing(String imageName) {
-    onSnapshotFailed("style image is missing: " + imageName);
+    if (observer != null) {
+      observer.onStyleImageMissing(imageName);
+    }
   }
 
   private void checkThread() {

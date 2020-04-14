@@ -48,6 +48,9 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
   }
 
   private val snapshotterObserver = object : MapSnapshotter.Observer {
+    override fun onStyleImageMissing(imageName: String?) {
+    }
+
     override fun onDidFinishLoadingStyle() {
       // Show only POI labels inside geometry using within expression
       (snapshotter.getLayer("poi-label") as SymbolLayer).setFilter(
