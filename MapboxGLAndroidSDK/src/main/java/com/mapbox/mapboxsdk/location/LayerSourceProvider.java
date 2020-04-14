@@ -117,7 +117,16 @@ class LayerSourceProvider {
     return new HashSet<>();
   }
 
-  LocationIndicatorLayer generateLocationComponentLayer() {
+  LocationLayerRenderer getSymbolLocationLayerRenderer(LayerFeatureProvider featureProvider,
+                                                       boolean isStale) {
+    return new SymbolLocationLayerRenderer(this, featureProvider, isStale);
+  }
+
+  LocationLayerRenderer getIndicatorLocationLayerRenderer() {
+    return new IndicatorLocationLayerRenderer(this);
+  }
+
+  Layer generateLocationComponentLayer() {
     LocationIndicatorLayer layer = new LocationIndicatorLayer(FOREGROUND_LAYER);
     layer.setProperties(
       LocationPropertyFactory.perspectiveCompensation(0.9f),

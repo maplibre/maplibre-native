@@ -123,14 +123,14 @@ public class LocationComponentActivationOptions {
   /**
    * True if you want to initialize and use the specialized location layer to render the location puck.
    * <p>
-   * The specialized layer comes with significant performance improvements,
+   * The specialized layer is not based on runtime styling. This brings significant performance improvements,
    * but since it's not based on the runtime styling,
    * it's not fully compatible with the traditional implementation. The incompatibilities are:
    * <ul>
    * <li> Constants like {@link LocationComponentConstants#FOREGROUND_LAYER}
    * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
    * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
-   * Use {@link LocationComponentOptions#foregroundDrawable()} instead.
+   * Use {@link LocationComponentOptions#foregroundDrawable()} to alter the image rendered as the puck.
    * </ul>
    *
    * @return whether the default specialized location layer is used
@@ -236,14 +236,14 @@ public class LocationComponentActivationOptions {
     /**
      * True if you want to initialize and use the specialized location layer to render the location puck.
      * <p>
-     * The specialized layer comes with significant performance improvements,
+     * The specialized layer is not based on runtime styling. This brings significant performance improvements,
      * but since it's not based on the runtime styling,
      * it's not fully compatible with the traditional implementation. The incompatibilities are:
      * <ul>
      * <li> Constants like {@link LocationComponentConstants#FOREGROUND_LAYER}
      * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
      * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
-     * Use {@link LocationComponentOptions#foregroundDrawable()} instead.
+     * Use {@link LocationComponentOptions#foregroundDrawable()} to alter the image rendered as the puck.
      * </ul>
      *
      * @param useSpecializedLocationLayer true if you want to initialize and use the

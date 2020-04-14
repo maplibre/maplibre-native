@@ -58,11 +58,9 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   private Feature locationFeature;
   private GeoJsonSource locationSource;
 
-  SymbolLocationLayerRenderer(Style style,
-                              LayerSourceProvider layerSourceProvider,
+  SymbolLocationLayerRenderer(LayerSourceProvider layerSourceProvider,
                               LayerFeatureProvider featureProvider,
                               boolean isStale) {
-    this.style = style;
     this.layerSourceProvider = layerSourceProvider;
     this.layerSet = layerSourceProvider.getEmptyLayerSet();
     this.locationFeature = featureProvider.generateLocationFeature(locationFeature, isStale);

@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.location;
 
 import android.graphics.Bitmap;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.JsonElement;
@@ -15,6 +16,8 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +46,8 @@ import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_LATLNG
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,6 +58,7 @@ public class LocationLayerControllerTest {
 
   private MapboxMap mapboxMap = mock(MapboxMap.class);
   private Style style = mock(Style.class);
+  private LocationLayerRenderer indicatorRenderer = mock(LocationLayerRenderer.class);
 
   @Before
   public void before() {
@@ -314,6 +320,20 @@ public class LocationLayerControllerTest {
       bitmapProvider, options, internalRenderModeChangedListener, false);
 
     verify(style).addImage(BEARING_ICON, bitmap);
+  }
+
+  @Test
+  public void applyStyle_specializedLayer_ignoreBitmapNames() {
+    OnRenderModeChangedListener internalRenderModeChangedListener = mock(OnRenderModeChangedListener.class);
+    LayerSourceProvider sourceProvider = buildLayerProvider();
+    LocationComponentOptions options = mock(LocationComponentOptions.class);
+    when(options.foregroundName()).thenReturn("new_name");
+    LayerBitmapProvider bitmapProvider = mock(LayerBitmapProvider.class);
+
+    new LocationLayerController(mapboxMap, mapboxMap.getStyle(), sourceProvider, buildFeatureProvider(options),
+      bitmapProvider, options, internalRenderModeChangedListener, true);
+
+    verify(indicatorRenderer).updateIconIds(eq(FOREGROUND_ICON), anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -599,7 +619,7 @@ public class LocationLayerControllerTest {
 
     LocationLayerController controller =
       new LocationLayerController(mapboxMap, mapboxMap.getStyle(), sourceProvider, buildFeatureProvider(options),
-      bitmapProvider, options, internalRenderModeChangedListener, false);
+        bitmapProvider, options, internalRenderModeChangedListener, false);
 
     controller.setRenderMode(RenderMode.NORMAL);
     controller.setRenderMode(RenderMode.NORMAL);
@@ -618,7 +638,7 @@ public class LocationLayerControllerTest {
 
     LocationLayerController controller =
       new LocationLayerController(mapboxMap, mapboxMap.getStyle(), sourceProvider, buildFeatureProvider(options),
-      bitmapProvider, options, internalRenderModeChangedListener, false);
+        bitmapProvider, options, internalRenderModeChangedListener, false);
 
     controller.setRenderMode(RenderMode.GPS);
     controller.setRenderMode(RenderMode.GPS);
@@ -642,7 +662,7 @@ public class LocationLayerControllerTest {
 
     LocationLayerController controller =
       new LocationLayerController(mapboxMap, mapboxMap.getStyle(), sourceProvider, buildFeatureProvider(options),
-      bitmapProvider, options, internalRenderModeChangedListener, false);
+        bitmapProvider, options, internalRenderModeChangedListener, false);
 
     verify(style).addImage(FOREGROUND_ICON, bitmap);
 
@@ -674,7 +694,18 @@ public class LocationLayerControllerTest {
   }
 
   private LayerSourceProvider buildLayerProvider() {
-    LayerSourceProvider layerSourceProvider = mock(LayerSourceProvider.class);
+    final LayerSourceProvider layerSourceProvider = mock(LayerSourceProvider.class);
+    when(layerSourceProvider.getIndicatorLocationLayerRenderer()).thenReturn(indicatorRenderer);
+    when(layerSourceProvider.getSymbolLocationLayerRenderer(any(LayerFeatureProvider.class), anyBoolean())).thenAnswer(
+      new Answer<LocationLayerRenderer>() {
+        @Override
+        public LocationLayerRenderer answer(InvocationOnMock invocation) {
+          LayerFeatureProvider featureProvider = invocation.getArgument(0);
+          boolean isStale = invocation.getArgument(1);
+          return new SymbolLocationLayerRenderer(layerSourceProvider, featureProvider, isStale);
+        }
+      }
+    );
 
     Layer shadowLayer = mock(Layer.class);
     when(shadowLayer.getId()).thenReturn(SHADOW_LAYER);

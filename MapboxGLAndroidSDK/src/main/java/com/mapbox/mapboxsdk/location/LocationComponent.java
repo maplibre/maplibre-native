@@ -141,7 +141,7 @@ public final class LocationComponent {
   private boolean isComponentInitialized;
 
   /**
-   * Indicates whether we're using the {@link com.mapbox.mapboxsdk.style.layers.LocationIndicatorLayer}
+   * Indicates whether we're using the {@link com.mapbox.mapboxsdk.location.LocationIndicatorLayer}
    * or the stack of {@link com.mapbox.mapboxsdk.style.layers.SymbolLayer}s.
    */
   private boolean useSpecializedLocationLayer;
@@ -217,7 +217,8 @@ public final class LocationComponent {
                     @NonNull LocationAnimatorCoordinator locationAnimatorCoordinator,
                     @NonNull StaleStateManager staleStateManager,
                     @NonNull CompassEngine compassEngine,
-                    @NonNull InternalLocationEngineProvider internalLocationEngineProvider) {
+                    @NonNull InternalLocationEngineProvider internalLocationEngineProvider,
+                    boolean useSpecializedLocationLayer) {
     this.mapboxMap = mapboxMap;
     this.transform = transform;
     developerAnimationListeners.add(developerAnimationListener);
@@ -229,6 +230,7 @@ public final class LocationComponent {
     this.staleStateManager = staleStateManager;
     this.compassEngine = compassEngine;
     this.internalLocationEngineProvider = internalLocationEngineProvider;
+    this.useSpecializedLocationLayer = useSpecializedLocationLayer;
     isComponentInitialized = true;
   }
 

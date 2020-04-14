@@ -21,6 +21,9 @@ task checkstyle(type: Checkstyle) {
     exclude '**/log/LoggerDefinition.java'
     exclude '**/log/Logger.java'
     exclude '**/Expression.java'
+    exclude '**/location/LocationPropertyFactory.java'
+    exclude '**/location/LocationIndicatorLayer.java'
+    exclude '**/location/LocationIndicatorLayerTest.java'
     classpath = files()
     ignoreFailures = false
 }

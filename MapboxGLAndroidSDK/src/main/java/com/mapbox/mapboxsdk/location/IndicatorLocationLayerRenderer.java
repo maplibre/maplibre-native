@@ -8,6 +8,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
@@ -26,26 +27,30 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
 
   private Style style;
   private final LayerSourceProvider layerSourceProvider;
-  private LocationIndicatorLayer layer;
+  private Layer layer;
 
   @Nullable
-  private LatLng latLng;
+  private LatLng lastLatLng;
+  private double lastBearing = 0;
+  private float lastAccuracy = 0;
 
-  IndicatorLocationLayerRenderer(Style style,
-                                 LayerSourceProvider layerSourceProvider) {
-    this.style = style;
+  IndicatorLocationLayerRenderer(LayerSourceProvider layerSourceProvider) {
     this.layerSourceProvider = layerSourceProvider;
   }
 
   @Override
   public void initializeComponents(Style style) {
     this.style = style;
+    layer = layerSourceProvider.generateLocationComponentLayer();
+    if (lastLatLng != null) {
+      setLatLng(lastLatLng);
+    }
+    setLayerBearing(lastBearing);
+    setAccuracyRadius(lastAccuracy);
   }
 
   @Override
   public void addLayers(LocationComponentPositionManager positionManager) {
-    layer = layerSourceProvider.generateLocationComponentLayer();
-    setLayerLocation(latLng);
     positionManager.addLayerToMap(layer);
   }
 
@@ -106,6 +111,7 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
     layer.setProperties(
       LocationPropertyFactory.accuracyRadius(accuracy)
     );
+    lastAccuracy = accuracy;
   }
 
   @Override
@@ -160,20 +166,19 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
     layer.setProperties(LocationPropertyFactory.visibility(visible ? VISIBLE : NONE));
   }
 
-  private void setLayerLocation(@Nullable LatLng latLng) {
-    this.latLng = latLng;
-    if (latLng != null) {
-      Double[] values = new Double[] {latLng.getLatitude(), latLng.getLongitude(), 0d};
-      layer.setProperties(
-        LocationPropertyFactory.location(values)
-      );
-    }
+  private void setLayerLocation(LatLng latLng) {
+    Double[] values = new Double[] {latLng.getLatitude(), latLng.getLongitude(), 0d};
+    layer.setProperties(
+      LocationPropertyFactory.location(values)
+    );
+    lastLatLng = latLng;
   }
 
   private void setLayerBearing(double bearing) {
     layer.setProperties(
       LocationPropertyFactory.bearing(bearing)
     );
+    lastBearing = bearing;
   }
 
   private void setImages(@RenderMode.Mode int renderMode, boolean isStale) {

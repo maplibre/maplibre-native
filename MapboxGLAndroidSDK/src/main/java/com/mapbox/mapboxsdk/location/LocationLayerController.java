@@ -39,7 +39,6 @@ final class LocationLayerController {
   private int renderMode;
 
   private final MapboxMap mapboxMap;
-  private Style style;
   private final LayerBitmapProvider bitmapProvider;
   private LocationComponentOptions options;
   private final OnRenderModeChangedListener internalRenderModeChangedListener;
@@ -60,21 +59,20 @@ final class LocationLayerController {
                           @NonNull OnRenderModeChangedListener internalRenderModeChangedListener,
                           boolean useSpecializedLocationLayer) {
     this.mapboxMap = mapboxMap;
-    this.style = style;
     this.bitmapProvider = bitmapProvider;
     this.internalRenderModeChangedListener = internalRenderModeChangedListener;
     this.useSpecializedLocationLayer = useSpecializedLocationLayer;
     this.isStale = options.enableStaleState();
     if (useSpecializedLocationLayer) {
-      locationLayerRenderer = new IndicatorLocationLayerRenderer(style, layerSourceProvider);
+      locationLayerRenderer = layerSourceProvider.getIndicatorLocationLayerRenderer();
     } else {
-      locationLayerRenderer = new SymbolLocationLayerRenderer(style, layerSourceProvider, featureProvider, isStale);
+      locationLayerRenderer =
+        layerSourceProvider.getSymbolLocationLayerRenderer(featureProvider, isStale);
     }
     initializeComponents(style, options);
   }
 
   void initializeComponents(Style style, LocationComponentOptions options) {
-    this.style = style;
     this.positionManager = new LocationComponentPositionManager(style, options.layerAbove(), options.layerBelow());
     locationLayerRenderer.initializeComponents(style);
     locationLayerRenderer.addLayers(positionManager);
