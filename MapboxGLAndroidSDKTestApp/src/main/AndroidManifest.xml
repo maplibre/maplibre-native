@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-          package="com.mapbox.mapboxsdk.testapp">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mapbox.mapboxsdk.testapp">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -8,6 +8,7 @@
     <application
         android:name=".MapboxApplication"
         android:allowBackup="true"
+        android:exported="true"
         android:fullBackupContent="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
@@ -17,6 +18,7 @@
 
         <activity
             android:name=".activity.FeatureOverviewActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -28,6 +30,7 @@
         <activity
             android:name=".activity.infowindow.InfoWindowActivity"
             android:description="@string/description_info_window"
+            android:exported="true"
             android:label="@string/activity_info_window">
             <meta-data
                 android:name="@string/category"
@@ -39,6 +42,7 @@
         <activity
             android:name=".activity.infowindow.InfoWindowAdapterActivity"
             android:description="@string/description_info_window_adapter"
+            android:exported="true"
             android:label="@string/activity_infowindow_adapter">
             <meta-data
                 android:name="@string/category"
@@ -50,6 +54,7 @@
         <activity
             android:name=".activity.infowindow.DynamicInfoWindowAdapterActivity"
             android:description="@string/description_dynamic_info_window_adapter"
+            android:exported="true"
             android:label="@string/activity_dynamic_infowindow_adapter">
             <meta-data
                 android:name="@string/category"
@@ -62,6 +67,7 @@
             android:name=".activity.annotation.BulkMarkerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:description="@string/description_add_bulk_markers"
+            android:exported="true"
             android:label="@string/activity_add_bulk_markers">
             <meta-data
                 android:name="@string/category"
@@ -73,6 +79,7 @@
         <activity
             android:name=".activity.annotation.AnimatedSymbolLayerActivity"
             android:description="@string/description_animated_symbollayer"
+            android:exported="true"
             android:label="@string/activity_animated_symbollayer">
             <meta-data
                 android:name="@string/category"
@@ -84,6 +91,7 @@
         <activity
             android:name=".activity.annotation.DynamicMarkerChangeActivity"
             android:description="@string/description_dynamic_marker"
+            android:exported="true"
             android:label="@string/activity_dynamic_marker">
             <meta-data
                 android:name="@string/category"
@@ -95,6 +103,7 @@
         <activity
             android:name=".activity.annotation.PressForMarkerActivity"
             android:description="@string/description_press_for_marker"
+            android:exported="true"
             android:label="@string/activity_press_for_marker">
             <meta-data
                 android:name="@string/category"
@@ -106,6 +115,7 @@
         <activity
             android:name=".activity.camera.CameraAnimationTypeActivity"
             android:description="@string/description_camera_animation_types"
+            android:exported="true"
             android:label="@string/activity_camera_animation_types">
             <meta-data
                 android:name="@string/category"
@@ -117,6 +127,7 @@
         <activity
             android:name=".activity.camera.CameraAnimatorActivity"
             android:description="@string/description_camera_animator"
+            android:exported="true"
             android:label="@string/activity_camera_animator">
             <meta-data
                 android:name="@string/category"
@@ -127,9 +138,10 @@
         </activity>
         <activity
             android:name=".activity.camera.CameraPositionActivity"
-            android:theme="@style/NoActionBar"
             android:description="@string/description_cameraposition"
-            android:label="@string/activity_camera_position">
+            android:exported="true"
+            android:label="@string/activity_camera_position"
+            android:theme="@style/NoActionBar">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_camera" />
@@ -140,6 +152,7 @@
         <activity
             android:name=".activity.camera.LatLngBoundsActivity"
             android:description="@string/description_visible_bounds"
+            android:exported="true"
             android:label="@string/activity_visible_coordinate_bounds"
             android:screenOrientation="portrait">
             <meta-data
@@ -152,6 +165,7 @@
         <activity
             android:name=".activity.fragment.MapFragmentActivity"
             android:description="@string/description_map_fragment"
+            android:exported="true"
             android:label="@string/activity_map_fragment">
             <meta-data
                 android:name="@string/category"
@@ -163,6 +177,7 @@
         <activity
             android:name=".activity.fragment.SupportMapFragmentActivity"
             android:description="@string/description_map_fragment_support"
+            android:exported="true"
             android:label="@string/activity_map_fragment_support">
             <meta-data
                 android:name="@string/category"
@@ -172,20 +187,22 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.fragment.FragmentBackStackActivity"
-                android:description="@string/description_map_fragment_backstack"
-                android:label="@string/activity_map_fragment_backstack"
-                android:launchMode="singleInstance">
+            android:name=".activity.fragment.FragmentBackStackActivity"
+            android:description="@string/description_map_fragment_backstack"
+            android:exported="true"
+            android:label="@string/activity_map_fragment_backstack"
+            android:launchMode="singleInstance">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_integration" />
+                android:name="@string/category"
+                android:value="@string/category_integration" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.fragment.MultiMapActivity"
             android:description="@string/description_multimap"
+            android:exported="true"
             android:label="@string/activity_multimap">
             <meta-data
                 android:name="@string/category"
@@ -197,6 +214,7 @@
         <activity
             android:name=".activity.camera.ManualZoomActivity"
             android:description="@string/description_camera_zoom"
+            android:exported="true"
             android:label="@string/activity_camera_zoom">
             <meta-data
                 android:name="@string/category"
@@ -208,6 +226,7 @@
         <activity
             android:name=".activity.camera.MaxMinZoomActivity"
             android:description="@string/description_minmax_zoom"
+            android:exported="true"
             android:label="@string/activity_minmax_zoom">
             <meta-data
                 android:name="@string/category"
@@ -219,6 +238,7 @@
         <activity
             android:name=".activity.customlayer.CustomLayerActivity"
             android:description="@string/description_custom_layer"
+            android:exported="true"
             android:label="@string/activity_custom_layer">
             <meta-data
                 android:name="@string/category"
@@ -230,6 +250,7 @@
         <activity
             android:name=".activity.annotation.PolygonActivity"
             android:description="@string/description_polygon"
+            android:exported="true"
             android:label="@string/activity_polygon">
             <meta-data
                 android:name="@string/category"
@@ -241,6 +262,7 @@
         <activity
             android:name=".activity.annotation.PolylineActivity"
             android:description="@string/description_polyline"
+            android:exported="true"
             android:label="@string/activity_polyline">
             <meta-data
                 android:name="@string/category"
@@ -252,6 +274,7 @@
         <activity
             android:name=".activity.camera.ScrollByActivity"
             android:description="@string/description_scroll_by"
+            android:exported="true"
             android:label="@string/activity_scroll_by"
             android:theme="@style/NoActionBar">
             <meta-data
@@ -264,6 +287,7 @@
         <activity
             android:name=".activity.maplayout.MapPaddingActivity"
             android:description="@string/description_map_padding"
+            android:exported="true"
             android:label="@string/activity_map_padding"
             android:screenOrientation="portrait">
             <meta-data
@@ -277,6 +301,7 @@
             android:name=".activity.maplayout.DebugModeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:description="@string/description_debug_mode"
+            android:exported="true"
             android:label="@string/activity_debug_mode">
             <meta-data
                 android:name="@string/category"
@@ -288,6 +313,7 @@
         <activity
             android:name=".activity.offline.OfflineActivity"
             android:description="@string/description_offline"
+            android:exported="true"
             android:label="@string/activity_offline">
             <meta-data
                 android:name="@string/category"
@@ -299,6 +325,7 @@
         <activity
             android:name=".activity.offline.UpdateMetadataActivity"
             android:description="@string/description_update_metadata"
+            android:exported="true"
             android:label="@string/activity_update_metadata">
             <meta-data
                 android:name="@string/category"
@@ -310,6 +337,7 @@
         <activity
             android:name=".activity.offline.DeleteRegionActivity"
             android:description="@string/description_offline_region_delete"
+            android:exported="true"
             android:label="@string/activity_offline_region_delete">
             <meta-data
                 android:name="@string/category"
@@ -321,6 +349,7 @@
         <activity
             android:name=".activity.offline.ChangeResourcesCachePathActivity"
             android:description="@string/description_change_resources_cache_path"
+            android:exported="true"
             android:label="@string/activity_change_resources_cache_path">
             <meta-data
                 android:name="@string/category"
@@ -332,6 +361,7 @@
         <activity
             android:name=".activity.imagegenerator.SnapshotActivity"
             android:description="@string/description_snapshot"
+            android:exported="true"
             android:label="@string/activity_snapshot">
             <meta-data
                 android:name="@string/category"
@@ -343,6 +373,7 @@
         <activity
             android:name=".activity.snapshot.MapSnapshotterActivity"
             android:description="@string/description_map_snapshotter"
+            android:exported="true"
             android:label="@string/activity_map_snapshotter">
             <meta-data
                 android:name="@string/category"
@@ -354,6 +385,7 @@
         <activity
             android:name=".activity.snapshot.MapSnapshotterReuseActivity"
             android:description="@string/description_map_snapshotter_reuse"
+            android:exported="true"
             android:label="@string/activity_map_snapshotter_reuse">
             <meta-data
                 android:name="@string/category"
@@ -365,6 +397,7 @@
         <activity
             android:name=".activity.snapshot.MapSnapshotterBitMapOverlayActivity"
             android:description="@string/description_map_snapshotter_bitmap_overlay"
+            android:exported="true"
             android:label="@string/activity_map_snapshotter_bitmap_overlay">
             <meta-data
                 android:name="@string/category"
@@ -388,6 +421,7 @@
         <activity
             android:name=".activity.snapshot.MapSnapshotterLocalStyleActivity"
             android:description="@string/description_map_snapshotter_local_style"
+            android:exported="true"
             android:label="@string/activity_map_snapshotter_local_style">
             <meta-data
                 android:name="@string/category"
@@ -399,6 +433,7 @@
         <activity
             android:name=".activity.turf.MapSnapshotterWithinExpression"
             android:description="@string/description_snapshot_within"
+            android:exported="true"
             android:label="@string/activity_snapshot_within">
             <meta-data
                 android:name="@string/category"
@@ -410,6 +445,7 @@
         <activity
             android:name=".activity.maplayout.DoubleMapActivity"
             android:description="@string/description_doublemap"
+            android:exported="true"
             android:label="@string/activity_double_map">
             <meta-data
                 android:name="@string/category"
@@ -421,6 +457,7 @@
         <activity
             android:name=".activity.fragment.ViewPagerActivity"
             android:description="@string/description_viewpager"
+            android:exported="true"
             android:label="@string/activity_viewpager">
             <meta-data
                 android:name="@string/category"
@@ -432,6 +469,7 @@
         <activity
             android:name=".activity.maplayout.SimpleMapActivity"
             android:description="@string/description_simple_map"
+            android:exported="true"
             android:label="@string/activity_simple_map"
             android:launchMode="singleInstance">
             <meta-data
@@ -444,6 +482,7 @@
         <activity
             android:name=".activity.maplayout.MapChangeActivity"
             android:description="@string/description_map_change"
+            android:exported="true"
             android:label="@string/activity_map_change">
             <meta-data
                 android:name="@string/category"
@@ -455,6 +494,7 @@
         <activity
             android:name=".activity.maplayout.VisibilityChangeActivity"
             android:description="@string/description_visibility_map"
+            android:exported="true"
             android:label="@string/activity_map_visibility">
             <meta-data
                 android:name="@string/category"
@@ -466,6 +506,7 @@
         <activity
             android:name=".activity.style.RuntimeStyleActivity"
             android:description="@string/description_runtime_style"
+            android:exported="true"
             android:label="@string/activity_runtime_style">
             <meta-data
                 android:name="@string/category"
@@ -475,19 +516,21 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.style.GradientLineActivity"
-                android:description="@string/description_gradient_line"
-                android:label="@string/activity_gradient_line">
+            android:name=".activity.style.GradientLineActivity"
+            android:description="@string/description_gradient_line"
+            android:exported="true"
+            android:label="@string/activity_gradient_line">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_style" />
+                android:name="@string/category"
+                android:value="@string/category_style" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.style.DataDrivenStyleActivity"
             android:description="@string/description_data_driven_style"
+            android:exported="true"
             android:label="@string/activity_data_driven_style">
             <meta-data
                 android:name="@string/category"
@@ -499,6 +542,7 @@
         <activity
             android:name=".activity.style.CircleLayerActivity"
             android:description="@string/description_circle_layer"
+            android:exported="true"
             android:label="@string/activity_circle_layer">
             <meta-data
                 android:name="@string/category"
@@ -510,6 +554,7 @@
         <activity
             android:name=".activity.style.CollectionUpdateOnStyleChange"
             android:description="@string/description_collection_style_change"
+            android:exported="true"
             android:label="@string/activity_collection_style_change">
             <meta-data
                 android:name="@string/category"
@@ -521,6 +566,7 @@
         <activity
             android:name=".activity.style.FillExtrusionActivity"
             android:description="@string/description_fill_extrusion_layer"
+            android:exported="true"
             android:label="@string/activity_fill_extrusion_layer">
             <meta-data
                 android:name="@string/category"
@@ -532,6 +578,7 @@
         <activity
             android:name=".activity.style.BuildingFillExtrusionActivity"
             android:description="@string/description_building_fill_extrusion_layer"
+            android:exported="true"
             android:label="@string/activity_building_fill_extrusion_layer">
             <meta-data
                 android:name="@string/category"
@@ -543,6 +590,7 @@
         <activity
             android:name=".activity.style.SymbolLayerActivity"
             android:description="@string/description_symbol_layer"
+            android:exported="true"
             android:label="@string/activity_symbol_layer">
             <meta-data
                 android:name="@string/category"
@@ -554,6 +602,7 @@
         <activity
             android:name=".activity.style.GeoJsonClusteringActivity"
             android:description="@string/description_geojson_clustering"
+            android:exported="true"
             android:label="@string/activity_geojson_clustering">
             <meta-data
                 android:name="@string/category"
@@ -565,6 +614,7 @@
         <activity
             android:name=".activity.style.RealTimeGeoJsonActivity"
             android:description="@string/description_geojson_realtime"
+            android:exported="true"
             android:label="@string/activity_geojson_realtime">
             <meta-data
                 android:name="@string/category"
@@ -576,6 +626,7 @@
         <activity
             android:name=".activity.style.StyleFileActivity"
             android:description="@string/description_style_file"
+            android:exported="true"
             android:label="@string/activity_style_file">
             <meta-data
                 android:name="@string/category"
@@ -587,6 +638,7 @@
         <activity
             android:name=".activity.style.CustomSpriteActivity"
             android:description="@string/description_custom_sprite"
+            android:exported="true"
             android:label="@string/activity_add_sprite">
             <meta-data
                 android:name="@string/category"
@@ -598,6 +650,7 @@
         <activity
             android:name=".activity.imagegenerator.PrintActivity"
             android:description="@string/description_print"
+            android:exported="true"
             android:label="@string/activity_print">
             <meta-data
                 android:name="@string/category"
@@ -609,6 +662,7 @@
         <activity
             android:name=".activity.style.AnimatedImageSourceActivity"
             android:description="@string/description_animated_image_source"
+            android:exported="true"
             android:label="@string/activity_animated_image_source">
             <meta-data
                 android:name="@string/category"
@@ -620,6 +674,7 @@
         <activity
             android:name=".activity.style.GridSourceActivity"
             android:description="@string/description_grid_source"
+            android:exported="true"
             android:label="@string/activity_grid_source">
             <meta-data
                 android:name="@string/category"
@@ -631,6 +686,7 @@
         <activity
             android:name=".activity.style.NoStyleActivity"
             android:description="@string/description_no_style"
+            android:exported="true"
             android:label="@string/activity_no_style">
             <meta-data
                 android:name="@string/category"
@@ -643,6 +699,7 @@
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesPropertiesActivity"
             android:description="@string/description_query_rendered_feature_properties_point"
+            android:exported="true"
             android:label="@string/activity_query_rendered_feature_properties">
             <meta-data
                 android:name="@string/category"
@@ -654,6 +711,7 @@
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesBoxCountActivity"
             android:description="@string/description_query_rendered_features_box_count"
+            android:exported="true"
             android:label="@string/activity_query_rendered_features_box_count"
             android:launchMode="singleInstance">
             <meta-data
@@ -666,6 +724,7 @@
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesBoxSymbolCountActivity"
             android:description="@string/description_query_rendered_features_box_symbol_count"
+            android:exported="true"
             android:label="@string/activity_query_rendered_features_box_symbol_count">
             <meta-data
                 android:name="@string/category"
@@ -677,6 +736,7 @@
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesBoxHighlightActivity"
             android:description="@string/description_query_rendered_features_box_highlight"
+            android:exported="true"
             android:label="@string/activity_query_rendered_features_box_highlight">
             <meta-data
                 android:name="@string/category"
@@ -688,6 +748,7 @@
         <activity
             android:name=".activity.feature.QuerySourceFeaturesActivity"
             android:description="@string/description_query_source_features"
+            android:exported="true"
             android:label="@string/activity_query_source_features">
             <meta-data
                 android:name="@string/category"
@@ -699,6 +760,7 @@
         <activity
             android:name=".activity.style.SymbolGeneratorActivity"
             android:description="@string/description_symbol_generator"
+            android:exported="true"
             android:label="@string/activity_symbol_generator">
             <meta-data
                 android:name="@string/category"
@@ -710,6 +772,7 @@
         <activity
             android:name=".activity.style.ZoomFunctionSymbolLayerActivity"
             android:description="@string/description_add_remove_markers"
+            android:exported="true"
             android:label="@string/activity_add_remove_markers">
             <meta-data
                 android:name="@string/category"
@@ -721,6 +784,7 @@
         <activity
             android:name=".activity.maplayout.MapInDialogActivity"
             android:description="@string/description_map_in_dialog"
+            android:exported="true"
             android:label="@string/activity_map_in_dialog">
             <meta-data
                 android:name="@string/category"
@@ -732,6 +796,7 @@
         <activity
             android:name=".activity.maplayout.LatLngBoundsForCameraActivity"
             android:description="@string/description_restricted_bounds"
+            android:exported="true"
             android:label="@string/activity_restricted_bounds">
             <meta-data
                 android:name="@string/category"
@@ -745,6 +810,7 @@
         <activity
             android:name=".activity.storage.UrlTransformActivity"
             android:description="@string/description_url_transform"
+            android:exported="true"
             android:label="@string/activity_url_transform">
             <meta-data
                 android:name="@string/category"
@@ -754,19 +820,21 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.storage.CacheManagementActivity"
-                android:description="@string/description_cache_management"
-                android:label="@string/activity_cache_management">
+            android:name=".activity.storage.CacheManagementActivity"
+            android:description="@string/description_cache_management"
+            android:exported="true"
+            android:label="@string/activity_cache_management">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_storage" />
+                android:name="@string/category"
+                android:value="@string/category_storage" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.maplayout.BottomSheetActivity"
             android:description="@string/description_bottom_sheet"
+            android:exported="true"
             android:label="@string/activity_bottom_sheet">
             <meta-data
                 android:name="@string/category"
@@ -780,6 +848,7 @@
         <activity
             android:name=".activity.textureview.TextureViewDebugModeActivity"
             android:description="@string/description_textureview_debug"
+            android:exported="true"
             android:label="@string/activity_textureview_debug"
             android:launchMode="singleInstance">
             <meta-data
@@ -792,6 +861,7 @@
         <activity
             android:name=".activity.textureview.TextureViewResizeActivity"
             android:description="@string/description_textureview_resize"
+            android:exported="true"
             android:label="@string/activity_textureview_resize">
             <meta-data
                 android:name="@string/category"
@@ -803,6 +873,7 @@
         <activity
             android:name=".activity.textureview.TextureViewTransparentBackgroundActivity"
             android:description="@string/description_textureview_transparent"
+            android:exported="true"
             android:label="@string/activity_textureview_transparent">
             <meta-data
                 android:name="@string/category"
@@ -814,6 +885,7 @@
         <activity
             android:name=".activity.textureview.TextureViewAnimationActivity"
             android:description="@string/description_textureview_animate"
+            android:exported="true"
             android:label="@string/activity_textureview_animate">
             <meta-data
                 android:name="@string/category"
@@ -823,19 +895,21 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.maplayout.OverlayMapActivity"
-                android:description="@string/description_overlay"
-                android:label="@string/activity_overlay">
+            android:name=".activity.maplayout.OverlayMapActivity"
+            android:description="@string/description_overlay"
+            android:exported="true"
+            android:label="@string/activity_overlay">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_maplayout" />
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.maplayout.LocalGlyphActivity"
             android:description="@string/description_local_glyph"
+            android:exported="true"
             android:label="@string/activity_local_glyph">
             <meta-data
                 android:name="@string/category"
@@ -847,6 +921,7 @@
         <activity
             android:name=".activity.style.HillshadeLayerActivity"
             android:description="@string/description_hillshade"
+            android:exported="true"
             android:label="@string/activity_hillshade">
             <meta-data
                 android:name="@string/category"
@@ -858,6 +933,7 @@
         <activity
             android:name=".activity.style.HeatmapLayerActivity"
             android:description="@string/description_heatmaplayer"
+            android:exported="true"
             android:label="@string/activity_heatmaplayer">
             <meta-data
                 android:name="@string/category"
@@ -870,6 +946,7 @@
         <activity
             android:name=".activity.style.DraggableMarkerActivity"
             android:description="@string/description_draggable_marker"
+            android:exported="true"
             android:label="@string/activity_draggable_maker">
             <meta-data
                 android:name="@string/category"
@@ -881,6 +958,7 @@
         <activity
             android:name=".activity.camera.GestureDetectorActivity"
             android:description="@string/description_gesture_detector"
+            android:exported="true"
             android:label="@string/activity_gesture_detector">
             <meta-data
                 android:name="@string/category"
@@ -892,6 +970,7 @@
         <activity
             android:name=".activity.offline.MergeOfflineRegionsActivity"
             android:description="@string/description_offline_merge"
+            android:exported="true"
             android:label="@string/activity_offline_merge">
             <meta-data
                 android:name="@string/category"
@@ -903,6 +982,7 @@
         <activity
             android:name=".activity.location.LocationMapChangeActivity"
             android:description="@string/description_location_map_change"
+            android:exported="true"
             android:label="@string/activity_location_map_change">
             <meta-data
                 android:name="@string/category"
@@ -914,6 +994,7 @@
         <activity
             android:name=".activity.location.LocationModesActivity"
             android:description="@string/description_location_modes"
+            android:exported="true"
             android:label="@string/activity_location_modes">
             <meta-data
                 android:name="@string/category"
@@ -925,6 +1006,7 @@
         <activity
             android:name=".activity.location.LocationFragmentActivity"
             android:description="@string/description_location_fragment"
+            android:exported="true"
             android:label="@string/activity_location_fragment">
             <meta-data
                 android:name="@string/category"
@@ -936,6 +1018,7 @@
         <activity
             android:name=".activity.location.ManualLocationUpdatesActivity"
             android:description="@string/description_location_manual"
+            android:exported="true"
             android:label="@string/activity_location_manual">
             <meta-data
                 android:name="@string/category"
@@ -947,6 +1030,7 @@
         <activity
             android:name=".activity.location.LocationComponentActivationActivity"
             android:description="@string/description_location_activation_builder"
+            android:exported="true"
             android:label="@string/activity_location_activation_builder">
             <meta-data
                 android:name="@string/category"
@@ -956,41 +1040,45 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.maplayout.TextureRecyclerViewActivity"
-                android:description="@string/description_recyclerview_textureview"
-                android:label="@string/activity_recyclerview_textureview">
+            android:name=".activity.maplayout.TextureRecyclerViewActivity"
+            android:description="@string/description_recyclerview_textureview"
+            android:exported="true"
+            android:label="@string/activity_recyclerview_textureview">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_integration" />
+                android:name="@string/category"
+                android:value="@string/category_integration" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.maplayout.GLSurfaceRecyclerViewActivity"
-                android:description="@string/description_recyclerview_glsurfaceview"
-                android:label="@string/activity_recyclerview_glsurfaceview">
+            android:name=".activity.maplayout.GLSurfaceRecyclerViewActivity"
+            android:description="@string/description_recyclerview_glsurfaceview"
+            android:exported="true"
+            android:label="@string/activity_recyclerview_glsurfaceview">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_integration" />
+                android:name="@string/category"
+                android:value="@string/category_integration" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.fragment.NestedViewPagerActivity"
-                android:description="@string/description_nested_viewpager"
-                android:label="@string/activity_nested_viewpager">
+            android:name=".activity.fragment.NestedViewPagerActivity"
+            android:description="@string/description_nested_viewpager"
+            android:exported="true"
+            android:label="@string/activity_nested_viewpager">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_integration" />
+                android:name="@string/category"
+                android:value="@string/category_integration" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.telemetry.PerformanceMeasurementActivity"
             android:description="@string/description_performance_measurement"
+            android:exported="true"
             android:label="@string/activity_performance_measurement">
             <meta-data
                 android:name="@string/category"
@@ -1002,6 +1090,7 @@
         <activity
             android:name=".activity.turf.PhysicalUnitCircleActivity"
             android:description="@string/description_physical_circle"
+            android:exported="true"
             android:label="@string/activity_physical_circle">
             <meta-data
                 android:name="@string/category"
@@ -1011,19 +1100,21 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-                android:name=".activity.offline.DownloadRegionActivity"
-                android:description="@string/description_region"
-                android:label="@string/activity_region">
+            android:name=".activity.offline.DownloadRegionActivity"
+            android:description="@string/description_region"
+            android:exported="true"
+            android:label="@string/activity_region">
             <meta-data
-                    android:name="@string/category"
-                    android:value="@string/category_offline" />
+                android:name="@string/category"
+                android:value="@string/category_offline" />
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.FeatureOverviewActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.turf.WithinExpressionActivity"
             android:description="@string/description_within"
+            android:exported="true"
             android:label="@string/activity_within">
             <meta-data
                 android:name="@string/category"
@@ -1040,8 +1131,8 @@
             android:name=".activity.espresso.EspressoTestActivity"
             android:screenOrientation="portrait" />
         <activity
-                android:name=".activity.espresso.PixelTestActivity"
-                android:screenOrientation="portrait" />
+            android:name=".activity.espresso.PixelTestActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.espresso.DeviceIndependentTestActivity"
             android:screenOrientation="portrait" />
@@ -1065,10 +1156,10 @@
         <!-- android:name="com.mapbox.SetStorageExternal" -->
         <!-- android:value="true" /> -->
 
-         <!-- Set value to true to have tile loading measurements on -->
-         <meta-data
-         android:name="com.mapbox.MeasureTileDownloadOn"
-         android:value="false" />
+        <!-- Set value to true to have tile loading measurements on -->
+        <meta-data
+            android:name="com.mapbox.MeasureTileDownloadOn"
+            android:value="false" />
 
     </application>
 
