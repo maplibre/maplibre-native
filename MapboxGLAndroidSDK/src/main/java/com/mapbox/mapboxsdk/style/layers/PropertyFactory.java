@@ -1826,7 +1826,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with lower sort keys are drawn and placed first.  When {@link PropertyFactory#iconAllowOverlap} or {@link PropertyFactory#textAllowOverlap} is `false`, features with a lower sort key will have priority during placement. When {@link PropertyFactory#iconAllowOverlap} or {@link PropertyFactory#textAllowOverlap} is set to `true`, features with a higher sort key will overlap over features with a lower sort key.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -1836,7 +1836,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with lower sort keys are drawn and placed first.  When {@link PropertyFactory#iconAllowOverlap} or {@link PropertyFactory#textAllowOverlap} is `false`, features with a lower sort key will have priority during placement. When {@link PropertyFactory#iconAllowOverlap} or {@link PropertyFactory#textAllowOverlap} is set to `true`, features with a higher sort key will overlap over features with a lower sort key.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -2593,6 +2593,26 @@ public class PropertyFactory {
    */
   public static PropertyValue<Expression> textOptional(Expression value) {
     return new LayoutPropertyValue<>("text-optional", value);
+  }
+
+  /**
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> circleSortKey(Float value) {
+    return new LayoutPropertyValue<>("circle-sort-key", value);
+  }
+
+  /**
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Expression> circleSortKey(Expression value) {
+    return new LayoutPropertyValue<>("circle-sort-key", value);
   }
 
 }

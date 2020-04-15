@@ -144,6 +144,18 @@ public class CircleLayer extends Layer {
   // Property getters
 
   /**
+   * Get the CircleSortKey property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getCircleSortKey() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("circle-sort-key", nativeGetCircleSortKey());
+  }
+
+  /**
    * Get the CircleRadius property
    *
    * @return property wrapper value around Float
@@ -476,6 +488,10 @@ public class CircleLayer extends Layer {
     checkThread();
     nativeSetCircleStrokeOpacityTransition(options.getDuration(), options.getDelay());
   }
+
+  @NonNull
+  @Keep
+  private native Object nativeGetCircleSortKey();
 
   @NonNull
   @Keep

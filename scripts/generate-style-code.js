@@ -7,7 +7,7 @@ const spec = require('../vendor/mapbox-gl-native/scripts/style-spec');
 const _ = require('lodash');
 
 // FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
-delete spec.layout_circle["circle-sort-key"]
+//delete spec.layout_circle["circle-sort-key"]
 //delete spec.layout_line["line-sort-key"]
 //delete spec.layout_fill["fill-sort-key"]
 
@@ -384,14 +384,14 @@ for (const layer of layers) {
 }
 
 // Jni
-const layerHpp = ejs.compile(fs.readFileSync('vendor/mapbox-gl-native/platform/android/src/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync('vendor/mapbox-gl-native/platform/android/src/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
+const layerHpp = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/cpp/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
+const layerCpp = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/cpp/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
 
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`vendor/mapbox-gl-native/platform/android/src/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`vendor/mapbox-gl-native/platform/android/src/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
+  writeIfModified(`MapboxGLAndroidSDK/src/cpp/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
+  writeIfModified(`MapboxGLAndroidSDK/src/cpp/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
 }
 
 // Java PropertyFactory

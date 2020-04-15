@@ -101,6 +101,32 @@ public class CircleLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testCircleSortKeyAsConstant() {
+    Timber.i("circle-sort-key");
+    assertNotNull(layer);
+    assertNull(layer.getCircleSortKey().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(circleSortKey(propertyValue));
+    assertEquals(layer.getCircleSortKey().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testCircleSortKeyAsExpression() {
+    Timber.i("circle-sort-key-expression");
+    assertNotNull(layer);
+    assertNull(layer.getCircleSortKey().getExpression());
+
+    // Set and Get
+    Expression expression = number(Expression.get("undefined"));
+    layer.setProperties(circleSortKey(expression));
+    assertEquals(layer.getCircleSortKey().getExpression(), expression);
+  }
+
+  @Test
+  @UiThreadTest
   public void testCircleRadiusTransition() {
     Timber.i("circle-radiusTransitionOptions");
     assertNotNull(layer);

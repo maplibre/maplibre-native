@@ -37,6 +37,11 @@ namespace android {
 
     // Property getters
 
+    jni::Local<jni::Object<>> CircleLayer::getCircleSortKey(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleSortKey()));
+    }
+
     jni::Local<jni::Object<>> CircleLayer::getCircleRadius(jni::JNIEnv& env) {
         using namespace mbgl::android::conversion;
         return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleRadius()));
@@ -237,6 +242,7 @@ namespace android {
             jni::MakePeer<CircleLayer, jni::String&, jni::String&>,
             "initialize",
             "finalize",
+            METHOD(&CircleLayer::getCircleSortKey, "nativeGetCircleSortKey"),
             METHOD(&CircleLayer::getCircleRadiusTransition, "nativeGetCircleRadiusTransition"),
             METHOD(&CircleLayer::setCircleRadiusTransition, "nativeSetCircleRadiusTransition"),
             METHOD(&CircleLayer::getCircleRadius, "nativeGetCircleRadius"),
