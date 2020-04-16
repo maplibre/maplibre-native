@@ -104,11 +104,6 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
 
   @Override
   public void onSensorChanged(@NonNull SensorEvent event) {
-    // check when the last time the compass was updated, return if too soon.
-    long currentTime = SystemClock.elapsedRealtime();
-    if (currentTime < compassUpdateNextTimestamp) {
-      return;
-    }
     if (lastAccuracySensorStatus == SensorManager.SENSOR_STATUS_UNRELIABLE) {
       Logger.d(TAG, "Compass sensor is unreliable, device calibration is needed.");
       return;
@@ -123,9 +118,6 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
       magneticValues = lowPassFilter(getRotationVectorFromSensorEvent(event), magneticValues);
       updateOrientation();
     }
-
-    // Update the compassUpdateNextTimestamp
-    compassUpdateNextTimestamp = currentTime + LocationComponentConstants.COMPASS_UPDATE_RATE_MS;
   }
 
   @Override
@@ -140,6 +132,12 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
 
   @SuppressWarnings("SuspiciousNameCombination")
   private void updateOrientation() {
+    // check when the last time the compass was updated, return if too soon.
+    long currentTime = SystemClock.elapsedRealtime();
+    if (currentTime < compassUpdateNextTimestamp) {
+      return;
+    }
+
     if (rotationVectorValue != null) {
       SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVectorValue);
     } else {
@@ -182,6 +180,9 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
 
     // The x-axis is all we care about here.
     notifyCompassChangeListeners((float) Math.toDegrees(orientation[0]));
+
+    // Update the compassUpdateNextTimestamp
+    compassUpdateNextTimestamp = currentTime + LocationComponentConstants.COMPASS_UPDATE_RATE_MS;
   }
 
   private void notifyCompassChangeListeners(float heading) {
