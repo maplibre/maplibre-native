@@ -145,28 +145,28 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
       SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues, magneticValues);
     }
 
-    final int worldAxisForDeviceAxisX;
-    final int worldAxisForDeviceAxisY;
+    int worldAxisForDeviceAxisX;
+    int worldAxisForDeviceAxisY;
 
-    // Remap the axes as if the device screen was the instrument panel,
+    // Assume the device screen was parallel to the ground,
     // and adjust the rotation matrix for the device orientation.
     switch (windowManager.getDefaultDisplay().getRotation()) {
       case Surface.ROTATION_90:
-        worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
+        worldAxisForDeviceAxisX = SensorManager.AXIS_Y;
         worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
         break;
       case Surface.ROTATION_180:
         worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_X;
-        worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Z;
+        worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Y;
         break;
       case Surface.ROTATION_270:
-        worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
+        worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Y;
         worldAxisForDeviceAxisY = SensorManager.AXIS_X;
         break;
       case Surface.ROTATION_0:
       default:
         worldAxisForDeviceAxisX = SensorManager.AXIS_X;
-        worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
+        worldAxisForDeviceAxisY = SensorManager.AXIS_Y;
         break;
     }
 
@@ -177,6 +177,37 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
     // Transform rotation matrix into azimuth/pitch/roll
     float[] orientation = new float[3];
     SensorManager.getOrientation(adjustedRotationMatrix, orientation);
+
+    if (orientation[1] < -Math.PI / 4) {
+      // The pitch is less than 45 degrees.
+      // Remap the axes as if the device screen was the instrument panel,
+      // and adjust the rotation matrix for the device orientation.
+      switch (windowManager.getDefaultDisplay().getRotation()) {
+        case Surface.ROTATION_90:
+          worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
+          worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
+          break;
+        case Surface.ROTATION_180:
+          worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_X;
+          worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Z;
+          break;
+        case Surface.ROTATION_270:
+          worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
+          worldAxisForDeviceAxisY = SensorManager.AXIS_X;
+          break;
+        case Surface.ROTATION_0:
+        default:
+          worldAxisForDeviceAxisX = SensorManager.AXIS_X;
+          worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
+          break;
+      }
+
+      SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
+              worldAxisForDeviceAxisY, adjustedRotationMatrix);
+
+      // Transform rotation matrix into azimuth/pitch/roll
+      SensorManager.getOrientation(adjustedRotationMatrix, orientation);
+    }
 
     // The x-axis is all we care about here.
     notifyCompassChangeListeners((float) Math.toDegrees(orientation[0]));
