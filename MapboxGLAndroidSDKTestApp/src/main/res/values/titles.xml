@@ -90,4 +90,5 @@
     <string name="activity_physical_circle">Physical Unit Circle</string>
     <string name="activity_region">Download region</string>
     <string name="activity_within">Within expression</string>
+    <string name="activity_stretchable_image">Stretchable Image</string>
 </resources>
