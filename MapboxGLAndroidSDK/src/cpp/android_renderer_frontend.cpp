@@ -50,7 +50,7 @@ public:
         delegate.invoke(&RendererObserver::onDidFinishRenderingMap);
     }
 
-    void onStyleImageMissing(const std::string& id, StyleImageMissingCallback done) override {
+    void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }
 
