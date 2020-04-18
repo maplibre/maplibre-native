@@ -6,11 +6,17 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ### Styles and rendering
 
+* Added the `distance` expression function for calculating the shortest distance between the evaluated feature and a GeoJSON `Point`, `MultiPoint`, `LineString`, or `MultiLineString` geometry that you specify. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. ([mapbox/mapbox-gl-native#16397](https://github.com/mapbox/mapbox-gl-native/pull/16397))
+* Added the `MGLCircleStyleLayer.circleSortKey` property. ([mapbox/mapbox-gl-native#15875](https://github.com/mapbox/mapbox-gl-native/pull/15875))
+* Fixed a crash when calling the `-[MGLStyle removeImageForName:]` method with the name of a nonexistent image. ([mapbox/mapbox-gl-native#16391](https://github.com/mapbox/mapbox-gl-native/pull/16391))
 * Fixed an issue where properties such as `MGLFillStyleLayer.fillColor` and `MGLLineStyleLayer.lineColor` misinterpreted non-opaque `UIColor`s. ([#266](https://github.com/mapbox/mapbox-gl-native-ios/pull/266))
 
 ### Other changes
 
+* Fixed a crash when encountering an invalid polyline. ([mapbox/mapbox-gl-native#16409](https://github.com/mapbox/mapbox-gl-native/pull/16409))
 * Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
+* Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
+* Certain logging statements no longer run on the main thread. ([mapbox/mapbox-gl-native#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
 
 ## 5.8.0
 

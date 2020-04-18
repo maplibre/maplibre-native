@@ -1,10 +1,20 @@
 # Changelog for Mapbox Maps SDK for macOS
 
-## master
+## 0.16.0
+
+### Styles and rendering
+
+* Added the `distance` expression function for calculating the shortest distance between the evaluated feature and a GeoJSON `Point`, `MultiPoint`, `LineString`, or `MultiLineString` geometry that you specify. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. ([mapbox/mapbox-gl-native#16397](https://github.com/mapbox/mapbox-gl-native/pull/16397))
+* Added the `MGLCircleStyleLayer.circleSortKey` property. ([mapbox/mapbox-gl-native#15875](https://github.com/mapbox/mapbox-gl-native/pull/15875))
+* Fixed a crash when calling the `-[MGLStyle removeImageForName:]` method with the name of a nonexistent image. ([mapbox/mapbox-gl-native#16391](https://github.com/mapbox/mapbox-gl-native/pull/16391))
+* Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
 
 ### Other changes
 
-* Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
+* Fixed various crashes, including crashes on launch, on macOS 10.11.0 through 10.14._x_. ([mapbox/mapbox-gl-native#16412](https://github.com/mapbox/mapbox-gl-native/pull/16412))
+* Fixed a crash when encountering an invalid polyline. ([mapbox/mapbox-gl-native#16409](https://github.com/mapbox/mapbox-gl-native/pull/16409))
+* Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
+* Certain logging statements no longer run on the main thread. ([mapbox/mapbox-gl-native#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
 
 ## 0.15.0
 
@@ -12,7 +22,7 @@
 
 * Added the `-[MGLMapViewDelegate mapView:shouldRemoveStyleImage:]` method for optimizing style image caching. ([#14769](https://github.com/mapbox/mapbox-gl-native/pull/14769))
 * Added the `image` expression function for converting an image name into a style image. Use this function in expressions in style JSON or with the `MGL_FUNCTION()` syntax in an `NSExpression` format string. Image expressions are compatible with the `mgl_attributed:` expression function and `MGLAttributedExpression` classes for embedding icons inline in text labels. ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877), [#15937](https://github.com/mapbox/mapbox-gl-native/pull/15937))
-* The `IN` and `CONTAINS` predicate operators can now test whether a string is a substring of another string or whether the evaluated feature (`SELF`) lies within a given `MGLShape` or `MGLFeature`. ([#183](https://github.com/mapbox/mapbox-gl-native-ios/pull/183), [#184](https://github.com/mapbox/mapbox-gl-native-ios/pull/184])
+* The `IN` and `CONTAINS` predicate operators can now test whether a string is a substring of another string or whether the evaluated feature (`SELF`) lies within a given `MGLShape` or `MGLFeature`. ([#183](https://github.com/mapbox/mapbox-gl-native-ios/pull/183), [#184](https://github.com/mapbox/mapbox-gl-native-ios/pull/184))
 * Added the `MGLSymbolStyleLayer.textWritingModes` layout property. This property can be set to `MGLTextWritingModeHorizontal` or `MGLTextWritingModeVertical`. ([#14932](https://github.com/mapbox/mapbox-gl-native/pull/14932))
 * Added the `MGLLineStyleLayer.lineSortKey` and `MGLFillStyleLayer.fillSortKey` properties. ([#179](https://github.com/mapbox/mapbox-gl-native-ios/pull/179))
 * The `MGLIdeographicFontFamilyName` Info.plist key now also accepts an array of font family names, to customize font fallback behavior. It can also be set to a Boolean value of `NO` to force the SDK to typeset CJK characters in a remote font specified by `MGLSymbolStyleLayer.textFontNames`. ([#14862](https://github.com/mapbox/mapbox-gl-native/pull/14862))
@@ -71,7 +81,7 @@
 
 ### Other changes
 
-* Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15179](https://github.com/mapbox/mapbox-gl-native/issues/15179))
+* Fixed a memory leak when zooming with any options enabled in the `MGLMapView.debugMask` property. ([#15395](https://github.com/mapbox/mapbox-gl-native/pull/15395))
 * `MGLLoggingLevel` has been updated to better match core log levels. You can now use `MGLLoggingConfiguration.loggingLevel` to filter logs from core. ([#15120](https://github.com/mapbox/mapbox-gl-native/pull/15120))
 
 ## 0.14.0 - May 22, 2018

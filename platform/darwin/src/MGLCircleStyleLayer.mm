@@ -91,6 +91,26 @@ namespace mbgl {
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
+#pragma mark - Accessing the Layout Attributes
+
+- (void)setCircleSortKey:(NSExpression *)circleSortKey {
+    MGLAssertStyleLayerIsValid();
+    MGLLogDebug(@"Setting circleSortKey: %@", circleSortKey);
+
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue<mbgl::style::PropertyValue<float>>(circleSortKey, true);
+    self.rawLayer->setCircleSortKey(mbglValue);
+}
+
+- (NSExpression *)circleSortKey {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getCircleSortKey();
+    if (propertyValue.isUndefined()) {
+        propertyValue = self.rawLayer->getDefaultCircleSortKey();
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toExpression(propertyValue);
+}
+
 #pragma mark - Accessing the Paint Attributes
 
 - (void)setCircleBlur:(NSExpression *)circleBlur {

@@ -49,6 +49,75 @@
     MGLTransition transitionTest = MGLTransitionMake(5, 4);
 
 
+    // circle-sort-key
+    {
+        XCTAssertTrue(rawLayer->getCircleSortKey().isUndefined(),
+                      @"circle-sort-key should be unset initially.");
+        NSExpression *defaultExpression = layer.circleSortKey;
+
+        NSExpression *constantExpression = [NSExpression expressionWithFormat:@"1"];
+        layer.circleSortKey = constantExpression;
+        mbgl::style::PropertyValue<float> propertyValue = { 1.0 };
+        XCTAssertEqual(rawLayer->getCircleSortKey(), propertyValue,
+                       @"Setting circleSortKey to a constant value expression should update circle-sort-key.");
+        XCTAssertEqualObjects(layer.circleSortKey, constantExpression,
+                              @"circleSortKey should round-trip constant value expressions.");
+
+        constantExpression = [NSExpression expressionWithFormat:@"1"];
+        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        layer.circleSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                step(zoom(), literal(1.0), 18.0, literal(1.0))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getCircleSortKey(), propertyValue,
+                       @"Setting circleSortKey to a camera expression should update circle-sort-key.");
+        XCTAssertEqualObjects(layer.circleSortKey, functionExpression,
+                              @"circleSortKey should round-trip camera expressions.");
+
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(keyName, 'linear', nil, %@)", @{@18: constantExpression}];
+        layer.circleSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                interpolate(linear(), number(get("keyName")), 18.0, literal(1.0))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getCircleSortKey(), propertyValue,
+                       @"Setting circleSortKey to a data expression should update circle-sort-key.");
+        NSExpression *pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(CAST(keyName, 'NSNumber'), 'linear', nil, %@)", @{@18: constantExpression}];
+        XCTAssertEqualObjects(layer.circleSortKey, pedanticFunctionExpression,
+                              @"circleSortKey should round-trip data expressions.");
+
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        layer.circleSortKey = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<float>(
+                interpolate(linear(), zoom(), 10.0, interpolate(linear(), number(get("keyName")), 18.0, literal(1.0)))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->getCircleSortKey(), propertyValue,
+                       @"Setting circleSortKey to a camera-data expression should update circle-sort-key.");
+        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        XCTAssertEqualObjects(layer.circleSortKey, pedanticFunctionExpression,
+                              @"circleSortKey should round-trip camera-data expressions.");
+
+        layer.circleSortKey = nil;
+        XCTAssertTrue(rawLayer->getCircleSortKey().isUndefined(),
+                      @"Unsetting circleSortKey should return circle-sort-key to the default value.");
+        XCTAssertEqualObjects(layer.circleSortKey, defaultExpression,
+                              @"circleSortKey should return the default value after being unset.");
+    }
+
     // circle-blur
     {
         XCTAssertTrue(rawLayer->getCircleBlur().isUndefined(),
@@ -779,6 +848,7 @@
 }
 
 - (void)testPropertyNames {
+    [self testPropertyName:@"circle-sort-key" isBoolean:NO];
     [self testPropertyName:@"circle-blur" isBoolean:NO];
     [self testPropertyName:@"circle-color" isBoolean:NO];
     [self testPropertyName:@"circle-opacity" isBoolean:NO];
