@@ -93,6 +93,29 @@ public abstract class Source {
   }
 
   /**
+   * When a set of tiles for a current zoom level is being rendered and some of the
+   * ideal tiles that cover the screen are not yet loaded, parent tile could be
+   * used instead. This might introduce unwanted rendering side-effects, especially
+   * for raster tiles that are overscaled multiple times. This method sets the maximum
+   * limit for how much a parent tile can be overscaled.
+   *
+   * @param maxOverscaleFactor maximum overscale factor
+   */
+  public void setMaxOverscaleFactorForParentTiles(@Nullable Integer maxOverscaleFactor) {
+    nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor);
+  }
+
+  /**
+   * Retrieve current maximum overscale factor for parent tiles.
+   *
+   * @return current maximum overscale factor or null if not set.
+   */
+  @Nullable
+  public Integer getMaxOverscaleFactorForParentTiles() {
+    return nativeGetMaxOverscaleFactorForParentTiles();
+  }
+
+  /**
    * Internal use
    *
    * @return the native peer pointer
