@@ -74,6 +74,16 @@ final class LocationAnimatorCoordinator {
     for (AnimatorListenerHolder holder : listenerHolders) {
       listeners.append(holder.getAnimatorType(), holder.getListener());
     }
+
+    for (int i = 0; i < animatorArray.size(); i++) {
+      @MapboxAnimator.Type int animatorType = animatorArray.keyAt(i);
+      if (listeners.get(animatorType) == null) {
+        MapboxAnimator animator = animatorArray.get(animatorType);
+        if (animator != null) {
+          animator.makeInvalid();
+        }
+      }
+    }
   }
 
   void feedNewLocation(@NonNull Location newLocation, @NonNull CameraPosition currentCameraPosition,
@@ -397,6 +407,8 @@ final class LocationAnimatorCoordinator {
     MapboxFloatAnimator gpsBearingAnimator = (MapboxFloatAnimator) animatorArray.get(ANIMATOR_LAYER_GPS_BEARING);
     MapboxFloatAnimator compassBearingAnimator =
       (MapboxFloatAnimator) animatorArray.get(ANIMATOR_LAYER_COMPASS_BEARING);
+    MapboxFloatAnimator accuracyAnimator =
+      (MapboxFloatAnimator) animatorArray.get(ANIMATOR_LAYER_ACCURACY);
 
     if (latLngAnimator != null && gpsBearingAnimator != null) {
       LatLng currentLatLng = (LatLng) latLngAnimator.getAnimatedValue();
@@ -419,6 +431,10 @@ final class LocationAnimatorCoordinator {
       playAnimators(
         compassAnimationEnabled ? COMPASS_UPDATE_RATE_MS : 0,
         ANIMATOR_LAYER_COMPASS_BEARING);
+    }
+
+    if (accuracyAnimator != null) {
+      feedNewAccuracyRadius(previousAccuracyRadius, false);
     }
   }
 

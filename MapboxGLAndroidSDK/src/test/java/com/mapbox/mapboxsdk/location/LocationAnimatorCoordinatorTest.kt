@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.location
 
 import android.animation.Animator
+import android.animation.ValueAnimator
 import android.location.Location
 import android.util.SparseArray
 import android.view.animation.LinearInterpolator
@@ -9,7 +10,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION
 import com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION
 import com.mapbox.mapboxsdk.location.MapboxAnimator.*
-import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Projection
@@ -517,16 +517,16 @@ class LocationAnimatorCoordinatorTest {
   @Test
   fun updateListeners() {
     val listener = Mockito.mock(AnimationsValueChangeListener::class.java)
-    val holder = AnimatorListenerHolder(RenderMode.NORMAL, listener)
+    val holder = AnimatorListenerHolder(ANIMATOR_LAYER_LATLNG, listener)
     val set = HashSet<AnimatorListenerHolder>().also {
       it.add(holder)
     }
     locationAnimatorCoordinator.updateAnimatorListenerHolders(set)
 
     val listener2 = Mockito.mock(AnimationsValueChangeListener::class.java)
-    val holder2 = AnimatorListenerHolder(RenderMode.NORMAL, listener2)
+    val holder2 = AnimatorListenerHolder(ANIMATOR_LAYER_LATLNG, listener2)
     val listener3 = Mockito.mock(AnimationsValueChangeListener::class.java)
-    val holder3 = AnimatorListenerHolder(CameraMode.TRACKING_GPS, listener3)
+    val holder3 = AnimatorListenerHolder(ANIMATOR_LAYER_ACCURACY, listener3)
     val set2 = HashSet<AnimatorListenerHolder>().also {
       it.add(holder2)
       it.add(holder3)
@@ -536,6 +536,37 @@ class LocationAnimatorCoordinatorTest {
     assertTrue(locationAnimatorCoordinator.listeners.size() == 2)
     assertTrue(locationAnimatorCoordinator.listeners.contains(listener2))
     assertTrue(locationAnimatorCoordinator.listeners.contains(listener3))
+  }
+
+  @Test
+  fun updateListeners_listenerRemoved_animtorInvalid() {
+    // setup accuracy animator
+    val listener: AnimationsValueChangeListener<Float> = mockk(relaxUnitFun = true)
+    val holder = AnimatorListenerHolder(ANIMATOR_LAYER_ACCURACY, listener)
+    val set = HashSet<AnimatorListenerHolder>().also {
+      it.add(holder)
+    }
+    locationAnimatorCoordinator.updateAnimatorListenerHolders(set)
+    locationAnimatorCoordinator.feedNewAccuracyRadius(500f, true)
+
+    // reset animator listeners which should make the previously created animator invalid
+    val listener2: AnimationsValueChangeListener<*> = mockk()
+    val holder2 = AnimatorListenerHolder(ANIMATOR_LAYER_LATLNG, listener2)
+    val listener3: AnimationsValueChangeListener<*> = mockk()
+    val holder3 = AnimatorListenerHolder(ANIMATOR_CAMERA_GPS_BEARING, listener3)
+    val set2 = HashSet<AnimatorListenerHolder>().also {
+      it.add(holder2)
+      it.add(holder3)
+    }
+    locationAnimatorCoordinator.updateAnimatorListenerHolders(set2)
+
+    // try pushing an update to verify it was ignored
+    val valueAnimator: ValueAnimator = mockk()
+    every { valueAnimator.animatedValue } returns 10f
+    val animator = locationAnimatorCoordinator.animatorArray.get(ANIMATOR_LAYER_ACCURACY)
+    animator.onAnimationUpdate(valueAnimator)
+
+    verify(exactly = 0) { listener.onNewAnimationValue(any()) }
   }
 
   @Test

@@ -50,6 +50,13 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
   private final double minUpdateInterval;
   private long timeElapsed;
 
+  /**
+   * Makes this animator invalid and prevents it from pushing any more updates to the listener.
+   *
+   * This can be used to prevent propagating final updates when the animator should be immediately canceled.
+   */
+  private boolean invalid;
+
   MapboxAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
                  int maxAnimationFps) {
     minUpdateInterval = 1E9 / maxAnimationFps;
@@ -82,7 +89,9 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
   }
 
   private void postUpdates() {
-    updateListener.onNewAnimationValue(animatedValue);
+    if (!invalid) {
+      updateListener.onNewAnimationValue(animatedValue);
+    }
   }
 
   K getTarget() {
@@ -93,5 +102,9 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
 
   interface AnimationsValueChangeListener<K> {
     void onNewAnimationValue(K value);
+  }
+
+  public void makeInvalid() {
+    invalid = true;
   }
 }
