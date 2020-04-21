@@ -58,7 +58,6 @@ public class CompassEngineTest {
   @Test
   public void whenGyroscopeIsNull_fallbackToGravity() {
     SensorManager sensorManager = mock(SensorManager.class);
-    when(sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)).thenReturn(null);
     new LocationComponentCompassEngine(windowManager, sensorManager);
 
     verify(sensorManager, times(1)).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -67,7 +66,6 @@ public class CompassEngineTest {
   @Test
   public void whenGyroscopeIsNull_fallbackToMagneticField() {
     SensorManager sensorManager = mock(SensorManager.class);
-    when(sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)).thenReturn(null);
     new LocationComponentCompassEngine(windowManager, sensorManager);
 
     verify(sensorManager, times(1)).getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
