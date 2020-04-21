@@ -23,6 +23,7 @@
 * Fixed an issue where style layers backed by a shape source could flicker when transitioning between styles. ([#15907](https://github.com/mapbox/mapbox-gl-native/pull/15907), [#15941](https://github.com/mapbox/mapbox-gl-native/pull/15941))
 * Improved the performance of loading a style that has many style images. ([#16187](https://github.com/mapbox/mapbox-gl-native/pull/16187))
 * Updated “map ID” to the more accurate term “tileset ID” in documentation; updated “style's Map ID” to the more accurate term “style URL”. ([#15116](https://github.com/mapbox/mapbox-gl-native/pull/15116))
+* Fixed an issue where properties such as `MGLFillStyleLayer.fillColor` and `MGLLineStyleLayer.lineColor` misinterpreted non-opaque `NSColor`s. ([#266](https://github.com/mapbox/mapbox-gl-native-ios/pull/266))
 
 ### Camera
 

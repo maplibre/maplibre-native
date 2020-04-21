@@ -9,6 +9,8 @@
 
 - (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue;
 
+- (mbgl::Color)mgl_colorForPremultipliedValue;
+
 + (UIColor *)mgl_colorWithColor:(mbgl::Color)color;
 
 @end

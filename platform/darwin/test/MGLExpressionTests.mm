@@ -296,9 +296,22 @@ using namespace std::string_literals;
         float blue = (213.0 * alpha) / 255;
         MGLColor *color = [MGLColor mgl_colorWithColor:{ red, green, blue, alpha }]; // papayawhip
         NSExpression *expression = [NSExpression expressionForConstantValue:color];
-        NSArray *jsonExpression = @[@"rgba", @127.5, @119.5, @106.5, @0.5];
+        NSArray *jsonExpression = @[@"rgba", @255.0, @239.0, @213.0, @0.5];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([expression expressionValueWithObject:nil context:nil], color);
+    }
+    {
+        // Transform color components to non-premultiplied values
+        NSArray *jsonExpression = @[@"rgba", @255.0, @239.0, @213.0, @0.5];
+        NSExpression *papayawhipExpression = [NSExpression expressionWithMGLJSONObject:jsonExpression];
+        MGLColor *papayaWhipColor = [papayawhipExpression expressionValueWithObject:nil context:nil];
+        CGFloat convertedRed = 0.0, convertedGreen = 0.0, convertedBlue = 0.0, convertedAlpha = 0.0;
+        [papayaWhipColor getRed:&convertedRed green:&convertedGreen blue:&convertedBlue alpha:&convertedAlpha];
+
+        XCTAssertEqualWithAccuracy(convertedRed, 255.0/255.0, 0.0000001);
+        XCTAssertEqualWithAccuracy(convertedGreen, 239.0/255.0, 0.0000001);
+        XCTAssertEqualWithAccuracy(convertedBlue, 213.0/255.0, 0.0000001);
+        XCTAssertEqual(convertedAlpha, 0.5);
     }
     {
         NSExpression *expression = [NSExpression expressionWithFormat:@"noindex(513)"];

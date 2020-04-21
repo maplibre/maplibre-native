@@ -308,7 +308,7 @@ const MGLExpressionInterpolationMode MGLExpressionInterpolationModeCubicBezier =
             return { (int64_t)number.longLongValue };
         }
     } else if ([value isKindOfClass:[MGLColor class]]) {
-        auto hexString = [(MGLColor *)value mgl_color].stringify();
+        auto hexString = [(MGLColor *)value mgl_colorForPremultipliedValue].stringify();
         return { hexString };
     } else if (value && value != [NSNull null]) {
         [NSException raise:NSInvalidArgumentException
@@ -481,7 +481,7 @@ const MGLExpressionInterpolationMode MGLExpressionInterpolationModeCubicBezier =
 @implementation MGLColor (MGLExpressionAdditions)
 
 - (id)mgl_jsonExpressionObject {
-    auto color = [self mgl_color];
+    auto color = [self mgl_colorForPremultipliedValue];
     if (color.a == 1) {
         return @[@"rgb", @(color.r * 255), @(color.g * 255), @(color.b * 255)];
     }
@@ -1019,7 +1019,7 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
                 return @[@"literal", collection];
             }
             if ([constantValue isKindOfClass:[MGLColor class]]) {
-                auto color = [constantValue mgl_color];
+                auto color = [constantValue mgl_colorForPremultipliedValue];
                 if (color.a == 1) {
                     return @[@"rgb", @(color.r * 255), @(color.g * 255), @(color.b * 255)];
                 }

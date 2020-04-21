@@ -21,6 +21,22 @@
     return { static_cast<float>(r*a), static_cast<float>(g*a), static_cast<float>(b*a), static_cast<float>(a) };
 }
 
+- (mbgl::Color)mgl_colorForPremultipliedValue {
+    CGFloat r, g, b, a;
+
+    // The Mapbox Style Specification does not specify a color space, but it is
+    // assumed to be sRGB for consistency with CSS.
+    NSColor *srgbColor = self;
+    if ([NSColor redColor].colorSpaceName == NSCalibratedRGBColorSpace) {
+        srgbColor = [srgbColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    } else {
+        srgbColor = [srgbColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+    }
+    [srgbColor getRed:&r green:&g blue:&b alpha:&a];
+
+    return { static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a) };
+}
+
 + (NSColor *)mgl_colorWithColor:(mbgl::Color)color {
     // If there is no alpha value, return original color values.
     if (color.a == 0.0f) {

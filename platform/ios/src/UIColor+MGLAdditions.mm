@@ -12,6 +12,14 @@
     return { static_cast<float>(r*a), static_cast<float>(g*a), static_cast<float>(b*a), static_cast<float>(a) };
 }
 
+// Intended to be used when providing colors on the basis of an NSExpression
+- (mbgl::Color)mgl_colorForPremultipliedValue
+{
+    CGFloat r, g, b, a;
+    [self getRed:&r green:&g blue:&b alpha:&a];
+    return { static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a) };
+}
+
 - (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue
 {
     mbgl::Color color = self.mgl_color;

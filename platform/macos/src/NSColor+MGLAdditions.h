@@ -10,6 +10,8 @@
  */
 - (mbgl::Color)mgl_color;
 
+- (mbgl::Color)mgl_colorForPremultipliedValue;
+
 /**
  Instantiates `NSColor` from an `mbgl::Color`
  */
