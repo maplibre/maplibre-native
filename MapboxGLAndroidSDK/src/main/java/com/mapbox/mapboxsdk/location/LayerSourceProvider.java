@@ -7,6 +7,7 @@ import com.mapbox.mapboxsdk.style.layers.CircleLayer;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -128,6 +129,7 @@ class LayerSourceProvider {
 
   Layer generateLocationComponentLayer() {
     LocationIndicatorLayer layer = new LocationIndicatorLayer(FOREGROUND_LAYER);
+    layer.setLocationTransition(new TransitionOptions(0, 0));
     layer.setProperties(
       LocationPropertyFactory.perspectiveCompensation(0.9f),
       LocationPropertyFactory.imageTiltDisplacement(4f)
