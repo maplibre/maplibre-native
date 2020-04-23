@@ -109,7 +109,6 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
       // Update the heading, even if the sensor is unreliable.
       // This makes it possible to use a different indicator for the unreliable case,
       // instead of just changing the RenderMode to NORMAL.
-      //return;
     }
     if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
       rotationVectorValue = getRotationVectorFromSensorEvent(event);
@@ -183,8 +182,7 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
 
     if (orientation[1] < -Math.PI / 4) {
       // The pitch is less than -45 degrees.
-      // Remap the axes as if the device screen was the instrument panel,
-      // and adjust the rotation matrix for the device orientation.
+      // Remap the axes as if the device screen was the instrument panel.
       switch (windowManager.getDefaultDisplay().getRotation()) {
         case Surface.ROTATION_90:
           worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
@@ -204,16 +202,9 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
           worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
           break;
       }
-
-      SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
-              worldAxisForDeviceAxisY, adjustedRotationMatrix);
-
-      // Transform rotation matrix into azimuth/pitch/roll
-      SensorManager.getOrientation(adjustedRotationMatrix, orientation);
     } else if (orientation[1] > Math.PI / 4) {
       // The pitch is larger than 45 degrees.
-      // Remap the axes as if the device screen was upside down and facing back,
-      // and adjust the rotation matrix for the device orientation.
+      // Remap the axes as if the device screen was upside down and facing back.
       switch (windowManager.getDefaultDisplay().getRotation()) {
         case Surface.ROTATION_90:
           worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
@@ -233,16 +224,9 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
           worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Z;
           break;
       }
-
-      SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
-              worldAxisForDeviceAxisY, adjustedRotationMatrix);
-
-      // Transform rotation matrix into azimuth/pitch/roll
-      SensorManager.getOrientation(adjustedRotationMatrix, orientation);
     } else if (Math.abs(orientation[2]) > Math.PI / 2) {
       // The roll is less than -90 degrees, or is larger than 90 degrees.
-      // Remap the axes as if the device screen was face down,
-      // and adjust the rotation matrix for the device orientation.
+      // Remap the axes as if the device screen was face down.
       switch (windowManager.getDefaultDisplay().getRotation()) {
         case Surface.ROTATION_90:
           worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Y;
@@ -262,13 +246,13 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
           worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Y;
           break;
       }
-
-      SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
-              worldAxisForDeviceAxisY, adjustedRotationMatrix);
-
-      // Transform rotation matrix into azimuth/pitch/roll
-      SensorManager.getOrientation(adjustedRotationMatrix, orientation);
     }
+
+    SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
+      worldAxisForDeviceAxisY, adjustedRotationMatrix);
+
+    // Transform rotation matrix into azimuth/pitch/roll
+    SensorManager.getOrientation(adjustedRotationMatrix, orientation);
 
     // The x-axis is all we care about here.
     notifyCompassChangeListeners((float) Math.toDegrees(orientation[0]));
