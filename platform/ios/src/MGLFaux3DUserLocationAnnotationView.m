@@ -267,9 +267,10 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
             _oldHeadingAccuracy = headingAccuracy;
         }
 
-        if (self.userLocation.heading.trueHeading >= 0)
+        CLLocationDirection headingDirection = (self.userLocation.heading.trueHeading >= 0 ? self.userLocation.heading.trueHeading : self.userLocation.heading.magneticHeading);
+        if (headingDirection >= 0)
         {
-            CGFloat rotation = -MGLRadiansFromDegrees(self.mapView.direction - self.userLocation.heading.trueHeading);
+            CGFloat rotation = -MGLRadiansFromDegrees(self.mapView.direction - headingDirection);
 
             // Don't rotate if the change is imperceptible.
             if (fabs(rotation) > MGLUserLocationHeadingUpdateThreshold)

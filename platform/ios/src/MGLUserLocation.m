@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)setHeading:(CLHeading *)newHeading
 {
-    if (newHeading.trueHeading != _heading.trueHeading)
+    if (newHeading.trueHeading != _heading.trueHeading || newHeading.magneticHeading != _heading.magneticHeading)
     {
         [self willChangeValueForKey:@"heading"];
         _heading = newHeading;
