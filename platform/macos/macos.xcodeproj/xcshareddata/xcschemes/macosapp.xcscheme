@@ -48,6 +48,11 @@
                BlueprintName = "test"
                ReferencedContainer = "container:macos.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MGLMapSnapshotterTests/testLocalGlyphRendering">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

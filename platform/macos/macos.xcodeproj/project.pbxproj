@@ -210,6 +210,8 @@
 		DAC2ABC51CC6D343006D18C4 /* MGLAnnotationImage_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DAC2ABC41CC6D343006D18C4 /* MGLAnnotationImage_Private.h */; };
 		DAC8325F24049D8700A61BF8 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3C61CC3499100DB3429 /* libsqlite3.tbd */; };
 		DAC8326024049D9C00A61BF8 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 55D9B4B01D005D3900C1CCE2 /* libz.tbd */; };
+		DAC8A47E24527EBB00C795BB /* glyphs.pbf in Resources */ = {isa = PBXBuildFile; fileRef = DAC8A47D24527EBB00C795BB /* glyphs.pbf */; };
+		DAC8A4842452972F00C795BB /* mixed.json in Resources */ = {isa = PBXBuildFile; fileRef = DAC8A4832452972F00C795BB /* mixed.json */; };
 		DACA8622201920BE00E9693A /* MGLRasterDEMSource.h in Headers */ = {isa = PBXBuildFile; fileRef = DACA8620201920BE00E9693A /* MGLRasterDEMSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DACA8623201920BE00E9693A /* MGLRasterDEMSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = DACA8621201920BE00E9693A /* MGLRasterDEMSource.mm */; };
 		DACB0C391E18DFFD005DDBEA /* MGLStyle+MBXAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DACB0C381E18DFFD005DDBEA /* MGLStyle+MBXAdditions.m */; };
@@ -615,6 +617,8 @@
 		DAC832652404AF9E00A61BF8 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../Makefile; sourceTree = "<group>"; };
 		DAC832662404AFB400A61BF8 /* ci.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = ci.xcconfig; path = ../darwin/ci.xcconfig; sourceTree = "<group>"; };
 		DAC832682404B26400A61BF8 /* jazzy.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = jazzy.yml; sourceTree = "<group>"; };
+		DAC8A47D24527EBB00C795BB /* glyphs.pbf */ = {isa = PBXFileReference; lastKnownFileType = file; name = glyphs.pbf; path = "../../../vendor/mapbox-gl-native/test/fixtures/resources/glyphs.pbf"; sourceTree = "<group>"; };
+		DAC8A4832452972F00C795BB /* mixed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = mixed.json; path = "../../../vendor/mapbox-gl-native/test/fixtures/local_glyphs/mixed.json"; sourceTree = "<group>"; };
 		DACA8620201920BE00E9693A /* MGLRasterDEMSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLRasterDEMSource.h; sourceTree = "<group>"; };
 		DACA8621201920BE00E9693A /* MGLRasterDEMSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLRasterDEMSource.mm; sourceTree = "<group>"; };
 		DACB0C371E18DFFD005DDBEA /* MGLStyle+MBXAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MGLStyle+MBXAdditions.h"; sourceTree = "<group>"; };
@@ -1221,6 +1225,8 @@
 				DAE6C3CC1CC34BD800DB3429 /* MGLStyleTests.mm */,
 				556660D51E1D07E400E2C41B /* MGLVersionNumber.m */,
 				DA35D0891E1A631B007DED41 /* one-liner.json */,
+				DAC8A4832452972F00C795BB /* mixed.json */,
+				DAC8A47D24527EBB00C795BB /* glyphs.pbf */,
 				1F8A59F921653483004DFE75 /* sideload_sat.db */,
 				DA8F257D1D51C5F40010E6B5 /* Styling */,
 				4031ACFA1E9EB39A00A3EA26 /* Swift Integration */,
@@ -1643,6 +1649,8 @@
 				35724FC41D630502002A4AB4 /* amsterdam.geojson in Resources */,
 				DA2784FE1DF03060001D5B8D /* Media.xcassets in Resources */,
 				DA35D08A1E1A631B007DED41 /* one-liner.json in Resources */,
+				DAC8A4842452972F00C795BB /* mixed.json in Resources */,
+				DAC8A47E24527EBB00C795BB /* glyphs.pbf in Resources */,
 				1F8A59FA21653483004DFE75 /* sideload_sat.db in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

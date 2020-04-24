@@ -49,7 +49,7 @@ MGLImage *MGLImageFromCurrentContext() {
 #endif
 }
 
-@interface MGLMapSnapshotterTests : XCTestCase <MGLMapSnapshotterDelegate>
+@interface MGLMapSnapshotterTests : XCTestCase <MGLMapSnapshotterDelegate, MGLOfflineStorageDelegate>
 
 @property (nonatomic) XCTestExpectation *styleLoadingExpectation;
 @property (nonatomic, copy, nullable) void (^runtimeStylingActions)(MGLStyle *style);
@@ -62,10 +62,13 @@ MGLImage *MGLImageFromCurrentContext() {
     [super setUp];
     
     [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    
+    [MGLOfflineStorage sharedOfflineStorage].delegate = self;
 }
 
 - (void)tearDown {
     [MGLAccountManager setAccessToken:nil];
+    [MGLOfflineStorage sharedOfflineStorage].delegate = nil;
     self.styleLoadingExpectation = nil;
     self.runtimeStylingActions = nil;
     [super tearDown];
@@ -138,11 +141,17 @@ MGLImage *MGLImageFromCurrentContext() {
 }
 
 - (void)testRuntimeStyling {
-    [self testRuntimeStylingActions:^(MGLStyle *style) {
+    [self testStyleURL:nil applyingRuntimeStylingActions:^(MGLStyle *style) {
         MGLBackgroundStyleLayer *backgroundLayer = [[MGLBackgroundStyleLayer alloc] initWithIdentifier:@"background"];
         backgroundLayer.backgroundColor = [NSExpression expressionForConstantValue:[MGLColor orangeColor]];
         [style addLayer:backgroundLayer];
     } expectedImageName:@"Fixtures/MGLMapSnapshotterTests/background"];
+}
+
+- (void)testLocalGlyphRendering {
+    [[NSUserDefaults standardUserDefaults] setObject:@[@"PingFang TC"] forKey:@"MGLIdeographicFontFamilyName"];
+    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"mixed" withExtension:@"json"];
+    [self testStyleURL:styleURL applyingRuntimeStylingActions:^(MGLStyle *style) {} expectedImageName:@"Fixtures/MGLMapSnapshotterTests/PingFang"];
 }
 
 /**
@@ -151,7 +160,7 @@ MGLImage *MGLImageFromCurrentContext() {
  @param actions Runtime styling actions to apply to the blank style.
  @param expectedImageName Name of the test fixture image in Media.xcassets.
  */
-- (void)testRuntimeStylingActions:(void (^)(MGLStyle *style))actions expectedImageName:(NSString *)expectedImageName {
+- (void)testStyleURL:(nullable NSURL *)styleURL applyingRuntimeStylingActions:(void (^)(MGLStyle *style))actions expectedImageName:(NSString *)expectedImageName {
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *overlayExpectation = [self expectationWithDescription:@"Overlay handler should get called."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
@@ -163,9 +172,15 @@ MGLImage *MGLImageFromCurrentContext() {
 #endif
     XCTAssertNotNil(expectedImage, @"Image fixture “%@” missing from Media.xcassets.", expectedImageName);
     
-    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
+    if (!styleURL) {
+        styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
+    }
     MGLMapCamera *camera = [MGLMapCamera camera];
-    MGLMapSnapshotOptions *options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:camera size:CGSizeMake(500, 500)];
+    camera.centerCoordinate = kCLLocationCoordinate2DInvalid;
+    camera.heading = -1;
+    camera.pitch = -1;
+    MGLMapSnapshotOptions *options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:camera size:expectedImage.size];
+    options.zoomLevel = -1;
     
     MGLMapSnapshotter *snapshotter = [[MGLMapSnapshotter alloc] initWithOptions:options];
     snapshotter.delegate = self;
@@ -183,8 +198,8 @@ MGLImage *MGLImageFromCurrentContext() {
         XCTAssertNil(error);
         XCTAssertNotNil(snapshot);
         if (snapshot) {
-            XCTAssertEqual(snapshot.image.size.width, 500);
-            XCTAssertEqual(snapshot.image.size.height, 500);
+            XCTAssertEqual(snapshot.image.size.width, expectedImage.size.width);
+            XCTAssertEqual(snapshot.image.size.height, expectedImage.size.height);
         }
         [completionExpectation fulfill];
     }];
@@ -203,6 +218,15 @@ MGLImage *MGLImageFromCurrentContext() {
     }
     
     [self.styleLoadingExpectation fulfill];
+}
+
+#pragma mark MGLOfflineStorageDelegate methods
+
+- (NSURL *)offlineStorage:(MGLOfflineStorage *)storage URLForResourceOfKind:(MGLResourceKind)kind withURL:(NSURL *)url {
+    if (kind == MGLResourceKindGlyphs && [url.scheme isEqualToString:@"local"]) {
+        return [[NSBundle bundleForClass:[self class]] URLForResource:@"glyphs" withExtension:@"pbf"];
+    }
+    return url;
 }
 
 @end
