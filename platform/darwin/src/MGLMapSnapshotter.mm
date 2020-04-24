@@ -736,10 +736,18 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     if (CLLocationCoordinate2DIsValid(options.camera.centerCoordinate)) {
         cameraOptions.center = MGLLatLngFromLocationCoordinate2D(options.camera.centerCoordinate);
     }
-    cameraOptions.bearing = MAX(0, options.camera.heading);
-    cameraOptions.zoom = MAX(0, options.zoomLevel);
-    cameraOptions.pitch = MAX(0, options.camera.pitch);
-    _mbglMapSnapshotter->setCameraOptions(cameraOptions);
+    if (options.camera.heading >= 0) {
+        cameraOptions.bearing = MAX(0, options.camera.heading);
+    }
+    if (options.zoomLevel >= 0) {
+        cameraOptions.zoom = MAX(0, options.zoomLevel);
+    }
+    if (options.camera.pitch >= 0) {
+        cameraOptions.pitch = MAX(0, options.camera.pitch);
+    }
+    if (cameraOptions != mbgl::CameraOptions()) {
+        _mbglMapSnapshotter->setCameraOptions(cameraOptions);
+    }
     
     // Region
     if (!MGLCoordinateBoundsIsEmpty(options.coordinateBounds)) {
