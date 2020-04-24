@@ -37,6 +37,7 @@ import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.concat;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.cos;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.cubicBezier;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.distance;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.downcase;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.e;
@@ -486,6 +487,22 @@ public class ExpressionTest {
     Object[] actual = in(literal(1f), literal(new Object[] {1f, 2f})).toArray();
     assertTrue("expression should match", Arrays.deepEquals(expected, actual));
   }
+
+
+  @Test
+  public void testDistance() throws Exception {
+    Point point = Point.fromLngLat(1, 2);
+    HashMap<String, String> map = new HashMap<>();
+    map.put("json", point.toJson());
+    Object[] expected = new Object[] {"distance", map};
+    Object[] actual = distance(point).toArray();
+    assertTrue("expression should match", Arrays.deepEquals(expected, actual));
+
+    Object[] expectedWithUnit = new Object[] {"distance", map, "meters"};
+    Object[] actualWithUnit = distance(point, "meters").toArray();
+    assertTrue("expression should match", Arrays.deepEquals(expectedWithUnit, actualWithUnit));
+  }
+
 
   @Test
   public void testInArray() throws Exception {

@@ -34,6 +34,7 @@
     <string name="description_dynamic_info_window_adapter">Learn how to create a dynamic custom InfoWindow</string>
     <string name="description_viewpager">Use SupportMapFragments in a ViewPager</string>
     <string name="description_runtime_style">Adopt the map style on the fly</string>
+    <string name="description_distance_style">Show POIs on a map with distance expression filter</string>
     <string name="description_gradient_line">Show a gradient line layer from a geojson source</string>
     <string name="description_data_driven_style">Use functions to change the map appearance</string>
     <string name="description_symbol_layer">Manipulate symbols at runtime</string>

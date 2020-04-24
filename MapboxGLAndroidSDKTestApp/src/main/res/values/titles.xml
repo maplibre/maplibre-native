@@ -32,6 +32,7 @@
     <string name="activity_minmax_zoom">Min/Max Zoom</string>
     <string name="activity_viewpager">ViewPager</string>
     <string name="activity_runtime_style">Runtime Style</string>
+    <string name="activity_distance_style">Distance Expression</string>
     <string name="activity_gradient_line">Gradient line layer</string>
     <string name="activity_data_driven_style">Data Driven Style</string>
     <string name="activity_circle_layer">Circle layer</string>
