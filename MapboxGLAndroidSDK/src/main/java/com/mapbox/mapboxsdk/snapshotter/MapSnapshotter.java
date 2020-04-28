@@ -721,16 +721,20 @@ public class MapSnapshotter {
 
   /**
    * Called by JNI peer when snapshot has failed.
-   * Always called on the origin (main) thread.
    *
    * @param reason the exception string
    */
   @Keep
-  protected void onSnapshotFailed(String reason) {
-    if (errorHandler != null) {
-      errorHandler.onError(reason);
-      reset();
-    }
+  protected void onSnapshotFailed(final String reason) {
+    new Handler().post(new Runnable() {
+      @Override
+      public void run() {
+        if (errorHandler != null) {
+          errorHandler.onError(reason);
+          reset();
+        }
+      }
+    });
   }
 
   /**
