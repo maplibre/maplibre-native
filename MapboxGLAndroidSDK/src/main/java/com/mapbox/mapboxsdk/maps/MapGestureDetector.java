@@ -410,8 +410,6 @@ final class MapGestureDetector {
         return false;
       }
 
-      notifyOnFlingListeners();
-
       if (!uiSettings.isFlingVelocityAnimationEnabled()) {
         return false;
       }
@@ -443,6 +441,7 @@ final class MapGestureDetector {
       }
 
       transform.cancelTransitions();
+      notifyOnFlingListeners();
       cameraChangeDispatcher.onCameraMoveStarted(REASON_API_GESTURE);
 
       // update transformation
