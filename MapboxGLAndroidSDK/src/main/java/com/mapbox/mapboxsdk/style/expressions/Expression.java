@@ -1579,24 +1579,6 @@ public class Expression {
    * Retrieves the shortest distance between two geometries.
    * The returned value can be consumed as an input into another expression for changing a paint or layout property
    * or filtering features by distance.
-   *
-   * @param geoJson the target feature geoJso.
-   *                Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString` geometry types
-   * @param unit    the unit for the returned value.
-   *                Currently supports `metres`, `kilometers`, `miles`, `nauticalmiles`, "yards"，"feet"，"inches"。
-   * @return the distance in the unit that is provided.
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-distance">Style specification</a>
-   */
-  public static Expression distance(@NonNull GeoJson geoJson, String unit) {
-    Map<String, Expression> map = new HashMap<>();
-    map.put("json", literal(geoJson.toJson()));
-    return new Expression("distance", new ExpressionMap(map), literal(unit));
-  }
-
-  /**
-   * Retrieves the shortest distance between two geometries.
-   * The returned value can be consumed as an input into another expression for changing a paint or layout property
-   * or filtering features by distance.
    * <p>
    * Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString` geometry types.
    *

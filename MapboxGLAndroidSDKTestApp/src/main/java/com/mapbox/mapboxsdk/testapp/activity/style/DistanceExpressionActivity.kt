@@ -74,7 +74,7 @@ class DistanceExpressionActivity : AppCompatActivity() {
       val symbolLayer = style.getLayer("poi-label") as SymbolLayer
       symbolLayer.setFilter(lt(
         distance(
-          Point.fromLngLat(lon, lat), "meters"
+          Point.fromLngLat(lon, lat)
         ), 150)
       )
 

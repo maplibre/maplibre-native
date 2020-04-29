@@ -497,10 +497,6 @@ public class ExpressionTest {
     Object[] expected = new Object[] {"distance", map};
     Object[] actual = distance(point).toArray();
     assertTrue("expression should match", Arrays.deepEquals(expected, actual));
-
-    Object[] expectedWithUnit = new Object[] {"distance", map, "meters"};
-    Object[] actualWithUnit = distance(point, "meters").toArray();
-    assertTrue("expression should match", Arrays.deepEquals(expectedWithUnit, actualWithUnit));
   }
 
 
