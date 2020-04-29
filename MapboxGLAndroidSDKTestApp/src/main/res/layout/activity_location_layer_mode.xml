@@ -16,6 +16,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:mapbox_uiAttribution="false" />
 
+    <View
+        android:id="@+id/view_protected_gesture_area"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0.5"
+        android:background="@android:color/holo_red_light"
+        app:layout_constraintStart_toStartOf="@id/mapView"
+        app:layout_constraintTop_toTopOf="@id/mapView" />
+
     <LinearLayout
         android:id="@+id/linearLayout"
         style="?android:attr/buttonBarStyle"

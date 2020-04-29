@@ -3,15 +3,10 @@ package com.mapbox.mapboxsdk.location;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.animation.Interpolator;
-
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.mapboxsdk.R;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-
-import java.util.Arrays;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
@@ -19,6 +14,12 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+
+import com.mapbox.android.gestures.AndroidGesturesManager;
+import com.mapbox.mapboxsdk.R;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+
+import java.util.Arrays;
 
 /**
  * This class exposes options for the Location Component. The options can be set by defining a
@@ -126,6 +127,8 @@ public class LocationComponentOptions implements Parcelable {
   private boolean trackingGesturesManagement;
   private float trackingInitialMoveThreshold;
   private float trackingMultiFingerMoveThreshold;
+  @Nullable
+  private RectF trackingMultiFingerProtectedMoveArea;
   private String layerAbove;
   private String layerBelow;
   private float trackingAnimationDurationMultiplier;
@@ -141,46 +144,47 @@ public class LocationComponentOptions implements Parcelable {
   private Interpolator pulseInterpolator;
 
   public LocationComponentOptions(
-      float accuracyAlpha,
-      int accuracyColor,
-      int backgroundDrawableStale,
-      @Nullable String backgroundStaleName,
-      int foregroundDrawableStale,
-      @Nullable String foregroundStaleName,
-      int gpsDrawable,
-      @Nullable String gpsName,
-      int foregroundDrawable,
-      @Nullable String foregroundName,
-      int backgroundDrawable,
-      @Nullable String backgroundName,
-      int bearingDrawable,
-      @Nullable String bearingName,
-      @Nullable Integer bearingTintColor,
-      @Nullable Integer foregroundTintColor,
-      @Nullable Integer backgroundTintColor,
-      @Nullable Integer foregroundStaleTintColor,
-      @Nullable Integer backgroundStaleTintColor,
-      float elevation,
-      boolean enableStaleState,
-      long staleStateTimeout,
-      @Nullable int[] padding,
-      float maxZoomIconScale,
-      float minZoomIconScale,
-      boolean trackingGesturesManagement,
-      float trackingInitialMoveThreshold,
-      float trackingMultiFingerMoveThreshold,
-      String layerAbove,
-      String layerBelow,
-      float trackingAnimationDurationMultiplier,
-      boolean compassAnimationEnabled,
-      boolean accuracyAnimationEnabled,
-      Boolean pulseEnabled,
-      Boolean pulseFadeEnabled,
-      Integer pulseColor,
-      float pulseSingleDuration,
-      float pulseMaxRadius,
-      float pulseAlpha,
-      @Nullable Interpolator pulseInterpolator) {
+    float accuracyAlpha,
+    int accuracyColor,
+    int backgroundDrawableStale,
+    @Nullable String backgroundStaleName,
+    int foregroundDrawableStale,
+    @Nullable String foregroundStaleName,
+    int gpsDrawable,
+    @Nullable String gpsName,
+    int foregroundDrawable,
+    @Nullable String foregroundName,
+    int backgroundDrawable,
+    @Nullable String backgroundName,
+    int bearingDrawable,
+    @Nullable String bearingName,
+    @Nullable Integer bearingTintColor,
+    @Nullable Integer foregroundTintColor,
+    @Nullable Integer backgroundTintColor,
+    @Nullable Integer foregroundStaleTintColor,
+    @Nullable Integer backgroundStaleTintColor,
+    float elevation,
+    boolean enableStaleState,
+    long staleStateTimeout,
+    @Nullable int[] padding,
+    float maxZoomIconScale,
+    float minZoomIconScale,
+    boolean trackingGesturesManagement,
+    float trackingInitialMoveThreshold,
+    float trackingMultiFingerMoveThreshold,
+    RectF trackingMultiFingerProtectedMoveArea,
+    String layerAbove,
+    String layerBelow,
+    float trackingAnimationDurationMultiplier,
+    boolean compassAnimationEnabled,
+    boolean accuracyAnimationEnabled,
+    Boolean pulseEnabled,
+    Boolean pulseFadeEnabled,
+    Integer pulseColor,
+    float pulseSingleDuration,
+    float pulseMaxRadius,
+    float pulseAlpha,
+    @Nullable Interpolator pulseInterpolator) {
     this.accuracyAlpha = accuracyAlpha;
     this.accuracyColor = accuracyColor;
     this.backgroundDrawableStale = backgroundDrawableStale;
@@ -212,6 +216,7 @@ public class LocationComponentOptions implements Parcelable {
     this.trackingGesturesManagement = trackingGesturesManagement;
     this.trackingInitialMoveThreshold = trackingInitialMoveThreshold;
     this.trackingMultiFingerMoveThreshold = trackingMultiFingerMoveThreshold;
+    this.trackingMultiFingerProtectedMoveArea = trackingMultiFingerProtectedMoveArea;
     this.layerAbove = layerAbove;
     this.layerBelow = layerBelow;
     this.trackingAnimationDurationMultiplier = trackingAnimationDurationMultiplier;
@@ -241,130 +246,130 @@ public class LocationComponentOptions implements Parcelable {
                                                               @StyleRes int styleRes) {
 
     TypedArray typedArray = context.obtainStyledAttributes(
-        styleRes, R.styleable.mapbox_LocationComponent);
+      styleRes, R.styleable.mapbox_LocationComponent);
 
     LocationComponentOptions.Builder builder = new LocationComponentOptions.Builder()
-        .enableStaleState(true)
-        .staleStateTimeout(STALE_STATE_DELAY_MS)
-        .maxZoomIconScale(MAX_ZOOM_ICON_SCALE_DEFAULT)
-        .minZoomIconScale(MIN_ZOOM_ICON_SCALE_DEFAULT)
-        .padding(PADDING_DEFAULT);
+      .enableStaleState(true)
+      .staleStateTimeout(STALE_STATE_DELAY_MS)
+      .maxZoomIconScale(MAX_ZOOM_ICON_SCALE_DEFAULT)
+      .minZoomIconScale(MIN_ZOOM_ICON_SCALE_DEFAULT)
+      .padding(PADDING_DEFAULT);
 
     builder.foregroundDrawable(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawable, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawable, -1));
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_foregroundTintColor)) {
       builder.foregroundTintColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_foregroundTintColor, -1));
+        R.styleable.mapbox_LocationComponent_mapbox_foregroundTintColor, -1));
     }
     builder.backgroundDrawable(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawable, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawable, -1));
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_backgroundTintColor)) {
       builder.backgroundTintColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_backgroundTintColor, -1));
+        R.styleable.mapbox_LocationComponent_mapbox_backgroundTintColor, -1));
     }
     builder.foregroundDrawableStale(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawableStale, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawableStale, -1));
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_foregroundStaleTintColor)) {
       builder.foregroundStaleTintColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_foregroundStaleTintColor, -1));
+        R.styleable.mapbox_LocationComponent_mapbox_foregroundStaleTintColor, -1));
     }
     builder.backgroundDrawableStale(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawableStale, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawableStale, -1));
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_backgroundStaleTintColor)) {
       builder.backgroundStaleTintColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_backgroundStaleTintColor, -1));
+        R.styleable.mapbox_LocationComponent_mapbox_backgroundStaleTintColor, -1));
     }
     builder.bearingDrawable(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_bearingDrawable, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_bearingDrawable, -1));
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_bearingTintColor)) {
       builder.bearingTintColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_bearingTintColor, -1));
+        R.styleable.mapbox_LocationComponent_mapbox_bearingTintColor, -1));
     }
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_enableStaleState)) {
       builder.enableStaleState(typedArray.getBoolean(
-          R.styleable.mapbox_LocationComponent_mapbox_enableStaleState, true));
+        R.styleable.mapbox_LocationComponent_mapbox_enableStaleState, true));
     }
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_staleStateTimeout)) {
       builder.staleStateTimeout(typedArray.getInteger(
-          R.styleable.mapbox_LocationComponent_mapbox_staleStateTimeout, (int) STALE_STATE_DELAY_MS));
+        R.styleable.mapbox_LocationComponent_mapbox_staleStateTimeout, (int) STALE_STATE_DELAY_MS));
     }
     builder.gpsDrawable(typedArray.getResourceId(
-        R.styleable.mapbox_LocationComponent_mapbox_gpsDrawable, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_gpsDrawable, -1));
     float elevation = typedArray.getDimension(
-        R.styleable.mapbox_LocationComponent_mapbox_elevation, 0);
+      R.styleable.mapbox_LocationComponent_mapbox_elevation, 0);
     builder.accuracyColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_accuracyColor, -1));
+      R.styleable.mapbox_LocationComponent_mapbox_accuracyColor, -1));
     builder.accuracyAlpha(typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_accuracyAlpha, ACCURACY_ALPHA_DEFAULT));
+      R.styleable.mapbox_LocationComponent_mapbox_accuracyAlpha, ACCURACY_ALPHA_DEFAULT));
     builder.elevation(elevation);
 
     builder.trackingGesturesManagement(typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_trackingGesturesManagement, false));
+      R.styleable.mapbox_LocationComponent_mapbox_trackingGesturesManagement, false));
     builder.trackingInitialMoveThreshold(typedArray.getDimension(
-        R.styleable.mapbox_LocationComponent_mapbox_trackingInitialMoveThreshold,
-        context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingInitialMoveThreshold)));
+      R.styleable.mapbox_LocationComponent_mapbox_trackingInitialMoveThreshold,
+      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingInitialMoveThreshold)));
     builder.trackingMultiFingerMoveThreshold(typedArray.getDimension(
-        R.styleable.mapbox_LocationComponent_mapbox_trackingMultiFingerMoveThreshold,
-        context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)));
+      R.styleable.mapbox_LocationComponent_mapbox_trackingMultiFingerMoveThreshold,
+      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)));
 
-    builder.padding(new int[]{
-        typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingLeft, 0),
-        typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingTop, 0),
-        typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingRight, 0),
-        typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingBottom, 0),
+    builder.padding(new int[] {
+      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingLeft, 0),
+      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingTop, 0),
+      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingRight, 0),
+      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingBottom, 0),
     });
 
     builder.layerAbove(
-        typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_above));
+      typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_above));
 
     builder.layerBelow(
-        typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_below));
+      typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_below));
 
     float minScale = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
+      R.styleable.mapbox_LocationComponent_mapbox_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
     float maxScale = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_maxZoomIconScale, MAX_ZOOM_ICON_SCALE_DEFAULT);
+      R.styleable.mapbox_LocationComponent_mapbox_maxZoomIconScale, MAX_ZOOM_ICON_SCALE_DEFAULT);
     builder.minZoomIconScale(minScale);
     builder.maxZoomIconScale(maxScale);
 
     float trackingAnimationDurationMultiplier = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_trackingAnimationDurationMultiplier,
-        TRACKING_ANIMATION_DURATION_MULTIPLIER_DEFAULT
+      R.styleable.mapbox_LocationComponent_mapbox_trackingAnimationDurationMultiplier,
+      TRACKING_ANIMATION_DURATION_MULTIPLIER_DEFAULT
     );
     builder.trackingAnimationDurationMultiplier(trackingAnimationDurationMultiplier);
 
     builder.compassAnimationEnabled = typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_compassAnimationEnabled, true
+      R.styleable.mapbox_LocationComponent_mapbox_compassAnimationEnabled, true
     );
 
     builder.accuracyAnimationEnabled = typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_accuracyAnimationEnabled, true
+      R.styleable.mapbox_LocationComponent_mapbox_accuracyAnimationEnabled, true
     );
 
     builder.pulseEnabled = typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleEnabled, false
+      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleEnabled, false
     );
 
     builder.pulseFadeEnabled = typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleFadeEnabled, true
+      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleFadeEnabled, true
     );
 
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor)) {
       builder.pulseColor(typedArray.getColor(
-          R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor,
-          -1));
+        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor,
+        -1));
     }
 
     builder.pulseSingleDuration = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleDuration, CIRCLE_PULSING_DURATION_DEFAULT_MS
+      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleDuration, CIRCLE_PULSING_DURATION_DEFAULT_MS
     );
 
     builder.pulseMaxRadius = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleRadius, CIRCLE_PULSING_MAX_RADIUS_DEFAULT
+      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleRadius, CIRCLE_PULSING_MAX_RADIUS_DEFAULT
     );
 
     builder.pulseAlpha = typedArray.getFloat(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleAlpha, CIRCLE_PULSING_ALPHA_DEFAULT);
+      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleAlpha, CIRCLE_PULSING_ALPHA_DEFAULT);
 
     typedArray.recycle();
 
@@ -394,7 +399,7 @@ public class LocationComponentOptions implements Parcelable {
   @NonNull
   public static Builder builder(@NonNull Context context) {
     return LocationComponentOptions.createFromAttributes(context,
-        R.style.mapbox_LocationComponent).toBuilder();
+      R.style.mapbox_LocationComponent).toBuilder();
   }
 
   /**
@@ -729,6 +734,7 @@ public class LocationComponentOptions implements Parcelable {
    * @return true if gestures are adjusted when in one of the camera tracking modes, false otherwise
    * @see Builder#trackingInitialMoveThreshold(float)
    * @see Builder#trackingMultiFingerMoveThreshold(float)
+   * @see Builder#trackingMultiFingerProtectedMoveArea(RectF)
    */
   public boolean trackingGesturesManagement() {
     return trackingGesturesManagement;
@@ -750,6 +756,20 @@ public class LocationComponentOptions implements Parcelable {
    */
   public float trackingMultiFingerMoveThreshold() {
     return trackingMultiFingerMoveThreshold;
+  }
+
+  /**
+   * Protected multi pointer gesture area. When the camera is in a tracking mode, any multi finger gesture with focal
+   * point inside the provided screen coordinate rectangle is not going to break the tracking.
+   * <p>
+   * Best paired with the {@link LocationComponentOptions.Builder#trackingMultiFingerMoveThreshold(float)}
+   * set to 0 or a relatively small value to not interfere with gestures outside of the defined rectangle.
+   *
+   * @return the protected multi finger area while camera is tracking
+   */
+  @Nullable
+  public RectF trackingMultiFingerProtectedMoveArea() {
+    return trackingMultiFingerProtectedMoveArea;
   }
 
   /**
@@ -874,44 +894,45 @@ public class LocationComponentOptions implements Parcelable {
   @Override
   public String toString() {
     return "LocationComponentOptions{"
-        + "accuracyAlpha=" + accuracyAlpha + ", "
-        + "accuracyColor=" + accuracyColor + ", "
-        + "backgroundDrawableStale=" + backgroundDrawableStale + ", "
-        + "backgroundStaleName=" + backgroundStaleName + ", "
-        + "foregroundDrawableStale=" + foregroundDrawableStale + ", "
-        + "foregroundStaleName=" + foregroundStaleName + ", "
-        + "gpsDrawable=" + gpsDrawable + ", "
-        + "gpsName=" + gpsName + ", "
-        + "foregroundDrawable=" + foregroundDrawable + ", "
-        + "foregroundName=" + foregroundName + ", "
-        + "backgroundDrawable=" + backgroundDrawable + ", "
-        + "backgroundName=" + backgroundName + ", "
-        + "bearingDrawable=" + bearingDrawable + ", "
-        + "bearingName=" + bearingName + ", "
-        + "bearingTintColor=" + bearingTintColor + ", "
-        + "foregroundTintColor=" + foregroundTintColor + ", "
-        + "backgroundTintColor=" + backgroundTintColor + ", "
-        + "foregroundStaleTintColor=" + foregroundStaleTintColor + ", "
-        + "backgroundStaleTintColor=" + backgroundStaleTintColor + ", "
-        + "elevation=" + elevation + ", "
-        + "enableStaleState=" + enableStaleState + ", "
-        + "staleStateTimeout=" + staleStateTimeout + ", "
-        + "padding=" + Arrays.toString(padding) + ", "
-        + "maxZoomIconScale=" + maxZoomIconScale + ", "
-        + "minZoomIconScale=" + minZoomIconScale + ", "
-        + "trackingGesturesManagement=" + trackingGesturesManagement + ", "
-        + "trackingInitialMoveThreshold=" + trackingInitialMoveThreshold + ", "
-        + "trackingMultiFingerMoveThreshold=" + trackingMultiFingerMoveThreshold + ", "
-        + "layerAbove=" + layerAbove
-        + "layerBelow=" + layerBelow
-        + "trackingAnimationDurationMultiplier=" + trackingAnimationDurationMultiplier
-        + "pulseEnabled=" + pulseEnabled
-        + "pulseFadeEnabled=" + pulseFadeEnabled
-        + "pulseColor=" + pulseColor
-        + "pulseSingleDuration=" + pulseSingleDuration
-        + "pulseMaxRadius=" + pulseMaxRadius
-        + "pulseAlpha=" + pulseAlpha
-        + "}";
+      + "accuracyAlpha=" + accuracyAlpha + ", "
+      + "accuracyColor=" + accuracyColor + ", "
+      + "backgroundDrawableStale=" + backgroundDrawableStale + ", "
+      + "backgroundStaleName=" + backgroundStaleName + ", "
+      + "foregroundDrawableStale=" + foregroundDrawableStale + ", "
+      + "foregroundStaleName=" + foregroundStaleName + ", "
+      + "gpsDrawable=" + gpsDrawable + ", "
+      + "gpsName=" + gpsName + ", "
+      + "foregroundDrawable=" + foregroundDrawable + ", "
+      + "foregroundName=" + foregroundName + ", "
+      + "backgroundDrawable=" + backgroundDrawable + ", "
+      + "backgroundName=" + backgroundName + ", "
+      + "bearingDrawable=" + bearingDrawable + ", "
+      + "bearingName=" + bearingName + ", "
+      + "bearingTintColor=" + bearingTintColor + ", "
+      + "foregroundTintColor=" + foregroundTintColor + ", "
+      + "backgroundTintColor=" + backgroundTintColor + ", "
+      + "foregroundStaleTintColor=" + foregroundStaleTintColor + ", "
+      + "backgroundStaleTintColor=" + backgroundStaleTintColor + ", "
+      + "elevation=" + elevation + ", "
+      + "enableStaleState=" + enableStaleState + ", "
+      + "staleStateTimeout=" + staleStateTimeout + ", "
+      + "padding=" + Arrays.toString(padding) + ", "
+      + "maxZoomIconScale=" + maxZoomIconScale + ", "
+      + "minZoomIconScale=" + minZoomIconScale + ", "
+      + "trackingGesturesManagement=" + trackingGesturesManagement + ", "
+      + "trackingInitialMoveThreshold=" + trackingInitialMoveThreshold + ", "
+      + "trackingMultiFingerMoveThreshold=" + trackingMultiFingerMoveThreshold + ", "
+      + "trackingMultiFingerProtectedMoveArea=" + trackingMultiFingerProtectedMoveArea + ", "
+      + "layerAbove=" + layerAbove
+      + "layerBelow=" + layerBelow
+      + "trackingAnimationDurationMultiplier=" + trackingAnimationDurationMultiplier
+      + "pulseEnabled=" + pulseEnabled
+      + "pulseFadeEnabled=" + pulseFadeEnabled
+      + "pulseColor=" + pulseColor
+      + "pulseSingleDuration=" + pulseSingleDuration
+      + "pulseMaxRadius=" + pulseMaxRadius
+      + "pulseAlpha=" + pulseAlpha
+      + "}";
   }
 
   @Override
@@ -976,6 +997,11 @@ public class LocationComponentOptions implements Parcelable {
     if (Float.compare(options.trackingAnimationDurationMultiplier, trackingAnimationDurationMultiplier) != 0) {
       return false;
     }
+    if (trackingMultiFingerProtectedMoveArea != null
+      ? !trackingMultiFingerProtectedMoveArea.equals(options.trackingMultiFingerProtectedMoveArea) :
+      options.trackingMultiFingerProtectedMoveArea != null) {
+      return false;
+    }
     if (compassAnimationEnabled != options.compassAnimationEnabled) {
       return false;
     }
@@ -983,11 +1009,11 @@ public class LocationComponentOptions implements Parcelable {
       return false;
     }
     if (backgroundStaleName != null ? !backgroundStaleName.equals(options.backgroundStaleName) :
-        options.backgroundStaleName != null) {
+      options.backgroundStaleName != null) {
       return false;
     }
     if (foregroundStaleName != null ? !foregroundStaleName.equals(options.foregroundStaleName) :
-        options.foregroundStaleName != null) {
+      options.foregroundStaleName != null) {
       return false;
     }
     if (gpsName != null ? !gpsName.equals(options.gpsName) : options.gpsName != null) {
@@ -1003,23 +1029,23 @@ public class LocationComponentOptions implements Parcelable {
       return false;
     }
     if (bearingTintColor != null ? !bearingTintColor.equals(options.bearingTintColor) :
-        options.bearingTintColor != null) {
+      options.bearingTintColor != null) {
       return false;
     }
     if (foregroundTintColor != null ? !foregroundTintColor.equals(options.foregroundTintColor) :
-        options.foregroundTintColor != null) {
+      options.foregroundTintColor != null) {
       return false;
     }
     if (backgroundTintColor != null ? !backgroundTintColor.equals(options.backgroundTintColor) :
-        options.backgroundTintColor != null) {
+      options.backgroundTintColor != null) {
       return false;
     }
     if (foregroundStaleTintColor != null ? !foregroundStaleTintColor.equals(options.foregroundStaleTintColor) :
-        options.foregroundStaleTintColor != null) {
+      options.foregroundStaleTintColor != null) {
       return false;
     }
     if (backgroundStaleTintColor != null ? !backgroundStaleTintColor.equals(options.backgroundStaleTintColor) :
-        options.backgroundStaleTintColor != null) {
+      options.backgroundStaleTintColor != null) {
       return false;
     }
     if (!Arrays.equals(padding, options.padding)) {
@@ -1038,7 +1064,7 @@ public class LocationComponentOptions implements Parcelable {
     }
 
     if (pulseColor != null ? !pulseColor.equals(options.pulseColor) :
-        options.pulseColor() != null) {
+      options.pulseColor() != null) {
       return false;
     }
     if (Float.compare(options.pulseSingleDuration, pulseSingleDuration) != 0) {
@@ -1085,13 +1111,15 @@ public class LocationComponentOptions implements Parcelable {
     result = 31 * result + (minZoomIconScale != +0.0f ? Float.floatToIntBits(minZoomIconScale) : 0);
     result = 31 * result + (trackingGesturesManagement ? 1 : 0);
     result = 31 * result + (trackingInitialMoveThreshold != +0.0f
-        ? Float.floatToIntBits(trackingInitialMoveThreshold) : 0);
+      ? Float.floatToIntBits(trackingInitialMoveThreshold) : 0);
     result = 31 * result + (trackingMultiFingerMoveThreshold != +0.0f
-        ? Float.floatToIntBits(trackingMultiFingerMoveThreshold) : 0);
+      ? Float.floatToIntBits(trackingMultiFingerMoveThreshold) : 0);
+    result = 31 * result + (trackingMultiFingerProtectedMoveArea != null
+      ? trackingMultiFingerProtectedMoveArea.hashCode() : 0);
     result = 31 * result + (layerAbove != null ? layerAbove.hashCode() : 0);
     result = 31 * result + (layerBelow != null ? layerBelow.hashCode() : 0);
     result = 31 * result + (trackingAnimationDurationMultiplier != +0.0f
-        ? Float.floatToIntBits(trackingAnimationDurationMultiplier) : 0);
+      ? Float.floatToIntBits(trackingAnimationDurationMultiplier) : 0);
     result = 31 * result + (compassAnimationEnabled ? 1 : 0);
     result = 31 * result + (accuracyAnimationEnabled ? 1 : 0);
     result = 31 * result + (pulseEnabled ? 1 : 0);
@@ -1103,52 +1131,103 @@ public class LocationComponentOptions implements Parcelable {
     return result;
   }
 
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeFloat(this.accuracyAlpha);
+    dest.writeInt(this.accuracyColor);
+    dest.writeInt(this.backgroundDrawableStale);
+    dest.writeString(this.backgroundStaleName);
+    dest.writeInt(this.foregroundDrawableStale);
+    dest.writeString(this.foregroundStaleName);
+    dest.writeInt(this.gpsDrawable);
+    dest.writeString(this.gpsName);
+    dest.writeInt(this.foregroundDrawable);
+    dest.writeString(this.foregroundName);
+    dest.writeInt(this.backgroundDrawable);
+    dest.writeString(this.backgroundName);
+    dest.writeInt(this.bearingDrawable);
+    dest.writeString(this.bearingName);
+    dest.writeValue(this.bearingTintColor);
+    dest.writeValue(this.foregroundTintColor);
+    dest.writeValue(this.backgroundTintColor);
+    dest.writeValue(this.foregroundStaleTintColor);
+    dest.writeValue(this.backgroundStaleTintColor);
+    dest.writeFloat(this.elevation);
+    dest.writeByte(this.enableStaleState ? (byte) 1 : (byte) 0);
+    dest.writeLong(this.staleStateTimeout);
+    dest.writeIntArray(this.padding);
+    dest.writeFloat(this.maxZoomIconScale);
+    dest.writeFloat(this.minZoomIconScale);
+    dest.writeByte(this.trackingGesturesManagement ? (byte) 1 : (byte) 0);
+    dest.writeFloat(this.trackingInitialMoveThreshold);
+    dest.writeFloat(this.trackingMultiFingerMoveThreshold);
+    dest.writeParcelable(this.trackingMultiFingerProtectedMoveArea, flags);
+    dest.writeString(this.layerAbove);
+    dest.writeString(this.layerBelow);
+    dest.writeFloat(this.trackingAnimationDurationMultiplier);
+    dest.writeByte(this.compassAnimationEnabled ? (byte) 1 : (byte) 0);
+    dest.writeByte(this.accuracyAnimationEnabled ? (byte) 1 : (byte) 0);
+    dest.writeValue(this.pulseEnabled);
+    dest.writeValue(this.pulseFadeEnabled);
+    dest.writeValue(this.pulseColor);
+    dest.writeFloat(this.pulseSingleDuration);
+    dest.writeFloat(this.pulseMaxRadius);
+    dest.writeFloat(this.pulseAlpha);
+  }
+
+  protected LocationComponentOptions(Parcel in) {
+    this.accuracyAlpha = in.readFloat();
+    this.accuracyColor = in.readInt();
+    this.backgroundDrawableStale = in.readInt();
+    this.backgroundStaleName = in.readString();
+    this.foregroundDrawableStale = in.readInt();
+    this.foregroundStaleName = in.readString();
+    this.gpsDrawable = in.readInt();
+    this.gpsName = in.readString();
+    this.foregroundDrawable = in.readInt();
+    this.foregroundName = in.readString();
+    this.backgroundDrawable = in.readInt();
+    this.backgroundName = in.readString();
+    this.bearingDrawable = in.readInt();
+    this.bearingName = in.readString();
+    this.bearingTintColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.foregroundTintColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.backgroundTintColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.foregroundStaleTintColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.backgroundStaleTintColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.elevation = in.readFloat();
+    this.enableStaleState = in.readByte() != 0;
+    this.staleStateTimeout = in.readLong();
+    this.padding = in.createIntArray();
+    this.maxZoomIconScale = in.readFloat();
+    this.minZoomIconScale = in.readFloat();
+    this.trackingGesturesManagement = in.readByte() != 0;
+    this.trackingInitialMoveThreshold = in.readFloat();
+    this.trackingMultiFingerMoveThreshold = in.readFloat();
+    this.trackingMultiFingerProtectedMoveArea = in.readParcelable(RectF.class.getClassLoader());
+    this.layerAbove = in.readString();
+    this.layerBelow = in.readString();
+    this.trackingAnimationDurationMultiplier = in.readFloat();
+    this.compassAnimationEnabled = in.readByte() != 0;
+    this.accuracyAnimationEnabled = in.readByte() != 0;
+    this.pulseEnabled = (Boolean) in.readValue(Boolean.class.getClassLoader());
+    this.pulseFadeEnabled = (Boolean) in.readValue(Boolean.class.getClassLoader());
+    this.pulseColor = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.pulseSingleDuration = in.readFloat();
+    this.pulseMaxRadius = in.readFloat();
+    this.pulseAlpha = in.readFloat();
+  }
+
   public static final Parcelable.Creator<LocationComponentOptions> CREATOR =
-      new Parcelable.Creator<LocationComponentOptions>() {
+    new Parcelable.Creator<LocationComponentOptions>() {
       @Override
-        public LocationComponentOptions createFromParcel(Parcel in) {
-        return new LocationComponentOptions(
-              in.readFloat(),
-              in.readInt(),
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt(),
-              in.readInt() == 0 ? in.readString() : null,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readFloat(),
-              in.readInt() == 1,
-              in.readLong(),
-              in.createIntArray(),
-              in.readFloat(),
-              in.readFloat(),
-              in.readInt() == 1,
-              in.readFloat(),
-              in.readFloat(),
-              in.readString(),
-              in.readString(),
-              in.readFloat(),
-              in.readInt() == 1,
-              in.readInt() == 1,
-              in.readInt() == 1,
-              in.readInt() == 1,
-              in.readInt() == 0 ? in.readInt() : null,
-              in.readFloat(),
-              in.readFloat(),
-              in.readFloat(),
-              null
-          );
+      public LocationComponentOptions createFromParcel(Parcel source) {
+        return new LocationComponentOptions(source);
       }
 
       @Override
@@ -1156,114 +1235,6 @@ public class LocationComponentOptions implements Parcelable {
         return new LocationComponentOptions[size];
       }
     };
-
-  @Override
-  public void writeToParcel(@NonNull Parcel dest, int flags) {
-    dest.writeFloat(accuracyAlpha());
-    dest.writeInt(accuracyColor());
-    dest.writeInt(backgroundDrawableStale());
-    if (backgroundStaleName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(backgroundStaleName());
-    }
-    dest.writeInt(foregroundDrawableStale());
-    if (foregroundStaleName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(foregroundStaleName());
-    }
-    dest.writeInt(gpsDrawable());
-    if (gpsName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(gpsName());
-    }
-    dest.writeInt(foregroundDrawable());
-    if (foregroundName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(foregroundName());
-    }
-    dest.writeInt(backgroundDrawable());
-    if (backgroundName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(backgroundName());
-    }
-    dest.writeInt(bearingDrawable());
-    if (bearingName() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeString(bearingName());
-    }
-    if (bearingTintColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(bearingTintColor());
-    }
-    if (foregroundTintColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(foregroundTintColor());
-    }
-    if (backgroundTintColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(backgroundTintColor());
-    }
-    if (foregroundStaleTintColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(foregroundStaleTintColor());
-    }
-    if (backgroundStaleTintColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(backgroundStaleTintColor());
-    }
-    dest.writeFloat(elevation());
-    dest.writeInt(enableStaleState() ? 1 : 0);
-    dest.writeLong(staleStateTimeout());
-    dest.writeIntArray(padding());
-    dest.writeFloat(maxZoomIconScale());
-    dest.writeFloat(minZoomIconScale());
-    dest.writeInt(trackingGesturesManagement() ? 1 : 0);
-    dest.writeFloat(trackingInitialMoveThreshold());
-    dest.writeFloat(trackingMultiFingerMoveThreshold());
-    dest.writeString(layerAbove());
-    dest.writeString(layerBelow());
-    dest.writeFloat(trackingAnimationDurationMultiplier);
-    dest.writeInt(compassAnimationEnabled() ? 1 : 0);
-    dest.writeInt(accuracyAnimationEnabled() ? 1 : 0);
-    dest.writeInt(pulseEnabled() ? 1 : 0);
-    dest.writeInt(pulseFadeEnabled() ? 1 : 0);
-    if (pulseColor() == null) {
-      dest.writeInt(1);
-    } else {
-      dest.writeInt(0);
-      dest.writeInt(pulseColor());
-    }
-    dest.writeFloat(pulseSingleDuration());
-    dest.writeFloat(pulseMaxRadius());
-    dest.writeFloat(pulseAlpha());
-  }
-
-  @Override
-  public int describeContents() {
-    return 0;
-  }
 
   /**
    * Builder class for constructing a new instance of {@link LocationComponentOptions}.
@@ -1280,17 +1251,17 @@ public class LocationComponentOptions implements Parcelable {
       LocationComponentOptions locationComponentOptions = autoBuild();
       if (locationComponentOptions.accuracyAlpha() < 0 || locationComponentOptions.accuracyAlpha() > 1) {
         throw new IllegalArgumentException(
-            "Accuracy alpha value must be between 0.0 and 1.0.");
+          "Accuracy alpha value must be between 0.0 and 1.0.");
       }
 
       if (locationComponentOptions.elevation() < 0f) {
         throw new IllegalArgumentException("Invalid shadow size "
-            + locationComponentOptions.elevation() + ". Must be >= 0");
+          + locationComponentOptions.elevation() + ". Must be >= 0");
       }
 
       if (locationComponentOptions.layerAbove() != null && locationComponentOptions.layerBelow() != null) {
         throw new IllegalArgumentException("You cannot set both layerAbove and layerBelow options."
-            + " Choose one or the other.");
+          + " Choose one or the other.");
       }
 
       if (locationComponentOptions.pulseEnabled() == null) {
@@ -1315,8 +1286,8 @@ public class LocationComponentOptions implements Parcelable {
         }
         if (!pulsingSetupError.isEmpty()) {
           throw new IllegalStateException("You've set up the following pulsing circle options but have not enabled"
-              + " the pulsing circle via the LocationComponentOptions builder:" + pulsingSetupError
-              + ". Enable the pulsing circle if you're going to set pulsing options.");
+            + " the pulsing circle via the LocationComponentOptions builder:" + pulsingSetupError
+            + ". Enable the pulsing circle if you're going to set pulsing options.");
         }
       }
       return locationComponentOptions;
@@ -1362,6 +1333,7 @@ public class LocationComponentOptions implements Parcelable {
     private Boolean trackingGesturesManagement;
     private Float trackingInitialMoveThreshold;
     private Float trackingMultiFingerMoveThreshold;
+    private RectF trackingMultiFingerProtectedMoveArea;
     private String layerAbove;
     private String layerBelow;
     private Float trackingAnimationDurationMultiplier;
@@ -1408,6 +1380,7 @@ public class LocationComponentOptions implements Parcelable {
       this.trackingGesturesManagement = source.trackingGesturesManagement();
       this.trackingInitialMoveThreshold = source.trackingInitialMoveThreshold();
       this.trackingMultiFingerMoveThreshold = source.trackingMultiFingerMoveThreshold();
+      this.trackingMultiFingerProtectedMoveArea = source.trackingMultiFingerProtectedMoveArea();
       this.layerAbove = source.layerAbove();
       this.layerBelow = source.layerBelow();
       this.trackingAnimationDurationMultiplier = source.trackingAnimationDurationMultiplier();
@@ -1814,6 +1787,7 @@ public class LocationComponentOptions implements Parcelable {
      *                                   false otherwise
      * @see Builder#trackingInitialMoveThreshold(float)
      * @see Builder#trackingMultiFingerMoveThreshold(float)
+     * @see Builder#trackingMultiFingerProtectedMoveArea(RectF)
      */
     @NonNull
     public LocationComponentOptions.Builder trackingGesturesManagement(boolean trackingGesturesManagement) {
@@ -1841,6 +1815,22 @@ public class LocationComponentOptions implements Parcelable {
     @NonNull
     public LocationComponentOptions.Builder trackingMultiFingerMoveThreshold(float moveThreshold) {
       this.trackingMultiFingerMoveThreshold = moveThreshold;
+      return this;
+    }
+
+    /**
+     * Sets protected multi pointer gesture area.
+     * When the camera is in a tracking mode,any multi finger gesture with focal
+     * point inside the provided screen coordinate rectangle is not going to break the tracking.
+     * <p>
+     * Best paired with the {@link LocationComponentOptions.Builder#trackingMultiFingerMoveThreshold(float)}
+     * set to 0 or a relatively small value to not interfere with gestures outside of the defined rectangle.
+     *
+     * @param rect the protected multi finger area while camera is tracking
+     */
+    @NonNull
+    public LocationComponentOptions.Builder trackingMultiFingerProtectedMoveArea(@Nullable RectF rect) {
+      this.trackingMultiFingerProtectedMoveArea = rect;
       return this;
     }
 
@@ -1879,7 +1869,7 @@ public class LocationComponentOptions implements Parcelable {
      */
     @NonNull
     public LocationComponentOptions.Builder trackingAnimationDurationMultiplier(
-        float trackingAnimationDurationMultiplier) {
+      float trackingAnimationDurationMultiplier) {
       this.trackingAnimationDurationMultiplier = trackingAnimationDurationMultiplier;
       return this;
     }
@@ -1971,7 +1961,7 @@ public class LocationComponentOptions implements Parcelable {
      * Sets the pulsing circle's interpolator animation.
      *
      * @param pulseInterpolator the type of Android-system interpolator to use when
-     *                                  creating the pulsing animation
+     *                          creating the pulsing animation
      * @return a String which represents the interpolator animation that the pulsing circle will use.
      */
     public LocationComponentOptions.Builder pulseInterpolator(Interpolator pulseInterpolator) {
@@ -2040,46 +2030,47 @@ public class LocationComponentOptions implements Parcelable {
         throw new IllegalStateException("Missing required properties:" + missing);
       }
       return new LocationComponentOptions(
-          this.accuracyAlpha,
-          this.accuracyColor,
-          this.backgroundDrawableStale,
-          this.backgroundStaleName,
-          this.foregroundDrawableStale,
-          this.foregroundStaleName,
-          this.gpsDrawable,
-          this.gpsName,
-          this.foregroundDrawable,
-          this.foregroundName,
-          this.backgroundDrawable,
-          this.backgroundName,
-          this.bearingDrawable,
-          this.bearingName,
-          this.bearingTintColor,
-          this.foregroundTintColor,
-          this.backgroundTintColor,
-          this.foregroundStaleTintColor,
-          this.backgroundStaleTintColor,
-          this.elevation,
-          this.enableStaleState,
-          this.staleStateTimeout,
-          this.padding,
-          this.maxZoomIconScale,
-          this.minZoomIconScale,
-          trackingGesturesManagement,
-          this.trackingInitialMoveThreshold,
-          this.trackingMultiFingerMoveThreshold,
-          this.layerAbove,
-          this.layerBelow,
-          this.trackingAnimationDurationMultiplier,
-          this.compassAnimationEnabled,
-          this.accuracyAnimationEnabled,
-          this.pulseEnabled,
-          this.pulseFadeEnabled,
-          this.pulseColor,
-          this.pulseSingleDuration,
-          this.pulseMaxRadius,
-          this.pulseAlpha,
-          this.pulseInterpolator);
+        this.accuracyAlpha,
+        this.accuracyColor,
+        this.backgroundDrawableStale,
+        this.backgroundStaleName,
+        this.foregroundDrawableStale,
+        this.foregroundStaleName,
+        this.gpsDrawable,
+        this.gpsName,
+        this.foregroundDrawable,
+        this.foregroundName,
+        this.backgroundDrawable,
+        this.backgroundName,
+        this.bearingDrawable,
+        this.bearingName,
+        this.bearingTintColor,
+        this.foregroundTintColor,
+        this.backgroundTintColor,
+        this.foregroundStaleTintColor,
+        this.backgroundStaleTintColor,
+        this.elevation,
+        this.enableStaleState,
+        this.staleStateTimeout,
+        this.padding,
+        this.maxZoomIconScale,
+        this.minZoomIconScale,
+        trackingGesturesManagement,
+        this.trackingInitialMoveThreshold,
+        this.trackingMultiFingerMoveThreshold,
+        this.trackingMultiFingerProtectedMoveArea,
+        this.layerAbove,
+        this.layerBelow,
+        this.trackingAnimationDurationMultiplier,
+        this.compassAnimationEnabled,
+        this.accuracyAnimationEnabled,
+        this.pulseEnabled,
+        this.pulseFadeEnabled,
+        this.pulseColor,
+        this.pulseSingleDuration,
+        this.pulseMaxRadius,
+        this.pulseAlpha,
+        this.pulseInterpolator);
     }
   }
 }

@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.testapp.activity.location;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.RectF;
 import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ListPopupWindow;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
@@ -39,6 +41,7 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
   private MapView mapView;
   private Button locationModeBtn;
   private Button locationTrackingBtn;
+  private View protectedGestureArea;
 
   private PermissionsManager permissionsManager;
 
@@ -64,6 +67,7 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
     setContentView(R.layout.activity_location_layer_mode);
 
     mapView = findViewById(R.id.mapView);
+    protectedGestureArea = findViewById(R.id.view_protected_gesture_area);
 
     locationModeBtn = findViewById(R.id.button_location_mode);
     locationModeBtn.setOnClickListener(v -> {
@@ -245,6 +249,9 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
       return;
     }
 
+    protectedGestureArea.getLayoutParams().height = 0;
+    protectedGestureArea.getLayoutParams().width = 0;
+
     LocationComponentOptions options = locationComponent
       .getLocationComponentOptions()
       .toBuilder()
@@ -258,10 +265,16 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
       return;
     }
 
+    RectF rectF = new RectF(0f, 0f, mapView.getWidth() / 2f, mapView.getHeight() / 2f);
+    protectedGestureArea.getLayoutParams().height = (int) rectF.bottom;
+    protectedGestureArea.getLayoutParams().width = (int) rectF.right;
+
     LocationComponentOptions options = locationComponent
       .getLocationComponentOptions()
       .toBuilder()
       .trackingGesturesManagement(true)
+      .trackingMultiFingerProtectedMoveArea(rectF)
+      .trackingMultiFingerMoveThreshold(500)
       .build();
     locationComponent.applyStyle(options);
   }
