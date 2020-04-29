@@ -1,11 +1,11 @@
 package com.mapbox.mapboxsdk.style.sources;
 
+import com.mapbox.mapboxsdk.LibraryLoader;
+import com.mapbox.mapboxsdk.utils.ThreadUtils;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.mapbox.mapboxsdk.LibraryLoader;
-import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
 /**
  * Base Peer class for sources. see source.hpp for the other half of the peer.
@@ -116,6 +116,44 @@ public abstract class Source {
   }
 
   /**
+   * Retrieve whether or not the fetched tiles for the given source should be stored in the local cache
+   *
+   @return true if tiles are volatile, false if they will be stored in local cache. Default value is false.
+   */
+  @NonNull
+  public Boolean isVolatile() {
+    return nativeIsVolatile();
+  }
+
+  /**
+   * Set a flag defining whether or not the fetched tiles for the given source should be stored in the local cache
+   *
+   * @param value current setting for volatile.
+   */
+  public void setVolatile(Boolean value) {
+    nativeSetVolatile(value);
+  }
+
+  /**
+   * Sets the minimum tile update interval, which is used to throttle the tile update network requests.
+   *
+   * @param interval the update interval in milliseconds.
+   */
+  public void setMinimumTileUpdateInterval(Long interval) {
+    nativeSetMinimumTileUpdateInterval(interval);
+  }
+
+  /**
+   * Retrieve the minimum tile update interval, which is used to throttle the tile update network requests.
+   *
+   * @return the update interval in milliseconds, default valuse is 0.
+   */
+  @NonNull
+  public Long getMinimumTileUpdateInterval() {
+    return nativeGetMinimumTileUpdateInterval();
+  }
+
+  /**
    * Internal use
    *
    * @return the native peer pointer
@@ -147,6 +185,22 @@ public abstract class Source {
   @NonNull
   @Keep
   protected native Integer nativeGetMaxOverscaleFactorForParentTiles();
+
+  @NonNull
+  @Keep
+  protected native Boolean nativeIsVolatile();
+
+  @NonNull
+  @Keep
+  protected native void nativeSetVolatile(Boolean value);
+
+  @NonNull
+  @Keep
+  protected native void nativeSetMinimumTileUpdateInterval(Long interval);
+
+  @NonNull
+  @Keep
+  protected native Long nativeGetMinimumTileUpdateInterval();
 
   public void setDetached() {
     detached = true;

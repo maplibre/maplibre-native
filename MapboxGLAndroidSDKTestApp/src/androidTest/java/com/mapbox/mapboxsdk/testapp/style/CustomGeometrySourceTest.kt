@@ -83,4 +83,28 @@ class CustomGeometrySourceTest : BaseTest() {
       }
     }
   }
+
+  @Test
+  fun isVolatileTest() {
+    validateTestSetup()
+    invoke(mapboxMap) { uiController, mapboxMap ->
+      mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        assertFalse(it.isVolatile)
+        it.isVolatile = true
+        assertTrue(it.isVolatile)
+      }
+    }
+  }
+
+  @Test
+  fun minimumTileUpdateIntervalTest() {
+    validateTestSetup()
+    invoke(mapboxMap) { uiController, mapboxMap ->
+      mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        assertEquals(0, it.minimumTileUpdateInterval)
+        it.minimumTileUpdateInterval = 1000
+        assertEquals(1000, it.minimumTileUpdateInterval)
+      }
+    }
+  }
 }
