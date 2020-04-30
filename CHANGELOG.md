@@ -18,6 +18,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [`Con
 
 ### Improvements and bug fixes
  - Improved the default compass engine's heading calculation by accounting for device orientation, ensuring accelerometer and magnetic field sensor events are retained, and pushing updates to the heading even if the sensor is unreliable. ([#338](https://github.com/mapbox/mapbox-gl-native-android/pull/338))（h/t [ystsoi](https://github.com/ystsoi))
+ - Correctly call the `onFling` listener only when the velocity of a gesture meets the threshold to animate the camera. ([#356](https://github.com/mapbox/mapbox-gl-native-android/pull/356))
  - Enabled adding style images on-demand on `MapSnapshotter`. ([#317](https://github.com/mapbox/mapbox-gl-native-android/pull/317))
  - Fixed a crash when changing the user interface in `MapSnapshotter.ErrorHandler`. ([#347](https://github.com/mapbox/mapbox-gl-native-android/pull/347))
  - Fixed a crash when calling the `Style.removeImage` method with the name of a nonexistent image. ([#16391](https://github.com/mapbox/mapbox-gl-native/pull/16391))
