@@ -187,7 +187,7 @@ static void * MGLTelemetryAccessTokenKeyContext = &MGLTelemetryAccessTokenKeyCon
     if (!metricsEnabledSettingShownInAppFlag &&
         [[NSUserDefaults mme_configuration] integerForKey:MGLMapboxAccountTypeKey] == 0) {
         // Opt-out is not configured in UI, so check for Settings.bundle
-        id defaultEnabledValue;
+        BOOL defaultEnabledValue = NO;
         NSString *appSettingsBundle = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"bundle"];
         
         if (appSettingsBundle) {
@@ -196,7 +196,8 @@ static void * MGLTelemetryAccessTokenKeyContext = &MGLTelemetryAccessTokenKeyCon
             NSArray *preferences = settings[@"PreferenceSpecifiers"];
             for (NSDictionary *prefSpecification in preferences) {
                 if ([prefSpecification[@"Key"] isEqualToString:MGLMapboxMetricsEnabledKey]) {
-                    defaultEnabledValue = prefSpecification[@"DefaultValue"];
+                    NSNumber *defaultValue = prefSpecification[@"DefaultValue"];
+                    defaultEnabledValue = [defaultValue boolValue];
                 }
             }
         }

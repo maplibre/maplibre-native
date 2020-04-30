@@ -21,6 +21,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 * Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
 * Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
 * Certain logging statements no longer run on the main thread. ([mapbox/mapbox-gl-native#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
+* Fixed an issue that prevented the Maps SDK from warning about a misconfiguration that violated the Mapbox ToS. ([#288](https://github.com/mapbox/mapbox-gl-native-ios/pull/288))
 
 ## 5.8.0
 
