@@ -139,6 +139,22 @@
     }];
     [pack requestProgress];
     [self waitForExpectationsWithTimeout:5 handler:nil];
+    
+    XCTAssertEqualObjects(pack.context, context, @"Offline pack context should match the context specified by the application.");
+    NSString *newName = @"🍑 Peach Grove";
+    NSData *newContext = [NSKeyedArchiver archivedDataWithRootObject:@{
+        nameKey: newName,
+    }];
+    
+    XCTestExpectation *contextCompletionHandlerExpectation = [self expectationWithDescription:@"set pack completion context handler"];
+    __weak MGLOfflinePack *weakPack = pack;
+    [pack setContext:newContext completionHandler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(weakPack);
+        XCTAssertEqualObjects(weakPack.context, newContext, @"Offline pack context should match the updated context specified by the application.");
+        [contextCompletionHandlerExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
 }
 
 - (void)testAddPackForGeometry {

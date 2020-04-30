@@ -10,6 +10,10 @@
 
 #import "NSValue+MGLAdditions.h"
 
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+    #import "MGLMapboxEvents.h"
+#endif
+
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/database_file_source.hpp>
 
@@ -109,6 +113,52 @@ private:
 
     const mbgl::OfflineRegionMetadata &metadata = _mbglOfflineRegion->getMetadata();
     return [NSData dataWithBytes:&metadata[0] length:metadata.size()];
+}
+
+- (void)setContext:(NSData *)context completionHandler:(void (^_Nullable)(NSError * _Nullable error))completion {
+    MGLAssertOfflinePackIsValid();
+    
+    mbgl::OfflineRegionMetadata metadata(context.length);
+    [context getBytes:&metadata[0] length:metadata.size()];
+    
+    [self willChangeValueForKey:@"context"];
+    __weak MGLOfflinePack *weakSelf = self;
+    _mbglDatabaseFileSource->updateOfflineMetadata(_mbglOfflineRegion->getID(), metadata, [&, completion, weakSelf](mbgl::expected<mbgl::OfflineRegionMetadata, std::exception_ptr> mbglOfflineRegionMetadata) {
+        NSError *error;
+        if (!mbglOfflineRegionMetadata) {
+            NSString *errorDescription = @(mbgl::util::toString(mbglOfflineRegionMetadata.error()).c_str());
+            error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:errorDescription ? @{
+                NSLocalizedDescriptionKey: errorDescription,
+            } : nil];
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+            [[MMEEventsManager sharedManager] reportError:error];
+#endif
+        }
+        dispatch_async(dispatch_get_main_queue(), [&, completion, weakSelf, error](void) {
+            [weakSelf reloadWithCompletionHandler:^(NSError * _Nullable reloadingError) {
+                MGLOfflinePack *strongSelf = weakSelf;
+                [strongSelf didChangeValueForKey:@"context"];
+                if (completion) {
+                    completion(error ?: reloadingError);
+                }
+            }];
+        });
+    });
+}
+
+- (void)reloadWithCompletionHandler:(void (^)(NSError * _Nullable error))completion {
+    auto regionID = _mbglOfflineRegion->getID();
+    MGLOfflineStorage *sharedOfflineStorage = [MGLOfflineStorage sharedOfflineStorage];
+    __weak MGLOfflinePack *weakSelf = self;
+    [sharedOfflineStorage getPacksWithCompletionHandler:^(NSArray<MGLOfflinePack *> *packs, __unused NSError * _Nullable error) {
+        for (MGLOfflinePack *pack in packs) {
+            if (pack.mbglOfflineRegion->getID() == regionID) {
+                weakSelf.mbglOfflineRegion = pack.mbglOfflineRegion;
+                break;
+            }
+        }
+        completion(error);
+    }];
 }
 
 - (void)resume {

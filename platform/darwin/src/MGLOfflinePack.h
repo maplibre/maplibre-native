@@ -131,8 +131,27 @@ MGL_EXPORT
 
  The context typically holds application-specific information for identifying
  the pack, such as a user-selected name.
+ 
+ To change the value of this property, use the `-setContext:completionHandler:`
+ method. If you access this property after calling that method but before its
+ completion handler is called, this property’s value may not reflect the new
+ value that you specify.
  */
 @property (nonatomic, readonly) NSData *context;
+
+/**
+ Associates arbitrary contextual data with the offline pack, replacing any
+ context that was previously associated with the offline pack.
+ 
+ Setting the context is asynchronous. The `context` property may not be updated
+ until the completion handler is called.
+ 
+ @param context The new context to associate with the offline pack.
+ @param completion The completion handler to call when the context has been
+    updated. If there is an error setting the context, the error is passed into
+    the completion handler.
+ */
+- (void)setContext:(NSData *)context completionHandler:(void (^_Nullable)(NSError * _Nullable error))completion;
 
 /**
  The pack’s current state.

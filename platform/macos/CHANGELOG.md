@@ -15,11 +15,15 @@
 
 ### Other changes
 
-* Fixed various crashes, including crashes on launch, on macOS 10.11.0 through 10.14._x_. ([mapbox/mapbox-gl-native#16412](https://github.com/mapbox/mapbox-gl-native/pull/16412))
+* Added the `-[MGLOfflinePack setContext:completionHandler:]` method for replacing the data associated with an offline pack, such as a name. ([#288](https://github.com/mapbox/mapbox-gl-native-ios/pull/288))
 * Fixed a crash when encountering an invalid polyline. ([mapbox/mapbox-gl-native#16409](https://github.com/mapbox/mapbox-gl-native/pull/16409))
 * Fixed an issue where an `MGLMapSnapshotOptions` with an invalid `MGLMapCamera.centerCoordinate`, negative `MGLMapCamera.heading`, negative `MGLMapCamera.pitch`, and negative `MGLMapSnapshotOptions.zoomLevel` resulted in a snapshot centered on Null Island at zoom level 0 even if the style specified a different initial center coordinate or zoom level. ([#280](https://github.com/mapbox/mapbox-gl-native-ios/pull/280))
 * Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
 * Certain logging statements no longer run on the main thread. ([mapbox/mapbox-gl-native#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
+
+## 0.15.1
+
+* Fixed various crashes, including crashes on launch, on macOS 10.11.0 through 10.14._x_. ([mapbox/mapbox-gl-native#16412](https://github.com/mapbox/mapbox-gl-native/pull/16412))
 
 ## 0.15.0
 

@@ -31,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) std::string mbglCachePath;
 
+- (void)getPacksWithCompletionHandler:(void (^)(NSArray<MGLOfflinePack *> *packs, NSError * _Nullable error))completion;
+
 @end
 
 NS_ASSUME_NONNULL_END
