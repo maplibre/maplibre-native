@@ -10,7 +10,7 @@ ext {
             mapboxServices  : '5.0.0',
             mapboxTelemetry : '5.0.0',
             mapboxCore      : '2.0.0',
-            mapboxGestures  : '0.6.0-20200429.121422-14',
+            mapboxGestures  : '0.7.0',
             mapboxAccounts  : '0.7.0',
             appCompat       : '1.0.0',
             constraintLayout: '1.1.3',
