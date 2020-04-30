@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.location.Location;
 import android.os.SystemClock;
 import android.util.SparseArray;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
@@ -32,6 +33,7 @@ import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_ACCURA
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_COMPASS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_GPS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_LATLNG;
+import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_PULSING_CIRCLE;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_TILT;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_ZOOM;
 import static com.mapbox.mapboxsdk.location.Utils.immediateAnimation;
@@ -184,6 +186,28 @@ final class LocationAnimatorCoordinator {
       ANIMATOR_LAYER_ACCURACY);
 
     this.previousAccuracyRadius = targetAccuracyRadius;
+  }
+
+  /**
+   * Initializes the {@link PulsingLocationCircleAnimator}, which is a type of {@link MapboxAnimator}.
+   * This method also adds the animator to this class' animator array.
+   *
+   * @param options the {@link LocationComponentOptions} passed to this class upstream from the
+   *                {@link LocationComponent}.
+   */
+  void startLocationComponentCirclePulsing(LocationComponentOptions options) {
+    cancelAnimator(ANIMATOR_PULSING_CIRCLE);
+    MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(ANIMATOR_PULSING_CIRCLE);
+    if (listener != null) {
+      PulsingLocationCircleAnimator pulsingLocationCircleAnimator = animatorProvider.pulsingCircleAnimator(
+        listener,
+        maxAnimationFps,
+        options.pulseSingleDuration(),
+        options.pulseMaxRadius(),
+        options.pulseInterpolator() == null ? new DecelerateInterpolator() : options.pulseInterpolator());
+      animatorArray.put(ANIMATOR_PULSING_CIRCLE, pulsingLocationCircleAnimator);
+      playPulsingAnimator();
+    }
   }
 
   void feedNewZoomLevel(double targetZoomLevel, @NonNull CameraPosition currentCameraPosition, long animationDuration,
@@ -349,6 +373,18 @@ final class LocationAnimatorCoordinator {
     animatorSetProvider.startAnimation(animators, new LinearInterpolator(), duration);
   }
 
+  /**
+   * Starts the {@link PulsingLocationCircleAnimator} in the animator array. This method is separate
+   * from {@link #playAnimators(long, int...)} because the MapboxAnimatorSetProvider has many more
+   * customizable animation parameters than the other {@link MapboxAnimator}s.
+   */
+  private void playPulsingAnimator() {
+    Animator animator = animatorArray.get(ANIMATOR_PULSING_CIRCLE);
+    if (animator != null) {
+      animator.start();
+    }
+  }
+
   void resetAllCameraAnimations(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {
     resetCameraCompassAnimation(currentCameraPosition);
     boolean snap = resetCameraLocationAnimations(currentCameraPosition, isGpsNorth);
@@ -444,6 +480,13 @@ final class LocationAnimatorCoordinator {
 
   void cancelTiltAnimation() {
     cancelAnimator(ANIMATOR_TILT);
+  }
+
+  /**
+   * Cancel the pulsing circle location animator.
+   */
+  void stopPulsingCircleAnimation() {
+    cancelAnimator(ANIMATOR_PULSING_CIRCLE);
   }
 
   void cancelAllAnimations() {

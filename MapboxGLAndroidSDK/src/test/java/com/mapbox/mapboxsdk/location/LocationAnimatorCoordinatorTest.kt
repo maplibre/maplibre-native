@@ -35,7 +35,9 @@ class LocationAnimatorCoordinatorTest {
 
   @Before
   fun setUp() {
-    locationAnimatorCoordinator = LocationAnimatorCoordinator(projection, animatorSetProvider, animatorProvider)
+    locationAnimatorCoordinator = LocationAnimatorCoordinator(projection,
+      animatorSetProvider,
+      animatorProvider)
     configureAnimatorProvider()
     every { projection.getMetersPerPixelAtLatitude(any()) } answers { 1.0 }
     every { animatorSetProvider.startAnimation(any(), any(), any()) } answers {}

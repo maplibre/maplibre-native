@@ -2,8 +2,6 @@ package com.mapbox.mapboxsdk.location;
 
 import android.graphics.Bitmap;
 
-import androidx.annotation.Nullable;
-
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -11,6 +9,8 @@ import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
+
+import androidx.annotation.Nullable;
 
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.BACKGROUND_ICON;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.BACKGROUND_STALE_ICON;
@@ -179,6 +179,30 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
       LocationPropertyFactory.bearing(bearing)
     );
     lastBearing = bearing;
+  }
+
+  /**
+   * Adjust the visibility of the pulsing LocationComponent circle.
+   */
+  @Override
+  public void adjustPulsingCircleLayerVisibility(boolean visible) {
+    // not supported at this time
+  }
+
+  /**
+   * Adjust the the pulsing LocationComponent circle based on the set options.
+   */
+  @Override
+  public void stylePulsingCircle(LocationComponentOptions options) {
+    // not supported at this time
+  }
+
+  /**
+   * Adjust the visual appearance of the pulsing LocationComponent circle.
+   */
+  @Override
+  public void updatePulsingUi(float radius, @Nullable Float opacity) {
+    // not supported at this time
   }
 
   private void setImages(@RenderMode.Mode int renderMode, boolean isStale) {

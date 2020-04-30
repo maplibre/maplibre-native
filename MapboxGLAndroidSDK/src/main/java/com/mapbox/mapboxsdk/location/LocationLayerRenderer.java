@@ -38,6 +38,12 @@ interface LocationLayerRenderer {
 
   void setLocationStale(boolean isStale, int renderMode);
 
+  void adjustPulsingCircleLayerVisibility(boolean visible);
+
+  void stylePulsingCircle(LocationComponentOptions options);
+
+  void updatePulsingUi(float radius, @Nullable Float opacity);
+
   void updateIconIds(String foregroundIconString, String foregroundStaleIconString, String backgroundIconString,
                      String backgroundStaleIconString, String bearingIconString);
 

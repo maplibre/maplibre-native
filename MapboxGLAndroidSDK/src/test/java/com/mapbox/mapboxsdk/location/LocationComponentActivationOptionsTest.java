@@ -3,6 +3,9 @@ package com.mapbox.mapboxsdk.location;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.view.animation.LinearInterpolator;
+
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.R;
@@ -63,6 +66,44 @@ public class LocationComponentActivationOptionsTest {
         .locationComponentOptions(locationComponentOptions)
         .useDefaultLocationEngine(true)
         .build();
+    assertNotNull(locationComponentActivationOptions);
+  }
+
+  @Test
+  public void sanityWithDefaultPulsingCircle() throws Exception {
+    when(style.isFullyLoaded()).thenReturn(true);
+
+    LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(context)
+        .accuracyAlpha(0.5f)
+        .pulseEnabled(true)
+        .build();
+    assertNotNull(locationComponentOptions);
+
+    LocationComponentActivationOptions locationComponentActivationOptions =
+        LocationComponentActivationOptions.builder(context, style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(true)
+            .build();
+    assertNotNull(locationComponentActivationOptions);
+  }
+
+  @Test
+  public void sanityWithCustomizedPulsingCircle() throws Exception {
+    when(style.isFullyLoaded()).thenReturn(true);
+
+    LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(context)
+        .accuracyAlpha(0.5f)
+        .pulseEnabled(true)
+        .pulseColor(Color.RED)
+        .pulseInterpolator(new LinearInterpolator())
+        .build();
+    assertNotNull(locationComponentOptions);
+
+    LocationComponentActivationOptions locationComponentActivationOptions =
+        LocationComponentActivationOptions.builder(context, style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(true)
+            .build();
     assertNotNull(locationComponentActivationOptions);
   }
 

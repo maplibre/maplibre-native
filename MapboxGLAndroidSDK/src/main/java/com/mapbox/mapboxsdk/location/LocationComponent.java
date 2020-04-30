@@ -726,7 +726,22 @@ public final class LocationComponent {
       locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(options.trackingAnimationDurationMultiplier());
       locationAnimatorCoordinator.setCompassAnimationEnabled(options.compassAnimationEnabled());
       locationAnimatorCoordinator.setAccuracyAnimationEnabled(options.accuracyAnimationEnabled());
+      if (options.pulseEnabled()) {
+        startPulsingLocationCircle();
+      } else {
+        stopPulsingLocationCircle();
+      }
       updateMapWithOptions(options);
+    }
+  }
+
+  /**
+   * Starts the LocationComponent's pulsing circle UI.
+   */
+  private void startPulsingLocationCircle() {
+    if (isEnabled && isLayerReady) {
+      locationAnimatorCoordinator.startLocationComponentCirclePulsing(options);
+      locationLayerController.adjustPulsingCircleLayerVisibility(true);
     }
   }
 
@@ -1215,6 +1230,14 @@ public final class LocationComponent {
     }
   }
 
+  /**
+   * Stop the LocationComponent's pulsing circle animation.
+   */
+  private void stopPulsingLocationCircle() {
+    locationAnimatorCoordinator.stopPulsingCircleAnimation();
+    locationLayerController.adjustPulsingCircleLayerVisibility(false);
+  }
+
   @SuppressLint("MissingPermission")
   private void onLocationLayerStart() {
     if (!isComponentInitialized || !isComponentStarted || mapboxMap.getStyle() == null) {
@@ -1240,6 +1263,11 @@ public final class LocationComponent {
         }
       }
       setCameraMode(locationCameraController.getCameraMode());
+      if (options.pulseEnabled()) {
+        startPulsingLocationCircle();
+      } else {
+        stopPulsingLocationCircle();
+      }
       setLastLocation();
       updateCompassListenerState(true);
       setLastCompassHeading();
@@ -1256,6 +1284,8 @@ public final class LocationComponent {
     if (compassEngine != null) {
       updateCompassListenerState(false);
     }
+
+    stopPulsingLocationCircle();
     locationAnimatorCoordinator.cancelAllAnimations();
     if (locationEngine != null) {
       locationEngine.removeLocationUpdates(currentLocationEngineListener);
@@ -1430,6 +1460,9 @@ public final class LocationComponent {
     boolean isLocationLayerHidden = locationLayerController.isHidden();
     if (isEnabled && isComponentStarted && isLocationLayerHidden) {
       locationLayerController.show();
+      if (options.pulseEnabled()) {
+        locationLayerController.adjustPulsingCircleLayerVisibility(true);
+      }
     }
   }
 

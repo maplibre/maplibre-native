@@ -98,6 +98,7 @@ final class LocationLayerController {
     styleBitmaps(options);
     locationLayerRenderer.styleAccuracy(options.accuracyAlpha(), options.accuracyColor());
     styleScaling(options);
+    locationLayerRenderer.stylePulsingCircle(options);
     determineIconsSource(options);
 
     if (!isHidden) {
@@ -258,7 +259,7 @@ final class LocationLayerController {
       public void onNewAnimationValue(LatLng value) {
         locationLayerRenderer.setLatLng(value);
       }
-    };
+  };
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
     new MapboxAnimator.AnimationsValueChangeListener<Float>() {
@@ -266,7 +267,7 @@ final class LocationLayerController {
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setGpsBearing(value);
       }
-    };
+  };
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
     new MapboxAnimator.AnimationsValueChangeListener<Float>() {
@@ -274,7 +275,7 @@ final class LocationLayerController {
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setCompassBearing(value);
       }
-    };
+  };
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> accuracyValueListener =
     new MapboxAnimator.AnimationsValueChangeListener<Float>() {
@@ -282,7 +283,22 @@ final class LocationLayerController {
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setAccuracyRadius(value);
       }
-    };
+  };
+
+  /**
+   * The listener that handles the updating of the pulsing circle's radius and opacity.
+   */
+  private final MapboxAnimator.AnimationsValueChangeListener<Float> pulsingCircleRadiusListener =
+    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+      @Override
+      public void onNewAnimationValue(Float newPulseRadiusValue) {
+        Float newPulseOpacityValue = null;
+        if (options.pulseFadeEnabled()) {
+          newPulseOpacityValue = (float) 1 - ((newPulseRadiusValue / 100) * 3);
+        }
+        locationLayerRenderer.updatePulsingUi(newPulseRadiusValue, newPulseOpacityValue);
+      }
+  };
 
   Set<AnimatorListenerHolder> getAnimationListeners() {
     Set<AnimatorListenerHolder> holders = new HashSet<>();
@@ -299,6 +315,10 @@ final class LocationLayerController {
       holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_LAYER_ACCURACY, accuracyValueListener));
     }
 
+    if (options.pulseEnabled()) {
+      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_PULSING_CIRCLE,
+          pulsingCircleRadiusListener));
+    }
     return holders;
   }
 
@@ -310,5 +330,9 @@ final class LocationLayerController {
 
   void cameraTiltUpdated(double tilt) {
     locationLayerRenderer.cameraTiltUpdated(tilt);
+  }
+
+  void adjustPulsingCircleLayerVisibility(boolean visible) {
+    locationLayerRenderer.adjustPulsingCircleLayerVisibility(visible);
   }
 }

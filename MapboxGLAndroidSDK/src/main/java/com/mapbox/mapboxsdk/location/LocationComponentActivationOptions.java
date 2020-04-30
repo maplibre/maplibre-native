@@ -131,6 +131,10 @@ public class LocationComponentActivationOptions {
    * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
    * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
    * Use {@link LocationComponentOptions#foregroundDrawable()} to alter the image rendered as the puck.
+   * <li> The LocationComponent's pulsing effect. Any of the {@link LocationComponentOptions}'
+   * pulsing methods such as {@link LocationComponentOptions#pulseEnabled()} or
+   * {@link LocationComponentOptions#pulseColor()}, are useless when using the
+   * the specialized location layer.
    * </ul>
    *
    * @return whether the default specialized location layer is used
@@ -244,6 +248,10 @@ public class LocationComponentActivationOptions {
      * or {@link LocationComponentConstants#LOCATION_SOURCE} are ignored.
      * <li> All options that alter the image ID, like {@link LocationComponentOptions#foregroundName()}, are ignored.
      * Use {@link LocationComponentOptions#foregroundDrawable()} to alter the image rendered as the puck.
+     * <li> The LocationComponent's pulsing effect. Any of the {@link LocationComponentOptions}'
+     * pulsing methods such as {@link LocationComponentOptions#pulseEnabled()} or
+     * {@link LocationComponentOptions#pulseColor()}, are useless when using the
+     * the specialized location layer.
      * </ul>
      *
      * @param useSpecializedLocationLayer true if you want to initialize and use the

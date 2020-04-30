@@ -10,7 +10,7 @@ import java.util.Random;
 import timber.log.Timber;
 
 /**
- * Useful utilities used throughout the testapp.
+ * Useful utilities used throughout the test app.
  */
 public class Utils {
 

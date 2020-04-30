@@ -41,11 +41,19 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_FOREGROUND_STALE_ICON;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_GPS_BEARING;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_LOCATION_STALE;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_PULSING_OPACITY;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_PULSING_RADIUS;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PULSING_CIRCLE_LAYER;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.SHADOW_ICON;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.SHADOW_LAYER;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
 import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleRadius;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleStrokeColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString;
@@ -84,6 +92,7 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
     addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER);
     addSymbolLayer(SHADOW_LAYER, BACKGROUND_LAYER);
     addAccuracyLayer();
+    addPulsingCircleLayerToMap();
   }
 
   @Override
@@ -244,6 +253,42 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
     }
   }
 
+  /**
+   * Adjust the visibility of the pulsing LocationComponent circle.
+   */
+  @Override
+  public void adjustPulsingCircleLayerVisibility(boolean visible) {
+    setLayerVisibility(PULSING_CIRCLE_LAYER, visible);
+  }
+
+  /**
+   * Adjust the the pulsing LocationComponent circle based on the set options.
+   */
+  @Override
+  public void stylePulsingCircle(LocationComponentOptions options) {
+    if (style.getLayer(PULSING_CIRCLE_LAYER) != null) {
+      setLayerVisibility(PULSING_CIRCLE_LAYER, true);
+      style.getLayer(PULSING_CIRCLE_LAYER).setProperties(
+          circleRadius(get(PROPERTY_PULSING_RADIUS)),
+          circleColor(options.pulseColor()),
+          circleStrokeColor(options.pulseColor()),
+          circleOpacity(get(PROPERTY_PULSING_OPACITY))
+      );
+    }
+  }
+
+  /**
+   * Adjust the visual appearance of the pulsing LocationComponent circle.
+   */
+  @Override
+  public void updatePulsingUi(float radius, @Nullable Float opacity) {
+    locationFeature.addNumberProperty(PROPERTY_PULSING_RADIUS, radius);
+    if (opacity != null) {
+      locationFeature.addNumberProperty(PROPERTY_PULSING_OPACITY, opacity);
+    }
+    refreshSource();
+  }
+
   private void addSymbolLayer(@NonNull String layerId, @NonNull String beforeLayerId) {
     Layer layer = layerSourceProvider.generateLayer(layerId);
     addLayerToMap(layer, beforeLayerId);
@@ -252,6 +297,14 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   private void addAccuracyLayer() {
     Layer accuracyLayer = layerSourceProvider.generateAccuracyLayer();
     addLayerToMap(accuracyLayer, BACKGROUND_LAYER);
+  }
+
+  /**
+   * Add the pulsing LocationComponent circle to the map for future use, if need be.
+   */
+  private void addPulsingCircleLayerToMap() {
+    Layer pulsingCircleLayer = layerSourceProvider.generatePulsingCircleLayer();
+    addLayerToMap(pulsingCircleLayer, ACCURACY_LAYER);
   }
 
   private void addLayerToMap(Layer layer, @NonNull String idBelowLayer) {
