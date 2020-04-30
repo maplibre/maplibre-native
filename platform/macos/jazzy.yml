@@ -22,6 +22,7 @@ custom_categories:
       - For Style Authors
       - Migrating to Expressions
       - Tile URL Templates
+      - Customizing Fonts
       - Info.plist Keys
   - name: Maps
     children:

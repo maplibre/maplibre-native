@@ -1232,15 +1232,12 @@ MGL_EXPORT
 /**
  An array of font face names used to display the text.
  
- Each font name must be included in the `{fontstack}` portion of the JSON
- stylesheet’s <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#glyphs"><code>glyphs</code></a>
- property. You can register a custom font when designing the style in Mapbox
- Studio. Fonts installed on the system are not used.
- 
  The first font named in the array is applied to the text. For each character in
  the text, if the first font lacks a glyph for the character, the next font is
  applied as a fallback, and so on.
+ 
+ See the “[Customizing Fonts](../customizing-fonts.html)” guide for details on
+ how this SDK chooses and renders fonts based on the value of this property.
  
  The default value of this property is an expression that evaluates to the array
  `Open Sans Regular`, `Arial Unicode MS Regular`. Set this property to `nil` to

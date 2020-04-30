@@ -22,13 +22,13 @@ If you have implemented custom opt-out of Mapbox Telemetry within the user inter
 
 ## MGLIdeographicFontFamilyName
 
-This key configures client-side text rendering of Chinese hanzi, Japanese kana, and Korean hangul characters (CJK) that appear in text labels. Client-side text rendering uses less bandwidth than server-side text rendering, especially when viewing regions of the map that feature a wide variety of CJK characters.
+This key configures a global fallback font or fonts for [client-side text rendering](customizing-fonts.html#client-side-fonts) of Chinese hanzi, Japanese kana, and Korean hangul characters (CJK) that appear in text labels.
 
-By default, the map renders CJK characters using locally installed fonts as specified by the system’s font cascade list, which may vary from device to device, and ignores the `MGLSymbolStyleLayer.textFont` property for these characters. To customize the displayed font, set this key to a string containing a font family name (for example, “PingFang TC”) or an individual font’s display name (“PingFang TC Ultralight”) or PostScript name (“PingFangTC-Ultralight”). The key can name a font that is installed system-wide or bundled with the application.
+If the fonts you specify in the `MGLSymbolStyleLayer.textFontNames` property are all unavailable or lack a glyph for rendering a given CJK character, the map uses the contents of this key to choose a [system font](https://developer.apple.com/fonts/system-fonts/) or a font [bundled with your application](https://developer.apple.com/documentation/uikit/text_display_and_fonts/adding_a_custom_font_to_your_app). This key specifies a fallback for all style layers in all map views and map snapshots. If you do not specify this key or none of the font names matches, the map applies a font from the system’s font cascade list, which may vary based on the device model and system language.
 
-In case your preferred font has glyphs for every character that may appear on the map, you can set this key to an array of font or font family names in order from most preferred to least preferred. Each character is rendered in the first font in the list that has a glyph for the character. If the entire font is exhausted, the map uses the system’s font cascade list.
+This key can either be set to a single string or an array of strings, which the map tries to apply in order from most preferred to least preferred. Each string can be a family name (for example, “PingFang TC”), display name (“PingFang TC Ultralight”), or PostScript name (“PingFangTC-Ultralight”).
 
-To disable client-side rendering of CJK characters, set this key to the Boolean value `NO`. Glyphs from the fonts specified by `MGLSymbolStyleLayer.textFont` will be downloaded and rendered instead.
+To disable client-side rendering of CJK characters in favor of [server-side rendering](customizing-fonts.html#server-side-fonts), set this key to the Boolean value `NO`.
 
 ## MGLCollisionBehaviorPre4_0
 
