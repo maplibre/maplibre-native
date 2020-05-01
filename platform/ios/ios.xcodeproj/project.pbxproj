@@ -3601,7 +3601,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15254;
+				CURRENT_PROJECT_VERSION = 15255;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -3667,7 +3667,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
 				INFOPLIST_FILE = framework/Info.plist;
@@ -3687,7 +3687,7 @@
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
@@ -3819,7 +3819,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15254;
+				CURRENT_PROJECT_VERSION = 15255;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3843,7 +3843,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15254;
+				CURRENT_PROJECT_VERSION = 15255;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -3950,7 +3950,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = framework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3971,7 +3971,7 @@
 				DEFINES_MODULE = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
 				INFOPLIST_FILE = framework/Info.plist;
@@ -4014,7 +4014,7 @@
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
@@ -4054,7 +4054,7 @@
 				BITCODE_GENERATION_MODE = bitcode;
 				DEFINES_MODULE = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DYLIB_CURRENT_VERSION = 15254;
+				DYLIB_CURRENT_VERSION = 15255;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
 					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
