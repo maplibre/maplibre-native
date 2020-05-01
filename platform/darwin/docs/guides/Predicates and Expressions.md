@@ -540,6 +540,21 @@ This function corresponds to the
 [`tan`](https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-tan)
 operator in the Mapbox Style Specification.
 
+### `mgl_distanceFrom:`
+
+<dl>
+<dt>Selector:</dt>
+<dd><code>mgl_distanceFrom:</code></dd>
+<dt>Format string syntax:</dt>
+<dd><code>mgl_distanceFrom(%@)</code> with an <code>MGLShape</code></dd>
+</dl>
+
+Returns the straight-line distance from the evaluated object to the given shape.
+
+This function corresponds to the
+[`distance`](https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#distance)
+operator in the Mapbox Style Specification.
+
 ### `mgl_coalesce:`
 
 <dl>

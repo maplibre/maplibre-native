@@ -77,6 +77,7 @@ const MGLExpressionInterpolationMode MGLExpressionInterpolationModeCubicBezier =
     INSTALL_METHOD(mgl_atan:);
     INSTALL_METHOD(mgl_tan:);
     INSTALL_METHOD(mgl_log2:);
+    INSTALL_METHOD(mgl_distanceFrom:);
     INSTALL_METHOD(mgl_attributed:);
     
     // Install functions that resemble control structures, taking arbitrary
@@ -160,6 +161,15 @@ const MGLExpressionInterpolationMode MGLExpressionInterpolationModeCubicBezier =
  */
 - (NSNumber *)mgl_log2:(NSNumber *)number {
     return @(log2(number.doubleValue));
+}
+
+/**
+ Returns a straight-line distance from the given shape to the evaluated feature.
+ */
+- (NSNumber *)mgl_distanceFrom:(id)object {
+    [NSException raise:NSInvalidArgumentException
+                format:@"Shape distance expressions lack underlying Objective-C implementations."];
+    return nil;
 }
 
 /**
@@ -656,6 +666,7 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
             @"floor": @"floor:",
             @"ceil": @"ceiling:",
             @"^": @"raise:toPower:",
+            @"distance": @"mgl_distanceFrom:",
             @"upcase": @"uppercase:",
             @"downcase": @"lowercase:",
             @"let": @"MGL_LET",
@@ -970,6 +981,7 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
             @"mgl_atan:" : @"atan",
             @"mgl_tan:" : @"tan",
             @"mgl_log2:" : @"log2",
+            @"mgl_distanceFrom:": @"distance",
             // Vararg aftermarket expressions need to be declared with an explicit and implicit first argument.
             @"MGL_LET": @"let",
             @"MGL_LET:": @"let",

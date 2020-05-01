@@ -667,6 +667,18 @@ using namespace std::string_literals;
     }
 }
 
+- (void)testShapeDistanceExpressionObject {
+    {
+        MGLPointAnnotation *point = [[MGLPointAnnotation alloc] init];
+        point.coordinate = CLLocationCoordinate2DMake(1, -1);
+        NSExpression *expression = [NSExpression expressionForFunction:@"mgl_distanceFrom:" arguments:@[MGLConstantExpression(point)]];
+        NSArray *jsonExpression = @[@"distance", @{@"type": @"Point", @"coordinates": @[@-1, @1]}];
+        XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
+        XCTAssertThrowsSpecificNamed([expression expressionValueWithObject:nil context:nil], NSException, NSInvalidArgumentException);
+        XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
+    }
+}
+
 - (void)testStringFormattingExpressionObject {
     NSArray *arguments = @[MGLConstantExpression(@"MacDonald")];
     {
