@@ -2009,8 +2009,6 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_COMMIT_HASH = deadbeef;
 				CURRENT_PROJECT_VERSION = 15254;
-				CURRENT_SEMANTIC_VERSION = 0.15.0;
-				CURRENT_SHORT_VERSION = 0.15.0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -2078,8 +2076,6 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_COMMIT_HASH = deadbeef;
 				CURRENT_PROJECT_VERSION = 15254;
-				CURRENT_SEMANTIC_VERSION = 0.15.0;
-				CURRENT_SHORT_VERSION = 0.15.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -2182,7 +2178,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
-				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "__attribute__((visibility (\"default\"))) ";
 			};
 			name = Debug;
@@ -2208,7 +2203,6 @@
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "__attribute__((visibility (\"default\"))) ";
 			};
 			name = Release;

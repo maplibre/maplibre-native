@@ -85,8 +85,6 @@ fi
 
 step "Building ${FORMAT} framework for iOS Simulator using ${SCHEME} scheme"
 xcodebuild \
-    CURRENT_PROJECT_VERSION=${PROJ_VERSION} \
-    CURRENT_SHORT_VERSION=${SHORT_VERSION} \
     CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
     CURRENT_COMMIT_HASH=${HASH} \
     ONLY_ACTIVE_ARCH=NO \
@@ -101,8 +99,6 @@ xcodebuild \
 if [[ ${BUILD_FOR_DEVICE} == true ]]; then
     step "Building ${FORMAT} framework for iOS devices using ${SCHEME} scheme"
     xcodebuild \
-        CURRENT_PROJECT_VERSION=${PROJ_VERSION} \
-        CURRENT_SHORT_VERSION=${SHORT_VERSION} \
         CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
         CURRENT_COMMIT_HASH=${HASH} \
         ONLY_ACTIVE_ARCH=NO \

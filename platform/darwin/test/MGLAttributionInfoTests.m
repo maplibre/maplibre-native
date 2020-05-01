@@ -67,7 +67,7 @@
     XCTAssertEqualObjects([infos[3] feedbackURLAtCenterCoordinate:mapbox zoomLevel:14],
                           [NSURL URLWithString:urlString]);
     
-    urlString = [NSString stringWithFormat:@"https://apps.mapbox.com/feedback/?referrer=%@&owner=mapbox&id=satellite-streets-v99&access_token=pk.feedcafedeadbeefbadebede&map_sdk_version=1.0.0#/77.63680/12.98108/3.14/90.9/13", bundleId];
+    urlString = [NSString stringWithFormat:@"https://apps.mapbox.com/feedback/?referrer=%@&owner=mapbox&id=satellite-streets-v99&access_token=pk.feedcafedeadbeefbadebede&map_sdk_version=0.0.0#/77.63680/12.98108/3.14/90.9/13", bundleId];
     XCTAssertEqualObjects([infos[3] feedbackURLForStyleURL:styleURL atCenterCoordinate:mapbox zoomLevel:3.14159 direction:90.9 pitch:12.5],
                           [NSURL URLWithString:urlString]);
 }
