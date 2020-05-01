@@ -141,7 +141,7 @@ MGLImage *MGLImageFromCurrentContext() {
 }
 
 - (void)testRuntimeStyling {
-    [self testStyleURL:nil applyingRuntimeStylingActions:^(MGLStyle *style) {
+    [self testStyleURL:nil camera:[MGLMapCamera camera] applyingRuntimeStylingActions:^(MGLStyle *style) {
         MGLBackgroundStyleLayer *backgroundLayer = [[MGLBackgroundStyleLayer alloc] initWithIdentifier:@"background"];
         backgroundLayer.backgroundColor = [NSExpression expressionForConstantValue:[MGLColor orangeColor]];
         [style addLayer:backgroundLayer];
@@ -151,16 +151,17 @@ MGLImage *MGLImageFromCurrentContext() {
 - (void)testLocalGlyphRendering {
     [[NSUserDefaults standardUserDefaults] setObject:@[@"PingFang TC"] forKey:@"MGLIdeographicFontFamilyName"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"mixed" withExtension:@"json"];
-    [self testStyleURL:styleURL applyingRuntimeStylingActions:^(MGLStyle *style) {} expectedImageName:@"Fixtures/MGLMapSnapshotterTests/PingFang"];
+    [self testStyleURL:styleURL camera:nil applyingRuntimeStylingActions:^(MGLStyle *style) {} expectedImageName:@"Fixtures/MGLMapSnapshotterTests/PingFang"];
 }
 
 /**
  Tests that applying the given runtime styling actions on a blank style results in a snapshot image that matches the image with the given name in the asset catalog.
  
  @param actions Runtime styling actions to apply to the blank style.
+ @param camera The camera to show, or `nil` to show the style’s default camera.
  @param expectedImageName Name of the test fixture image in Media.xcassets.
  */
-- (void)testStyleURL:(nullable NSURL *)styleURL applyingRuntimeStylingActions:(void (^)(MGLStyle *style))actions expectedImageName:(NSString *)expectedImageName {
+- (void)testStyleURL:(nullable NSURL *)styleURL camera:(nullable MGLMapCamera *)camera applyingRuntimeStylingActions:(void (^)(MGLStyle *style))actions expectedImageName:(NSString *)expectedImageName {
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *overlayExpectation = [self expectationWithDescription:@"Overlay handler should get called."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
@@ -175,12 +176,17 @@ MGLImage *MGLImageFromCurrentContext() {
     if (!styleURL) {
         styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     }
-    MGLMapCamera *camera = [MGLMapCamera camera];
-    camera.centerCoordinate = kCLLocationCoordinate2DInvalid;
-    camera.heading = -1;
-    camera.pitch = -1;
-    MGLMapSnapshotOptions *options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:camera size:expectedImage.size];
-    options.zoomLevel = -1;
+    
+    MGLMapCamera *defaultCamera = camera ?: [MGLMapCamera camera];
+    if (!camera) {
+        defaultCamera.centerCoordinate = kCLLocationCoordinate2DInvalid;
+        defaultCamera.heading = -1;
+        defaultCamera.pitch = -1;
+    }
+    MGLMapSnapshotOptions *options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:defaultCamera size:expectedImage.size];
+    if (!camera) {
+        options.zoomLevel = -1;
+    }
     
     MGLMapSnapshotter *snapshotter = [[MGLMapSnapshotter alloc] initWithOptions:options];
     snapshotter.delegate = self;
