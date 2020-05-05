@@ -721,7 +721,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.mbglCachePath)
+    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
 
     // Create the snapshotter

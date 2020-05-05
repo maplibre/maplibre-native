@@ -26,12 +26,13 @@
     NSString *bundleIdentifier = [NSBundle mgl_applicationBundleIdentifier];
     cacheDirectoryURL = [cacheDirectoryURL URLByAppendingPathComponent:bundleIdentifier];
     cacheDirectoryURL = [cacheDirectoryURL URLByAppendingPathComponent:@".mapbox"];
-    XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:cacheDirectoryURL.path], @"Cache subdirectory should exist.");
+    XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:cacheDirectoryURL.path], @"Directory containing database should exist.");
     
     NSURL *cacheURL = [cacheDirectoryURL URLByAppendingPathComponent:@"cache.db"];
+    XCTAssertEqualObjects(cacheURL, MGLOfflineStorage.sharedOfflineStorage.databaseURL);
     
     [[NSFileManager defaultManager] removeItemAtURL:cacheURL error:nil];
-    XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:cacheURL.path], @"Cache subdirectory should not exist.");
+    XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:cacheURL.path], @"Database should not exist.");
 }
 
 - (void)setUp {

@@ -26,11 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
 
-/**
- The shared offline cache path.
- */
-@property (nonatomic) std::string mbglCachePath;
-
 - (void)getPacksWithCompletionHandler:(void (^)(NSArray<MGLOfflinePack *> *packs, NSError * _Nullable error))completion;
 
 @end

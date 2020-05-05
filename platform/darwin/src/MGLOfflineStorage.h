@@ -201,42 +201,6 @@ MGL_EXPORT
  */
 @property (class, nonatomic, readonly) MGLOfflineStorage *sharedOfflineStorage;
 
-#pragma mark - Adding Contents of File
-
-/**
- Adds the offline packs located at the given file path to offline storage.
- 
- The file must be a valid offline region database bundled with the application
- or downloaded separately.
- 
- The resulting packs are added or updated to the shared offline storage object’s `packs`
- property, then the `completion` block is executed.
- 
- @param filePath A string representation of the file path. The file path must be
- writable as schema updates may be perfomed.
- @param completion The completion handler to call once the contents of the given
- file has been added to offline storage. This handler is executed asynchronously
- on the main queue.
- */
-- (void)addContentsOfFile:(NSString *)filePath withCompletionHandler:(nullable MGLBatchedOfflinePackAdditionCompletionHandler)completion;
-
-/**
- Adds the offline packs located at the given URL to offline storage.
- 
- The file must be a valid offline region database bundled with the application
- or downloaded separately.
- 
- The resulting packs are added or updated to the shared offline storage object’s `packs`
- property, then the `completion` block is executed.
- 
- @param fileURL A file URL specifying the file to add. URL should be a valid system path.
- The file URL must be writable as schema updates may be performed.
- @param completion The completion handler to call once the contents of the given
- file has been added to offline storage. This handler is executed asynchronously
- on the main queue.
- */
-- (void)addContentsOfURL:(NSURL *)fileURL withCompletionHandler:(nullable MGLBatchedOfflinePackAdditionCompletionHandler)completion;
-
 #pragma mark - Accessing the Delegate
 
 /**
@@ -248,6 +212,52 @@ MGL_EXPORT
  or endpoints.
  */
 @property(nonatomic, weak, nullable) IBOutlet id<MGLOfflineStorageDelegate> delegate;
+
+#pragma mark - Managing the Database of Offline Packs
+
+/**
+ The file path at which offline packs and the ambient cache are stored.
+ */
+@property (nonatomic, readonly, copy) NSString *databasePath;
+
+/**
+ The file URL at which offline packs and the ambient cache are stored.
+ */
+@property (nonatomic, readonly, copy) NSURL *databaseURL;
+
+/**
+ Adds the offline packs located at the given file path to offline storage.
+ 
+ The file must be a valid offline pack database bundled with the application or
+ downloaded separately.
+ 
+ The resulting packs are added or updated to the shared offline storage object’s
+ `packs` property, then the `completion` block is executed.
+ 
+ @param filePath A string representation of the file path. The file path must be
+    writable as schema updates may be perfomed.
+ @param completion The completion handler to call once the contents of the given
+    file has been added to offline storage. This handler is executed
+    asynchronously on the main queue.
+ */
+- (void)addContentsOfFile:(NSString *)filePath withCompletionHandler:(nullable MGLBatchedOfflinePackAdditionCompletionHandler)completion;
+
+/**
+ Adds the offline packs located at the given URL to offline storage.
+ 
+ The file must be a valid offline pack database bundled with the application or
+ downloaded separately.
+ 
+ The resulting packs are added or updated to the shared offline storage object’s
+ `packs` property, then the `completion` block is executed.
+ 
+ @param fileURL A file URL specifying the file to add. The URL should be a valid
+    system path. The URL must be writable as schema updates may be performed.
+ @param completion The completion handler to call once the contents of the given
+    file has been added to offline storage. This handler is executed
+    asynchronously on the main queue.
+ */
+- (void)addContentsOfURL:(NSURL *)fileURL withCompletionHandler:(nullable MGLBatchedOfflinePackAdditionCompletionHandler)completion;
 
 #pragma mark - Managing Offline Packs
 
@@ -367,8 +377,7 @@ MGL_EXPORT
  */
 @property (nonatomic, readonly) unsigned long long countOfBytesCompleted;
 
-
-#pragma mark - Managing Ambient Cache
+#pragma mark - Managing the Ambient Cache
 
 /**
  Sets the maximum ambient cache size in bytes. The default maximum cache
@@ -388,10 +397,9 @@ MGL_EXPORT
  specified amount.
  
  @param cacheSize The maximum size in bytes for the ambient cache.
- @param completion The completion handler to call once the maximum ambient cache size
- has been set. This handler is executed synchronously on the main queue.
+ @param completion The completion handler to call once the maximum ambient cache
+    size has been set. This handler is executed synchronously on the main queue.
  */
-
 - (void)setMaximumAmbientCacheSize:(NSUInteger)cacheSize withCompletionHandler:(void (^)(NSError *_Nullable error))completion;
 
 /**
@@ -405,32 +413,29 @@ MGL_EXPORT
  Resources shared with offline packs will not be affected by this method.
  
  @param completion The completion handler to call once the ambient cache has
- been revalidated. This handler is executed asynchronously on the main queue.
+    been revalidated. This handler is executed asynchronously on the main queue.
  */
-
 - (void)invalidateAmbientCacheWithCompletionHandler:(void (^)(NSError *_Nullable error))completion;
 
 /**
- Clears the ambient cache by deleting resources. This method does not
- affect resources shared with offline regions.
+ Clears the ambient cache by deleting resources. This method does not affect
+ resources shared with offline regions.
  
- @param completion The completion handler to call once resources from
- the ambient cache have been cleared. This handler is executed
- asynchronously on the main queue.
+ @param completion The completion handler to call once resources from the
+    ambient cache have been cleared. This handler is executed asynchronously on
+    the main queue.
  */
 
 - (void)clearAmbientCacheWithCompletionHandler:(void (^)(NSError *_Nullable error))completion;
-
 /**
- Deletes the existing database, which includes both the ambient cache and offline packs,
- then reinitializes it.
+ Deletes the existing database, which includes both the ambient cache and
+ offline packs, then reinitializes it.
  
  You typically do not need to call this method.
  
  @param completion The completion handler to call once the pack has database has
  been reset. This handler is executed asynchronously on the main queue.
  */
-
 - (void)resetDatabaseWithCompletionHandler:(void (^)(NSError *_Nullable error))completion;
 
 /**
@@ -444,7 +449,8 @@ MGL_EXPORT
  in-progress requests, though subsequent requests should have access to the
  cached data.
 
- To find out when the resource is ready to retrieve from the cache, use the -preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler: method.
+ To find out when the resource is ready to retrieve from the cache, use the `-preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:`
+ method.
 
  @param data Response data to store for this resource. The data is expected to
     be uncompressed; internally, the cache will compress data as necessary.
@@ -460,25 +466,26 @@ MGL_EXPORT
 - (void)putResourceWithUrl:(NSURL *)url data:(NSData *)data modified:(nullable NSDate *)modified expires:(nullable NSDate *)expires etag:(nullable NSString *)etag mustRevalidate:(BOOL)mustRevalidate __attribute__((deprecated("", "-preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:")));
 
 /**
-Inserts the provided resource into the ambient cache, calling a completion handler when finished.
+ Inserts the provided resource into the ambient cache, calling a completion
+ handler when finished.
 
-This method is asynchronous. The data is available for in-progress requests as
-soon as the completion handler is called.
+ This method is asynchronous. The data is available for in-progress requests as
+ soon as the completion handler is called.
 
-This method is asynchronous; the data may not be immediately available for
-in-progress requests, though subsequent requests should have access to the
-cached data.
+ This method is asynchronous; the data may not be immediately available for
+ in-progress requests, though subsequent requests should have access to the
+ cached data.
 
-@param data Response data to store for this resource. The data is expected to
-   be uncompressed; internally, the cache will compress data as necessary.
-@param url The URL at which the data can normally be found.
-@param modified The date the resource was last modified.
-@param expires The date after which the resource is no longer valid.
-@param eTag An HTTP entity tag.
-@param mustRevalidate A Boolean value indicating whether the data is still
-   usable past the expiration date.
-@param completion The completion handler to call once the data has been preloaded.
-This handler is executed asynchronously on the main queue.
+ @param data Response data to store for this resource. The data is expected to
+    be uncompressed; internally, the cache will compress data as necessary.
+ @param url The URL at which the data can normally be found.
+ @param modified The date the resource was last modified.
+ @param expires The date after which the resource is no longer valid.
+ @param eTag An HTTP entity tag.
+ @param mustRevalidate A Boolean value indicating whether the data is still
+    usable past the expiration date.
+ @param completion The completion handler to call once the data has been
+    preloaded. This handler is executed asynchronously on the main queue.
 */
 - (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(nullable NSDate *)modified expirationDate:(nullable NSDate *)expires eTag:(nullable NSString *)eTag mustRevalidate:(BOOL)mustRevalidate
     completionHandler:(nullable MGLOfflinePreloadDataCompletionHandler)completion;

@@ -49,7 +49,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 @property (nonatomic) std::shared_ptr<mbgl::DatabaseFileSource> mbglDatabaseFileSource;
 @property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
 @property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
-@property (nonatomic) std::string mbglCachePath;
 @property (nonatomic, getter=isPaused) BOOL paused;
 @end
 
@@ -153,6 +152,92 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     }
 }
 
+- (instancetype)init {
+    // Ensure network configuration & appropriate delegate prior to starting the
+    // run loop. Calling `resetNativeNetworkManagerDelegate` is not necessary here,
+    // since the shared manager already calls it.
+    [MGLNetworkConfiguration sharedManager];
+
+    MGLInitializeRunLoop();
+
+    if (self = [super init]) {
+        _databaseURL = [[self class] cacheURLIncludingSubdirectory:YES];
+        NSString *cachePath = self.databasePath;
+        NSAssert(cachePath, @"Offline pack database URL “%@” is not a valid file URL.", _databaseURL);
+
+        // Move the offline cache from v3.2.0-beta.1 to a location that can also
+        // be used for ambient caching.
+        if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
+            NSString *legacyCachePath = [[self class] legacyCachePath];
+            [[NSFileManager defaultManager] moveItemAtPath:legacyCachePath toPath:cachePath error:NULL];
+        }
+
+        // Move the offline file cache from v3.2.x path to a subdirectory that
+        // can be reliably excluded from backups.
+        if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
+            NSURL *subdirectorylessCacheURL = [[self class] cacheURLIncludingSubdirectory:NO];
+            [[NSFileManager defaultManager] moveItemAtPath:subdirectorylessCacheURL.path toPath:cachePath error:NULL];
+        }
+
+        mbgl::ResourceOptions options;
+        options.withCachePath(cachePath.UTF8String)
+               .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+        _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, options);
+        _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
+        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
+
+        // Observe for changes to the API base URL (and find out the current one).
+        [[MGLAccountManager sharedManager] addObserver:self
+                                            forKeyPath:@"apiBaseURL"
+                                               options:(NSKeyValueObservingOptionInitial |
+                                                              NSKeyValueObservingOptionNew)
+                                               context:NULL];
+
+        // Observe for changes to the global access token (and find out the current one).
+        [[MGLAccountManager sharedManager] addObserver:self
+                                            forKeyPath:@"accessToken"
+                                               options:(NSKeyValueObservingOptionInitial |
+                                                        NSKeyValueObservingOptionNew)
+                                               context:NULL];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"apiBaseURL"];
+    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"accessToken"];
+
+    for (MGLOfflinePack *pack in self.packs) {
+        [pack invalidate];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context {
+    // Synchronize the file source’s access token with the global one in MGLAccountManager.
+    if ([keyPath isEqualToString:@"accessToken"] && object == [MGLAccountManager sharedManager]) {
+        NSString *accessToken = change[NSKeyValueChangeNewKey];
+        if (![accessToken isKindOfClass:[NSNull class]]) {
+            _mbglOnlineFileSource->setProperty(mbgl::ACCESS_TOKEN_KEY, accessToken.UTF8String);
+        }
+    } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLAccountManager sharedManager]) {
+        NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
+        if ([apiBaseURL isKindOfClass:[NSNull class]]) {
+            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, mbgl::util::API_BASE_URL);
+        } else {
+            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
+        }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+#pragma mark Database management methods
+
+- (NSString *)databasePath {
+    return self.databaseURL.path;
+}
+
 /**
  Returns the file URL to the offline cache, with the option to omit the private
  subdirectory for legacy (v3.2.0 - v3.2.3) migration purposes.
@@ -218,88 +303,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 #endif
     return legacyCachePath;
 }
-
-- (instancetype)init {
-    // Ensure network configuration & appropriate delegate prior to starting the
-    // run loop. Calling `resetNativeNetworkManagerDelegate` is not necessary here,
-    // since the shared manager already calls it.
-    [MGLNetworkConfiguration sharedManager];
-
-    MGLInitializeRunLoop();
-
-    if (self = [super init]) {
-        NSURL *cacheURL = [[self class] cacheURLIncludingSubdirectory:YES];
-        NSString *cachePath = cacheURL.path ?: @"";
-
-        // Move the offline cache from v3.2.0-beta.1 to a location that can also
-        // be used for ambient caching.
-        if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
-            NSString *legacyCachePath = [[self class] legacyCachePath];
-            [[NSFileManager defaultManager] moveItemAtPath:legacyCachePath toPath:cachePath error:NULL];
-        }
-
-        // Move the offline file cache from v3.2.x path to a subdirectory that
-        // can be reliably excluded from backups.
-        if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
-            NSURL *subdirectorylessCacheURL = [[self class] cacheURLIncludingSubdirectory:NO];
-            [[NSFileManager defaultManager] moveItemAtPath:subdirectorylessCacheURL.path toPath:cachePath error:NULL];
-        }
-
-        _mbglCachePath = cachePath.UTF8String;
-        mbgl::ResourceOptions options;
-        options.withCachePath(_mbglCachePath)
-               .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
-        _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, options);
-        _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
-        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
-
-        // Observe for changes to the API base URL (and find out the current one).
-        [[MGLAccountManager sharedManager] addObserver:self
-                                            forKeyPath:@"apiBaseURL"
-                                               options:(NSKeyValueObservingOptionInitial |
-                                                              NSKeyValueObservingOptionNew)
-                                               context:NULL];
-
-        // Observe for changes to the global access token (and find out the current one).
-        [[MGLAccountManager sharedManager] addObserver:self
-                                            forKeyPath:@"accessToken"
-                                               options:(NSKeyValueObservingOptionInitial |
-                                                        NSKeyValueObservingOptionNew)
-                                               context:NULL];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"apiBaseURL"];
-    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"accessToken"];
-
-    for (MGLOfflinePack *pack in self.packs) {
-        [pack invalidate];
-    }
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context {
-    // Synchronize the file source’s access token with the global one in MGLAccountManager.
-    if ([keyPath isEqualToString:@"accessToken"] && object == [MGLAccountManager sharedManager]) {
-        NSString *accessToken = change[NSKeyValueChangeNewKey];
-        if (![accessToken isKindOfClass:[NSNull class]]) {
-            _mbglOnlineFileSource->setProperty(mbgl::ACCESS_TOKEN_KEY, accessToken.UTF8String);
-        }
-    } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLAccountManager sharedManager]) {
-        NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
-        if ([apiBaseURL isKindOfClass:[NSNull class]]) {
-            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, mbgl::util::API_BASE_URL);
-        } else {
-            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-#pragma mark Offline merge methods
 
 - (void)addContentsOfFile:(NSString *)filePath withCompletionHandler:(MGLBatchedOfflinePackAdditionCompletionHandler)completion {
     MGLLogDebug(@"Adding contentsOfFile: %@ completionHandler: %@", filePath, completion);
@@ -631,13 +634,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 #pragma mark -
 
 - (unsigned long long)countOfBytesCompleted {
-    NSURL *cacheURL = [[self class] cacheURLIncludingSubdirectory:YES];
-    NSString *cachePath = cacheURL.path;
-    if (!cachePath) {
-        return 0;
-    }
-
-    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:cachePath error:NULL];
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:self.databasePath error:NULL];
     return attributes.fileSize;
 }
 

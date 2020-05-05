@@ -494,7 +494,7 @@ public:
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath([[MGLOfflineStorage sharedOfflineStorage] mbglCachePath])
+    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
