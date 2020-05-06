@@ -30,6 +30,16 @@ This key can either be set to a single string or an array of strings, which the 
 
 To disable client-side rendering of CJK characters in favor of [server-side rendering](customizing-fonts.html#server-side-fonts), set this key to the Boolean value `NO`.
 
+## MGLOfflineStorageDatabasePath
+
+This key customizes the file path at which `MGLOfflineStorage` keeps the offline map database, which contains any offline packs as well as the ambient cache. Most applications should not need to customize this path; however, you could customize it to implement a migration path between different versions of your application.
+
+The key is interpreted as either an absolute file path or a file path relative to the main bundle’s resource folder, resolving any tilde or symbolic link. The path must be writable. If a database does not exist at the path you specify, one will be created automatically.
+
+An offline map database can consume a significant amount of the user’s bandwidth and iCloud storage due to iCloud backups. To exclude the database from backups, set the containing directory’s `NSURLIsExcludedFromBackupKey` resource property to the Boolean value `YES` using the `-[NSURL setResourceValue:forKey:error:]` method. The entire directory will be affected, not just the database file. If the user restores the application from a backup, your application will need to restore any offline packs that had been previously downloaded.
+
+At runtime, you can obtain the value of this key using the `MGLOfflineStorage.databasePath` and `MGLOfflineStorage.databaseURL` properties.
+
 ## MGLCollisionBehaviorPre4_0
 
  If this key is set to YES (`true`), collision detection is performed only between symbol style layers based on the same source, as in versions 2.0–3.7 of the Mapbox Maps SDK for iOS. In other words, symbols in an `MGLSymbolStyleLayer` based on one source (for example, an `MGLShapeSource`) may overlap with symbols in another layer that is based on a different source (such as the Mapbox Streets source). This is the case regardless of the `MGLSymbolStyleLayer.iconAllowsOverlap`, `MGLSymbolStyleLayer.iconIgnoresPlacement`, `MGLSymbolStyleLayer.textAllowsOverlap`, and `MGLSymbolStyleLayer.textIgnoresPlacement` properties.

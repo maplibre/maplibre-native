@@ -217,11 +217,19 @@ MGL_EXPORT
 
 /**
  The file path at which offline packs and the ambient cache are stored.
+ 
+ To customize this path, specify the
+ [`MGLOfflineStorageDatabasePath`](../infoplist-keys.html#mglofflinestoragedatabasepath)
+ key in Info.plist.
  */
 @property (nonatomic, readonly, copy) NSString *databasePath;
 
 /**
  The file URL at which offline packs and the ambient cache are stored.
+ 
+ To customize this path, specify the
+ [`MGLOfflineStorageDatabasePath`](../infoplist-keys.html#mglofflinestoragedatabasepath)
+ key in Info.plist.
  */
 @property (nonatomic, readonly, copy) NSURL *databaseURL;
 

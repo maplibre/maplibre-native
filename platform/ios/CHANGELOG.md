@@ -18,7 +18,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 ### Offline maps
 
 * Added the `-[MGLOfflinePack setContext:completionHandler:]` method for replacing the data associated with an offline pack, such as a name. ([#288](https://github.com/mapbox/mapbox-gl-native-ios/pull/288))
-* Added the `MGLOfflineStorage.databasePath` and `MGLOfflineStorage.databaseURL` properties. ([#298](https://github.com/mapbox/mapbox-gl-native-ios/pull/298))
+* Added the `MGLOfflineStorage.databasePath` and `MGLOfflineStorage.databaseURL` properties to obtain the path of the database that contains offline packs and the ambient cache. To customize this path, set the `MGLOfflineStorageDatabasePath` in Info.plist. ([#298](https://github.com/mapbox/mapbox-gl-native-ios/pull/298))
 * Fixed an error that occurred if your implementation of the `-[MGLOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
 
 ### Other changes
