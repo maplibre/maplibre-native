@@ -94,4 +94,5 @@
     <string name="activity_region">Download region</string>
     <string name="activity_within">Within expression</string>
     <string name="activity_stretchable_image">Stretchable Image</string>
+    <string name="activity_image_in_label">Image In Label</string>
 </resources>
