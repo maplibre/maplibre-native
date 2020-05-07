@@ -2,17 +2,10 @@ package com.mapbox.mapboxsdk.module.loader;
 
 import com.mapbox.mapboxsdk.LibraryLoader;
 import com.mapbox.mapboxsdk.LibraryLoaderProvider;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
-import com.mapbox.mapboxsdk.log.Logger;
-
-import static com.facebook.soloader.SoLoader.init;
-import static com.facebook.soloader.SoLoader.loadLibrary;
 
 /**
  * Concrete implementation of a native library loader.
  * <p>
- * Uses SoLoader from https://github.com/facebook/SoLoader.
  * </p>
  */
 public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
@@ -24,27 +17,16 @@ public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
    */
   @Override
   public LibraryLoader getDefaultLibraryLoader() {
-    return new SoLibraryLoader();
+    return new SystemLibraryLoader();
   }
 
   /**
-   * Concrete implementation of a LibraryLoader using SoLoader.
+   * Concrete implementation of a LibraryLoader using System.loadLibrary.
    */
-  private static class SoLibraryLoader extends LibraryLoader {
-
-    private static final String TAG = "SoLibraryLoader";
-
+  private static class SystemLibraryLoader extends LibraryLoader {
     @Override
     public void load(String name) {
-      try {
-        // nativeExopackage = false, https://buck.build/article/exopackage.html
-        init(Mapbox.getApplicationContext(), false);
-        loadLibrary(name);
-      } catch (MapboxConfigurationException exception) {
-        Logger.e(TAG, "Couldn't load so file with relinker, application context missing, "
-          + "call Mapbox.getInstance(Context context, String accessToken) first");
-        throw new UnsatisfiedLinkError(exception.getMessage());
-      }
+      System.loadLibrary(name);
     }
   }
 }

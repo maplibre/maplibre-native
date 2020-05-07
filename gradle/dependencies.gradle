@@ -35,7 +35,6 @@ ext {
             androidPublish  : '3.6.2',
             lint            : '26.4.2',
             gms             : '16.0.0',
-            soLoader        : '0.8.0',
             jacoco          : '0.8.4',
             appcenter       : '1.4',
             ktlint          : '0.34.0',
@@ -74,7 +73,6 @@ ext {
             okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
             leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanary}",
-            soLoader               : "com.facebook.soloader:soloader:${versions.soLoader}",
 
             kotlinLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",

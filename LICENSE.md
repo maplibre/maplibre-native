@@ -218,24 +218,6 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox GL uses portions of SoLoader.  
-URL: [https://github.com/facebook/soloader](https://github.com/facebook/soloader)  
-License: [Apache-2](https://github.com/facebook/soloader/blob/master/LICENSE)
-
-===========================================================================
-
-Mapbox GL uses portions of SoLoader.  
-URL: [https://github.com/facebook/soloader](https://github.com/facebook/soloader)  
-License: [Apache-2](https://github.com/facebook/soloader/blob/master/LICENSE)
-
-===========================================================================
-
-Mapbox GL uses portions of SoLoader.  
-URL: [https://github.com/facebook/soloader](https://github.com/facebook/soloader)  
-License: [Apache-2](https://github.com/facebook/soloader/blob/master/LICENSE)
-
-===========================================================================
-
 Mapbox GL uses portions of VersionedParcelable and friends.  
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)  
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)

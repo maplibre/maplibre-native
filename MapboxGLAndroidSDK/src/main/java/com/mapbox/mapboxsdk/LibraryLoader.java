@@ -5,7 +5,7 @@ import com.mapbox.mapboxsdk.log.Logger;
 /**
  * Loads the mapbox-gl shared library
  * <p>
- * By default uses SoLoader from https://github.com/facebook/SoLoader
+ * By default uses System.loadLibrary
  * use {@link #setLibraryLoader(LibraryLoader)} to provide an alternative library loading hook.
  * </p>
  */
