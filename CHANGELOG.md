@@ -2,7 +2,7 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
-## 9.2.0-beta.1 - April 30, 2020
+## 9.2.0 - May 7, 2020
 ### Features
  - Added the `distance` expression for calculating the shortest distance between an evaluated feature and a given GeoJSON object. ([#339](https://github.com/mapbox/mapbox-gl-native-android/pull/339))
  - The [`SymbolLayer.iconTextFit`](https://docs.mapbox.com/android/api/map-sdk/9.2.0-beta.1/com/mapbox/mapboxsdk/style/layers/PropertyFactory.html#iconTextFit-com.mapbox.mapboxsdk.style.expressions.Expression-) property now respects the stretch metadata of any nine-part stretchable image passed into the `style.addImage` method. You can define the stretchable area of an image by configuring the `stretchX`, `stretchY`, `content` options on `Style.addImage` to append the requisite [metadata](https://github.com/mapbox/mapbox-gl-js/issues/8917). ([#314](https://github.com/mapbox/mapbox-gl-native-android/pull/314))
@@ -25,7 +25,11 @@ Mapbox welcomes participation and contributions from everyone. Please read [`Con
  - Fixed a crash when encountering an invalid polyline. ([#16409](https://github.com/mapbox/mapbox-gl-native/pull/16409))
  - Certain logging statements no longer run on the main thread. ([#16325](https://github.com/mapbox/mapbox-gl-native/pull/16325))
 
-## 9.1.0
+### Other changes
+ - Rollback to `System.loadLibrary` to fix SoLoader fails to load the native library on x86 devices. ([#368](https://github.com/mapbox/mapbox-gl-native-android/pull/368))
+ - Worked around crashes caused by `JobIntentService` on devices >= API 26 by using a network request to report errors instead. ([#472](https://github.com/mapbox/mapbox-events-android/pull/472)
+
+## 9.1.0 - April 7, 2020
 ### Features
  - Added `within` expression for testing whether an evaluated feature lies within a given GeoJSON object. `within` accepts `Feature`, `FeatureCollection`, `Polygon`, and `MultiPolygon` as valid GeoJSON objects. ([#198](https://github.com/mapbox/mapbox-gl-native-android/pull/198))
  - Added `in` expression for testing whether an item exists in an array or a substring exists in a string. ([#171](https://github.com/mapbox/mapbox-gl-native-android/pull/171))
