@@ -52,7 +52,7 @@ public class LocalGlyphRasterizer {
   protected Bitmap drawGlyphBitmap(String fontFamily, boolean bold, char glyphID) {
     paint.setTypeface(Typeface.create(fontFamily, bold ? Typeface.BOLD : Typeface.NORMAL));
     canvas.drawColor(Color.WHITE);
-    canvas.drawText(String.valueOf(glyphID), 0, 20, paint);
+    canvas.drawText(String.valueOf(glyphID), 5, 25, paint);
     return bitmap;
   }
 }

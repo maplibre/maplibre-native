@@ -111,8 +111,8 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
 
     fixedMetrics.metrics.width = size.width;
     fixedMetrics.metrics.height = size.height;
-    fixedMetrics.metrics.left = 3;
-    fixedMetrics.metrics.top = -10;
+    fixedMetrics.metrics.left = -2;
+    fixedMetrics.metrics.top = -5;
     fixedMetrics.metrics.advance = 24;
 
     PremultipliedImage rgbaBitmap = impl->drawGlyphBitmap(fontStack, glyphID);
