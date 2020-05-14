@@ -14,6 +14,12 @@ import android.graphics.Color;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.MultiLineString;
+import com.mapbox.geojson.MultiPoint;
+import com.mapbox.geojson.MultiPolygon;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
 import org.junit.Before;
 import timber.log.Timber;
@@ -40,6 +46,9 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
 <% } -%>
 
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Basic smoke tests for <%- camelize(type) %>Layer
@@ -48,6 +57,19 @@ import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
 
   private <%- camelize(type) %>Layer layer;
+  private final List<Point> pointsList = new ArrayList<Point>() {
+    {
+      add(Point.fromLngLat(55.30122473231012, 25.26476622289597));
+      add(Point.fromLngLat(55.29743486255916, 25.25827212207261));
+      add(Point.fromLngLat(55.28978863411328, 25.251356725509737));
+      add(Point.fromLngLat(55.300027931336984, 25.246425506635504));
+      add(Point.fromLngLat(55.307474692951274, 25.244200378933655));
+      add(Point.fromLngLat(55.31212891895635, 25.256408010450187));
+      add(Point.fromLngLat(55.30774064871093, 25.26266169122738));
+      add(Point.fromLngLat(55.301357710197806, 25.264946609615492));
+      add(Point.fromLngLat(55.30122473231012, 25.26476622289597));
+    }
+  };
 
   @Before
   @UiThreadTest
@@ -122,6 +144,60 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
     assertEquals(layer.getFilter().toString(), filter.toString());
   }
 
+  @Test
+  @UiThreadTest
+  public void testFilterDistance() {
+    Timber.i("FilterDistance");
+    assertNotNull(layer);
+
+    // Get initial
+    assertEquals(layer.getFilter(), null);
+
+    // distance with Point
+    Expression filter = lt(distance(Point.fromLngLat(1.0, 1.0)), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+
+    // distance with LineString
+    filter = lt(distance(LineString.fromLngLats(pointsList)), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+
+    // distance with MultiPoint
+    filter = lt(distance(MultiPoint.fromLngLats(pointsList)), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+
+    // distance with MultiPoint
+    filter = lt(distance(MultiLineString.fromLngLats(Collections.singletonList(pointsList))), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+
+    // distance with Polygon
+    filter = lt(distance(Polygon.fromLngLats(Collections.singletonList(pointsList))), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+
+    // distance with MultiPolygon
+    filter = lt(distance(MultiPolygon.fromLngLats(Collections
+      .singletonList(Collections.singletonList(pointsList)))), 50);
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFilterWithin() {
+    Timber.i("FilterWithin");
+    assertNotNull(layer);
+
+    // Get initial
+    assertEquals(layer.getFilter(), null);
+
+    Expression filter = within(Polygon.fromLngLats(Collections.singletonList(pointsList)));
+    layer.setFilter(filter);
+    assertEquals(layer.getFilter().toString(), filter.toString());
+  }
 
 <% } -%>
 <% for (const property of properties) { -%>

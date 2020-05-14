@@ -9,7 +9,13 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mapbox.geojson.GeoJson;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.MultiLineString;
+import com.mapbox.geojson.MultiPoint;
+import com.mapbox.geojson.MultiPolygon;
+import com.mapbox.geojson.Point;
 import com.mapbox.geojson.Polygon;
+import com.mapbox.geojson.gson.GeometryGeoJson;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 
@@ -1583,7 +1589,8 @@ public class Expression {
    * Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString` geometry types.
    *
    * @param geoJson the target feature geoJson.
-   *                Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString` geometry types
+   *                Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`
+   *                geometry types
    * @return the distance in the unit "meters".
    * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-distance">Style specification</a>
    */
@@ -4767,6 +4774,8 @@ public class Expression {
       final List<Expression> arguments = new ArrayList<>();
       if (operator.equals("within")) {
         return within(Polygon.fromJson(jsonArray.get(1).toString()));
+      } else if (operator.equals("distance")) {
+        return distance(GeometryGeoJson.fromJson(jsonArray.get(1).toString()));
       }
       for (int i = 1; i < jsonArray.size(); i++) {
         JsonElement jsonElement = jsonArray.get(i);
