@@ -2,6 +2,12 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 9.2.1 - May 15, 2020
+### Improvements and bug fixes
+ - Added compiler and linker options to reduce binary size for release build. ([#382](https://github.com/mapbox/mapbox-gl-native-android/pull/382))
+ - Fixed a crash when `Layer.getFilter()` is used with the `distance` expression. ([#380](https://github.com/mapbox/mapbox-gl-native-android/pull/380))
+ - Reset AndroidRendererBackend properly to prevent a crash during rotation on an Android 4.2.2 x86 tablet. ([#381](https://github.com/mapbox/mapbox-gl-native-android/pull/381)（h/t [ystsoi](https://github.com/ystsoi))
+
 ## 9.2.0 - May 7, 2020
 ### Features
  - Added the `distance` expression for calculating the shortest distance between an evaluated feature and a given GeoJSON object. ([#339](https://github.com/mapbox/mapbox-gl-native-android/pull/339))
