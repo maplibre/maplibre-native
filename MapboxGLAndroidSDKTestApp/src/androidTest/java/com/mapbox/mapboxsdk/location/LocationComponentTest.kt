@@ -382,6 +382,10 @@ class LocationComponentTest : EspressoTest() {
         uiController: UiController,
         context: Context
       ) {
+        val foregroundDrawable = BitmapUtils.getDrawableFromRes(context, R.drawable.ic_media_play)
+        foregroundDrawable?.let {
+          mapboxMap.addImageFromDrawable("custom-gps-bitmap", it)
+        }
         locationComponentActivationOptions = LocationComponentActivationOptions
                 .builder(context, style)
                 .useDefaultLocationEngine(false)
@@ -422,6 +426,10 @@ class LocationComponentTest : EspressoTest() {
         uiController: UiController,
         context: Context
       ) {
+        val foregroundDrawable = BitmapUtils.getDrawableFromRes(context, R.drawable.ic_media_play)
+        foregroundDrawable?.let {
+          mapboxMap.addImageFromDrawable("custom-gps-bitmap", it)
+        }
         locationComponentActivationOptions = LocationComponentActivationOptions
                 .builder(context, style)
                 .useDefaultLocationEngine(false)
@@ -1008,7 +1016,7 @@ class LocationComponentTest : EspressoTest() {
         component.forceLocationUpdate(location)
         TestingAsyncUtils.waitForLayer(uiController, mapView)
         uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS) // Waiting for the animation to finish
-        assertEquals(92.0f, mapboxMap.querySourceFeatures(LOCATION_SOURCE)[0].getNumberProperty(PROPERTY_GPS_BEARING).toFloat(), 0.1f)
+        assertEquals(92.0f, mapboxMap.querySourceFeatures(LOCATION_SOURCE)[0].getNumberProperty(PROPERTY_GPS_BEARING).toFloat(), 0.5f)
       }
     }
 
