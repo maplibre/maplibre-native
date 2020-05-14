@@ -122,6 +122,7 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
+    backend.reset();
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
