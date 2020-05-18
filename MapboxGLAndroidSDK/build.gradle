@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: "com.jaredsburrows.license"
 apply plugin: 'kotlin-android'
 apply from: "${rootDir}/gradle/native-build.gradle"
+apply plugin: 'com.mapbox.android.sdk.versions'
 
 dependencies {
     lintChecks project(":MapboxGLAndroidSDKLint")
