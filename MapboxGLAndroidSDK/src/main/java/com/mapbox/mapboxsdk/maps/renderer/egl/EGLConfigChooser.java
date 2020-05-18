@@ -196,6 +196,10 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
     int i = 0;
     for (EGLConfig config : configs) {
+      if (config == null) {
+        continue;
+      }
+
       i++;
 
       int caveat = getConfigAttr(egl, display, config, EGL_CONFIG_CAVEAT);
