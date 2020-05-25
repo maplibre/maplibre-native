@@ -320,11 +320,27 @@ jobs:
           command: make apackage
       - run:
           name: Build release Test App
-          command: make android
+          command: |
+            if [ -n "${MAPBOX_DEVELOPER_CONFIG_XML}" ]; then
+              echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+              make android
+            fi
       - run:
           name: Generate javadoc
           command: make android-javadoc
       - save-dependencies: { gradle: true }
+      - login-google-cloud-platform
+      - run:
+          name: Run robotest of release Test App on Firebase
+          no_output_timeout: 10m
+          command: |
+            if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+              if [[ $CIRCLE_BRANCH != master && $CIRCLE_TAG != android-v* ]]; then
+                gcloud firebase test android run --type robo \
+                  --app MapboxGLAndroidSDKTestApp/build/outputs/apk/release/MapboxGLAndroidSDKTestApp-release.apk \
+                  --device-ids sailfish --os-version-ids "26" --locales en --orientations portrait --timeout 90s
+              fi
+            fi
       - run:
           name: archive debugable objects
           command: |
