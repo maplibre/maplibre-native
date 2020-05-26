@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
@@ -141,7 +140,11 @@ open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
       }
 
       fun bind(mapItem: MapItem) {
-        mapView.getMapAsync { mapboxMap -> mapboxMap.setStyle(mapItem.style) }
+        mapView.getMapAsync { mapboxMap ->
+          mapboxMap.setStyle(mapItem.style) {
+            mapboxMap.snapshot { }
+          }
+        }
       }
     }
 

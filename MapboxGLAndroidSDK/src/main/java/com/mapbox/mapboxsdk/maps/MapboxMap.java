@@ -81,6 +81,7 @@ public final class MapboxMap {
   private Style style;
 
   private boolean debugActive;
+  private boolean started;
 
   MapboxMap(NativeMap map, Transform transform, UiSettings ui, Projection projection,
             OnGesturesManagerInteractionListener listener, CameraChangeDispatcher cameraChangeDispatcher,
@@ -143,6 +144,7 @@ public final class MapboxMap {
    * Called when the hosting Activity/Fragment onStart() method is called.
    */
   void onStart() {
+    started = true;
     locationComponent.onStart();
   }
 
@@ -150,6 +152,7 @@ public final class MapboxMap {
    * Called when the hosting Activity/Fragment onStop() method is called.
    */
   void onStop() {
+    started = false;
     locationComponent.onStop();
   }
 
@@ -2003,6 +2006,9 @@ public final class MapboxMap {
    * @param callback Callback method invoked when the snapshot is taken.
    */
   public void snapshot(@NonNull SnapshotReadyCallback callback) {
+    if (!started) {
+      return;
+    }
     nativeMapView.addSnapshotCallback(callback);
   }
 
