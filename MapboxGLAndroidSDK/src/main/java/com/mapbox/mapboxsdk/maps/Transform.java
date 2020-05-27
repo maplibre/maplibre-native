@@ -112,8 +112,8 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
       nativeMap.jumpTo(cameraPosition.target, cameraPosition.zoom, cameraPosition.tilt, cameraPosition.bearing,
         cameraPosition.padding);
-      cameraChangeDispatcher.onCameraIdle();
       invalidateCameraPosition();
+      cameraChangeDispatcher.onCameraIdle();
       handler.post(new Runnable() {
         @Override
         public void run() {

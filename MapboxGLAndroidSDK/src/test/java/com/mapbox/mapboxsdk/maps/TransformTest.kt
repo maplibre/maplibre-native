@@ -15,10 +15,11 @@ class TransformTest {
   private lateinit var mapView: MapView
   private lateinit var nativeMapView: NativeMap
   private lateinit var transform: Transform
+  private lateinit var cameraChangeDispatcher: CameraChangeDispatcher
 
   @Before
   fun setup() {
-    val cameraChangeDispatcher = spyk<CameraChangeDispatcher>()
+    cameraChangeDispatcher = spyk()
     mapView = mockk()
     nativeMapView = mockk()
     transform = Transform(mapView, nativeMapView, cameraChangeDispatcher)
@@ -45,8 +46,12 @@ class TransformTest {
     val target = LatLng(1.0, 2.0)
     val expected = CameraPosition.Builder().target(target).build()
     val update = CameraUpdateFactory.newCameraPosition(expected)
+
+    transform.cameraPosition
+    every { nativeMapView.cameraPosition } returns expected
     transform.moveCamera(mapboxMap, update, callback)
 
+    verify { cameraChangeDispatcher.onCameraMove() }
     verify { nativeMapView.jumpTo(target, -1.0, -1.0, -1.0, null) }
     verify { callback.onFinish() }
   }

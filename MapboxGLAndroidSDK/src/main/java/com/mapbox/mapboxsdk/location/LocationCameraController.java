@@ -35,7 +35,6 @@ final class LocationCameraController {
   private final Transform transform;
   private final OnCameraTrackingChangedListener internalCameraTrackingChangedListener;
   private LocationComponentOptions options;
-  private boolean adjustFocalPoint;
 
   private final MoveGestureDetector moveGestureDetector;
   private final OnCameraMoveInvalidateListener onCameraMoveInvalidateListener;
@@ -44,6 +43,7 @@ final class LocationCameraController {
   private final AndroidGesturesManager internalGesturesManager;
 
   private boolean isTransitioning;
+  private LatLng lastLocation;
 
   LocationCameraController(
     Context context,
@@ -61,7 +61,7 @@ final class LocationCameraController {
     mapboxMap.addOnRotateListener(onRotateListener);
     mapboxMap.addOnFlingListener(onFlingListener);
     mapboxMap.addOnMoveListener(onMoveListener);
-
+    mapboxMap.addOnCameraMoveListener(onCameraMoveListener);
     this.internalCameraTrackingChangedListener = internalCameraTrackingChangedListener;
     this.onCameraMoveInvalidateListener = onCameraMoveInvalidateListener;
     initializeOptions(options);
@@ -76,6 +76,7 @@ final class LocationCameraController {
                            AndroidGesturesManager initialGesturesManager,
                            AndroidGesturesManager internalGesturesManager) {
     this.mapboxMap = mapboxMap;
+    mapboxMap.addOnCameraMoveListener(onCameraMoveListener);
     this.transform = transform;
     this.moveGestureDetector = moveGestureDetector;
     this.internalCameraTrackingChangedListener = internalCameraTrackingChangedListener;
@@ -207,15 +208,9 @@ final class LocationCameraController {
     if (isTransitioning) {
       return;
     }
-
+    lastLocation = latLng;
     transform.moveCamera(mapboxMap, CameraUpdateFactory.newLatLng(latLng), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
-
-    if (adjustFocalPoint) {
-      PointF focalPoint = mapboxMap.getProjection().toScreenLocation(latLng);
-      mapboxMap.getUiSettings().setFocalPoint(focalPoint);
-      adjustFocalPoint = false;
-    }
   }
 
   private void setZoom(float zoom) {
@@ -312,7 +307,6 @@ final class LocationCameraController {
   private void adjustGesturesThresholds() {
     if (options.trackingGesturesManagement()) {
       if (isLocationTracking()) {
-        adjustFocalPoint = true;
         moveGestureDetector.setMoveThreshold(options.trackingInitialMoveThreshold());
       } else {
         moveGestureDetector.setMoveThreshold(0f);
@@ -354,6 +348,17 @@ final class LocationCameraController {
       internalCameraTrackingChangedListener.onCameraTrackingDismissed();
     }
   }
+
+  private MapboxMap.OnCameraMoveListener onCameraMoveListener = new MapboxMap.OnCameraMoveListener() {
+
+    @Override
+    public void onCameraMove() {
+      if (isLocationTracking() && lastLocation != null && options.trackingGesturesManagement()) {
+        PointF focalPoint = mapboxMap.getProjection().toScreenLocation(lastLocation);
+        mapboxMap.getUiSettings().setFocalPoint(focalPoint);
+      }
+    }
+  };
 
   @NonNull
   @VisibleForTesting

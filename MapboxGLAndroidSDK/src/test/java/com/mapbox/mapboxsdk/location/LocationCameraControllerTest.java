@@ -283,13 +283,22 @@ public class LocationCameraControllerTest {
   @Test
   public void onNewLatLngValue_focalPointIsAdjusted() {
     MapboxMap mapboxMap = mock(MapboxMap.class);
-    UiSettings uiSettings = mock(UiSettings.class);
-    when(mapboxMap.getUiSettings()).thenReturn(uiSettings);
+    Transform transform = mock(Transform.class);
+
+    final MapboxMap.OnCameraMoveListener[] listener = {null};
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) {
+        listener[0] = (MapboxMap.OnCameraMoveListener) invocation.getArguments()[0];
+        return null;
+      }
+    }).when(mapboxMap).addOnCameraMoveListener(any(MapboxMap.OnCameraMoveListener.class));
+
     Projection projection = mock(Projection.class);
     PointF pointF = mock(PointF.class);
     when(projection.toScreenLocation(any(LatLng.class))).thenReturn(pointF);
     when(mapboxMap.getProjection()).thenReturn(projection);
-    LocationCameraController camera = buildCamera(mapboxMap);
+    LocationCameraController camera = buildCamera(mapboxMap, transform);
     LocationComponentOptions options = mock(LocationComponentOptions.class);
     when(options.trackingGesturesManagement()).thenReturn(true);
     camera.initializeOptions(options);
@@ -297,7 +306,12 @@ public class LocationCameraControllerTest {
     LatLng latLng = mock(LatLng.class);
 
     getAnimationListener(ANIMATOR_CAMERA_LATLNG, camera.getAnimationListeners()).onNewAnimationValue(latLng);
+    verify(transform).moveCamera(any(MapboxMap.class), any(CameraUpdate.class),
+      nullable(MapboxMap.CancelableCallback.class));
 
+    UiSettings uiSettings = mock(UiSettings.class);
+    when(mapboxMap.getUiSettings()).thenReturn(uiSettings);
+    listener[0].onCameraMove();
     verify(uiSettings).setFocalPoint(pointF);
   }
 
