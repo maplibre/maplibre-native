@@ -2,13 +2,16 @@ package com.mapbox.mapboxsdk.maps.renderer.egl;
 
 import android.opengl.GLSurfaceView;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +77,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     int[] numConfigs = getNumberOfConfigurations(egl, display, configAttribs);
     if (numConfigs[0] < 1) {
       Logger.e(TAG, "eglChooseConfig() returned no configs.");
-      throw new EGLConfigException("eglChooseConfig() failed");
     }
 
     // Get all possible configurations
@@ -84,7 +86,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     EGLConfig config = chooseBestMatchConfig(egl, display, possibleConfigurations);
     if (config == null) {
       Logger.e(TAG, "No config chosen");
-      throw new EGLConfigException("No config chosen");
     }
 
     return config;
@@ -97,7 +98,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
       Logger.e(TAG, String.format(
         MapboxConstants.MAPBOX_LOCALE, "eglChooseConfig(NULL) returned error %d", egl.eglGetError())
       );
-      throw new EGLConfigException("eglChooseConfig() failed");
     }
     return numConfigs;
   }
@@ -110,7 +110,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
       Logger.e(TAG, String.format(
         MapboxConstants.MAPBOX_LOCALE, "eglChooseConfig() returned error %d", egl.eglGetError())
       );
-      throw new EGLConfigException("eglChooseConfig() failed");
     }
     return configs;
   }
@@ -259,7 +258,8 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     Collections.sort(matches);
 
     if (matches.size() == 0) {
-      throw new EGLConfigException("No matching configurations after filtering");
+      Logger.e(TAG, "No matching configurations after filtering");
+      return null;
     }
 
     Config bestMatch = matches.get(0);
@@ -281,7 +281,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
       Logger.e(TAG, String.format(
         MapboxConstants.MAPBOX_LOCALE, "eglGetConfigAttrib(%d) returned error %d", attributeName, egl.eglGetError())
       );
-      throw new EGLConfigException("eglGetConfigAttrib() failed");
     }
     return attributevalue[0];
   }

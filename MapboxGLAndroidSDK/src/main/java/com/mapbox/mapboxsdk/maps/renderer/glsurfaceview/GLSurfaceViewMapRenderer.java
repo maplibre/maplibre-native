@@ -2,10 +2,13 @@ package com.mapbox.mapboxsdk.maps.renderer.glsurfaceview;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.maps.renderer.MapRenderer;
 import com.mapbox.mapboxsdk.maps.renderer.egl.EGLConfigChooser;
+import com.mapbox.mapboxsdk.maps.renderer.egl.EGLContextFactory;
+import com.mapbox.mapboxsdk.maps.renderer.egl.EGLWindowSurfaceFactory;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -28,7 +31,8 @@ public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceVi
                                   String localIdeographFontFamily) {
     super(context, localIdeographFontFamily);
     this.glSurfaceView = glSurfaceView;
-    glSurfaceView.setEGLContextClientVersion(2);
+    glSurfaceView.setEGLContextFactory(new EGLContextFactory());
+    glSurfaceView.setEGLWindowSurfaceFactory(new EGLWindowSurfaceFactory());
     glSurfaceView.setEGLConfigChooser(new EGLConfigChooser());
     glSurfaceView.setRenderer(this);
     glSurfaceView.setRenderMode(RENDERMODE_WHEN_DIRTY);

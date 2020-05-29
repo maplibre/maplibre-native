@@ -1,6 +1,5 @@
 package com.mapbox.mapboxsdk.testapp.maps
 
-import android.opengl.GLSurfaceView
 import android.view.TextureView
 import android.view.ViewGroup
 import androidx.test.annotation.UiThreadTest
@@ -9,6 +8,7 @@ import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions
+import com.mapbox.mapboxsdk.maps.renderer.glsurfaceview.MapboxGLSurfaceView
 import com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity
 import java.util.concurrent.CountDownLatch
 import junit.framework.Assert.assertNotNull
@@ -34,7 +34,7 @@ class RenderViewGetterTest : AppCenter() {
     rootView = rule.activity.findViewById(android.R.id.content)
     mapView = MapView(rule.activity)
     assertNotNull(mapView.renderView)
-    assertTrue(mapView.renderView is GLSurfaceView)
+    assertTrue(mapView.renderView is MapboxGLSurfaceView)
   }
 
   @Test
