@@ -190,7 +190,7 @@ jobs:
         default: "c++_static"
       image:
         type: string
-        default: android-ndk-r20:7b7c4b42cf
+        default: android-ndk-r21b:a111a5b966
       firebase_device_id:
         type: string
         default: sailfish
@@ -269,7 +269,7 @@ jobs:
   # ------------------------------------------------------------------------------
   android-release:
     docker:
-      - image: mbgl/android-ndk-r20:7b7c4b42cf
+      - image: mbgl/android-ndk-r21b:a111a5b966
     resource_class: xlarge
     working_directory: /src
     environment:
