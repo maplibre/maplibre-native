@@ -361,4 +361,11 @@ jobs:
                 make run-android-upload-to-artifactory
               fi
             fi
+      - run:
+          name: upload debuggable objects to release tag
+          command: |
+            if [[ $CIRCLE_TAG == android-v* ]]; then
+              export GITHUB_TOKEN=${DANGER_GITHUB_API_TOKEN}
+              python3 scripts/upload-to-github-release.py --file MapboxGLAndroidSDK/build/intermediates/cmake/release/debuggable-objects.tar.gz --release $CIRCLE_TAG --project mapbox-gl-native-android
+            fi
       - generate-api-javadoc
