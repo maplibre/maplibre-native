@@ -63,7 +63,8 @@ public final class LocationComponentConstants {
   public static final String SHADOW_LAYER = "mapbox-location-shadow-layer";
 
   /**
-   * Layer ID of the location foreground icon.
+   * Layer ID of the location foreground icon or the only runtime layer added if
+   * {@link LocationComponentActivationOptions#useSpecializedLocationLayer()} is used.
    */
   public static final String FOREGROUND_LAYER = "mapbox-location-foreground-layer";
 
