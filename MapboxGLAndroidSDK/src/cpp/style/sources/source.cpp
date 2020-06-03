@@ -76,6 +76,10 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
     }
 
     Source::~Source() {
+        if (ownedSource) {
+            ownedSource.reset();
+            ownedSource.release();
+        }
         // Before being added to a map, the Java peer owns this C++ peer and cleans
         //  up after itself correctly through the jni native peer bindings.
         // After being added to the map, the ownership is flipped and the C++ peer has a strong reference
@@ -209,7 +213,7 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
 
         // Release the strong reference to the java peer
         assert(javaPeer);
-        javaPeer.release();
+        javaPeer.reset();
 
         rendererFrontend = nullptr;
     }
