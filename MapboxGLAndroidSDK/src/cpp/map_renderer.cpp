@@ -3,6 +3,7 @@
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <string>
 
@@ -37,17 +38,21 @@ std::shared_ptr<Mailbox> MapRenderer::MailboxData::getMailbox() const noexcept {
 MapRenderer::~MapRenderer() = default;
 
 void MapRenderer::reset() {
-    destroyed = true;
+    try {
+        destroyed = true;
 
-    if (renderer) {
-        // Make sure to destroy the renderer on the GL Thread
-        auto self = ActorRef<MapRenderer>(*this, mailboxData.getMailbox());
-        self.ask(&MapRenderer::resetRenderer).wait();
+        if (renderer) {
+            // Make sure to destroy the renderer on the GL Thread
+            auto self = ActorRef<MapRenderer>(*this, mailboxData.getMailbox());
+            self.ask(&MapRenderer::resetRenderer).wait();
+        }
+
+        // Lock to make sure there is no concurrent initialisation on the gl thread
+        std::lock_guard<std::mutex> lock(initialisationMutex);
+        rendererObserver.reset();
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, "MapRenderer::reset failed: %s", exception.what());
     }
-
-    // Lock to make sure there is no concurrent initialisation on the gl thread
-    std::lock_guard<std::mutex> lock(initialisationMutex);
-    rendererObserver.reset();
 }
 
 ActorRef<Renderer> MapRenderer::actor() const {
@@ -55,51 +60,67 @@ ActorRef<Renderer> MapRenderer::actor() const {
 }
 
 void MapRenderer::schedule(std::function<void()> scheduled) {
-    // Create a runnable
-    android::UniqueEnv _env = android::AttachEnv();
-    auto runnable = std::make_unique<MapRendererRunnable>(*_env, std::move(scheduled));
+    try {
+        // Create a runnable
+        android::UniqueEnv _env = android::AttachEnv();
+        auto runnable = std::make_unique<MapRendererRunnable>(*_env, std::move(scheduled));
 
-    // Obtain ownership of the peer (gets transferred to the MapRenderer on the JVM for later GC)
-    auto peer = runnable->peer();
+        // Obtain ownership of the peer (gets transferred to the MapRenderer on the JVM for later GC)
+        auto peer = runnable->peer();
 
-    // Queue the event on the Java Peer
-    static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
-    static auto queueEvent = javaClass.GetMethod<void(
-            jni::Object<MapRendererRunnable>)>(*_env, "queueEvent");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env, queueEvent, peer);
+        // Queue the event on the Java Peer
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
+        static auto queueEvent = javaClass.GetMethod<void(
+                jni::Object<MapRendererRunnable>)>(*_env, "queueEvent");
+        auto weakReference = javaPeer.get(*_env);
+        if (weakReference) {
+            weakReference.Call(*_env, queueEvent, peer);
+        }
+
+        // Release the c++ peer as it will be destroyed on GC of the Java Peer
+        runnable.release();
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, "MapRenderer::schedule failed: %s", exception.what());
     }
-
-    // Release the c++ peer as it will be destroyed on GC of the Java Peer
-    runnable.release();
 }
 
 void MapRenderer::requestRender() {
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
-    static auto onInvalidate = javaClass.GetMethod<void()>(*_env, "requestRender");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env, onInvalidate);
+    try {
+        android::UniqueEnv _env = android::AttachEnv();
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
+        static auto onInvalidate = javaClass.GetMethod<void()>(*_env, "requestRender");
+        auto weakReference = javaPeer.get(*_env);
+        if (weakReference) {
+            weakReference.Call(*_env, onInvalidate);
+        }
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, "MapRenderer::requestRender failed: %s", exception.what());
     }
 }
 
 void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
-    // Lock on the parameters
-    std::lock_guard<std::mutex> lock(updateMutex);
-    updateParameters = std::move(params);
+    try {
+        // Lock on the parameters
+        std::lock_guard<std::mutex> lock(updateMutex);
+        updateParameters = std::move(params);
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, "MapRenderer::update failed: %s", exception.what());
+    }
 }
 
 void MapRenderer::setObserver(std::shared_ptr<RendererObserver> _rendererObserver) {
-    // Lock as the initialization can come from the main thread or the GL thread first
-    std::lock_guard<std::mutex> lock(initialisationMutex);
+    try {
+        // Lock as the initialization can come from the main thread or the GL thread first
+        std::lock_guard<std::mutex> lock(initialisationMutex);
 
-    rendererObserver = std::move(_rendererObserver);
+        rendererObserver = std::move(_rendererObserver);
 
-    // Set the new observer on the Renderer implementation
-    if (renderer) {
-        renderer->setObserver(rendererObserver.get());
+        // Set the new observer on the Renderer implementation
+        if (renderer) {
+            renderer->setObserver(rendererObserver.get());
+        }
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, "MapRenderer::setObserver failed: %s", exception.what());
     }
 }
 
