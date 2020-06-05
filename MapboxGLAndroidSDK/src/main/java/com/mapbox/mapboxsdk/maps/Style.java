@@ -157,7 +157,7 @@ public class Style {
    * Removes the source from the style.
    *
    * @param sourceId the source to remove
-   * @return the source handle or null if the source was not present
+   * @return true if the source was removed, false otherwise
    */
   public boolean removeSource(@NonNull String sourceId) {
     validateState("removeSource");
@@ -169,7 +169,7 @@ public class Style {
    * Removes the source, preserving the reference for re-use
    *
    * @param source the source to remove
-   * @return the source
+   * @return true if the source was removed, false otherwise
    */
   public boolean removeSource(@NonNull Source source) {
     validateState("removeSource");
@@ -274,7 +274,7 @@ public class Style {
    * Removes the layer. Any references to the layer become invalid and should not be used anymore
    *
    * @param layerId the layer to remove
-   * @return the removed layer or null if not found
+   * @return true if the layer was removed, false otherwise
    */
   public boolean removeLayer(@NonNull String layerId) {
     validateState("removeLayer");
@@ -286,7 +286,7 @@ public class Style {
    * Removes the layer. The reference is re-usable after this and can be re-added
    *
    * @param layer the layer to remove
-   * @return the layer
+   * @return true if the layer was removed, false otherwise
    */
   public boolean removeLayer(@NonNull Layer layer) {
     validateState("removeLayer");
@@ -298,7 +298,7 @@ public class Style {
    * Removes the layer. Any other references to the layer become invalid and should not be used anymore
    *
    * @param index the layer index
-   * @return the removed layer or null if not found
+   * @return true if the layer was removed, false otherwise
    */
   public boolean removeLayerAt(@IntRange(from = 0) int index) {
     validateState("removeLayerAt");
