@@ -22,7 +22,7 @@ isLocal = args.dryrun
 
 # request for upload url
 fileName = os.path.basename(filePath)
-githubRelease = requests.get(f"https://api.github.com/repos/mapbox/{project}/releases/tags/{release}")
+githubRelease = requests.get(f"https://api.github.com/repos/mapbox/{project}/releases/tags/{release}", headers={'authorization': f"token {os.environ.get('GITHUB_TOKEN')}"})
 if githubRelease.status_code == 200:
   uploadUrl = re.sub("[\{].*?[\}]", "", githubRelease.json()["upload_url"])
   print(f"Github upload Url: {uploadUrl}?name={fileName}")
