@@ -35,29 +35,31 @@ class FileSourceStandaloneTest : AppCenter() {
   @Test
   @UiThreadTest
   fun testDefault() {
-    Assert.assertFalse("FileSource should not be active", fileSource.isActivated)
+    Assert.assertTrue("FileSource should be active", fileSource.isActivated)
   }
 
   @Test
   @UiThreadTest
   fun testActivateDeactivate() {
-    Assert.assertFalse("1) FileSource should not be active", fileSource.isActivated)
-    fileSource.activate()
-    Assert.assertTrue("2) FileSource should be active", fileSource.isActivated)
+    Assert.assertTrue("1) FileSource should be active", fileSource.isActivated)
     fileSource.deactivate()
-    Assert.assertFalse("3) FileSource should not be active", fileSource.isActivated)
+    Assert.assertFalse("2) FileSource should not be active", fileSource.isActivated)
+    fileSource.activate()
+    Assert.assertTrue("3) FileSource should be active", fileSource.isActivated)
   }
 
   @Test
   fun pathChangeTest() {
-    Assert.assertFalse("FileSource should not be active", fileSource.isActivated)
+    Assert.assertTrue("FileSource should be active", fileSource.isActivated)
     Assert.assertEquals(fileSourceTestUtils.originalPath, FileSource.getResourcesCachePath(rule.activity))
 
     fileSourceTestUtils.changePath(fileSourceTestUtils.testPath)
     Assert.assertEquals(fileSourceTestUtils.testPath, FileSource.getResourcesCachePath(rule.activity))
+    Assert.assertTrue("FileSource should be active", fileSource.isActivated)
 
     fileSourceTestUtils.changePath(fileSourceTestUtils.originalPath)
     Assert.assertEquals(fileSourceTestUtils.originalPath, FileSource.getResourcesCachePath(rule.activity))
+    Assert.assertTrue("FileSource should be active", fileSource.isActivated)
   }
 
   @Test
@@ -93,18 +95,10 @@ class FileSourceStandaloneTest : AppCenter() {
     }
 
     if (!secondLatch.await(5, TimeUnit.SECONDS)) {
-      rule.runOnUiThread {
-        // if we fail to call a callback, the file source is not going to be deactivated
-        fileSource.deactivate()
-      }
       Assert.fail("Second attempt should fail.")
     }
 
     if (!firstLatch.await(5, TimeUnit.SECONDS)) {
-      rule.runOnUiThread {
-        // if we fail to call a callback, the file source is not going to be deactivated
-        fileSource.deactivate()
-      }
       Assert.fail("First attempt should succeed.")
     }
   }

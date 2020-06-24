@@ -39,13 +39,12 @@ open class FileSourceMapTest : AppCenter() {
     rule.activity.runOnUiThread {
       FileSource.setResourcesCachePath(fileSourceTestUtils.testPath, object : FileSource.ResourcesCachePathChangeCallback {
         override fun onSuccess(path: String) {
-          Assert.fail("Requested resources change while the map is running should fail")
+          latch.countDown()
+          Assert.assertEquals(fileSourceTestUtils.testPath, path)
         }
 
         override fun onError(message: String) {
-          Assert.assertEquals("Cannot set path, file source is activated." +
-            " Make sure that the map or a resources download is not running.", message)
-          latch.countDown()
+          Assert.fail("Resources path can be changed while the map is running")
         }
       })
     }

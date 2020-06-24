@@ -19,7 +19,8 @@ namespace android {
 
 // FileSource //
 
-FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const jni::String& _cachePath) {
+FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const jni::String& _cachePath)
+:activationCounter( optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
 
@@ -140,11 +141,6 @@ void FileSource::resume(jni::JNIEnv&) {
         return;
     }
 
-    if (!activationCounter) {
-        activationCounter = optional<int>(1) ;
-        return;
-    }
-
     activationCounter.value()++;
     if (activationCounter == 1) {
         resourceLoader->resume();
@@ -156,19 +152,14 @@ void FileSource::pause(jni::JNIEnv&) {
         return;
     }
 
-    if (activationCounter) {
-        activationCounter.value()--;
-        if (activationCounter == 0) {
-            resourceLoader->pause();
-        }
+    activationCounter.value()--;
+    if (activationCounter == 0) {
+        resourceLoader->pause();
     }
 }
 
-jni::jboolean FileSource::isResumed(jni::JNIEnv&) {
-    if (activationCounter) {
-       return  (jboolean) (activationCounter > 0);
-    }
-    return (jboolean) false;
+jni::jboolean FileSource::isResumed(jni::JNIEnv &) {
+    return (jboolean) (activationCounter > 0);
 }
 
 FileSource* FileSource::getNativePeer(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource) {
