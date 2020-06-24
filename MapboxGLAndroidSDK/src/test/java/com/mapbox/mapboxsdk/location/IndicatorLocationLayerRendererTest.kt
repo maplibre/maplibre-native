@@ -119,7 +119,7 @@ class IndicatorLocationLayerRendererTest {
       layer.setProperties(
         LocationPropertyFactory.topImage(""),
         LocationPropertyFactory.bearingImage(FOREGROUND_ICON),
-        LocationPropertyFactory.shadowImage("")
+        LocationPropertyFactory.shadowImage(BACKGROUND_ICON)
       )
     }
     verify { layer.setProperties(LocationPropertyFactory.accuracyRadius(0f)) }
@@ -159,7 +159,7 @@ class IndicatorLocationLayerRendererTest {
       layer.setProperties(
         LocationPropertyFactory.topImage(""),
         LocationPropertyFactory.bearingImage(FOREGROUND_STALE_ICON),
-        LocationPropertyFactory.shadowImage("")
+        LocationPropertyFactory.shadowImage(BACKGROUND_STALE_ICON)
       )
     }
     verify { layer.setProperties(LocationPropertyFactory.accuracyRadius(0f)) }

@@ -219,7 +219,7 @@ class IndicatorLocationLayerRenderer implements LocationLayerRenderer {
       case RenderMode.GPS:
         topImage = "";
         bearingImage = isStale ? FOREGROUND_STALE_ICON : FOREGROUND_ICON;
-        shadowImage = "";
+        shadowImage = isStale ? BACKGROUND_STALE_ICON : BACKGROUND_ICON;
         setAccuracyRadius(0f);
         break;
       case RenderMode.NORMAL:
