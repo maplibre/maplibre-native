@@ -14,8 +14,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Projection
 import io.mockk.*
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +39,12 @@ class LocationAnimatorCoordinatorTest {
       animatorProvider)
     configureAnimatorProvider()
     every { projection.getMetersPerPixelAtLatitude(any()) } answers { 1.0 }
-    every { animatorSetProvider.startAnimation(any(), any(), any()) } answers {}
+    val startedAnimatorsSlot = slot<List<Animator>>()
+    every { animatorSetProvider.startAnimation(capture(startedAnimatorsSlot), any(), any()) } answers {
+      startedAnimatorsSlot.captured.forEach {
+        it.start()
+      }
+    }
     locationAnimatorCoordinator.updateAnimatorListenerHolders(getListenerHoldersSet(
       ANIMATOR_LAYER_LATLNG,
       ANIMATOR_CAMERA_LATLNG,
@@ -460,9 +464,11 @@ class LocationAnimatorCoordinatorTest {
   @Test
   fun cancelAllAnimators() {
     locationAnimatorCoordinator.feedNewLocation(Location(""), cameraPosition, true)
+    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG].isStarted)
+
     locationAnimatorCoordinator.cancelAllAnimations()
 
-    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG] == null)
+    assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG].isStarted)
   }
 
   @Test
@@ -473,9 +479,11 @@ class LocationAnimatorCoordinatorTest {
       DEFAULT_TRACKING_ZOOM_ANIM_DURATION,
       null
     )
+    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_ZOOM].isStarted)
+
     locationAnimatorCoordinator.cancelZoomAnimation()
 
-    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_ZOOM] == null)
+    assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_ZOOM].isStarted)
   }
 
   @Test
@@ -486,10 +494,11 @@ class LocationAnimatorCoordinatorTest {
       DEFAULT_TRACKING_TILT_ANIM_DURATION,
       null
     )
+    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_TILT].isStarted)
 
     locationAnimatorCoordinator.cancelTiltAnimation()
 
-    assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_TILT] == null)
+    assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_TILT].isStarted)
   }
 
   @Test
@@ -568,7 +577,7 @@ class LocationAnimatorCoordinatorTest {
     val animator = locationAnimatorCoordinator.animatorArray.get(ANIMATOR_LAYER_ACCURACY)
     animator.onAnimationUpdate(valueAnimator)
 
-    verify(exactly = 0) { listener.onNewAnimationValue(any()) }
+    verify(exactly = 0) { listener.onNewAnimationValue(10f) }
   }
 
   @Test
@@ -642,7 +651,7 @@ class LocationAnimatorCoordinatorTest {
   private fun getListenerHoldersSet(vararg animatorTypes: Int): Set<AnimatorListenerHolder> {
     return HashSet<AnimatorListenerHolder>().also {
       for (type in animatorTypes) {
-        it.add(AnimatorListenerHolder(type, mockk()))
+        it.add(AnimatorListenerHolder(type, mockk(relaxUnitFun = true)))
       }
     }
   }

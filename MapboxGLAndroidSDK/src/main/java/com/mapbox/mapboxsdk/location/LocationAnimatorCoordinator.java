@@ -502,7 +502,6 @@ final class LocationAnimatorCoordinator {
       animator.cancel();
       animator.removeAllUpdateListeners();
       animator.removeAllListeners();
-      animatorArray.put(animatorType, null);
     }
   }
 
