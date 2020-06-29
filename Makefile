@@ -241,10 +241,10 @@ apackage: gradle/configuration.gradle
 android-ui-test: gradle/configuration.gradle
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDKTestApp:assembleDebug :MapboxGLAndroidSDKTestApp:assembleAndroidTest
 
-#Run instrumentations tests on MicroSoft App Center
+#Run instrumentations tests on MicroSoft App Center, ${devices} can be "xiaomi","huawei","OnePlus","htc"
 .PHONY: run-android-test-app-center
 run-android-test-app-center:
-	appcenter test run espresso --app "mapboxcn-outlook.com/MapsSdk" --devices "mapboxcn-outlook.com/china" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug
+	appcenter test run espresso --app "Mapbox-mobile/Maps-sdk" --devices "Mapbox-mobile/${devices}" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug --token ${APPCENTER_ACCESS_TOKEN}
 
 # Uploads the compiled Android SDK to Bintray
 .PHONY: run-android-upload-to-bintray
