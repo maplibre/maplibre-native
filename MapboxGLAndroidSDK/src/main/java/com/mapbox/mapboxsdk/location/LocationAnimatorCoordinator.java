@@ -114,9 +114,9 @@ final class LocationAnimatorCoordinator {
     // replace the animation start with the camera's previous value
     latLngValues[0] = previousCameraLatLng;
     if (isGpsNorth) {
-      bearingValues = new Float[] {previousCameraBearing, 0f};
+      bearingValues = new Float[] {previousCameraBearing, shortestRotation(0f, previousCameraBearing)};
     } else {
-      bearingValues[0] = previousCameraBearing;
+      bearingValues = getBearingValues(previousCameraBearing, newLocations);
     }
     updateCameraAnimators(latLngValues, bearingValues);
 

@@ -172,6 +172,35 @@ class LocationAnimatorCoordinatorTest {
   }
 
   @Test
+  fun feedNewLocation_animatorValue_bearing() {
+    val previous = Location("")
+    previous.latitude = 51.1
+    previous.longitude = 17.1
+    previous.bearing = 355f
+
+    val current = Location("")
+    current.latitude = 51.2
+    current.longitude = 17.2
+    current.bearing = 0f
+
+    locationAnimatorCoordinator.feedNewLocation(arrayOf(previous, current), cameraPosition, false, false)
+
+    verify {
+      animatorProvider.floatAnimator(
+        arrayOf(0f, -5f, 0f), any(), any()
+      )
+    }
+
+    locationAnimatorCoordinator.feedNewLocation(arrayOf(previous, current), cameraPosition, true, false)
+
+    verify {
+      animatorProvider.floatAnimator(
+        arrayOf(0f, 0f), any(), any()
+      )
+    }
+  }
+
+  @Test
   fun feedNewLocation_animatorValue_multiplePoints_animationDuration() {
     every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10000.0 } // disable snap
     val locationInter = Location("")
