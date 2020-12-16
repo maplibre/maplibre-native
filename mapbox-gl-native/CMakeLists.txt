@@ -1005,7 +1005,7 @@ set_target_properties(
     mbgl-core
     PROPERTIES
         INTERFACE_MAPBOX_NAME "Mapbox GL Native"
-        INTERFACE_MAPBOX_URL "https://github.com/mapbox/mapbox-gl-native"
+        INTERFACE_MAPBOX_URL "https://github.com/maptiler/maptiler-gl-mobile"
         INTERFACE_MAPBOX_AUTHOR "Mapbox"
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
