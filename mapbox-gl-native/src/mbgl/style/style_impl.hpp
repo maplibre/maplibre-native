@@ -1,0 +1,142 @@
+#pragma once
+
+#include <mbgl/style/style.hpp>
+#include <mbgl/style/transition_options.hpp>
+#include <mbgl/style/observer.hpp>
+#include <mbgl/style/source_observer.hpp>
+#include <mbgl/style/layer_observer.hpp>
+#include <mbgl/style/light_observer.hpp>
+#include <mbgl/sprite/sprite_loader_observer.hpp>
+#include <mbgl/style/image.hpp>
+#include <mbgl/style/source.hpp>
+#include <mbgl/style/layer.hpp>
+#include <mbgl/style/collection.hpp>
+
+#include <mbgl/map/camera.hpp>
+
+#include <mbgl/util/noncopyable.hpp>
+#include <mbgl/util/optional.hpp>
+#include <mbgl/util/geo.hpp>
+
+#include <memory>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+namespace mbgl {
+
+class FileSource;
+class AsyncRequest;
+class SpriteLoader;
+
+namespace style {
+
+class Style::Impl : public SpriteLoaderObserver,
+                    public SourceObserver,
+                    public LayerObserver,
+                    public LightObserver,
+                    public util::noncopyable {
+public:
+    Impl(std::shared_ptr<FileSource>, float pixelRatio);
+    ~Impl() override;
+
+    void loadJSON(const std::string&);
+    void loadURL(const std::string&);
+
+    std::string getJSON() const;
+    std::string getURL() const;
+
+    void setObserver(Observer*);
+
+    bool isLoaded() const;
+
+    std::exception_ptr getLastError() const {
+        return lastError;
+    }
+
+    std::vector<      Source*> getSources();
+    std::vector<const Source*> getSources() const;
+    Source* getSource(const std::string& id) const;
+
+    void addSource(std::unique_ptr<Source>);
+    std::unique_ptr<Source> removeSource(const std::string& sourceID);
+
+    std::vector<      Layer*> getLayers();
+    std::vector<const Layer*> getLayers() const;
+    Layer* getLayer(const std::string& id) const;
+
+    Layer* addLayer(std::unique_ptr<Layer>, const optional<std::string>& beforeLayerID = {});
+    std::unique_ptr<Layer> removeLayer(const std::string& layerID);
+
+    std::string getName() const;
+    CameraOptions getDefaultCamera() const;
+
+    TransitionOptions getTransitionOptions() const;
+    void setTransitionOptions(const TransitionOptions&);
+
+    void setLight(std::unique_ptr<Light>);
+    Light* getLight() const;
+
+    optional<Immutable<style::Image::Impl>> getImage(const std::string&) const;
+    void addImage(std::unique_ptr<style::Image>);
+    void removeImage(const std::string&);
+
+    const std::string& getGlyphURL() const;
+
+    using ImageImpls = std::vector<Immutable<Image::Impl>>;
+    Immutable<ImageImpls> getImageImpls() const;
+    Immutable<std::vector<Immutable<Source::Impl>>> getSourceImpls() const;
+    Immutable<std::vector<Immutable<Layer::Impl>>> getLayerImpls() const;
+
+    void dumpDebugLogs() const;
+
+    bool mutated = false;
+    bool loaded = false;
+    bool spriteLoaded = false;
+
+private:
+    void parse(const std::string&);
+
+    std::shared_ptr<FileSource> fileSource;
+
+    std::string url;
+    std::string json;
+
+    std::unique_ptr<AsyncRequest> styleRequest;
+    std::unique_ptr<SpriteLoader> spriteLoader;
+
+    std::string glyphURL;
+    Immutable<ImageImpls> images = makeMutable<ImageImpls>();
+    CollectionWithPersistentOrder<Source> sources;
+    Collection<Layer> layers;
+    TransitionOptions transitionOptions;
+    std::unique_ptr<Light> light;
+
+    // Defaults
+    std::string name;
+    CameraOptions defaultCamera;
+
+    // SpriteLoaderObserver implementation.
+    void onSpriteLoaded(std::vector<Immutable<style::Image::Impl>>) override;
+    void onSpriteError(std::exception_ptr) override;
+
+    // SourceObserver implementation.
+    void onSourceLoaded(Source&) override;
+    void onSourceChanged(Source&) override;
+    void onSourceError(Source&, std::exception_ptr) override;
+    void onSourceDescriptionChanged(Source&) override;
+
+    // LayerObserver implementation.
+    void onLayerChanged(Layer&) override;
+
+    // LightObserver implementation.
+    void onLightChanged(const Light&) override;
+
+    Observer nullObserver;
+    Observer* observer = &nullObserver;
+
+    std::exception_ptr lastError;
+};
+
+} // namespace style
+} // namespace mbgl

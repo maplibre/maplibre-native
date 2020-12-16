@@ -1,0 +1,3 @@
+# Integrating a custom build of the Mapbox Maps SDK for macOS into your application
+
+The [Mapbox Maps SDK for macOS](https://mapbox.github.io/mapbox-gl-native/macos/) moved out of this repository [in late 2019](https://github.com/mapbox/mapbox-gl-native/issues/15971). To build a development version of the SDK for use in your own Cocoa application, see the instructions now located [in the mapbox-gl-native-ios repository](https://github.com/mapbox/mapbox-gl-native-ios/tree/master/platform/macos/INSTALL.md). To use a production-ready version of the SDK, see the [Mapbox Maps SDK for macOS homepage](https://mapbox.github.io/mapbox-gl-native/macos/).

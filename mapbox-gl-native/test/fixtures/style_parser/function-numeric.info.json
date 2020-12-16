@@ -1,0 +1,7 @@
+{
+    "default": {
+        "log": [
+            [1, "WARNING", "ParseStyle", "function stop must be an array"]
+        ]
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "version": 8,
+  "sources": {
+    "fake": {
+      "type": "vector",
+      "tiles": ["fake"]
+    }
+  },
+  "layers": [{
+    "id": "annotation",
+    "type": "fill",
+    "source": "fake",
+    "source-layer": "fake",
+    "layout": {
+      "visibility": "none"
+    },
+    "paint": {
+      "fill-color": "rgba(255,0,0,1)"
+    }
+  }]
+}

@@ -1,0 +1,18 @@
+{
+   Valgrind x Mesa
+   Memcheck:Cond
+   ...
+   obj:*/swrast_dri.*
+   obj:*/swrast_dri.*
+   obj:*/swrast_dri.*
+   ...
+}
+{
+   Valgrind x Mesa
+   Memcheck:Value8
+   ...
+   obj:*/swrast_dri.*
+   obj:*/swrast_dri.*
+   obj:*/swrast_dri.*
+   ...
+}
