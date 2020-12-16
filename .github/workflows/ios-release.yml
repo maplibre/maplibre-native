@@ -5,7 +5,7 @@ on:
     tags:
       - ios-v*
     branches:
-      - main   
+      - master   
   
 jobs:
   build:

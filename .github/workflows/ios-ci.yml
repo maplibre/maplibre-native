@@ -8,10 +8,10 @@ on:
     paths-ignore:
       - "mapbox-gl-native-android/**"      
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main   
+      - master   
 
 jobs:
   build:
