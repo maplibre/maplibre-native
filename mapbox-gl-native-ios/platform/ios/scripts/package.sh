@@ -59,7 +59,7 @@ fi
 
 step "Recording library version…"
 VERSION="${OUTPUT}"/version.txt
-echo -n "https://github.com/mapbox/mapbox-gl-native-ios/commit/" > ${VERSION}
+echo -n "https://github.com/maptiler/mapbox-gl-mobile/commit/" > ${VERSION}
 HASH=`git log | head -1 | awk '{ print $2 }' | cut -c 1-10` && true
 echo -n "mapbox-gl-native-ios "
 echo ${HASH}

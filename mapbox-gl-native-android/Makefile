@@ -256,6 +256,11 @@ run-android-upload-to-bintray: gradle/configuration.gradle
 run-android-upload-to-artifactory: gradle/configuration.gradle
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:artifactoryPublish
 
+# Uploads the compiled Android SDK to maven github package registry
+.PHONY: android-maven-publish
+android-maven-publish: gradle/configuration.gradle
+	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:publish	
+
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
 android-gfxinfo:

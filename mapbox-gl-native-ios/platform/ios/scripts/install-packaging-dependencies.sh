@@ -4,7 +4,7 @@ set -euo pipefail
 
 COCOAPODS_VERSION="1.7.5"
 JAZZY_VERSION="0.11.1"
-CIRCLECI=${CIRCLECI:-false}
+CILAUNCH=${CILAUNCH:-false}
 
 function step { >&2 echo -e "\033[1m\033[36m* $@\033[0m"; }
 function finish { >&2 echo -en "\033[0m"; }
@@ -21,25 +21,6 @@ else
     echo "Found awscli"
 fi
 
-##
-## cocoapods
-##
-if [[ -z `which pod` || $(pod --version) != "${COCOAPODS_VERSION}" ]]; then
-    step "Installing cocoapods…"
-
-    if [[ "${CIRCLECI}" == true ]]; then
-        sudo gem install cocoapods -v $COCOAPODS_VERSION --no-document
-    else
-        gem install cocoapods -v $COCOAPODS_VERSION --no-document
-    fi
-
-    if [ -z `which pod` ]; then
-        echo "Unable to install cocoapods ($COCOAPODS_VERSION)."
-        exit 1
-    fi
-else
-    echo "Found cocoapods (${COCOAPODS_VERSION})"
-fi
 
 ##
 ## jazzy
@@ -47,7 +28,7 @@ fi
 if [[ -z `which jazzy` || $(jazzy -v) != "jazzy version: ${JAZZY_VERSION}" ]]; then
     step "Installing jazzy…"
 
-    if [[ "${CIRCLECI}" == true ]]; then
+    if [[ "${CILAUNCH}" == true ]]; then
         sudo gem install jazzy -v $JAZZY_VERSION --no-document
     else
         gem install jazzy -v $JAZZY_VERSION --no-document

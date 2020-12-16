@@ -1,0 +1,100 @@
+name: ios-ci
+
+on:
+  workflow_dispatch:
+  push:
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - "mapbox-gl-native-android/**"      
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main   
+
+jobs:
+  build:
+    #runs-on: [self-hosted, petr-macos-vbox1]
+    runs-on: [self-hosted, petr-self-hosted]
+    env:
+      BUILDTYPE: Debug
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    defaults:
+      run:
+        working-directory: mapbox-gl-native-ios
+        shell: bash 
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      
+      - name: Install macos dependencies
+        run: |
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list pkg-config || brew install pkg-config
+          brew list glfw3 || brew install glfw3
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: /user/local/lib/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: npm install
+        run: npm install --ignore-scripts          
+
+      - name: Prepare ccache
+        run: ccache --clear       
+
+      - name: Cache ccache
+        uses: actions/cache@v2
+        env:
+          cache-name: ccache-v1     
+        with:
+          path: ~/.ccache'
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats
+          ccache --max-size=2G
+          ccache --show-stats            
+
+      - name: Install iOS packaging dependencies
+        run: |
+          ./platform/ios/scripts/install-packaging-dependencies.sh
+        env:
+          CILAUNCH: true
+      
+      - name: Check debug symbols
+        run: make darwin-check-public-symbols
+
+      - name: Lint plist files
+        run: make ios-lint-plist
+
+      - name: Running ios unit tests
+        run: make ios-test
+
+      - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
+        run: make ios-sanitize      
+
+      - name: Build and run SDK unit tests with address sanitizer
+        run: make ios-sanitize-address
+
+      - name: Build and run SDK unit tests with the static analyzer
+        run: make ios-static-analyzer

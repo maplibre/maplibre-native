@@ -18,23 +18,23 @@ else
     PUBLISH_STYLE=""
 fi
 
-GITHUB_REPO=${GITHUB_REPO:-'mapbox-gl-native-ios'}
+GITHUB_REPO=${GITHUB_REPO:-'maptiler-gl-native'}
 
 #
 # zip
 #
 cd build/ios/pkg
-ZIP_FILENAME="mapbox-ios-sdk-${PUBLISH_VERSION}${PUBLISH_STYLE}.zip"
-step "Compressing ${ZIP_FILENAME}…"
-rm -f ../${ZIP_FILENAME}
-zip -yr ../${ZIP_FILENAME} *
+BINARY_ARTIFACT_ZIP_FILE="mapbox-ios-sdk-${PUBLISH_VERSION}${PUBLISH_STYLE}.zip"
+step "Compressing ${BINARY_ARTIFACT_ZIP_FILE}…"
+rm -f ../${BINARY_ARTIFACT_ZIP_FILE}
+zip -yr ../${BINARY_ARTIFACT_ZIP_FILE} *
 cd ..
 
 #
 # report file sizes
 #
 step "Echoing file sizes…"
-du -sh ${ZIP_FILENAME}
+du -sh ${BINARY_ARTIFACT_ZIP_FILE}
 du -sch pkg/*
 du -sch pkg/dynamic/*
 
@@ -51,11 +51,13 @@ if [ -n "${CI:-}" ]; then
     PROGRESS="--no-progress"
 fi
 
-step "Uploading ${ZIP_FILENAME} to s3… ${DRYRUN}"
+step "Uploading ${BINARY_ARTIFACT_ZIP_FILE} to s3… ${DRYRUN}"
 
-aws s3 cp ${ZIP_FILENAME} s3://mapbox/mapbox-gl-native/ios/builds/ --acl public-read ${PROGRESS} ${DRYRUN}
-S3_URL=https://mapbox.s3.amazonaws.com/mapbox-gl-native/ios/builds/${ZIP_FILENAME}
-echo "URL: ${S3_URL}"
+aws s3 cp ${BINARY_ARTIFACT_ZIP_FILE} s3://mapbox-gl-native/ios/builds --acl public-read ${PROGRESS} ${DRYRUN}
+BINARY_ARTIFACT_URL=https://mapbox-gl-native.s3.us-east-2.amazonaws.com/ios/builds/${BINARY_ARTIFACT_ZIP_FILE}
+export BINARY_ARTIFACT_URL
+export BINARY_ARTIFACT_ZIP_FILE
+echo "URL: ${BINARY_ARTIFACT_URL}"
 echo "mapbox-gl-native is currently hardcoded"
 
 #
@@ -63,10 +65,10 @@ echo "mapbox-gl-native is currently hardcoded"
 #
 if [[ ${PUBLISH_VERSION} =~ "snapshot" ]]; then
     step "Updating ${PUBLISH_VERSION} to ${PUBLISH_STYLE}…"
-    GENERIC_ZIP_FILENAME="mapbox-ios-sdk-${PUBLISH_VERSION}.zip"
+    GENERIC_BINARY_ARTIFACT_ZIP_FILE="mapbox-ios-sdk-${PUBLISH_VERSION}.zip"
     aws s3 cp \
-        s3://mapbox/mapbox-gl-native/ios/builds/${ZIP_FILENAME} \
-        s3://mapbox/mapbox-gl-native/ios/builds/${GENERIC_ZIP_FILENAME} --acl public-read ${PROGRESS} ${DRYRUN}
+        s3://mapbox-gl-native/ios/builds/${BINARY_ARTIFACT_ZIP_FILE} \
+        s3://mapbox-gl-native/ios/builds/${GENERIC_BINARY_ARTIFACT_ZIP_FILE} --acl public-read ${PROGRESS} ${DRYRUN}
 fi
 
 #
@@ -76,9 +78,9 @@ fi
 step "Validating local and remote checksums…"
 
 if [[ ! ${SKIP_S3-} ]]; then
-    curl --output remote-${ZIP_FILENAME} ${S3_URL}
-    LOCAL_CHECKSUM=$( shasum -a 256 -b ${ZIP_FILENAME} | cut -d ' ' -f 1 )
-    REMOTE_CHECKSUM=$( shasum -a 256 -b remote-${ZIP_FILENAME} | cut -d ' ' -f 1 )
+    curl --output remote-${BINARY_ARTIFACT_ZIP_FILE} ${BINARY_ARTIFACT_URL}
+    LOCAL_CHECKSUM=$( shasum -a 256 -b ${BINARY_ARTIFACT_ZIP_FILE} | cut -d ' ' -f 1 )
+    REMOTE_CHECKSUM=$( shasum -a 256 -b remote-${BINARY_ARTIFACT_ZIP_FILE} | cut -d ' ' -f 1 )
 
     if [ "${LOCAL_CHECKSUM}" == "${REMOTE_CHECKSUM}" ]; then
         echo "Checksums match: ${LOCAL_CHECKSUM}"

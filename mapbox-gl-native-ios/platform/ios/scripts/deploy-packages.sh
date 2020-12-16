@@ -48,11 +48,13 @@ buildPackageStyle() {
 export GITHUB_USER=mapbox
 export GITHUB_REPO=mapbox-gl-native-ios
 export BUILDTYPE=Release
+export PACKAGE_FORMAT=xcframework
 
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
 BINARY_DIRECTORY='build/ios'
-GITHUB_RELEASE=${GITHUB_RELEASE:-true}
+GITHUB_RELEASE=${GITHUB_RELEASE:-false}
+BUILD_FOR_COCOAPODS=${BUILD_FOR_COCOAPODS:-false}
 PUBLISH_PRE_FLAG=''
 
 if [[ -z `which github-release` ]]; then
@@ -70,6 +72,14 @@ fi
 
 if [[ ${GITHUB_RELEASE} = "false" ]]; then
     GITHUB_RELEASE=false # Assign bool, not just a string
+fi
+
+if [[ ${BUILD_FOR_COCOAPODS} = "false" ]]; then
+    BUILD_FOR_COCOAPODS=false # Assign bool, not just a string
+fi
+
+if [[ ${BUILD_FOR_COCOAPODS} = "true" ]]; then
+    BUILD_FOR_COCOAPODS=true # Assign bool, not just a string
 fi
 
 if [[ -z ${VERSION_TAG} ]]; then
@@ -120,10 +130,31 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
 fi
 
 # Used for binary release on Github - includes events SDK
-buildPackageStyle "iframework" "dynamic-with-events"
+buildPackageStyle "${PACKAGE_FORMAT}" "dynamic"
 
-# Used for Cocoapods/Carthage
-buildPackageStyle "iframework" "dynamic"
-buildPackageStyle "iframework SYMBOLS=NO" "stripped-dynamic"
+echo "Binary artifact zip file: ${BINARY_ARTIFACT_ZIP_FILE}"
+echo "Binary artifact url: ${BINARY_ARTIFACT_URL}"
+
+if [[ !-z "${BINARY_ARTIFACT_URL}" ]]; then
+    step "Creating Swift package…"
+
+    rm -f Package.swift
+    cp swift_package_template.swift Package.swift
+    sed -i "s/__PACKAGE_URL__/${BINARY_ARTIFACT_URL}/g" Package.swift
+    CHECKSUM=$(swift package compute-checksum ${BINARY_ARTIFACT_ZIP_FILE})
+    echo "Checksum: ${CHECKSUM}"
+    sed -i "s/__PACKAGE_CHECKSUM__/${CHECKSUM}/g" Package.swift
+    cat Package.swift
+fi
+
+
+if [[ ${BUILD_FOR_COCOAPODS} == true ]]; then
+    # Used for Cocoapods/Carthage
+    buildPackageStyle "${PACKAGE_FORMAT}" "dynamic"
+    buildPackageStyle "${PACKAGE_FORMAT} SYMBOLS=NO" "stripped-dynamic"
+fi
+
+
+
 
 step "Finished deploying ${PUBLISH_VERSION} in $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"

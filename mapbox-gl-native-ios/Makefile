@@ -57,7 +57,7 @@ endif
 .PHONY: default
 default: test
 
-BUILD_DEPS += ./vendor/mapbox-gl-native/CMakeLists.txt
+BUILD_DEPS += ../mapbox-gl-native/CMakeLists.txt
 
 BUILD_DOCS ?= true
 
@@ -150,6 +150,11 @@ ios: $(IOS_PROJ_PATH)
 iproj: $(IOS_PROJ_PATH)
 	xed $(IOS_WORK_PATH)
 
+.PHONY: ios-lint-plist
+ios-lint-plist:
+	find platform/ios/framework -type f -name '*.plist' | xargs plutil -lint
+	find platform/ios/app -type f -name '*.plist' | xargs plutil -lint
+
 .PHONY: ios-lint
 ios-lint: ios-pod-lint
 	find platform/ios/framework -type f -name '*.plist' | xargs plutil -lint
@@ -194,6 +199,11 @@ ipackage%:
 iframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
+
+.PHONY: xcframework
+xcframework: $(IOS_PROJ_PATH)
+	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
+	./platform/ios/scripts/xcpackage.sh
 
 .PHONY: ideploy
 ideploy:
