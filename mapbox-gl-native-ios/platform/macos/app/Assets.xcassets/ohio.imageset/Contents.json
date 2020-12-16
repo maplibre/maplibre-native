@@ -1,0 +1,26 @@
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "filename" : "ohio.pdf",
+      "resizing" : {
+        "mode" : "9-part",
+        "center" : {
+          "mode" : "stretch",
+          "width" : 15,
+          "height" : 18
+        },
+        "cap-insets" : {
+          "bottom" : 3,
+          "top" : 3,
+          "right" : 4,
+          "left" : 5
+        }
+      }
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
