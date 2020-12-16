@@ -6,7 +6,9 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "mapbox-gl-native-android/**"      
+      - "mapbox-gl-native-android/**" 
+      - ".github/**"  
+      - "README.md"             
     branches:
       - master
   pull_request:
