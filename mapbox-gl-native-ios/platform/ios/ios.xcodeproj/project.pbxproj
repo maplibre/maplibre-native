@@ -821,7 +821,7 @@
 		1F7454A61ED08AB400021D39 /* MGLLightTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLLightTest.mm; path = ../../darwin/test/MGLLightTest.mm; sourceTree = "<group>"; };
 		1F78399D235AA1E600D4D606 /* libmbgl-core.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-core.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F7839A3235E11FC00D4D606 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
-		1F7839A5235E137000D4D606 /* sideload_sat.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = sideload_sat.db; path = "../../vendor/mapbox-gl-native/test/fixtures/offline_database/sideload_sat.db"; sourceTree = "<group>"; };
+		1F7839A5235E137000D4D606 /* sideload_sat.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = sideload_sat.db; path = "../../../mapbox-gl-native/test/fixtures/offline_database/sideload_sat.db"; sourceTree = "<group>"; };
 		1F8E8A80233A9FD9009B51ED /* MGLMapViewGestureRecognizerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLMapViewGestureRecognizerTests.mm; sourceTree = "<group>"; };
 		1F95931C1E6DE2E900D5B294 /* MGLNSDateAdditionsTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLNSDateAdditionsTests.mm; path = ../../darwin/test/MGLNSDateAdditionsTests.mm; sourceTree = "<group>"; };
 		1FC4817B2098CBC0000D09B4 /* NSPredicate+MGLPrivateAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSPredicate+MGLPrivateAdditions.h"; sourceTree = "<group>"; };
@@ -1283,8 +1283,8 @@
 		DAC49C621CD07D74009E1AA3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		DAC832642404AF9000A61BF8 /* darwin.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = darwin.xcconfig; path = ../darwin/darwin.xcconfig; sourceTree = "<group>"; };
 		DAC832672404AFBB00A61BF8 /* ci.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = ci.xcconfig; path = ../darwin/ci.xcconfig; sourceTree = "<group>"; };
-		DAC8A47F24527EDB00C795BB /* glyphs.pbf */ = {isa = PBXFileReference; lastKnownFileType = file; name = glyphs.pbf; path = "../../../vendor/mapbox-gl-native/test/fixtures/resources/glyphs.pbf"; sourceTree = "<group>"; };
-		DAC8A4812452971B00C795BB /* mixed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = mixed.json; path = "../../../vendor/mapbox-gl-native/test/fixtures/local_glyphs/mixed.json"; sourceTree = "<group>"; };
+		DAC8A47F24527EDB00C795BB /* glyphs.pbf */ = {isa = PBXFileReference; lastKnownFileType = file; name = glyphs.pbf; path = "../../../../mapbox-gl-native/test/fixtures/resources/glyphs.pbf"; sourceTree = "<group>"; };
+		DAC8A4812452971B00C795BB /* mixed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = mixed.json; path = "../../../../mapbox-gl-native/test/fixtures/local_glyphs/mixed.json"; sourceTree = "<group>"; };
 		DACA86242019218500E9693A /* MGLRasterDEMSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLRasterDEMSource.h; sourceTree = "<group>"; };
 		DACA86252019218500E9693A /* MGLRasterDEMSource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLRasterDEMSource.mm; sourceTree = "<group>"; };
 		DACBC60B20118ABE00C4D7E2 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -3604,6 +3604,7 @@
 				CURRENT_PROJECT_VERSION = 15256;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -3638,18 +3639,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = GJZR2MEM28;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/expected/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/expected/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;
@@ -3689,18 +3690,18 @@
 				DEFINES_MODULE = YES;
 				DYLIB_CURRENT_VERSION = 15256;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -4016,18 +4017,18 @@
 				DEFINES_MODULE = YES;
 				DYLIB_CURRENT_VERSION = 15256;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -4056,18 +4057,18 @@
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DYLIB_CURRENT_VERSION = 15256;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -4095,18 +4096,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = GJZR2MEM28;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/expected/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/expected/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;
@@ -4122,18 +4123,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = GJZR2MEM28;
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include",
-					"$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/expected/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/variant/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geometry.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/value/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/geojson.hpp/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/optional",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/typewrapper/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/mapbox/weak/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include",
+					"$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/expected/include",
 					"$(PROJECT_DIR)/../../platform/darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;

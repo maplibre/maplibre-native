@@ -58,17 +58,17 @@ GCC_WARN_UNUSED_VARIABLE = YES
 
 HEADER_SEARCH_PATHS = $(inherited)
 HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../platform/darwin/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/default/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/platform/darwin/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/deps/variant/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/deps/geometry.hpp/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/deps/geojson.hpp/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/deps/optional"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include"
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../vendor/mapbox-gl-native/vendor/polylabel/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/platform/default/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/platform/darwin/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/deps/variant/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/deps/geometry.hpp/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/deps/geojson.hpp/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/deps/optional"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/rapidjson/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/mapbox-base/extras/expected-lite/include"
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) "$(PROJECT_DIR)/../../../mapbox-gl-native/vendor/polylabel/include"
 
 LD_GENERATE_MAP_FILE = YES
 

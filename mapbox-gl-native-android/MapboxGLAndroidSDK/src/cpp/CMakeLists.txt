@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(../../../vendor/mapbox-gl-native
-                 ../../../vendor/mapbox-gl-native/${ANDROID_ABI})
+add_subdirectory(../../../../mapbox-gl-native
+                 ../../../../mapbox-gl-native/${ANDROID_ABI})
 
 target_compile_options(mbgl-compiler-options INTERFACE -frtti)
 
@@ -188,9 +188,9 @@ add_library(mapbox-gl SHARED
 target_include_directories(
   mapbox-gl
   PRIVATE ${PROJECT_SOURCE_DIR}
-          ../../../vendor/mapbox-gl-native/src
-          ../../../vendor/mapbox-gl-native/platform/android/src
-          ../../../vendor/mapbox-gl-native/platform/default/include)
+          ../../../../mapbox-gl-native/src
+          ../../../../mapbox-gl-native/platform/android/src
+          ../../../../mapbox-gl-native/platform/default/include)
 
 target_compile_options(mapbox-gl
                        PRIVATE $<$<CONFIG:Release>:-Oz>

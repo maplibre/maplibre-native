@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const ejs = require('ejs');
-const spec = require('../vendor/mapbox-gl-native/scripts/style-spec');
+const spec = require('../../mapbox-gl-native/scripts/style-spec');
 const _ = require('lodash');
 
 // FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
@@ -11,7 +11,7 @@ const _ = require('lodash');
 //delete spec.layout_line["line-sort-key"]
 //delete spec.layout_fill["fill-sort-key"]
 
-require('../vendor/mapbox-gl-native/scripts/style-code');
+require('../../mapbox-gl-native/scripts/style-code');
 
 // Specification parsing //
 const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
