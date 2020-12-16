@@ -1,0 +1,60 @@
+[submodule "mapbox-gl-native/mapbox-gl-js"]
+	path = mapbox-gl-native/mapbox-gl-js
+	url = https://github.com/mapbox/mapbox-gl-js.git
+[submodule "mapbox-gl-native/vendor/earcut.hpp"]
+	path = mapbox-gl-native/vendor/earcut.hpp
+	url = https://github.com/mapbox/earcut.hpp.git
+[submodule "mapbox-gl-native/vendor/polylabel"]
+	path = mapbox-gl-native/vendor/polylabel
+	url = https://github.com/mapbox/polylabel.git
+[submodule "mapbox-gl-native/vendor/protozero"]
+	path = mapbox-gl-native/vendor/protozero
+	url = https://github.com/mapbox/protozero.git
+[submodule "mapbox-gl-native/vendor/vector-tile"]
+	path = mapbox-gl-native/vendor/vector-tile
+	url = https://github.com/mapbox/vector-tile.git
+[submodule "mapbox-gl-native/vendor/wagyu"]
+	path = mapbox-gl-native/vendor/wagyu
+	url = https://github.com/mapbox/wagyu.git
+[submodule "mapbox-gl-native/vendor/unique_resource"]
+	path = mapbox-gl-native/vendor/unique_resource
+	url = https://github.com/okdshin/unique_resource.git
+[submodule "mapbox-gl-native/vendor/boost"]
+	path = mapbox-gl-native/vendor/boost
+	url = https://github.com/mapbox/mapbox-gl-native-boost.git
+[submodule "mapbox-gl-native/vendor/benchmark"]
+	path = mapbox-gl-native/vendor/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "mapbox-gl-native/vendor/eternal"]
+	path = mapbox-gl-native/vendor/eternal
+	url = https://github.com/mapbox/eternal.git
+[submodule "mapbox-gl-native/vendor/mapbox-base"]
+	path = mapbox-gl-native/vendor/mapbox-base
+	url = https://github.com/mapbox/mapbox-base.git
+[submodule "mapbox-gl-native/vendor/googletest"]
+	path = mapbox-gl-native/vendor/googletest
+	url = https://github.com/google/googletest.git
+[submodule "mapbox-gl-native/vendor/zip-archive"]
+	path = mapbox-gl-native/vendor/zip-archive
+	url = https://github.com/ZipArchive/ZipArchive.git
+[submodule "mapbox-gl-native/vendor/cpp-httplib"]
+	path = mapbox-gl-native/vendor/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib.git
+[submodule "mapbox-gl-native/vendor/mapbox-gl-native-curl"]
+	path = mapbox-gl-native/vendor/mapbox-gl-native-curl
+	url = https://github.com/mapbox/mapbox-gl-native-curl.git
+[submodule "mapbox-gl-native-android/vendor/mapbox-events-android"]
+	path = mapbox-gl-native-android/vendor/mapbox-events-android
+	url = https://github.com/mapbox/mapbox-events-android.git
+[submodule "mapbox-gl-native-android/vendor/mapbox-java"]
+	path = mapbox-gl-native-android/vendor/mapbox-java
+	url = https://github.com/mapbox/mapbox-java.git
+[submodule "mapbox-gl-native-android/vendor/mapbox-gestures-android"]
+	path = mapbox-gl-native-android/vendor/mapbox-gestures-android
+	url = https://github.com/mapbox/mapbox-gestures-android.git
+[submodule "mapbox-gl-native-ios/platform/ios/vendor/mapbox-events-ios"]
+	path = mapbox-gl-native-ios/platform/ios/vendor/mapbox-events-ios
+	url = https://github.com/mapbox/mapbox-events-ios.git
+[submodule "mapbox-gl-native-ios/platform/darwin/docs/theme"]
+	path = mapbox-gl-native-ios/platform/darwin/docs/theme
+	url = https://github.com/mapbox/jazzy-theme.git
