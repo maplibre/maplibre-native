@@ -10,7 +10,7 @@ on:
       - "README.md"        
 jobs:
   build:
-    runs-on: [self-hosted, petr-ubuntu-acct]
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: mapbox-gl-native-android
@@ -109,30 +109,30 @@ jobs:
       - name: Generate javadoc
         run: make android-javadoc
 
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash  
+      # - name: Log in to Google Cloud Platform
+      #   run: |
+      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+      #       echo "Activating google cloud account..."
+      #       echo "${GLCLOUD_SERVICE_JSON}" > secret.json
+      #       gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
+      #       rm secret.json
+      #     else
+      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
+      #     fi
+      #   shell: bash  
 
-      - name: Run robotest of release Test App on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android run --type robo \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/release/MapboxGLAndroidSDKTestApp-release.apk \
-              --device-ids sailfish --os-version-ids "26" --locales en --orientations portrait --timeout 90s
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping tests..."
-          fi
-        shell: bash     
+      # - name: Run robotest of release Test App on Firebase
+      #   run: |
+      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+      #       gcloud firebase test android run --type robo \
+      #         --app MapboxGLAndroidSDKTestApp/build/outputs/apk/release/MapboxGLAndroidSDKTestApp-release.apk \
+      #         --device-ids sailfish --os-version-ids "26" --locales en --orientations portrait --timeout 90s
+      #     else
+      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping tests..."
+      #     fi
+      #   shell: bash     
 
       # create github release
       - name: Prepare release
@@ -173,7 +173,7 @@ jobs:
         shell: bash                    
 
       # deploy to github maven repo
-      - name: Publish package
-        run: make android-maven-publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Publish package
+      #   run: make android-maven-publish
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
