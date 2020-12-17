@@ -17,8 +17,7 @@ on:
 
 jobs:
   build:
-    #runs-on: [self-hosted, petr-macos-vbox1]
-    runs-on: [self-hosted, petr-self-hosted]
+    runs-on: macos-10.15
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1

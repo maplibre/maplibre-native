@@ -17,7 +17,7 @@ on:
   
 jobs:
   build:
-    runs-on: [self-hosted, petr-ubuntu-acct]
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: mapbox-gl-native-android

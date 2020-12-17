@@ -9,7 +9,7 @@ on:
       - "README.md"      
 jobs:
   build:
-    runs-on: [self-hosted, petr-macos-vbox1]
+    runs-on: macos-10.15
     env:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
