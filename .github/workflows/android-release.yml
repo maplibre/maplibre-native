@@ -123,6 +123,7 @@ jobs:
         shell: bash  
 
       - name: Run robotest of release Test App on Firebase
+        if: ${{ false }} # temporarily disabled
         run: |
           GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
           if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
