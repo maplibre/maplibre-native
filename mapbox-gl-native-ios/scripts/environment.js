@@ -11,7 +11,7 @@ if (pr) {
     const number = +pr.match(/\/(\d+)\/?$/)[1];
     return github.pullRequests.get({
         owner: 'maptiler',
-        repo: 'maptiler-gl-mobile',
+        repo: 'maplibre-gl-native',
         number
     }).then(({data}) => {
         const base = data.base.ref;

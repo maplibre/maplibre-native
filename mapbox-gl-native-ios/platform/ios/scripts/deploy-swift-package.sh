@@ -17,7 +17,7 @@ function finish { >&2 echo -en "\033[0m"; }
 trap finish EXIT
 
 export GITHUB_USER=maptiler
-export GITHUB_REPO=maptiler-gl-mobile
+export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
 
 VERSION_TAG=${VERSION_TAG:-''}
@@ -159,7 +159,7 @@ setTarget "MAPBOX_EVENTS" "${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE}" "${MAP
 
 step "Publishing Swift package…"
 
-DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maptiler-gl-mobile-distribution
+DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maplibre-gl-native-distribution
 
 if [[ -z "${DIST_GITHUB_TOKEN}" ]]; then
     echo "DIST_GITHUB_TOKEN is not set"

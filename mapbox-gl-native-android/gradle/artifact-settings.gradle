@@ -5,12 +5,12 @@ ext {
     mapboxArtifactDescription = 'MapTiler Maps SDK for Android'
     mapboxDeveloperName = 'MapTiler'
     mapboxDeveloperId = 'maptiler'
-    mapboxArtifactUrl = 'https://github.com/maptiler/maptiler-gl-mobile'
-    mapboxArtifactVcsUrl = 'https://github.com/maptiler/maptiler-gl-mobile.git'
-    mapboxArtifactScmUrl = 'scm:git@github.com:maptiler/maptiler-gl-mobile.git'
+    mapboxArtifactUrl = 'https://github.com/maptiler/maplibre-gl-native'
+    mapboxArtifactVcsUrl = 'https://github.com/maptiler/maplibre-gl-native.git'
+    mapboxArtifactScmUrl = 'scm:git@github.com:maptiler/maplibre-gl-native.git'
     mapboxArtifactLicenseName = 'BSD'
     mapboxArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    mapboxPackageRepository = 'https://maven.pkg.github.com/maptiler/maptiler-gl-mobile'
+    mapboxPackageRepository = 'https://maven.pkg.github.com/maptiler/maplibre-gl-native'
     versionName = project.hasProperty('VERSION_NAME') ? project.property('VERSION_NAME') : System.getenv('VERSION_NAME')
 
     mapboxBintrayUserOrg = 'mapbox'

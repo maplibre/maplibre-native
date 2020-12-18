@@ -115,7 +115,7 @@ jobs:
           if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
             echo "Activating google cloud account..."
             echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
+            gcloud auth activate-service-account --key-file secret.json --project maplibre-gl-native
             rm secret.json
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
