@@ -1,0 +1,57 @@
+FROM ubuntu:xenial-20181005
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# Add base filesystems
+ADD filesystem/libsysconfcpus.tar.gz \
+    filesystem/apt-google-cloud-sdk.tar.gz \
+    /
+
+# libsysconfcpus.so can be used to alter the number of CPUs reported by the system
+ENV LD_PRELOAD=/usr/lib/libsysconfcpus.so
+
+# Add apt keys
+RUN set -eu \
+ && (find /tmp/*.gpg | xargs -n1 apt-key add) \
+ && rm /tmp/*.gpg
+
+# Install base packages
+RUN set -eu \
+ && apt-get update \ 
+ && apt-get -y install software-properties-common \
+ && apt-get update \ 
+ && add-apt-repository -y ppa:git-core/ppa \
+ && apt-get update \
+ && apt-get -y install git curl make python3 python3-pip zip unzip ccache openjdk-8-jdk-headless apt-transport-https \
+ && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install CLI tools for CI scripting
+RUN set -eu \
+ && apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0 \
+ && apt-add-repository https://cli.github.com/packages \
+ && apt-get update \
+ && apt-get -y install jq gh \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install Google Cloud SDK
+RUN set -eu \
+ && apt-get update \
+ && apt-get -y install google-cloud-sdk \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install awscli
+RUN set -eu \
+ && pip3 install awscli
+
+# Install Node.js
+# Check https://nodejs.org/en/download/releases/ for releases
+ENV NVM_DIR="/root/.nvm" \
+    PATH="/root/.nvm/versions/node/v10.13.0/bin:$PATH"
+RUN set -e \
+ && git -c advice.detachedHead=false clone https://github.com/creationix/nvm.git -b v0.33.11 --depth=1 "$NVM_DIR" \
+ && . "$NVM_DIR/nvm.sh" \
+ && nvm install v10.13.0
+
+ENV ANDROID_NDK_HOME=/android/sdk/ndk-bundle \
+    ANDROID_HOME=/android/sdk \
+    GRADLE_OPTS=-Dorg.gradle.daemon=false
