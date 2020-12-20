@@ -16,7 +16,7 @@ jobs:
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
       run:
-        working-directory: mapbox-gl-native-ios
+        working-directory: platform/ios
         shell: bash 
 
     steps:

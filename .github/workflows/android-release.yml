@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-        working-directory: mapbox-gl-native-android
+        working-directory: platform/android
     container:
       image: ghcr.io/maptiler/android-ndk-r21b
       credentials:
@@ -45,7 +45,7 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts          
-        working-directory: mapbox-gl-native-android
+        working-directory: platform/android
 
       - name: Prepare ccache
         run: ccache --clear       
@@ -164,7 +164,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: mapbox-gl-native-android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
+          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
           asset_name: MapboxGLAndroidSDK-release.aar
           asset_content_type: application/zip 
 

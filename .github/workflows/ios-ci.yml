@@ -6,7 +6,7 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "mapbox-gl-native-android/**" 
+      - "platform/android/**" 
       - ".github/**"  
       - "README.md"             
     branches:
@@ -24,7 +24,7 @@ jobs:
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
       run:
-        working-directory: mapbox-gl-native-ios
+        working-directory: platform/ios
         shell: bash 
 
     steps:

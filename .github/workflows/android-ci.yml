@@ -6,7 +6,7 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "mapbox-gl-native-ios/**"
+      - "parform/ios/**"
       - ".github/**" 
       - "README.md"      
     branches:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-        working-directory: mapbox-gl-native-android
+        working-directory: platform/android
     container:
       image: ghcr.io/maptiler/android-ndk-r21b
       credentials:
@@ -53,7 +53,7 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts          
-        working-directory: mapbox-gl-native-android
+        working-directory: platform/android
 
       - name: Prepare ccache
         run: ccache --clear       

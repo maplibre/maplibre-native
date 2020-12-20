@@ -23,7 +23,7 @@ jobs:
       - name: Build and push android-base image
         uses: docker/build-push-action@v2
         with:
-          file: ./mapbox-gl-native-android/docker/android-base        
-          context: ./mapbox-gl-native-android/docker
+          file: ./platform/android/docker/android-base        
+          context: ./platform/android/docker
           tags: ghcr.io/maptiler/android-base:latest
           push: true
