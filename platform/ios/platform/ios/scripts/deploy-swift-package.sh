@@ -19,6 +19,7 @@ trap finish EXIT
 export GITHUB_USER=maptiler
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
+export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maplibre-gl-mobile-distribution
 
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
@@ -158,8 +159,6 @@ setTarget "MAPBOX" "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${MAPBOX_ZIP_FILE_U
 setTarget "MAPBOX_EVENTS" "${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE}" "${MAPBOX_EVENTS_ZIP_FILE_URL}"
 
 step "Publishing Swift package…"
-
-DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maplibre-gl-native-distribution
 
 if [[ -z "${DIST_GITHUB_TOKEN}" ]]; then
     echo "DIST_GITHUB_TOKEN is not set"
