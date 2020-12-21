@@ -1,6 +1,7 @@
 name: ios-release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - ios-v*
