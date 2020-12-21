@@ -1,2 +1,5 @@
 /mapbox-gl-native-android/MapboxGLAndroidSDK/mapbox-gl-native
 /mapbox-gl-native-android/MapboxGLAndroidSDKTestApp/mapbox-gl-native
+/platform/android/MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+/platform/android/local.properties
+/platform/android/gradle/configuration.gradle
