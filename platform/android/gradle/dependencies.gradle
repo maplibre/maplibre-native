@@ -37,7 +37,7 @@ ext {
             gms              : '16.0.0',
             jacoco           : '0.8.5',
             appcenter        : '1.4',
-            ktlint           : '0.34.0',
+            ktlint           : '0.40.0',
             commonsIO        : '2.6',
             mapboxSdkVersions: '1.0.1'
     ]

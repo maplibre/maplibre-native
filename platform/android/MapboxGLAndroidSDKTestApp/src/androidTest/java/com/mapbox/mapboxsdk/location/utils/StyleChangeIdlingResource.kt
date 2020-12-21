@@ -11,30 +11,30 @@ import com.mapbox.mapboxsdk.maps.Style
  */
 class StyleChangeIdlingResource : IdlingResource {
 
-  private var callback: IdlingResource.ResourceCallback? = null
-  private var isIdle = true
+    private var callback: IdlingResource.ResourceCallback? = null
+    private var isIdle = true
 
-  override fun getName(): String {
-    return javaClass.simpleName
-  }
-
-  override fun isIdleNow(): Boolean {
-    return isIdle
-  }
-
-  override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
-    this.callback = callback
-  }
-
-  private fun setIdle() {
-    isIdle = true
-    callback?.onTransitionToIdle()
-  }
-
-  fun waitForStyle(mapboxMap: MapboxMap, styleUrl: String) {
-    isIdle = false
-    mapboxMap.setStyle(Style.Builder().fromUri(styleUrl)) {
-      setIdle()
+    override fun getName(): String {
+        return javaClass.simpleName
     }
-  }
+
+    override fun isIdleNow(): Boolean {
+        return isIdle
+    }
+
+    override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
+        this.callback = callback
+    }
+
+    private fun setIdle() {
+        isIdle = true
+        callback?.onTransitionToIdle()
+    }
+
+    fun waitForStyle(mapboxMap: MapboxMap, styleUrl: String) {
+        isIdle = false
+        mapboxMap.setStyle(Style.Builder().fromUri(styleUrl)) {
+            setIdle()
+        }
+    }
 }

@@ -155,9 +155,11 @@ class StyleBuilderTest {
         drawable.intrinsicHeight = 1
         val builder = Style.Builder()
         builder.withImage("id", drawable)
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable)!!,
-                builder.images[0].bitmap)
+                builder.images[0].bitmap
+            )
         )
         assertEquals("id", builder.images[0].id)
         assertEquals(false, builder.images[0].sdf)
@@ -170,9 +172,11 @@ class StyleBuilderTest {
         drawable.intrinsicHeight = 1
         val builder = Style.Builder()
         builder.withImage("id", drawable, true)
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable)!!,
-                builder.images[0].bitmap)
+                builder.images[0].bitmap
+            )
         )
         assertEquals("id", builder.images[0].id)
         assertEquals(true, builder.images[0].sdf)
@@ -188,15 +192,19 @@ class StyleBuilderTest {
         drawable2.intrinsicHeight = 1
         val builder = Style.Builder()
         builder.withDrawableImages(Pair<String, Drawable>("id1", drawable1), Pair<String, Drawable>("id2", drawable2))
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable1)!!,
-                builder.images[0].bitmap)
+                builder.images[0].bitmap
+            )
         )
         assertEquals("id1", builder.images[0].id)
         assertEquals(false, builder.images[0].sdf)
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
-                builder.images[1].bitmap)
+                builder.images[1].bitmap
+            )
         )
         assertEquals("id2", builder.images[1].id)
         assertEquals(false, builder.images[1].sdf)
@@ -212,15 +220,19 @@ class StyleBuilderTest {
         drawable2.intrinsicHeight = 1
         val builder = Style.Builder()
         builder.withDrawableImages(true, Pair<String, Drawable>("id1", drawable1), Pair<String, Drawable>("id2", drawable2))
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable1)!!,
-                builder.images[0].bitmap)
+                builder.images[0].bitmap
+            )
         )
         assertEquals("id1", builder.images[0].id)
         assertEquals(true, builder.images[0].sdf)
-        assertTrue(BitmapUtils.equals(
+        assertTrue(
+            BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
-                builder.images[1].bitmap)
+                builder.images[1].bitmap
+            )
         )
         assertEquals("id2", builder.images[1].id)
         assertEquals(true, builder.images[1].sdf)

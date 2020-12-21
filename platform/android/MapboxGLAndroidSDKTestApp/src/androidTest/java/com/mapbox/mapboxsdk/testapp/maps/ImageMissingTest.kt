@@ -7,66 +7,67 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.activity.espresso.EspressoTestActivity
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @RunWith(AndroidJUnit4::class)
 class ImageMissingTest : AppCenter() {
 
-  @Rule
-  @JvmField
-  var rule = ActivityTestRule(EspressoTestActivity::class.java)
+    @Rule
+    @JvmField
+    var rule = ActivityTestRule(EspressoTestActivity::class.java)
 
-  private lateinit var mapView: MapView
-  private lateinit var latch: CountDownLatch
+    private lateinit var mapView: MapView
+    private lateinit var latch: CountDownLatch
 
-  @Before
-  fun setup() {
-    latch = CountDownLatch(1)
-  }
-
-  @Test
-  fun testMissingImage() {
-    rule.runOnUiThread {
-      initMap(styleJson).addOnStyleImageMissingListener {
-        assertEquals("missing-icon", it)
-        latch.countDown()
-      }
+    @Before
+    fun setup() {
+        latch = CountDownLatch(1)
     }
 
-    if (!latch.await(10, TimeUnit.SECONDS)) {
-      throw TimeoutException()
+    @Test
+    fun testMissingImage() {
+        rule.runOnUiThread {
+            initMap(styleJson).addOnStyleImageMissingListener {
+                assertEquals("missing-icon", it)
+                latch.countDown()
+            }
+        }
+
+        if (!latch.await(10, TimeUnit.SECONDS)) {
+            throw TimeoutException()
+        }
     }
-  }
 
-  @Test
-  fun testMissingImage_invalidSprite() {
-    rule.runOnUiThread {
-      initMap(styleJsonInvalidSprite).addOnStyleImageMissingListener {
-        assertEquals("missing-icon", it)
-        latch.countDown()
-      }
+    @Test
+    fun testMissingImage_invalidSprite() {
+        rule.runOnUiThread {
+            initMap(styleJsonInvalidSprite).addOnStyleImageMissingListener {
+                assertEquals("missing-icon", it)
+                latch.countDown()
+            }
+        }
+
+        if (!latch.await(10, TimeUnit.SECONDS)) {
+            throw TimeoutException()
+        }
     }
 
-    if (!latch.await(10, TimeUnit.SECONDS)) {
-      throw TimeoutException()
+    private fun initMap(style: String): MapView {
+        mapView = rule.activity.findViewById(R.id.mapView)
+        mapView.getMapAsync { it.setStyle(Style.Builder().fromJson(style)) }
+        return mapView
     }
-  }
 
-  private fun initMap(style: String): MapView {
-    mapView = rule.activity.findViewById(R.id.mapView)
-    mapView.getMapAsync { it.setStyle(Style.Builder().fromJson(style)) }
-    return mapView
-  }
-
-  companion object {
-    private const val styleJson = """
+    companion object {
+        private const val styleJson =
+            """
     {
       "version": 8,
       "name": "Mapbox Streets",
@@ -109,7 +110,8 @@ class ImageMissingTest : AppCenter() {
     }
           """
 
-    private const val styleJsonInvalidSprite = """
+        private const val styleJsonInvalidSprite =
+            """
     {
       "version": 8,
       "name": "Mapbox Streets",
@@ -151,5 +153,5 @@ class ImageMissingTest : AppCenter() {
       }]
     }
           """
-  }
+    }
 }

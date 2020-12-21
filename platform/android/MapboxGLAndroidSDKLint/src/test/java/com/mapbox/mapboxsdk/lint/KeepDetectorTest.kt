@@ -9,20 +9,24 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class KeepDetectorTest {
 
-  @Test
-  fun correctClassName() {
-    lint()
-      .allowMissingSdk()
-      .files(java("""
+    @Test
+    fun correctClassName() {
+        lint()
+            .allowMissingSdk()
+            .files(
+                java(
+                    """
         |package foo;
         |
         |import android.support.annotation.Keep;
         |
         |@Keep
         |class TestClass {
-        |}""".trimMargin()))
-      .issues(KeepDetector.ISSUE_NOT_KEPT)
-      .run()
-      .expectClean()
-  }
+        |}""".trimMargin()
+                )
+            )
+            .issues(KeepDetector.ISSUE_NOT_KEPT)
+            .run()
+            .expectClean()
+    }
 }

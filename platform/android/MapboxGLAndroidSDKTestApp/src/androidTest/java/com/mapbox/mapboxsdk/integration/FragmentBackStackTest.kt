@@ -15,31 +15,31 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FragmentBackStackTest : BaseIntegrationTest() {
 
-  @get:Rule
-  var activityRule: ActivityTestRule<FragmentBackStackActivity> = ActivityTestRule(FragmentBackStackActivity::class.java)
+    @get:Rule
+    var activityRule: ActivityTestRule<FragmentBackStackActivity> = ActivityTestRule(FragmentBackStackActivity::class.java)
 
-  @Test
-  @LargeTest
-  fun backPressedOnBackStackResumed() {
-    device.waitForIdle()
-    clickReplaceFragmentButton()
-    device.pressHome()
-    device.waitForIdle()
-    device.launchActivity(activityRule.activity.applicationContext, FragmentBackStackActivity::class.java)
-    backPressBackStack()
-    device.waitForIdle()
-  }
+    @Test
+    @LargeTest
+    fun backPressedOnBackStackResumed() {
+        device.waitForIdle()
+        clickReplaceFragmentButton()
+        device.pressHome()
+        device.waitForIdle()
+        device.launchActivity(activityRule.activity.applicationContext, FragmentBackStackActivity::class.java)
+        backPressBackStack()
+        device.waitForIdle()
+    }
 
-  private fun clickReplaceFragmentButton() {
-    device.findObject(UiSelector().description(textDescription)).click()
-  }
+    private fun clickReplaceFragmentButton() {
+        device.findObject(UiSelector().description(textDescription)).click()
+    }
 
-  private fun backPressBackStack() {
-    device.pressBack() // pops fragment, showing map
-    device.pressBack() // finish activity
-  }
+    private fun backPressBackStack() {
+        device.pressBack() // pops fragment, showing map
+        device.pressBack() // finish activity
+    }
 
-  private companion object {
-    const val textDescription = "btn_change_fragment"
-  }
+    private companion object {
+        const val textDescription = "btn_change_fragment"
+    }
 }

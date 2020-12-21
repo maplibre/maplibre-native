@@ -14,16 +14,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GLSurfaceViewReuseTest : BaseIntegrationTest() {
 
-  @get:Rule
-  var activityRule: ActivityTestRule<GLSurfaceRecyclerViewActivity> = ActivityTestRule(GLSurfaceRecyclerViewActivity::class.java)
+    @get:Rule
+    var activityRule: ActivityTestRule<GLSurfaceRecyclerViewActivity> = ActivityTestRule(GLSurfaceRecyclerViewActivity::class.java)
 
-  @Test
-  @LargeTest
-  fun scrollRecyclerView() {
-    device.waitForIdle()
-    device.scrollRecyclerViewTo("Twenty-one")
-    device.waitForIdle()
-    device.scrollRecyclerViewTo("One")
-    device.waitForIdle()
-  }
+    @Test
+    @LargeTest
+    fun scrollRecyclerView() {
+        device.waitForIdle()
+        device.scrollRecyclerViewTo("Twenty-one")
+        device.waitForIdle()
+        device.scrollRecyclerViewTo("One")
+        device.waitForIdle()
+    }
 }

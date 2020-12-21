@@ -14,17 +14,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class QueryRenderedFeaturesBoxCountTest : BaseIntegrationTest() {
 
-  @get:Rule
-  var activityRule: ActivityTestRule<QueryRenderedFeaturesBoxCountActivity> =
-    ActivityTestRule(QueryRenderedFeaturesBoxCountActivity::class.java)
+    @get:Rule
+    var activityRule: ActivityTestRule<QueryRenderedFeaturesBoxCountActivity> =
+        ActivityTestRule(QueryRenderedFeaturesBoxCountActivity::class.java)
 
-  @Test
-  @LargeTest
-  fun reopenQueryRendererFeaturesActivity() {
-    device.waitForIdle()
-    device.pressHome()
-    device.waitForIdle()
-    device.launchActivity(activityRule.activity, QueryRenderedFeaturesBoxCountActivity::class.java)
-    device.waitForIdle()
-  }
+    @Test
+    @LargeTest
+    fun reopenQueryRendererFeaturesActivity() {
+        device.waitForIdle()
+        device.pressHome()
+        device.waitForIdle()
+        device.launchActivity(activityRule.activity, QueryRenderedFeaturesBoxCountActivity::class.java)
+        device.waitForIdle()
+    }
 }

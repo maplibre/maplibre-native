@@ -9,7 +9,7 @@ import com.mapbox.mapboxsdk.testapp.R
 @SuppressLint("ClickableViewAccessibility")
 class TextureRecyclerViewActivity : GLSurfaceRecyclerViewActivity() {
 
-  override fun getMapItemLayoutId(): Int {
-    return R.layout.item_map_texture
-  }
+    override fun getMapItemLayoutId(): Int {
+        return R.layout.item_map_texture
+    }
 }

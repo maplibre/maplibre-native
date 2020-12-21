@@ -57,10 +57,10 @@ class OverlayMapActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-      super.onSaveInstanceState(outState, outPersistentState)
-      outState?.let {
-        mapView.onSaveInstanceState(it)
-      }
+        super.onSaveInstanceState(outState, outPersistentState)
+        outState?.let {
+            mapView.onSaveInstanceState(it)
+        }
     }
 
     class OverlayView(context: Context) : View(context) {
@@ -77,8 +77,14 @@ class OverlayMapActivity : AppCompatActivity() {
                     paint.color = Color.BLACK
                     paint.strokeWidth = 1.0f
                     paint.style = Paint.Style.FILL_AND_STROKE
-                    paint.shader = RadialGradient(width / 2.0f, height / 2.0f,
-                            height / 3.0f, Color.TRANSPARENT, Color.BLACK, Shader.TileMode.CLAMP)
+                    paint.shader = RadialGradient(
+                        width / 2.0f,
+                        height / 2.0f,
+                        height / 3.0f,
+                        Color.TRANSPARENT,
+                        Color.BLACK,
+                        Shader.TileMode.CLAMP
+                    )
                 }
                 it.drawRect(0.0f, 0.0f, width.toFloat(), height.toFloat(), paint)
             }

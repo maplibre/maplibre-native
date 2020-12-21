@@ -16,7 +16,7 @@ task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "src/**/*.kt"
+    args "--disabled_rules=no-wildcard-imports", "src/**/*.kt"
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {

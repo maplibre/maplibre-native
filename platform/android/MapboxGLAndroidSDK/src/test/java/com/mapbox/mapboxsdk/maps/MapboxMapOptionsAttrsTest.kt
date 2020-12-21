@@ -16,86 +16,86 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MapboxMapOptionsAttrsTest {
 
-  @RelaxedMockK
-  private lateinit var options: MapboxMapOptions
+    @RelaxedMockK
+    private lateinit var options: MapboxMapOptions
 
-  @RelaxedMockK
-  private lateinit var typedArray: TypedArray
+    @RelaxedMockK
+    private lateinit var typedArray: TypedArray
 
-  @RelaxedMockK
-  private lateinit var context: Context
+    @RelaxedMockK
+    private lateinit var context: Context
 
-  @RelaxedMockK
-  private lateinit var resources: Resources
+    @RelaxedMockK
+    private lateinit var resources: Resources
 
-  @Before
-  fun setUp() {
-    MockKAnnotations.init(this)
-    every {
-      context.resources
-    }.returns(resources)
-  }
-
-  @Test
-  fun enabledLocalIdeographFontFamily() {
-    mockEnableLocalIdeograph(enabled = true)
-
-    val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
-
-    verify(exactly = 1) {
-      options.localIdeographFontFamily(any())
+    @Before
+    fun setUp() {
+        MockKAnnotations.init(this)
+        every {
+            context.resources
+        }.returns(resources)
     }
-  }
 
-  @Test
-  fun localIdeographFontFamily() {
-    mockEnableLocalIdeograph(enabled = true)
+    @Test
+    fun enabledLocalIdeographFontFamily() {
+        mockEnableLocalIdeograph(enabled = true)
 
-    val font = "foo"
-    mockLocalIdeographString(font)
+        val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
 
-    val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
-
-    verify(exactly = 1) {
-      options.localIdeographFontFamily(font)
+        verify(exactly = 1) {
+            options.localIdeographFontFamily(any())
+        }
     }
-  }
 
-  @Test
-  fun localIdeographFontFamilies() {
-    mockEnableLocalIdeograph(enabled = true)
+    @Test
+    fun localIdeographFontFamily() {
+        mockEnableLocalIdeograph(enabled = true)
 
-    val fonts = arrayOf("foo", "bar")
-    mockLocalIdeographStringArray(fonts)
+        val font = "foo"
+        mockLocalIdeographString(font)
 
-    val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
+        val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
 
-    verify(exactly = 1) {
-      options.localIdeographFontFamily(*fonts)
+        verify(exactly = 1) {
+            options.localIdeographFontFamily(font)
+        }
     }
-  }
 
-  private fun mockEnableLocalIdeograph(enabled: Boolean) {
-    every {
-      typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_localIdeographEnabled, true)
-    }.returns(enabled)
-  }
+    @Test
+    fun localIdeographFontFamilies() {
+        mockEnableLocalIdeograph(enabled = true)
 
-  private fun mockLocalIdeographString(font: String) {
-    every {
-      typedArray.getString(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamily)
-    }.returns(font)
-  }
+        val fonts = arrayOf("foo", "bar")
+        mockLocalIdeographStringArray(fonts)
 
-  private fun mockLocalIdeographStringArray(fonts: Array<String>) {
-    val resId = 9000
+        val options = MapboxMapOptions.createFromAttributes(options, context, typedArray)
 
-    every {
-      typedArray.getResourceId(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamilies, 0)
-    }.returns(resId)
+        verify(exactly = 1) {
+            options.localIdeographFontFamily(*fonts)
+        }
+    }
 
-    every {
-      resources.getStringArray(resId)
-    }.returns(fonts)
-  }
+    private fun mockEnableLocalIdeograph(enabled: Boolean) {
+        every {
+            typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_localIdeographEnabled, true)
+        }.returns(enabled)
+    }
+
+    private fun mockLocalIdeographString(font: String) {
+        every {
+            typedArray.getString(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamily)
+        }.returns(font)
+    }
+
+    private fun mockLocalIdeographStringArray(fonts: Array<String>) {
+        val resId = 9000
+
+        every {
+            typedArray.getResourceId(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamilies, 0)
+        }.returns(resId)
+
+        every {
+            resources.getStringArray(resId)
+        }.returns(fonts)
+    }
 }

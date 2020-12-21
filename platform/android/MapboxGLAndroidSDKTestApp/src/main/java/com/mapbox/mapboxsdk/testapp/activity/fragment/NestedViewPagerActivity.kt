@@ -41,9 +41,9 @@ class NestedViewPagerActivity : AppCompatActivity() {
     class ItemAdapter(private val context: Context, private val inflater: LayoutInflater, private val fragmentManager: androidx.fragment.app.FragmentManager) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
         private val items = listOf(
-                "one", "two", "three", ViewPagerItem(), "four", "five", "six", "seven", "eight", "nine", "ten",
-                "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
-                "nineteen", "twenty", "twenty-one"
+            "one", "two", "three", ViewPagerItem(), "four", "five", "six", "seven", "eight", "nine", "ten",
+            "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+            "nineteen", "twenty", "twenty-one"
         )
 
         private var mapHolder: ViewPagerHolder? = null
