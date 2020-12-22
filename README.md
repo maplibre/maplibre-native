@@ -22,7 +22,7 @@ For iOS and Android
             repositories {
                 ...
                 maven {
-                    url = "https://maven.pkg.github.com/maptiler/mapbox-gl-mobile"
+                    url = "https://maven.pkg.github.com/maptiler/maplibre-gl-native"
                 }
             }
         }

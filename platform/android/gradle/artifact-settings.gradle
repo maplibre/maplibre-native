@@ -1,5 +1,5 @@
 ext {
-    mapboxArtifactGroupId = 'com.maplibre.gl'
+    mapboxArtifactGroupId = 'org.maplibre.gl'
     mapboxArtifactId = 'android-sdk'
     mapboxArtifactTitle = 'MapLibre Maps SDK for Android'
     mapboxArtifactDescription = 'MapLibre Maps SDK for Android'
