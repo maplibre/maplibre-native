@@ -11,13 +11,12 @@
     "url": "git@github.com:mapbox/mapbox-gl-native-android.git"
   },
   "license": "BSD-2-Clause",
-  "dependencies": {},
   "devDependencies": {
     "ejs": "^2.7.4",
     "esm": "~3.1.0",
-    "lodash": "^4.16.4",
+    "lodash": "^4.17.19",
     "pixelmatch": "^4.0.2",
-    "semver": "^5.5.0"    
+    "semver": "^5.5.0"
   },
   "engines": {
     "node": ">=6"
