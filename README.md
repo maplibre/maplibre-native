@@ -2,20 +2,31 @@
 
 For iOS and Android 
 
+MapLibre GL Native is a community led fork derived from [mapbox-gl-native](https://github.com/mapbox/mapbox-gl-native) prior to their switch to a non-OSS license. The fork also includes Maps SDK for iOS and MacOS (forked from [mapbox-gl-native-ios](https://github.com/mapbox/mapbox-gl-native-ios)) and Android SDK (forked from [mapbox-gl-native-android](https://github.com/mapbox/mapbox-gl-native-android)). These platform-specific SDKs were merged under platform directory and they reference mapbox-gl-native directly, not as a submodule.
+
+Beside merging in platform specific SDKs, the following changes were made compared to original mapbox projects:
+
+* The code was upgraded so that it can be built using latest clang compiler / Xcode 12.
+* CI/CD was migrated from CircleCI to GitHub Actions. 
+* Along with GitHub releases, binaries are distributed as follows:
+    * The iOS binaries distribution was upgraded from fat packages to Swift package containing XCFramework.
+    * The Android binaries are distributed to GitHub maven package repository.
+
+> The mapbox-gl-native was forked from 5.9.0 tag, mapbox-gl-native-ios from [a139216](https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216) and mapbox-gl-native-android from [4c12fb2c](https://github.com/mapbox/mapbox-gl-native-android/commit/4c12fb2c)
 ## Build Status
 
 | SDK                                                           | Build   | Build status                                                                                                                                                                                  |
 |---------------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Mapbox Maps SDK for iOS](platform/ios/) | CI      | [![Github Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/ios-ci/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/ios-ci)                   |
-| [Mapbox Maps SDK for iOS](platform/ios/) | Release | [![Github Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/ios-release/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/ios-release)         |
-| [Mapbox Maps SDK for Android](platform/android/)      | CI      | [![Github Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/android-ci)           |
-| [Mapbox Maps SDK for Android](platform/android/)     | Release | [![Github Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/android-release) |
+| [Mapbox Maps SDK for iOS](platform/ios/) | CI      | [![GitHub Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/ios-ci/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/ios-ci)                   |
+| [Mapbox Maps SDK for iOS](platform/ios/) | Release | [![GitHub Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/ios-release/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/ios-release)         |
+| [Mapbox Maps SDK for Android](platform/android/)      | CI      | [![GitHub Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/android-ci)           |
+| [Mapbox Maps SDK for Android](platform/android/)     | Release | [![GitHub Action build status](https://github.com/maptiler/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maptiler/maplibre-gl-native/workflows/android-release) |
 
 ## Installation
 
 ### Android
 
-1. Add github maven repositories to your build.gradle at project level so that you can access MapTiler packages for Android:
+1. Add GitHub maven repositories to your build.gradle at project level so that you can access MapTiler packages for Android:
 
     ```gradle
         allprojects {
@@ -33,7 +44,7 @@ For iOS and Android
     ```gradle
         dependencies {
             ...
-            implementation 'com.maptiler.gl:android-sdk:9.2.1'
+            implementation 'org.maplibre.gl:android-sdk:9.2.1'
             ...
         }
     ```
