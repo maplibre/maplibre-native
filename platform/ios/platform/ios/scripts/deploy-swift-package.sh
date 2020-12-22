@@ -19,7 +19,7 @@ trap finish EXIT
 export GITHUB_USER=maptiler
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
-export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maplibre-gl-mobile-distribution
+export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maptiler/maplibre-gl-native-distribution
 
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
