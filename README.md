@@ -33,17 +33,11 @@ Beside merging in platform specific SDKs, the following changes were made compar
             repositories {
                 ...
                 maven {
-                    url = "https://maven.pkg.github.com/maptiler/maplibre-gl-native"
-                    credentials {
-                        username = "maptiler"
-                        password = "7316cac510384aaa7408b9feb49341a15ba68171"
-                    }
+                    url = "https://dl.bintray.com/maplibre/maplibre-gl-native"
                 }
             }
         }
     ```
-
-> The credentials section is required because [GitHub does not support public access to maven package repository currently](https://github.community/t/download-from-github-package-registry-without-authentication/14407/63).
 
 2. Add the library as a dependency into your module build.gradle
 

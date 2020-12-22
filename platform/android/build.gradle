@@ -23,7 +23,7 @@ allprojects {
         google()
         jcenter()
         // For publishing Maps SDK files to Bintray
-        maven { url 'https://mapbox.bintray.com/mapbox' }
+        // maven { url 'https://mapbox.bintray.com/mapbox' }
         // Snapshot repository
         // maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     }
