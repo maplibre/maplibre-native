@@ -26,7 +26,7 @@ Beside merging in platform specific SDKs, the following changes were made compar
 
 ### Android
 
-1. Add GitHub maven repositories to your build.gradle at project level so that you can access MapTiler packages for Android:
+1. Add bintray maven repositories to your build.gradle at project level so that you can access MapTiler packages for Android:
 
     ```gradle
         allprojects {
