@@ -1,4 +1,4 @@
-# MapBox GL Native SDK Open-Source Fork
+# Mapbox GL Native SDK Open-Source Fork
 
 For iOS and Android 
 
