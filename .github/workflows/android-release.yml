@@ -115,7 +115,7 @@ jobs:
           if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
             echo "Activating google cloud account..."
             echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maplibre-gl-native
+            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
             rm secret.json
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
@@ -123,7 +123,6 @@ jobs:
         shell: bash  
 
       - name: Run robotest of release Test App on Firebase
-        if: ${{ false }} # temporarily disabled
         run: |
           GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
           if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
@@ -175,7 +174,6 @@ jobs:
 
       # deploy to github maven repo
       - name: Publish package
-        if: ${{ false }} # temporarily disabled
         run: make android-maven-publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
