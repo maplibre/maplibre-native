@@ -19,11 +19,13 @@ public:
     MainResourceLoaderThread(std::shared_ptr<FileSource> assetFileSource_,
                              std::shared_ptr<FileSource> databaseFileSource_,
                              std::shared_ptr<FileSource> localFileSource_,
-                             std::shared_ptr<FileSource> onlineFileSource_)
+                             std::shared_ptr<FileSource> onlineFileSource_,
+                             std::shared_ptr<FileSource> maptilerFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
-          onlineFileSource(std::move(onlineFileSource_)) {}
+          onlineFileSource(std::move(onlineFileSource_)),
+          maptilerFileSource(std::move(maptilerFileSource_)) {}
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto callback = [ref](const Response& res) { ref.invoke(&FileSourceRequest::setResponse, res); };
@@ -63,6 +65,9 @@ public:
         if (assetFileSource && assetFileSource->canRequest(resource)) {
             // Asset request
             tasks[req] = assetFileSource->request(resource, callback);
+        } else if (maptilerFileSource && maptilerFileSource->canRequest(resource)) {
+            // Local file request
+            tasks[req] = maptilerFileSource->request(resource, callback);            
         } else if (localFileSource && localFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = localFileSource->request(resource, callback);
@@ -122,6 +127,7 @@ private:
     const std::shared_ptr<FileSource> databaseFileSource;
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
+    const std::shared_ptr<FileSource> maptilerFileSource;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
@@ -130,11 +136,13 @@ public:
     Impl(std::shared_ptr<FileSource> assetFileSource_,
          std::shared_ptr<FileSource> databaseFileSource_,
          std::shared_ptr<FileSource> localFileSource_,
-         std::shared_ptr<FileSource> onlineFileSource_)
+         std::shared_ptr<FileSource> onlineFileSource_,
+         std::shared_ptr<FileSource> maptilerFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
           onlineFileSource(std::move(onlineFileSource_)),
+          maptilerFileSource(std::move(maptilerFileSource_)),          
           supportsCacheOnlyRequests_(bool(databaseFileSource)),
           thread(std::make_unique<util::Thread<MainResourceLoaderThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER),
@@ -142,7 +150,8 @@ public:
               assetFileSource,
               databaseFileSource,
               localFileSource,
-              onlineFileSource)) {}
+              onlineFileSource,
+              maptilerFileSource)) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -158,7 +167,8 @@ public:
         return (assetFileSource && assetFileSource->canRequest(resource)) ||
                (localFileSource && localFileSource->canRequest(resource)) ||
                (databaseFileSource && databaseFileSource->canRequest(resource)) ||
-               (onlineFileSource && onlineFileSource->canRequest(resource));
+               (onlineFileSource && onlineFileSource->canRequest(resource)) ||
+               (maptilerFileSource && maptilerFileSource->canRequest(resource));
     }
 
     bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
@@ -172,6 +182,7 @@ private:
     const std::shared_ptr<FileSource> databaseFileSource;
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
+    const std::shared_ptr<FileSource> maptilerFileSource;
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
 };
@@ -180,7 +191,8 @@ MainResourceLoader::MainResourceLoader(const ResourceOptions& options)
     : impl(std::make_unique<Impl>(FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
                                   FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
                                   FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Network, options))) {}
+                                  FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
+                                  FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 

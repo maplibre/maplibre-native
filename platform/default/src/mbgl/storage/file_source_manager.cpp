@@ -4,6 +4,7 @@
 #include <mbgl/storage/local_file_source.hpp>
 #include <mbgl/storage/main_resource_loader.hpp>
 #include <mbgl/storage/online_file_source.hpp>
+#include <mbgl/storage/mbtiles_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
@@ -25,6 +26,9 @@ public:
 
         registerFileSourceFactory(FileSourceType::FileSystem,
                                   [](const ResourceOptions&) { return std::make_unique<LocalFileSource>(); });
+
+        registerFileSourceFactory(FileSourceType::Mbtiles,
+                                  [](const ResourceOptions&) { return std::make_unique<MaptilerFileSource>(); });                                  
 
         registerFileSourceFactory(FileSourceType::Network, [](const ResourceOptions& options) {
             std::unique_ptr<FileSource> networkSource = std::make_unique<OnlineFileSource>();

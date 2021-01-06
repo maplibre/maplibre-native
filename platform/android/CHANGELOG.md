@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 9.3.0 - January 6, 2021
+### Features
+ - Added the mbtiles file source for rendering vector tiles from file stored locally on the device.
+
 ## 9.2.1 - May 15, 2020
 ### Improvements and bug fixes
  - Added compiler and linker options to reduce binary size for release build. ([#382](https://github.com/mapbox/mapbox-gl-native-android/pull/382))

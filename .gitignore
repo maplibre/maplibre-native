@@ -3,3 +3,12 @@
 /platform/android/MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
 /platform/android/local.properties
 /platform/android/gradle/configuration.gradle
+/platform/android/arm64-v8a
+/platform/android/armeabi-v7a
+/platform/android/MapboxGLAndroidSDK/.cxx
+/platform/android/MapboxGLAndroidSDK/build
+/platform/android/MapboxGLAndroidSDKTestApp/.cxx
+/platform/android/MapboxGLAndroidSDKTestApp/build
+/platform/android/.gradle
+/platform/android/x86
+/platform/android/x86_64

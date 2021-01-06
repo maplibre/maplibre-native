@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) to get started.
 
+
+## 5.10.0 - January 6, 2021
+
+### Features
+
+* Added the mbtiles file source for rendering vector tiles from file stored locally on the device.
+ 
 ## 5.9.0
 
 ### Styles and rendering

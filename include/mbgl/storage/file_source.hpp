@@ -22,6 +22,7 @@ enum FileSourceType : uint8_t {
     Database,
     FileSystem,
     Network,
+    Mbtiles,
     // Resource loader acts as a proxy and has logic
     // for request delegation to Asset, Cache, and other
     // file sources.
