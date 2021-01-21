@@ -110,7 +110,7 @@ TEST(Transform, PerspectiveProjection) {
     // 0.9 rad ~ 51.56620156 deg
     transform.jumpTo(CameraOptions().withCenter(LatLng { 38.0, -77.0 }).withZoom(10.0).withPitch(51.56620156));
 
-    // expected values are from mapbox-gl-js
+    // expected values are from maplibre-gl-js
 
     loc = transform.getLatLng();
     ASSERT_DOUBLE_EQ(-77, loc.longitude());

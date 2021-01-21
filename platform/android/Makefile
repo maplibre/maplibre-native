@@ -91,13 +91,13 @@ android-core-test-$1: android-test-lib-$1
 
 run-android-core-test-$1-%: android-core-test-$1
 	# Ensure clean state on the device
-	adb shell "rm -Rf $(MBGL_ANDROID_LOCAL_WORK_DIR) && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/test && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/mapbox-gl-js/src/style-spec/reference"
+	adb shell "rm -Rf $(MBGL_ANDROID_LOCAL_WORK_DIR) && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/test && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/maplibre-gl-js/src/style-spec/reference"
 
 	# Push all needed files to the device
 	adb push $(MBGL_ANDROID_CORE_TEST_DIR)/classes.dex $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmapbox-gl.so $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 	adb push test/fixtures $(MBGL_ANDROID_LOCAL_WORK_DIR)/test > /dev/null 2>&1
-	adb push mapbox-gl-js/src/style-spec/reference/v8.json $(MBGL_ANDROID_LOCAL_WORK_DIR)/mapbox-gl-js/src/style-spec/reference > /dev/null 2>&1
+	adb push maplibre-gl-js/src/style-spec/reference/v8.json $(MBGL_ANDROID_LOCAL_WORK_DIR)/maplibre-gl-js/src/style-spec/reference > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/cmake/$(buildtype)/obj/$2/mbgl-test $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 
 # Create gtest filter for skipped tests.
@@ -176,7 +176,7 @@ run-android-render-test-$1: $(BUILD_DEPS) gradle/configuration.gradle
 	rm -rf build/render-test/mapbox/
   # copy test definitions & ignore file to test app assets folder, clear old ones first
 	rm -rf MapboxGLAndroidSDKTestApp/src/main/assets/integration
-	cp -r mapbox-gl-js/test/integration MapboxGLAndroidSDKTestApp/src/main/assets
+	cp -r maplibre-gl-js/test/integration MapboxGLAndroidSDKTestApp/src/main/assets
 	cp platform/node/test/ignores.json MapboxGLAndroidSDKTestApp/src/main/assets/integration/ignores.json
 	# run RenderTest.java to generate static map images
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="com.mapbox.mapboxsdk.testapp.render.RenderTest"

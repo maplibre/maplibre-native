@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## master
+
+### Features
+
+### Other
+
+* mapbox-gl-js submodule has been replaced with maplibre-gl-js
+
 ## 9.3.0 - January 6, 2021
 ### Features
  - Added the mbtiles file source for rendering vector tiles from file stored locally on the device.

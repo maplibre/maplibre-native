@@ -1,4 +1,4 @@
-import {run} from '../../../mapbox-gl-js/test/integration/lib/render';
+import {run} from '../../../maplibre-gl-js/test/integration/lib/render';
 import implementation from './suite_implementation';
 import ignores from './ignores.json';
 

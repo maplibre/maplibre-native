@@ -1,5 +1,13 @@
 # Changelog for Mapbox Maps SDK for macOS
 
+## master
+
+### Features
+
+### Other
+
+* mapbox-gl-js submodule has been replaced with maplibre-gl-js
+
 ## 0.17.0 - January 6, 2021
 
 ### Features
