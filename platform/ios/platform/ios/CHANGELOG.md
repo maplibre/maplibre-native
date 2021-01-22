@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) to get started.
 
+## master
+
+### Features
+
+### Other
+
+* mapbox-gl-js submodule has been replaced with maplibre-gl-js
 
 ## 5.10.0 - January 6, 2021
 

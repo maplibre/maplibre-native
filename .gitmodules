@@ -1,6 +1,3 @@
-[submodule "mapbox-gl-js"]
-	path = mapbox-gl-js
-	url = https://github.com/mapbox/mapbox-gl-js.git
 [submodule "vendor/earcut.hpp"]
 	path = vendor/earcut.hpp
 	url = https://github.com/mapbox/earcut.hpp.git
@@ -58,3 +55,6 @@
 [submodule "platform/android/vendor/mapbox-events-android"]
 	path = platform/android/vendor/mapbox-events-android
 	url = https://github.com/mapbox/mapbox-events-android.git
+[submodule "maplibre-gl-js"]
+	path = maplibre-gl-js
+	url = https://github.com/maplibre/maplibre-gl-js.git

@@ -104,7 +104,7 @@ export default function (style, options, callback) {
                 applyOperations(operations.slice(1), callback);
             }, operation[1]);
         } else if (operation[0] === 'addImage' || operation[0] === 'updateImage') {
-            const img = PNG.sync.read(fs.readFileSync(path.join(__dirname, '../../../mapbox-gl-js/test/integration', operation[2])));
+            const img = PNG.sync.read(fs.readFileSync(path.join(__dirname, '../../../maplibre-gl-js/test/integration', operation[2])));
             const testOpts = (operation.length > 3) ? operation[3] : {};
 
             const options = {
