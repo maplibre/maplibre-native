@@ -12,3 +12,5 @@
 /platform/android/.gradle
 /platform/android/x86
 /platform/android/x86_64
+/.idea
+/cmake-build-debug
