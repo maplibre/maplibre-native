@@ -46,15 +46,9 @@
 [submodule "platform/android/vendor/mapbox-gestures-android"]
 	path = platform/android/vendor/mapbox-gestures-android
 	url = https://github.com/mapbox/mapbox-gestures-android.git
-[submodule "platform/ios/platform/ios/vendor/mapbox-events-ios"]
-	path = platform/ios/platform/ios/vendor/mapbox-events-ios
-	url = https://github.com/mapbox/mapbox-events-ios.git
 [submodule "platform/ios/platform/darwin/docs/theme"]
 	path = platform/ios/platform/darwin/docs/theme
 	url = https://github.com/mapbox/jazzy-theme.git
-[submodule "platform/android/vendor/mapbox-events-android"]
-	path = platform/android/vendor/mapbox-events-android
-	url = https://github.com/mapbox/mapbox-events-android.git
 [submodule "maplibre-gl-js"]
 	path = maplibre-gl-js
 	url = https://github.com/maplibre/maplibre-gl-js.git
