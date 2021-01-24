@@ -5,14 +5,6 @@
 #import "NSProcessInfo+MGLAdditions.h"
 #endif
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import "MGLMapboxEvents.h"
-#import "MBXSKUToken.h"
-
-static NSString * const MGLAccountManagerExternalClassName = @"MBXAccounts";
-static NSString * const MGLAccountManagerExternalMethodName = @"skuToken";
-#endif
-
 NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 
 @interface MGLAccountManager ()
@@ -73,12 +65,6 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     }
 
     [MGLAccountManager sharedManager].accessToken = accessToken;
-
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [MGLMapboxEvents setupWithAccessToken:accessToken];
-    });
-#endif
 }
 
 + (NSString *)accessToken {
@@ -92,21 +78,5 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 + (NSURL *)apiBaseURL {
     return [MGLAccountManager sharedManager].apiBaseURL;
 }
-
-#pragma mark - SKU Tokens
-
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-
-+ (NSString *)skuToken {
-    Class mbx = NSClassFromString(MGLAccountManagerExternalClassName);
-    
-    if ([mbx respondsToSelector:NSSelectorFromString(MGLAccountManagerExternalMethodName)]) {
-        return (NSString *)[mbx valueForKeyPath:MGLAccountManagerExternalMethodName];
-    }
-    
-    return MBXSKUToken.skuToken;
-}
-
-#endif
 
 @end

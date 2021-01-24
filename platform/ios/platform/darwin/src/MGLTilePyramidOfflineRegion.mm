@@ -10,10 +10,6 @@
 #import "MGLStyle.h"
 #import "MGLLoggingConfiguration_Private.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import <MapboxMobileEvents/MMEConstants.h>
-#endif
-
 @interface MGLTilePyramidOfflineRegion () <MGLOfflineRegion_Private, MGLTilePyramidOfflineRegion_Private>
 
 @end
@@ -26,14 +22,7 @@
 @synthesize includesIdeographicGlyphs = _includesIdeographicGlyphs;
 
 -(NSDictionary *)offlineStartEventAttributes {
-    return @{
-             #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-             MMEEventKeyShapeForOfflineRegion: @"tileregion",
-             MMEEventKeyMinZoomLevel: @(self.minimumZoomLevel),
-             MMEEventKeyMaxZoomLevel: @(self.maximumZoomLevel),
-             MMEEventKeyStyleURL: self.styleURL.absoluteString ?: [NSNull null]
-             #endif
-             };
+    return @{};
 }
 
 + (BOOL)supportsSecureCoding {

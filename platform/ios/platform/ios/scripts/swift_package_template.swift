@@ -6,10 +6,7 @@ let package = Package(
     products: [
         .library(
             name: "Mapbox",
-            targets: ["Mapbox"]),
-        .library(
-            name: "MapboxMobileEvents",
-            targets: ["MapboxMobileEvents"])            
+            targets: ["Mapbox"])
     ],
     dependencies: [
     ],    
@@ -17,10 +14,6 @@ let package = Package(
         .binaryTarget(
             name: "Mapbox",
             url: "MAPBOX_PACKAGE_URL",
-            checksum: "MAPBOX_PACKAGE_CHECKSUM"),
-        .binaryTarget(
-            name: "MapboxMobileEvents",
-            url: "MAPBOX_EVENTS_PACKAGE_URL",
-            checksum: "MAPBOX_EVENTS_PACKAGE_CHECKSUM")            
+            checksum: "MAPBOX_PACKAGE_CHECKSUM")
     ]
 )

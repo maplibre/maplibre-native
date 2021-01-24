@@ -24,15 +24,6 @@ static MGLNativeNetworkManager *instance = nil;
     return sessionConfiguration;
 }
 
-#pragma mark - Optionals
-
-- (NSString *)skuToken {
-    if([self.delegate respondsToSelector:@selector(skuToken)]) {
-        return [self.delegate skuToken];
-    }
-    return nil;
-}
-
 #pragma mark - Required
 
 - (NSURLSessionConfiguration *)sessionConfiguration {

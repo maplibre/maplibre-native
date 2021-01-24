@@ -105,12 +105,6 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     }
 }
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-- (NSString *)skuToken {
-    return MGLAccountManager.skuToken;
-}
-#endif
-
 - (void)startDownloadEvent:(NSString *)urlString type:(NSString *)resourceType {
     if (urlString && resourceType && ![self eventDictionaryForKey:urlString]) {
         NSDate *startDate = [NSDate date];

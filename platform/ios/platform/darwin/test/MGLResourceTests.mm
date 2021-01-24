@@ -40,26 +40,6 @@ namespace mbgl {
 
     Resource resource(Resource::Kind::Unknown, testURL);
 
-    // By default, resources are NOT offline
-    {
-        bool skuTokenQueryItemFound;
-        NSURL *url = resourceURL(resource);
-        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        for (NSURLQueryItem *item in components.queryItems) {
-            XCTAssertFalse([item.name isEqualToString:@"offline"]);
-            if ([item.name isEqualToString:@"sku"]) {
-                skuTokenQueryItemFound = YES;
-            }
-        }
-
-        // https://github.com/mapbox/mapbox-gl-native-ios/pull/296
-//#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-        XCTAssertTrue(skuTokenQueryItemFound, "Default resource URL should have SKU token query item");
-//#else
-//        XCTAssertFalse(skuTokenQueryItemFound, "Non-iOS platforms should not have a SKU token query item");
-//#endif
-    }
-    
     // Now check offline
     resource.setUsage(Resource::Usage::Offline);
     

@@ -8,8 +8,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-- (NSString *)skuToken;
-
 - (NSURLSession *)sessionForNetworkManager:(MGLNativeNetworkManager *)networkManager;
 
 @required
@@ -35,8 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (MGLNativeNetworkManager *)sharedManager;
 
 @property (nonatomic, weak) id<MGLNativeNetworkDelegate> delegate;
-
-@property (nonatomic, readonly) NSString *skuToken;
 
 @property (nonatomic, readonly) NSURLSessionConfiguration *sessionConfiguration;
 

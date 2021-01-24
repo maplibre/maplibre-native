@@ -110,10 +110,8 @@ function addFramework {
     fi
 }
 
-
 step "Creating ${NAME} xcframework"
 
-EVENTS_NAME=MapboxMobileEvents
 INCLUDE_DEBUG_SYMBOLS=false
 if [[ $BUILDTYPE='RelWithDebInfo' || $BUILDTYPE='Debug' ]]; then
     INCLUDE_DEBUG_SYMBOLS=true
@@ -128,15 +126,6 @@ BUILD_ARGS="$BUILD_ARGS -output ${BINOUT}/${NAME}.xcframework"
 echo "Creating ${NAME}.xcframework with args: $BUILD_ARGS"
 xcodebuild -create-xcframework $BUILD_ARGS
 echo "${NAME}.xcframework created"
-
-# Mapbox mobile events
-BUILD_ARGS=""
-BUILD_ARGS="$BUILD_ARGS -output ${BINOUT}/${EVENTS_NAME}.xcframework"
-addFramework "${BINOUT}/${NAME}-iphoneos.xcarchive" ${EVENTS_NAME} ${INCLUDE_DEBUG_SYMBOLS}
-addFramework "${BINOUT}/${NAME}-iphonesimulator.xcarchive" ${EVENTS_NAME} ${INCLUDE_DEBUG_SYMBOLS}
-echo "Creating ${EVENTS_NAME}.xcframework with args: $BUILD_ARGS"
-xcodebuild -create-xcframework $BUILD_ARGS
-echo "${EVENTS_NAME}.xcframework created"        
 
 step "Copying library resources…"
 cp -pv LICENSE.md ${OUTPUT}

@@ -54,7 +54,6 @@
     XCTAssertNotNil(manager);
 
     // Expected properties
-    XCTAssertNotNil([manager skuToken]);
     XCTAssertNotNil([manager sessionConfiguration]);
 
     [MGLNetworkConfiguration sharedManager];
@@ -77,7 +76,6 @@
     XCTAssertNotNil(manager);
 
     // Expected properties
-    XCTAssertNotNil([manager skuToken]);
     XCTAssertNotNil([manager sessionConfiguration]);
 }
 
