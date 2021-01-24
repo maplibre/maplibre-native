@@ -5,8 +5,8 @@ import android.content.res.Resources
 import android.content.res.TypedArray
 import android.location.Location
 import android.os.Looper
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.mapboxsdk.location.engine.LocationEngine
+import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest
 import com.mapbox.mapboxsdk.R
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS

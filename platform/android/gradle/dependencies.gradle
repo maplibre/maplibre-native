@@ -2,13 +2,12 @@ ext {
 
     androidVersions = [
             minSdkVersion    : 14,
-            targetSdkVersion : 28,
-            compileSdkVersion: 28,
+            targetSdkVersion : 29,
+            compileSdkVersion: 29,
     ]
 
     versions = [
             mapboxServices   : '5.3.0',
-            mapboxTelemetry  : '5.1.0',
             mapboxCore       : '2.0.1',
             mapboxGestures   : '0.7.0',
             mapboxAccounts   : '0.7.0',
@@ -39,12 +38,12 @@ ext {
             appcenter        : '1.4',
             ktlint           : '0.40.0',
             commonsIO        : '2.6',
-            mapboxSdkVersions: '1.0.1'
+            mapboxSdkVersions: '1.0.1',
+            assertj          : "3.11.1"
     ]
 
     dependenciesList = [
             mapboxJavaGeoJSON      : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${versions.mapboxServices}",
-            mapboxAndroidTelemetry : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${versions.mapboxTelemetry}",
             mapboxAndroidGestures  : "com.mapbox.mapboxsdk:mapbox-android-gestures:${versions.mapboxGestures}",
             mapboxAndroidAccounts  : "com.mapbox.mapboxsdk:mapbox-android-accounts:${versions.mapboxAccounts}",
             mapboxJavaTurf         : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${versions.mapboxServices}",
@@ -53,6 +52,7 @@ ext {
             mockito                : "org.mockito:mockito-core:${versions.mockito}",
             mockk                  : "io.mockk:mockk:${versions.mockk}",
             robolectric            : "org.robolectric:robolectric:${versions.robolectric}",
+            assertjcore            : "org.assertj:assertj-core:${versions.assertj}",
 
             testRunner             : "androidx.test.ext:junit:${versions.testRunner}",
             testRules              : "androidx.test:rules:${versions.testRunner}",

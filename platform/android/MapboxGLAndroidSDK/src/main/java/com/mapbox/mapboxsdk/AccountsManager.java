@@ -13,8 +13,6 @@ import com.mapbox.android.accounts.v1.MapboxAccounts;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
 
-import static com.mapbox.mapboxsdk.constants.MapboxConstants.KEY_PREFERENCE_SKU_TOKEN;
-
 /**
  * REMOVAL OR MODIFICATION OF THE FOLLOWING CODE VIOLATES THE MAPBOX TERMS
  * OF SERVICE
@@ -39,45 +37,19 @@ class AccountsManager {
 
   private SharedPreferences sharedPreferences;
   private String userId;
-  private String skuToken;
   private long timestamp;
-  private boolean isManaged;
 
   AccountsManager() {
-    isManaged = isSkuTokenManaged();
     initialize();
   }
 
   @VisibleForTesting
-  AccountsManager(SharedPreferences sharedPreferences, boolean isManaged) {
+  AccountsManager(SharedPreferences sharedPreferences) {
     this.sharedPreferences = sharedPreferences;
-    this.isManaged = isManaged;
     initialize();
   }
 
   private void initialize() {
-    retrieveSkuTokenAndTimestamp();
-    if (isManaged) {
-      validateRotation();
-    }
-  }
-
-  private boolean isSkuTokenManaged() {
-    boolean value = MapboxConstants.DEFAULT_MANAGE_SKU_TOKEN;
-    try {
-      // Try getting a custom value from the app Manifest
-      ApplicationInfo appInfo = retrieveApplicationInfo();
-      if (appInfo.metaData != null) {
-        value = appInfo.metaData.getBoolean(
-          MapboxConstants.KEY_META_DATA_MANAGE_SKU_TOKEN,
-          MapboxConstants.DEFAULT_MANAGE_SKU_TOKEN
-        );
-      }
-    } catch (Exception exception) {
-      Logger.e(TAG, "Failed to read the package metadata: ", exception);
-    }
-
-    return value;
   }
 
   private ApplicationInfo retrieveApplicationInfo() throws PackageManager.NameNotFoundException {
@@ -86,48 +58,12 @@ class AccountsManager {
       PackageManager.GET_META_DATA);
   }
 
-  private void retrieveSkuTokenAndTimestamp() {
-    SharedPreferences sharedPreferences = getSharedPreferences();
-    skuToken = sharedPreferences.getString(KEY_PREFERENCE_SKU_TOKEN, "");
-    timestamp = sharedPreferences.getLong(PREFERENCE_TIMESTAMP, 0L);
-  }
-
-  private void validateRotation() {
-    if (TextUtils.isEmpty(skuToken) || timestamp == 0L) {
-      skuToken = generateSkuToken(getUserId());
-      timestamp = persistRotation(skuToken);
-    }
-  }
-
-  String getSkuToken() {
-    if (isManaged) {
-      if (isExpired()) {
-        skuToken = generateSkuToken(getUserId());
-        timestamp = persistRotation(skuToken);
-      }
-    } else {
-      SharedPreferences sharedPreferences = getSharedPreferences();
-      String notManagedSkuToken = sharedPreferences.getString(KEY_PREFERENCE_SKU_TOKEN, "");
-      skuToken = notManagedSkuToken;
-    }
-    return skuToken;
-  }
-
   private boolean isExpired() {
     return isExpired(getNow(), timestamp);
   }
 
   static boolean isExpired(long now, long then) {
     return ((now - then) > DateUtils.HOUR_IN_MILLIS);
-  }
-
-  private long persistRotation(String skuToken) {
-    long now = getNow();
-    SharedPreferences.Editor editor = getSharedPreferences().edit();
-    editor.putLong(PREFERENCE_TIMESTAMP, now);
-    editor.putString(KEY_PREFERENCE_SKU_TOKEN, skuToken);
-    editor.apply();
-    return now;
   }
 
   @NonNull
@@ -166,10 +102,5 @@ class AccountsManager {
   @NonNull
   private String generateUserId() {
     return MapboxAccounts.obtainEndUserId();
-  }
-
-  @NonNull
-  private String generateSkuToken(String userId) {
-    return MapboxAccounts.obtainMapsSkuUserToken(userId);
   }
 }

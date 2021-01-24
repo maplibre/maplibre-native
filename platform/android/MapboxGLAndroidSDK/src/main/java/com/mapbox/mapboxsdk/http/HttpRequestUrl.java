@@ -31,8 +31,6 @@ public class HttpRequestUrl {
       // Only add SKU token to requests not tagged as "offline" usage.
       if (offline) {
         resourceUrl = resourceUrl + "offline=true";
-      } else {
-        resourceUrl = resourceUrl + "sku=" + Mapbox.getSkuToken();
       }
     }
     return resourceUrl;

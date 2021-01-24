@@ -69,6 +69,9 @@ dependencies {
 
     implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber
+
+    implementation dependenciesList.okhttp3
+
     debugImplementation dependenciesList.leakCanaryDebug
     releaseImplementation dependenciesList.leakCanaryRelease
 

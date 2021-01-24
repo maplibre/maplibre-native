@@ -1,5 +1,3 @@
-package com.mapbox.mapboxsdk.testapp.activity.telemetry;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
@@ -123,8 +121,6 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
     bundle.putString("attributes", gson.toJson(attributes));
     bundle.putString("counters", gson.toJson(counters));
     bundle.putString("metadata", metaData.toString());
-
-    Mapbox.getTelemetry().onPerformanceEvent(bundle);
   }
 
   private static String getRam() {

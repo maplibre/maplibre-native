@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
  * <p>
  * When the user clicks the attribution icon, {@link AttributionDialogManager#onClick(View)} will be invoked.
  * An attribution dialog will be shown to the user with contents based on the attributions found in the map style.
- * Additionally an telemetry option item is shown to configure telemetry settings.
  * </p>
  */
 public class AttributionDialogManager implements View.OnClickListener, DialogInterface.OnClickListener {
@@ -87,14 +86,10 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
     return titles.toArray(new String[titles.size()]);
   }
 
-  // Called when someone selects an attribution or telemetry settings from the dialog
+  // Called when someone selects an attribution from the dialog
   @Override
   public void onClick(DialogInterface dialog, int which) {
-    if (isLatestEntry(which)) {
-      showTelemetryDialog();
-    } else {
-      showMapAttributionWebPage(which);
-    }
+    showMapAttributionWebPage(which);
   }
 
   public void onStop() {
@@ -105,40 +100,6 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
 
   private boolean isLatestEntry(int attributionKeyIndex) {
     return attributionKeyIndex == getAttributionTitles().length - 1;
-  }
-
-  private void showTelemetryDialog() {
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(R.string.mapbox_attributionTelemetryTitle);
-    builder.setMessage(R.string.mapbox_attributionTelemetryMessage);
-    builder.setPositiveButton(R.string.mapbox_attributionTelemetryPositive, new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(@NonNull DialogInterface dialog, int which) {
-        TelemetryDefinition telemetry = Mapbox.getTelemetry();
-        if (telemetry != null) {
-          telemetry.setUserTelemetryRequestState(true);
-        }
-        dialog.cancel();
-      }
-    });
-    builder.setNeutralButton(R.string.mapbox_attributionTelemetryNeutral, new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(@NonNull DialogInterface dialog, int which) {
-        showWebPage(context.getResources().getString(R.string.mapbox_telemetryLink));
-        dialog.cancel();
-      }
-    });
-    builder.setNegativeButton(R.string.mapbox_attributionTelemetryNegative, new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(@NonNull DialogInterface dialog, int which) {
-        TelemetryDefinition telemetry = Mapbox.getTelemetry();
-        if (telemetry != null) {
-          telemetry.setUserTelemetryRequestState(false);
-        }
-        dialog.cancel();
-      }
-    });
-    builder.show();
   }
 
   private void showMapAttributionWebPage(int which) {
@@ -236,7 +197,6 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
       return new AttributionParser.Options(context)
         .withCopyrightSign(true)
         .withImproveMap(true)
-        .withTelemetryAttribution(true)
         .withAttributionData(attributions.toArray(new String[attributions.size()]))
         .build().getAttributions();
     }

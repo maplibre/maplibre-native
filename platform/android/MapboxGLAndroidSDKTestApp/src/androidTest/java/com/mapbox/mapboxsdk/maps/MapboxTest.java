@@ -74,8 +74,6 @@ public class MapboxTest extends AppCenter {
     );
 
     Mapbox.setAccessToken(invalidAccessToken);
-    assertNull(Mapbox.getTelemetry());
-    Mapbox.getSkuToken();
   }
 
   @Test
@@ -90,8 +88,6 @@ public class MapboxTest extends AppCenter {
     );
 
     Mapbox.setAccessToken(null);
-    assertNull(Mapbox.getTelemetry());
-    Mapbox.getSkuToken();
   }
 
   @Test
@@ -100,8 +96,6 @@ public class MapboxTest extends AppCenter {
     final String invalidAccessToken = "xyz";
     Mapbox.setAccessToken(invalidAccessToken);
     Mapbox.setAccessToken(ACCESS_TOKEN);
-    assertNotNull(Mapbox.getTelemetry());
-    assertNotNull(Mapbox.getSkuToken());
   }
 
   @After

@@ -95,12 +95,6 @@
     <public name="mapbox_attributionsIconContentDescription" type="string" />
     <public name="mapbox_mapActionDescription" type="string" />
     <public name="mapbox_attributionsDialogTitle" type="string" />
-    <public name="mapbox_attributionTelemetryTitle" type="string" />
-    <public name="mapbox_attributionTelemetryMessage" type="string" />
-    <public name="mapbox_attributionTelemetryPositive" type="string" />
-    <public name="mapbox_attributionTelemetryNegative" type="string" />
-    <public name="mapbox_attributionTelemetryNeutral" type="string" />
-    <public name="mapbox_telemetrySettings" type="string" />
     <public name="mapbox_offline_error_region_definition_invalid" type="string" />
 
     <!-- Exposed drawables -->

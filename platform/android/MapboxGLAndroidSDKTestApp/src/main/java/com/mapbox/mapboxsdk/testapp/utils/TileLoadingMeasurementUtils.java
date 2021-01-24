@@ -125,8 +125,6 @@ public class TileLoadingMeasurementUtils {
       bundle.putString("attributes", gson.toJson(attributes));
       bundle.putString("counters", gson.toJson(counters));
       bundle.putString("metadata", getMetadata());
-
-      Mapbox.getTelemetry().onPerformanceEvent(bundle);
     }
 
     private static String getUrl(Request request) {

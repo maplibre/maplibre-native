@@ -42,17 +42,6 @@
     </issue>
 
     <issue
-        errorLine1="    &lt;string name=&quot;mapbox_attributionTelemetryMessage&quot;>Estàs ajudant a millorar els mapes d\&apos;OpenStreetMap i de Mapbox aportant dades d\&apos;ús anònimes.&lt;/string>"
-        errorLine2="                                                      ^"
-        id="TypographyQuotes"
-        message="Replace straight quotes (&apos;&apos;) with directional quotes (‘’, &amp;#8216; and &amp;#8217;) ?">
-        <location
-            column="55"
-            file="src/main/res/values-ca/strings.xml"
-            line="9"/>
-    </issue>
-
-    <issue
         id="IconDipSize"
         message="The image `icon_burned.png` varies significantly in its density-independent (dip) size across the various density versions: drawable-hdpi/icon_burned.png: 64x64 dp (96x96 px), drawable-xxxhdpi/icon_burned.png: 48x48 dp (192x192 px), drawable-xxhdpi/icon_burned.png: 48x48 dp (144x144 px), drawable-xhdpi/icon_burned.png: 48x48 dp (96x96 px), drawable-mdpi/icon_burned.png: 48x48 dp (48x48 px)">
         <location

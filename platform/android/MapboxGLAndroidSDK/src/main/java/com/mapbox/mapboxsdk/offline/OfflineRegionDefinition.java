@@ -63,7 +63,7 @@ public interface OfflineRegionDefinition extends Parcelable {
   boolean getIncludeIdeographs();
 
   /**
-   * Gets the type of the OfflineRegionDefinition for telemetry ("tileregion", "shaperegion").
+   * Gets the type of the OfflineRegionDefinition ("tileregion", "shaperegion").
    *
    * @return The type of the OfflineRegionDefinition.
    */

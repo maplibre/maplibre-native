@@ -1,5 +1,3 @@
-package com.mapbox.mapboxsdk.module.telemetry;
-
 import android.os.Build;
 import android.os.Bundle;
 
@@ -14,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.mapbox.mapboxsdk.module.telemetry.PerformanceEvent.PerformanceAttribute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;

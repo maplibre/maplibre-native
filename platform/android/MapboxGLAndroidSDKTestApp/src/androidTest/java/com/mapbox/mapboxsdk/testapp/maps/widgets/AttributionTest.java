@@ -129,25 +129,7 @@ public class AttributionTest extends EspressoTest {
     intended(expectedIntent);
   }
 
-  @Test
-  public void testTelemetryDialog() {
-    assumeTrue(
-      "Can only run on API Level 23 or newer because of instability",
-      Build.VERSION.SDK_INT >= 23
-    );
-
-    validateTestSetup();
-
-    // click on View to open dialog
-    onView(withTagValue(is("attrView"))).perform(click());
-    onView(withText(R.string.mapbox_attributionsDialogTitle)).inRoot(isDialog()).check(matches(isDisplayed()));
-
-    // click on item to open second dialog
-    onView(withText(R.string.mapbox_telemetrySettings)).inRoot(isDialog()).perform(click());
-    onView(withText(R.string.mapbox_attributionTelemetryTitle)).inRoot(isDialog()).check(matches(isDisplayed()));
-  }
-
-  @After
+    @After
   public void afterTest() {
     super.afterTest();
     Intents.release();

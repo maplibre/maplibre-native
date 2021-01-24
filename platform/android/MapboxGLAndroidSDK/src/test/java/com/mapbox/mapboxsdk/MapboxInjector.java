@@ -18,7 +18,7 @@ public class MapboxInjector {
     inject(context, accessToken, null);
   }
 
-  public static void inject(@NonNull Context context, @NonNull String accessToken, @Nullable String skuToken) {
+  public static void inject(@NonNull Context context, @NonNull String accessToken) {
     Mapbox mapbox = new Mapbox(context, accessToken);
     try {
       Field instance = Mapbox.class.getDeclaredField(FIELD_INSTANCE);
@@ -29,7 +29,6 @@ public class MapboxInjector {
       accounts.setAccessible(true);
 
       AccountsManager manager = mock(AccountsManager.class);
-      when(manager.getSkuToken()).thenReturn(skuToken);
       accounts.set(mapbox, manager);
     } catch (Exception exception) {
       throw new AssertionError();
