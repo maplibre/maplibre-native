@@ -14,3 +14,4 @@
 /platform/android/x86_64
 /.idea
 /cmake-build-debug
+/platform/android/.idea
