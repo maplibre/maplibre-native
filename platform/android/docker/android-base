@@ -21,7 +21,7 @@ RUN set -eu \
  && apt-get update \ 
  && add-apt-repository -y ppa:git-core/ppa \
  && apt-get update \
- && apt-get -y install git curl make python3 python3-pip zip unzip ccache openjdk-8-jdk-headless apt-transport-https \
+ && apt-get -y install git curl make python3 python3-pip zip unzip ccache openjdk-9-jdk-headless apt-transport-https \
  && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
  && rm -rf /var/lib/apt/lists/*
 
