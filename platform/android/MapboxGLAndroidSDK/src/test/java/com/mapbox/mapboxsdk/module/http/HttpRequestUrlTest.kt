@@ -15,7 +15,7 @@ class HttpRequestUrlTest {
 
     @Before
     fun setUp() {
-        MapboxInjector.inject(mockk(relaxed = true), "pk.foobar", "foobar")
+        MapboxInjector.inject(mockk(relaxed = true), "pk.foobar")
     }
 
     @Test
