@@ -10,6 +10,7 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.os.BuildCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +56,7 @@ public class PermissionsManager {
   }
 
   public static boolean isBackgroundLocationPermissionGranted(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT >= 29) {
       return isPermissionGranted(context, BACKGROUND_LOCATION_PERMISSION);
     }
 
@@ -106,7 +107,7 @@ public class PermissionsManager {
       permissions.add(COARSE_LOCATION_PERMISSION);
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && requestBackgroundLocation) {
+    if (Build.VERSION.SDK_INT >= 29 && requestBackgroundLocation) {
       permissions.add(BACKGROUND_LOCATION_PERMISSION);
     }
 

@@ -21,7 +21,6 @@ import java.util.Set;
  */
 public class AttributionParser {
 
-  private static final String IMPROVE_THIS_MAP = "Improve this map";
   private final WeakReference<Context> context;
   private final Set<Attribution> attributions = new LinkedHashSet<>();
   private final String attributionData;
@@ -118,16 +117,6 @@ public class AttributionParser {
    */
   private boolean isUrlValid(@NonNull String url) {
     return isValidForImproveThisMap(url) && isValidForMapbox(url);
-  }
-
-  /**
-   * Invoked to validate if an anchor is equal to Improve this map coming from tilesets.
-   *
-   * @param anchor the anchor to be validated
-   * @return if the url is valid
-   */
-  private boolean isImproveThisMapAnchor(String anchor) {
-    return anchor.equals(IMPROVE_THIS_MAP);
   }
 
   /**

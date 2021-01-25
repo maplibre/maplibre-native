@@ -40,20 +40,6 @@ class HttpRequestUrlTest {
     }
 
     @Test
-    fun testOnlineMapboxCom() {
-        val expected = "http://mapbox.com/path/of/no/return.pbf?sku=foobar"
-        val actual = HttpRequestUrl.buildResourceUrl("mapbox.com", "http://mapbox.com/path/of/no/return.pbf", 0, false)
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testOnlineMapboxCn() {
-        val expected = "http://mapbox.cn/path/of/no/return.pbf?sku=foobar"
-        val actual = HttpRequestUrl.buildResourceUrl("mapbox.cn", "http://mapbox.cn/path/of/no/return.pbf", 0, false)
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun testOnlineInvalidHost() {
         val expected = "http://foobar.com/path/of/no/return.pbf"
         val actual = HttpRequestUrl.buildResourceUrl("foobar.com", "http://foobar.com/path/of/no/return.pbf", 0, false)
