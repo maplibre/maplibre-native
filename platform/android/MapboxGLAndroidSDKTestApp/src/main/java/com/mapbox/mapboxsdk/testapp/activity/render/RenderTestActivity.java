@@ -5,19 +5,18 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter;
-import okio.BufferedSource;
-import okio.Okio;
-import timber.log.Timber;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okio.BufferedSource;
+import okio.Okio;
+import timber.log.Timber;
 
 /**
  * Activity that generates map snapshots based on the node render test suite.

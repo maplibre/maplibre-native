@@ -1,9 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
+import android.view.View;
+
 import androidx.annotation.RawRes;
 import androidx.test.espresso.ViewAction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import android.view.View;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;

@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.location.engine;
 
 import android.app.PendingIntent;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

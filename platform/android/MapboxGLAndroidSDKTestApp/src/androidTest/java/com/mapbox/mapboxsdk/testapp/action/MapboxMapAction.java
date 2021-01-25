@@ -1,9 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.action;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import android.view.View;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 

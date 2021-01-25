@@ -5,12 +5,12 @@ package com.mapbox.mapboxsdk.location;
 import androidx.annotation.ColorInt;
 
 import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.types.Formatted;
-import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString;
 import com.mapbox.mapboxsdk.style.layers.LayoutPropertyValue;
 import com.mapbox.mapboxsdk.style.layers.PaintPropertyValue;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyValue;
+
+import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString;
 
 /**
  * Constructs paint/layout properties for Layers

@@ -3,34 +3,37 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
+
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.mapbox.geojson.LineString;
-import com.mapbox.geojson.MultiLineString;
-import com.mapbox.geojson.MultiPoint;
-import com.mapbox.geojson.MultiPolygon;
 import com.mapbox.geojson.Point;
-import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
-import org.junit.Before;
-import timber.log.Timber;
-
-import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.HillshadeLayer;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
-import static org.junit.Assert.*;
-import static com.mapbox.mapboxsdk.style.layers.Property.*;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
-
-import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import timber.log.Timber;
+
+import static com.mapbox.mapboxsdk.style.layers.Property.HILLSHADE_ILLUMINATION_ANCHOR_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeAccentColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeExaggeration;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeHighlightColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeIlluminationAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeIlluminationDirection;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.hillshadeShadowColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Basic smoke tests for HillshadeLayer

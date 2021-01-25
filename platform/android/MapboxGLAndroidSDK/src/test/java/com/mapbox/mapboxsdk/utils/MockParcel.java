@@ -2,9 +2,10 @@ package com.mapbox.mapboxsdk.utils;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 

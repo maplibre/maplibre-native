@@ -3,24 +3,38 @@
 package com.mapbox.mapboxsdk.location;
 
 import android.graphics.Color;
+
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+
 import org.junit.Before;
-import timber.log.Timber;
-
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
-import static org.junit.Assert.*;
-import static com.mapbox.mapboxsdk.style.layers.Property.*;
-import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.*;
+import timber.log.Timber;
 
-import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.accuracyRadius;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.accuracyRadiusBorderColor;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.accuracyRadiusColor;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.bearing;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.bearingImage;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.bearingImageSize;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.imageTiltDisplacement;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.location;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.perspectiveCompensation;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.shadowImage;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.shadowImageSize;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.topImage;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.topImageSize;
+import static com.mapbox.mapboxsdk.location.LocationPropertyFactory.visibility;
+import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Basic smoke tests for LocationIndicatorLayer

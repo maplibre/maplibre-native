@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.location.engine;
 
 import android.location.Location;
+
 import androidx.annotation.Nullable;
 
 final class Utils {

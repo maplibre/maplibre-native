@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.testapp.utils;
 
 import android.content.Context;
 import android.widget.TextView;
+
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.testapp.R;

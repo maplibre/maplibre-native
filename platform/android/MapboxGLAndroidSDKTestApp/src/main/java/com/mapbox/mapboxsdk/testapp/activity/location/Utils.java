@@ -2,8 +2,8 @@ package com.mapbox.mapboxsdk.testapp.activity.location;
 
 import android.location.Location;
 
-import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.maps.Style;
 
 import java.util.Random;
 

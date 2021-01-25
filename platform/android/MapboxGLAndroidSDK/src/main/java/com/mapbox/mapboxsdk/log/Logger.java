@@ -1,8 +1,9 @@
 package com.mapbox.mapboxsdk.log;
 
+import android.util.Log;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.Keep;
-import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

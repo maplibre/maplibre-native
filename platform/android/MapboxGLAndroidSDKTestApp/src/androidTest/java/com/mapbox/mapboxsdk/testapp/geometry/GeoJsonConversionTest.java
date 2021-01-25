@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.testapp.geometry;
 
 import androidx.test.annotation.UiThreadTest;
+
 import com.google.gson.JsonArray;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
@@ -13,6 +14,7 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.testapp.action.MapboxMapAction;
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
 import com.mapbox.mapboxsdk.testapp.utils.TestingAsyncUtils;
+
 import org.junit.Test;
 
 import static androidx.test.espresso.Espresso.onView;

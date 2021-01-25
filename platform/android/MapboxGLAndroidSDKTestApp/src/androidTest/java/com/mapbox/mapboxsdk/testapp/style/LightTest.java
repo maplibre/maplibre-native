@@ -1,25 +1,26 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
+import android.view.View;
+
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import android.view.View;
 
-import com.mapbox.mapboxsdk.style.light.Light;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.FillExtrusionLayer;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+import com.mapbox.mapboxsdk.style.light.Light;
 import com.mapbox.mapboxsdk.style.light.Position;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.activity.BaseTest;
 import com.mapbox.mapboxsdk.testapp.activity.style.FillExtrusionStyleTestActivity;
 
-import timber.log.Timber;
-
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import timber.log.Timber;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -30,7 +31,6 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionBas
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHeight;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionOpacity;
-
 import static com.mapbox.mapboxsdk.testapp.action.MapboxMapAction.invoke;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;

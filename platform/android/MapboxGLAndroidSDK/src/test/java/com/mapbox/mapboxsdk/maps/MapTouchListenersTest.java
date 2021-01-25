@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.maps;
 import android.graphics.PointF;
 
 import androidx.annotation.Nullable;
+
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.RotateGestureDetector;
 import com.mapbox.android.gestures.ShoveGestureDetector;

@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.module.http;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import okhttp3.OkHttpClient;
 import okio.Buffer;
 

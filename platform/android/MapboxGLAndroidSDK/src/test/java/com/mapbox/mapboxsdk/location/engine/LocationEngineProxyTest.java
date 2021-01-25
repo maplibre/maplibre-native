@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.location.engine;
 
 import android.location.LocationListener;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

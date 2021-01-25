@@ -1,11 +1,11 @@
 package com.mapbox.mapboxsdk.style.sources;
 
-import com.mapbox.mapboxsdk.LibraryLoader;
-import com.mapbox.mapboxsdk.utils.ThreadUtils;
-
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.mapbox.mapboxsdk.LibraryLoader;
+import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
 /**
  * Base Peer class for sources. see source.hpp for the other half of the peer.

@@ -7,6 +7,9 @@ import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mapbox.geojson.Feature;
@@ -32,8 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;

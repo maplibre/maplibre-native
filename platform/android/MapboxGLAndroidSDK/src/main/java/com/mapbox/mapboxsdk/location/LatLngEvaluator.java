@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.location;
 import android.animation.TypeEvaluator;
 
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {

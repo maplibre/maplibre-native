@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.style.sources;
 
 import android.net.Uri;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

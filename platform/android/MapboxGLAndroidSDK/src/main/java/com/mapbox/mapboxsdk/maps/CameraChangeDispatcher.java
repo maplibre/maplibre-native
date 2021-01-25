@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.maps;
 
 import android.os.Handler;
 import android.os.Message;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 

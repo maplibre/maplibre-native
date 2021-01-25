@@ -2,6 +2,8 @@ package com.mapbox.mapboxsdk.location;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.Nullable;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -9,8 +11,6 @@ import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
-
-import androidx.annotation.Nullable;
 
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.BACKGROUND_ICON;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.BACKGROUND_STALE_ICON;

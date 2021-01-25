@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
 import com.mapbox.mapboxsdk.http.HttpRequest;
 
 /**

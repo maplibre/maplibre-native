@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.style.layers;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.google.gson.JsonElement;
 import com.mapbox.mapboxsdk.LibraryLoader;
 import com.mapbox.mapboxsdk.style.expressions.Expression;

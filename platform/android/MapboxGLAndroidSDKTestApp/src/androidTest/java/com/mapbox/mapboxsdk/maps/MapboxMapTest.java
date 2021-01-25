@@ -1,9 +1,11 @@
 package com.mapbox.mapboxsdk.maps;
 
 import android.graphics.Color;
+import android.view.View;
+
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import android.view.View;
+
 import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -15,6 +17,7 @@ import com.mapbox.mapboxsdk.exceptions.InvalidMarkerPositionException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
+
 import org.hamcrest.Matcher;
 import org.junit.Test;
 

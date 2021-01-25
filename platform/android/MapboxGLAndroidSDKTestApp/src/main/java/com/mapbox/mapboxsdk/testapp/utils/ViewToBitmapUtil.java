@@ -2,8 +2,9 @@ package com.mapbox.mapboxsdk.testapp.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import androidx.annotation.NonNull;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 /**
  * Converts a View to a Bitmap so we can use an Android SDK View as a Symbol.

@@ -3,10 +3,12 @@ package com.mapbox.mapboxsdk.testapp.activity.feature;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -14,10 +16,11 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.utils.NavUtils;
-import timber.log.Timber;
 
 import java.util.List;
 import java.util.Map;
+
+import timber.log.Timber;
 
 /**
  * Test activity showcasing using the query rendered features API to count features in a rectangle.

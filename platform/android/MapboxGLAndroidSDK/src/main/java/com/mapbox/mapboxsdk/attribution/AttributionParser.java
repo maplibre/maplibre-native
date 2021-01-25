@@ -1,12 +1,12 @@
 package com.mapbox.mapboxsdk.attribution;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.URLSpan;
-import com.mapbox.mapboxsdk.R;
+
+import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashSet;

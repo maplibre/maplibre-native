@@ -8,7 +8,10 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
 import com.mapbox.mapboxsdk.style.sources.CannotAddSourceException
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

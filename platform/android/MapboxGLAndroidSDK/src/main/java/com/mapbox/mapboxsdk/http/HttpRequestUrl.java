@@ -2,8 +2,6 @@ package com.mapbox.mapboxsdk.http;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.mapboxsdk.Mapbox;
-
 public class HttpRequestUrl {
 
   private HttpRequestUrl() {

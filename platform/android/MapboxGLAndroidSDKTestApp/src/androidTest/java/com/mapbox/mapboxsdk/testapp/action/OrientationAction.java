@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ActivityInfo;
-import androidx.test.espresso.UiController;
-import androidx.test.espresso.ViewAction;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+
 import org.hamcrest.Matcher;
 
 import static androidx.test.espresso.Espresso.onView;

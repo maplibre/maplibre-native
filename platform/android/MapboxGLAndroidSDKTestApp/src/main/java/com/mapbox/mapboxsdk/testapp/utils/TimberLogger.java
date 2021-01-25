@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.testapp.utils;
 
 import com.mapbox.mapboxsdk.log.LoggerDefinition;
+
 import timber.log.Timber;
 
 public class TimberLogger implements LoggerDefinition {

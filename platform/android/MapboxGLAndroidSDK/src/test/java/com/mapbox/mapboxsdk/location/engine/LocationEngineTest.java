@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.location.engine;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Looper;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +20,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationEngineTest {

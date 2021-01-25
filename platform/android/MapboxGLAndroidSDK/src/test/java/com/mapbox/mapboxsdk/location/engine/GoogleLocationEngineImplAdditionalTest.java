@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.location.engine;
 
 import android.location.Location;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.location.FusedLocationProviderClient;

@@ -3,9 +3,10 @@ package com.mapbox.mapboxsdk.annotations;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import androidx.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.R;
 

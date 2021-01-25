@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.offline;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 

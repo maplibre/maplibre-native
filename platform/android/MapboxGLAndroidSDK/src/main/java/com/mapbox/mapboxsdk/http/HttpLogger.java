@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.http;
 
 import android.util.Log;
+
 import com.mapbox.mapboxsdk.log.Logger;
 
 import static com.mapbox.mapboxsdk.http.HttpRequest.CONNECTION_ERROR;

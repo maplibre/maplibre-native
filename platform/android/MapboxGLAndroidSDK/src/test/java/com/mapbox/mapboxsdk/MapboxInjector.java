@@ -1,13 +1,12 @@
 package com.mapbox.mapboxsdk;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class MapboxInjector {
 

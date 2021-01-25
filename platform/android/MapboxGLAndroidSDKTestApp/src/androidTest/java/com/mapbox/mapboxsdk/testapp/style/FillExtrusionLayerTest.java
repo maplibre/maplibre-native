@@ -3,6 +3,7 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
+
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -13,24 +14,45 @@ import com.mapbox.geojson.MultiPolygon;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
-import org.junit.Before;
-import timber.log.Timber;
-
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.FillExtrusionLayer;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
-import static org.junit.Assert.*;
-import static com.mapbox.mapboxsdk.style.layers.Property.*;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
-
-import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import timber.log.Timber;
+
+import static com.mapbox.mapboxsdk.style.expressions.Expression.distance;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.image;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.number;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.string;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.toColor;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.within;
+import static com.mapbox.mapboxsdk.style.layers.Property.FILL_EXTRUSION_TRANSLATE_ANCHOR_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionBase;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHeight;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionPattern;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionTranslate;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionTranslateAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionVerticalGradient;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Basic smoke tests for FillExtrusionLayer

@@ -3,7 +3,9 @@ package com.mapbox.mapboxsdk.utils;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.exceptions.CalledFromWorkerThreadException;
 
 /**

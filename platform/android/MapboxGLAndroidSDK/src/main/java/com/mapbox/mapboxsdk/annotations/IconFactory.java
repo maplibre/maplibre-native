@@ -7,10 +7,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.R;

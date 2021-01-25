@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.maps;
 
 import android.graphics.PointF;
+
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 

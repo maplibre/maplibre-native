@@ -1,8 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.action;
 
+import android.view.View;
+
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import android.view.View;
+
 import org.hamcrest.Matcher;
 
 import static androidx.test.espresso.Espresso.onView;

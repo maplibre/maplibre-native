@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.testapp.activity.storage;
 
 import android.app.Activity;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mapbox.mapboxsdk.maps.MapView;

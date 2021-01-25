@@ -2,18 +2,9 @@
 
 package com.mapbox.mapboxsdk.style.layers;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-
-import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 
 /**
  * Raster map textures such as satellite imagery.

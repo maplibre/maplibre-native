@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.geometry;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.FloatRange;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;

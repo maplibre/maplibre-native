@@ -1,7 +1,9 @@
 package com.mapbox.mapboxsdk.testapp.activity.render;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshot;
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter;
 

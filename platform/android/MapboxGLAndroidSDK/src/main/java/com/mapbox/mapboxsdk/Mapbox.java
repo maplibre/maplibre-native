@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,7 +11,6 @@ import androidx.annotation.UiThread;
 
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
-import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;

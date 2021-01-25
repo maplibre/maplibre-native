@@ -7,6 +7,11 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import androidx.annotation.IntRange;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.LibraryLoader;
@@ -35,11 +40,6 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import androidx.annotation.IntRange;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 // Class that wraps the native methods for convenience
 final class NativeMapView implements NativeMap {

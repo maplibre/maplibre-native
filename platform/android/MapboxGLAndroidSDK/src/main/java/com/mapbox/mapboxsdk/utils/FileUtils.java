@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.utils;
 
 import android.os.AsyncTask;
+
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.log.Logger;

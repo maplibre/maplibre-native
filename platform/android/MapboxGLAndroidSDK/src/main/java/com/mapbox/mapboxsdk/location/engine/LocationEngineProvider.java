@@ -1,7 +1,9 @@
 package com.mapbox.mapboxsdk.location.engine;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
