@@ -6,7 +6,7 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "parform/ios/**"
+      - "platform/ios/**"
       - ".github/**" 
       - "README.md"      
     branches:

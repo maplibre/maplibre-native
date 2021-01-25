@@ -10,7 +10,6 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.os.BuildCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
