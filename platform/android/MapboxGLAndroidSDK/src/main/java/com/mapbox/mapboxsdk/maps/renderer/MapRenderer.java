@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.maps.renderer;
 
 import android.content.Context;
+
 import androidx.annotation.CallSuper;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;

@@ -3,15 +3,15 @@ package com.mapbox.mapboxsdk.testapp.maps.widgets;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import androidx.test.espresso.UiController;
-import androidx.test.espresso.ViewAction;
-import androidx.test.espresso.intent.Intents;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.view.View;
+
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.intent.Intents;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.sources.Source;
@@ -32,7 +32,6 @@ import static androidx.test.espresso.intent.Intents.intended;
 import static androidx.test.espresso.intent.Intents.intending;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasAction;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasData;
-import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
@@ -41,7 +40,6 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assume.assumeTrue;
 
 public class AttributionTest extends EspressoTest {
 
@@ -127,24 +125,6 @@ public class AttributionTest extends EspressoTest {
     // click item and test for url
     onData(anything()).inAdapterView(withId(R.id.select_dialog_listview)).atPosition(2).perform(click());
     intended(expectedIntent);
-  }
-
-  @Test
-  public void testTelemetryDialog() {
-    assumeTrue(
-      "Can only run on API Level 23 or newer because of instability",
-      Build.VERSION.SDK_INT >= 23
-    );
-
-    validateTestSetup();
-
-    // click on View to open dialog
-    onView(withTagValue(is("attrView"))).perform(click());
-    onView(withText(R.string.mapbox_attributionsDialogTitle)).inRoot(isDialog()).check(matches(isDisplayed()));
-
-    // click on item to open second dialog
-    onView(withText(R.string.mapbox_telemetrySettings)).inRoot(isDialog()).perform(click());
-    onView(withText(R.string.mapbox_attributionTelemetryTitle)).inRoot(isDialog()).check(matches(isDisplayed()));
   }
 
   @After

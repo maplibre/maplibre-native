@@ -8,13 +8,13 @@ import androidx.annotation.NonNull;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLDisplay;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLDisplay;
 
 import static com.mapbox.mapboxsdk.utils.Compare.compare;
 import static javax.microedition.khronos.egl.EGL10.EGL_ALPHA_MASK_SIZE;

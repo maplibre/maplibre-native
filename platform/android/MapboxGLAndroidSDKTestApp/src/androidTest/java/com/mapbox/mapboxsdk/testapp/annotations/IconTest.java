@@ -1,8 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.annotations;
 
 import android.app.Activity;
-import androidx.test.annotation.UiThreadTest;
+
 import androidx.core.content.res.ResourcesCompat;
+import androidx.test.annotation.UiThreadTest;
+
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -12,6 +14,7 @@ import com.mapbox.mapboxsdk.maps.IconManagerResolver;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
 import com.mapbox.mapboxsdk.testapp.utils.IconUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 

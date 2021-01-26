@@ -5,8 +5,8 @@ import android.os.Parcelable;
 
 import com.mapbox.mapboxsdk.utils.MockParcel;
 
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;

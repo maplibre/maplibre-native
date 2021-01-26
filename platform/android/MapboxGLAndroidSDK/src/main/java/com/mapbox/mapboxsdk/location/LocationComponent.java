@@ -14,18 +14,18 @@ import androidx.annotation.RequiresPermission;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 
-import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineCallback;
-import com.mapbox.android.core.location.LocationEngineProvider;
-import com.mapbox.android.core.location.LocationEngineRequest;
-import com.mapbox.android.core.location.LocationEngineResult;
-import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.engine.LocationEngine;
+import com.mapbox.mapboxsdk.location.engine.LocationEngineCallback;
+import com.mapbox.mapboxsdk.location.engine.LocationEngineProvider;
+import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest;
+import com.mapbox.mapboxsdk.location.engine.LocationEngineResult;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
+import com.mapbox.mapboxsdk.location.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -77,10 +77,10 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.TRANSITIO
  * <p>
  * This component offers a default, built-in {@link LocationEngine} with some of the activation methods.
  * This engine will be obtained by {@link LocationEngineProvider#getBestLocationEngine(Context, boolean)} which defaults
- * to the {@link com.mapbox.android.core.location.MapboxFusedLocationEngineImpl}. If you'd like to utilize Google
+ * to the {@link com.mapbox.mapboxsdk.location.engine.MapboxFusedLocationEngineImpl}. If you'd like to utilize Google
  * Play Services
  * for more precise location updates, simply add the Google Play Location Services dependency in your build script.
- * This will make the default engine the {@link com.mapbox.android.core.location.GoogleLocationEngineImpl} instead.
+ * This will make the default engine the {@link com.mapbox.mapboxsdk.location.engine.GoogleLocationEngineImpl} instead.
  * After a custom engine is passed to the component, or the built-in is initialized,
  * the location updates are going to be requested with the {@link LocationEngineRequest}, either a default one,
  * or the one passed during the activation.

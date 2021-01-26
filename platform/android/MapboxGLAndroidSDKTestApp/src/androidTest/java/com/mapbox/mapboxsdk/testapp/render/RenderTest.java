@@ -1,25 +1,28 @@
 package com.mapbox.mapboxsdk.testapp.render;
 
 import android.Manifest;
+
 import androidx.test.espresso.IdlingPolicies;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResourceTimeoutException;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.mapbox.mapboxsdk.AppCenter;
 import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity;
 import com.mapbox.mapboxsdk.testapp.utils.SnapshotterIdlingResource;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import timber.log.Timber;
 
 import java.util.concurrent.TimeUnit;
+
+import timber.log.Timber;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;

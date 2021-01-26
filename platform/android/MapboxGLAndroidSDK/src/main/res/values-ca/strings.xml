@@ -5,11 +5,6 @@
     <string name="mapbox_myLocationViewContentDescription">Vista de posició. Mostra la teva posició al mapa.</string>
     <string name="mapbox_mapActionDescription">Mostrant un mapa creat amb Mapbox. Desplaça’t arrossegant amb dos dits. Fes zoom pessigant amb dos dits.</string>
     <string name="mapbox_attributionsDialogTitle">Mapbox Android SDK</string>
-    <string name="mapbox_attributionTelemetryTitle">Millora els mapes de Mapbox</string>
-    <string name="mapbox_attributionTelemetryMessage">Estàs ajudant a millorar els mapes d’OpenStreetMap i de Mapbox aportant dades d’ús anònimes.</string>
-    <string name="mapbox_attributionTelemetryPositive">D’acord</string>
-    <string name="mapbox_attributionTelemetryNegative">Disconforme</string>
-    <string name="mapbox_attributionTelemetryNeutral">Més informació</string>
     <string name="mapbox_offline_error_region_definition_invalid">La OfflineRegionDefinition proporcionada no encaixa amb els límits del món: %s</string>
 
     </resources>

@@ -1,8 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.activity.fragment;
 
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.SupportMapFragment;
 import com.mapbox.mapboxsdk.testapp.R;

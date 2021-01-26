@@ -377,7 +377,7 @@ MGL_EXPORT
 
 
 /**
- A view showing legally required copyright notices and telemetry settings,
+ A view showing legally required copyright notices,
  positioned at the bottom-right of the map view.
 
  If you choose to reimplement this view, assign the `-showAttribution:` method
@@ -391,13 +391,6 @@ MGL_EXPORT
     data. If that applies to this map view, do not hide this view or remove
     any notices from it.
 
- @note You are additionally
-    <a href="https://www.mapbox.com/tos/#[FamaFama]">required</a>
-    to provide users with the option to disable anonymous usage and location
-    sharing (telemetry). If this view is hidden, you must implement this
-    setting elsewhere in your app or via `Settings.bundle`. See our
-    <a href="https://docs.mapbox.com/help/how-mapbox-works/attribution/#mapbox-maps-sdk-for-ios">website</a> for
-    implementation help.
  */
 @property (nonatomic, readonly) UIButton *attributionButton;
 
@@ -412,7 +405,7 @@ MGL_EXPORT
 @property (nonatomic, assign) CGPoint attributionButtonMargins;
 
 /**
- Show the attribution and telemetry action sheet.
+ Show the attribution action sheet.
 
  This action is performed when the user taps on the attribution button provided
  by default via the `attributionButton` property. If you implement a custom

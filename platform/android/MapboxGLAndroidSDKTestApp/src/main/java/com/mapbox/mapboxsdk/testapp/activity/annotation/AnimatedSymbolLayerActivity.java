@@ -6,9 +6,10 @@ import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.JsonObject;
 import com.mapbox.geojson.Feature;

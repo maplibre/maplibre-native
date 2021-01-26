@@ -1,8 +1,8 @@
 package com.mapbox.mapboxsdk.annotations;
 
 import androidx.annotation.Keep;
-
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.ArrayList;

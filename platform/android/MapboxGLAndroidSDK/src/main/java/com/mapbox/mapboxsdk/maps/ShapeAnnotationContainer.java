@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.maps;
 
 import android.graphics.RectF;
+
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 

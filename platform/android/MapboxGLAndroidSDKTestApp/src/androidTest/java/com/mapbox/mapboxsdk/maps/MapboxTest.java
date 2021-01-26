@@ -15,8 +15,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
@@ -74,8 +72,6 @@ public class MapboxTest extends AppCenter {
     );
 
     Mapbox.setAccessToken(invalidAccessToken);
-    assertNull(Mapbox.getTelemetry());
-    Mapbox.getSkuToken();
   }
 
   @Test
@@ -90,8 +86,6 @@ public class MapboxTest extends AppCenter {
     );
 
     Mapbox.setAccessToken(null);
-    assertNull(Mapbox.getTelemetry());
-    Mapbox.getSkuToken();
   }
 
   @Test
@@ -100,8 +94,6 @@ public class MapboxTest extends AppCenter {
     final String invalidAccessToken = "xyz";
     Mapbox.setAccessToken(invalidAccessToken);
     Mapbox.setAccessToken(ACCESS_TOKEN);
-    assertNotNull(Mapbox.getTelemetry());
-    assertNotNull(Mapbox.getSkuToken());
   }
 
   @After

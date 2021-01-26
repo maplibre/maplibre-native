@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.annotations;
 
 import android.graphics.Bitmap;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

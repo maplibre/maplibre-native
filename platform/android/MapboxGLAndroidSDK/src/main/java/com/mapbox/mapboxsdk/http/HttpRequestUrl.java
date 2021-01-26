@@ -2,8 +2,6 @@ package com.mapbox.mapboxsdk.http;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.mapboxsdk.Mapbox;
-
 public class HttpRequestUrl {
 
   private HttpRequestUrl() {
@@ -31,8 +29,6 @@ public class HttpRequestUrl {
       // Only add SKU token to requests not tagged as "offline" usage.
       if (offline) {
         resourceUrl = resourceUrl + "offline=true";
-      } else {
-        resourceUrl = resourceUrl + "sku=" + Mapbox.getSkuToken();
       }
     }
     return resourceUrl;

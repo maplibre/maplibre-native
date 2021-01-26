@@ -190,12 +190,6 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
-Mapbox GL uses portions of Mapbox Android Telemetry Library.  
-URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)  
-License: [The MIT License](https://opensource.org/licenses/MIT)
-
-===========================================================================
-
 Mapbox GL uses portions of Mapbox Java SDK.  
 URL: [https://github.com/mapbox/mapbox-java](https://github.com/mapbox/mapbox-java)  
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)

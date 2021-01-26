@@ -1,12 +1,12 @@
 package com.mapbox.mapboxsdk.attribution;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.URLSpan;
-import com.mapbox.mapboxsdk.R;
+
+import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashSet;
@@ -21,22 +21,19 @@ import java.util.Set;
  */
 public class AttributionParser {
 
-  private static final String IMPROVE_THIS_MAP = "Improve this map";
   private final WeakReference<Context> context;
   private final Set<Attribution> attributions = new LinkedHashSet<>();
   private final String attributionData;
   private final boolean withImproveMap;
   private final boolean withCopyrightSign;
-  private final boolean withTelemetryAttribution;
   private final boolean withMapboxAttribution;
 
   AttributionParser(WeakReference<Context> context, String attributionData, boolean withImproveMap,
-                    boolean withCopyrightSign, boolean withTelemetryAttribution, boolean withMapboxAttribution) {
+                    boolean withCopyrightSign, boolean withMapboxAttribution) {
     this.context = context;
     this.attributionData = attributionData;
     this.withImproveMap = withImproveMap;
     this.withCopyrightSign = withCopyrightSign;
-    this.withTelemetryAttribution = withTelemetryAttribution;
     this.withMapboxAttribution = withMapboxAttribution;
   }
 
@@ -85,7 +82,6 @@ public class AttributionParser {
    */
   protected void parse() {
     parseAttributions();
-    addAdditionalAttributions();
   }
 
   /**
@@ -109,9 +105,6 @@ public class AttributionParser {
     String url = urlSpan.getURL();
     if (isUrlValid(url)) {
       String anchor = parseAnchorValue(htmlBuilder, urlSpan);
-      if (isImproveThisMapAnchor(anchor)) {
-        anchor = translateImproveThisMapAnchor(anchor);
-      }
       attributions.add(new Attribution(anchor, url));
     }
   }
@@ -124,30 +117,6 @@ public class AttributionParser {
    */
   private boolean isUrlValid(@NonNull String url) {
     return isValidForImproveThisMap(url) && isValidForMapbox(url);
-  }
-
-  /**
-   * Invoked to validate if an anchor is equal to Improve this map coming from tilesets.
-   *
-   * @param anchor the anchor to be validated
-   * @return if the url is valid
-   */
-  private boolean isImproveThisMapAnchor(String anchor) {
-    return anchor.equals(IMPROVE_THIS_MAP);
-  }
-
-  /**
-   * Invoked to replace the english Improve this map with localized variant.
-   *
-   * @param anchor the anchor to be translated
-   * @return the translated anchor
-   */
-  private String translateImproveThisMapAnchor(String anchor) {
-    Context context = this.context.get();
-    if (context != null) {
-      anchor = context.getString(R.string.mapbox_telemetryImproveMap);
-    }
-    return anchor;
   }
 
   /**
@@ -202,21 +171,6 @@ public class AttributionParser {
   }
 
   /**
-   * Invoked to manually add attributions
-   */
-  private void addAdditionalAttributions() {
-    if (withTelemetryAttribution) {
-      Context context = this.context.get();
-      attributions.add(
-        new Attribution(
-          context != null ? context.getString(R.string.mapbox_telemetrySettings) : Attribution.TELEMETRY,
-          Attribution.TELEMETRY_URL
-        )
-      );
-    }
-  }
-
-  /**
    * Convert a string to a spanned html representation.
    *
    * @param html the string to convert
@@ -236,15 +190,14 @@ public class AttributionParser {
    * Builder to configure using an AttributionParser.
    * <p>
    * AttributionData, set with {@link #withAttributionData(String...)}, is the only required property to build
-   * the underlying AttributionParser. Other properties include trimming the copyright sign, adding telemetry
-   * attribution or hiding attribution as improve this map and Mapbox.
+   * the underlying AttributionParser. Other properties include trimming the copyright sign, hiding
+   * attribution as improve this map and Mapbox.
    * </p>
    */
   public static class Options {
     private final WeakReference<Context> context;
     private boolean withImproveMap = true;
     private boolean withCopyrightSign = true;
-    private boolean withTelemetryAttribution = false;
     private boolean withMapboxAttribution = true;
     private String[] attributionDataStringArray;
 
@@ -271,12 +224,6 @@ public class AttributionParser {
     }
 
     @NonNull
-    public Options withTelemetryAttribution(boolean withTelemetryAttribution) {
-      this.withTelemetryAttribution = withTelemetryAttribution;
-      return this;
-    }
-
-    @NonNull
     public Options withMapboxAttribution(boolean withMapboxAttribution) {
       this.withMapboxAttribution = withMapboxAttribution;
       return this;
@@ -294,7 +241,6 @@ public class AttributionParser {
         fullAttributionString,
         withImproveMap,
         withCopyrightSign,
-        withTelemetryAttribution,
         withMapboxAttribution
       );
       attributionParser.parse();

@@ -1,7 +1,8 @@
 package com.mapbox.mapboxsdk.testapp.utils;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.mapboxsdk.testapp.R;
 

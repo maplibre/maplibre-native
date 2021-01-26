@@ -1,12 +1,11 @@
 package com.mapbox.mapboxsdk.maps.renderer.textureview;
 
 import android.graphics.SurfaceTexture;
+import android.view.TextureView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-
-import android.view.TextureView;
 
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.maps.renderer.egl.EGLConfigChooser;

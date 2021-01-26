@@ -1,13 +1,12 @@
-package com.mapbox.mapboxsdk.testapp.activity.telemetry;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -123,8 +122,6 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
     bundle.putString("attributes", gson.toJson(attributes));
     bundle.putString("counters", gson.toJson(counters));
     bundle.putString("metadata", metaData.toString());
-
-    Mapbox.getTelemetry().onPerformanceEvent(bundle);
   }
 
   private static String getRam() {

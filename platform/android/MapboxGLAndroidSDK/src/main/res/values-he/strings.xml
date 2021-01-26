@@ -5,12 +5,6 @@
     <string name="mapbox_myLocationViewContentDescription">סמן מיקום. מציג את המיקום הנוכחי שלך על המפה.</string>
     <string name="mapbox_mapActionDescription">מציג מפה שנוצרה עם Mapbox. גלול באמצעות גרירה עם שתי אצבעות, זום באמצעות צביטה עם שתי אצבעות.</string>
     <string name="mapbox_attributionsDialogTitle">Mapbox Maps SDK for Android</string>
-    <string name="mapbox_attributionTelemetryTitle">שפר את המפות של Mapbox </string>
-    <string name="mapbox_attributionTelemetryMessage">אתם מסייעים לשפר את המפות של OpenStreetMap ו Mapbox באמצעות שיתוף אנונימי של נתוני השימוש.</string>
-    <string name="mapbox_attributionTelemetryPositive">מסכים/מה</string>
-    <string name="mapbox_attributionTelemetryNegative">לא מסכים/מה</string>
-    <string name="mapbox_attributionTelemetryNeutral">מידע נוסף</string>
     <string name="mapbox_attributionErrorNoBrowser">לא מותקן דפדפן אינטרנט במכשיר, לא ניתן לפתוח את דף האינטרנט.</string>
     <string name="mapbox_offline_error_region_definition_invalid">בתנאי ש- OfflineRegionDefinition אינו מתאים לגבולות העולם: %s</string>
-    <string name="mapbox_telemetrySettings">הגדרות טלמטריות</string>
     </resources>

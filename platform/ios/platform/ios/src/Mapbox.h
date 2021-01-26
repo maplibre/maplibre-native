@@ -74,4 +74,3 @@ FOUNDATION_EXPORT MGL_EXPORT const unsigned char MapboxVersionString[];
 #import "MGLLoggingConfiguration.h"
 #import "MGLNetworkConfiguration.h"
 #import "MGLAttributedExpression.h"
-#import "MGLSDKMetricsManager.h"

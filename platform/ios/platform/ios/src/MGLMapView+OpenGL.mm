@@ -2,10 +2,6 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLMapView+OpenGL.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import <MapboxMobileEvents/MapboxMobileEvents.h>
-#endif
-
 #include <mbgl/gl/renderable_resource.hpp>
 
 #import <GLKit/GLKit.h>
@@ -113,15 +109,6 @@ void MGLMapViewOpenGLImpl::display() {
 #ifdef MGL_RECREATE_GL_IN_AN_EMERGENCY
             dispatch_async(dispatch_get_main_queue(), ^{
               emergencyRecreateGL();
-            });
-#else
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
-                NSError *error = [NSError errorWithDomain:MGLErrorDomain
-                                                     code:MGLErrorCodeRenderingError
-                                                 userInfo:@{ NSLocalizedFailureReasonErrorKey :
-                                                                 @"https://github.com/mapbox/mapbox-gl-native/issues/14232" }];
-                [[MMEEventsManager sharedManager] reportError:error];
             });
 #endif
         }

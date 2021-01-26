@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.testapp.utils;
 
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.Mapbox;

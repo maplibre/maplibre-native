@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.location;
 
 import android.os.Handler;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;

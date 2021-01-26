@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.attribution;
 
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

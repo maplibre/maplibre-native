@@ -104,16 +104,11 @@ make xcframework
 step "Zipping xcframeworks…"
 MAPBOX_ZIP_FILE="Mapbox-${PUBLISH_VERSION}.zip"
 (cd ${BINARY_DIRECTORY} && rm -f ${MAPBOX_ZIP_FILE} && zip -yr ${MAPBOX_ZIP_FILE} Mapbox.xcframework)
-MAPBOX_EVENTS_ZIP_FILE="MapboxMobileEvents-${PUBLISH_VERSION}.zip"
-(cd ${BINARY_DIRECTORY} && rm -f ${MAPBOX_EVENTS_ZIP_FILE} && zip -yr ${MAPBOX_EVENTS_ZIP_FILE} MapboxMobileEvents.xcframework)
 
 if [[ ${S3_DISTRIBUTION} == true ]]; then    
     step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE} to s3"
     uploadToS3 "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" false
     MAPBOX_ZIP_FILE_URL=$EXT_TARGET_S3_URL
-    step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE} to s3"
-    uploadToS3 "${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE}" false
-    MAPBOX_EVENTS_ZIP_FILE_URL=$EXT_TARGET_S3_URL
 fi
 
 step "Create GitHub release…"
@@ -132,9 +127,6 @@ github-release release \
 step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE} to github release [${VERSION_TAG}]"
 uploadToGithub "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${VERSION_TAG}"
 MAPBOX_ZIP_FILE_URL=$EXT_TARGET_GITHUB_URL
-step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE} to github releases"
-uploadToGithub "${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE}" "${VERSION_TAG}"
-MAPBOX_EVENTS_ZIP_FILE_URL=$EXT_TARGET_GITHUB_URL
 
 step "Creating Swift package…"
 
@@ -156,7 +148,6 @@ setTarget() {
 }
 
 setTarget "MAPBOX" "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${MAPBOX_ZIP_FILE_URL}"
-setTarget "MAPBOX_EVENTS" "${BINARY_DIRECTORY}/${MAPBOX_EVENTS_ZIP_FILE}" "${MAPBOX_EVENTS_ZIP_FILE_URL}"
 
 step "Publishing Swift package…"
 

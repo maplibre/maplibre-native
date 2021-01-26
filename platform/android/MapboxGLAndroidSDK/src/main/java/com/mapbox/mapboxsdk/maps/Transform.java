@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.maps;
 
 import android.graphics.PointF;
 import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;

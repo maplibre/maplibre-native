@@ -3,8 +3,6 @@ apply from: "${rootDir}/gradle/dependencies.gradle"
 def MAPBOX_JAVA_DIR = 'mapbox-java'
 def MAPBOX_JAVA_TAG_PREFIX = 'v'
 
-def MAPBOX_TELEMETRY_DIR = 'mapbox-events-android'
-def MAPBOX_TELEMETRY_TAG_PREFIX = 'telem-'
 def MAPBOX_CORE_TAG_PREFIX = '-core-'
 
 def MAPBOX_GESTURES_DIR = 'mapbox-gestures-android'
@@ -16,8 +14,6 @@ task androidNitpick {
 
         println "Verify vendor submodule pins"
         verifyVendorSubmodulePin(MAPBOX_JAVA_DIR, MAPBOX_JAVA_TAG_PREFIX, versions.mapboxServices)
-        verifyVendorSubmodulePin(MAPBOX_TELEMETRY_DIR, MAPBOX_TELEMETRY_TAG_PREFIX,
-                versions.mapboxTelemetry + MAPBOX_CORE_TAG_PREFIX + versions.mapboxCore)
         verifyVendorSubmodulePin(MAPBOX_GESTURES_DIR, MAPBOX_GESTURES_TAG_PREFIX, versions.mapboxGestures)
 
         verifyLicenseGeneration()

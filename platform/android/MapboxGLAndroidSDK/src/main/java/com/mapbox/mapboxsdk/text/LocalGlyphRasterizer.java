@@ -1,10 +1,11 @@
 package com.mapbox.mapboxsdk.text;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;

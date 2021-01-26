@@ -6,6 +6,7 @@ import androidx.annotation.ColorInt;
 
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.types.Formatted;
+
 import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString;
 
 /**

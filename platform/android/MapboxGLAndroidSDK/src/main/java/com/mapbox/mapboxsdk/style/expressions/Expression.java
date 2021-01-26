@@ -2,6 +2,11 @@ package com.mapbox.mapboxsdk.style.expressions;
 
 import android.annotation.SuppressLint;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -9,11 +14,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mapbox.geojson.GeoJson;
-import com.mapbox.geojson.LineString;
-import com.mapbox.geojson.MultiLineString;
-import com.mapbox.geojson.MultiPoint;
-import com.mapbox.geojson.MultiPolygon;
-import com.mapbox.geojson.Point;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.geojson.gson.GeometryGeoJson;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
@@ -25,11 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
 
 import static com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaArray;
 

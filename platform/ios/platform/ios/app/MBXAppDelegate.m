@@ -3,7 +3,7 @@
 #import "MBXAppDelegate.h"
 #import "MBXViewController.h"
 
-@interface MBXAppDelegate() <MGLMetricsManagerDelegate>
+@interface MBXAppDelegate()
 
 @end
 
@@ -15,7 +15,6 @@
     [MGLLoggingConfiguration sharedConfiguration].loggingLevel = MGLLoggingLevelFault;
 #endif
 
-    [MGLMetricsManager sharedManager].delegate = self;
     return YES;
 }
 
@@ -35,14 +34,6 @@
     }
 
     return NO;
-}
-
-- (BOOL)metricsManager:(MGLMetricsManager *)metricsManager shouldHandleMetric:(MGLMetricType)metricType {
-    return YES;
-}
-
-- (void)metricsManager:(MGLMetricsManager *)metricsManager didCollectMetric:(MGLMetricType)metricType withAttributes:(NSDictionary *)attributes {
-    [[MGLMetricsManager sharedManager] pushMetric:metricType withAttributes:attributes];
 }
 
 @end

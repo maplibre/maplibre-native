@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.R;
 
 import org.junit.Before;

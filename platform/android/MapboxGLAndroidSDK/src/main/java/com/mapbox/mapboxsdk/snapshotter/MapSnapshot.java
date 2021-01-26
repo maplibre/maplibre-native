@@ -2,9 +2,10 @@ package com.mapbox.mapboxsdk.snapshotter;
 
 import android.graphics.Bitmap;
 import android.graphics.PointF;
-import androidx.annotation.Keep;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 /**

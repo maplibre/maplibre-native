@@ -7,6 +7,7 @@ import com.mapbox.mapboxsdk.testapp.action.MapboxMapAction;
 import com.mapbox.mapboxsdk.testapp.activity.BaseTest;
 import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesBoxHighlightActivity;
 import com.mapbox.mapboxsdk.testapp.utils.TestConstants;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;

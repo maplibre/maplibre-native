@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.style.layers;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.exceptions.ConversionException;

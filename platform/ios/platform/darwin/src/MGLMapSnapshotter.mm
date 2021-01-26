@@ -17,10 +17,6 @@
 #import "MGLRendererConfiguration.h"
 #import "MGLMapSnapshotter_Private.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import "MGLMapboxEvents.h"
-#endif
-
 #if TARGET_OS_IPHONE
 #import "UIImage+MGLAdditions.h"
 #else
@@ -269,9 +265,6 @@ private:
 #else
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
 #endif
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-        [MGLMapboxEvents pushTurnstileEvent];
-#endif
     }
     return self;
 }
@@ -336,9 +329,7 @@ private:
             NSString *description = @(mbgl::util::toString(mbglError).c_str());
             NSDictionary *userInfo = @{NSLocalizedDescriptionKey: description};
             NSError *error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeSnapshotFailed userInfo:userInfo];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
+
             // Dispatch to result queue
             dispatch_async(queue, ^{
                 strongSelf.loading = NO;

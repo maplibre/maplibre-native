@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.camera;
 
 import android.graphics.Point;
 import android.graphics.PointF;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

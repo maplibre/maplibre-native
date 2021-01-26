@@ -13,11 +13,6 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import <MapboxMobileEvents/MapboxMobileEvents.h>
-#import "MGLMapboxEvents.h"
-#endif
-
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
@@ -390,9 +385,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
                                                NSLocalizedDescriptionKey: description,
                                                NSLocalizedFailureReasonErrorKey: @(mbgl::util::toString(result.error()).c_str())
                                                }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         } else {
             auto& regions = result.value();
             packs = [NSMutableArray arrayWithCapacity:regions.size()];
@@ -421,17 +413,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         if (completion) {
             completion(pack, error);
         }
-            
-        #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            NSMutableDictionary *offlineDownloadStartEventAttributes = [NSMutableDictionary dictionaryWithObject:MMEventTypeOfflineDownloadStart forKey:MMEEventKeyEvent];
-        
-            if ([region conformsToProtocol:@protocol(MGLOfflineRegion_Private)]) {
-                NSDictionary *regionAttributes = ((id<MGLOfflineRegion_Private>)region).offlineStartEventAttributes;
-                [offlineDownloadStartEventAttributes addEntriesFromDictionary:regionAttributes];
-            }
-        
-            [MGLMapboxEvents pushEvent:MMEventTypeOfflineDownloadStart withAttributes:offlineDownloadStartEventAttributes];
-        #endif
     }];
 }
 
@@ -452,9 +433,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
             error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:errorDescription ? @{
                 NSLocalizedDescriptionKey: errorDescription,
             } : nil];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         }
         if (completion) {
             MGLOfflinePack *pack = mbglOfflineRegion ? [[MGLOfflinePack alloc] initWithMBGLRegion:new mbgl::OfflineRegion(std::move(mbglOfflineRegion.value()))] : nil;
@@ -492,9 +470,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
             error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:@{
                 NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
             }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         }
         if (completion) {
             dispatch_async(dispatch_get_main_queue(), [&, completion, error](void) {
@@ -518,9 +493,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
             error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:@{
                 NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
             }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         }
     });
     if (completion) {
@@ -548,9 +520,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
             error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeUnknown userInfo:@{
                 NSLocalizedDescriptionKey: @(mbgl::util::toString(result.error()).c_str()),
             }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         } else {
             auto& regions = result.value();
             packs = [NSMutableArray arrayWithCapacity:regions.size()];
@@ -582,9 +551,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
                 error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:@{
                     NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
                 }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-                [[MMEEventsManager sharedManager] reportError:error];
-#endif
             }
             dispatch_sync(dispatch_get_main_queue(), ^ {
                 completion(error);
@@ -602,9 +568,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
                 error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:@{
                     NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
                 }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-                [[MMEEventsManager sharedManager] reportError:error];
-#endif
             }
             dispatch_async(dispatch_get_main_queue(), ^ {
                 completion(error);
@@ -621,9 +584,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
                 error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:@{
                     NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
                 }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-                [[MMEEventsManager sharedManager] reportError:error];
-#endif
             }
             dispatch_async(dispatch_get_main_queue(), [&, completion, error](void) {
                 completion(error);
@@ -640,9 +600,6 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
                 error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeUnknown userInfo:@{
                     NSLocalizedDescriptionKey: @(mbgl::util::toString(exception).c_str()),
                 }];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-                [[MMEEventsManager sharedManager] reportError:error];
-#endif
             }
             dispatch_async(dispatch_get_main_queue(), ^{
                 completion(error);

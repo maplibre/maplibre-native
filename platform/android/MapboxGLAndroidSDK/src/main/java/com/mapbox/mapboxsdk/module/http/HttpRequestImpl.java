@@ -4,6 +4,10 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.mapbox.mapboxsdk.BuildConfig;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.http.HttpIdentifier;
@@ -21,9 +25,6 @@ import java.net.UnknownHostException;
 
 import javax.net.ssl.SSLException;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Dispatcher;

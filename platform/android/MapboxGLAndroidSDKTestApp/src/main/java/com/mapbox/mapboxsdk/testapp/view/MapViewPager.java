@@ -1,11 +1,12 @@
 package com.mapbox.mapboxsdk.testapp.view;
 
 import android.content.Context;
-import androidx.viewpager.widget.PagerTabStrip;
-import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.view.SurfaceView;
 import android.view.View;
+
+import androidx.viewpager.widget.PagerTabStrip;
+import androidx.viewpager.widget.ViewPager;
 
 public class MapViewPager extends ViewPager {
 

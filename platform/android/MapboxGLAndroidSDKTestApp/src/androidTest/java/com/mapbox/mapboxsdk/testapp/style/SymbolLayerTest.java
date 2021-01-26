@@ -3,6 +3,7 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
+
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -13,26 +14,108 @@ import com.mapbox.geojson.MultiPolygon;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
-import org.junit.Before;
-import timber.log.Timber;
-
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import com.mapbox.mapboxsdk.style.types.Formatted;
 import com.mapbox.mapboxsdk.style.types.FormattedSection;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
-import static org.junit.Assert.*;
-import static com.mapbox.mapboxsdk.style.layers.Property.*;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
-
-import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import timber.log.Timber;
+
+import static com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.distance;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.format;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.image;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.number;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.string;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.toColor;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.within;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_CENTER;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_PITCH_ALIGNMENT_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ROTATION_ALIGNMENT_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_TEXT_FIT_NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_TRANSLATE_ANCHOR_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.SYMBOL_PLACEMENT_POINT;
+import static com.mapbox.mapboxsdk.style.layers.Property.SYMBOL_Z_ORDER_AUTO;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_CENTER;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_JUSTIFY_AUTO;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_PITCH_ALIGNMENT_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ROTATION_ALIGNMENT_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_TRANSFORM_NONE;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_TRANSLATE_ANCHOR_MAP;
+import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconHaloBlur;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconHaloColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconHaloWidth;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconKeepUpright;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOptional;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconPadding;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconPitchAlignment;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconRotate;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconRotationAlignment;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconTextFit;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconTextFitPadding;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconTranslate;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconTranslateAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolAvoidEdges;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolPlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolSortKey;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolSpacing;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolZOrder;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAllowOverlap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textFont;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textHaloBlur;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textHaloColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textHaloWidth;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textIgnorePlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textJustify;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textKeepUpright;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textLetterSpacing;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textLineHeight;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textMaxAngle;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textMaxWidth;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOptional;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textPadding;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textPitchAlignment;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textRadialOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textRotate;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textRotationAlignment;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textTransform;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textTranslate;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textTranslateAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textVariableAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textWritingMode;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Basic smoke tests for SymbolLayer

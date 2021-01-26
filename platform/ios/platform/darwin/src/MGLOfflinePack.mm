@@ -10,10 +10,6 @@
 
 #import "NSValue+MGLAdditions.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-    #import "MGLMapboxEvents.h"
-#endif
-
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/database_file_source.hpp>
 
@@ -130,9 +126,6 @@ private:
             error = [NSError errorWithDomain:MGLErrorDomain code:MGLErrorCodeModifyingOfflineStorageFailed userInfo:errorDescription ? @{
                 NSLocalizedDescriptionKey: errorDescription,
             } : nil];
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-            [[MMEEventsManager sharedManager] reportError:error];
-#endif
         }
         dispatch_async(dispatch_get_main_queue(), [&, completion, weakSelf, error](void) {
             [weakSelf reloadWithCompletionHandler:^(NSError * _Nullable reloadingError) {

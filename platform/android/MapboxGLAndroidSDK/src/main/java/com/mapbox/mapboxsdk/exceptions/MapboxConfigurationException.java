@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.exceptions;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 /**
