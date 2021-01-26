@@ -88,14 +88,6 @@ public class MapboxTest extends AppCenter {
     Mapbox.setAccessToken(null);
   }
 
-  @Test
-  @UiThreadTest
-  public void setValidAccessToken() {
-    final String invalidAccessToken = "xyz";
-    Mapbox.setAccessToken(invalidAccessToken);
-    Mapbox.setAccessToken(ACCESS_TOKEN);
-  }
-
   @After
   public void tearDown() {
     Mapbox.setAccessToken(realToken);
