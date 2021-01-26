@@ -86,14 +86,9 @@ public final class Mapbox {
    */
   public static void setAccessToken(String accessToken) {
     validateMapbox();
+    throwIfAccessTokenInvalid(accessToken);
     INSTANCE.accessToken = accessToken;
-
-    // initialize components dependent on a token
-    if (isAccessTokenValid(accessToken)) {
-      INSTANCE.accounts = new AccountsManager();
-    } else {
-      INSTANCE.accounts = null;
-    }
+    INSTANCE.accounts = new AccountsManager();
     FileSource.getInstance(getApplicationContext()).setAccessToken(accessToken);
   }
 
@@ -167,6 +162,20 @@ public final class Mapbox {
     accessToken = accessToken.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
     return accessToken.length() != 0 && (accessToken.startsWith("pk.") || accessToken.startsWith("sk."));
   }
+
+  /**
+   * Throws exception when access token is invalid
+   */
+  public static void throwIfAccessTokenInvalid(@Nullable String accessToken) {
+    if (!isAccessTokenValid(accessToken)) {
+      throw new MapboxConfigurationException(
+              "A valid access token parameter is required when using a Mapbox service."
+                      + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
+                      + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
+                      + "Currently provided token is: " + INSTANCE.accessToken);
+    }
+  }
+
 
   /**
    * Internal use. Check if the {@link Mapbox#INSTANCE} is present.
