@@ -172,7 +172,7 @@ public final class Mapbox {
               "A valid access token parameter is required when using a Mapbox service."
                       + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
                       + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
-                      + "Currently provided token is: " + INSTANCE.accessToken);
+                      + "Currently provided token is: " + accessToken);
     }
   }
 
