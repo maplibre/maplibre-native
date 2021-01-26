@@ -17,6 +17,7 @@ buildscript {
     }
 }
 
+// ci test
 allprojects {
     repositories {
         mavenCentral()
