@@ -1,16 +1,14 @@
-name: android-ci
+name: android-ci-pull
 
 on: 
   workflow_dispatch:
-  push:
-    tags-ignore:
-      - '**'
+  pull_request:
+    branches:
+      - master      
     paths-ignore:
       - "parform/ios/**"
       - ".github/**" 
       - "README.md"      
-    branches:
-      - master
   
 jobs:
   build:
@@ -20,9 +18,6 @@ jobs:
         working-directory: platform/android
     container:
       image: ghcr.io/maptiler/android-ndk-r21b
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
@@ -94,45 +89,6 @@ jobs:
 
       - name: Generate Espresso sanity tests
         run: make test-code-android
-
-      - name: Build Test APK
-        run: |
-          MAPBOX_DEVELOPER_CONFIG_XML='${{ secrets.MAPBOX_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPBOX_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
-            make android-ui-test-arm-v8
-          else
-            echo "No secrets.MAPBOX_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash        
-
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash          
-
-      - name: Run instrumentation tests on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android models list
-            gcloud firebase test android run --type instrumentation \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
-              --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
-              --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir mapbox-android-sdk-${CIRCLE_BUILD_NUM}
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
-          fi
-        shell: bash  
 
       - name: Store debug artifacts
         uses: actions/upload-artifact@v2

@@ -13,7 +13,11 @@ on:
       - master
   pull_request:
     branches:
-      - master   
+      - master  
+    paths-ignore:
+      - "platform/android/**" 
+      - ".github/**"  
+      - "README.md"       
 
 jobs:
   build:
