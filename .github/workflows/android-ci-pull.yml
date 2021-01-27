@@ -6,7 +6,7 @@ on:
     branches:
       - master      
     paths-ignore:
-      - "parform/ios/**"
+      - "platform/ios/**"
       - ".github/**" 
       - "README.md"  
       - ".gitignore"    
