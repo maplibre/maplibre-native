@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "maplibre-gl-native",
+    name: "MapLibre GL Native",
     products: [
         .library(
             name: "Mapbox",
