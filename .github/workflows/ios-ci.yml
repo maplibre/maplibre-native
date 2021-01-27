@@ -8,7 +8,8 @@ on:
     paths-ignore:
       - "platform/android/**" 
       - ".github/**"  
-      - "README.md"             
+      - "README.md"
+      - ".gitignore"              
     branches:
       - master
   pull_request:
@@ -17,7 +18,8 @@ on:
     paths-ignore:
       - "platform/android/**" 
       - ".github/**"  
-      - "README.md"       
+      - "README.md"
+      - ".gitignore"       
 
 jobs:
   build:

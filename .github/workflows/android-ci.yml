@@ -8,7 +8,8 @@ on:
     paths-ignore:
       - "platform/ios/**"
       - ".github/**" 
-      - "README.md"      
+      - "README.md"
+      - ".gitignore"      
     branches:
       - master
   
