@@ -62,11 +62,6 @@ NS_INLINE MGLSphericalPosition MGLSphericalPositionMake(CGFloat radial, CLLocati
  
  ### Example
  ```swift
- let light = MGLLight()
- let position = MGLSphericalPosition(radial: 5, azimuthal: 180, polar: 80)
- light.position = NSExpression(forConstantValue: NSValue(mglSphericalPosition: position))
- light.anchor = NSExpression(forConstantValue: "map")
- mapView.style?.light = light
  ```
  
  #### Related examples
