@@ -38,41 +38,44 @@ _.forOwn(cocoaConventions, function (properties, kind) {
     _.forOwn(properties, function (newConvention, oldName) {
         let conventionOverride = new ConventionOverride(newConvention);
         let property = spec[kind][oldName];
-        if (conventionOverride.name.startsWith('is-')) {
-            property.getter = conventionOverride.name;
-            conventionOverride.name = conventionOverride.name.substr(3);
-        }
-
-        // Override enum name based on style-spec-cocoa-conventions-v8.json
-        property.enumName = conventionOverride.enumName;
-
-        if (conventionOverride.name !== oldName) {
-            property.original = oldName;
-            delete spec[kind][oldName];
-            spec[kind][conventionOverride.name] = property;
-        }
-
-        // Update cross-references to this property in other properties'
-        // documentation and requirements.
-        let renameCrossReferences = function (property, name) {
-            property.doc = property.doc.replace(new RegExp('`' + oldName + '`', 'g'), '`' + conventionOverride.name + '`');
-            let requires = property.requires || [];
-            for (let i = 0; i < requires.length; i++) {
-                if (requires[i] === oldName) {
-                    property.requires[i] = conventionOverride.name;
-                }
-                if (typeof requires[i] !== 'string') {
-                    _.forOwn(requires[i], function (values, name, require) {
-                        if (name === oldName) {
-                            require[conventionOverride.name] = values;
-                            delete require[name];
-                        }
-                    });
-                }
+        
+        if (property) {
+            if (conventionOverride.name.startsWith('is-')) {
+                property.getter = conventionOverride.name;
+                conventionOverride.name = conventionOverride.name.substr(3);
             }
-        };
-        _.forOwn(spec[kind.replace(/^layout_/, 'paint_')], renameCrossReferences);
-        _.forOwn(spec[kind.replace(/^paint_/, 'layout_')], renameCrossReferences);
+
+            // Override enum name based on style-spec-cocoa-conventions-v8.json
+            property.enumName = conventionOverride.enumName;
+
+            if (conventionOverride.name !== oldName) {
+                property.original = oldName;
+                delete spec[kind][oldName];
+                spec[kind][conventionOverride.name] = property;
+            }
+
+            // Update cross-references to this property in other properties'
+            // documentation and requirements.
+            let renameCrossReferences = function (property, name) {
+                property.doc = property.doc.replace(new RegExp('`' + oldName + '`', 'g'), '`' + conventionOverride.name + '`');
+                let requires = property.requires || [];
+                for (let i = 0; i < requires.length; i++) {
+                    if (requires[i] === oldName) {
+                        property.requires[i] = conventionOverride.name;
+                    }
+                    if (typeof requires[i] !== 'string') {
+                        _.forOwn(requires[i], function (values, name, require) {
+                            if (name === oldName) {
+                                require[conventionOverride.name] = values;
+                                delete require[name];
+                            }
+                        });
+                    }
+                }
+            };
+            _.forOwn(spec[kind.replace(/^layout_/, 'paint_')], renameCrossReferences);
+            _.forOwn(spec[kind.replace(/^paint_/, 'layout_')], renameCrossReferences);
+        }
     })
 });
 

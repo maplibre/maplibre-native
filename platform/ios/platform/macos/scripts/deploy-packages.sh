@@ -74,7 +74,7 @@ publish() {
     fi
 }
 
-export GITHUB_USER=mapbox
+export GITHUB_USER=maptiler
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
 
