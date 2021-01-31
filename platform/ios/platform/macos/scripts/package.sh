@@ -8,6 +8,7 @@ NAME=Mapbox
 OUTPUT=build/macos/pkg
 APP_OUTPUT=build/macos/app
 DERIVED_DATA=build/macos
+ENABLE_APP_PUBLISH=${ENABLE_APP_PUBLISH:-NO}
 
 BUILDTYPE=${BUILDTYPE:-Release}
 SYMBOLS=${SYMBOLS:-YES}
@@ -87,7 +88,7 @@ function validate_dsym {
     fi
 }
 
-if [[ ${BUILDTYPE} == Release ]]; then
+if [[ ${BUILDTYPE} == Release && ${ENABLE_APP_PUBLISH} = "YES" ]]; then
     validate_dsym \
         "${OUTPUT}/${NAME}.framework.dSYM/Contents/Resources/DWARF/${NAME}" \
         "${OUTPUT}/${NAME}.framework/${NAME}"

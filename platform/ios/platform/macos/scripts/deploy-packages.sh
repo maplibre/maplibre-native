@@ -19,6 +19,8 @@ function step { >&2 echo -e "\033[1m\033[36m* $@\033[0m"; }
 function finish { >&2 echo -en "\033[0m"; }
 trap finish EXIT
 
+ENABLE_APP_PUBLISH=${ENABLE_APP_PUBLISH:-NO}
+
 publish() {
     OPTRESET=1
     OPTIND=
@@ -139,6 +141,11 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
 fi
 
 publish -r xpackage -s symbols
-publish -r "xpackage SYMBOLS=NO" -a true
+
+if [[ ${ENABLE_APP_PUBLISH} = "YES" ]]; then
+    publish -r "xpackage SYMBOLS=NO" -a true
+else
+    publish -r "xpackage SYMBOLS=NO"
+fi;
 
 step "Finished deploying ${PUBLISH_VERSION} in $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
