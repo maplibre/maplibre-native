@@ -13,6 +13,7 @@ jobs:
     runs-on: macos-10.15
     env:
       BUILDTYPE: Release
+      SYMBOLS: NO
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
