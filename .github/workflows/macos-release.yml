@@ -78,7 +78,7 @@ jobs:
       - name: Build package
         run: make xpackage
       
-      - name: Build package
+      - name: Deploy package
         run: make xdeploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
