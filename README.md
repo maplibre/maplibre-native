@@ -12,7 +12,7 @@ Beside merging in platform specific SDKs, the following changes were made compar
     * The iOS binaries distribution was upgraded from fat packages to Swift package containing XCFramework.
     * The Android binaries are distributed to GitHub maven package repository.
 
-> The mapbox-gl-native was forked from [d60fd30](https://github.com/mapbox/mapbox-gl-native/tree/d60fd302b1f6563e7d16952f8855122fdcc85f73), mapbox-gl-native-ios from [a139216](https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216) and mapbox-gl-native-android from [4c12fb2](https://github.com/mapbox/mapbox-gl-native-android/commit/4c12fb2c)
+> The mapbox-gl-native was forked from [d60fd30 - mgbl 1.6.0](https://github.com/mapbox/mapbox-gl-native/tree/d60fd302b1f6563e7d16952f8855122fdcc85f73), mapbox-gl-native-ios from [a139216](https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216) and mapbox-gl-native-android from [4c12fb2](https://github.com/mapbox/mapbox-gl-native-android/commit/4c12fb2c)
 ## Build Status
 
 | SDK                                                           | Build   | Build status                                                                                                                                                                                  |
