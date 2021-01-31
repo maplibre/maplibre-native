@@ -61,6 +61,9 @@ typedef NS_ENUM(NSUInteger, MGLRasterResamplingMode) {
  ### Example
 
  ```swift
+ let layer = MGLRasterStyleLayer(identifier: "clouds", source: source)
+ layer.rasterOpacity = NSExpression(forConstantValue: 0.5)
+ mapView.style?.addLayer(layer)
  ```
  */
 MGL_EXPORT

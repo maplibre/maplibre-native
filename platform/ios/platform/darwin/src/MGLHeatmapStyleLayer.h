@@ -40,6 +40,14 @@ NS_ASSUME_NONNULL_BEGIN
  ### Example
 
  ```swift
+ let layer = MGLHeatmapStyleLayer(identifier: "earthquake-heat", source: earthquakes)
+ layer.heatmapWeight = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(magnitude, 'linear', nil, %@)",
+                                    [0: 0,
+                                     6: 1])
+ layer.heatmapIntensity = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
+                                       [0: 1,
+                                        9: 3])
+ mapView.style?.addLayer(layer)
  ```
  */
 MGL_EXPORT

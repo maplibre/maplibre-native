@@ -402,6 +402,16 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslationAnchor) {
  ### Example
 
  ```swift
+ let layer = MGLSymbolStyleLayer(identifier: "coffeeshops", source: pois)
+ layer.sourceLayerIdentifier = "pois"
+ layer.iconImageName = NSExpression(forConstantValue: "coffee")
+ layer.iconScale = NSExpression(forConstantValue: 0.5)
+ layer.text = NSExpression(forKeyPath: "name")
+ layer.textTranslation = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 10, dy: 0)))
+ layer.textJustification = NSExpression(forConstantValue: "left")
+ layer.textAnchor = NSExpression(forConstantValue: "left")
+ layer.predicate = NSPredicate(format: "%K == %@", "venue-type", "coffee")
+ mapView.style?.addLayer(layer)
  ```
  */
 MGL_EXPORT

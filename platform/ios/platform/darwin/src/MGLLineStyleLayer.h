@@ -101,6 +101,15 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslationAnchor) {
  ### Example
 
  ```swift
+ let layer = MGLLineStyleLayer(identifier: "trails-path", source: trails)
+ layer.sourceLayerIdentifier = "trails"
+ layer.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.5, %@)",
+                                [14: 2,
+                                 18: 20])
+ layer.lineColor = NSExpression(forConstantValue: UIColor.brown)
+ layer.lineCap = NSExpression(forConstantValue: "round")
+ layer.predicate = NSPredicate(format: "%K == %@", "trail-type", "mountain-biking")
+ mapView.style?.addLayer(layer)
  ```
  */
 MGL_EXPORT

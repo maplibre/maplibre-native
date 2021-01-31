@@ -51,6 +51,11 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslationAnchor) {
  ### Example
 
  ```swift
+ let layer = MGLFillStyleLayer(identifier: "parks", source: parks)
+ layer.sourceLayerIdentifier = "parks"
+ layer.fillColor = NSExpression(forConstantValue: UIColor.green)
+ layer.predicate = NSPredicate(format: "type == %@", "national-park")
+ mapView.style?.addLayer(layer)
  ```
  */
 MGL_EXPORT

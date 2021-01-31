@@ -48,6 +48,11 @@ typedef NS_ENUM(NSUInteger, MGLHillshadeIlluminationAnchor) {
  ### Example
 
  ```swift
+ let layer = MGLHillshadeStyleLayer(identifier: "hills", source: source)
+ layer.hillshadeExaggeration = NSExpression(forConstantValue: 0.6)
+ if let canalShadowLayer = mapView.style?.layer(withIdentifier: "waterway-river-canal-shadow") {
+     mapView.style?.insertLayer(layer, below: canalShadowLayer)
+ }
  ```
  */
 MGL_EXPORT
