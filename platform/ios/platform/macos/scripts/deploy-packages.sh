@@ -140,14 +140,11 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
         --draft ${PUBLISH_PRE_FLAG}
 fi
 
-step "publish -r xpackage -s symbols"
 publish -r xpackage -s symbols
 
 if [[ ${ENABLE_APP_PUBLISH} = "YES" ]]; then
-    step "publish -r "xpackage SYMBOLS=NO" -a true"
     publish -r "xpackage SYMBOLS=NO" -a true
 else
-    step "publish -r "xpackage SYMBOLS=NO"
     publish -r "xpackage SYMBOLS=NO"
 fi;
 

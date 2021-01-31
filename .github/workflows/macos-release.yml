@@ -16,6 +16,7 @@ jobs:
       SYMBOLS: NO
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
+      CILAUNCH: true
     defaults:
       run:
         working-directory: platform/ios
@@ -73,13 +74,11 @@ jobs:
       - name: Install packaging dependencies
         run: |
           ./platform/ios/scripts/install-packaging-dependencies.sh
-        env:
-          CILAUNCH: true
 
       - name: Build package
         run: make xpackage
-      
+                
       - name: Deploy package
         run: make xdeploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
