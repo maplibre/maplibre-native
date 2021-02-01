@@ -118,7 +118,7 @@ if [[ $( wget --spider -O- https://api.github.com/repos/${GITHUB_USER}/${GITHUB_
 fi
 
 PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^macos-v//' )
-git checkout ${VERSION_TAG}
+#git checkout ${VERSION_TAG}
 
 step "Deploying version ${PUBLISH_VERSION}…"
 
