@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.19)
 
 message(source-dir=${CMAKE_SOURCE_DIR} current-dir=${CMAKE_CURRENT_SOURCE_DIR} current-binary-dir=${CMAKE_CURRENT_BINARY_DIR})
 

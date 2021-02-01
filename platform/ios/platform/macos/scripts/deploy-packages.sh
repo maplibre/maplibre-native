@@ -47,7 +47,7 @@ publish() {
     else
         file_name=mapbox-macos-sdk-${PUBLISH_VERSION}-${suffix}.zip
     fi
-    step "Compressing ${file_name}…"
+    step "Compressing ${file_name}-> ${PWD}../deploy/${file_name}"
     cd build/macos/pkg
     rm -f ../deploy/${file_name}
     zip -yr ../deploy/${file_name} *
@@ -129,6 +129,14 @@ fi
 npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
 
+step "Generating release notes…"
+RELEASE_NOTES=$( ./platform/macos/scripts/release-notes.js github )
+
+if [[ -z "${RELEASE_NOTES}" ]]; then
+    echo "Release notes cannot be empty."
+    exit 1
+fi
+
 if [[ "${GITHUB_RELEASE}" == true ]]; then
     step "Create GitHub release…"
     if [[ $( echo ${PUBLISH_VERSION} | awk '/[0-9]-/' ) ]]; then
@@ -137,6 +145,7 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
     github-release release \
         --tag "macos-v${PUBLISH_VERSION}" \
         --name "macos-v${PUBLISH_VERSION}" \
+        --description "${RELEASE_NOTES}" \
         --draft ${PUBLISH_PRE_FLAG}
 fi
 

@@ -95,6 +95,8 @@ if github-release info --tag ${VERSION_TAG} | grep --quiet "draft: ✗"; then
 fi
 PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^ios-v//' )
 
+git checkout ${VERSION_TAG}
+
 npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
 
