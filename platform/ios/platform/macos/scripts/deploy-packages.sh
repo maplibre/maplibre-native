@@ -47,17 +47,17 @@ publish() {
     else
         file_name=mapbox-macos-sdk-${PUBLISH_VERSION}-${suffix}.zip
     fi
-    step "Compressing ${file_name}-> ${pwd}../deploy/${file_name}"
+    step "Compressing ${file_name}-> ${PWD}../deploy/${file_name}"
     cd build/macos/pkg
     rm -f ../deploy/${file_name}
     zip -yr ../deploy/${file_name} *
     cd -
     if [[ "${GITHUB_RELEASE}" == true ]]; then
         echo "Uploading ${file_name} to GitHub"
-        github-release upload \
-            --tag "macos-v${PUBLISH_VERSION}" \
-            --name ${file_name} \
-            --file "${BINARY_DIRECTORY}/${file_name}" > /dev/null
+        # github-release upload \
+        #     --tag "macos-v${PUBLISH_VERSION}" \
+        #     --name ${file_name} \
+        #     --file "${BINARY_DIRECTORY}/${file_name}" > /dev/null
     fi
     if [ ${app} ]; then
         file_name="Mapbox GL.app.zip"
