@@ -118,7 +118,7 @@ if [[ $( wget --spider -O- https://api.github.com/repos/${GITHUB_USER}/${GITHUB_
 fi
 
 PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^macos-v//' )
-git checkout ${VERSION_TAG}
+#git checkout ${VERSION_TAG}
 
 step "Deploying version ${PUBLISH_VERSION}…"
 
@@ -142,11 +142,11 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
     if [[ $( echo ${PUBLISH_VERSION} | awk '/[0-9]-/' ) ]]; then
         PUBLISH_PRE_FLAG='--pre-release'
     fi
-    github-release release \
-        --tag "macos-v${PUBLISH_VERSION}" \
-        --name "macos-v${PUBLISH_VERSION}" \
-        --description "${RELEASE_NOTES}" \
-        --draft ${PUBLISH_PRE_FLAG}
+    # github-release release \
+    #     --tag "macos-v${PUBLISH_VERSION}" \
+    #     --name "macos-v${PUBLISH_VERSION}" \
+    #     --description "${RELEASE_NOTES}" \
+    #     --draft ${PUBLISH_PRE_FLAG}
 fi
 
 publish -r xpackage -s symbols
