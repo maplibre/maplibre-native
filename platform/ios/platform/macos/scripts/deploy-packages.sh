@@ -134,10 +134,10 @@ if [[ "${GITHUB_RELEASE}" == true ]]; then
     if [[ $( echo ${PUBLISH_VERSION} | awk '/[0-9]-/' ) ]]; then
         PUBLISH_PRE_FLAG='--pre-release'
     fi
-    github-release release \
-        --tag "macos-v${PUBLISH_VERSION}" \
-        --name "macos-v${PUBLISH_VERSION}" \
-        --draft ${PUBLISH_PRE_FLAG}
+    # github-release release \
+    #     --tag "macos-v${PUBLISH_VERSION}" \
+    #     --name "macos-v${PUBLISH_VERSION}" \
+    #     --draft ${PUBLISH_PRE_FLAG}
 fi
 
 publish -r xpackage -s symbols
