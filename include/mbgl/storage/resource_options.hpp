@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <mbgl/util/tile_server_options.hpp>
 
 namespace mbgl {
 
@@ -36,19 +37,19 @@ public:
     const std::string& accessToken() const;
 
     /**
-     * @brief Sets the API base URL. Default is https://api.mapbox.com for Mapbox.
+     * @brief Sets the tile server options..
      *
-     * @param baseURL API base URL.
+     * @param tileServerOptions Tile server options.
      * @return ResourceOptions for chaining options together.
      */
-    ResourceOptions& withBaseURL(std::string baseURL);
+    ResourceOptions& withTileServerOptions(const TileServerOptions& tileServerOptions);
 
     /**
-     * @brief Gets the previously set (or default) API base URL.
+     * @brief Gets the previously set (or default) TileServerOptions.
      *
-     * @return const std::string& API base URL.
+     * @return const TileServerOptions& tile server options.
      */
-    const std::string& baseURL() const;
+    const TileServerOptions& tileServerOptions() const;
 
     /**
      * @brief Sets the cache path.

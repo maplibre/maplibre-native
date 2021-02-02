@@ -201,9 +201,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         }
     } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLAccountManager sharedManager]) {
         NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
-        if ([apiBaseURL isKindOfClass:[NSNull class]]) {
-            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, mbgl::util::API_BASE_URL);
-        } else {
+        if (![apiBaseURL isKindOfClass:[NSNull class]]) {
             _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
         }
     } else {

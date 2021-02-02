@@ -6,6 +6,7 @@
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/util/async_task.hpp>
@@ -177,9 +178,6 @@ public:
         maximumConcurrentRequests = maximumConcurrentRequests_;
     }
 
-    void setAPIBaseURL(std::string t) { apiBaseURL = std::move(t); }
-    const std::string& getAPIBaseURL() const { return apiBaseURL; }
-
     void setAccessToken(std::string t) { accessToken = std::move(t); }
     const std::string& getAccessToken() const { return accessToken; }
 
@@ -288,7 +286,6 @@ private:
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
     std::string accessToken;
-    std::string apiBaseURL = mbgl::util::API_BASE_URL;
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
 };
 
@@ -316,22 +313,23 @@ public:
 
     void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
 
-    void setAPIBaseURL(const mapbox::base::Value& value) {
-        if (auto* baseURL = value.getString()) {
-            thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
-            {
-                std::lock_guard<std::mutex> lock(cachedBaseURLMutex);
-                cachedBaseURL = *baseURL;
-            }
-        } else {
-            Log::Error(Event::General, "Invalid api-base-url property value type.");
-        }
-    }
-
-    std::string getAPIBaseURL() const {
-        std::lock_guard<std::mutex> lock(cachedBaseURLMutex);
-        return cachedBaseURL;
-    }
+    // TODO:PP
+//    void setTileServerOptions(const mapbox::base::Value& value) {
+//        if (auto* tileServerOptions = value.get<TileServerOptions>()) {
+//            thread->actor().invoke(&OnlineFileSourceThread::setTileServerOptions, *tileServerOptions);
+//            {
+//                std::lock_guard<std::mutex> lock(cachedTileServerOptionsMutex);
+//                cachedTileServerOptions = *tileServerOptions;
+//            }
+//        } else {
+//            Log::Error(Event::General, "Invalid api-base-url property value type.");
+//        }
+//    }
+//
+//    TileServerOptions getTileServerOptions() const {
+//        std::lock_guard<std::mutex> lock(cachedTileServerOptionsMutex);
+//        return cachedTileServerOptions;
+//    }
 
     void setMaximumConcurrentRequests(const mapbox::base::Value& value) {
         if (auto* maximumConcurrentRequests = value.getUint()) {
@@ -352,6 +350,7 @@ public:
         return cachedMaximumConcurrentRequests;
     }
 
+    //TODO:PP check if token is used in thread
     void setAccessToken(const mapbox::base::Value& value) {
         if (auto* accessToken = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setAccessToken, *accessToken);
@@ -369,11 +368,37 @@ public:
         return cachedAccessToken;
     }
 
+    void setAPIBaseURL(const mapbox::base::Value& value) {
+        if (auto* baseURL = value.getString()) {
+            std::lock_guard<std::mutex> lock(tileServerOptionsMutex);
+            tileServerOptions.withBaseURL(*baseURL);
+        } else {
+            Log::Error(Event::General, "Invalid base-url property value type.");
+        }
+    }
+
+    std::string getAPIBaseURL() const {
+        std::lock_guard<std::mutex> lock(tileServerOptionsMutex);
+        return tileServerOptions.baseURL();
+    }
+
+    void setTileServerOptions(const TileServerOptions& options) {
+        std::lock_guard<std::mutex> lock(tileServerOptionsMutex);
+        tileServerOptions = options;
+    }
+
+    TileServerOptions getTileServerOptions() const {
+        std::lock_guard<std::mutex> lock(tileServerOptionsMutex);
+        return tileServerOptions;
+    }
+
 private:
     mutable std::mutex cachedAccessTokenMutex;
     std::string cachedAccessToken;
-    mutable std::mutex cachedBaseURLMutex;
-    std::string cachedBaseURL = util::API_BASE_URL;
+
+    mutable std::mutex tileServerOptionsMutex;
+    TileServerOptions tileServerOptions;
+
     mutable std::mutex maximumConcurrentRequestsMutex;
     uint32_t cachedMaximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
@@ -574,24 +599,24 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
 
         case Resource::Kind::Style:
             res.url =
-                mbgl::util::mapbox::normalizeStyleURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+                mbgl::util::mapbox::normalizeStyleURL(impl->getTileServerOptions(), resource.url, impl->getAccessToken());
             break;
 
         case Resource::Kind::Source:
-            res.url = util::mapbox::normalizeSourceURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSourceURL(impl->getTileServerOptions(), resource.url, impl->getAccessToken());
             break;
 
         case Resource::Kind::Glyphs:
-            res.url = util::mapbox::normalizeGlyphsURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeGlyphsURL(impl->getTileServerOptions(), resource.url, impl->getAccessToken());
             break;
 
         case Resource::Kind::SpriteImage:
         case Resource::Kind::SpriteJSON:
-            res.url = util::mapbox::normalizeSpriteURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSpriteURL(impl->getTileServerOptions(), resource.url, impl->getAccessToken());
             break;
 
         case Resource::Kind::Tile:
-            res.url = util::mapbox::normalizeTileURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeTileURL(impl->getTileServerOptions(), resource.url, impl->getAccessToken());
             break;
     }
 

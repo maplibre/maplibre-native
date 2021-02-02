@@ -3,34 +3,30 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/url.hpp>
 #include <mbgl/util/tileset.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <stdexcept>
 #include <vector>
 #include <cstring>
 
-namespace {
-
-const char* protocol = "mapbox://";
-const std::size_t protocolLength = 9;
-
-} // namespace
-
 namespace mbgl {
 namespace util {
 namespace mapbox {
 
-bool isMapboxURL(const std::string& url) {
-    return url.compare(0, protocolLength, protocol) == 0;
+bool isAliasedResource(const TileServerOptions& tileServerOptions, const std::string& url) {
+    const auto& protocol = tileServerOptions.uriSchemeAlias();
+    return url == protocol;
 }
 
-static bool equals(const std::string& str, const URL::Segment& segment, const char* ref) {
-    return str.compare(segment.first, segment.second, ref) == 0;
-}
+// TODO:PP remove
+//static bool equals(const std::string& str, const URL::Segment& segment, const char* ref) {
+//    return str.compare(segment.first, segment.second, ref) == 0;
+//}
 
-std::string normalizeSourceURL(const std::string& baseURL,
+std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isMapboxURL(str)) {
+    if (!isAliasedResource(tileServerOptions, str)) {
         return str;
     }
     if (accessToken.empty()) {
@@ -39,81 +35,72 @@ std::string normalizeSourceURL(const std::string& baseURL,
     }
 
     const URL url(str);
-    const auto tpl = baseURL + "/v4/{domain}.json?access_token=" + accessToken + "&secure";
+    //TODO:PP
+    //const auto tpl = baseURL + "/v4/{domain}.json?access_token=" + accessToken + "&secure";
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeStyleURL(const std::string& baseURL,
+std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
                               const std::string& str,
                               const std::string& accessToken) {
-    if (!isMapboxURL(str)) {
+    if (!isAliasedResource(tileServerOptions, str)) {
         return str;
     }
 
     const URL url(str);
-    if (!equals(str, url.domain, "styles")) {
-        Log::Error(Event::ParseStyle, "Invalid style URL");
-        return str;
-    }
-
-    const auto tpl = baseURL + "/styles/v1{path}?access_token=" + accessToken;
+    //TODO:PP
+    //const auto tpl = baseURL + "/styles/v1{path}?access_token=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeSpriteURL(const std::string& baseURL,
+std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isMapboxURL(str)) {
+    if (!isAliasedResource(tileServerOptions, str)) {
         return str;
     }
 
     const URL url(str);
-    if (!equals(str, url.domain, "sprites")) {
-        Log::Error(Event::ParseStyle, "Invalid sprite URL");
-        return str;
-    }
-
-    const auto tpl =
-        baseURL + "/styles/v1{directory}{filename}/sprite{extension}?access_token=" + accessToken;
+    //TODO:PP
+//    const auto tpl =
+//        baseURL + "/styles/v1{directory}{filename}/sprite{extension}?access_token=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeGlyphsURL(const std::string& baseURL,
+std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isMapboxURL(str)) {
+    if (!isAliasedResource(tileServerOptions, str)) {
         return str;
     }
 
     const URL url(str);
-    if (!equals(str, url.domain, "fonts")) {
-        Log::Error(Event::ParseStyle, "Invalid glyph URL");
-        return str;
-    }
-
-    const auto tpl = baseURL + "/fonts/v1{path}?access_token=" + accessToken;
+    //TODO:PP
+    //const auto tpl = baseURL + "/fonts/v1{path}?access_token=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.glyphsTemplate() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeTileURL(const std::string& baseURL,
+std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
                              const std::string& str,
                              const std::string& accessToken) {
-    if (!isMapboxURL(str)) {
+    if (!isAliasedResource(tileServerOptions, str)) {
         return str;
     }
 
     const URL url(str);
-    if (!equals(str, url.domain, "tiles")) {
-        Log::Error(Event::ParseStyle, "Invalid tile URL");
-        return str;
-    }
-
-    const auto tpl = baseURL + "/v4{path}?access_token=" + accessToken;
+    //TODO:PP
+    //const auto tpl = baseURL + "/v4{path}?access_token=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.glyphsTemplate() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
+//TODO:PP remove?
 std::string
-canonicalizeTileURL(const std::string& str, const style::SourceType type, const uint16_t tileSize) {
+canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::string& str, const style::SourceType type, const uint16_t tileSize) {
     const char* version = "/v4/";
     const size_t versionLen = strlen(version);
 
@@ -158,9 +145,10 @@ canonicalizeTileURL(const std::string& str, const style::SourceType type, const 
     return result;
 }
 
-void canonicalizeTileset(Tileset& tileset, const std::string& sourceURL, style::SourceType type, uint16_t tileSize) {
+void canonicalizeTileset(const TileServerOptions& tileServerOptions, Tileset& tileset,
+                         const std::string& sourceURL, style::SourceType type, uint16_t tileSize) {
     // TODO: Remove this hack by delivering proper URLs in the TileJSON to begin with.
-    if (isMapboxURL(sourceURL)) {
+    if (isAliasedResource(tileServerOptions, sourceURL)) {
         for (auto& url : tileset.tiles) {
             url = canonicalizeTileURL(url, type, tileSize);
         }

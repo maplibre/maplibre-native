@@ -1,12 +1,13 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 namespace mbgl {
 
 class ResourceOptions::Impl {
 public:
     std::string accessToken;
-    std::string baseURL = mbgl::util::API_BASE_URL;
+    TileServerOptions tileServerOptions;
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
     uint64_t maximumSize = mbgl::util::DEFAULT_MAX_CACHE_SIZE;
@@ -32,13 +33,13 @@ const std::string& ResourceOptions::accessToken() const {
     return impl_->accessToken;
 }
 
-ResourceOptions& ResourceOptions::withBaseURL(std::string url) {
-    impl_->baseURL = std::move(url);
+ResourceOptions& ResourceOptions::withTileServerOptions(const TileServerOptions& tileServerOptions) {
+    impl_->tileServerOptions = tileServerOptions;
     return *this;
 }
 
-const std::string& ResourceOptions::baseURL() const {
-    return impl_->baseURL;
+const TileServerOptions& ResourceOptions::tileServerOptions() const {
+    return impl_->tileServerOptions;
 }
 
 ResourceOptions& ResourceOptions::withCachePath(std::string path) {
