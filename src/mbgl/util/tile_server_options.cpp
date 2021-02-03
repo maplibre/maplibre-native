@@ -8,12 +8,12 @@ namespace mbgl {
     public:
         std::string baseURL;
         std::string uriSchemeAlias;
-        std::string sourceTemplate;
-        std::string styleTemplate;
-        std::string spritesTemplate;
-        std::string glyphsTemplate;
-        std::string tileTemplate;
-        std::string accessTokenParameterName;
+        std::string sourceTemplate = "/tiles/v3/{domain}.json";
+        std::string styleTemplate = "/maps/{path}/style.json";
+        std::string spritesTemplate = "/maps/{path}/sprite.json";
+        std::string glyphsTemplate = "/fonts/{fontstack}/{range}.pbf";
+        std::string tileTemplate = "/tiles/v3/{path}";
+        std::string accessTokenParameterName = "key";
     };
 
 // These requires the complete type of Impl.
