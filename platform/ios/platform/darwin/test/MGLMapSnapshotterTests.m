@@ -137,7 +137,7 @@ MGLImage *MGLImageFromCurrentContext() {
         }
         [completionExpectation fulfill];
     }];
-    [self waitForExpectations:@[self.styleLoadingExpectation, completionExpectation] timeout:5 enforceOrder:YES];
+    [self waitForExpectations:@[self.styleLoadingExpectation, completionExpectation] timeout:10 enforceOrder:YES];
 }
 
 - (void)testRuntimeStyling {
