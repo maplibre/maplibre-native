@@ -10,7 +10,7 @@ const pr = process.env['GITHUB_PULL_REQUEST'];
 if (pr) {
     const number = +pr.match(/\/(\d+)\/?$/)[1];
     return github.pullRequests.get({
-        owner: 'maptiler',
+        owner: 'maplibre',
         repo: 'maplibre-gl-native',
         number
     }).then(({data}) => {
