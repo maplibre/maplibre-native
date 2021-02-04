@@ -4,7 +4,7 @@ on:
 jobs:
   push_to_registry:
     name: Docker image android-ndk-r21b
-    runs-on: [self-hosted, petr-ubuntu-acct]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
