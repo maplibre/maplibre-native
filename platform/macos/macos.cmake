@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.19)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
@@ -149,6 +150,7 @@ target_link_libraries(
 set_property(TARGET mbgl-benchmark-runner PROPERTY FOLDER Executables)
 set_property(TARGET mbgl-test-runner PROPERTY FOLDER Executables)
 set_property(TARGET mbgl-render-test-runner PROPERTY FOLDER Executables)
+set_target_properties(mbgl-benchmark-runner mbgl-test-runner mbgl-render-test-runner PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES")
 
 # Disable benchmarks in CI as they run in VM environment
 if(NOT DEFINED ENV{CI})

@@ -38,6 +38,19 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
     set_target_properties(mbgl-benchmark PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set_target_properties(mbgl-benchmark mbgl-vendor-benchmark
+        PROPERTIES
+        XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>
+    )
+    set_target_properties(mbgl-benchmark mbgl-vendor-benchmark
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()
+
 # Needed for testing private classes
 get_target_property(MBGL_CORE_PRIVATE_LIBRARIES mbgl-core LINK_LIBRARIES)
 
