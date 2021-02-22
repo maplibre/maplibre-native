@@ -2002,4 +2002,6 @@ MGL_EXPORT
  */
 @property (nonatomic) MGLMapDebugMaskOptions debugMask;
 
+@end
+
 NS_ASSUME_NONNULL_END

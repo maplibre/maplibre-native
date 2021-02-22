@@ -1,6 +1,6 @@
 #import "MGLFaux3DUserLocationAnnotationView.h"
 
-#import "MGLMapView.h"
+#import "MGLMapView_Private.h"
 #import "MGLMapViewDelegate.h"
 #import "MGLUserLocation.h"
 #import "MGLUserLocationHeadingIndicator.h"
@@ -32,7 +32,7 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
     CALayer *_dotBorderLayer;
     CALayer *_dotLayer;
     CALayer *_haloLayer;
-
+    
     CALayer *_approximateLayer;
 
     CLLocationDirection _oldHeadingAccuracy;
@@ -72,6 +72,8 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
         }
         
     }
+
+    
 }
 
 - (void)drawPreciseLocationPuck {
@@ -85,7 +87,6 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
     [self updatePitch];
     _haloLayer.hidden = ! CLLocationCoordinate2DIsValid(self.mapView.userLocation.coordinate) || self.mapView.userLocation.location.horizontalAccuracy > 10;
 }
-
 
 - (void)setTintColor:(UIColor *)tintColor
 {
@@ -129,6 +130,7 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
         _dotLayer.backgroundColor = [dotFillColor CGColor];
         [_headingIndicatorLayer updateTintColor:[headingFillColor CGColor]];
     }
+    
 }
 
 - (void)updatePitch
@@ -202,12 +204,12 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFrameWithSize:MGLUserLocationAnnotationPuckSize];
     }
-
+    
     UIColor *arrowColor = self.mapView.tintColor;
     UIColor *puckShadowColor = UIColor.blackColor;
     CGFloat shadowOpacity = 0.25;
 
-
+    
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         arrowColor = style.puckArrowFillColor ? style.puckArrowFillColor : arrowColor;
@@ -296,13 +298,13 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFrameWithSize:MGLUserLocationAnnotationDotSize];
     }
-
-
+    
     UIColor *haloColor = self.mapView.tintColor;
     UIColor *puckBackgroundColor = self.mapView.tintColor;
     UIColor *puckShadowColor = UIColor.blackColor;
     CGFloat shadowOpacity = 0.25;
 
+    
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         haloColor = style.haloFillColor ? style.haloFillColor : haloColor;
@@ -379,7 +381,7 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
     //
     if (_accuracyRingLayer && (_oldZoom != self.mapView.zoomLevel || _oldHorizontalAccuracy != self.userLocation.location.horizontalAccuracy))
     {
-        CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
+        CGFloat accuracyRingSize = [self calculateAccuracyRingSize: self.mapView.zoomLevel];
 
         // only show the accuracy ring if it won't be obscured by the location dot
         if (accuracyRingSize > MGLUserLocationAnnotationDotSize + 15)
@@ -421,7 +423,7 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
     //
     if ( ! _accuracyRingLayer && self.userLocation.location.horizontalAccuracy)
     {
-        CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
+        CGFloat accuracyRingSize = [self calculateAccuracyRingSize: self.mapView.zoomLevel];
         _accuracyRingLayer = [self circleLayerWithSize:accuracyRingSize];
         _accuracyRingLayer.backgroundColor = [self.mapView.tintColor CGColor];
         _accuracyRingLayer.opacity = 0.1;
@@ -518,10 +520,12 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFaux3DEffect];
     }
+    
 }
 
 - (void)drawApproximate
 {
+    
     if ( ! _approximateModeActivated)
     {
         self.layer.sublayers = nil;
@@ -533,15 +537,15 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
         _haloLayer = nil;
         _puckDot = nil;
         _puckArrow = nil;
-
+        
         _approximateModeActivated = YES;
     }
-
+    
     UIColor *backgroundColor = self.mapView.tintColor;
     UIColor *strokeColor = UIColor.blackColor;
     CGFloat borderSize = 2.0;
     CGFloat opacity = 0.25;
-
+    
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         if (@available(iOS 14, *)) {
@@ -552,17 +556,31 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
         }
     }
 
+    // approximate ring
+    if ( ! _approximateLayer && self.userLocation.location.horizontalAccuracy)
+    {
+        CGFloat accuracyRingSize = [self calculateAccuracyRingSize: MAX(self.mapView.zoomLevel, MGLUserLocationApproximateZoomThreshold)];
+        _approximateLayer = [self circleLayerWithSize:accuracyRingSize];
+        _approximateLayer.backgroundColor = [backgroundColor CGColor];
+        _approximateLayer.opacity = opacity;
+        _approximateLayer.shouldRasterize = NO;
+        _approximateLayer.allowsGroupOpacity = NO;
+        _approximateLayer.borderWidth = borderSize;
+        _approximateLayer.borderColor = [strokeColor CGColor];
+
+        [self.layer addSublayer:_approximateLayer];
+    }
+
     // update approximate ring (if zoom or horizontal accuracy have changed)
     if (_approximateLayer && (_oldZoom != self.mapView.zoomLevel || _oldHorizontalAccuracy != self.userLocation.location.horizontalAccuracy))
     {
-        CGFloat borderWidth = 2;
         if (self.mapView.zoomLevel < MGLUserLocationApproximateZoomThreshold) {
-            borderSize = 3;
+            borderSize = 1.0;
         }
         _approximateLayer.borderWidth = borderSize;
-
+        
         if (self.mapView.zoomLevel >= MGLUserLocationApproximateZoomThreshold) {
-            CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
+            CGFloat accuracyRingSize = [self calculateAccuracyRingSize: self.mapView.zoomLevel];
 
             _approximateLayer.hidden = NO;
 
@@ -577,25 +595,10 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
 
             [CATransaction commit];
         }
-
+        
         // store accuracy and zoom so we're not redrawing unchanged location updates
         _oldHorizontalAccuracy = self.userLocation.location.horizontalAccuracy;
         _oldZoom = self.mapView.zoomLevel;
-    }
-
-    // approximate ring
-    if ( ! _approximateLayer && self.userLocation.location.horizontalAccuracy)
-    {
-        CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
-        _approximateLayer = [self circleLayerWithSize:accuracyRingSize];
-        approximateLayer.backgroundColor = [backgroundColor CGColor];
-        _approximateLayer.opacity = opacity;
-        _approximateLayer.shouldRasterize = NO;
-        _approximateLayer.allowsGroupOpacity = NO;
-        _approximateLayer.borderWidth = borderSize;
-        _approximateLayer.borderColor = [strokeColor CGColor];
-
-        [self.layer addSublayer:_approximateLayer];
     }
 }
 
@@ -625,10 +628,10 @@ const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
     return animationGroup;
 }
 
-- (CGFloat)calculateAccuracyRingSize
+- (CGFloat)calculateAccuracyRingSize:(double)zoomLevel
 {
     // diameter in screen points
-    return round(self.userLocation.location.horizontalAccuracy / [self.mapView metersPerPointAtLatitude:self.userLocation.coordinate.latitude] * 2.0);
+    return round(self.userLocation.location.horizontalAccuracy / [self.mapView metersPerPointAtLatitude:self.userLocation.coordinate.latitude zoomLevel:zoomLevel] * 2.0);
 }
 
 @end
