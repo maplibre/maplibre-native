@@ -67,6 +67,8 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
+#import "MGLObserver_Private.h"
+#import "MGLEvent_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -276,6 +278,8 @@ public:
 /// and calculate the ornament's position
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
+
+@property (nonatomic) NSMutableSet<MGLObserver *> *observerCache;
 
 @end
 
@@ -517,6 +521,8 @@ public:
     _annotationViewReuseQueueByIdentifier = [NSMutableDictionary dictionary];
     _selectedAnnotationTag = MGLAnnotationTagNotFound;
     _annotationsNearbyLastTap = {};
+
+     _observerCache = [NSMutableSet set];
     
     // TODO: This warning should be removed when automaticallyAdjustsScrollViewInsets is removed from
     // the UIViewController api.
@@ -5417,6 +5423,11 @@ public:
     }
 }
 
+- (NSString *)accuracyDescriptionString {
+    NSDictionary *dictionary = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationTemporaryUsageDescriptionDictionary"];
+    return dictionary[@"MGLAccuracyAuthorizationDescription"];
+}
+
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MGLLogDebug(@"Setting showsUserLocation: %@", MGLStringFromBOOL(showsUserLocation));
@@ -5973,6 +5984,47 @@ public:
             [self.delegate mapView:self didFailToLocateUserWithError:error];
         }
     }
+}
+
+- (void)locationManagerDidChangeAuthorization:(id<MGLLocationManager>)manager
+{
+    if (![self shouldShowLocationDotBasedOnCurrentLocationPermissions])
+    {
+        [self.userLocationAnnotationView removeFromSuperview];
+        [self.locationManager stopUpdatingLocation];
+        [self.locationManager stopUpdatingHeading];
+    } else {
+        if (@available(iOS 14, *)) {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+            if (self.userTrackingMode != MGLUserTrackingModeNone &&
+                [manager respondsToSelector:@selector(authorizationStatus)] &&
+                (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
+                 manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
+                 manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
+                [manager respondsToSelector:@selector(accuracyAuthorization)] &&
+                manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
+                [self accuracyDescriptionString] != nil ) {
+                [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:@"MGLAccuracyAuthorizationDescription"];
+            } else {
+                [self validateLocationServices];
+            }
+#endif
+        } else {
+            [self validateLocationServices];
+        }
+    }
+    
+    if (@available(iOS 14, *)) {
+        if ([self.delegate respondsToSelector:@selector(mapView:didChangeLocationManagerAuthorization:)]) {
+            [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
+        }
+    }
+}
+
+- (BOOL)shouldShowLocationDotBasedOnCurrentLocationPermissions
+{
+    return self.locationManager && (self.locationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedAlways
+                                    || self.locationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedWhenInUse);
 }
 
 - (void)updateHeadingForDeviceOrientation
@@ -6838,6 +6890,41 @@ public:
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+#pragma mark - MGLObservable methods -
+
+static std::vector<std::string> vectorOfStringsFromSet(NSSet<NSString *> *setOfStrings) {
+    __block std::vector<std::string> strings;
+    strings.reserve(setOfStrings.count);
+    [setOfStrings enumerateObjectsUsingBlock:^(NSString * _Nonnull text, BOOL * _Nonnull stop) {
+        strings.push_back(text.UTF8String);
+    }];
+    return strings;
+}
+
+// Convenience method
+- (void)subscribeForObserver:(nonnull MGLObserver *)observer event:(nonnull MGLEventType)event {
+    [self subscribeForObserver:observer events:[NSSet setWithObject:event]];
+}
+
+- (void)subscribeForObserver:(MGLObserver *)observer events:(nonnull NSSet<MGLEventType> *)events {
+    observer.observing = YES;
+    [self.observerCache addObject:observer];
+
+    auto eventTypes = vectorOfStringsFromSet(events);
+    self.mbglMap.subscribe(observer.peer, eventTypes);
+}
+
+- (void)unsubscribeForObserver:(MGLObserver *)observer events:(nonnull NSSet<MGLEventType> *)events {
+    auto eventTypes = vectorOfStringsFromSet(events);
+    self.mbglMap.unsubscribe(observer.peer, eventTypes);
+}
+
+- (void)unsubscribeForObserver:(MGLObserver *)observer {
+    self.mbglMap.unsubscribe(observer.peer);
+    [self.observerCache removeObject:observer];
+    observer.observing = NO;
 }
 
 @end

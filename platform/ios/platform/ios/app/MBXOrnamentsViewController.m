@@ -2,7 +2,7 @@
 
 #import "MBXOrnamentsViewController.h"
 
-@interface MBXOrnamentsViewController ()<MGLMapViewDelegate>
+@interface MBXOrnamentsViewController ()
 
 @property (nonatomic) MGLMapView *mapView;
 @property (nonatomic) NSTimer *timer;
@@ -64,7 +64,6 @@
                        zoomLevel:16
                        direction:30
                         animated:NO];
-    mapView.delegate = self;
     mapView.showsScale = YES;
     [self.view addSubview:mapView];
 

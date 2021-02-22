@@ -6,6 +6,19 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 ### Features
 
+* Added `MGLLocationManager.accuracyAuthorization` and `[MGLLocationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKeyproperty:]` to support iOS 14 location accuracy privacy changes. (cherry pick from [#361](https://github.com/mapbox/mapbox-gl-native-ios/pull/361))
+* Added `[MGLLocationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKeyproperty:]` to allow developers request just-in-time full-accuracy permissions. (cherry pick from [#361](https://github.com/mapbox/mapbox-gl-native-ios/pull/361))
+* Added `[MGLLocationManagerDelegate locationManagerDidChangeAuthorization:]` to let `MGLMapView` know about privacy changes. (cherry pick from [#376](https://github.com/mapbox/mapbox-gl-native-ios/pull/376))
+* Added `[MGLMapViewDelegate mapView:didChangeLocationManagerAuthorization:]` to allow developers adjust their apps to privacy settings changes. (cherry pick from [#376](https://github.com/mapbox/mapbox-gl-native-ios/pull/376))
+* Added `MGLObserver`, `MGLObservable` and `MGLEvent` to monitor events from the map view. (cherry pick from [#358](https://github.com/mapbox/mapbox-gl-native-ios/pull/358))
+* Added an approximate user location halo when `MGLLocationManager.accuracyAuthorization` is set to `CLAccuracyAuthorizationReducedAccuracy`. (cherry pick from [#381](https://github.com/mapbox/mapbox-gl-native-ios/pull/381))
+* The `MGLAccuracyAuthorizationDescription` as element of `NSLocationTemporaryUsageDescriptionDictionary` Info.plist key can now be set to describe why you request accuracy authorization. (cherry pick from [#392](https://github.com/mapbox/mapbox-gl-native-ios/pull/392))
+* Added `[MGLMapViewDelegate mapViewStyleForDefaultUserLocationAnnotationView:]` and `MGLUserLocationAnnotationViewStyle` class to allow developers customize the default user location annotation view UI style. (cherry pick from [#403](https://github.com/mapbox/mapbox-gl-native-ios/pull/403))
+
+### Bug Fixes
+
+* Fixed an issue that caused a crash when custom location managers did not implement `MGLLocationManager.accuracyAuthorization`. (cherry pick from [#474](https://github.com/mapbox/mapbox-gl-native-ios/pull/474))
+
 ### Other
 
 * mapbox-gl-js submodule has been replaced with maplibre-gl-js

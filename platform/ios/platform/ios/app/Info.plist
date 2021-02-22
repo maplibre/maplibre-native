@@ -24,6 +24,11 @@
 	<string>15256</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>MGLAccuracyAuthorizationDescription</key>
+		<string>MapLibre requires your precise location to help you navigate the map.</string>
+	</dict>	
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2014–2019 Mapbox</string>
 	<key>NSLocationAlwaysUsageDescription</key>

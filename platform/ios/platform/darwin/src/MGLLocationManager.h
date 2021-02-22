@@ -58,6 +58,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setDesiredAccuracy:(CLLocationAccuracy)desiredAccuracy;
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+/**
+ Specifies the level of location accuracy the Maps SDK has permission to use.
+ 
+ @note If the value of this property is `CLAccuracyAuthorizationFullAccuracy`, you can set the
+ `MGLLocationManager.desiredAccuracy` property to any value. If the value is `CLAccuracyAuthorizationReducedAccuracy`,
+ setting `MGLLocationManager.desiredAccuracy` to a value other than` kCLLocationAccuracyReduced` has no effect on
+ the location information.
+ */
+- (CLAccuracyAuthorization)accuracyAuthorization API_AVAILABLE(ios(14));
+#endif
+
 /**
  Specifies the type of user activity associated with the location updates.
  
@@ -77,6 +89,17 @@ NS_ASSUME_NONNULL_BEGIN
  @param activityType The location's manager activity type.
  */
 - (void)setActivityType:(CLActivityType)activityType;
+
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+/**
+ Requests the user's permission to temporarily use location update services
+ with full accuracy.
+ 
+ @note If the user turned off location accuracy you may use this method to
+ request full accuracy for a session.
+ */
+- (void)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:(NSString *)purposeKey API_AVAILABLE(ios(14));
+#endif
 
 @required
 
@@ -195,6 +218,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)locationManager:(id<MGLLocationManager>)manager
        didFailWithError:(nonnull NSError *)error;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+/**
+ Notifies the delegate that the location authorization status has changed.
+ 
+ @param manager The location manager reporting the change.
+ */
+- (void)locationManagerDidChangeAuthorization:(id<MGLLocationManager>)manager;
+#endif       
 
 @optional
 

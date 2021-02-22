@@ -1,10 +1,13 @@
 #import "MGLFaux3DUserLocationAnnotationView.h"
 
 #import "MGLMapView.h"
+#import "MGLMapViewDelegate.h"
 #import "MGLUserLocation.h"
 #import "MGLUserLocationHeadingIndicator.h"
 #import "MGLUserLocationHeadingArrowLayer.h"
 #import "MGLUserLocationHeadingBeamLayer.h"
+#import "MGLLocationManager_Private.h"
+#import "MGLUserLocationAnnotationViewStyle.h"
 
 const CGFloat MGLUserLocationAnnotationDotSize = 22.0;
 const CGFloat MGLUserLocationAnnotationHaloSize = 115.0;
@@ -14,9 +17,12 @@ const CGFloat MGLUserLocationAnnotationArrowSize = MGLUserLocationAnnotationPuck
 
 const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
 
+const CGFloat MGLUserLocationApproximateZoomThreshold = 7.0;
+
 @implementation MGLFaux3DUserLocationAnnotationView
 {
     BOOL _puckModeActivated;
+    BOOL _approximateModeActivated;
 
     CALayer *_puckDot;
     CAShapeLayer *_puckArrow;
@@ -26,6 +32,8 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     CALayer *_dotBorderLayer;
     CALayer *_dotLayer;
     CALayer *_haloLayer;
+
+    CALayer *_approximateLayer;
 
     CLLocationDirection _oldHeadingAccuracy;
     CLLocationAccuracy _oldHorizontalAccuracy;
@@ -49,28 +57,77 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
 
     if (CLLocationCoordinate2DIsValid(self.userLocation.coordinate))
     {
-        (self.mapView.userTrackingMode == MGLUserTrackingModeFollowWithCourse) ? [self drawPuck] : [self drawDot];
-        [self updatePitch];
+        if (@available(iOS 14, *)) {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+            if (![self.mapView.locationManager respondsToSelector:@selector(accuracyAuthorization)] ||
+                self.mapView.locationManager.accuracyAuthorization == CLAccuracyAuthorizationFullAccuracy) {
+                [self drawPreciseLocationPuck];
+            } else {
+                [self drawApproximate];
+                [self updatePitch];
+            }
+#endif
+        } else {
+            [self drawPreciseLocationPuck];
+        }
+        
     }
+}
 
+- (void)drawPreciseLocationPuck {
+    if (_approximateModeActivated) {
+        [_approximateLayer removeFromSuperlayer];
+        _approximateLayer = nil;
+        
+        _approximateModeActivated = NO;
+    }
+    (self.mapView.userTrackingMode == MGLUserTrackingModeFollowWithCourse) ? [self drawPuck] : [self drawDot];
+    [self updatePitch];
     _haloLayer.hidden = ! CLLocationCoordinate2DIsValid(self.mapView.userLocation.coordinate) || self.mapView.userLocation.location.horizontalAccuracy > 10;
 }
 
+
 - (void)setTintColor:(UIColor *)tintColor
 {
-    CGColorRef newTintColor = [tintColor CGColor];
-
+    UIColor *puckArrowFillColor = tintColor;
+    UIColor *puckArrowStrokeColor = tintColor;
+    
+    UIColor *approximateFillColor = tintColor;
+    
+    UIColor *accuracyFillColor = tintColor;
+    UIColor *haloFillColor = tintColor;
+    UIColor *dotFillColor = tintColor;
+    UIColor *headingFillColor = tintColor;
+    
+    if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
+        MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
+        
+        puckArrowFillColor = style.puckArrowFillColor ? style.puckArrowFillColor : puckArrowFillColor;
+        
+        if (@available(iOS 14, *)) {
+            approximateFillColor = style.approximateHaloFillColor ? style.approximateHaloFillColor : approximateFillColor;
+        } 
+        
+        haloFillColor = style.haloFillColor ? style.haloFillColor : haloFillColor;
+        dotFillColor = style.puckFillColor ? style.puckFillColor : dotFillColor;
+        headingFillColor = style.puckFillColor ? style.puckFillColor : headingFillColor;
+    }
+    
     if (_puckModeActivated)
     {
-        _puckArrow.fillColor = newTintColor;
-        _puckArrow.strokeColor = newTintColor;
+        _puckArrow.fillColor = [puckArrowFillColor CGColor];
+        _puckArrow.strokeColor = [puckArrowStrokeColor CGColor];
+    }
+    else if (_approximateModeActivated)
+    {
+        _approximateLayer.backgroundColor = [approximateFillColor CGColor];
     }
     else
     {
-        _accuracyRingLayer.backgroundColor = newTintColor;
-        _haloLayer.backgroundColor = newTintColor;
-        _dotLayer.backgroundColor = newTintColor;
-        [_headingIndicatorLayer updateTintColor:newTintColor];
+        _accuracyRingLayer.backgroundColor = [accuracyFillColor CGColor];
+        _haloLayer.backgroundColor = [haloFillColor CGColor];
+        _dotLayer.backgroundColor = [dotFillColor CGColor];
+        [_headingIndicatorLayer updateTintColor:[headingFillColor CGColor]];
     }
 }
 
@@ -146,14 +203,26 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
         [self updateFrameWithSize:MGLUserLocationAnnotationPuckSize];
     }
 
+    UIColor *arrowColor = self.mapView.tintColor;
+    UIColor *puckShadowColor = UIColor.blackColor;
+    CGFloat shadowOpacity = 0.25;
+
+
+    if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
+        MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
+        arrowColor = style.puckArrowFillColor ? style.puckArrowFillColor : arrowColor;
+        puckShadowColor = style.puckShadowColor ? style.puckShadowColor : puckShadowColor;
+        shadowOpacity = style.puckShadowOpacity;
+    }
+
     // background dot (white with black shadow)
     //
     if ( ! _puckDot)
     {
         _puckDot = [self circleLayerWithSize:MGLUserLocationAnnotationPuckSize];
         _puckDot.backgroundColor = [[UIColor whiteColor] CGColor];
-        _puckDot.shadowColor = [[UIColor blackColor] CGColor];
-        _puckDot.shadowOpacity = 0.25;
+        _puckDot.shadowColor = [puckShadowColor CGColor];
+        _puckDot.shadowOpacity = shadowOpacity;
         _puckDot.shadowPath = [[UIBezierPath bezierPathWithOvalInRect:_puckDot.bounds] CGPath];
 
         if (self.mapView.camera.pitch)
@@ -175,7 +244,7 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     {
         _puckArrow = [CAShapeLayer layer];
         _puckArrow.path = [[self puckArrow] CGPath];
-        _puckArrow.fillColor = [self.mapView.tintColor CGColor];
+        _puckArrow.fillColor = [arrowColor CGColor];
         _puckArrow.bounds = CGRectMake(0, 0, round(MGLUserLocationAnnotationArrowSize), round(MGLUserLocationAnnotationArrowSize));
         _puckArrow.position = CGPointMake(CGRectGetMidX(super.bounds), CGRectGetMidY(super.bounds));
         _puckArrow.shouldRasterize = YES;
@@ -228,6 +297,20 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
         [self updateFrameWithSize:MGLUserLocationAnnotationDotSize];
     }
 
+
+    UIColor *haloColor = self.mapView.tintColor;
+    UIColor *puckBackgroundColor = self.mapView.tintColor;
+    UIColor *puckShadowColor = UIColor.blackColor;
+    CGFloat shadowOpacity = 0.25;
+
+    if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
+        MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
+        haloColor = style.haloFillColor ? style.haloFillColor : haloColor;
+        puckBackgroundColor = style.puckFillColor ? style.puckFillColor : puckBackgroundColor;
+        puckShadowColor = style.puckShadowColor ? style.puckShadowColor : puckShadowColor;
+        shadowOpacity = style.puckShadowOpacity;
+    }
+
     // heading indicator (tinted, beam or arrow)
     //
     BOOL headingTrackingModeEnabled = self.mapView.userTrackingMode == MGLUserTrackingModeFollowWithHeading;
@@ -251,11 +334,13 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
             if (headingTrackingModeEnabled)
             {
                 _headingIndicatorLayer = [[MGLUserLocationHeadingBeamLayer alloc] initWithUserLocationAnnotationView:self];
+                [_headingIndicatorLayer updateTintColor:[haloColor CGColor]];
                 [self.layer insertSublayer:_headingIndicatorLayer below:_dotBorderLayer];
             }
             else
             {
                 _headingIndicatorLayer = [[MGLUserLocationHeadingArrowLayer alloc] initWithUserLocationAnnotationView:self];
+                [_headingIndicatorLayer updateTintColor:[puckBackgroundColor CGColor]];
                 [self.layer addSublayer:_headingIndicatorLayer];
                 _headingIndicatorLayer.zPosition = 1;
             }
@@ -351,7 +436,7 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     if ( ! _haloLayer)
     {
         _haloLayer = [self circleLayerWithSize:MGLUserLocationAnnotationHaloSize];
-        _haloLayer.backgroundColor = [self.mapView.tintColor CGColor];
+        _haloLayer.backgroundColor = [haloColor CGColor];
         _haloLayer.allowsGroupOpacity = NO;
         _haloLayer.zPosition = -0.1f;
 
@@ -381,8 +466,8 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     {
         _dotBorderLayer = [self circleLayerWithSize:MGLUserLocationAnnotationDotSize];
         _dotBorderLayer.backgroundColor = [[UIColor whiteColor] CGColor];
-        _dotBorderLayer.shadowColor = [[UIColor blackColor] CGColor];
-        _dotBorderLayer.shadowOpacity = 0.25;
+        _dotBorderLayer.shadowColor = [puckShadowColor CGColor];
+        _dotBorderLayer.shadowOpacity = shadowOpacity;
         _dotBorderLayer.shadowPath = [[UIBezierPath bezierPathWithOvalInRect:_dotBorderLayer.bounds] CGPath];
 
         if (self.mapView.camera.pitch)
@@ -403,7 +488,7 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     if ( ! _dotLayer)
     {
         _dotLayer = [self circleLayerWithSize:MGLUserLocationAnnotationDotSize * 0.75];
-        _dotLayer.backgroundColor = [self.mapView.tintColor CGColor];
+        _dotLayer.backgroundColor = [puckBackgroundColor CGColor];
 
         // set defaults for the animations
         CAAnimationGroup *animationGroup = [self loopingAnimationGroupWithDuration:1.5];
@@ -432,6 +517,85 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
         _puckModeActivated = NO;
 
         [self updateFaux3DEffect];
+    }
+}
+
+- (void)drawApproximate
+{
+    if ( ! _approximateModeActivated)
+    {
+        self.layer.sublayers = nil;
+
+        _headingIndicatorLayer = nil;
+        _dotBorderLayer = nil;
+        _dotLayer = nil;
+        _accuracyRingLayer = nil;
+        _haloLayer = nil;
+        _puckDot = nil;
+        _puckArrow = nil;
+
+        _approximateModeActivated = YES;
+    }
+
+    UIColor *backgroundColor = self.mapView.tintColor;
+    UIColor *strokeColor = UIColor.blackColor;
+    CGFloat borderSize = 2.0;
+    CGFloat opacity = 0.25;
+
+    if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
+        MGLUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
+        if (@available(iOS 14, *)) {
+            backgroundColor = style.approximateHaloFillColor ? style.approximateHaloFillColor : backgroundColor;
+            strokeColor = style.approximateHaloBorderColor ? style.approximateHaloBorderColor : strokeColor;
+            opacity = style.approximateHaloOpacity;
+            borderSize = style.approximateHaloBorderWidth;
+        }
+    }
+
+    // update approximate ring (if zoom or horizontal accuracy have changed)
+    if (_approximateLayer && (_oldZoom != self.mapView.zoomLevel || _oldHorizontalAccuracy != self.userLocation.location.horizontalAccuracy))
+    {
+        CGFloat borderWidth = 2;
+        if (self.mapView.zoomLevel < MGLUserLocationApproximateZoomThreshold) {
+            borderSize = 3;
+        }
+        _approximateLayer.borderWidth = borderSize;
+
+        if (self.mapView.zoomLevel >= MGLUserLocationApproximateZoomThreshold) {
+            CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
+
+            _approximateLayer.hidden = NO;
+
+            // disable implicit animation of the accuracy ring, unless triggered by a change in accuracy
+            BOOL shouldDisableActions = _oldHorizontalAccuracy == self.userLocation.location.horizontalAccuracy;
+
+            [CATransaction begin];
+            [CATransaction setDisableActions:shouldDisableActions];
+
+            _approximateLayer.bounds = CGRectMake(0, 0, accuracyRingSize, accuracyRingSize);
+            _approximateLayer.cornerRadius = accuracyRingSize / 2.0;
+
+            [CATransaction commit];
+        }
+
+        // store accuracy and zoom so we're not redrawing unchanged location updates
+        _oldHorizontalAccuracy = self.userLocation.location.horizontalAccuracy;
+        _oldZoom = self.mapView.zoomLevel;
+    }
+
+    // approximate ring
+    if ( ! _approximateLayer && self.userLocation.location.horizontalAccuracy)
+    {
+        CGFloat accuracyRingSize = [self calculateAccuracyRingSize];
+        _approximateLayer = [self circleLayerWithSize:accuracyRingSize];
+        approximateLayer.backgroundColor = [backgroundColor CGColor];
+        _approximateLayer.opacity = opacity;
+        _approximateLayer.shouldRasterize = NO;
+        _approximateLayer.allowsGroupOpacity = NO;
+        _approximateLayer.borderWidth = borderSize;
+        _approximateLayer.borderColor = [strokeColor CGColor];
+
+        [self.layer addSublayer:_approximateLayer];
     }
 }
 

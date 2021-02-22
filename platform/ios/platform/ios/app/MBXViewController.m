@@ -15,7 +15,6 @@
 
 #import "MBXFrameTimeGraphView.h"
 #import "../src/MGLMapView_Experimental.h"
-
 #import <objc/runtime.h>
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
@@ -193,6 +192,15 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 @implementation MBXSpriteBackedAnnotation
 @end
 
+@interface MBXTestObserver: MGLObserver
+@end
+
+@implementation MBXTestObserver
+- (void)notifyWithEvent:(MGLEvent *)event {
+    NSLog(@"Received event: %@", event);
+}
+@end
+
 @interface MBXViewController () <UITableViewDelegate,
                                  UITableViewDataSource,
                                  MGLMapViewDelegate,
@@ -213,7 +221,8 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 @property (nonatomic) BOOL zoomLevelOrnamentEnabled;
 @property (nonatomic) NSMutableArray<UIWindow *> *helperWindows;
 @property (nonatomic) NSMutableArray<UIView *> *contentInsetsOverlays;
-
+@property (nonatomic) MBXTestObserver *testObserver;
+@property (nonatomic, copy) void (^locationBlock)(void);
 @end
 
 @interface MGLMapView (MBXViewController)
@@ -300,6 +309,15 @@ CLLocationCoordinate2D randomWorldCoordinate() {
             }
         }
     }];
+
+    // TODO: Replace with menu implementation
+    self.testObserver = [[MBXTestObserver alloc] init];
+    [self.mapView subscribeForObserver:self.testObserver event:MGLEventTypeResourceRequest];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self.mapView unsubscribeForObserver:self.testObserver];
+        self.testObserver = nil;
+    });
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
@@ -1953,6 +1971,12 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 
 - (IBAction)locateUser:(id)sender
 {
+    [self nextTrackingMode:sender];
+}
+
+
+- (void)nextTrackingMode:(id)sender
+{
     MGLUserTrackingMode nextMode;
     NSString *nextAccessibilityValue;
     switch (self.mapView.userTrackingMode) {
@@ -2331,6 +2355,34 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     if (self.frameTimeGraphEnabled) {
         [self.frameTimeGraphView updatePathWithFrameDuration:mapView.frameTime];
     }
+}
+
+- (void)mapView:(nonnull MGLMapView *)mapView didChangeLocationManagerAuthorization:(nonnull id<MGLLocationManager>)manager {
+    if (@available(iOS 14, *)) {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+        if (manager.authorizationStatus == kCLAuthorizationStatusDenied || manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy) {
+            [self alertAccuracyChanges];
+        }
+#endif
+    }
+}
+
+- (void)alertAccuracyChanges {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Mapbox GL works best with your precise location."
+                                   message:@"You'll get turn-by-turn directions."
+                                   preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:@"Turn On in Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }];
+
+    UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"Keep Precise Location Off" style:UIAlertActionStyleDefault
+       handler:^(UIAlertAction * action) {
+       handler:nil];
+
+    [alert addAction:settingsAction];
+    [alert addAction:defaultAction];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)saveCurrentMapState:(__unused NSNotification *)notification {
