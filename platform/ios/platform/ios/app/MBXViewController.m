@@ -2358,7 +2358,6 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     }];
 
     UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"Keep Precise Location Off" style:UIAlertActionStyleDefault
-       handler:^(UIAlertAction * action) {
        handler:nil];
 
     [alert addAction:settingsAction];

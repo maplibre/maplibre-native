@@ -224,7 +224,7 @@
 		40F887701D7A1E58008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40F887711D7A1E59008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40FDA76B1CCAAA6800442548 /* MBXAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 40FDA76A1CCAAA6800442548 /* MBXAnnotationView.m */; };
-		4BC5769325E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */; };
+		4BC5769325E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4BC5769425E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */; };
 		4BC5769525E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BC5769225E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m */; };
 		4BC5769625E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BC5769225E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m */; };
@@ -2168,6 +2168,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BC5769325E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */,
 				556660DB1E1D8E8D00E2C41B /* MGLFoundation.h in Headers */,
 				92FC0AEA207CEE16007B6B54 /* MGLShapeOfflineRegion.h in Headers */,
 				35D13AC31D3D19DD00AFB4E0 /* MGLFillStyleLayer.h in Headers */,
@@ -2247,7 +2248,6 @@
 				CAFB3C14234505D500399265 /* MGLMapSnapshotter_Private.h in Headers */,
 				1FCAE2A220B872A400C577DD /* MGLLocationManager.h in Headers */,
 				DACA86262019218600E9693A /* MGLRasterDEMSource.h in Headers */,
-				4BC5769325E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */,
 				353933F81D3FB79F003F57D7 /* MGLLineStyleLayer.h in Headers */,
 				92F2C3ED1F0E3C3A00268EC0 /* MGLRendererFrontend.h in Headers */,
 				DAAF722D1DA903C700312FA4 /* MGLStyleValue_Private.h in Headers */,
