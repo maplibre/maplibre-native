@@ -67,8 +67,6 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
-#import "MGLObserver_Private.h"
-#import "MGLEvent_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -278,8 +276,6 @@ public:
 /// and calculate the ornament's position
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
-
-@property (nonatomic) NSMutableSet<MGLObserver *> *observerCache;
 
 @end
 
@@ -522,8 +518,6 @@ public:
     _selectedAnnotationTag = MGLAnnotationTagNotFound;
     _annotationsNearbyLastTap = {};
 
-     _observerCache = [NSMutableSet set];
-    
     // TODO: This warning should be removed when automaticallyAdjustsScrollViewInsets is removed from
     // the UIViewController api.
     static dispatch_once_t onceToken;
@@ -6890,41 +6884,6 @@ public:
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
-}
-
-#pragma mark - MGLObservable methods -
-
-static std::vector<std::string> vectorOfStringsFromSet(NSSet<NSString *> *setOfStrings) {
-    __block std::vector<std::string> strings;
-    strings.reserve(setOfStrings.count);
-    [setOfStrings enumerateObjectsUsingBlock:^(NSString * _Nonnull text, BOOL * _Nonnull stop) {
-        strings.push_back(text.UTF8String);
-    }];
-    return strings;
-}
-
-// Convenience method
-- (void)subscribeForObserver:(nonnull MGLObserver *)observer event:(nonnull MGLEventType)event {
-    [self subscribeForObserver:observer events:[NSSet setWithObject:event]];
-}
-
-- (void)subscribeForObserver:(MGLObserver *)observer events:(nonnull NSSet<MGLEventType> *)events {
-    observer.observing = YES;
-    [self.observerCache addObject:observer];
-
-    auto eventTypes = vectorOfStringsFromSet(events);
-    self.mbglMap.subscribe(observer.peer, eventTypes);
-}
-
-- (void)unsubscribeForObserver:(MGLObserver *)observer events:(nonnull NSSet<MGLEventType> *)events {
-    auto eventTypes = vectorOfStringsFromSet(events);
-    self.mbglMap.unsubscribe(observer.peer, eventTypes);
-}
-
-- (void)unsubscribeForObserver:(MGLObserver *)observer {
-    self.mbglMap.unsubscribe(observer.peer);
-    [self.observerCache removeObject:observer];
-    observer.observing = NO;
 }
 
 @end
