@@ -2661,6 +2661,7 @@
 					};
 					DA2E88501CC036F400F24E7B = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = V6F7X5J9Y7;
 						LastSwiftMigration = 1010;
 					};
 					DA8847D11CBAF91600AB86E3 = {
@@ -3644,6 +3645,8 @@
 			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = V6F7X5J9Y7;
 				INFOPLIST_FILE = test/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_CFLAGS = "-fvisibility=hidden";
@@ -3805,6 +3808,8 @@
 			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = V6F7X5J9Y7;
 				INFOPLIST_FILE = test/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_CFLAGS = "-fvisibility=hidden";
@@ -3832,6 +3837,8 @@
 			baseConfigurationReference = CAE5AE2B2389FBF000E4A5A1 /* ios.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = V6F7X5J9Y7;
 				INFOPLIST_FILE = test/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_CFLAGS = "-fvisibility=hidden";
