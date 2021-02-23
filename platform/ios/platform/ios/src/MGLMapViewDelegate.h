@@ -6,6 +6,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MGLMapView;
+@class MGLUserLocationAnnotationViewStyle;
 
 /**
  The `MGLMapViewDelegate` protocol defines a set of optional methods that you
@@ -314,6 +315,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapViewDidStopLocatingUser:(MGLMapView *)mapView;
 
 /**
+ Asks the delegate styling options for each default user location annotation view.
+ 
+ This method is called many times during gesturing, so you should avoid performing
+ complex or performance-intensive tasks in your implementation.
+ 
+ @param mapView The map view that is tracking the user’s location.
+ */
+- (MGLUserLocationAnnotationViewStyle *)mapViewStyleForDefaultUserLocationAnnotationView:(MGLMapView *)mapView NS_SWIFT_NAME(mapView(styleForDefaultUserLocationAnnotationView:));
+
+/**
  Tells the delegate that the location of the user was updated.
 
  While the `showsUserLocation` property is set to `YES`, this method is called
@@ -367,6 +378,18 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view that is tracking the user's location.
  */
 - (CGPoint)mapViewUserLocationAnchorPoint:(MGLMapView *)mapView;
+
+/**
+ Tells the delegate that the map's location updates accuracy authorization has changed.
+ 
+ This method is called after the user changes location accuracy authorization when
+ requesting location permissions or in privacy settings.
+ 
+ @param mapView The map view that changed its location accuracy authorization.
+ @param manager The location manager reporting the update.
+ 
+ */
+- (void)mapView:(MGLMapView *)mapView didChangeLocationManagerAuthorization:(id<MGLLocationManager>)manager API_AVAILABLE(ios(14));
 
 #pragma mark Managing the Appearance of Annotations
 

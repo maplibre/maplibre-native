@@ -1,6 +1,7 @@
 #import "MBXBenchViewController.h"
 #import "MBXBenchAppDelegate.h"
 #import "MGLMapView_Private.h"
+#import "MGLMapViewDelegate.h"
 
 #include "locations.hpp"
 

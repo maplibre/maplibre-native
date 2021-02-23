@@ -38,7 +38,15 @@
 }
 
 - (CLAuthorizationStatus)authorizationStatus {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+    if (@available(iOS 14.0, *)) {
+        return self.locationManager.authorizationStatus;
+    } else {
+        return kCLAuthorizationStatusNotDetermined;
+    }
+#else
     return [CLLocationManager authorizationStatus];
+#endif
 }
 
 - (void)setActivityType:(CLActivityType)activityType {
@@ -48,6 +56,23 @@
 - (CLActivityType)activityType {
     return self.locationManager.activityType;
 }
+
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+- (CLAccuracyAuthorization)accuracyAuthorization {
+    if (@available(iOS 14.0, *)) {
+        return self.locationManager.accuracyAuthorization;
+    } else {
+        return CLAccuracyAuthorizationFullAccuracy;
+    }
+}
+
+- (void)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:(NSString *)purposeKey {
+    if (@available(iOS 14.0, *)) {
+        [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
+    } 
+}
+#endif
+
 
 - (void)dismissHeadingCalibrationDisplay {
     [self.locationManager dismissHeadingCalibrationDisplay];
@@ -113,4 +138,9 @@
     }
 }
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager {
+    [self.delegate locationManagerDidChangeAuthorization:self];
+}
+#endif
 @end

@@ -46,6 +46,8 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const _Nonnull MGLUnderlyingMapUna
 - (void)didFailToLoadImage:(nonnull NSString *)imageName;
 - (BOOL)shouldRemoveStyleImage:(nonnull NSString *)imageName;
 
+- (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel;
+
 /** Triggers another render pass even when it is not necessary. */
 - (void)setNeedsRerender;
 
