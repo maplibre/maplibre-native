@@ -46,7 +46,6 @@
     }
 #else
     return [CLLocationManager authorizationStatus];
-    return [CLLocationManager authorizationStatus];
 #endif
 }
 
