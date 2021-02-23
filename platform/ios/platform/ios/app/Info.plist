@@ -27,9 +27,9 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2014–2019 Mapbox</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>The map will display your location. If you choose Always, the map may also use your location when it isn’t visible in order to improve OpenStreetMap and Mapbox products.</string>
+	<string>The map will display your location. If you choose Always, the map may also use your location when it isn’t visible in order to improve OpenStreetMap.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>The map will display your location. The map may also use your location when it isn’t visible in order to improve OpenStreetMap and Mapbox products.</string>
+	<string>The map will display your location. The map may also use your location when it isn’t visible in order to improve OpenStreetMap.</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
 	<dict>
 		<key>MGLAccuracyAuthorizationDescription</key>

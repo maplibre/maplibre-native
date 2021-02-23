@@ -2349,7 +2349,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 }
 
 - (void)alertAccuracyChanges {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Mapbox GL works best with your precise location."
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"MapLibre works best with your precise location."
                                    message:@"You'll get turn-by-turn directions."
                                    preferredStyle:UIAlertControllerStyleAlert];
 
