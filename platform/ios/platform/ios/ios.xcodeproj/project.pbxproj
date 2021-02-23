@@ -1045,7 +1045,7 @@
 		DA17BE2F1CC4BAC300402C41 /* MGLMapView_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLMapView_Private.h; sourceTree = "<group>"; };
 		DA1AC01B1E5B8774006DF1D6 /* lt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = lt; path = lt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DA1AC0201E5B8917006DF1D6 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = uk; path = uk.lproj/Foundation.stringsdict; sourceTree = "<group>"; };
-		DA1DC94A1CB6C1C2006E619F /* Mapbox GL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mapbox GL.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA1DC94A1CB6C1C2006E619F /* MapLibre GL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MapLibre GL.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA1DC9501CB6C1C2006E619F /* MBXAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBXAppDelegate.h; sourceTree = "<group>"; };
 		DA1DC9531CB6C1C2006E619F /* MBXViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBXViewController.h; sourceTree = "<group>"; };
 		DA1DC95E1CB6C1C2006E619F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1704,7 +1704,7 @@
 		DA1DC94B1CB6C1C2006E619F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DA1DC94A1CB6C1C2006E619F /* Mapbox GL.app */,
+				DA1DC94A1CB6C1C2006E619F /* MapLibre GL.app */,
 				DABCABA81CB80692000A7C39 /* Bench GL.app */,
 				DA8847D21CBAF91600AB86E3 /* Mapbox.framework */,
 				DAA4E4131CBB71D400178DFB /* libMapbox.a */,
@@ -2539,7 +2539,7 @@
 			);
 			name = iosapp;
 			productName = iosapp;
-			productReference = DA1DC94A1CB6C1C2006E619F /* Mapbox GL.app */;
+			productReference = DA1DC94A1CB6C1C2006E619F /* MapLibre GL.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DA2E88501CC036F400F24E7B /* test */ = {
@@ -2676,7 +2676,8 @@
 					};
 					DABCABA71CB80692000A7C39 = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = GJZR2MEM28;
+						DevelopmentTeam = KBDAWM7T4E;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -3504,6 +3505,8 @@
 		96AF1AA321B615A3007CB696 /* RelWithDebInfo */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -3535,7 +3538,7 @@
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
-				PRODUCT_NAME = "Mapbox GL";
+				PRODUCT_NAME = "MapLibre GL";
 				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
 			};
 			name = RelWithDebInfo;
@@ -3544,7 +3547,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = GJZR2MEM28;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = KBDAWM7T4E;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../../../include",
 					"$(PROJECT_DIR)/../../../default/include",
@@ -3561,9 +3567,11 @@
 					"$(PROJECT_DIR)/../../../darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;
+				LD_GENERATE_MAP_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.bench;
+				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.bench;
 				PRODUCT_NAME = "Bench GL";
+				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL Bench Development";
 			};
 			name = RelWithDebInfo;
 		};
@@ -3726,6 +3734,8 @@
 		DA1DC95F1CB6C1C2006E619F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -3750,6 +3760,8 @@
 		DA1DC9601CB6C1C2006E619F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -3781,7 +3793,7 @@
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
-				PRODUCT_NAME = "Mapbox GL";
+				PRODUCT_NAME = "MapLibre GL";
 				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
 			};
 			name = Debug;
@@ -3798,7 +3810,7 @@
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
-				PRODUCT_NAME = "Mapbox GL";
+				PRODUCT_NAME = "MapLibre GL";
 				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
 			};
 			name = Release;
@@ -4011,7 +4023,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = GJZR2MEM28;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = KBDAWM7T4E;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../../../include",
 					"$(PROJECT_DIR)/../../../default/include",
@@ -4028,9 +4043,11 @@
 					"$(PROJECT_DIR)/../../../platform/darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;
+				LD_GENERATE_MAP_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.bench;
+				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.bench;
 				PRODUCT_NAME = "Bench GL";
+				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL Bench Development";
 			};
 			name = Debug;
 		};
@@ -4038,7 +4055,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = GJZR2MEM28;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = KBDAWM7T4E;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../../../include",
 					"$(PROJECT_DIR)/../../../default/include",
@@ -4055,9 +4075,11 @@
 					"$(PROJECT_DIR)/../../../platform/darwin/include",
 				);
 				INFOPLIST_FILE = benchmark/Info.plist;
+				LD_GENERATE_MAP_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.bench;
+				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.bench;
 				PRODUCT_NAME = "Bench GL";
+				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL Bench Development";
 			};
 			name = Release;
 		};
