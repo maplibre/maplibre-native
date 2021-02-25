@@ -134,8 +134,7 @@ final class LocationCameraController {
                                            long transitionDuration,
                                            Double zoom, Double bearing, Double tilt,
                                            final OnLocationCameraTransitionListener internalTransitionListener) {
-    if (!wasTracking && isLocationTracking() && lastLocation != null && isEnabled)
-    {
+    if (!wasTracking && isLocationTracking() && lastLocation != null && isEnabled) {
       isTransitioning = true;
       LatLng target = new LatLng(lastLocation);
 

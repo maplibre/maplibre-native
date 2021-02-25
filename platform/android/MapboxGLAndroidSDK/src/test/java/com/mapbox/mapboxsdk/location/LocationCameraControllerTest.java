@@ -1232,8 +1232,9 @@ public class LocationCameraControllerTest {
     OnCameraMoveInvalidateListener onCameraMoveInvalidateListener = mock(OnCameraMoveInvalidateListener.class);
     AndroidGesturesManager initialGesturesManager = mock(AndroidGesturesManager.class);
     AndroidGesturesManager internalGesturesManager = mock(AndroidGesturesManager.class);
-    LocationCameraController locationCameraController = new LocationCameraController(mapboxMap, transform, moveGestureDetector,
-      onCameraTrackingChangedListener, onCameraMoveInvalidateListener, initialGesturesManager, internalGesturesManager);
+    LocationCameraController locationCameraController = new LocationCameraController(
+      mapboxMap, transform, moveGestureDetector, onCameraTrackingChangedListener,
+      onCameraMoveInvalidateListener, initialGesturesManager, internalGesturesManager);
     locationCameraController.setEnabled(true);
     return locationCameraController;
   }
