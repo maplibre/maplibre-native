@@ -517,6 +517,7 @@ public final class LocationComponent {
     } else {
       disableLocationComponent();
     }
+    locationCameraController.setEnabled(isEnabled);
   }
 
   /**
