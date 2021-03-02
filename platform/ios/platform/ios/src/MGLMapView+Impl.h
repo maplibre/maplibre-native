@@ -1,6 +1,7 @@
 #import <mbgl/gfx/renderer_backend.hpp>
 #import <mbgl/map/map_observer.hpp>
 #import <mbgl/util/image.hpp>
+#import <MetalANGLE/MGLContext.h>
 
 #import <UIKit/UIView.h>
 #import <UIKit/UIImage.h>
@@ -18,7 +19,7 @@ public:
     virtual mbgl::gfx::RendererBackend& getRendererBackend() = 0;
 
     // Returns a handle to the OpenGL context object if this view is rendered with OpenGL.
-    virtual EAGLContext* getEAGLContext() {
+    virtual MGLContext* getEAGLContext() {
         return nullptr;
     }
 

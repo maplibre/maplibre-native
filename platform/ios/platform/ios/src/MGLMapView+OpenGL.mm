@@ -4,11 +4,7 @@
 
 #include <mbgl/gl/renderable_resource.hpp>
 
-#import <GLKit/GLKit.h>
-#import <OpenGLES/EAGL.h>
-#import <QuartzCore/CAEAGLLayer.h>
-
-@interface MGLMapViewImplDelegate : NSObject <GLKViewDelegate>
+@interface MGLMapViewImplDelegate : NSObject <MGLKViewDelegate>
 @end
 
 @implementation MGLMapViewImplDelegate {
@@ -22,7 +18,7 @@
     return self;
 }
 
-- (void)glkView:(nonnull GLKView*)view drawInRect:(CGRect)rect {
+- (void)mglkView:(MGLKView *)view drawInRect:(CGRect)rect {
     _impl->render();
 }
 
@@ -60,8 +56,8 @@ private:
 
 public:
     MGLMapViewImplDelegate* delegate = nil;
-    GLKView *glView = nil;
-    EAGLContext *context = nil;
+    MGLKView *glView = nil;
+    MGLContext *context = nil;
     const bool atLeastiOS_12_2_0;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
@@ -77,8 +73,8 @@ MGLMapViewOpenGLImpl::MGLMapViewOpenGLImpl(MGLMapView* nativeView_)
 
 MGLMapViewOpenGLImpl::~MGLMapViewOpenGLImpl() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
-    if (resource.context && [[EAGLContext currentContext] isEqual:resource.context]) {
-        [EAGLContext setCurrentContext:nil];
+    if (resource.context && [[MGLContext currentContext] isEqual:resource.context]) {
+        [MGLContext setCurrentContext:nil];
     }
 }
 
@@ -89,9 +85,7 @@ void MGLMapViewOpenGLImpl::setOpaque(const bool opaque) {
 }
 
 void MGLMapViewOpenGLImpl::setPresentsWithTransaction(const bool value) {
-    auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
-    CAEAGLLayer* eaglLayer = MGL_OBJC_DYNAMIC_CAST(resource.glView.layer, CAEAGLLayer);
-    eaglLayer.presentsWithTransaction = value;
+    // No-op on Metal.
 }
 
 void MGLMapViewOpenGLImpl::display() {
@@ -124,22 +118,20 @@ void MGLMapViewOpenGLImpl::createView() {
     }
 
     if (!resource.context) {
-        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        resource.context = [[MGLContext alloc] initWithAPI:kMGLRenderingAPIOpenGLES2];
         assert(resource.context);
     }
 
-    resource.glView = [[GLKView alloc] initWithFrame:mapView.bounds context:resource.context];
+    resource.glView = [[MGLKView alloc] initWithFrame:mapView.bounds context:resource.context];
     resource.glView.delegate = resource.delegate;
     resource.glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     resource.glView.contentScaleFactor = contentScaleFactor();
     resource.glView.contentMode = UIViewContentModeCenter;
-    resource.glView.drawableStencilFormat = GLKViewDrawableStencilFormat8;
-    resource.glView.drawableDepthFormat = GLKViewDrawableDepthFormat16;
+    resource.glView.drawableStencilFormat = MGLDrawableStencilFormat8;
+    resource.glView.drawableDepthFormat = MGLDrawableDepthFormat16;
     resource.glView.opaque = mapView.opaque;
     resource.glView.layer.opaque = mapView.opaque;
     resource.glView.enableSetNeedsDisplay = NO;
-    CAEAGLLayer* eaglLayer = MGL_OBJC_DYNAMIC_CAST(resource.glView.layer, CAEAGLLayer);
-    eaglLayer.presentsWithTransaction = NO;
 
     [mapView insertSubview:resource.glView atIndex:0];
 }
@@ -150,49 +142,8 @@ UIView* MGLMapViewOpenGLImpl::getView() {
 }
 
 void MGLMapViewOpenGLImpl::deleteView() {
-    auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
-    [resource.glView deleteDrawable];
+    // No-op on Metal
 }
-
-#ifdef MGL_RECREATE_GL_IN_AN_EMERGENCY
-// See https://github.com/mapbox/mapbox-gl-native/issues/14232
-void MGLMapViewOpenGLImpl::emergencyRecreateGL() {
-    auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
-    MGLLogError(@"Rendering took too long - creating GL views");
-
-    CAEAGLLayer* eaglLayer = MGL_OBJC_DYNAMIC_CAST(resource.glView.layer, CAEAGLLayer);
-    eaglLayer.presentsWithTransaction = NO;
-
-    [mapView pauseRendering:nil];
-
-    // Just performing a pauseRendering:/resumeRendering: pair isn't sufficient - in this case
-    // we can still get errors when calling bindDrawable. Here we completely
-    // recreate the GLKView
-
-    [mapView.userLocationAnnotationView removeFromSuperview];
-    [resource.glView removeFromSuperview];
-
-    // Recreate the view
-    resource.glView = nil;
-    createView();
-
-    if (mapView.annotationContainerView) {
-        [resource.glView insertSubview:mapView.annotationContainerView atIndex:0];
-    }
-
-    [mapView updateUserLocationAnnotationView];
-
-    // Do not bind...yet
-
-    if (mapView.window) {
-        [mapView resumeRendering:nil];
-        eaglLayer = MGL_OBJC_DYNAMIC_CAST(resource.glView.layer, CAEAGLLayer);
-        eaglLayer.presentsWithTransaction = mapView.enablePresentsWithTransaction;
-    } else {
-        MGLLogDebug(@"No window - skipping resumeRendering");
-    }
-}
-#endif
 
 mbgl::gl::ProcAddress MGLMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
     static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
@@ -210,7 +161,7 @@ void MGLMapViewOpenGLImpl::activate() {
         return;
     }
 
-    [EAGLContext setCurrentContext:resource.context];
+    [MGLContext setCurrentContext:resource.context];
 }
 
 void MGLMapViewOpenGLImpl::deactivate() {
@@ -219,7 +170,7 @@ void MGLMapViewOpenGLImpl::deactivate() {
         return;
     }
 
-    [EAGLContext setCurrentContext:nil];
+    [MGLContext setCurrentContext:nil];
 }
 
 /// This function is called before we start rendering, when iOS invokes our rendering method.
@@ -257,7 +208,7 @@ void MGLMapViewOpenGLImpl::layoutChanged() {
              static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
 }
 
-EAGLContext* MGLMapViewOpenGLImpl::getEAGLContext() {
+MGLContext* MGLMapViewOpenGLImpl::getEAGLContext() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
     return resource.context;
 }

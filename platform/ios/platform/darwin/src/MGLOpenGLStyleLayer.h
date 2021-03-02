@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MGLMapView;
 @class MGLStyle;
+@class MGLContext;
 
 typedef struct MGLStyleLayerDrawingContext {
     CGSize size;
@@ -30,7 +31,7 @@ MGL_EXPORT
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #if TARGET_OS_IPHONE
-@property (nonatomic, readonly) EAGLContext *context;
+@property (nonatomic, readonly) MGLContext *context;
 #else
 @property (nonatomic, readonly) CGLContextObj context;
 #endif

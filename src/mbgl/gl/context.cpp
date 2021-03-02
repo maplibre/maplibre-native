@@ -219,10 +219,8 @@ UniqueTexture Context::createUniqueTexture() {
 }
 
 bool Context::supportsVertexArrays() const {
-    return vertexArray &&
-           vertexArray->genVertexArrays &&
-           vertexArray->bindVertexArray &&
-           vertexArray->deleteVertexArrays;
+    // TODO: Metal: Metal does not work with vertex arrays.
+    return false;
 }
 
 VertexArray Context::createVertexArray() {

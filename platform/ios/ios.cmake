@@ -22,7 +22,7 @@ set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC
 if(MBGL_WITH_OPENGL)
     target_compile_definitions(
         mbgl-core
-        PUBLIC MBGL_USE_GLES2 GLES_SILENCE_DEPRECATION
+        PUBLIC MBGL_USE_GLES2
     )
     target_sources(
         mbgl-core
@@ -32,7 +32,7 @@ if(MBGL_WITH_OPENGL)
     )
     target_link_libraries(
         mbgl-core
-        PRIVATE "-framework GLKit" "-framework OpenGLES"
+        PRIVATE "-framework MetalANGLE"
     )
 endif()
 

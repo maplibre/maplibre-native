@@ -76,7 +76,7 @@ class MGLOpenGLLayerHost;
 }
 
 #if TARGET_OS_IPHONE
-- (EAGLContext *)context {
+- (MGLContext *)context {
     return self.mapView.context;
 }
 #else
