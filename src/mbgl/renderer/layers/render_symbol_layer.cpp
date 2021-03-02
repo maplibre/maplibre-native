@@ -424,7 +424,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        bucket.justReloaded = false;
+        // Prevent a flickering issue when a symbol is moved.
+        // bucket.justReloaded = false;
 
         auto addRenderables = [&renderableSegments, &tile, renderData, &bucketPaintProperties, it = renderableSegments.begin()] (auto& segments, const SymbolType type) mutable {
             for (auto& segment : segments) {
