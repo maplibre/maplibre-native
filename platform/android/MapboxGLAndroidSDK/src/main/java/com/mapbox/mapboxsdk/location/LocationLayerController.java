@@ -106,6 +106,10 @@ final class LocationLayerController {
     }
   }
 
+  void setGpsBearing(float gpsBearing) {
+    locationLayerRenderer.setGpsBearing(gpsBearing);
+  }
+
   void setRenderMode(@RenderMode.Mode int renderMode) {
     if (this.renderMode == renderMode) {
       return;

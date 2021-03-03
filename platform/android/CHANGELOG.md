@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [`Con
 
 * Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
 * Fixes crash caused by NullPointerException MapKeyListener [#464](https://github.com/mapbox/mapbox-gl-native-android/issues/464), cherry picked from [#466](https://github.com/mapbox/mapbox-gl-native-android/pull/466) 
+* Fixed an issue where GPS puck keeps previous value when enabled. [#462]https://github.com/mapbox/mapbox-gl-native-android/issues/462, cherry picked from [#470](https://github.com/mapbox/mapbox-gl-native-android/pull/470) 
 
 ### Other
 
