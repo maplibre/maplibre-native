@@ -470,6 +470,34 @@ class LocationComponentTest {
     }
 
     @Test
+    fun change_to_gps_mode_symbolLayerBearingValue() {
+        val location = Location("test")
+        location.bearing = 50f
+        val projection: Projection = mock(Projection::class.java)
+        `when`(projection.getMetersPerPixelAtLatitude(location.latitude)).thenReturn(10.0)
+        `when`(mapboxMap.projection).thenReturn(projection)
+        `when`(style.isFullyLoaded).thenReturn(true)
+        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+
+        locationComponent.activateLocationComponent(
+        LocationComponentActivationOptions.builder(context, style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(false)
+            .build()
+        )
+        locationComponent.isLocationComponentEnabled = true
+        locationComponent.onStart()
+        locationComponent.renderMode = RenderMode.NORMAL
+        locationComponent.forceLocationUpdate(location)
+
+        verify(locationLayerController, times(0)).setGpsBearing(50f)
+
+        locationComponent.renderMode = RenderMode.GPS
+        verify(locationLayerController, times(1)).setGpsBearing(50f)
+        verify(locationAnimatorCoordinator).cancelAndRemoveGpsBearingAnimation()
+    }
+
+    @Test
     fun tiltWhileTracking_notReady() {
         `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         locationComponent.activateLocationComponent(context, mock(Style::class.java), locationEngine, locationEngineRequest, locationComponentOptions)

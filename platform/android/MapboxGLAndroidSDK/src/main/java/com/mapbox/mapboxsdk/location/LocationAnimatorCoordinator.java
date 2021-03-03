@@ -482,6 +482,11 @@ final class LocationAnimatorCoordinator {
     cancelAnimator(ANIMATOR_TILT);
   }
 
+  void cancelAndRemoveGpsBearingAnimation() {
+    cancelAnimator(ANIMATOR_LAYER_GPS_BEARING);
+    animatorArray.remove(ANIMATOR_LAYER_GPS_BEARING);
+  }
+
   /**
    * Cancel the pulsing circle location animator.
    */
