@@ -241,8 +241,15 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
         if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
         placeSymbol(symbol, ctx);
-        seenCrossTileIDs.insert(symbol.crossTileID);
+
+        // Prevent a flickering issue while zooming out.
+        if (symbol.crossTileID != SymbolInstance::invalidCrossTileID() && !ctx.getRenderTile().holdForFade()) {
+            seenCrossTileIDs.insert(symbol.crossTileID);
+        }        
     }
+
+    // Prevent a flickering issue when a symbol is moved.
+    symbolBucket.justReloaded = false;
 
     // As long as this placement lives, we have to hold onto this bucket's
     // matching FeatureIndex/data for querying purposes
@@ -905,9 +912,10 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     // But we have to wait for placement if we potentially depend on a paired icon/text
     // with allow-overlap: false.
     // See https://github.com/mapbox/mapbox-gl-native/issues/12483
+    // Prevent a flickering issue when showing a symbol allowing overlap.
     const JointOpacityState defaultOpacityState(
-            textAllowOverlap && (iconAllowOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) || bucket.layout->get<style::IconOptional>()),
-            iconAllowOverlap && (textAllowOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
+            bucket.justReloaded && textAllowOverlap && (iconAllowOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) || bucket.layout->get<style::IconOptional>()),
+            bucket.justReloaded && iconAllowOverlap && (textAllowOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
             true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {

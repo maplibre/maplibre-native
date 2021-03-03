@@ -6,6 +6,10 @@ Mapbox welcomes participation and contributions from everyone. Please read [`Con
 
 ### Features
 
+### Bug Fixes
+
+* Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
+
 ### Other
 
 * mapbox-gl-js submodule has been replaced with maplibre-gl-js
