@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [`Con
 ### Bug Fixes
 
 * Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
+* Fixes crash caused by NullPointerException MapKeyListener [#464](https://github.com/mapbox/mapbox-gl-native-android/issues/464), cherry picked from [#466](https://github.com/mapbox/mapbox-gl-native-android/pull/466) 
 
 ### Other
 
