@@ -525,21 +525,33 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   @Override
   public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
+    if (!isKeyDetectorInitialized()) {
+      return super.onKeyDown(keyCode, event);
+    }
     return mapKeyListener.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
   }
 
   @Override
   public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+    if (!isKeyDetectorInitialized()) {
+      return super.onKeyLongPress(keyCode, event);
+    }
     return mapKeyListener.onKeyLongPress(keyCode, event) || super.onKeyLongPress(keyCode, event);
   }
 
   @Override
   public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
+    if (!isKeyDetectorInitialized()) {
+      return super.onKeyUp(keyCode, event);
+    }
     return mapKeyListener.onKeyUp(keyCode, event) || super.onKeyUp(keyCode, event);
   }
 
   @Override
   public boolean onTrackballEvent(@NonNull MotionEvent event) {
+    if (!isKeyDetectorInitialized()) {
+      return super.onTrackballEvent(event);
+    }
     return mapKeyListener.onTrackballEvent(event) || super.onTrackballEvent(event);
   }
 
@@ -1119,6 +1131,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   private boolean isGestureDetectorInitialized() {
     return mapGestureDetector != null;
+  }
+
+  private boolean isKeyDetectorInitialized() {
+    return mapKeyListener != null;
   }
 
   @Nullable
