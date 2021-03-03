@@ -480,10 +480,10 @@ class LocationComponentTest {
         `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         locationComponent.activateLocationComponent(
-        LocationComponentActivationOptions.builder(context, style)
-            .locationComponentOptions(locationComponentOptions)
-            .useDefaultLocationEngine(false)
-            .build()
+            LocationComponentActivationOptions.builder(context, style)
+                .locationComponentOptions(locationComponentOptions)
+                .useDefaultLocationEngine(false)
+                .build()
         )
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
