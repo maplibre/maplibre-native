@@ -407,6 +407,7 @@
 		CF75A91522D85E860058A5C4 /* MGLLoggingConfiguration.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF75A91422D85E860058A5C4 /* MGLLoggingConfiguration.mm */; };
 		CF75A91622D85E860058A5C4 /* MGLLoggingConfiguration.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF75A91422D85E860058A5C4 /* MGLLoggingConfiguration.mm */; };
 		D717FE7A25F1955A0054E06E /* iosapp_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D717FE7925F1955A0054E06E /* iosapp_UITests.swift */; };
+		D717FECB25F19F520054E06E /* XCTestCase+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D717FECA25F19F520054E06E /* XCTestCase+Extensions.swift */; };
 		DA00FC8E1D5EEB0D009AABC8 /* MGLAttributionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DA00FC8F1D5EEB0D009AABC8 /* MGLAttributionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DA00FC901D5EEB0D009AABC8 /* MGLAttributionInfo.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA00FC8D1D5EEB0D009AABC8 /* MGLAttributionInfo.mm */; };
@@ -1049,6 +1050,8 @@
 		D717FE7725F1955A0054E06E /* iosapp UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "iosapp UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D717FE7925F1955A0054E06E /* iosapp_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosapp_UITests.swift; sourceTree = "<group>"; };
 		D717FE7B25F1955A0054E06E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D717FEC925F19D200054E06E /* iosapp_TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = iosapp_TestPlan.xctestplan; sourceTree = "<group>"; };
+		D717FECA25F19F520054E06E /* XCTestCase+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Extensions.swift"; sourceTree = "<group>"; };
 		DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAttributionInfo.h; sourceTree = "<group>"; };
 		DA00FC8D1D5EEB0D009AABC8 /* MGLAttributionInfo.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLAttributionInfo.mm; sourceTree = "<group>"; };
 		DA0CD58F1CF56F6A00A5F5A5 /* MGLFeatureTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLFeatureTests.mm; path = ../../darwin/test/MGLFeatureTests.mm; sourceTree = "<group>"; };
@@ -1704,8 +1707,10 @@
 		D717FE7825F1955A0054E06E /* iosapp UITests */ = {
 			isa = PBXGroup;
 			children = (
+				D717FEC925F19D200054E06E /* iosapp_TestPlan.xctestplan */,
 				D717FE7925F1955A0054E06E /* iosapp_UITests.swift */,
 				D717FE7B25F1955A0054E06E /* Info.plist */,
+				D717FECA25F19F520054E06E /* XCTestCase+Extensions.swift */,
 			);
 			path = "iosapp UITests";
 			sourceTree = "<group>";
@@ -2967,6 +2972,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D717FE7A25F1955A0054E06E /* iosapp_UITests.swift in Sources */,
+				D717FECB25F19F520054E06E /* XCTestCase+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
