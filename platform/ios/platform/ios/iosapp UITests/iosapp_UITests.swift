@@ -8,9 +8,13 @@
 import XCTest
 
 class iosapp_UITests: XCTestCase {
+    
+    let app = XCUIApplication()
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        // UI tests must launch the application that they test.
+        app.launch()
 
         // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
@@ -23,13 +27,32 @@ class iosapp_UITests: XCTestCase {
     }
 
     func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+        /// Launch and take a screenshot
         add(screenshot())
 
         // Use recording to get started writing UI tests.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
+    
+    /// Turn on Debug tile boundaries, tile info and FPS ornaments
+    func testDebugBoundaryTiles() {
+        let mapSettingsButton = app.navigationBars["Streets"].buttons["Map settings"]
+        mapSettingsButton.tap()
+        
+        /// setup initial conditions for position (0,0) and debug settings
+        let tablesQuery = app.tables
+        tablesQuery.staticTexts["Reset position"].tap()
+        mapSettingsButton.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show zoom level ornament"]/*[[".cells.staticTexts[\"Show zoom level ornament\"]",".staticTexts[\"Show zoom level ornament\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        mapSettingsButton.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile boundaries"]/*[[".cells.staticTexts[\"Show tile boundaries\"]",".staticTexts[\"Show tile boundaries\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        mapSettingsButton.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile info"]/*[[".cells.staticTexts[\"Show tile info\"]",".staticTexts[\"Show tile info\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        mapSettingsButton.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile timestamps"]/*[[".cells.staticTexts[\"Show tile timestamps\"]",".staticTexts[\"Show tile timestamps\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        mapSettingsButton.tap()
+
+        add(screenshot(name: "Null Island Tiles"))
     }
 
     func testLaunchPerformance() throws {
