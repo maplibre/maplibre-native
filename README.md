@@ -89,7 +89,19 @@ Please refer to [Mapbox Maps SDK for Android](platform/android/) for detailed in
 
 ```bash
 cd platform/ios
+
+# make and open the Xcode workspace
+make iproj
+
+# make Xcode workspace, but run in headless mode
+make iproj CI=1
+
+# Make Frameworks
 make xcframework BUILDTYPE=Release
+
+# test
+cd platform/ios/platform/ios
+xcodebuild -scheme bench test -destination "platform=iOS Simulator,name=iPhone 8"
 ```
 
 The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`

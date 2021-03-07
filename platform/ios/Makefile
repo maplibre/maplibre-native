@@ -1,6 +1,7 @@
 export BUILDTYPE ?= Debug
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= master
+export CI ?= 0
 
 CMAKE ?= cmake
 
@@ -146,9 +147,14 @@ $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettin
 ios: $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' build $(XCPRETTY)
 
+# make iproj
 .PHONY: iproj
 iproj: $(IOS_PROJ_PATH)
-	xed $(IOS_WORK_PATH)
+	# Check if Xcode should run in headless mode
+	if [ $(CI) == 1 ]; then echo "CI=1.  Running in headless mode, skipping $(IOS_WORK_PATH)"; \
+	  else \
+		  echo "Opening MapLibre in Xcode 'xed $(IOS_WORK_PATH)'.  To skip opening Xcode, use 'make iproj CI=1'"; \
+		  xed $(IOS_WORK_PATH);  fi;
 
 .PHONY: ios-lint-plist
 ios-lint-plist:
@@ -200,6 +206,7 @@ iframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
 
+# make xcframework
 .PHONY: xcframework
 xcframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
@@ -307,6 +314,7 @@ style-code:
 codestyle:
 	scripts/codestyle.sh
 
+# make clean
 .PHONY: clean
 clean:
 	-rm -rf ./build \
