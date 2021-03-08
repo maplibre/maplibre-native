@@ -15,7 +15,10 @@
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapboxGLAndroidSDK/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
+/platform/ios/platform/ios/Mapbox.playground/build/
 *.code-workspace
+
+.DS_Store
 /build
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
