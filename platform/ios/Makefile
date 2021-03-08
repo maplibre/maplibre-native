@@ -170,6 +170,12 @@ ios-lint: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
 
+# make ios-uitest
+.PHONY: ios-uitest
+ios-uitest: $(IOS_PROJ_PATH)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'iosapp' test $(XCPRETTY)
+	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
+
 .PHONY: ios-test
 ios-test: $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)

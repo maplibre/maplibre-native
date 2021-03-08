@@ -102,8 +102,11 @@ make iproj CI=1
 make xcframework BUILDTYPE=Release
 
 # test
-cd platform/ios/platform/ios
-xcodebuild -scheme iosapp test -destination "platform=iOS Simulator,name=iPhone 8"
+make ios-test
+
+# UITests
+#   You can review uitest results:  $(IOS_OUTPUT_PATH)/Logs/Test
+ make ios-uitest
 ```
 
 The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`
