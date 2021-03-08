@@ -705,6 +705,15 @@ class LocationAnimatorCoordinatorTest {
         verify { animatorProvider.floatAnimator(any(), any(), 5) }
     }
 
+    @Test
+    fun remove_gps_animator() {
+        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
+
+        locationAnimatorCoordinator.cancelAndRemoveGpsBearingAnimation()
+        assertTrue(locationAnimatorCoordinator.animatorArray.get(ANIMATOR_LAYER_GPS_BEARING) == null)
+    }
+
     private fun getListenerHoldersSet(vararg animatorTypes: Int): Set<AnimatorListenerHolder> {
         return HashSet<AnimatorListenerHolder>().also {
             for (type in animatorTypes) {

@@ -48,6 +48,7 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_I
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
+import static com.mapbox.mapboxsdk.location.modes.RenderMode.GPS;
 
 /**
  * The Location Component provides location awareness to your mobile application. Enabling this
@@ -674,6 +675,10 @@ public final class LocationComponent {
    */
   public void setRenderMode(@RenderMode.Mode int renderMode) {
     checkActivationState();
+    if (lastLocation != null && renderMode == GPS) {
+      locationAnimatorCoordinator.cancelAndRemoveGpsBearingAnimation();
+      locationLayerController.setGpsBearing(lastLocation.getBearing());
+    }
     locationLayerController.setRenderMode(renderMode);
     updateLayerOffsets(true);
     updateCompassListenerState(true);

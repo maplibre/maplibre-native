@@ -17,6 +17,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 ### Bug Fixes
 
 * Fixed an issue that caused a crash when custom location managers did not implement `MGLLocationManager.accuracyAuthorization`. (cherry pick from [#474](https://github.com/mapbox/mapbox-gl-native-ios/pull/474))
+* Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
 
 ### Other
 
