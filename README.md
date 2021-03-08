@@ -87,6 +87,8 @@ Please refer to [Mapbox Maps SDK for Android](platform/android/) for detailed in
 
 #### iOS
 
+You can run automated test on a Simulator or Device by changing to the Scheme `iosapp` and choosing `Product` > `Test` (or use `⌘-U`).  Use `⌘-9` to navigate to `Reports` to see results and browse through screenshots.  This method of testing should work well with CI tools such as GitHub Actions, Xcode Server Bots, & AWS Device Farm.
+
 ```bash
 cd platform/ios
 
@@ -101,7 +103,7 @@ make xcframework BUILDTYPE=Release
 
 # test
 cd platform/ios/platform/ios
-xcodebuild -scheme bench test -destination "platform=iOS Simulator,name=iPhone 8"
+xcodebuild -scheme iosapp test -destination "platform=iOS Simulator,name=iPhone 8"
 ```
 
 The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`

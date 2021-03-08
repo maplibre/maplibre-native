@@ -22,13 +22,13 @@ class bench_UITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
+    func test_benchScheme() throws {
         // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
         
         // Give the app enough time to run
-        sleep(300)
+        sleep(100)
 
         // Use recording to get started writing UI tests.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
