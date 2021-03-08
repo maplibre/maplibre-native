@@ -16,11 +16,9 @@
 /platform/android/build
 /platform/android/MapboxGLAndroidSDK/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
 *.code-workspace
-<<<<<<< HEAD
+
 .DS_Store
-=======
 /build
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
 /new_offline.db
->>>>>>> master
