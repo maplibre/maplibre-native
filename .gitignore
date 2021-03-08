@@ -18,3 +18,4 @@
 /platform/android/build
 /platform/android/MapboxGLAndroidSDK/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
 *.code-workspace
+.DS_Store
