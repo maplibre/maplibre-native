@@ -47,7 +47,7 @@ public:
         return *this;
     }
 
-    EAGLContext* getEAGLContext() override;
+    MGLContext* getEAGLContext() override;
     void setOpaque(bool) override;
     void display() override;
     void setPresentsWithTransaction(bool) override;

@@ -1,6 +1,8 @@
 #import "MGLMapView.h"
 #import "MGLUserLocationAnnotationView.h"
 #import "MGLAnnotationContainerView.h"
+#import <MetalANGLE/MGLContext.h>
+#import <MetalANGLE/MGLKView.h>
 
 #include <mbgl/util/size.hpp>
 
@@ -24,7 +26,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const _Nonnull MGLUnderlyingMapUna
 @interface MGLMapView (Private)
 
 /// The map view’s OpenGL rendering context.
-@property (nonatomic, readonly, nullable) EAGLContext *context;
+@property (nonatomic, readonly, nullable) MGLContext *context;
 
 /// Currently shown popover representing the selected annotation.
 @property (nonatomic, nonnull) UIView<MGLCalloutView> *calloutViewForSelectedAnnotation;

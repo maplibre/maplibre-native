@@ -49,3 +49,6 @@
 [submodule "maplibre-gl-js"]
 	path = maplibre-gl-js
 	url = https://github.com/maplibre/maplibre-gl-js.git
+[submodule "platform/ios/platform/ios/vendor/metalangle"]
+	path = platform/ios/platform/ios/vendor/metalangle
+	url = https://github.com/kakashidinho/metalangle.git
