@@ -45,7 +45,7 @@ buildPackageStyle() {
     fi
 }
 
-export GITHUB_USER=mapbox
+export GITHUB_USER=maplibre
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
 export PACKAGE_FORMAT=xcframework
