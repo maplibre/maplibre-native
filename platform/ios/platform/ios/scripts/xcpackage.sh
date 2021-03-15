@@ -51,6 +51,9 @@ PROJ_VERSION=$(git rev-list --count HEAD)
 SEM_VERSION=$( git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//' )
 SHORT_VERSION=${SEM_VERSION%-*}
 
+step "Fetching MetalANGLE dependencies"
+platform/ios/vendor/metalangle/ios/xcode/fetchDependencies.sh
+
 step "Building targets (build ${PROJ_VERSION}, version ${SEM_VERSION})"
 
 SCHEME='dynamic'
@@ -126,6 +129,16 @@ BUILD_ARGS="$BUILD_ARGS -output ${BINOUT}/${NAME}.xcframework"
 echo "Creating ${NAME}.xcframework with args: $BUILD_ARGS"
 xcodebuild -create-xcframework $BUILD_ARGS
 echo "${NAME}.xcframework created"
+
+# MetalANGLE
+METAL_ANGLE_NAME="MetalANGLE.framework"
+BUILD_ARGS=""
+BUILD_ARGS="$BUILD_ARGS -output ${BINOUT}/${METAL_ANGLE_NAME}.xcframework"
+addFramework "${BINOUT}/${NAME}-iphoneos.xcarchive" ${METAL_ANGLE_NAME} ${INCLUDE_DEBUG_SYMBOLS}
+addFramework "${BINOUT}/${NAME}-iphonesimulator.xcarchive" ${METAL_ANGLE_NAME} ${INCLUDE_DEBUG_SYMBOLS}
+echo "Creating ${METAL_ANGLE_NAME}.xcframework with args: $BUILD_ARGS"
+xcodebuild -create-xcframework $BUILD_ARGS
+echo "${METAL_ANGLE_NAME}.xcframework created"   
 
 step "Copying library resources…"
 cp -pv LICENSE.md ${OUTPUT}
