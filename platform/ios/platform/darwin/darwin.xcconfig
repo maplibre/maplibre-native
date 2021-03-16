@@ -79,7 +79,6 @@ OTHER_CPLUSPLUSFLAGS = $(inherited) -fvisibility=hidden -fcxx-modules
 OTHER_SWIFT_FLAGS = -warnings-as-errors
 
 // User defined
-BITCODE_GENERATION_MODE = bitcode 
 CURRENT_COMMIT_HASH = deadbeef
 CURRENT_SEMANTIC_VERSION = 0.0.0
 CURRENT_SHORT_VERSION = 0.0
