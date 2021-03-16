@@ -12,11 +12,7 @@ LOG_PATH=build/xcodebuild-$(date +"%Y-%m-%d_%H%M%S").log
 
 BUILD_DOCS=${BUILD_DOCS:-true}
 SYMBOLS=${SYMBOLS:-YES}
-
 BUILDTYPE=${BUILDTYPE:-Debug}
-if [[ ${SYMBOLS} == YES && ${BUILDTYPE} == Release ]]; then
-    BUILDTYPE='RelWithDebInfo'
-fi
 
 FORMAT=${FORMAT:-dynamic}
 if [[ ${FORMAT} != "dynamic" ]]; then
@@ -50,6 +46,8 @@ echo ${HASH} >> ${VERSION}
 PROJ_VERSION=$(git rev-list --count HEAD)
 SEM_VERSION=$( git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//' )
 SHORT_VERSION=${SEM_VERSION%-*}
+
+echo "Version=${SHORT_VERSION}"
 
 step "Fetching MetalANGLE dependencies"
 platform/ios/vendor/metalangle/ios/xcode/fetchDependencies.sh
@@ -131,7 +129,7 @@ xcodebuild -create-xcframework $BUILD_ARGS
 echo "${NAME}.xcframework created"
 
 # MetalANGLE
-METAL_ANGLE_NAME="MetalANGLE.framework"
+METAL_ANGLE_NAME="MetalANGLE"
 BUILD_ARGS=""
 BUILD_ARGS="$BUILD_ARGS -output ${BINOUT}/${METAL_ANGLE_NAME}.xcframework"
 addFramework "${BINOUT}/${NAME}-iphoneos.xcarchive" ${METAL_ANGLE_NAME} ${INCLUDE_DEBUG_SYMBOLS}
