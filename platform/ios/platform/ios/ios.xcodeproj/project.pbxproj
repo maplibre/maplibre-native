@@ -223,6 +223,11 @@
 		40F887701D7A1E58008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40F887711D7A1E59008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40FDA76B1CCAAA6800442548 /* MBXAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 40FDA76A1CCAAA6800442548 /* MBXAnnotationView.m */; };
+		4B056A2926016C1B00FE6761 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; };
+		4B056A6126016D5600FE6761 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; };
+		4B056A6226016D5600FE6761 /* MetalANGLE.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4B056A6326016D9A00FE6761 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; };
+		4B056A6426016D9A00FE6761 /* MetalANGLE.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4BC5769325E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4BC5769425E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */; };
 		4BC5769525E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BC5769225E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m */; };
@@ -369,7 +374,6 @@
 		A4DE3DCB23038C98005B3473 /* MGLMockGestureRecognizers.h in Sources */ = {isa = PBXBuildFile; fileRef = A4DE3DCA23038A7F005B3473 /* MGLMockGestureRecognizers.h */; };
 		A4DE3DCC23038CCA005B3473 /* MGLMockGestureRecognizers.m in Sources */ = {isa = PBXBuildFile; fileRef = A4DE3DC823038A07005B3473 /* MGLMockGestureRecognizers.m */; };
 		A4F3FB1D2254865900A30170 /* missing_icon.json in Resources */ = {isa = PBXBuildFile; fileRef = A4F3FB1C2254865900A30170 /* missing_icon.json */; };
-		AC3302A425EEEDB0004890E9 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC3302A325EEEDB0004890E9 /* MetalANGLE.framework */; };
 		CA0B3C022329DE9A00E4B493 /* MGLTestAssertionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAA65D82321BBA900F08A39 /* MGLTestAssertionHandler.m */; };
 		CA0C27922076C804001CE5B7 /* MGLShapeSourceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CA0C27912076C804001CE5B7 /* MGLShapeSourceTests.m */; };
 		CA0C27942076CA19001CE5B7 /* MGLMapViewIntegrationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CA0C27932076CA19001CE5B7 /* MGLMapViewIntegrationTest.m */; };
@@ -711,6 +715,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4B056A6226016D5600FE6761 /* MetalANGLE.framework in Embed Frameworks */,
 				CA94E5FC237D21030037AEA0 /* Mapbox.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -733,6 +738,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4B056A6426016D9A00FE6761 /* MetalANGLE.framework in Embed Frameworks */,
 				DAA4E4091CBB6C9500178DFB /* Mapbox.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -1321,6 +1327,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B056A6126016D5600FE6761 /* MetalANGLE.framework in Frameworks */,
 				CA94E5FB237D21030037AEA0 /* Mapbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1343,7 +1350,7 @@
 			files = (
 				DA0BDD202407C12600DAA576 /* libmbgl-core.a in Frameworks */,
 				CAB369E5237471D600592F74 /* libz.tbd in Frameworks */,
-				AC3302A425EEEDB0004890E9 /* MetalANGLE.framework in Frameworks */,
+				4B056A2926016C1B00FE6761 /* MetalANGLE.framework in Frameworks */,
 				DA35D9CE240920AB0013ECB0 /* libmbgl-vendor-csscolorparser.a in Frameworks */,
 				358B3DBB2359EA0F007BEB26 /* libmbgl-vendor-icu.a in Frameworks */,
 				DA35D9D1240920B60013ECB0 /* libmbgl-vendor-parsedate.a in Frameworks */,
@@ -1369,6 +1376,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B056A6326016D9A00FE6761 /* MetalANGLE.framework in Frameworks */,
 				DAA4E4081CBB6C9500178DFB /* Mapbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
