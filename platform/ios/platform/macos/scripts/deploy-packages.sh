@@ -80,6 +80,7 @@ export GITHUB_USER=maplibre
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
 
+
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
 BINARY_DIRECTORY=${BINARY_DIRECTORY:-build/macos/deploy}
@@ -111,10 +112,12 @@ if [[ $( echo ${VERSION_TAG} | grep --invert-match macos-v ) ]]; then
     exit 1
 fi
 
-if [[ $( wget --spider -O- https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/releases/tags/${VERSION_TAG} 2>&1 | grep -c "404 Not Found" ) == 0 ]]; then
+if [[ github-release info --tag ${VERSION_TAG} | grep --quiet "draft: ✗" ]]; then
     echo "Error: ${VERSION_TAG} has already been published on GitHub"
     echo "See: https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/tag/${VERSION_TAG}"
-    exit 1
+    if [[ "${GITHUB_RELEASE}" == true ]]; then
+        exit 1
+    fi
 fi
 
 PUBLISH_VERSION=$( echo ${VERSION_TAG} | sed 's/^macos-v//' )
