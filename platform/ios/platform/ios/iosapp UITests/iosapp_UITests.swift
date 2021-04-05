@@ -29,7 +29,6 @@ class iosapp_UITests: XCTestCase {
     /// Launch `iosapp`, reset to XYZ = (0, 0, 0) and take a screenshot
     func test_iosappScheme() throws {
         /// Launch and take a screenshot
-        app.alerts["MapLibre works best with your precise location."].scrollViews.otherElements.buttons["Keep Precise Location Off"].tap()
         app.navigationBars["Zeroconf Style"].buttons["Map settings"].tap()
         app.tables/*@START_MENU_TOKEN@*/.staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         sleep(1)
