@@ -87,9 +87,26 @@ Please refer to [Mapbox Maps SDK for Android](platform/android/) for detailed in
 
 #### iOS
 
+You can run automated test on a Simulator or Device by changing to the Scheme `iosapp` and choosing `Product` > `Test` (or use `⌘-U`).  Use `⌘-9` to navigate to `Reports` to see results and browse through screenshots.  This method of testing should work well with CI tools such as GitHub Actions, Xcode Server Bots, & AWS Device Farm.
+
 ```bash
 cd platform/ios
+
+# make and open the Xcode workspace
+make iproj
+
+# make Xcode workspace, but run in headless mode
+make iproj CI=1
+
+# Make Frameworks
 make xcframework BUILDTYPE=Release
+
+# test
+make ios-test
+
+# UITests
+#   You can review uitest results:  $(IOS_OUTPUT_PATH)/Logs/Test
+ make ios-uitest
 ```
 
 The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`

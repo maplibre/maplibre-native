@@ -97,6 +97,9 @@ jobs:
       - name: Running ios unit tests
         run: make ios-test
 
+      - name: Running ios UI tests
+        run: make ios-uitest
+
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
         run: make ios-sanitize      
 
