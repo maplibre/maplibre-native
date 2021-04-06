@@ -581,6 +581,9 @@ public:
 
     // setup interaction
     //
+    
+    self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
+    
     _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     _pan.delegate = self;
     _pan.maximumNumberOfTouches = 1;
@@ -1829,6 +1832,11 @@ public:
     [self cancelTransitions];
 
     CGPoint centerPoint = [self anchorPointForGesture:pinch];
+    if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+        if (pinch.numberOfTouches != 1 || pinch.state == UIGestureRecognizerStateEnded) {
+            centerPoint = [self contentCenter];
+        }
+    }
     MGLMapCamera *oldCamera = self.camera;
 
     self.cameraChangeReasonBitmask |= MGLCameraChangeReasonGesturePinch;
@@ -1937,6 +1945,9 @@ public:
     [self cancelTransitions];
 
     CGPoint centerPoint = [self anchorPointForGesture:rotate];
+    if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+        centerPoint = [self contentCenter];
+    }
     MGLMapCamera *oldCamera = self.camera;
 
     self.cameraChangeReasonBitmask |= MGLCameraChangeReasonGestureRotate;
@@ -1947,6 +1958,9 @@ public:
     // Check whether a zoom triggered by a pinch gesture is occurring and if the rotation threshold has been met.
     if (MGLDegreesFromRadians(self.rotationBeforeThresholdMet) < self.rotationThresholdWhileZooming && self.isZooming && !self.isRotating) {
         self.rotationBeforeThresholdMet += fabs(rotate.rotation);
+        if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+            self.rotationBeforeThresholdMet = 0;
+        }
         rotate.rotation = 0;
         return;
     }
@@ -2468,6 +2482,14 @@ public:
         {
             id<MGLAnnotation> annotation = [self annotationForGestureRecognizer:(UITapGestureRecognizer*)gestureRecognizer persistingResults:NO];
             if (!annotation) {
+                return NO;
+            }
+        }
+    }
+    else if (gestureRecognizer == _pan)
+    {
+        if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+            if (self.isZooming || self.isRotating) {
                 return NO;
             }
         }
