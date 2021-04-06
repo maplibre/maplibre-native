@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-               BuildableName = "Mapbox GL.app"
+               BuildableName = "MapLibre GL.app"
                BlueprintName = "iosapp"
                ReferencedContainer = "container:ios.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
@@ -78,7 +78,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
