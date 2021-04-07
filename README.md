@@ -1,4 +1,4 @@
-# MapLibre GL Native - Open-Source Fork of Mapbox GL Native
+# MapLibre GL Native - Open-Source Mapbox GL Native
 
 SDK for iOS, Android and other platforms
 
