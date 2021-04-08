@@ -4,7 +4,7 @@ on:
 jobs:
   push_to_registry:
     name: Docker image android-ndk-r21b
-    runs-on: [self-hosted, petr-ubuntu-acct]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -25,5 +25,5 @@ jobs:
         with:
           file: ./platform/android/docker/android-ndk-r21b        
           context: ./platform/android/docker
-          tags: ghcr.io/maptiler/android-ndk-r21b:latest
+          tags: ghcr.io/maplibre/android-ndk-r21b:latest
           push: true          

@@ -10,6 +10,22 @@ Mapbox-hosted vector tiles and styles require an API access token, which you can
 
 As an alternative, you can use `MGLAccountManager.accessToken` to set a token in code. See [our guide](https://www.mapbox.com/help/ios-private-access-token/) for some tips on keeping access tokens in open source code private.
 
+## MGLAccuracyAuthorizationDescription
+
+Set the Mapbox accuracy authorization description string as an element of `NSLocationTemporaryUsageDescriptionDictionary` to be used by the map to request authorization when the `MGLLocationManager.accuracyAuthorization` is set to `CLAccuracyAuthorizationReducedAccuracy`. Requesting accuracy authorization is available for devices running iOS 14.0 and above.
+
+Example:
+
+```xml
+<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+ <dict>
+  <key>MGLAccuracyAuthorizationDescription</key>
+  <string>Mapbox requires your precise location to help you navigate the map.</string>
+ </dict>
+```
+
+Remove `MGLAccuracyAuthorizationDescription` if you want to control when to request for accuracy authorization.
+
 ## MGLMapboxAPIBaseURL
 
 Use this key if you need to customize the API base URL used throughout the SDK. If unset, the default Mapbox API is used.
@@ -47,4 +63,3 @@ At runtime, you can obtain the value of this key using the `MGLOfflineStorage.da
 Beginning in version 4.0, the SDK also performs collision detection between style layers based on different sources by default. For the default behavior, omit the `MGLCollisionBehaviorPre4_0` key or set it to NO (`false`).
 
 This property may also be set using `[[NSUserDefaults standardUserDefaults] setObject:@(YES) forKey:@"MGLCollisionBehaviorPre4_0"]`; it will override any value specified in the `Info.plist`.
-

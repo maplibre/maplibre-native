@@ -100,4 +100,8 @@ extension MGLMapViewDelegateIntegrationTests: MGLMapViewDelegate {
     func mapView(_ mapView: MGLMapView, didFailToLoadImage imageName: String) -> UIImage? { return nil }
     
     func mapView(_ mapView: MGLMapView, shouldRemoveStyleImage imageName: String) -> Bool { return false }
+
+    func mapView(_ mapView: MGLMapView, didChangeLocationManagerAuthorization manager: MGLLocationManager) {}
+
+    func mapView(styleForDefaultUserLocationAnnotationView mapView: MGLMapView) -> MGLUserLocationAnnotationViewStyle { return MGLUserLocationAnnotationViewStyle() }
 }

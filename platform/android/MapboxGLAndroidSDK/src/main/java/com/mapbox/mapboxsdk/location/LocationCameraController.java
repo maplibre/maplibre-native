@@ -44,6 +44,7 @@ final class LocationCameraController {
 
   private boolean isTransitioning;
   private LatLng lastLocation;
+  private boolean isEnabled;
 
   LocationCameraController(
     Context context,
@@ -133,7 +134,7 @@ final class LocationCameraController {
                                            long transitionDuration,
                                            Double zoom, Double bearing, Double tilt,
                                            final OnLocationCameraTransitionListener internalTransitionListener) {
-    if (!wasTracking && isLocationTracking() && lastLocation != null) {
+    if (!wasTracking && isLocationTracking() && lastLocation != null && isEnabled) {
       isTransitioning = true;
       LatLng target = new LatLng(lastLocation);
 
@@ -318,6 +319,10 @@ final class LocationCameraController {
   boolean isConsumingCompass() {
     return cameraMode == CameraMode.TRACKING_COMPASS
       || cameraMode == CameraMode.NONE_COMPASS;
+  }
+
+  void setEnabled(boolean enabled) {
+    isEnabled = enabled;
   }
 
   private boolean isLocationTracking() {

@@ -734,6 +734,12 @@ MGL_EXPORT
 @property(nonatomic, getter=isPitchEnabled) BOOL pitchEnabled;
 
 /**
+ A Boolean value that determines whether gestures are anchored to the center coordinate of the map while rotating or zooming.
+ Default value is set to NO.
+ */
+@property(nonatomic) BOOL anchorRotateOrZoomGesturesToCenterCoordinate;
+
+/**
  A Boolean value that determines whether the user will receive haptic feedback
  for certain interactions with the map.
 

@@ -25,6 +25,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
     set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
+    set_target_properties(mbgl-render-test
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()
+
 # FIXME: Should not use core private interface
 target_include_directories(
     mbgl-render-test

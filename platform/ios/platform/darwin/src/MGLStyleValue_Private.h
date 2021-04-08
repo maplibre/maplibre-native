@@ -35,6 +35,8 @@ namespace mbgl {
     }
 }
 
+id MGLJSONObjectFromMBGLValue(const mbgl::Value &value);
+
 NS_INLINE MGLTransition MGLTransitionFromOptions(const mbgl::style::TransitionOptions& options) {
     MGLTransition transition;
     transition.duration = MGLTimeIntervalFromDuration(options.duration.value_or(mbgl::Duration::zero()));

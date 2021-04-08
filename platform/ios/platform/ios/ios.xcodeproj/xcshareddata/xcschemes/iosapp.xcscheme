@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1120"
+   LastUpgradeVersion = "1240"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-               BuildableName = "Mapbox GL.app"
+               BuildableName = "MapLibre GL.app"
                BlueprintName = "iosapp"
                ReferencedContainer = "container:ios.xcodeproj">
             </BuildableReference>
@@ -31,12 +31,32 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D717FE7625F1955A0054E06E"
+               BuildableName = "iosapp UITests.xctest"
+               BlueprintName = "iosapp UITests"
+               ReferencedContainer = "container:ios.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D7E7CE8425F2EF6A00C175FC"
+               BuildableName = "bench UITests.xctest"
+               BlueprintName = "bench UITests"
+               ReferencedContainer = "container:ios.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -54,7 +74,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
@@ -78,7 +98,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "Mapbox GL.app"
+            BuildableName = "MapLibre GL.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>

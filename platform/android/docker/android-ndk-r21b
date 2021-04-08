@@ -1,4 +1,4 @@
-FROM ghcr.io/maptiler/android-base
+FROM ghcr.io/maplibre/android-base
 
 WORKDIR /android/sdk
 

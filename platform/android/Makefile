@@ -44,7 +44,9 @@ MBGL_ANDROID_APK_SUFFIX = $(if $(filter Release,$(BUILDTYPE)),release,debug)
 MBGL_ANDROID_CORE_TEST_DIR = MapboxGLAndroidSDK/.externalNativeBuild/cmake/$(buildtype)/$2/core-tests
 MBGL_ANDROID_BENCHMARK_DIR = MapboxGLAndroidSDK/.externalNativeBuild/cmake/$(buildtype)/$2/benchmark
 MBGL_ANDROID_STL ?= c++_static
-MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL)
+SOCKET_TIMEOUT = 360000
+CONNECTION_TIMEOUT = 360000
+MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 
 # Lists all devices, and extracts the identifiers, then obtains the ABI for every one.
 # Some devices return \r\n, so we'll have to remove the carriage return before concatenating.

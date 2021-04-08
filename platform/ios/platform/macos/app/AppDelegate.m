@@ -157,18 +157,36 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 #pragma mark Services
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
+    // geo:29.95,-90.066667,3000
+    // geo:29.95,-90.066667?z=14    
     // mapboxgl://?center=29.95,-90.066667&zoom=14&bearing=45&pitch=30
-    NSURL *url = [NSURL URLWithString:[event paramDescriptorForKeyword:keyDirectObject].stringValue];
+    
+    NSURLComponents *components = [NSURLComponents componentsWithString:[event paramDescriptorForKeyword:keyDirectObject].stringValue];
+    BOOL isGLURL = [components.scheme isEqualToString:@"mapboxgl"];
+    BOOL isGeoURL = [components.scheme isEqualToString:@"geo"];
+
+    NSString *centerString;
+
     NSMutableDictionary<NSString *, NSString *> *params = [[NSMutableDictionary alloc] init];
-    for (NSString *param in [url.query componentsSeparatedByString:@"&"]) {
-        NSArray *parts = [param componentsSeparatedByString:@"="];
-        if (parts.count >= 2) {
-            params[parts[0]] = [parts[1] stringByRemovingPercentEncoding];
-        }
+    for (NSURLQueryItem *queryItem in components.queryItems) {
+        params[queryItem.name] = queryItem.value;
     }
 
+    if (isGLURL) {
+        centerString = params[@"center"];
+    } else if (isGeoURL) {
+        NSArray<NSString *> *parsedPath = [components.path componentsSeparatedByString:@";"];
+        centerString = parsedPath.firstObject;
+        for (NSString *param in [parsedPath subarrayWithRange:NSMakeRange(1, parsedPath.count - 1)]) {
+            NSArray *parts = [param componentsSeparatedByString:@"="];
+            if (parts.count >= 2) {
+                params[parts[0]] = parts[1];
+            }
+        }
+    }    
+
     MGLMapCamera *camera = [MGLMapCamera camera];
-    NSString *zoomLevelString = params[@"zoom"];
+    NSString *zoomLevelString = params[@"zoom"] ?: params[@"z"];
     self.pendingZoomLevel = zoomLevelString.length ? zoomLevelString.doubleValue : -1;
 
     NSString *directionString = params[@"bearing"];
@@ -176,12 +194,14 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
         camera.heading = directionString.doubleValue;
     }
 
-    NSString *centerString = params[@"center"];
     if (centerString) {
         NSArray *coordinateValues = [centerString componentsSeparatedByString:@","];
-        if (coordinateValues.count == 2) {
+        if (coordinateValues.count >= 2) {
             camera.centerCoordinate = CLLocationCoordinate2DMake([coordinateValues[0] doubleValue],
                                                                  [coordinateValues[1] doubleValue]);
+        }
+        if (coordinateValues.count == 3) {
+            camera.altitude = [coordinateValues[2] doubleValue];
         }
     }
 

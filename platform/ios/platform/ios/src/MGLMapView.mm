@@ -158,6 +158,12 @@ enum { MGLAnnotationTagNotFound = UINT32_MAX };
 /// The threshold used to consider when a tilt gesture should start.
 const CLLocationDegrees MGLHorizontalTiltToleranceDegrees = 45.0;
 
+/// The time between background snapshot attempts.
+const NSTimeInterval MGLBackgroundSnapshotImageInterval = 60.0;
+
+/// The delay after the map has idled before a background snapshot is attempted.
+const NSTimeInterval MGLBackgroundSnapshotImageIdleDelay = 3.0;
+
 /// Mapping from an annotation tag to metadata about that annotation, including
 /// the annotation itself.
 typedef std::unordered_map<MGLAnnotationTag, MGLAnnotationContext> MGLAnnotationTagContextMap;
@@ -517,7 +523,7 @@ public:
     _annotationViewReuseQueueByIdentifier = [NSMutableDictionary dictionary];
     _selectedAnnotationTag = MGLAnnotationTagNotFound;
     _annotationsNearbyLastTap = {};
-    
+
     // TODO: This warning should be removed when automaticallyAdjustsScrollViewInsets is removed from
     // the UIViewController api.
     static dispatch_once_t onceToken;
@@ -575,6 +581,9 @@ public:
 
     // setup interaction
     //
+    
+    self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
+    
     _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     _pan.delegate = self;
     _pan.maximumNumberOfTouches = 1;
@@ -968,12 +977,31 @@ public:
     }
 }
 
+- (void)updateViewsPostMapRendering {
+    // Update UIKit elements, prior to rendering
+    [self updateUserLocationAnnotationView];
+    [self updateAnnotationViews];
+    [self updateCalloutView];
+
+    // Call any pending completion blocks. This is primarily to ensure
+    // that annotations are in the expected position after core rendering
+    // and map update.
+    //
+    // TODO: Consider using this same mechanism for delegate callbacks.
+    [self processPendingBlocks];
+}
+
 - (void)renderSync
 {
     if ( ! self.dormant && _rendererFrontend)
     {
         _rendererFrontend->render();
     }
+
+    // TODO: This should be moved from what's essentially the UIView rendering
+    // To do this, add view models that can be updated separately, before the
+    // UIViews can be updated to match
+    [self updateViewsPostMapRendering];
 }
 
 // This gets called when the view dimension changes, e.g. because the device is being rotated.
@@ -1166,6 +1194,37 @@ public:
 
 - (void)updateFromDisplayLink:(CADisplayLink *)displayLink
 {
+    // CADisplayLink's call interval closely matches the that defined by,
+    // preferredFramesPerSecond, however it is NOT called on the vsync and
+    // can fire some time after the vsync, and the duration can often exceed
+    // the expected period.
+    //
+    // The `timestamp` property should represent (or be very close to) the vsync,
+    // so for any kind of frame rate measurement, it can be important to record
+    // the time upon entry to this method.
+    //
+    // This start time, coupled with the `targetTimestamp` gives you a measure
+    // of how long you have to do work before the next vsync.
+    //
+    // Note that CADisplayLink's duration property is interval between vsyncs at
+    // the device's natural frequency (60, 120). Instead, for the duration of a
+    // frame, use the two timestamps instead. This is especially important if
+    // you have set preferredFramesPerSecond to something other than the default.
+    //
+    //                 │   remaining duration  ┃
+    //                 │◀ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ▶┃
+    //     ┌ ─ ─ ─ ─ ─ ┼───────────────────────╋───────────────────────────────────┳───────
+    //                 │                       ┃                                   ┃
+    //     │           │                       ┃                                   ┃
+    //                 │                       ┃                                   ┃
+    //     ▼           │                       ▼                                   ▼
+    // timestamp       │                    target
+    // (vsync?)        │                   timestamp
+    //                 │
+    //                 ▼
+    //           display link
+    //            start time
+
     MGLAssertIsMainThread();
 
     // Not "visible" - this isn't a full definition of visibility, but if
@@ -1190,21 +1249,13 @@ public:
     {
         _needsDisplayRefresh = NO;
 
-        // Update UIKit elements, prior to rendering
-        [self updateUserLocationAnnotationView];
-        [self updateAnnotationViews];
-        [self updateCalloutView];
-
-        // Call any pending completion blocks. This is primarily to ensure
-        // that annotations are in the expected position after core rendering
-        // and map update.
-        //
-        // TODO: Consider using this same mechanism for delegate callbacks.
-        [self processPendingBlocks];
-        
+        // UIView update logic has moved into `renderSync` above, which now gets
+        // triggered by a call to setNeedsDisplay.
+        // See MGLMapViewOpenGLImpl::display() for more details
         _mbglView->display();
     }
 
+    // TODO: Fix
     if (self.experimental_enableFrameRateMeasurement)
     {
         CFTimeInterval now = CACurrentMediaTime();
@@ -1552,23 +1603,27 @@ public:
         _displayLink.paused = YES;
         [self processPendingBlocks];
 
-        if ( ! self.glSnapshotView)
+        if (self.lastSnapshotImage)
         {
-            self.glSnapshotView = [[UIImageView alloc] initWithFrame: _mbglView->getView().frame];
-            self.glSnapshotView.autoresizingMask = _mbglView->getView().autoresizingMask;
-            self.glSnapshotView.contentMode = UIViewContentModeCenter;
-            [self insertSubview:self.glSnapshotView aboveSubview:_mbglView->getView()];
-        }
+            if ( ! self.glSnapshotView)
+            {
+               self.glSnapshotView = [[UIImageView alloc] initWithFrame: _mbglView->getView().frame];
+               self.glSnapshotView.autoresizingMask = _mbglView->getView().autoresizingMask;
+               self.glSnapshotView.contentMode = UIViewContentModeCenter;
+               [self insertSubview:self.glSnapshotView aboveSubview:_mbglView->getView()];
+           }
+    
+            self.glSnapshotView.image = self.lastSnapshotImage;
+            self.glSnapshotView.hidden = NO;
+            self.glSnapshotView.alpha = 1;
 
-        self.glSnapshotView.image = self.lastSnapshotImage;
-        self.glSnapshotView.hidden = NO;
-
-        if (self.debugMask && [self.glSnapshotView.subviews count] == 0)
-        {
-            UIView *snapshotTint = [[UIView alloc] initWithFrame:self.glSnapshotView.bounds];
-            snapshotTint.autoresizingMask = self.glSnapshotView.autoresizingMask;
-            snapshotTint.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.25];
-            [self.glSnapshotView addSubview:snapshotTint];
+            if (self.debugMask && [self.glSnapshotView.subviews count] == 0)
+            {
+                UIView *snapshotTint = [[UIView alloc] initWithFrame:self.glSnapshotView.bounds];
+                snapshotTint.autoresizingMask = self.glSnapshotView.autoresizingMask;
+                snapshotTint.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.25];
+                [self.glSnapshotView addSubview:snapshotTint];
+            }
         }
 
         _mbglView->deleteView();
@@ -1586,9 +1641,15 @@ public:
 
         _mbglView->createView();
 
-        self.glSnapshotView.hidden = YES;
-
-        [self.glSnapshotView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        [UIView transitionWithView:self
+                                 duration:0.25
+                                  options:UIViewAnimationOptionTransitionCrossDissolve
+                               animations:^{
+                   self.glSnapshotView.hidden = YES;
+               }
+                               completion:^(BOOL finished) {
+                   [self.glSnapshotView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        }];
 
         _displayLink.paused = NO;
 
@@ -1771,6 +1832,11 @@ public:
     [self cancelTransitions];
 
     CGPoint centerPoint = [self anchorPointForGesture:pinch];
+    if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+        if (pinch.numberOfTouches != 1 || pinch.state == UIGestureRecognizerStateEnded) {
+            centerPoint = [self contentCenter];
+        }
+    }
     MGLMapCamera *oldCamera = self.camera;
 
     self.cameraChangeReasonBitmask |= MGLCameraChangeReasonGesturePinch;
@@ -1879,6 +1945,9 @@ public:
     [self cancelTransitions];
 
     CGPoint centerPoint = [self anchorPointForGesture:rotate];
+    if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+        centerPoint = [self contentCenter];
+    }
     MGLMapCamera *oldCamera = self.camera;
 
     self.cameraChangeReasonBitmask |= MGLCameraChangeReasonGestureRotate;
@@ -1889,6 +1958,9 @@ public:
     // Check whether a zoom triggered by a pinch gesture is occurring and if the rotation threshold has been met.
     if (MGLDegreesFromRadians(self.rotationBeforeThresholdMet) < self.rotationThresholdWhileZooming && self.isZooming && !self.isRotating) {
         self.rotationBeforeThresholdMet += fabs(rotate.rotation);
+        if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+            self.rotationBeforeThresholdMet = 0;
+        }
         rotate.rotation = 0;
         return;
     }
@@ -2410,6 +2482,14 @@ public:
         {
             id<MGLAnnotation> annotation = [self annotationForGestureRecognizer:(UITapGestureRecognizer*)gestureRecognizer persistingResults:NO];
             if (!annotation) {
+                return NO;
+            }
+        }
+    }
+    else if (gestureRecognizer == _pan)
+    {
+        if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
+            if (self.isZooming || self.isRotating) {
                 return NO;
             }
         }
@@ -4056,6 +4136,11 @@ public:
     return mbgl::Projection::getMetersPerPixelAtLatitude(latitude, self.zoomLevel);
 }
 
+- (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel
+{
+    return mbgl::Projection::getMetersPerPixelAtLatitude(latitude, zoomLevel);
+}
+
 #pragma mark - Camera Change Reason -
 
 - (void)resetCameraChangeReason
@@ -5417,6 +5502,11 @@ public:
     }
 }
 
+- (NSString *)accuracyDescriptionString {
+    NSDictionary *dictionary = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationTemporaryUsageDescriptionDictionary"];
+    return dictionary[@"MGLAccuracyAuthorizationDescription"];
+}
+
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MGLLogDebug(@"Setting showsUserLocation: %@", MGLStringFromBOOL(showsUserLocation));
@@ -5936,29 +6026,32 @@ public:
 
 - (void)locationManager:(__unused id<MGLLocationManager>)manager didUpdateHeading:(CLHeading *)newHeading
 {
-    if ( ! _showsUserLocation || self.pan.state == UIGestureRecognizerStateBegan || newHeading.headingAccuracy < 0) return;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+        if ( ! self->_showsUserLocation || self.pan.state == UIGestureRecognizerStateBegan || newHeading.headingAccuracy < 0) return;
 
-    self.userLocation.heading = newHeading;
+        self.userLocation.heading = newHeading;
 
-    if (self.showsUserHeadingIndicator || self.userTrackingMode == MGLUserTrackingModeFollowWithHeading)
-    {
-        [self updateUserLocationAnnotationView];
-    }
+        if (self.showsUserHeadingIndicator || self.userTrackingMode == MGLUserTrackingModeFollowWithHeading)
+        {
+            [self updateUserLocationAnnotationView];
+        }
 
-    if ([self.delegate respondsToSelector:@selector(mapView:didUpdateUserLocation:)])
-    {
-        [self.delegate mapView:self didUpdateUserLocation:self.userLocation];
+        if ([self.delegate respondsToSelector:@selector(mapView:didUpdateUserLocation:)])
+        {
+            [self.delegate mapView:self didUpdateUserLocation:self.userLocation];
 
-        if ( ! _showsUserLocation) return;
-    }
+            if (!self->_showsUserLocation) return;
+        }
 
-    CLLocationDirection headingDirection = (newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading);
+        CLLocationDirection headingDirection = (newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading);
 
-    if (headingDirection >= 0 && self.userTrackingMode == MGLUserTrackingModeFollowWithHeading
-        && self.userTrackingState != MGLUserTrackingStateBegan)
-    {
-        [self _setDirection:headingDirection animated:YES];
-    }
+        if (headingDirection >= 0 && self.userTrackingMode == MGLUserTrackingModeFollowWithHeading
+            && self.userTrackingState != MGLUserTrackingStateBegan)
+        {
+            [self _setDirection:headingDirection animated:YES];
+            [self updateUserLocationAnnotationView];
+        }
+    });
 }
 
 - (void)locationManager:(__unused id<MGLLocationManager>)manager didFailWithError:(NSError *)error
@@ -5973,6 +6066,47 @@ public:
             [self.delegate mapView:self didFailToLocateUserWithError:error];
         }
     }
+}
+
+- (void)locationManagerDidChangeAuthorization:(id<MGLLocationManager>)manager
+{
+    if (![self shouldShowLocationDotBasedOnCurrentLocationPermissions])
+    {
+        [self.userLocationAnnotationView removeFromSuperview];
+        [self.locationManager stopUpdatingLocation];
+        [self.locationManager stopUpdatingHeading];
+    } else {
+        if (@available(iOS 14, *)) {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+            if (self.userTrackingMode != MGLUserTrackingModeNone &&
+                [manager respondsToSelector:@selector(authorizationStatus)] &&
+                (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
+                 manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
+                 manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
+                [manager respondsToSelector:@selector(accuracyAuthorization)] &&
+                manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
+                [self accuracyDescriptionString] != nil ) {
+                [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:@"MGLAccuracyAuthorizationDescription"];
+            } else {
+                [self validateLocationServices];
+            }
+#endif
+        } else {
+            [self validateLocationServices];
+        }
+    }
+    
+    if (@available(iOS 14, *)) {
+        if ([self.delegate respondsToSelector:@selector(mapView:didChangeLocationManagerAuthorization:)]) {
+            [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
+        }
+    }
+}
+
+- (BOOL)shouldShowLocationDotBasedOnCurrentLocationPermissions
+{
+    return self.locationManager && (self.locationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedAlways
+                                    || self.locationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedWhenInUse);
 }
 
 - (void)updateHeadingForDeviceOrientation
@@ -6302,6 +6436,8 @@ public:
 }
 
 - (void)mapViewWillStartRenderingFrame {
+    [self cancelBackgroundSnapshot];
+
     if (!_mbglMap)
     {
         return;
@@ -6361,7 +6497,9 @@ public:
     if (!_mbglMap) {
         return;
     }
-    
+
+    [self queueBackgroundSnapshot];
+
     if ([self.delegate respondsToSelector:@selector(mapViewDidBecomeIdle:)]) {
         [self.delegate mapViewDidBecomeIdle:self];
     }
@@ -6838,6 +6976,39 @@ public:
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+#pragma mark - Snapshot image -
+
+- (void)attemptBackgroundSnapshot {
+    static NSTimeInterval lastSnapshotTime = 0.0;
+
+    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+        return;
+    }
+
+    NSTimeInterval now = CACurrentMediaTime();
+
+    if (lastSnapshotTime == 0.0 || (now - lastSnapshotTime > MGLBackgroundSnapshotImageInterval)) {
+        self.lastSnapshotImage = _mbglView->snapshot();
+        lastSnapshotTime = now;
+    }
+}
+
+- (void)cancelBackgroundSnapshot
+{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(attemptBackgroundSnapshot) object:nil];
+}
+
+- (void)queueBackgroundSnapshot {
+    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+        return;
+    }
+
+    [self cancelBackgroundSnapshot];
+    [self performSelector:@selector(attemptBackgroundSnapshot)
+               withObject:nil
+               afterDelay:MGLBackgroundSnapshotImageIdleDelay];
 }
 
 @end

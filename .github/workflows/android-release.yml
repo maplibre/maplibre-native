@@ -10,12 +10,13 @@ on:
       - "README.md"        
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, petr-ubuntu-home]
     defaults:
       run:
         working-directory: platform/android
     container:
-      image: ghcr.io/maptiler/android-ndk-r21b
+      image: ghcr.io/maplibre/android-ndk-r21b
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}

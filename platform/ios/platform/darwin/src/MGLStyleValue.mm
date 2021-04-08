@@ -14,6 +14,8 @@ id MGLJSONObjectFromMBGLValue(const mbgl::Value &value) {
         return @(value);
     }, [](const int64_t value) {
         return @(value);
+    }, [](const uint64_t value) {
+        return @(value);        
     }, [](const double value) {
         return @(value);
     }, [](const std::string &value) {

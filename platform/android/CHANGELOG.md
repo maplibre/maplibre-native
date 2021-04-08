@@ -1,20 +1,36 @@
 # Changelog for the Mapbox Maps SDK for Android
 
-Mapbox welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/mapbox/mapbox-gl-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
 ## master
 
 ### Features
 
+### Bug Fixes
+
+## 9.4.0 - March 12, 2021
+
+### Bug Fixes
+
+* Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
+* Fixes crash caused by NullPointerException MapKeyListener [#464](https://github.com/mapbox/mapbox-gl-native-android/issues/464), cherry picked from [#466](https://github.com/mapbox/mapbox-gl-native-android/pull/466) 
+* Fixed an issue where GPS puck keeps previous value when enabled. [#462]https://github.com/mapbox/mapbox-gl-native-android/issues/462, cherry picked from [#470](https://github.com/mapbox/mapbox-gl-native-android/pull/470) 
+* Not changing location camera mode while disabled. [#24](https://github.com/maplibre/maplibre-gl-native/issues/24)
+* Symbol layer flickering after zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
+* Avoid throwing null pointer exception on slow initialization [#22](https://github.com/maplibre/maplibre-gl-native/issues/22)
+
 ### Other
 
 * mapbox-gl-js submodule has been replaced with maplibre-gl-js
+* Removed Telemetry [#7](https://github.com/maplibre/maplibre-gl-native/pull/7)
 
 ## 9.3.0 - January 6, 2021
+
 ### Features
  - Added the mbtiles file source for rendering vector tiles from file stored locally on the device.
 
 ## 9.2.1 - May 15, 2020
+
 ### Improvements and bug fixes
  - Added compiler and linker options to reduce binary size for release build. ([#382](https://github.com/mapbox/mapbox-gl-native-android/pull/382))
  - Fixed a crash when `Layer.getFilter()` is used with the `distance` expression. ([#380](https://github.com/mapbox/mapbox-gl-native-android/pull/380))
