@@ -45,13 +45,8 @@ pitchSwitch.addTarget(responder, action: #selector(responder.togglePitch(sender:
 panel.addSubview(pitchLabel)
 panel.addSubview(pitchSwitch)
 
-//: # Mapbox Maps
+//: ## MapLibre Maps
 
-/*:
- Put your access token into a plain text file called `token`. Then select the “token” placeholder below, go to Editor ‣ Insert File Literal, and select the `token` file.
- */
-var accessToken = try String(contentsOfURL: <#token#>)
-MGLAccountManager.accessToken = accessToken
 
 class PlaygroundAnnotationView: MGLAnnotationView {
     
@@ -145,9 +140,18 @@ responder.mapView = mapView
 let tapGesture = UILongPressGestureRecognizer(target: mapDelegate, action: #selector(mapDelegate.handleTap))
 mapView.addGestureRecognizer(tapGesture)
 
+//: Set Style
+let styleJSON = "https://raw.githubusercontent.com/roblabs/openmaptiles-ios-demo/master/OSM2VectorTiles/styles/geography-class.GitHub.json"
+mapView.styleURL = URL(string: styleJSON)
+
 //: Zoom in to a location
 
-mapView.setCenter(CLLocationCoordinate2D(latitude: 37.174057, longitude: -104.490984), zoomLevel: 12, animated: false)
+mapView.setCenter(CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0), zoomLevel: 2, animated: false)
+
+//: Optional Debug Mask options
+mapView.debugMask = [ MGLMapDebugMaskOptions.tileBoundariesMask, MGLMapDebugMaskOptions.tileInfoMask, MGLMapDebugMaskOptions.timestampsMask]
+mapView.logoView.isHidden = true
+mapView.attributionButton.isHidden = true
 
 //: Add control panel
 
