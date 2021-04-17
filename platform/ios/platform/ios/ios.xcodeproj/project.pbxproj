@@ -416,7 +416,8 @@
 		D741238926290D1B00572FE7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D741238826290D1B00572FE7 /* Preview Assets.xcassets */; };
 		D74123CD262911C200572FE7 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
 		D74123CF262911D600572FE7 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D74123CE262911D600572FE7 /* MetalANGLE.framework */; };
-		D79D3AA92629165C001AF3D1 /* iosapp_swiftui.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79D3AA82629165C001AF3D1 /* iosapp_swiftui.swift */; };
+		D79D3AA92629165C001AF3D1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79D3AA82629165C001AF3D1 /* SceneDelegate.swift */; };
+		D7A66C7F262A6CE1009B1147 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A66C7E262A6CE1009B1147 /* AppDelegate.swift */; };
 		DA00FC8E1D5EEB0D009AABC8 /* MGLAttributionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DA00FC8F1D5EEB0D009AABC8 /* MGLAttributionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DA00FC901D5EEB0D009AABC8 /* MGLAttributionInfo.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA00FC8D1D5EEB0D009AABC8 /* MGLAttributionInfo.mm */; };
@@ -1065,7 +1066,8 @@
 		D741238826290D1B00572FE7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D741238A26290D1B00572FE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D74123CE262911D600572FE7 /* MetalANGLE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MetalANGLE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D79D3AA82629165C001AF3D1 /* iosapp_swiftui.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosapp_swiftui.swift; sourceTree = "<group>"; };
+		D79D3AA82629165C001AF3D1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D7A66C7E262A6CE1009B1147 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA00FC8C1D5EEB0D009AABC8 /* MGLAttributionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAttributionInfo.h; sourceTree = "<group>"; };
 		DA00FC8D1D5EEB0D009AABC8 /* MGLAttributionInfo.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLAttributionInfo.mm; sourceTree = "<group>"; };
 		DA0CD58F1CF56F6A00A5F5A5 /* MGLFeatureTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLFeatureTests.mm; path = ../../darwin/test/MGLFeatureTests.mm; sourceTree = "<group>"; };
@@ -1724,8 +1726,9 @@
 		D741238026290D1900572FE7 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				D7A66C7E262A6CE1009B1147 /* AppDelegate.swift */,
 				D741238326290D1900572FE7 /* ContentView.swift */,
-				D79D3AA82629165C001AF3D1 /* iosapp_swiftui.swift */,
+				D79D3AA82629165C001AF3D1 /* SceneDelegate.swift */,
 				D741238126290D1900572FE7 /* MapView.swift */,
 				D741238526290D1B00572FE7 /* Assets.xcassets */,
 				D741238A26290D1B00572FE7 /* Info.plist */,
@@ -3001,7 +3004,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D79D3AA92629165C001AF3D1 /* iosapp_swiftui.swift in Sources */,
+				D7A66C7F262A6CE1009B1147 /* AppDelegate.swift in Sources */,
+				D79D3AA92629165C001AF3D1 /* SceneDelegate.swift in Sources */,
 				D741238426290D1900572FE7 /* ContentView.swift in Sources */,
 				D741238226290D1900572FE7 /* MapView.swift in Sources */,
 			);
@@ -3661,7 +3665,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = SwiftUI/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -3720,7 +3724,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = SwiftUI/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.maplibre.iosapp-swiftui";
