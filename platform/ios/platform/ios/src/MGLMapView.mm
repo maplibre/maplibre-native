@@ -283,6 +283,11 @@ public:
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
 
+// Display Link
+@property (nonatomic, weak) UIScreen *displayLinkScreen;
+@property (nonatomic) CADisplayLink *displayLink;
+@property (nonatomic, assign) BOOL needsDisplayRefresh;
+
 @end
 
 @implementation MGLMapView
@@ -729,6 +734,8 @@ public:
     {
         [self removeAnnotations:annotations];
     }
+
+    [self destroyDisplayLink];
 
     [self validateDisplayLink];
 
@@ -1299,6 +1306,35 @@ public:
     [self destroyCoreObjects];
 }
 
+- (UIScreen *)windowScreen {
+    UIScreen *screen;
+
+#ifdef SUPPORT_UIWINDOWSCENE
+    if (@available(iOS 13.0, *)) {
+        if (self.window.windowScene) {
+            screen = self.window.windowScene.screen;
+        }
+    }
+#endif
+
+    // Fallback if there's no windowScene
+    if (!screen) {
+        screen = self.window.screen;
+    }
+
+    return screen;
+}
+
+- (BOOL)isVisible
+{
+    // "Visible" is not strictly true here - for example, the view hierarchy is not
+    // currently observed (e.g. looking at a parent's or the window's hidden
+    // status.
+    // This does NOT take application state into account
+    UIScreen *screen = [self windowScreen];
+    return (!self.isHidden && screen);
+}
+
 - (void)validateDisplayLink
 {
     BOOL isVisible = self.superview && self.window;
@@ -1518,16 +1554,75 @@ public:
     [self setNeedsLayout];
 }
 
+- (void)stopDisplayLink
+{
+    MGLLogDebug(@"[%p]", self);
+    self.displayLink.paused = YES;
+    self.needsDisplayRefresh = NO;
+    [self processPendingBlocks];
+}
+
+- (void)createDisplayLink
+{
+    MGLLogDebug(@"[%p]", self);
+
+    // Create and start the display link in a *paused* state
+    MGLAssert(!self.displayLinkScreen, @"");
+    MGLAssert(!self.displayLink, @"");
+    MGLAssert(self.window, @"");
+    MGLAssert(self.window.screen, @"");
+
+    self.displayLinkScreen  = self.window.screen;
+    self.displayLink        = [self.window.screen displayLinkWithTarget:self selector:@selector(updateFromDisplayLink:)];
+    self.displayLink.paused = YES;
+
+    [self updateDisplayLinkPreferredFramesPerSecond];
+
+    [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+
+    if (_mbglMap && self.mbglMap.getMapOptions().constrainMode() == mbgl::ConstrainMode::None)
+    {
+        self.mbglMap.setConstrainMode(mbgl::ConstrainMode::HeightOnly);
+    }
+}
+
+- (void)destroyDisplayLink
+{
+    MGLLogDebug(@"[%p]", self);
+    [self.displayLink invalidate];
+    self.displayLink = nil;
+    self.displayLinkScreen = nil;
+    self.needsDisplayRefresh = NO;
+    [self processPendingBlocks];
+}
+
+- (void)startDisplayLink
+{
+    MGLLogDebug(@"[%p]", self);
+    MGLAssert(self.displayLink, @"");
+    MGLAssert([self isVisible], @"Display link should only be started when allowed");
+
+    self.displayLink.paused = NO;
+    [self setNeedsRerender];
+    [self updateFromDisplayLink:self.displayLink];
+}
+
 #pragma mark - Application lifecycle
 - (void)willResignActive:(NSNotification *)notification
 {
-    if ([self supportsBackgroundRendering])
-    {
+    MGLAssertIsMainThread();
+    MGLLogDebug(@"[%p]", self);
+
+    // Going from active to inactive states. This could be because a system dialog
+    // has been displayed, control center, or the app is headed into the background
+
+    if (self.supportsBackgroundRendering) {
         return;
     }
-    
-    self.lastSnapshotImage = _mbglView->snapshot();
-    
+
+    // We want to pause the rendering
+    [self stopDisplayLink];
+
     // For OpenGL this calls glFinish as recommended in
     // https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
     // reduceMemoryUse(), calls performCleanup(), which calls glFinish
@@ -1544,7 +1639,17 @@ public:
 
 - (void)willEnterForeground:(NSNotification *)notification
 {
-    // Do nothing, currently if resumeRendering is called here it's a no-op.
+    UIScreen *screen = [self windowScreen];
+
+    if (screen) {
+        [self createDisplayLink];
+
+        // If we can render during the inactive state, start the display link now
+        if (self.isVisible) {
+            [self startDisplayLink];
+        }
+    }
+    self.dormant = NO;
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
