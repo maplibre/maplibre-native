@@ -1,12 +1,21 @@
 # Changelog for Mapbox Maps SDK for macOS
 
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
+
 ## master
 
 ### Features
 
+## 0.18.0 - March 12, 2021
+
+### Features
+
+* Added open geo url support to the macos app.
+
 ### Other
 
 * mapbox-gl-js submodule has been replaced with maplibre-gl-js
+* Removed Mapbox Mobile Events and Telemetry [#7](https://github.com/maplibre/maplibre-gl-native/pull/7)
 
 ## 0.17.0 - January 6, 2021
 

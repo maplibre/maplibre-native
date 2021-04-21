@@ -10,8 +10,7 @@ else
     plutil -replace MGLMapboxAccessToken -string $token "$TARGET_BUILD_DIR/$INFOPLIST_PATH"
     echo "Token insertion successful"
   else
-    echo \'error: Missing Mapbox access token\'
-    echo "error: Get an access token from <https://www.mapbox.com/studio/account/tokens/>, then create a new file at $token_file that contains the access token."
-    exit 1
+    echo \'Warning: Missing Mapbox access token.  You can optionally use MapLibre with Mapbox Styles\'
+    echo "Warning: Get an access token from <https://www.mapbox.com/studio/account/tokens/>, then create a new file at $token_file that contains the access token."
   fi
 fi

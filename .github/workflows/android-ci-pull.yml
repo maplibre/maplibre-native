@@ -19,13 +19,6 @@ jobs:
         working-directory: platform/android
     container:
       image: ghcr.io/maplibre/android-ndk-r21b
-      # FIXME: remove credentials when 
-      # public access to docker images will be
-      # enable in MapLibre organization
-      # This is needed for PRs from outside
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}      
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8

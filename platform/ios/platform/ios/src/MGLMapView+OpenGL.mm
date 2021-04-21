@@ -91,24 +91,14 @@ void MGLMapViewOpenGLImpl::setPresentsWithTransaction(const bool value) {
 void MGLMapViewOpenGLImpl::display() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
 
-    // See https://github.com/mapbox/mapbox-gl-native/issues/14232
-    // glClear can be blocked for 1 second. This code is an "escape hatch",
-    // an attempt to detect this situation and rebuild the GL views.
-    if (mapView.enablePresentsWithTransaction && resource.atLeastiOS_12_2_0) {
-        CFTimeInterval before = CACurrentMediaTime();
-        [resource.glView display];
-        CFTimeInterval after = CACurrentMediaTime();
-
-        if (after - before >= 1.0) {
-#ifdef MGL_RECREATE_GL_IN_AN_EMERGENCY
-            dispatch_async(dispatch_get_main_queue(), ^{
-              emergencyRecreateGL();
-            });
-#endif
-        }
-    } else {
-        [resource.glView display];
-    }
+    // Calling `display` here directly causes the stuttering bug (if
+    // `presentsWithTransaction` is `YES` - see above)
+    // as reported in https://github.com/mapbox/mapbox-gl-native-ios/issues/350
+    //
+    // Since we use `presentsWithTransaction` to synchronize with UIView
+    // annotations, we now let the system handle when the view is rendered. This
+    // has the potential to increase latency
+    [resource.glView setNeedsDisplay];
 }
 
 void MGLMapViewOpenGLImpl::createView() {
@@ -131,7 +121,7 @@ void MGLMapViewOpenGLImpl::createView() {
     resource.glView.drawableDepthFormat = MGLDrawableDepthFormat16;
     resource.glView.opaque = mapView.opaque;
     resource.glView.layer.opaque = mapView.opaque;
-    resource.glView.enableSetNeedsDisplay = NO;
+    resource.glView.enableSetNeedsDisplay = YES;
 
     [mapView insertSubview:resource.glView atIndex:0];
 }

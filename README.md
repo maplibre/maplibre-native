@@ -1,6 +1,6 @@
-# Mapbox GL Native SDK Open-Source Fork
+# MapLibre GL Native - Open-Source Mapbox GL Native
 
-For iOS and Android 
+SDK for iOS, Android and other platforms
 
 MapLibre GL Native is a community led fork derived from [mapbox-gl-native](https://github.com/mapbox/mapbox-gl-native) prior to their switch to a non-OSS license. The fork also includes Maps SDK for iOS and MacOS (forked from [mapbox-gl-native-ios](https://github.com/mapbox/mapbox-gl-native-ios)) and Android SDK (forked from [mapbox-gl-native-android](https://github.com/mapbox/mapbox-gl-native-android)). These platform-specific SDKs were merged under platform directory and they reference mapbox-gl-native directly, not as a submodule.
 
@@ -17,10 +17,10 @@ Beside merging in platform specific SDKs, the following changes were made compar
 
 | SDK                                                           | Build   | Build status                                                                                                                                                                                  |
 |---------------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Mapbox Maps SDK for iOS](platform/ios/) | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/ios-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/ios-ci)                   |
-| [Mapbox Maps SDK for iOS](platform/ios/) | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/ios-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/ios-release)         |
-| [Mapbox Maps SDK for Android](platform/android/)      | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci)           |
-| [Mapbox Maps SDK for Android](platform/android/)     | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-release) |
+| [Maps SDK for iOS](platform/ios/) | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/ios-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/ios-ci)                   |
+| [Maps SDK for iOS](platform/ios/) | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/ios-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/ios-release)         |
+| [Maps SDK for Android](platform/android/)      | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci)           |
+| [Maps SDK for Android](platform/android/)     | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-release) |
 
 ## Installation
 
@@ -87,9 +87,26 @@ Please refer to [Mapbox Maps SDK for Android](platform/android/) for detailed in
 
 #### iOS
 
+You can run automated test on a Simulator or Device by changing to the Scheme `iosapp` and choosing `Product` > `Test` (or use `⌘-U`).  Use `⌘-9` to navigate to `Reports` to see results and browse through screenshots.  This method of testing should work well with CI tools such as GitHub Actions, Xcode Server Bots, & AWS Device Farm.
+
 ```bash
 cd platform/ios
+
+# make and open the Xcode workspace
+make iproj
+
+# make Xcode workspace, but run in headless mode
+make iproj CI=1
+
+# Make Frameworks
 make xcframework BUILDTYPE=Release
+
+# test
+make ios-test
+
+# UITests
+#   You can review uitest results:  $(IOS_OUTPUT_PATH)/Logs/Test
+ make ios-uitest
 ```
 
 The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`
