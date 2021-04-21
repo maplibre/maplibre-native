@@ -10,8 +10,6 @@ on:
       - ".github/**"  
       - "README.md"
       - ".gitignore"              
-    branches:
-      - master
   pull_request:
     branches:
       - master  
