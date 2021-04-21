@@ -4,6 +4,7 @@
 
 #include <mbgl/gl/renderable_resource.hpp>
 
+
 @interface MGLMapViewImplDelegate : NSObject <MGLKViewDelegate>
 @end
 
@@ -91,15 +92,26 @@ void MGLMapViewOpenGLImpl::setPresentsWithTransaction(const bool value) {
 void MGLMapViewOpenGLImpl::display() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
 
-    // Calling `display` here directly causes the stuttering bug (if
-    // `presentsWithTransaction` is `YES` - see above)
-    // as reported in https://github.com/mapbox/mapbox-gl-native-ios/issues/350
-    //
-    // Since we use `presentsWithTransaction` to synchronize with UIView
-    // annotations, we now let the system handle when the view is rendered. This
-    // has the potential to increase latency
-    [resource.glView setNeedsDisplay];
+    // See https://github.com/mapbox/mapbox-gl-native/issues/14232
+    // glClear can be blocked for 1 second. This code is an "escape hatch",
+    // an attempt to detect this situation and rebuild the GL views.
+    if (mapView.enablePresentsWithTransaction && resource.atLeastiOS_12_2_0) {
+        CFTimeInterval before = CACurrentMediaTime();
+        [resource.glView display];
+        CFTimeInterval after = CACurrentMediaTime();
+
+        if (after - before >= 1.0) {
+#ifdef MGL_RECREATE_GL_IN_AN_EMERGENCY
+            dispatch_async(dispatch_get_main_queue(), ^{
+              emergencyRecreateGL();
+            });
+#endif
+        }
+    } else {
+        [resource.glView display];
+    }
 }
+
 
 void MGLMapViewOpenGLImpl::createView() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
@@ -121,7 +133,7 @@ void MGLMapViewOpenGLImpl::createView() {
     resource.glView.drawableDepthFormat = MGLDrawableDepthFormat16;
     resource.glView.opaque = mapView.opaque;
     resource.glView.layer.opaque = mapView.opaque;
-    resource.glView.enableSetNeedsDisplay = YES;
+    resource.glView.enableSetNeedsDisplay = NO;
 
     [mapView insertSubview:resource.glView atIndex:0];
 }
@@ -134,6 +146,8 @@ UIView* MGLMapViewOpenGLImpl::getView() {
 void MGLMapViewOpenGLImpl::deleteView() {
     // No-op on Metal
 }
+
+
 
 mbgl::gl::ProcAddress MGLMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
     static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));

@@ -977,19 +977,7 @@ public:
     }
 }
 
-- (void)updateViewsPostMapRendering {
-    // Update UIKit elements, prior to rendering
-    [self updateUserLocationAnnotationView];
-    [self updateAnnotationViews];
-    [self updateCalloutView];
 
-    // Call any pending completion blocks. This is primarily to ensure
-    // that annotations are in the expected position after core rendering
-    // and map update.
-    //
-    // TODO: Consider using this same mechanism for delegate callbacks.
-    [self processPendingBlocks];
-}
 
 - (void)renderSync
 {
@@ -997,11 +985,6 @@ public:
     {
         _rendererFrontend->render();
     }
-
-    // TODO: This should be moved from what's essentially the UIView rendering
-    // To do this, add view models that can be updated separately, before the
-    // UIViews can be updated to match
-    [self updateViewsPostMapRendering];
 }
 
 // This gets called when the view dimension changes, e.g. because the device is being rotated.
@@ -1194,37 +1177,6 @@ public:
 
 - (void)updateFromDisplayLink:(CADisplayLink *)displayLink
 {
-    // CADisplayLink's call interval closely matches the that defined by,
-    // preferredFramesPerSecond, however it is NOT called on the vsync and
-    // can fire some time after the vsync, and the duration can often exceed
-    // the expected period.
-    //
-    // The `timestamp` property should represent (or be very close to) the vsync,
-    // so for any kind of frame rate measurement, it can be important to record
-    // the time upon entry to this method.
-    //
-    // This start time, coupled with the `targetTimestamp` gives you a measure
-    // of how long you have to do work before the next vsync.
-    //
-    // Note that CADisplayLink's duration property is interval between vsyncs at
-    // the device's natural frequency (60, 120). Instead, for the duration of a
-    // frame, use the two timestamps instead. This is especially important if
-    // you have set preferredFramesPerSecond to something other than the default.
-    //
-    //                 │   remaining duration  ┃
-    //                 │◀ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ▶┃
-    //     ┌ ─ ─ ─ ─ ─ ┼───────────────────────╋───────────────────────────────────┳───────
-    //                 │                       ┃                                   ┃
-    //     │           │                       ┃                                   ┃
-    //                 │                       ┃                                   ┃
-    //     ▼           │                       ▼                                   ▼
-    // timestamp       │                    target
-    // (vsync?)        │                   timestamp
-    //                 │
-    //                 ▼
-    //           display link
-    //            start time
-
     MGLAssertIsMainThread();
 
     // Not "visible" - this isn't a full definition of visibility, but if
@@ -1249,13 +1201,21 @@ public:
     {
         _needsDisplayRefresh = NO;
 
-        // UIView update logic has moved into `renderSync` above, which now gets
-        // triggered by a call to setNeedsDisplay.
-        // See MGLMapViewOpenGLImpl::display() for more details
+        // Update UIKit elements, prior to rendering
+        [self updateUserLocationAnnotationView];
+        [self updateAnnotationViews];
+        [self updateCalloutView];
+
+        // Call any pending completion blocks. This is primarily to ensure
+        // that annotations are in the expected position after core rendering
+        // and map update.
+        //
+        // TODO: Consider using this same mechanism for delegate callbacks.
+        [self processPendingBlocks];
+        
         _mbglView->display();
     }
 
-    // TODO: Fix
     if (self.experimental_enableFrameRateMeasurement)
     {
         CFTimeInterval now = CACurrentMediaTime();
@@ -1277,6 +1237,7 @@ public:
         }
     }
 }
+
 
 - (void)setNeedsRerender
 {
