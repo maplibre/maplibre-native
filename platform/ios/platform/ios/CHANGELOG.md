@@ -6,6 +6,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### Features
 
+## 5.12.0-pre.1 - April 21, 2021
+
+### Features
+
+* Migrating from OpenGL ES to Metal. This pre-release includes [Metal support](https://github.com/maplibre/maplibre-gl-native/issues/19), implemented using [MetalANGLE](https://github.com/kakashidinho/metalangle) library.
+
 ## 5.11.0 - March 12, 2021
 
 ### Features
