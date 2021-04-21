@@ -138,6 +138,7 @@ $(IOS_PROJ_PATH): $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEP
 	mkdir -p $(IOS_OUTPUT_PATH)
 	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../../../ \
 		-DCMAKE_SYSTEM_NAME=iOS )
+	platform/ios/vendor/metalangle/ios/xcode/fetchDependencies.sh
 
 $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettings.xcsettings
 	mkdir -p "$(IOS_USER_DATA_PATH)"
