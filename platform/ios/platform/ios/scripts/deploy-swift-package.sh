@@ -19,7 +19,7 @@ trap finish EXIT
 export GITHUB_USER=maplibre
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
-export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maplibre/maplibre-gl-native-distribution
+export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/branches/pre-release
 
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
@@ -35,6 +35,7 @@ uploadToGithub() {
         --tag "${version_tag}" \
         --name ${file_name} \
         --file "${file_path}" > /dev/null
+        --pre-release
 
     EXT_TARGET_GITHUB_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${version_tag}/${file_name}"
 }
@@ -79,7 +80,7 @@ fi
 
 if [[ -z ${VERSION_TAG} ]]; then
     step "Determining version number from most recent relevant git tag…"
-    VERSION_TAG=$( git describe --tags --match=ios-v*.*.* --abbrev=0 )
+    VERSION_TAG=$( git describe --tags --match=ios-v*.*.*-pre.* --abbrev=0 )
     echo "Found tag: ${VERSION_TAG}"
 fi
 

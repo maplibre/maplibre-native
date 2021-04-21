@@ -45,7 +45,7 @@ let previousVersion = semver.maxSatisfying(gitTags, "<" + currentVersion);
     - Groups the changelog content.
     - Ends when another "## x.x.x" is found.
 */
-const regex = /^## (\d+\.\d+\.\d+).*?\n(.+?)(?=\n^## \d+\.\d+\.\d+.*?\n)/gms;
+const regex = /^## (\d+\.\d+\.\d+-pre\.\d+).*?\n(.+?)(?=\n^## \d+\.\d+\.\d+.*?\n)/gms;
 
 let releaseNotes = [];
 while (match = regex.exec(changelog)) {
