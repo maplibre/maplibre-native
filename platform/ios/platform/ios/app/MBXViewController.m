@@ -1909,7 +1909,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     [self.styleURLs addObject:[NSURL URLWithString:@"https://raw.githubusercontent.com/roblabs/openmaptiles-ios-demo/master/OSM2VectorTiles/styles/geography-class.GitHub.json"]];
 
     /// Add Mapbox Styles if an `accessToken` exists
-    if ([MGLAccountManager accessToken].length)
+    if ([MGLSettings accessToken].length)
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{

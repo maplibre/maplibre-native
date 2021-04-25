@@ -1,14 +1,14 @@
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// NSUserDefaults key that controls developer account type
 FOUNDATION_EXTERN NSString * const MGLMapboxAccountTypeKey;
 
-@interface MGLAccountManager (Private)
+@interface MGLSettings (Private)
 
-/// Returns the shared instance of the `MGLAccountManager` class.
-@property (class, nonatomic, readonly) MGLAccountManager *sharedManager;
+/// Returns the shared instance of the `MGLSettings` class.
+@property (class, nonatomic, readonly) MGLSettings *sharedSettings;
 
 /// The current global access token.
 @property (atomic, nullable) NSString *accessToken;

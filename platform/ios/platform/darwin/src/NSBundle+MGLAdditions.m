@@ -1,13 +1,13 @@
 #import "NSBundle+MGLAdditions.h"
 
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 
 const MGLExceptionName MGLBundleNotFoundException = @"MGLBundleNotFoundException";
 
 @implementation NSBundle (MGLAdditions)
 
 + (instancetype)mgl_frameworkBundle {
-    NSBundle *bundle = [self bundleForClass:[MGLAccountManager class]];
+    NSBundle *bundle = [self bundleForClass:[MGLSettings class]];
 
     if (![bundle.infoDictionary[@"CFBundlePackageType"] isEqualToString:@"FMWK"]) {
         // For static frameworks, the bundle is the containing application
@@ -41,7 +41,7 @@ const MGLExceptionName MGLBundleNotFoundException = @"MGLBundleNotFoundException
     // Before SDK 12.2 (bundled with Xcode 10.2): There’s no main bundle identifier when running in a unit test bundle.
     // 12.2 and after: the above bundle identifier is: com.apple.dt.xctest.tool
     if (!bundleIdentifier) {
-        bundleIdentifier = [NSBundle bundleForClass:[MGLAccountManager class]].bundleIdentifier;
+        bundleIdentifier = [NSBundle bundleForClass:[MGLSettings class]].bundleIdentifier;
     }
 #endif
     return bundleIdentifier;

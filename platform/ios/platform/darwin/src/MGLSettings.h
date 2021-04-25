@@ -5,11 +5,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MGLAccountManager` object provides a global way to set a Mapbox API access
- token.
+ The `MGLSettings` object provides a global way to set SDK properties such
+ as accessToken, backend URL, etc.
  */
 MGL_EXPORT
-@interface MGLAccountManager : NSObject
+@interface MGLSettings : NSObject
 
 #pragma mark Authorizing Access
 

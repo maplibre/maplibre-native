@@ -1,7 +1,7 @@
 #import "MGLOfflineStorage_Private.h"
 
 #import "MGLFoundation_Private.h"
-#import "MGLAccountManager_Private.h"
+#import "MGLSettings_Private.h"
 #import "MGLGeometry_Private.h"
 #import "MGLOfflinePack_Private.h"
 #import "MGLOfflineRegion_Private.h"
@@ -166,14 +166,14 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
 
         // Observe for changes to the API base URL (and find out the current one).
-        [[MGLAccountManager sharedManager] addObserver:self
+        [[MGLSettings sharedSettings] addObserver:self
                                             forKeyPath:@"apiBaseURL"
                                                options:(NSKeyValueObservingOptionInitial |
                                                               NSKeyValueObservingOptionNew)
                                                context:NULL];
 
         // Observe for changes to the global access token (and find out the current one).
-        [[MGLAccountManager sharedManager] addObserver:self
+        [[MGLSettings sharedSettings] addObserver:self
                                             forKeyPath:@"accessToken"
                                                options:(NSKeyValueObservingOptionInitial |
                                                         NSKeyValueObservingOptionNew)
@@ -184,8 +184,8 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"apiBaseURL"];
-    [[MGLAccountManager sharedManager] removeObserver:self forKeyPath:@"accessToken"];
+    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"apiBaseURL"];
+    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"accessToken"];
 
     for (MGLOfflinePack *pack in self.packs) {
         [pack invalidate];
@@ -193,13 +193,13 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context {
-    // Synchronize the file source’s access token with the global one in MGLAccountManager.
-    if ([keyPath isEqualToString:@"accessToken"] && object == [MGLAccountManager sharedManager]) {
+    // Synchronize the file source’s access token with the global one in MGLSettings.
+    if ([keyPath isEqualToString:@"accessToken"] && object == [MGLSettings sharedSettings]) {
         NSString *accessToken = change[NSKeyValueChangeNewKey];
         if (![accessToken isKindOfClass:[NSNull class]]) {
             _mbglOnlineFileSource->setProperty(mbgl::ACCESS_TOKEN_KEY, accessToken.UTF8String);
         }
-    } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLAccountManager sharedManager]) {
+    } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLSettings sharedSettings]) {
         NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
         if (![apiBaseURL isKindOfClass:[NSNull class]]) {
             _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);

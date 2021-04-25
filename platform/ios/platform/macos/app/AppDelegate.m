@@ -83,8 +83,8 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 #pragma mark Lifecycle
 
 + (void)load {
-    // Set access token, unless MGLAccountManager already read it in from Info.plist.
-    if (![MGLAccountManager accessToken]) {
+    // Set access token, unless MGLSettings already read it in from Info.plist.
+    if (![MGLSettings accessToken]) {
         NSString *accessToken = [NSProcessInfo processInfo].environment[@"MAPBOX_ACCESS_TOKEN"];
         if (accessToken) {
             // Store to preferences so that we can launch the app later on without having to specify
@@ -95,7 +95,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
             // the token.
             accessToken = [[NSUserDefaults standardUserDefaults] stringForKey:MGLMapboxAccessTokenDefaultsKey];
         }
-        [MGLAccountManager setAccessToken:accessToken];
+        [MGLSettings setAccessToken:accessToken];
     }
 }
 
@@ -121,8 +121,8 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    // Set access token, unless MGLAccountManager already read it in from Info.plist.
-    if (![MGLAccountManager accessToken]) {
+    // Set access token, unless MGLSettings already read it in from Info.plist.
+    if (![MGLSettings accessToken]) {
         NSAlert *alert = [[NSAlert alloc] init];
         alert.messageText = @"Access token required";
         alert.informativeText = @"To load Mapbox-hosted tiles and styles, enter your Mapbox access token in Preferences.";

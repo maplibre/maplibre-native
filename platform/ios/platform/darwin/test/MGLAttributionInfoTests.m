@@ -10,11 +10,11 @@
 @implementation MGLAttributionInfoTests
 
 - (void)setUp {
-    [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
 }
 
 - (void)tearDown {
-    [MGLAccountManager setAccessToken:nil];
+    [MGLSettings setAccessToken:nil];
 }
 
 - (void)testParsing {

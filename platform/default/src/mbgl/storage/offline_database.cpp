@@ -6,14 +6,15 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <mbgl/storage/offline_schema.hpp>
 #include <mbgl/storage/merge_sideloaded.hpp>
 
 namespace mbgl {
 
-OfflineDatabase::OfflineDatabase(std::string path_)
-    : path(std::move(path_)) {
+OfflineDatabase::OfflineDatabase(std::string path_, TileServerOptions options)
+    : path(std::move(path_)), tileServerOptions(options) {
     try {
         initialize();
     } catch (...) {
@@ -1050,7 +1051,7 @@ uint64_t OfflineDatabase::putRegionResourceInternal(int64_t regionID, const Reso
 
     if (offlineMapboxTileCount
         && resource.kind == Resource::Kind::Tile
-        && util::mapbox::isMapboxURL(resource.url)
+        && util::mapbox::isCanonicalURL(tileServerOptions, resource.url)
         && previouslyUnused) {
         *offlineMapboxTileCount += 1;
     }
@@ -1408,7 +1409,7 @@ uint64_t OfflineDatabase::getOfflineMapboxTileCount() try {
 
 bool OfflineDatabase::exceedsOfflineMapboxTileCountLimit(const Resource& resource) {
     return resource.kind == Resource::Kind::Tile
-        && util::mapbox::isMapboxURL(resource.url)
+        && util::mapbox::isCanonicalURL(tileServerOptions, resource.url)
         && offlineMapboxTileCountLimitExceeded();
 }
 

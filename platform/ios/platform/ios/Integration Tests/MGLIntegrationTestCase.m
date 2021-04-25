@@ -51,6 +51,6 @@
         }
     }
 
-    [MGLAccountManager setAccessToken:accessToken ?: @"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setAccessToken:accessToken ?: @"pk.feedcafedeadbeefbadebede"];
 }
 @end

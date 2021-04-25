@@ -6,7 +6,7 @@
     #import <Cocoa/Cocoa.h>
 #endif
 
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 #import "MGLMapCamera.h"
 #import "NSArray+MGLAdditions.h"
 #import "NSBundle+MGLAdditions.h"
@@ -175,7 +175,7 @@
             [queryItems addObjectsFromArray:@[
                 [NSURLQueryItem queryItemWithName:@"owner" value:stylePathComponents[1]],
                 [NSURLQueryItem queryItemWithName:@"id" value:stylePathComponents[2]],
-                [NSURLQueryItem queryItemWithName:@"access_token" value:[MGLAccountManager accessToken]],
+                [NSURLQueryItem queryItemWithName:@"access_token" value:[MGLSettings accessToken]],
                 [NSURLQueryItem queryItemWithName:@"map_sdk_version" value:[NSBundle mgl_frameworkInfoDictionary][@"MGLSemanticVersionString"]],
             ]];
         }

@@ -262,7 +262,8 @@ void OfflineDownload::activateDownload() {
                         style::conversion::Error error;
                         optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
                         if (tileset) {
-                            util::mapbox::canonicalizeTileset(*tileset, url, type, tileSize);
+                            auto& resourceOptions = onlineFileSource.getResourceOptions();
+                            util::mapbox::canonicalizeTileset(resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
                             queueTiles(type, tileSize, *tileset);
 
                             requiredSourceURLs.erase(url);

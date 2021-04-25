@@ -147,8 +147,8 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 - (void)userDefaultsDidChange:(NSNotification *)notification {
     NSUserDefaults *userDefaults = notification.object;
     NSString *accessToken = [userDefaults stringForKey:MGLMapboxAccessTokenDefaultsKey];
-    if (![accessToken isEqualToString:[MGLAccountManager accessToken]]) {
-        [MGLAccountManager setAccessToken:accessToken];
+    if (![accessToken isEqualToString:[MGLSettings accessToken]]) {
+        [MGLSettings setAccessToken:accessToken];
         [self reload:self];
     }
 }
@@ -178,7 +178,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     MGLMapCamera *camera = self.mapView.camera;
     return [NSURL URLWithString:
             [NSString stringWithFormat:@"https://api.mapbox.com/styles/v1/%@/%@.html?access_token=%@#%.2f/%.5f/%.5f/%.f/%.f",
-             components[1], components[2], [MGLAccountManager accessToken],
+             components[1], components[2], [MGLSettings accessToken],
              self.mapView.zoomLevel, camera.centerCoordinate.latitude, camera.centerCoordinate.longitude,
              camera.heading, camera.pitch]];
 }
@@ -1330,7 +1330,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (NSUInteger)indexOfStyleInToolbarItem {
-    if (![MGLAccountManager accessToken]) {
+    if (![MGLSettings accessToken]) {
         return NSNotFound;
     }
 
@@ -1353,7 +1353,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     SEL action = toolbarItem.action;
     if (action == @selector(showShareMenu:)) {
         [(NSButton *)toolbarItem.view sendActionOn:NSLeftMouseDownMask];
-        if (![MGLAccountManager accessToken]) {
+        if (![MGLSettings accessToken]) {
             return NO;
         }
         NSURL *styleURL = self.mapView.styleURL;

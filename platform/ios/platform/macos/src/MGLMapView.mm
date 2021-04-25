@@ -16,7 +16,7 @@
 #import "MGLStyle_Private.h"
 #import "MGLShape_Private.h"
 
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 #import "MGLMapCamera.h"
 #import "MGLPolygon.h"
 #import "MGLPolyline.h"
@@ -638,7 +638,7 @@ public:
     }
     MGLLogDebug(@"Setting styleURL: %@", styleURL);
     // An access token is required to load any default style, including Streets.
-    if (![MGLAccountManager accessToken] && [styleURL.scheme isEqualToString:@"mapbox"]) {
+    if (![MGLSettings accessToken] && [styleURL.scheme isEqualToString:@"mapbox"]) {
         NSLog(@"Cannot set the style URL to %@ because no access token has been specified.", styleURL);
         return;
     }

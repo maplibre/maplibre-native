@@ -12,14 +12,14 @@
 - (void)setUp {
     [super setUp];
 
-    [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     self.mapView = [[MGLMapView alloc] initWithFrame:UIScreen.mainScreen.bounds styleURL:styleURL];
 }
 
 - (void)tearDown {
     self.mapView = nil;
-    [MGLAccountManager setAccessToken:nil];
+    [MGLSettings setAccessToken:nil];
 
     [super tearDown];
 }

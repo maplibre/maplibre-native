@@ -26,7 +26,7 @@ custom_categories:
       - Info.plist Keys
   - name: Maps
     children:
-      - MGLAccountManager
+      - MGLSettings
       - MGLMapCamera
       - MGLMapView
       - MGLMapViewDelegate

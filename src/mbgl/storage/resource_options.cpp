@@ -19,6 +19,7 @@ ResourceOptions::ResourceOptions() : impl_(std::make_unique<Impl>()) {}
 ResourceOptions::~ResourceOptions() = default;
 ResourceOptions::ResourceOptions(ResourceOptions&&) noexcept = default;
 ResourceOptions::ResourceOptions(const ResourceOptions& other) : impl_(std::make_unique<Impl>(*other.impl_)) {}
+ResourceOptions& ResourceOptions::operator=(ResourceOptions& options) {swap(impl_, options.impl_); return *this; }
 
 ResourceOptions ResourceOptions::clone() const {
     return ResourceOptions(*this);

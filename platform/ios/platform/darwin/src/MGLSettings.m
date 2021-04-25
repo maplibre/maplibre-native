@@ -1,4 +1,4 @@
-#import "MGLAccountManager_Private.h"
+#import "MGLSettings_Private.h"
 #import "NSBundle+MGLAdditions.h"
 
 #if TARGET_OS_OSX
@@ -7,14 +7,14 @@
 
 NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 
-@interface MGLAccountManager ()
+@interface MGLSettings ()
 
 @property (atomic) NSString *accessToken;
 @property (nonatomic) NSURL *apiBaseURL;
 
 @end
 
-@implementation MGLAccountManager
+@implementation MGLSettings
 
 #pragma mark - Internal
 
@@ -33,7 +33,7 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     }
 }
 
-+ (instancetype)sharedManager {
++ (instancetype)_sharedSettings {
 #if TARGET_OS_OSX
     if (NSProcessInfo.processInfo.mgl_isInterfaceBuilderDesignablesAgent) {
         return nil;
@@ -41,10 +41,10 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 #endif
     
     static dispatch_once_t onceToken;
-    static MGLAccountManager *_sharedManager;
+    static MGLSettings *_sharedSettings;
     void (^setupBlock)(void) = ^{
         dispatch_once(&onceToken, ^{
-            _sharedManager = [[self alloc] init];
+            _sharedSettings = [[self alloc] init];
         });
     };
     if (![[NSThread currentThread] isMainThread]) {
@@ -54,7 +54,7 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     } else {
         setupBlock();
     }
-    return _sharedManager;
+    return _sharedSettings;
 }
 
 + (void)setAccessToken:(NSString *)accessToken {
@@ -64,19 +64,19 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
         return;
     }
 
-    [MGLAccountManager sharedManager].accessToken = accessToken;
+    [MGLSettings sharedSettings].accessToken = accessToken;
 }
 
 + (NSString *)accessToken {
-    return [MGLAccountManager sharedManager].accessToken;
+    return [MGLSettings sharedSettings].accessToken;
 }
 
 + (void)setAPIBaseURL:(NSURL *)apiBaseURL {
-    [MGLAccountManager sharedManager].apiBaseURL = apiBaseURL;
+    [MGLSettings sharedSettings].apiBaseURL = apiBaseURL;
 }
 
 + (NSURL *)apiBaseURL {
-    return [MGLAccountManager sharedManager].apiBaseURL;
+    return [MGLSettings sharedSettings].apiBaseURL;
 }
 
 @end

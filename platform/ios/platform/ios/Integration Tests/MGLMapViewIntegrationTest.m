@@ -36,7 +36,7 @@
     self.mapView = nil;
     self.style = nil;
     self.window = nil;
-    [MGLAccountManager setAccessToken:nil];
+    [MGLSettings setAccessToken:nil];
 
     [super tearDown];
 }

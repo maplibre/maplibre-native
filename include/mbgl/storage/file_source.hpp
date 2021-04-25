@@ -2,6 +2,7 @@
 
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 
@@ -86,6 +87,11 @@ public:
 
     // When supported, sets the modifier of the requested resources.
     virtual void setResourceTransform(ResourceTransform) {} // NOLINT(performance-unnecessary-value-param)
+
+    // When supported, sets the resource options
+    virtual void setResourceOptions(ResourceOptions) { throw std::runtime_error("ResourceOptions is not supported by this FileSource"); };
+    // When supported, gets the resource options
+    virtual ResourceOptions& getResourceOptions() { throw std::runtime_error("ResourceOptions is not supported by this FileSource"); };
 
 protected:
     FileSource() = default;

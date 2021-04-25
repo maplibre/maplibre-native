@@ -61,13 +61,13 @@ MGLImage *MGLImageFromCurrentContext() {
 - (void)setUp {
     [super setUp];
     
-    [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
     
     [MGLOfflineStorage sharedOfflineStorage].delegate = self;
 }
 
 - (void)tearDown {
-    [MGLAccountManager setAccessToken:nil];
+    [MGLSettings setAccessToken:nil];
     [MGLOfflineStorage sharedOfflineStorage].delegate = nil;
     self.styleLoadingExpectation = nil;
     self.runtimeStylingActions = nil;

@@ -11,7 +11,7 @@ class Tileset;
 namespace util {
 namespace mapbox {
 
-bool isAliasedResource(const TileServerOptions& tileServerOptions,const std::string& url);
+bool isCanonicalURL(const TileServerOptions& tileServerOptions,const std::string& url);
 
 std::string normalizeSourceURL(const TileServerOptions& tileServerOptions, const std::string& str, const std::string& accessToken);
 std::string normalizeStyleURL(const TileServerOptions& tileServerOptions, const std::string& str, const std::string& accessToken);

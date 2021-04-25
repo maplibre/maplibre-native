@@ -13,7 +13,7 @@ namespace mbgl {
 namespace util {
 namespace mapbox {
 
-bool isAliasedResource(const TileServerOptions& tileServerOptions, const std::string& url) {
+bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::string& url) {
     const auto& protocol = tileServerOptions.uriSchemeAlias();
     return url == protocol;
 }
@@ -26,7 +26,7 @@ bool isAliasedResource(const TileServerOptions& tileServerOptions, const std::st
 std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isAliasedResource(tileServerOptions, str)) {
+    if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
     if (accessToken.empty()) {
@@ -44,7 +44,7 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
 std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
                               const std::string& str,
                               const std::string& accessToken) {
-    if (!isAliasedResource(tileServerOptions, str)) {
+    if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
 
@@ -58,7 +58,7 @@ std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
 std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isAliasedResource(tileServerOptions, str)) {
+    if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
 
@@ -73,7 +73,7 @@ std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
 std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
                                const std::string& accessToken) {
-    if (!isAliasedResource(tileServerOptions, str)) {
+    if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
 
@@ -87,7 +87,7 @@ std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
 std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
                              const std::string& str,
                              const std::string& accessToken) {
-    if (!isAliasedResource(tileServerOptions, str)) {
+    if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
 
@@ -148,9 +148,9 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
 void canonicalizeTileset(const TileServerOptions& tileServerOptions, Tileset& tileset,
                          const std::string& sourceURL, style::SourceType type, uint16_t tileSize) {
     // TODO: Remove this hack by delivering proper URLs in the TileJSON to begin with.
-    if (isAliasedResource(tileServerOptions, sourceURL)) {
+    if (isCanonicalURL(tileServerOptions, sourceURL)) {
         for (auto& url : tileset.tiles) {
-            url = canonicalizeTileURL(url, type, tileSize);
+            url = canonicalizeTileURL(tileServerOptions, url, type, tileSize);
         }
     }
 }
