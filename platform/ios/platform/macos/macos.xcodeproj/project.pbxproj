@@ -226,7 +226,7 @@
 		DAE6C3321CC30DB200DB3429 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3281CC30DB200DB3429 /* Mapbox.framework */; };
 		DAE6C33D1CC30DB200DB3429 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3281CC30DB200DB3429 /* Mapbox.framework */; };
 		DAE6C33E1CC30DB200DB3429 /* Mapbox.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DAE6C3281CC30DB200DB3429 /* Mapbox.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DAE6C35A1CC31E0400DB3429 /* MGLAccountManager.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C34A1CC31E0400DB3429 /* MGLAccountManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DAE6C35A1CC31E0400DB3429 /* MGLSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C34A1CC31E0400DB3429 /* MGLSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DAE6C35B1CC31E0400DB3429 /* MGLAnnotation.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C34B1CC31E0400DB3429 /* MGLAnnotation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DAE6C35C1CC31E0400DB3429 /* MGLGeometry.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C34C1CC31E0400DB3429 /* MGLGeometry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DAE6C35D1CC31E0400DB3429 /* MGLMapCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C34D1CC31E0400DB3429 /* MGLMapCamera.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -242,8 +242,8 @@
 		DAE6C3671CC31E0400DB3429 /* MGLStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C3571CC31E0400DB3429 /* MGLStyle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DAE6C3681CC31E0400DB3429 /* MGLTilePyramidOfflineRegion.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C3581CC31E0400DB3429 /* MGLTilePyramidOfflineRegion.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DAE6C3691CC31E0400DB3429 /* MGLTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C3591CC31E0400DB3429 /* MGLTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DAE6C3841CC31E2A00DB3429 /* MGLAccountManager_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C36A1CC31E2A00DB3429 /* MGLAccountManager_Private.h */; };
-		DAE6C3851CC31E2A00DB3429 /* MGLAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C36B1CC31E2A00DB3429 /* MGLAccountManager.m */; };
+		DAE6C3841CC31E2A00DB3429 /* MGLSettings_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C36A1CC31E2A00DB3429 /* MGLSettings_Private.h */; };
+		DAE6C3851CC31E2A00DB3429 /* MGLSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C36B1CC31E2A00DB3429 /* MGLSettings.m */; };
 		DAE6C3861CC31E2A00DB3429 /* MGLGeometry_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DAE6C36C1CC31E2A00DB3429 /* MGLGeometry_Private.h */; };
 		DAE6C3871CC31E2A00DB3429 /* MGLGeometry.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C36D1CC31E2A00DB3429 /* MGLGeometry.mm */; };
 		DAE6C3881CC31E2A00DB3429 /* MGLMapCamera.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAE6C36E1CC31E2A00DB3429 /* MGLMapCamera.mm */; };
@@ -645,7 +645,7 @@
 		DAE6C3311CC30DB200DB3429 /* test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAE6C33A1CC30DB200DB3429 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DAE6C3451CC31D1200DB3429 /* libmbgl-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmbgl-core.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAE6C34A1CC31E0400DB3429 /* MGLAccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAccountManager.h; sourceTree = "<group>"; };
+		DAE6C34A1CC31E0400DB3429 /* MGLSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLSettings.h; sourceTree = "<group>"; };
 		DAE6C34B1CC31E0400DB3429 /* MGLAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAnnotation.h; sourceTree = "<group>"; };
 		DAE6C34C1CC31E0400DB3429 /* MGLGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLGeometry.h; sourceTree = "<group>"; };
 		DAE6C34D1CC31E0400DB3429 /* MGLMapCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLMapCamera.h; sourceTree = "<group>"; };
@@ -661,8 +661,8 @@
 		DAE6C3571CC31E0400DB3429 /* MGLStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLStyle.h; sourceTree = "<group>"; };
 		DAE6C3581CC31E0400DB3429 /* MGLTilePyramidOfflineRegion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLTilePyramidOfflineRegion.h; sourceTree = "<group>"; };
 		DAE6C3591CC31E0400DB3429 /* MGLTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLTypes.h; sourceTree = "<group>"; };
-		DAE6C36A1CC31E2A00DB3429 /* MGLAccountManager_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAccountManager_Private.h; sourceTree = "<group>"; };
-		DAE6C36B1CC31E2A00DB3429 /* MGLAccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLAccountManager.m; sourceTree = "<group>"; };
+		DAE6C36A1CC31E2A00DB3429 /* MGLSettings_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLSettings_Private.h; sourceTree = "<group>"; };
+		DAE6C36B1CC31E2A00DB3429 /* MGLSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLSettings.m; sourceTree = "<group>"; };
 		DAE6C36C1CC31E2A00DB3429 /* MGLGeometry_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLGeometry_Private.h; sourceTree = "<group>"; };
 		DAE6C36D1CC31E2A00DB3429 /* MGLGeometry.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLGeometry.mm; sourceTree = "<group>"; };
 		DAE6C36E1CC31E2A00DB3429 /* MGLMapCamera.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLMapCamera.mm; sourceTree = "<group>"; };
@@ -1238,9 +1238,9 @@
 				DAD1657C1CF4CE6B001FF4B9 /* Formatters */,
 				DAD1657D1CF4CECB001FF4B9 /* Geometry */,
 				DAD1657E1CF4CF04001FF4B9 /* Offline Maps */,
-				DAE6C34A1CC31E0400DB3429 /* MGLAccountManager.h */,
-				DAE6C36A1CC31E2A00DB3429 /* MGLAccountManager_Private.h */,
-				DAE6C36B1CC31E2A00DB3429 /* MGLAccountManager.m */,
+				DAE6C34A1CC31E0400DB3429 /* MGLSettings.h */,
+				DAE6C36A1CC31E2A00DB3429 /* MGLSettings_Private.h */,
+				DAE6C36B1CC31E2A00DB3429 /* MGLSettings.m */,
 				DA00FC881D5EEAC3009AABC8 /* MGLAttributionInfo.h */,
 				DAF0D8151DFE6B1800B28378 /* MGLAttributionInfo_Private.h */,
 				DA00FC891D5EEAC3009AABC8 /* MGLAttributionInfo.mm */,
@@ -1369,7 +1369,7 @@
 				DA8F25971D51CAC70010E6B5 /* MGLVectorTileSource.h in Headers */,
 				DA7DC9811DED5F5C0027472F /* MGLVectorTileSource_Private.h in Headers */,
 				DAE6C3861CC31E2A00DB3429 /* MGLGeometry_Private.h in Headers */,
-				DAE6C3841CC31E2A00DB3429 /* MGLAccountManager_Private.h in Headers */,
+				DAE6C3841CC31E2A00DB3429 /* MGLSettings_Private.h in Headers */,
 				DACA8622201920BE00E9693A /* MGLRasterDEMSource.h in Headers */,
 				DAE6C3691CC31E0400DB3429 /* MGLTypes.h in Headers */,
 				07D9474D1F67441B00E37934 /* MGLComputedShapeSource_Private.h in Headers */,
@@ -1418,7 +1418,7 @@
 				DACC22141CF3D3E200D220D9 /* MGLFeature.h in Headers */,
 				3538AA231D542685008EC33D /* MGLStyleLayer.h in Headers */,
 				DAE6C35C1CC31E0400DB3429 /* MGLGeometry.h in Headers */,
-				DAE6C35A1CC31E0400DB3429 /* MGLAccountManager.h in Headers */,
+				DAE6C35A1CC31E0400DB3429 /* MGLSettings.h in Headers */,
 				DA551B821DB496AC0009AFAF /* MGLTileSource.h in Headers */,
 				35602C001D3EA9B40050646F /* MGLForegroundStyleLayer.h in Headers */,
 				DAE6C35D1CC31E0400DB3429 /* MGLMapCamera.h in Headers */,
@@ -1728,7 +1728,7 @@
 				DAED38601D62CED700D7640F /* NSURL+MGLAdditions.m in Sources */,
 				35C5D84A1D6DD66D00E95907 /* NSCompoundPredicate+MGLAdditions.mm in Sources */,
 				DAE6C3951CC31E2A00DB3429 /* MGLTilePyramidOfflineRegion.mm in Sources */,
-				DAE6C3851CC31E2A00DB3429 /* MGLAccountManager.m in Sources */,
+				DAE6C3851CC31E2A00DB3429 /* MGLSettings.m in Sources */,
 				DA00FC8B1D5EEAC3009AABC8 /* MGLAttributionInfo.mm in Sources */,
 				DAE6C3921CC31E2A00DB3429 /* MGLPolyline.mm in Sources */,
 				3527428A1D4C245800A1ECE6 /* MGLShapeSource.mm in Sources */,

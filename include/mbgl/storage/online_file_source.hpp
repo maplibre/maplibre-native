@@ -10,6 +10,8 @@ class OnlineFileSource : public FileSource {
 public:
     OnlineFileSource();
     ~OnlineFileSource() override;
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions& getResourceOptions() override;    
 
 private:
     // FileSource overrides
@@ -20,9 +22,6 @@ private:
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;
     void setResourceTransform(ResourceTransform) override;
-
-    void setResourceOptions(ResourceOptions) override;
-    ResourceOptions& getResourceOptions() override;      
 
     class Impl;
     const std::unique_ptr<Impl> impl;

@@ -664,4 +664,12 @@ void OnlineFileSource::setResourceTransform(ResourceTransform transform) {
     impl->setResourceTransform(std::move(transform));
 }
 
+void OnlineFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(std::move(options));
+}
+
+ResourceOptions& OnlineFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
+}
+
 } // namespace mbgl
