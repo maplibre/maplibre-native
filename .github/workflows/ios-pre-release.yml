@@ -1,4 +1,4 @@
-name: ios-release
+name: ios-pre-release
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     tags:
       - ios-v*
     branches:
-      - master
+      - metal-support
     paths-ignore:
       - ".github/**"
       - "README.md"      
