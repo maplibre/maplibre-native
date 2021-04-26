@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 namespace mbgl {
 
@@ -12,23 +13,25 @@ namespace mbgl {
         /**
          * @brief Constructs a TileServerOptions object with default values.
          */
-        TileServerOptions();
-        TileServerOptions(const TileServerOptions&);
-
+        explicit TileServerOptions();
         ~TileServerOptions();
-        TileServerOptions(TileServerOptions&&) noexcept;
-        TileServerOptions& operator=(TileServerOptions options);
-
-        TileServerOptions clone() const;
+        
+        // movable
+        TileServerOptions(TileServerOptions&& options) noexcept;
+        TileServerOptions& operator=(TileServerOptions&& options) noexcept;
+        
+        // copyable
+        TileServerOptions(const TileServerOptions&);
+        TileServerOptions& operator=(const TileServerOptions& options);
 
         /**
-         * @brief Sets the API base URL. For example https://api.mapbox.com for Mapbox.
+         * @brief Sets the API base URL.
          *
          * @param baseURL API base URL.
          * @return TileServerOptions for chaining options together.
          */
         TileServerOptions& withBaseURL(std::string baseURL);
-
+        
         /**
          * @brief Gets the previously set (or default) API base URL.
          *
@@ -142,16 +145,17 @@ namespace mbgl {
         const std::string& accessTokenParameterName() const;
 
         /**
-         * @brief Sets the Mapbox configuration. All previous settings will be replaced.
+         * @brief Get the tile server options configured for Mapbox.
          */
-        TileServerOptions& withMapboxConfiguration();
+        static TileServerOptions MapboxConfiguration();
 
         /**
-         * @brief Sets the MapTiler configuration. All previous settings will be replaced.
+         * @brief Get the tile server options configured for MapTiler.
          */
-        TileServerOptions& withMapTilerConfiguration();
+        static TileServerOptions MapTilerConfiguration();
 
     private:
+
         class Impl;
         std::unique_ptr<Impl> impl_;
     };

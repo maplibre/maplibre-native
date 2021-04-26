@@ -52,8 +52,7 @@ void VectorSource::loadDescription(FileSource& fileSource) {
     }
 
     const auto& url = urlOrTileset.get<std::string>();
-    const auto& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
-    req = fileSource.request(Resource::source(url), [this, url, tileServerOptions](const Response& res) {
+    req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {
         if (res.error) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
@@ -73,6 +72,7 @@ void VectorSource::loadDescription(FileSource& fileSource) {
             if (minZoom) {
                 tileset->zoomRange.min = *minZoom;
             }
+            const TileServerOptions& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
             util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), util::tileSize);
             bool changed = impl().tileset != *tileset;
 

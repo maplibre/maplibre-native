@@ -110,7 +110,7 @@ const Response response = [] {
     return res;
 }();
 
-const TileServerOptions& tileServerOptions = TileServerOptions().withMapboxConfiguration();
+const TileServerOptions& tileServerOptions = TileServerOptions::MapboxConfiguration();
 
 } // namespace fixture
 

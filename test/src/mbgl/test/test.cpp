@@ -12,6 +12,9 @@ int runTests(int argc, char *argv[]) {
 #endif
 
     testing::InitGoogleTest(&argc, argv);
+    
+    // In order to run specific tests
+    testing::GTEST_FLAG(filter) = "Mapbox*";
 
     return RUN_ALL_TESTS();
 }

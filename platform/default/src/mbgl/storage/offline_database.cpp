@@ -13,7 +13,7 @@
 
 namespace mbgl {
 
-OfflineDatabase::OfflineDatabase(std::string path_, TileServerOptions options)
+OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)
     : path(std::move(path_)), tileServerOptions(options) {
     try {
         initialize();

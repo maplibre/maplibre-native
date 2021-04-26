@@ -443,7 +443,7 @@ TEST(OnlineFileSource, GetBaseURLAndAccessTokenWhilePaused) {
 TEST(OnlineFileSource, ChangeAPIBaseURL){
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>();
-    const TileServerOptions& tileServerOptions = TileServerOptions().withMapboxConfiguration();
+    const TileServerOptions& tileServerOptions = TileServerOptions::MapboxConfiguration();
 
     EXPECT_EQ(tileServerOptions.baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
     const std::string customURL = "test.domain";

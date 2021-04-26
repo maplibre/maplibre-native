@@ -370,9 +370,10 @@ public:
         if (auto* baseURL = value.getString()) {
             std::lock_guard<std::mutex> lock(resourceOptionsMutex);
 
-            TileServerOptions tileServerOptions = cachedResourceOptions.tileServerOptions().clone();
-            tileServerOptions = tileServerOptions.withBaseURL(*baseURL);
-            cachedResourceOptions = cachedResourceOptions.withTileServerOptions(tileServerOptions);
+            ResourceOptions newResOpts = cachedResourceOptions.clone();
+            TileServerOptions newTileServerOpts = cachedResourceOptions.tileServerOptions();
+            newTileServerOpts = newTileServerOpts.withBaseURL(*baseURL);
+            cachedResourceOptions = newResOpts.withTileServerOptions(newTileServerOpts);
         } else {
             Log::Error(Event::General, "Invalid base-url property value type.");
         }
@@ -582,7 +583,7 @@ OnlineFileSource::~OnlineFileSource() = default;
 
 std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
     Resource res = resource;
-    auto& options = impl->getResourceOptions().tileServerOptions();
+    const TileServerOptions& options = impl->getResourceOptions().tileServerOptions();
 
     switch (resource.kind) {
         case Resource::Kind::Unknown:

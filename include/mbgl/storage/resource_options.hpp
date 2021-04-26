@@ -43,7 +43,7 @@ public:
      * @param tileServerOptions Tile server options.
      * @return ResourceOptions for chaining options together.
      */
-    ResourceOptions& withTileServerOptions(const TileServerOptions& tileServerOptions);
+    ResourceOptions& withTileServerOptions(TileServerOptions& tileServerOptions);
 
     /**
      * @brief Gets the previously set (or default) TileServerOptions.

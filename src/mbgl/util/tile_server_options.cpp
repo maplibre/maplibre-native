@@ -8,23 +8,30 @@ namespace mbgl {
     public:
         std::string baseURL;
         std::string uriSchemeAlias;
-        std::string sourceTemplate = "/tiles/v3/{domain}.json";
-        std::string styleTemplate = "/maps/{path}/style.json";
-        std::string spritesTemplate = "/maps/{path}/sprite.json";
-        std::string glyphsTemplate = "/fonts/{fontstack}/{range}.pbf";
-        std::string tileTemplate = "/tiles/v3/{path}";
-        std::string accessTokenParameterName = "key";
+        std::string sourceTemplate;
+        std::string styleTemplate;
+        std::string spritesTemplate;
+        std::string glyphsTemplate;
+        std::string tileTemplate;
+        std::string accessTokenParameterName;
     };
 
-// These requires the complete type of Impl.
+    // These requires the complete type of Impl.
     TileServerOptions::TileServerOptions() : impl_(std::make_unique<Impl>()) {}
     TileServerOptions::~TileServerOptions() = default;
-    TileServerOptions::TileServerOptions(TileServerOptions&&) noexcept = default;
-    TileServerOptions::TileServerOptions(const TileServerOptions& other) : impl_(std::make_unique<Impl>(*other.impl_)) {}
-    TileServerOptions& TileServerOptions::operator=(TileServerOptions options) {swap(impl_, options.impl_); return *this; }
 
-    TileServerOptions TileServerOptions::clone() const {
-        return TileServerOptions(*this);
+    // movable
+    TileServerOptions::TileServerOptions(TileServerOptions&& ) noexcept = default;
+    TileServerOptions& TileServerOptions::operator=(TileServerOptions &&) noexcept = default;
+
+    // copyable
+    TileServerOptions::TileServerOptions(const TileServerOptions& options)
+        : impl_(std::make_unique<Impl>(*options.impl_)) {}
+    TileServerOptions& TileServerOptions::operator=(const TileServerOptions& options) {
+        if (this != &options) {
+            *impl_ = *options.impl_;
+        }
+        return *this;
     }
 
     TileServerOptions& TileServerOptions::withBaseURL(std::string url) {
@@ -99,14 +106,30 @@ namespace mbgl {
         return impl_->accessTokenParameterName;
     }
 
-    TileServerOptions& TileServerOptions::withMapboxConfiguration() {
-        return withUriSchemeAlias("mapbox");
-        //TODO:PP
+    TileServerOptions TileServerOptions::MapboxConfiguration() {
+        TileServerOptions options = TileServerOptions()
+            .withBaseURL("https://api.mapbox.com")
+            .withUriSchemeAlias("mapbox")
+            .withAccessTokenParameterName("access_token")
+            .withSourceTemplate("/v4/{domain}.json")
+            .withStyleTemplate("/styles/v1{path}")
+            .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}")
+            .withGlyphsTemplate("/fonts/v1{path}")
+            .withTileTemplate("/v4{path}");
+        return options;
     }
 
-    TileServerOptions& TileServerOptions::withMapTilerConfiguration() {
-        return withUriSchemeAlias("maptiler");
-        //TODO:PP
+    TileServerOptions TileServerOptions::MapTilerConfiguration() {
+        TileServerOptions options = TileServerOptions()
+            .withBaseURL("https://api.maptiler.com")
+            .withUriSchemeAlias("maptiler")
+            .withAccessTokenParameterName("key")
+            .withSourceTemplate("/tiles/{path}/tiles.json")
+            .withStyleTemplate("/maps/{path}")
+            .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}")
+            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf")
+            .withTileTemplate("/tiles/{path}");
+        return options;
     }
 
 }  // namespace mbgl

@@ -53,8 +53,7 @@ void RasterSource::loadDescription(FileSource& fileSource) {
     }
 
     const auto& url = urlOrTileset.get<std::string>();
-    const auto& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
-    req = fileSource.request(Resource::source(url), [this, url, tileServerOptions](const Response& res) {
+    req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {
         if (res.error) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
@@ -68,7 +67,7 @@ void RasterSource::loadDescription(FileSource& fileSource) {
                 observer->onSourceError(*this, std::make_exception_ptr(util::StyleParseException(error.message)));
                 return;
             }
-
+            const auto& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
             util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
             bool changed = impl().tileset != *tileset;
 

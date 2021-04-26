@@ -7,7 +7,7 @@ namespace mbgl {
 class ResourceOptions::Impl {
 public:
     std::string accessToken;
-    TileServerOptions tileServerOptions;
+    TileServerOptions* tileServerOptions;
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
     uint64_t maximumSize = mbgl::util::DEFAULT_MAX_CACHE_SIZE;
@@ -34,13 +34,13 @@ const std::string& ResourceOptions::accessToken() const {
     return impl_->accessToken;
 }
 
-ResourceOptions& ResourceOptions::withTileServerOptions(const TileServerOptions& tileServerOptions) {
-    impl_->tileServerOptions = tileServerOptions;
+ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions& tileServerOptions) {
+    impl_->tileServerOptions = &tileServerOptions;
     return *this;
 }
 
 const TileServerOptions& ResourceOptions::tileServerOptions() const {
-    return impl_->tileServerOptions;
+    return *impl_->tileServerOptions;
 }
 
 ResourceOptions& ResourceOptions::withCachePath(std::string path) {

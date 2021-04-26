@@ -59,7 +59,7 @@ public:
 
 class OfflineTest {
 public:
-    OfflineTest(const std::string& path = ":memory:") : db(path, TileServerOptions().withMapboxConfiguration()) {
+    OfflineTest(const std::string& path = ":memory:") : db(path, TileServerOptions::MapboxConfiguration()) {
     }
 
     util::RunLoop loop;

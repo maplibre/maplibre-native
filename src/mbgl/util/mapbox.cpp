@@ -15,7 +15,7 @@ namespace mapbox {
 
 bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::string& url) {
     const auto& protocol = tileServerOptions.uriSchemeAlias();
-    return url == protocol;
+    return url.compare(0, protocol.length(), protocol) == 0;
 }
 
 // TODO:PP remove
@@ -37,7 +37,7 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
     const URL url(str);
     //TODO:PP
     //const auto tpl = baseURL + "/v4/{domain}.json?access_token=" + accessToken + "&secure";
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken + "&secure";
     return transformURL(tpl, str, url);
 }
 
@@ -98,7 +98,6 @@ std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
     return transformURL(tpl, str, url);
 }
 
-//TODO:PP remove?
 std::string
 canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::string& str, const style::SourceType type, const uint16_t tileSize) {
     const char* version = "/v4/";
@@ -107,16 +106,17 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
     const URL url(str);
     const Path path(str, url.path.first, url.path.second);
 
-    // Make sure that we are dealing with a valid Mapbox tile URL.
-    // Has to be /v4/, with a valid filename + extension
-    if (str.compare(url.path.first, versionLen, version) != 0 || path.filename.second == 0 ||
+    // Make sure that we are dealing with a valid tile URL.
+    // Has to be with the tile template prefix, with a valid filename + extension
+    if (str.find(tileServerOptions.tileTemplate(), url.path.first) == 0 || path.filename.second == 0 ||
         path.extension.second <= 1) {
-        // Not a proper Mapbox tile URL.
+        // Not a proper tile URL.
         return str;
     }
 
     // Reassemble the canonical URL from the parts we've parsed before.
-    std::string result = "mapbox://tiles/";
+    //std::string result = "mapbox://tiles/";
+    std::string result = tileServerOptions.uriSchemeAlias() + "://" + tileServerOptions.tileTemplate();
     result.append(str, path.directory.first + versionLen, path.directory.second - versionLen);
     result.append(str, path.filename.first, path.filename.second);
     if (type == style::SourceType::Raster || type == style::SourceType::RasterDEM) {
@@ -131,8 +131,9 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
         while (idx != std::string::npos) {
             idx++; // skip & or ?
             auto ampersandIdx = str.find('&', idx);
-            const char* accessToken = "access_token=";
-            if (str.compare(idx, strlen(accessToken), accessToken) != 0) {
+            //const char* accessToken = "access_token=";
+            const auto& accessToken = tileServerOptions.accessTokenParameterName() + "=";
+            if (str.compare(idx, accessToken.length(), accessToken) != 0) {
                 result.append(1, hasQuery ? '&' : '?');
                 result.append(str, idx, ampersandIdx != std::string::npos ? ampersandIdx - idx
                                                                           : std::string::npos);
