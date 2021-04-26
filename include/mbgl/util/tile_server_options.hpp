@@ -141,6 +141,16 @@ namespace mbgl {
          */
         const std::string& accessTokenParameterName() const;
 
+        /**
+         * @brief Sets the Mapbox configuration. All previous settings will be replaced.
+         */
+        TileServerOptions& withMapboxConfiguration();
+
+        /**
+         * @brief Sets the MapTiler configuration. All previous settings will be replaced.
+         */
+        TileServerOptions& withMapTilerConfiguration();
+
     private:
         class Impl;
         std::unique_ptr<Impl> impl_;

@@ -97,6 +97,16 @@ namespace mbgl {
 
     const std::string& TileServerOptions::accessTokenParameterName() const {
         return impl_->accessTokenParameterName;
-    }    
+    }
+
+    TileServerOptions& TileServerOptions::withMapboxConfiguration() {
+        return withUriSchemeAlias("mapbox");
+        //TODO:PP
+    }
+
+    TileServerOptions& TileServerOptions::withMapTilerConfiguration() {
+        return withUriSchemeAlias("maptiler");
+        //TODO:PP
+    }
 
 }  // namespace mbgl
