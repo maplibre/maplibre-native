@@ -13,10 +13,71 @@ namespace mbgl {
 namespace util {
 namespace mapbox {
 
+inline bool endsWith(const std::string& str, const std::string& search) {
+    if (search.size() > str.size()) return false;
+    return std::equal(search.rbegin(), search.rend(), str.rbegin());
+}
+
+inline int nthOccurrenceFromEnd(const std::string& str, const std::string& search, int nth) {
+    size_t pos = str.length();
+    int cnt = 0;
+
+    while (cnt != nth){
+        pos-=1;
+        pos = str.rfind(search, pos);
+        if ( pos == std::string::npos )
+            return -1;
+        cnt++;
+    }
+    return pos;
+}
+
+inline void replace(std::string& str, const std::string& search, const std::string& replacement) {
+  std::string::size_type pos = 0u;
+  while((pos = str.find(search, pos)) != std::string::npos){
+     str.replace(pos, search.length(), replacement);
+     pos += replacement.length();
+  }
+}
+
 bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::string& url) {
     const auto& protocol = tileServerOptions.uriSchemeAlias() + "://";
     return url.compare(0, protocol.length(), protocol) == 0;
 }
+
+//std::string baseUrlWithoutSubdomains(const std::string& baseUrl) {
+//    const URL url(baseUrl);
+//    const auto domainAndScheme = baseUrl.substr(0, url.domain.first + url.domain.second);
+//    const auto lastSubdomainIdx = nthOccurrenceFromEnd(domainAndScheme, ".", 2);
+//    auto str = baseUrl.substr(lastSubdomainIdx + 1, baseUrl.length() - 1);
+//    return str;
+//}
+
+bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
+    const URL url(str);
+    const Path path(str, url.path.first, url.path.second);
+
+    // Make sure that we are dealing with a valid tile URL.
+    // Has to be with the tile template prefix, with a valid filename + extension
+    const URL baseURL(tileServerOptions.baseURL());
+    auto domain = str.substr(url.domain.first, url.domain.second);
+    
+    if (tileServerOptions.uriSchemeAlias() == "mapbox") {
+        replace(domain, ".cn", ".com"); // hack for mapbox china
+    }
+    
+    auto refDomain = tileServerOptions.baseURL().substr(baseURL.domain.first, baseURL.domain.second);
+    const auto refDomainIdx = nthOccurrenceFromEnd(refDomain, ".", 2);
+    refDomain = refDomain.substr(refDomainIdx + 1, refDomain.length() - refDomainIdx - 1);
+   
+    if (!endsWith(domain, refDomain) || path.filename.second == 0 || path.extension.second <= 1) {
+        // Not a proper tile URL.
+        return false;
+    }
+    
+    return true;
+}
+
 
 static bool equals(const std::string& str, const URL::Segment& segment, std::string& ref) {
     return str.compare(segment.first, segment.second, ref) == 0;
@@ -34,9 +95,7 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
-    //TODO:PP
-    //const auto tpl = baseURL + "/v4/{domain}.json?access_token=" + accessToken + "&secure";
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken + "&secure";
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken + "&secure";
     return transformURL(tpl, str, url);
 }
 
@@ -48,15 +107,13 @@ std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
-    auto domainConstraint = tileServerOptions.styleDomainConstraint();
-    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+    auto domainName = tileServerOptions.styleDomainName();
+    if (!equals(str, url.domain, domainName)) {
         Log::Error(Event::ParseStyle, "Invalid style URL");
         return str;
     }
     
-    //TODO:PP
-    //const auto tpl = baseURL + "/styles/v1{path}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleVersionPrefix().value_or("") + tileServerOptions.styleTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
@@ -68,16 +125,13 @@ std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
-    auto domainConstraint = tileServerOptions.spritesDomainConstraint();
-    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+    auto domainName = tileServerOptions.spritesDomainName();
+    if (!equals(str, url.domain, domainName)) {
         Log::Error(Event::ParseStyle, "Invalid sprite URL");
         return str;
     }
-    
-    //TODO:PP
-//    const auto tpl =
-//        baseURL + "/styles/v1{directory}{filename}/sprite{extension}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesVersionPrefix().value_or("") + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
@@ -89,15 +143,13 @@ std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
-    auto domainConstraint = tileServerOptions.glyphsDomainConstraint();
-    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+    auto domainName = tileServerOptions.glyphsDomainName();
+    if (!equals(str, url.domain, domainName)) {
         Log::Error(Event::ParseStyle, "Invalid glyph URL");
         return str;
     }
-    
-    //TODO:PP
-    //const auto tpl = baseURL + "/fonts/v1{path}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.accessTokenParameterName() + "=" + accessToken;
+
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsVersionPrefix().value_or("") + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.accessTokenParameterName() + "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
@@ -109,38 +161,37 @@ std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
     }
     
     const URL url(str);
-    auto domainConstraint = tileServerOptions.tileDomainConstraint();
-    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+    auto domainName = tileServerOptions.tileDomainName();
+    if (!equals(str, url.domain, domainName)) {
         Log::Error(Event::ParseStyle, "Invalid tile URL");
         return str;
     }
 
-    //TODO:PP
-    //const auto tpl = baseURL + "/v4{path}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileVersionPrefix().value_or("") + tileServerOptions.tileTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
 std::string
 canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::string& str, const style::SourceType type, const uint16_t tileSize) {
-    const char* version = "/v4/";
-    const size_t versionLen = strlen(version);
 
-    const URL url(str);
-    const Path path(str, url.path.first, url.path.second);
-
-    // Make sure that we are dealing with a valid tile URL.
-    // Has to be with the tile template prefix, with a valid filename + extension
-    if (str.find(tileServerOptions.tileTemplate(), url.path.first) == 0 || path.filename.second == 0 ||
-        path.extension.second <= 1) {
-        // Not a proper tile URL.
+    if (!isNormalizedURL(tileServerOptions, str)){
         return str;
     }
 
-    // Reassemble the canonical URL from the parts we've parsed before.
-    //std::string result = "mapbox://tiles/";
-    std::string result = tileServerOptions.uriSchemeAlias() + "://" + tileServerOptions.tileTemplate();
-    result.append(str, path.directory.first + versionLen, path.directory.second - versionLen);
+    //TODO:PP remove
+    // std::string result = "mapbox://tiles/";
+    std::string result = tileServerOptions.uriSchemeAlias() + "://" + tileServerOptions.tileDomainName();
+    //auto str = "http://" + baseUrlWithoutSubdomains(str);
+    
+    const URL url(str);
+    const Path path(str, url.path.first, url.path.second);
+    
+    int versionPrefixLen = 0;
+    const auto& versionPrefix = tileServerOptions.tileVersionPrefix();
+    if (versionPrefix.has_value()){
+        versionPrefixLen = versionPrefix.value().length();
+    }
+    result.append(str, path.directory.first + versionPrefixLen, path.directory.second - versionPrefixLen);
     result.append(str, path.filename.first, path.filename.second);
     if (type == style::SourceType::Raster || type == style::SourceType::RasterDEM) {
         result += tileSize == util::tileSize ? "@2x" : "{ratio}";
@@ -166,6 +217,7 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
         }
     }
 
+    //mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf
     return result;
 }
 

@@ -7,16 +7,22 @@ namespace mbgl {
     class TileServerOptions::Impl {
     public:
         std::string baseURL;
+        optional<std::string> versionPrefix;
         std::string uriSchemeAlias;
         std::string sourceTemplate;
+        optional<std::string> sourceVersionPrefix;
         std::string styleTemplate;
-        optional<std::string> styleDomainConstraint = {};
+        std::string styleDomainName;
+        optional<std::string> styleVersionPrefix;
         std::string spritesTemplate;
-        optional<std::string> spritesDomainConstraint = {};
+        std::string spritesDomainName;
+        optional<std::string> spritesVersionPrefix;
         std::string glyphsTemplate;
-        optional<std::string> glyphsDomainConstraint = {};
+        std::string glyphsDomainName;
+        optional<std::string> glyphsVersionPrefix;
         std::string tileTemplate;
-        optional<std::string> tileDomainConstraint = {};
+        std::string tileDomainName;
+        optional<std::string> tileVersionPrefix;
         std::string accessTokenParameterName;
     };
 
@@ -56,8 +62,9 @@ namespace mbgl {
         return impl_->uriSchemeAlias;
     }
 
-    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate) {
+    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate, optional<std::string> versionPrefix) {
         impl_->sourceTemplate = std::move(sourceTemplate);
+        impl_->sourceVersionPrefix = std::move(versionPrefix);
         return *this;
     }
 
@@ -65,9 +72,14 @@ namespace mbgl {
         return impl_->sourceTemplate;
     }
 
-    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate, optional<std::string> domainConstraint) {
+    const optional<std::string>& TileServerOptions::sourceVersionPrefix() const {
+        return impl_->sourceVersionPrefix;
+    }
+
+    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate, std::string domainName, optional<std::string> versionPrefix) {
         impl_->styleTemplate = std::move(styleTemplate);
-        impl_->styleDomainConstraint = std::move(domainConstraint);
+        impl_->styleDomainName = std::move(domainName);
+        impl_->styleVersionPrefix = std::move(versionPrefix);
         return *this;
     }
 
@@ -75,13 +87,18 @@ namespace mbgl {
         return impl_->styleTemplate;
     }
 
-    const optional<std::string>& TileServerOptions::styleDomainConstraint() const {
-        return impl_->styleDomainConstraint;
+    const std::string& TileServerOptions::styleDomainName() const {
+        return impl_->styleDomainName;
     }
 
-    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate, optional<std::string> domainConstraint) {
+    const optional<std::string>& TileServerOptions::styleVersionPrefix() const {
+        return impl_->styleVersionPrefix;
+    }
+
+    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate, std::string domainName, optional<std::string> versionPrefix) {
         impl_->spritesTemplate = std::move(spritesTemplate);
-        impl_->spritesDomainConstraint = std::move(domainConstraint);
+        impl_->spritesDomainName = std::move(domainName);
+        impl_->spritesVersionPrefix = std::move(versionPrefix);
         return *this;
     }
 
@@ -89,13 +106,18 @@ namespace mbgl {
         return impl_->spritesTemplate;
     }
 
-    const optional<std::string>& TileServerOptions::spritesDomainConstraint() const {
-        return impl_->spritesDomainConstraint;
+    const std::string& TileServerOptions::spritesDomainName() const {
+        return impl_->spritesDomainName;
     }
 
-    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate, optional<std::string> domainConstraint) {
+    const optional<std::string>& TileServerOptions::spritesVersionPrefix() const {
+        return impl_->spritesVersionPrefix;
+    }
+
+    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate, std::string domainName, optional<std::string> versionPrefix) {
         impl_->glyphsTemplate = std::move(glyphsTemplate);
-        impl_->glyphsDomainConstraint = std::move(domainConstraint);
+        impl_->glyphsDomainName = std::move(domainName);
+        impl_->glyphsVersionPrefix = std::move(versionPrefix);
         return *this;
     }
 
@@ -103,13 +125,18 @@ namespace mbgl {
         return impl_->glyphsTemplate;
     }
 
-    const optional<std::string>& TileServerOptions::glyphsDomainConstraint() const {
-        return impl_->glyphsDomainConstraint;
+    const std::string& TileServerOptions::glyphsDomainName() const {
+        return impl_->glyphsDomainName;
     }
 
-    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate, optional<std::string> domainConstraint) {
+    const optional<std::string>& TileServerOptions::glyphsVersionPrefix() const {
+        return impl_->glyphsVersionPrefix;
+    }
+
+    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate, std::string domainName, optional<std::string> versionPrefix) {
         impl_->tileTemplate = std::move(tileTemplate);
-        impl_->tileDomainConstraint = std::move(domainConstraint);
+        impl_->tileDomainName = std::move(domainName);
+        impl_->tileVersionPrefix = std::move(versionPrefix);
         return *this;
     }
 
@@ -117,8 +144,12 @@ namespace mbgl {
         return impl_->tileTemplate;
     }
 
-    const optional<std::string>& TileServerOptions::tileDomainConstraint() const {
-        return impl_->tileDomainConstraint;
+    const std::string& TileServerOptions::tileDomainName() const {
+        return impl_->tileDomainName;
+    }
+
+    const optional<std::string>& TileServerOptions::tileVersionPrefix() const {
+        return impl_->tileVersionPrefix;
     }
 
     TileServerOptions& TileServerOptions::withAccessTokenParameterName(std::string accessTokenParameterName) {
@@ -135,11 +166,11 @@ namespace mbgl {
             .withBaseURL("https://api.mapbox.com")
             .withUriSchemeAlias("mapbox")
             .withAccessTokenParameterName("access_token")
-            .withSourceTemplate("/v4/{domain}.json")
-            .withStyleTemplate("/styles/v1{path}", {"styles"})
-            .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", {"sprites"})
-            .withGlyphsTemplate("/fonts/v1{path}", {"fonts"})
-        .withTileTemplate("/v4{path}", {"tiles"});
+            .withSourceTemplate("/{domain}.json", {"/v4"})
+            .withStyleTemplate("/styles/v1{path}", "styles", {})
+            .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
+            .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
+            .withTileTemplate("{path}", "tiles", {"/v4"});
         return options;
     }
 
@@ -148,11 +179,11 @@ namespace mbgl {
             .withBaseURL("https://api.maptiler.com")
             .withUriSchemeAlias("maptiler")
             .withAccessTokenParameterName("key")
-            .withSourceTemplate("/tiles/{path}/tiles.json")
-            .withStyleTemplate("/maps/{path}", {"maps"})
-            .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", {})
-            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", {"fonts"})
-            .withTileTemplate("/tiles/{path}", {"tiles"});
+            .withSourceTemplate("/tiles/{path}/tiles.json", {})
+            .withStyleTemplate("/maps/{path}", "maps", {})
+            .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})
+            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
+            .withTileTemplate("/tiles/{path}", "tiles", {});
         return options;
     }
 
