@@ -7,7 +7,7 @@ namespace mbgl {
 class ResourceOptions::Impl {
 public:
     std::string accessToken;
-    TileServerOptions* tileServerOptions;
+    TileServerOptions tileServerOptions = TileServerOptions::MapboxConfiguration(); // temporary. Should be changed to MapLibre after tests will be migrated
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
     uint64_t maximumSize = mbgl::util::DEFAULT_MAX_CACHE_SIZE;
@@ -35,12 +35,12 @@ const std::string& ResourceOptions::accessToken() const {
 }
 
 ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions& tileServerOptions) {
-    impl_->tileServerOptions = &tileServerOptions;
+    impl_->tileServerOptions = std::move(tileServerOptions);
     return *this;
 }
 
 const TileServerOptions& ResourceOptions::tileServerOptions() const {
-    return *impl_->tileServerOptions;
+    return impl_->tileServerOptions;
 }
 
 ResourceOptions& ResourceOptions::withCachePath(std::string path) {
