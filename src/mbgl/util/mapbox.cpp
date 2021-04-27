@@ -14,14 +14,13 @@ namespace util {
 namespace mapbox {
 
 bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::string& url) {
-    const auto& protocol = tileServerOptions.uriSchemeAlias();
+    const auto& protocol = tileServerOptions.uriSchemeAlias() + "://";
     return url.compare(0, protocol.length(), protocol) == 0;
 }
 
-// TODO:PP remove
-//static bool equals(const std::string& str, const URL::Segment& segment, const char* ref) {
-//    return str.compare(segment.first, segment.second, ref) == 0;
-//}
+static bool equals(const std::string& str, const URL::Segment& segment, std::string& ref) {
+    return str.compare(segment.first, segment.second, ref) == 0;
+}
 
 std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
@@ -49,6 +48,12 @@ std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
+    auto domainConstraint = tileServerOptions.styleDomainConstraint();
+    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+        Log::Error(Event::ParseStyle, "Invalid style URL");
+        return str;
+    }
+    
     //TODO:PP
     //const auto tpl = baseURL + "/styles/v1{path}?access_token=" + accessToken;
     const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
@@ -63,6 +68,12 @@ std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
+    auto domainConstraint = tileServerOptions.spritesDomainConstraint();
+    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+        Log::Error(Event::ParseStyle, "Invalid sprite URL");
+        return str;
+    }
+    
     //TODO:PP
 //    const auto tpl =
 //        baseURL + "/styles/v1{directory}{filename}/sprite{extension}?access_token=" + accessToken;
@@ -78,9 +89,15 @@ std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
     }
 
     const URL url(str);
+    auto domainConstraint = tileServerOptions.glyphsDomainConstraint();
+    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+        Log::Error(Event::ParseStyle, "Invalid glyph URL");
+        return str;
+    }
+    
     //TODO:PP
     //const auto tpl = baseURL + "/fonts/v1{path}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.glyphsTemplate() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.accessTokenParameterName() + "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 
@@ -90,11 +107,17 @@ std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
-
+    
     const URL url(str);
+    auto domainConstraint = tileServerOptions.tileDomainConstraint();
+    if (domainConstraint.has_value() && !equals(str, url.domain, domainConstraint.value())) {
+        Log::Error(Event::ParseStyle, "Invalid tile URL");
+        return str;
+    }
+
     //TODO:PP
     //const auto tpl = baseURL + "/v4{path}?access_token=" + accessToken;
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.glyphsTemplate() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
     return transformURL(tpl, str, url);
 }
 

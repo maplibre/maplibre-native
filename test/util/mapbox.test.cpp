@@ -21,7 +21,7 @@ TEST(Mapbox, SourceURL) {
         mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::tileServerOptions, "mapbox://user.map", "key"));
     EXPECT_EQ(
         "https://api.example.com/v4/user.map.json?access_token=key&secure",
-        mbgl::util::mapbox::normalizeSourceURL(TileServerOptions().withBaseURL("https://api.example.com"), "mapbox://user.map", "key"));
+        mbgl::util::mapbox::normalizeSourceURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://user.map", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/v4/user.map.json?access_token=key&secure&style=mapbox://styles/mapbox/streets-v9@0",
         mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::tileServerOptions, "mapbox://user.map?style=mapbox://styles/mapbox/streets-v9@0", "key"));
@@ -42,7 +42,7 @@ TEST(Mapbox, GlyphsURL) {
         mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::tileServerOptions, "mapbox://fonts/boxmap/Comic%20Sans/0-255.pbf", "key"));
     EXPECT_EQ(
         "https://api.example.com/fonts/v1/boxmap/Comic%20Sans/0-255.pbf?access_token=key",
-         mbgl::util::mapbox::normalizeGlyphsURL(TileServerOptions().withBaseURL("https://api.example.com"), "mapbox://fonts/boxmap/Comic%20Sans/0-255.pbf", "key"));
+         mbgl::util::mapbox::normalizeGlyphsURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://fonts/boxmap/Comic%20Sans/0-255.pbf", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/fonts/v1/boxmap/{fontstack}/{range}.pbf?access_token=key",
         mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::tileServerOptions, "mapbox://fonts/boxmap/{fontstack}/{range}.pbf", "key"));
@@ -63,7 +63,7 @@ TEST(Mapbox, StyleURL) {
         mbgl::util::mapbox::normalizeStyleURL(mapboxFixture::tileServerOptions, "mapbox://styles/user/style", "key"));
     EXPECT_EQ(
         "https://api.example.com/styles/v1/user/style?access_token=key",
-        mbgl::util::mapbox::normalizeStyleURL(TileServerOptions().withBaseURL("https://api.example.com"), "mapbox://styles/user/style", "key"));
+        mbgl::util::mapbox::normalizeStyleURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://styles/user/style", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/styles/v1/user/style/draft?access_token=key",
         mbgl::util::mapbox::normalizeStyleURL(mapboxFixture::tileServerOptions, "mapbox://styles/user/style/draft", "key"));
@@ -90,7 +90,7 @@ TEST(Mapbox, SpriteURL) {
         mbgl::util::mapbox::normalizeSpriteURL(mapboxFixture::tileServerOptions, "mapbox://sprites/mapbox/streets-v8.json", "key"));
     EXPECT_EQ(
         "https://api.example.com/styles/v1/mapbox/streets-v8/sprite.json?access_token=key",
-        mbgl::util::mapbox::normalizeSpriteURL(TileServerOptions().withBaseURL("https://api.example.com"), "mapbox://sprites/mapbox/streets-v8.json", "key"));
+        mbgl::util::mapbox::normalizeSpriteURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://sprites/mapbox/streets-v8.json", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/styles/v1/mapbox/streets-v8/sprite@2x.png?access_token=key",
         mbgl::util::mapbox::normalizeSpriteURL(mapboxFixture::tileServerOptions, "mapbox://sprites/mapbox/streets-v8@2x.png", "key"));
@@ -120,7 +120,7 @@ TEST(Mapbox, TileURL) {
         mbgl::util::mapbox::normalizeTileURL(mapboxFixture::tileServerOptions, "mapbox://tiles/a.b/0/0/0.png", "key"));
     EXPECT_EQ(
         "https://api.example.com/v4/a.b/0/0/0.png?access_token=key",
-        mbgl::util::mapbox::normalizeTileURL(TileServerOptions().withBaseURL("https://api.example.com"), "mapbox://tiles/a.b/0/0/0.png", "key"));
+        mbgl::util::mapbox::normalizeTileURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://tiles/a.b/0/0/0.png", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/v4/a.b/0/0/0@2x.png?access_token=key",
         mbgl::util::mapbox::normalizeTileURL(mapboxFixture::tileServerOptions, "mapbox://tiles/a.b/0/0/0@2x.png", "key"));

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/util/optional.hpp>
 #include <string>
 #include <memory>
 
@@ -73,9 +74,11 @@ namespace mbgl {
          * @brief Sets the template for styles.
          *
          * @param styleTemplate The style template.
+         * @param domainConstraint If set, the URL domain must contain the specified string to be matched as canonical style URL .
+         *
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withStyleTemplate(std::string styleTemplate);
+        TileServerOptions& withStyleTemplate(std::string styleTemplate, optional<std::string> domainConstraint);
 
         /**
          * @brief Gets the previously set (or default) style template.
@@ -83,14 +86,22 @@ namespace mbgl {
          * @return const std::string& style template.
          */
         const std::string& styleTemplate() const;
+        
+        /**
+         * @brief Gets the previously set (or default) style domain constraint.
+         *
+         * @return const optional<std::string>& domain constraint.
+         */
+        const optional<std::string>& styleDomainConstraint() const;
 
         /**
          * @brief Sets the template for sprites.
+         * @param domainConstraint If set, the URL domain must contain the specified string to be matched as canonical sprite URL .
          *
          * @param spritesTemplate The sprites template.
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withSpritesTemplate(std::string spritesTemplate);
+        TileServerOptions& withSpritesTemplate(std::string spritesTemplate, optional<std::string> domainConstraint);
 
         /**
          * @brief Gets the previously set (or default) sprites template.
@@ -98,14 +109,23 @@ namespace mbgl {
          * @return const std::string& sprites template.
          */
         const std::string& spritesTemplate() const;
+        
+        /**
+         * @brief Gets the previously set (or default) sprites domain constraint.
+         *
+         * @return const optional<std::string>& domain constraint.
+         */
+        const optional<std::string>& spritesDomainConstraint() const;
 
         /**
          * @brief Sets the template for glyphs.
          *
          * @param glyphsTemplate The glyphs template.
+         * @param domainConstraint If set, the URL domain must contain the specified string to be matched as canonical glyphs URL .
+         *
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withGlyphsTemplate(std::string glyphsTemplate);
+        TileServerOptions& withGlyphsTemplate(std::string glyphsTemplate, optional<std::string> domainConstraint);
 
         /**
          * @brief Gets the previously set (or default) glyphs template.
@@ -113,14 +133,23 @@ namespace mbgl {
          * @return const std::string& glyphs template.
          */
         const std::string& glyphsTemplate() const;
+        
+        /**
+         * @brief Gets the previously set (or default) glyphs domain constraint.
+         *
+         * @return const optional<std::string>& domain constraint.
+         */
+        const optional<std::string>& glyphsDomainConstraint() const;
 
         /**
          * @brief Sets the template for tiles.
          *
          * @param tileTemplate The tile template.
+         * @param domainConstraint If set, the URL domain must contain the specified string to be matched as canonical tile URL .
+         *
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withTileTemplate(std::string tileTemplate);
+        TileServerOptions& withTileTemplate(std::string tileTemplate, optional<std::string> domainConstraint);
 
         /**
          * @brief Gets the previously set (or default) tile template.
@@ -129,6 +158,13 @@ namespace mbgl {
          */
         const std::string& tileTemplate() const;
 
+        /**
+         * @brief Gets the previously set (or default) tile domain constraint.
+         *
+         * @return const optional<std::string>& domain constraint.
+         */
+        const optional<std::string>& tileDomainConstraint() const;
+        
         /**
          * @brief Sets the access token parameter name.
          *

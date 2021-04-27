@@ -1,6 +1,6 @@
 
 #include <mbgl/util/tile_server_options.hpp>
-
+#include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 
@@ -10,9 +10,13 @@ namespace mbgl {
         std::string uriSchemeAlias;
         std::string sourceTemplate;
         std::string styleTemplate;
+        optional<std::string> styleDomainConstraint = {};
         std::string spritesTemplate;
+        optional<std::string> spritesDomainConstraint = {};
         std::string glyphsTemplate;
+        optional<std::string> glyphsDomainConstraint = {};
         std::string tileTemplate;
+        optional<std::string> tileDomainConstraint = {};
         std::string accessTokenParameterName;
     };
 
@@ -61,8 +65,9 @@ namespace mbgl {
         return impl_->sourceTemplate;
     }
 
-    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate) {
+    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate, optional<std::string> domainConstraint) {
         impl_->styleTemplate = std::move(styleTemplate);
+        impl_->styleDomainConstraint = std::move(domainConstraint);
         return *this;
     }
 
@@ -70,8 +75,13 @@ namespace mbgl {
         return impl_->styleTemplate;
     }
 
-    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate) {
+    const optional<std::string>& TileServerOptions::styleDomainConstraint() const {
+        return impl_->styleDomainConstraint;
+    }
+
+    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate, optional<std::string> domainConstraint) {
         impl_->spritesTemplate = std::move(spritesTemplate);
+        impl_->spritesDomainConstraint = std::move(domainConstraint);
         return *this;
     }
 
@@ -79,8 +89,13 @@ namespace mbgl {
         return impl_->spritesTemplate;
     }
 
-    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate) {
+    const optional<std::string>& TileServerOptions::spritesDomainConstraint() const {
+        return impl_->spritesDomainConstraint;
+    }
+
+    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate, optional<std::string> domainConstraint) {
         impl_->glyphsTemplate = std::move(glyphsTemplate);
+        impl_->glyphsDomainConstraint = std::move(domainConstraint);
         return *this;
     }
 
@@ -88,13 +103,22 @@ namespace mbgl {
         return impl_->glyphsTemplate;
     }
 
-    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate) {
+    const optional<std::string>& TileServerOptions::glyphsDomainConstraint() const {
+        return impl_->glyphsDomainConstraint;
+    }
+
+    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate, optional<std::string> domainConstraint) {
         impl_->tileTemplate = std::move(tileTemplate);
+        impl_->tileDomainConstraint = std::move(domainConstraint);
         return *this;
     }
 
     const std::string& TileServerOptions::tileTemplate() const {
         return impl_->tileTemplate;
+    }
+
+    const optional<std::string>& TileServerOptions::tileDomainConstraint() const {
+        return impl_->tileDomainConstraint;
     }
 
     TileServerOptions& TileServerOptions::withAccessTokenParameterName(std::string accessTokenParameterName) {
@@ -112,10 +136,10 @@ namespace mbgl {
             .withUriSchemeAlias("mapbox")
             .withAccessTokenParameterName("access_token")
             .withSourceTemplate("/v4/{domain}.json")
-            .withStyleTemplate("/styles/v1{path}")
-            .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}")
-            .withGlyphsTemplate("/fonts/v1{path}")
-            .withTileTemplate("/v4{path}");
+            .withStyleTemplate("/styles/v1{path}", {"styles"})
+            .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", {"sprites"})
+            .withGlyphsTemplate("/fonts/v1{path}", {"fonts"})
+        .withTileTemplate("/v4{path}", {"tiles"});
         return options;
     }
 
@@ -125,10 +149,10 @@ namespace mbgl {
             .withUriSchemeAlias("maptiler")
             .withAccessTokenParameterName("key")
             .withSourceTemplate("/tiles/{path}/tiles.json")
-            .withStyleTemplate("/maps/{path}")
-            .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}")
-            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf")
-            .withTileTemplate("/tiles/{path}");
+            .withStyleTemplate("/maps/{path}", {"maps"})
+            .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", {})
+            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", {"fonts"})
+            .withTileTemplate("/tiles/{path}", {"tiles"});
         return options;
     }
 
