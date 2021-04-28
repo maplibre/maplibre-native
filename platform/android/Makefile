@@ -248,20 +248,10 @@ android-ui-test: gradle/configuration.gradle
 run-android-test-app-center:
 	appcenter test run espresso --app "Mapbox-mobile/Maps-sdk" --devices "Mapbox-mobile/${devices}" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug --token ${APPCENTER_ACCESS_TOKEN}
 
-# Uploads the compiled Android SDK to Bintray
-.PHONY: run-android-upload-to-bintray
-run-android-upload-to-bintray: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:bintrayUpload
-
-# Uploads the compiled Android SDK SNAPSHOT to oss.jfrog.org
-.PHONY: run-android-upload-to-artifactory
-run-android-upload-to-artifactory: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:artifactoryPublish
-
-# Uploads the compiled Android SDK to maven github package registry
-.PHONY: android-maven-publish
-android-maven-publish: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:publish	
+# Uploads the compiled Android SDK to Maven Central
+.PHONY: run-android-publish
+run-android-publish: gradle/configuration.gradle
+	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
@@ -338,6 +328,11 @@ run-android-nitpick: android-update-vendor
 .PHONY: android-graph
 android-graph: gradle/configuration.gradle
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:generateDependencyGraphMapboxLibraries
+
+# Lists tasks
+.PHONY: list-tasks
+list-tasks: gradle/configuration.gradle
+	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all tasks
 
 #### Miscellaneous targets #####################################################
 
