@@ -2,12 +2,13 @@
 
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
 class HTTPFileSource : public FileSource {
 public:
-    HTTPFileSource();
+    HTTPFileSource(const ResourceOptions& options);
     ~HTTPFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;

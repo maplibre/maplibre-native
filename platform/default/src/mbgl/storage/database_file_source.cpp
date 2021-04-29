@@ -11,6 +11,7 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/tile_server_options.cpp>
+#include <mbgl/storage/file_source_impl_base.hpp>
 
 #include <map>
 #include <utility>
@@ -153,14 +154,15 @@ private:
     std::shared_ptr<FileSource> onlineFileSource;
 };
 
-class DatabaseFileSource::Impl {
+class DatabaseFileSource::Impl: FileSourceImplBase {
 public:
-    Impl(std::shared_ptr<FileSource> onlineFileSource, const std::string& cachePath)
-        : thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
+    Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& options) :
+        FileSourceImplBase(options),
+        thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              cachePath)) {}
+              options.cachePath())) {}
 
     ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
 
@@ -172,8 +174,9 @@ private:
 };
 
 DatabaseFileSource::DatabaseFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-                                  options.cachePath())) {}
+    : impl(std::make_unique<Impl>(
+            FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
+            options)) {}
 
 DatabaseFileSource::~DatabaseFileSource() = default;
 

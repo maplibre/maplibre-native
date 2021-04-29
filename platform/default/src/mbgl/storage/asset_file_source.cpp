@@ -8,6 +8,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
+#include <mbgl/storage/file_source_impl_base.hpp>
 
 namespace {
 bool acceptsURL(const std::string& url) {
@@ -17,9 +18,11 @@ bool acceptsURL(const std::string& url) {
 
 namespace mbgl {
 
-class AssetFileSource::Impl {
+class AssetFileSource::Impl: FileSourceImplBase {
 public:
-    Impl(const ActorRef<Impl>&, std::string root_) : root(std::move(root_)) {}
+    Impl(const ActorRef<Impl>&, const ResourceOptions& options) :
+        FileSourceImplBase(options),
+        root(std::move(options.cachePath())) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -40,9 +43,9 @@ private:
     std::string root;
 };
 
-AssetFileSource::AssetFileSource(const std::string& root)
+AssetFileSource::AssetFileSource(const ResourceOptions& options)
     : impl(std::make_unique<util::Thread<Impl>>(
-          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", root)) {}
+    util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", options.clone())) {}
 
 AssetFileSource::~AssetFileSource() = default;
 

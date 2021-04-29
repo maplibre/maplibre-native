@@ -8,6 +8,7 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread.hpp>
+#include <mbgl/storage/file_source_impl_base.hpp>
 
 #include <cassert>
 #include <map>
@@ -131,14 +132,16 @@ private:
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
-class MainResourceLoader::Impl {
+class MainResourceLoader::Impl: FileSourceImplBase {
 public:
-    Impl(std::shared_ptr<FileSource> assetFileSource_,
+    Impl(const ResourceOptions& options,
+         std::shared_ptr<FileSource> assetFileSource_,
          std::shared_ptr<FileSource> databaseFileSource_,
          std::shared_ptr<FileSource> localFileSource_,
          std::shared_ptr<FileSource> onlineFileSource_,
          std::shared_ptr<FileSource> maptilerFileSource_)
-        : assetFileSource(std::move(assetFileSource_)),
+        : FileSourceImplBase(options),
+          assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
           onlineFileSource(std::move(onlineFileSource_)),
@@ -187,12 +190,13 @@ private:
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
 };
 
-MainResourceLoader::MainResourceLoader(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
+MainResourceLoader::MainResourceLoader(const ResourceOptions& options):
+    impl(std::make_unique<Impl>(options.clone(),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 

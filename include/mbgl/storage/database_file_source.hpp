@@ -4,6 +4,7 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/expected.hpp>
 #include <mbgl/util/optional.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 

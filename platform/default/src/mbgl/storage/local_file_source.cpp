@@ -8,6 +8,8 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
+#include <mbgl/storage/file_source_impl_base.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace {
 bool acceptsURL(const std::string& url) {
@@ -17,9 +19,9 @@ bool acceptsURL(const std::string& url) {
 
 namespace mbgl {
 
-class LocalFileSource::Impl {
+class LocalFileSource::Impl: FileSourceImplBase {
 public:
-    explicit Impl(const ActorRef<Impl>&) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): FileSourceImplBase(options) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -36,9 +38,9 @@ public:
     }
 };
 
-LocalFileSource::LocalFileSource()
-    : impl(std::make_unique<util::Thread<Impl>>(
-          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "LocalFileSource")) {}
+LocalFileSource::LocalFileSource(const ResourceOptions& options):
+    impl(std::make_unique<util::Thread<Impl>>(
+          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "LocalFileSource", options.clone())) {}
 
 LocalFileSource::~LocalFileSource() = default;
 

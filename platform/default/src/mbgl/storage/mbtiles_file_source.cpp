@@ -17,6 +17,8 @@
 #include <mbgl/storage/sqlite3.hpp>
 #include <zlib.h>
 
+#include <mbgl/storage/file_source_impl_base.hpp>
+
 namespace {
 //TODO: replace by mbgl::util::MBTILES_PROTOCOL
 const std::string maptilerProtocol = "mbtiles://";
@@ -29,9 +31,10 @@ namespace mbgl {
 using namespace rapidjson;
 //using namespace mapbox::sqlite;
 
-class MaptilerFileSource::Impl {
+class MaptilerFileSource::Impl: FileSourceImplBase {
 public:
-    explicit Impl(const ActorRef<Impl>&) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options):
+            FileSourceImplBase(options) {}
 
     std::vector<double> &split(const std::string &s, char delim, std::vector<double> &elems) {
         std::stringstream ss(s);
@@ -287,10 +290,9 @@ private:
 };
 
 
-
-MaptilerFileSource::MaptilerFileSource() :
+MaptilerFileSource::MaptilerFileSource(const ResourceOptions& options) :
     thread(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MaptilerFileSource")) {}
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MaptilerFileSource", options)) {}
 
 
 std::unique_ptr<AsyncRequest> MaptilerFileSource::request(const Resource &resource, FileSource::Callback callback) {

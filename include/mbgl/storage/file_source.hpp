@@ -88,13 +88,17 @@ public:
     // When supported, sets the modifier of the requested resources.
     virtual void setResourceTransform(ResourceTransform) {} // NOLINT(performance-unnecessary-value-param)
 
-    // When supported, sets the resource options
-    virtual void setResourceOptions(ResourceOptions) { throw std::runtime_error("ResourceOptions is not supported by this FileSource"); };
-    // When supported, gets the resource options
-    virtual ResourceOptions& getResourceOptions() { throw std::runtime_error("ResourceOptions is not supported by this FileSource"); };
+    // sets the resource options
+    virtual void setResourceOptions(ResourceOptions)  = 0;
+    // gets the resource options
+    virtual ResourceOptions& getResourceOptions() = 0;
 
 protected:
-    FileSource() = default;
+    explicit FileSource() = default;
+
+private:
+    class Impl;
+    const std::unique_ptr<Impl> impl;
 };
 
 // Properties that may be supported by online file sources:

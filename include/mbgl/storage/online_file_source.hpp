@@ -8,7 +8,7 @@ namespace mbgl {
 
 class OnlineFileSource : public FileSource {
 public:
-    OnlineFileSource();
+    OnlineFileSource(const ResourceOptions& options);
     ~OnlineFileSource() override;
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions& getResourceOptions() override;    

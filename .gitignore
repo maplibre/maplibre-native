@@ -23,3 +23,4 @@
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
 /new_offline.db
+/.vscode
