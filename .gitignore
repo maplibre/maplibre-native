@@ -25,3 +25,4 @@
 /new_offline.db
 *.gpg
 /.vscode
+/platform/android/signing-key.text
