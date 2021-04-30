@@ -36,7 +36,7 @@ static void handleError(CURLcode code) {
 
 namespace mbgl {
 
-class HTTPFileSource::Impl: FileSourceImplBase {
+class HTTPFileSource::Impl {
 public:
     Impl(const ResourceOptions& options);
     ~Impl();
@@ -63,6 +63,13 @@ public:
     // A queue that we use for storing reusable CURL easy handles to avoid creating and destroying
     // them all the time.
     std::queue<CURL *> handles;
+
+    void setResourceOptions(ResourceOptions options);
+    ResourceOptions& getResourceOptions();
+
+private:
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 class HTTPRequest : public AsyncRequest {
@@ -93,7 +100,7 @@ private:
     char error[CURL_ERROR_SIZE] = { 0 };
 };
 
-HTTPFileSource::Impl::Impl(const ResourceOptions& options): FileSourceImplBase(options) {
+HTTPFileSource::Impl::Impl(const ResourceOptions& options): resourceOptions (options.clone()) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         throw std::runtime_error("Could not init cURL");
     }
@@ -224,6 +231,16 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
         std::bind(&Impl::onTimeout, context));
 
     return 0;
+}
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    resourceOptions = options;
+}
+
+ResourceOptions& HTTPFileSource::getResourceOptions() {
+    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    return resourceOptions;
 }
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
@@ -416,6 +433,14 @@ HTTPFileSource::~HTTPFileSource() = default;
 
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
+}
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions& HTTPFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

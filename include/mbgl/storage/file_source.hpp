@@ -34,7 +34,6 @@ enum FileSourceType : uint8_t {
 // GeoJSONSource, RasterSource, VectorSource, CustomGeometrySource and other *Sources.
 class FileSource {
 public:
-    FileSource(const FileSource&) = delete;
     FileSource& operator=(const FileSource&) = delete;
     virtual ~FileSource() = default;
 
@@ -89,16 +88,12 @@ public:
     virtual void setResourceTransform(ResourceTransform) {} // NOLINT(performance-unnecessary-value-param)
 
     // sets the resource options
-    virtual void setResourceOptions(ResourceOptions)  = 0;
+    virtual void setResourceOptions(ResourceOptions) = 0;
     // gets the resource options
     virtual ResourceOptions& getResourceOptions() = 0;
 
 protected:
-    explicit FileSource() = default;
-
-private:
-    class Impl;
-    const std::unique_ptr<Impl> impl;
+    FileSource() = default;
 };
 
 // Properties that may be supported by online file sources:

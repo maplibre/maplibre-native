@@ -6,6 +6,8 @@
 
 namespace mbgl {
 
+class ResourceOptions;
+
 class HTTPFileSource : public FileSource {
 public:
     HTTPFileSource(const ResourceOptions& options);
@@ -16,10 +18,12 @@ public:
         return resource.hasLoadingMethod(Resource::LoadingMethod::Network);
     }
 
-    class Impl;
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions& getResourceOptions() override;
 
 private:
-    std::unique_ptr<Impl> impl;
+    class Impl;
+    const std::unique_ptr<Impl> impl;
 };
 
 } // namespace mbgl

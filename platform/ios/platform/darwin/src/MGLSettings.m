@@ -33,7 +33,7 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     }
 }
 
-+ (instancetype)_sharedSettings {
++ (instancetype)sharedSettings {
 #if TARGET_OS_OSX
     if (NSProcessInfo.processInfo.mgl_isInterfaceBuilderDesignablesAgent) {
         return nil;

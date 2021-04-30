@@ -3,6 +3,7 @@
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/tile/vector_tile_data.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/map/transform.hpp>
@@ -22,7 +23,7 @@ using namespace mbgl;
 
 class VectorTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
+    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default());
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};

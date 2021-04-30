@@ -49,7 +49,7 @@ public:
     MapAdapter map;
 
     MapTest(float pixelRatio = 1, MapMode mode = MapMode::Static)
-        : fileSource(std::make_shared<FileSource>())
+        : fileSource(std::make_shared<FileSource>(ResourceOptions::Default()))
         , frontend(pixelRatio)
         , map(frontend, observer, fileSource,
               MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
@@ -66,6 +66,17 @@ public:
             MapMode mode = MapMode::Static,
             typename std::enable_if<std::is_same<T, MainResourceLoader>::value>::type* = nullptr)
         : fileSource(std::make_shared<T>(ResourceOptions().withCachePath(cachePath).withAssetPath(assetPath))),
+          frontend(pixelRatio),
+          map(frontend,
+              observer,
+              fileSource,
+              MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
+    
+    template <typename T = FileSource>
+    MapTest(const ResourceOptions& options,
+            float pixelRatio = 1,
+            MapMode mode = MapMode::Static)
+        : fileSource(std::make_shared<T>(options)),
           frontend(pixelRatio),
           map(frontend,
               observer,
@@ -664,7 +675,7 @@ TEST(Map, StyleLoadedSignal) {
 
 // Test for https://github.com/mapbox/mapbox-gl-native/issues/7902
 TEST(Map, TEST_REQUIRES_SERVER(StyleNetworkErrorRetry)) {
-    MapTest<OnlineFileSource> test;
+    MapTest<OnlineFileSource> test(ResourceOptions::Default());
 
     test.map.getStyle().loadURL("http://127.0.0.1:3000/style-fail-once-500");
 
@@ -676,7 +687,7 @@ TEST(Map, TEST_REQUIRES_SERVER(StyleNetworkErrorRetry)) {
 }
 
 TEST(Map, TEST_REQUIRES_SERVER(StyleNotFound)) {
-    MapTest<OnlineFileSource> test;
+    MapTest<OnlineFileSource> test(ResourceOptions::Default());
 
     test.map.getStyle().loadURL("http://127.0.0.1:3000/style-fail-once-404");
 

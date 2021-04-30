@@ -19,6 +19,9 @@ public:
     void pause() override;
     void resume() override;
 
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions& getResourceOptions() override;
+
 private:
     class Impl;
     const std::unique_ptr<Impl> impl;

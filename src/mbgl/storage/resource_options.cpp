@@ -79,4 +79,10 @@ void* ResourceOptions::platformContext() const {
     return impl_->platformContext;
 }
 
+ResourceOptions ResourceOptions::Default() {
+    TileServerOptions options = TileServerOptions::MapboxConfiguration();
+    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(options);
+    return resourceOptions;
+}
+
 }  // namespace mbgl

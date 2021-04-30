@@ -15,7 +15,7 @@ int runTests(int argc, char *argv[]) {
     
     // In order to run specific tests
     // testing::GTEST_FLAG(filter) = "Mapbox*";
-    // testing::GTEST_FLAG(filter) = "Map.StyleNetworkErrorRetry";
+    // testing::GTEST_FLAG(filter) = "AssetFileSource.Load";
 
     return RUN_ALL_TESTS();
 }

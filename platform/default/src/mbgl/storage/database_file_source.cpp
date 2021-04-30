@@ -11,7 +11,6 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/tile_server_options.cpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 
 #include <map>
 #include <utility>
@@ -154,23 +153,35 @@ private:
     std::shared_ptr<FileSource> onlineFileSource;
 };
 
-class DatabaseFileSource::Impl: FileSourceImplBase {
+class DatabaseFileSource::Impl {
 public:
     Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& options) :
-        FileSourceImplBase(options),
         thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              options.cachePath())) {}
+              options.cachePath())),
+        resourceOptions(options.clone()) {}
 
     ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
 
     void pause() { thread->pause(); }
     void resume() { thread->resume(); }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions& getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions;
+    }
+
 private:
     const std::unique_ptr<util::Thread<DatabaseFileSourceThread>> thread;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 DatabaseFileSource::DatabaseFileSource(const ResourceOptions& options)
@@ -302,6 +313,14 @@ void DatabaseFileSource::pause() {
 
 void DatabaseFileSource::resume() {
     impl->resume();
+}
+
+void DatabaseFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions& DatabaseFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

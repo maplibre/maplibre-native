@@ -19,6 +19,9 @@ public:
     //static bool acceptsURL(const std::string &url);
     bool canRequest(const Resource&) const override;
 
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions& getResourceOptions() override;
+
 private:
     class Impl;
     std::unique_ptr <util::Thread<Impl>> thread; //impl

@@ -4,11 +4,11 @@
 #include <mbgl/storage/local_file_request.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 
 namespace {
 bool acceptsURL(const std::string& url) {
@@ -18,11 +18,11 @@ bool acceptsURL(const std::string& url) {
 
 namespace mbgl {
 
-class AssetFileSource::Impl: FileSourceImplBase {
+class AssetFileSource::Impl {
 public:
-    Impl(const ActorRef<Impl>&, const ResourceOptions& options) :
-        FileSourceImplBase(options),
-        root(std::move(options.cachePath())) {}
+    Impl(const ActorRef<Impl>&, const ResourceOptions& options):
+        root (options.assetPath()),
+        resourceOptions (options.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -39,13 +39,26 @@ public:
         requestLocalFile(path, req);
     }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions& getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions;
+    }
+
 private:
     std::string root;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 AssetFileSource::AssetFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<util::Thread<Impl>>(
-    util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", options.clone())) {}
+        : impl(std::make_unique<util::Thread<Impl>>(
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", options.clone())) {}
+
 
 AssetFileSource::~AssetFileSource() = default;
 
@@ -68,5 +81,14 @@ void AssetFileSource::pause() {
 void AssetFileSource::resume() {
     impl->resume();
 }
+
+void AssetFileSource::setResourceOptions(ResourceOptions options) {
+    impl->actor().invoke(&Impl::setResourceOptions, options.clone());
+}
+
+ResourceOptions& AssetFileSource::getResourceOptions() {
+    return impl->actor().ask(&Impl::getResourceOptions).get();
+}
+
 
 } // namespace mbgl

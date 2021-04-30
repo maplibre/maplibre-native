@@ -114,6 +114,13 @@ public:
      */
     void* platformContext() const;
 
+    /**
+     * @brief Returns default resource options.
+     *
+     * @return Resource options.
+     */
+    static ResourceOptions Default();
+
 private:
     ResourceOptions(const ResourceOptions&);
 

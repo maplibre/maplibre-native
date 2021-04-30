@@ -8,7 +8,6 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread.hpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 
 #include <cassert>
 #include <map>
@@ -132,7 +131,7 @@ private:
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
-class MainResourceLoader::Impl: FileSourceImplBase {
+class MainResourceLoader::Impl {
 public:
     Impl(const ResourceOptions& options,
          std::shared_ptr<FileSource> assetFileSource_,
@@ -140,8 +139,7 @@ public:
          std::shared_ptr<FileSource> localFileSource_,
          std::shared_ptr<FileSource> onlineFileSource_,
          std::shared_ptr<FileSource> maptilerFileSource_)
-        : FileSourceImplBase(options),
-          assetFileSource(std::move(assetFileSource_)),
+        : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
           onlineFileSource(std::move(onlineFileSource_)),
@@ -154,7 +152,8 @@ public:
               databaseFileSource,
               localFileSource,
               onlineFileSource,
-              maptilerFileSource)) {}
+              maptilerFileSource)),
+          resourceOptions (options.clone()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -180,6 +179,16 @@ public:
 
     void resume() { thread->resume(); }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions& getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions;
+    }
+
 private:
     const std::shared_ptr<FileSource> assetFileSource;
     const std::shared_ptr<FileSource> databaseFileSource;
@@ -188,6 +197,8 @@ private:
     const std::shared_ptr<FileSource> maptilerFileSource;
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 MainResourceLoader::MainResourceLoader(const ResourceOptions& options):
@@ -218,6 +229,14 @@ void MainResourceLoader::pause() {
 
 void MainResourceLoader::resume() {
     impl->resume();
+}
+
+void MainResourceLoader::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions& MainResourceLoader::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

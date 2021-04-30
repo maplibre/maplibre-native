@@ -530,9 +530,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_parser.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_parser.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/asset_file_source.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/file_source_impl_base.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/file_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/mbtiles_file_source.hpp    
+    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/mbtiles_file_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/file_source_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/http_file_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/local_file_source.hpp

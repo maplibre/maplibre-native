@@ -8,7 +8,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/util/async_task.hpp>
@@ -75,7 +74,7 @@ struct OnlineFileRequest {
 
 class OnlineFileSourceThread {
 public:
-    OnlineFileSourceThread() {
+    OnlineFileSourceThread(const ResourceOptions& options): httpFileSource(options) {
         NetworkStatus::Subscribe(&reachability);
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
@@ -300,12 +299,11 @@ private:
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
 };
 
-class OnlineFileSource::Impl: FileSourceImplBase {
+class OnlineFileSource::Impl {
 public:
     Impl(const ResourceOptions& options) :
-        FileSourceImplBase(options),
         thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
-              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource")) {}
+              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", options.clone())) {}
 
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -323,11 +321,19 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::setResourceTransform, std::move(transform));
     }
 
-    void setResourceOptions(ResourceOptions options) override {
+    void setResourceOptions(ResourceOptions options) {
         thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, std::move(options));
-        FileSourceImplBase::setResourceOptions(options.clone());
+        {
+            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+            cachedResourceOptions = options;
+        }
     }
-    
+
+    ResourceOptions& getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return cachedResourceOptions;
+    }
+
     void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
 
     void setMaximumConcurrentRequests(const mapbox::base::Value& value) {
@@ -664,6 +670,14 @@ mapbox::base::Value OnlineFileSource::getProperty(const std::string& key) const 
 
 void OnlineFileSource::setResourceTransform(ResourceTransform transform) {
     impl->setResourceTransform(std::move(transform));
+}
+
+void OnlineFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions& OnlineFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

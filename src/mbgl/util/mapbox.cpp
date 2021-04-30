@@ -29,7 +29,7 @@ inline int nthOccurrenceFromEnd(const std::string& str, const std::string& searc
             return -1;
         cnt++;
     }
-    return pos;
+    return static_cast<int>(pos);
 }
 
 inline void replace(std::string& str, const std::string& search, const std::string& replacement) {
@@ -189,7 +189,7 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
     int versionPrefixLen = 0;
     const auto& versionPrefix = tileServerOptions.tileVersionPrefix();
     if (versionPrefix.has_value()){
-        versionPrefixLen = versionPrefix.value().length();
+        versionPrefixLen = static_cast<int>(versionPrefix.value().length());
     }
     result.append(str, path.directory.first + versionPrefixLen, path.directory.second - versionPrefixLen);
     result.append(str, path.filename.first, path.filename.second);

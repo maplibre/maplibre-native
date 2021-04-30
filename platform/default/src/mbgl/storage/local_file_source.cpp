@@ -8,7 +8,6 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
 namespace {
@@ -19,9 +18,9 @@ bool acceptsURL(const std::string& url) {
 
 namespace mbgl {
 
-class LocalFileSource::Impl: FileSourceImplBase {
+class LocalFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): FileSourceImplBase(options) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): resourceOptions (options.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -36,6 +35,20 @@ public:
         const auto path = mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
         requestLocalFile(path, req);
     }
+
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions& getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions;
+    }
+
+private:
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 LocalFileSource::LocalFileSource(const ResourceOptions& options):
@@ -63,5 +76,14 @@ void LocalFileSource::pause() {
 void LocalFileSource::resume() {
     impl->resume();
 }
+
+void LocalFileSource::setResourceOptions(ResourceOptions options) {
+    impl->actor().invoke(&Impl::setResourceOptions, options.clone());
+}
+
+ResourceOptions& LocalFileSource::getResourceOptions() {
+    return impl->actor().ask(&Impl::getResourceOptions).get();
+}
+
 
 } // namespace mbgl
