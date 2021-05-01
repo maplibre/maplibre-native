@@ -25,18 +25,18 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const 
     mapbox::sqlite::setTempPath(path);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions&) {
+        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions& opts) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
             if (android::Mapbox::hasInstance(*env)) {
                 auto assetManager = android::Mapbox::getAssetManager(*env);
-                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager);
+                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager, opts.clone());
             }
             return assetFileSource;
         });
 
     resourceOptions.withAccessToken(accessToken ? jni::Make<std::string>(_env, accessToken) : "")
-        .withCachePath(path + DATABASE_FILE);
+            .withCachePath(path + DATABASE_FILE);
 
     // Create a core file sources
     // TODO: Split Android FileSource API to smaller interfaces

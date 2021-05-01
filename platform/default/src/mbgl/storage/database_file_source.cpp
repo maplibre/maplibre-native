@@ -10,7 +10,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/thread.hpp>
-#include <mbgl/util/tile_server_options.cpp>
 
 #include <map>
 #include <utility>
