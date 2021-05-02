@@ -105,4 +105,5 @@ apply from: "${rootDir}/gradle/gradle-dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/gradle-update-vendor-modules.gradle"
 apply from: "${rootDir}/gradle/android-nitpick.gradle"
 apply from: "${rootDir}/gradle/gradle-bintray-maplibre.gradle"
-apply from: "${rootDir}/gradle/jacoco-report.gradle"
+// Disabled to prevent timeouts
+// apply from: "${rootDir}/gradle/jacoco-report.gradle"
