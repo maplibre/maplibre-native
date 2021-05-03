@@ -23,7 +23,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: [self-hosted, petr]
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
