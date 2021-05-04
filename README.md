@@ -32,19 +32,19 @@ Beside merging in platform specific SDKs, the following changes were made compar
         allprojects {
             repositories {
                 ...
-                maven {
-                    url = "https://dl.bintray.com/maplibre/maplibre-gl-native"
-                }
+                mavenCentral()                
             }
         }
     ```
+
+   > Note: [Bintray was turn off May 1st, 2021](https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/) so we migrated all packages to maven central.
 
 2. Add the library as a dependency into your module build.gradle
 
     ```gradle
         dependencies {
             ...
-            implementation 'org.maplibre.gl:android-sdk:9.2.1'
+            implementation 'org.maplibre.gl:android-sdk:9.4.0'
             ...
         }
     ```

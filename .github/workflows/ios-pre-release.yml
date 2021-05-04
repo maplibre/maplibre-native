@@ -9,7 +9,8 @@ on:
       - metal-support
     paths-ignore:
       - ".github/**"
-      - "README.md"      
+      - "README.md"
+      - "platform/android/**"      
 jobs:
   build:
     runs-on: macos-10.15
