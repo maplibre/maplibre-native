@@ -47,6 +47,7 @@ MBGL_ANDROID_STL ?= c++_static
 SOCKET_TIMEOUT = 360000
 CONNECTION_TIMEOUT = 360000
 MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
+MBGL_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 
 # Lists all devices, and extracts the identifiers, then obtains the ABI for every one.
 # Some devices return \r\n, so we'll have to remove the carriage return before concatenating.
@@ -248,20 +249,10 @@ android-ui-test: gradle/configuration.gradle
 run-android-test-app-center:
 	appcenter test run espresso --app "Mapbox-mobile/Maps-sdk" --devices "Mapbox-mobile/${devices}" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug --token ${APPCENTER_ACCESS_TOKEN}
 
-# Uploads the compiled Android SDK to Bintray
-.PHONY: run-android-upload-to-bintray
-run-android-upload-to-bintray: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:bintrayUpload
-
-# Uploads the compiled Android SDK SNAPSHOT to oss.jfrog.org
-.PHONY: run-android-upload-to-artifactory
-run-android-upload-to-artifactory: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:artifactoryPublish
-
-# Uploads the compiled Android SDK to maven github package registry
-.PHONY: android-maven-publish
-android-maven-publish: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDK:publish	
+# Uploads the compiled Android SDK to Maven Central Staging
+.PHONY: run-android-publish
+run-android-publish: gradle/configuration.gradle
+	$(MBGL_ANDROID_GRADLE_SINGLE_JOB) -Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
@@ -338,6 +329,11 @@ run-android-nitpick: android-update-vendor
 .PHONY: android-graph
 android-graph: gradle/configuration.gradle
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:generateDependencyGraphMapboxLibraries
+
+# Lists tasks
+.PHONY: list-tasks
+list-tasks: gradle/configuration.gradle
+	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all tasks
 
 #### Miscellaneous targets #####################################################
 

@@ -1,7 +1,11 @@
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
 buildscript {
     apply from: "${rootDir}/gradle/dependencies.gradle"
 
     repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
         google()
         jcenter()
     }
@@ -9,11 +13,9 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.6.3'
         classpath dependenciesList.licensesPlugin
         classpath dependenciesList.kotlinPlugin
-        classpath dependenciesList.bintrayPlugin
-        classpath dependenciesList.artifactoryPlugin
-        classpath dependenciesList.androidPublishPlugin
         classpath dependenciesList.jacocoPlugin
         classpath dependenciesList.mapboxSdkVersions
+        classpath dependenciesList.gradleNexus
     }
 }
 
@@ -22,14 +24,24 @@ allprojects {
         mavenCentral()
         google()
         jcenter()
-        // For publishing Maps SDK files to Bintray
-        // maven { url 'https://mapbox.bintray.com/mapbox' }
-        // Snapshot repository
-        // maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     }
     apply from: "${rootDir}/gradle/ktlint.gradle"
 }
 
 subprojects {
     apply from: "${rootDir}/gradle/dependencies.gradle"
+}
+
+apply from: "${rootDir}/gradle/publish-root.gradle"
+// Set up Sonatype repository
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))            
+        }
+    }
 }
