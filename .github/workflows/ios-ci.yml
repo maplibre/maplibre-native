@@ -94,7 +94,6 @@ jobs:
       - name: Set XCode version
         run: |
           sudo xcode-select --switch /Applications/Xcode12.4.app
-          sudo xcode-select --install
       
       - name: Check debug symbols
         run: make darwin-check-public-symbols
