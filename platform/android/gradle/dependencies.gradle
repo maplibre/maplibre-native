@@ -29,9 +29,6 @@ ext {
             okhttp           : '3.12.3',
             kotlin           : '1.3.72',
             licenses         : '0.8.80',
-            bintray          : '1.8.5',
-            artifactory      : '4.15.2',
-            androidPublish   : '3.6.2',
             lint             : '26.4.2',
             gms              : '16.0.0',
             jacoco           : '0.8.5',
@@ -39,7 +36,8 @@ ext {
             ktlint           : '0.40.0',
             commonsIO        : '2.6',
             mapboxSdkVersions: '1.0.1',
-            assertj          : "3.11.1"
+            assertj          : "3.11.1",
+            gradleNexus      : "1.1.0"
     ]
 
     dependenciesList = [
@@ -78,9 +76,6 @@ ext {
             kotlinLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
             licensesPlugin         : "com.jaredsburrows:gradle-license-plugin:${versions.licenses}",
-            bintrayPlugin          : "com.jfrog.bintray.gradle:gradle-bintray-plugin:${versions.bintray}",
-            artifactoryPlugin      : "org.jfrog.buildinfo:build-info-extractor-gradle:${versions.artifactory}",
-            androidPublishPlugin   : "digital.wup:android-maven-publish:${versions.androidPublish}",
             jacocoPlugin           : "org.jacoco:org.jacoco.core:${versions.jacoco}",
 
             lint                   : "com.android.tools.lint:lint:${versions.lint}",
@@ -88,6 +83,8 @@ ext {
             lintChecks             : "com.android.tools.lint:lint-checks:${versions.lint}",
             lintTests              : "com.android.tools.lint:lint-tests:${versions.lint}",
             ktlint                 : "com.pinterest:ktlint:${versions.ktlint}",
-            mapboxSdkVersions      : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${versions.mapboxSdkVersions}"
+            mapboxSdkVersions      : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${versions.mapboxSdkVersions}",
+
+            gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}"
     ]
 }

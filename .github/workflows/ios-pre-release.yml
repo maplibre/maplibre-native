@@ -1,29 +1,21 @@
-name: ios-ci
+name: ios-pre-release
 
 on:
   workflow_dispatch:
   push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
-      - "README.md"
-      - ".gitignore"              
-  pull_request:
+    tags:
+      - ios-v*
     branches:
-      - master  
+      - metal-support
     paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
+      - ".github/**"
       - "README.md"
-      - ".gitignore"       
-
+      - "platform/android/**"      
 jobs:
   build:
-    runs-on: [self-hosted, petr]
+    runs-on: macos-10.15
     env:
-      BUILDTYPE: Debug
+      BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
@@ -39,20 +31,17 @@ jobs:
       
       - name: Install macos dependencies
         run: |
-          which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          brew list cmake 1> /dev/null || brew install cmake
-          brew list ccache 1> /dev/null || brew install ccache
-          brew list pkg-config 1> /dev/null || brew install pkg-config
-          brew list glfw3 1> /dev/null || brew install glfw3
-          brew list node 1> /dev/null || brew install node
-          gem list -i xcpretty || sudo gem install xcpretty
-          
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list pkg-config || brew install pkg-config
+          brew list glfw3 || brew install glfw3
+
       - name: Cache node modules
         uses: actions/cache@v2
         env:
           cache-name: cache-node-modules
         with:
-          path: /user/local/lib/node_modules
+          path: ~/.npm
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -88,28 +77,9 @@ jobs:
           ./platform/ios/scripts/install-packaging-dependencies.sh
         env:
           CILAUNCH: true
-      
-      # - name: Set XCode version
-      #   run: |
-      #     sudo xcode-select --switch /Applications/Xcode12.4.app
-      
-      - name: Check debug symbols
-        run: make darwin-check-public-symbols
 
-      - name: Lint plist files
-        run: make ios-lint-plist
-
-      - name: Running ios unit tests
-        run: make ios-test
-
-      - name: Running ios UI tests
-        run: make ios-uitest
-
-      - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-        run: make ios-sanitize      
-
-      - name: Build and run SDK unit tests with address sanitizer
-        run: make ios-sanitize-address
-
-      - name: Build and run SDK unit tests with the static analyzer
-        run: make ios-static-analyzer
+      - name: Build, package, and upload iOS release
+        run: platform/ios/scripts/deploy-swift-package.sh
+        env:
+          DIST_GITHUB_TOKEN: ${{ secrets.DIST_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

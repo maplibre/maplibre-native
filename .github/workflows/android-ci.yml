@@ -9,9 +9,7 @@ on:
       - "platform/ios/**"
       - ".github/**" 
       - "README.md"
-      - ".gitignore"      
-    branches:
-      - master
+      - ".gitignore"
   
 jobs:
   build:

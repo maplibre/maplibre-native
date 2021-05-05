@@ -7,7 +7,8 @@ on:
       - android-v* 
     paths-ignore:      
       - ".github/**"      
-      - "README.md"        
+      - "README.md"
+      - "platform/ios/**"
 jobs:
   build:
     #runs-on: ubuntu-latest
@@ -178,16 +179,18 @@ jobs:
           rm -f ${{ steps.prepare_release.outputs.release_notes }}
         shell: bash                    
 
-      # deploy to github maven repo
-      - name: Publish package
-        run: make android-maven-publish
+      - name: Prepare MavenCentral release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
+        run: |
+          echo '$GPG_KEY_CONTENTS' | base64 -d > signing-key.gpg
+        shell: bash
 
-      # deploy to bintray
-      - name: Publish to Bintray
-        run: make run-android-upload-to-bintray
+      - name: Publish to MavenCentral
+        run: make run-android-publish
         env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}         
