@@ -41,6 +41,7 @@ jobs:
       
       - name: Install macos dependencies
         run: |
+          which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list pkg-config || brew install pkg-config
