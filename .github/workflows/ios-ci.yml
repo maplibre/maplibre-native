@@ -42,11 +42,11 @@ jobs:
       - name: Install macos dependencies
         run: |
           which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
-          brew list node || brew install node
+          brew list cmake 1> /dev/null || brew install cmake
+          brew list ccache 1> /dev/null || brew install ccache
+          brew list pkg-config 1> /dev/null || brew install pkg-config
+          brew list glfw3 1> /dev/null || brew install glfw3
+          brew list node 1> /dev/null || brew install node
           gem list -i xcpretty || sudo gem install xcpretty
           
       - name: Cache node modules
