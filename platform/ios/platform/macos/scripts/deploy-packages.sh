@@ -80,7 +80,6 @@ export GITHUB_USER=maplibre
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
 
-
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
 BINARY_DIRECTORY=${BINARY_DIRECTORY:-build/macos/deploy}

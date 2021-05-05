@@ -346,6 +346,11 @@ public:
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
+    if (CGRectIsEmpty(frame))
+    {
+        frame = CGRectMake(0.0, 0.0, 1.0, 1.0);
+    }
+
     if (self = [super initWithFrame:frame])
     {
         MGLLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
@@ -359,6 +364,11 @@ public:
 
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL
 {
+    if (CGRectIsEmpty(frame))
+    {
+        frame = CGRectMake(0.0, 0.0, 1.0, 1.0);
+    }
+    
     if (self = [super initWithFrame:frame])
     {
         MGLLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
@@ -977,8 +987,6 @@ public:
     }
 }
 
-
-
 - (void)renderSync
 {
     if ( ! self.dormant && _rendererFrontend)
@@ -1237,7 +1245,6 @@ public:
         }
     }
 }
-
 
 - (void)setNeedsRerender
 {

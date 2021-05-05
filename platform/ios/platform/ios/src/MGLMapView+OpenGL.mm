@@ -4,7 +4,6 @@
 
 #include <mbgl/gl/renderable_resource.hpp>
 
-
 @interface MGLMapViewImplDelegate : NSObject <MGLKViewDelegate>
 @end
 
@@ -112,7 +111,6 @@ void MGLMapViewOpenGLImpl::display() {
     }
 }
 
-
 void MGLMapViewOpenGLImpl::createView() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
     if (resource.glView) {
@@ -146,8 +144,6 @@ UIView* MGLMapViewOpenGLImpl::getView() {
 void MGLMapViewOpenGLImpl::deleteView() {
     // No-op on Metal
 }
-
-
 
 mbgl::gl::ProcAddress MGLMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
     static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
