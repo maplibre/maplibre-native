@@ -1,8 +1,18 @@
 # Changelog for Mapbox Maps SDK for iOS
 
-Mapbox welcomes participation and contributions from everyone. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
 ## master
+
+### Features
+
+## 5.12.0-pre.1 - April 21, 2021
+
+### Features
+
+* Migrating from OpenGL ES to Metal. This pre-release includes [Metal support](https://github.com/maplibre/maplibre-gl-native/issues/19), implemented using [MetalANGLE](https://github.com/kakashidinho/metalangle) library.
+
+## 5.11.0 - March 12, 2021
 
 ### Features
 
@@ -18,10 +28,13 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 
 * Fixed an issue that caused a crash when custom location managers did not implement `MGLLocationManager.accuracyAuthorization`. (cherry pick from [#474](https://github.com/mapbox/mapbox-gl-native-ios/pull/474))
 * Fixed an issue where symbols flickered when zooming out. [#16](https://github.com/maplibre/maplibre-gl-native/issues/16)
+* Benchmark app updated and fixes to the latest xcode version
+* iOS performance improvements [#44](https://github.com/maplibre/maplibre-gl-native/pull/44)
 
 ### Other
 
 * mapbox-gl-js submodule has been replaced with maplibre-gl-js
+* Removed Mapbox Mobile Events and Telemetry [#7](https://github.com/maplibre/maplibre-gl-native/pull/7)
 
 ## 5.10.0 - January 6, 2021
 

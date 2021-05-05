@@ -51,8 +51,52 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    
+    #ifdef LOG_TO_DOCUMENTS_DIR
+    [self setAndRedirectLogFileToDocuments];
+    #endif
 
     [self startBenchmarkIteration];
+}
+
+// For setting the filename
+NSDate* const currentDate = [NSDate date];
+
+/*!
+ \description
+  Write the Benchmark log to the Documents Directory.  For the device or simulator, fetch the Documents Directory, and make a friendly name for the benchmarking output file.  In Build Settings > Other C Flags add the compiler flag. `-DLOG_TO_DOCUMENTS_DIR`
+ */
+- (void)setAndRedirectLogFileToDocuments
+{
+    NSString* const name = UIDevice.currentDevice.name;
+    #if TARGET_IPHONE_SIMULATOR
+        NSString* const DeviceMode = @"Simulator";
+    #else
+        NSString* const DeviceMode = @"Device";
+    #endif
+
+    // Set log file name date
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd-HHmm"];
+    NSString *dateString = [formatter stringFromDate:currentDate];
+    
+    // Set the log file name
+    NSString* filename = [NSString stringWithFormat: @"MapLibre-bench-%@-%@-%@.log", name, DeviceMode, dateString];
+
+    // Set log file path
+    NSArray *allPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [allPaths objectAtIndex:0];
+    NSString *pathForLog = [documentsDirectory stringByAppendingPathComponent: filename];
+    NSLog(@"Writing MapLibre Bench log.  To open in Console, use the CLI command");
+    NSLog(@"  open \"%@\"", pathForLog);
+
+    [self redirectLogToDocuments :pathForLog];
+}
+
+- (void)redirectLogToDocuments: (NSString*) fileName
+{
+    // write to file in append "a+" mode
+    freopen([fileName cStringUsingEncoding:NSASCIIStringEncoding], "a+", stderr);
 }
 
 size_t idx = 0;

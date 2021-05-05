@@ -1,6 +1,7 @@
 export BUILDTYPE ?= Debug
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= master
+export CI ?= 0
 
 CMAKE ?= cmake
 
@@ -137,6 +138,7 @@ $(IOS_PROJ_PATH): $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings $(BUILD_DEP
 	mkdir -p $(IOS_OUTPUT_PATH)
 	(cd $(IOS_OUTPUT_PATH) && $(CMAKE) -G Xcode ../../../../ \
 		-DCMAKE_SYSTEM_NAME=iOS )
+	platform/ios/vendor/metalangle/ios/xcode/fetchDependencies.sh
 
 $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettings.xcsettings
 	mkdir -p "$(IOS_USER_DATA_PATH)"
@@ -146,9 +148,14 @@ $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettin
 ios: $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' build $(XCPRETTY)
 
+# make iproj
 .PHONY: iproj
 iproj: $(IOS_PROJ_PATH)
-	xed $(IOS_WORK_PATH)
+	# Check if Xcode should run in headless mode
+	if [ $(CI) == 1 ]; then echo "CI=1.  Running in headless mode, skipping $(IOS_WORK_PATH)"; \
+	  else \
+		  echo "Opening MapLibre in Xcode 'xed $(IOS_WORK_PATH)'.  To skip opening Xcode, use 'make iproj CI=1'"; \
+		  xed $(IOS_WORK_PATH);  fi;
 
 .PHONY: ios-lint-plist
 ios-lint-plist:
@@ -163,6 +170,12 @@ ios-lint: ios-pod-lint
 .PHONY: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
+
+# make ios-uitest
+.PHONY: ios-uitest
+ios-uitest: $(IOS_PROJ_PATH)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'iosapp' test $(XCPRETTY)
+	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
 ios-test: $(IOS_PROJ_PATH)
@@ -200,6 +213,7 @@ iframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
 
+# make xcframework
 .PHONY: xcframework
 xcframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
@@ -307,6 +321,7 @@ style-code:
 codestyle:
 	scripts/codestyle.sh
 
+# make clean
 .PHONY: clean
 clean:
 	-rm -rf ./build \
