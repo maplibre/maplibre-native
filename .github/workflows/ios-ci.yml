@@ -47,7 +47,7 @@ jobs:
           brew list pkg-config || brew install pkg-config
           brew list glfw3 || brew install glfw3
           brew list node || brew install node
-          sudo gem list -i xcpretty || sudo gem install xcpretty
+          gem list -i xcpretty || sudo gem install xcpretty
           
       - name: Cache node modules
         uses: actions/cache@v2
