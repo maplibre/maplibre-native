@@ -31,10 +31,13 @@ jobs:
       
       - name: Install macos dependencies
         run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
+          which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          brew list cmake 1> /dev/null || brew install cmake
+          brew list ccache 1> /dev/null || brew install ccache
+          brew list pkg-config 1> /dev/null || brew install pkg-config
+          brew list glfw3 1> /dev/null || brew install glfw3
+          brew list node 1> /dev/null || brew install node
+          gem list -i xcpretty || sudo gem install xcpretty
 
       - name: Cache node modules
         uses: actions/cache@v2
@@ -77,6 +80,10 @@ jobs:
           ./platform/ios/scripts/install-packaging-dependencies.sh
         env:
           CILAUNCH: true
+
+      # - name: Set XCode version
+      #   run: |
+      #     sudo xcode-select --switch /Applications/Xcode12.4.app          
 
       - name: Build, package, and upload iOS release
         run: platform/ios/scripts/deploy-swift-package.sh
