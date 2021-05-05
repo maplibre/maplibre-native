@@ -23,7 +23,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, vbox]
+    runs-on: [self-hosted, petr]
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -91,9 +91,9 @@ jobs:
         env:
           CILAUNCH: true
       
-      - name: Set XCode version
-        run: |
-          sudo xcode-select --switch /Applications/Xcode12.4.app
+      # - name: Set XCode version
+      #   run: |
+      #     sudo xcode-select --switch /Applications/Xcode12.4.app
       
       - name: Check debug symbols
         run: make darwin-check-public-symbols
