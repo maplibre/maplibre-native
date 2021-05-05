@@ -13,6 +13,16 @@ trap finish EXIT
 step "Installing packaging dependencies…"
 
 ##
+## brew
+##
+if [ -z `which brew` ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+else
+    echo "Found brew"
+fi
+
+
+##
 ## aws
 ##
 if [ -z `which aws` ]; then
