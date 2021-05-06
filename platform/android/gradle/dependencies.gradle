@@ -42,9 +42,9 @@ ext {
 
     dependenciesList = [
             mapboxJavaGeoJSON      : "org.maplibre.gl:android-sdk-geojson:${versions.mapLibreServices}",
-            mapboxAndroidGestures  : "org.maplibre.gl:mapbox-android-gestures:${versions.mapboxGestures}",
-            mapboxAndroidAccounts  : "org.maplibre.gl:mapbox-android-accounts:${versions.mapboxAccounts}",
-            mapboxJavaTurf         : "org.maplibre.gl:android-sdk-turf:${versions.mapboxServices}",
+            mapboxAndroidGestures  : "com.mapbox.mapboxsdk:mapbox-android-gestures:${versions.mapboxGestures}",
+            mapboxAndroidAccounts  : "com.mapbox.mapboxsdk:mapbox-android-accounts:${versions.mapboxAccounts}",
+            mapboxJavaTurf         : "org.maplibre.gl:android-sdk-turf:${versions.mapLibreServices}",
 
             junit                  : "junit:junit:${versions.junit}",
             mockito                : "org.mockito:mockito-core:${versions.mockito}",
