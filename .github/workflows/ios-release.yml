@@ -2,15 +2,7 @@ name: ios-release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - ios-v*
-    branches:
-      - master
-    paths-ignore:
-      - ".github/**"
-      - "README.md" 
-      - "platform/android/**"
+
 jobs:
   build:
     runs-on: [self-hosted, petr]

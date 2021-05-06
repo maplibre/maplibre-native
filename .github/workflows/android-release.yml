@@ -2,13 +2,7 @@ name: android-release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - android-v* 
-    paths-ignore:      
-      - ".github/**"      
-      - "README.md"
-      - "platform/ios/**"
+
 jobs:
   build:
     #runs-on: ubuntu-latest
