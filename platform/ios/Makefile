@@ -150,11 +150,10 @@ ios: $(IOS_PROJ_PATH)
 # make iproj
 .PHONY: iproj
 iproj: $(IOS_PROJ_PATH)
-	# Check if Xcode should run in headless mode
-	if [ $(CI) == 1 ]; then echo "CI=1.  Running in headless mode, skipping $(IOS_WORK_PATH)"; \
-	  else \
-		  echo "Opening MapLibre in Xcode 'xed $(IOS_WORK_PATH)'.  To skip opening Xcode, use 'make iproj CI=1'"; \
-		  xed $(IOS_WORK_PATH);  fi;
+	@#   Check if Xcode should run in headless mode
+	@#     If CI=1, then just perform `make iproj`
+	@#       else, use `xed` to open the XCworkspace
+	@if [ $(CI) == 1 ]; then echo "make iproj CI=1.  Running in headless mode, skip opening .xcworkspace in Xcode.  To open Xcode use 'xed $(IOS_WORK_PATH)'"; else echo "make iproj. Opening MapLibre in Xcode using:  'xed $(IOS_WORK_PATH)'.  To skip opening Xcode, use 'make iproj CI=1'"; xed $(IOS_WORK_PATH);  fi;
 
 .PHONY: ios-lint-plist
 ios-lint-plist:
