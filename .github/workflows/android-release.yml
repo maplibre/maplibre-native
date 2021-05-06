@@ -177,7 +177,7 @@ jobs:
         env:
           GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
         run: |
-          echo '$GPG_KEY_CONTENTS' | base64 -d > signing-key.gpg
+          echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
         shell: bash
 
       - name: Publish to MavenCentral
