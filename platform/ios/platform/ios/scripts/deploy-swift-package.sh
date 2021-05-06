@@ -19,7 +19,7 @@ trap finish EXIT
 export GITHUB_USER=maplibre
 export GITHUB_REPO=maplibre-gl-native
 export BUILDTYPE=Release
-export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/branches/pre-release
+export DISTRIBUTION_GITHUB_REPO=https://api.github.com/repos/maplibre/maplibre-gl-native-distribution
 
 VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
@@ -174,17 +174,21 @@ UPDATED_PACKAGE_CONTENT=$(cat Package.swift | base64)
 ORIGINAL_FILE_SHA="$(curl -H "Authorization: token ${DIST_GITHUB_TOKEN}" ${DISTRIBUTION_GITHUB_REPO}/contents/Package.swift | jq -r -c '.sha')"
 PAYLOAD="{\"message\": \"New release: ${PUBLISH_VERSION}\",\"content\": \"$UPDATED_PACKAGE_CONTENT\", \"sha\": \"$ORIGINAL_FILE_SHA\"}"
 
-# package definition update
+# create pre-release
+step "Package definition update..."
 curl -v -X PUT \
     -H "Authorization: token ${DIST_GITHUB_TOKEN}" \
     "${DISTRIBUTION_GITHUB_REPO}"/contents/Package.swift \
     -d "${PAYLOAD}"
 
-# setting up new tag
+step "setting up new tag..."
+ESCAPED_NOTES=$(echo "${RELEASE_NOTES}" | jq -aRs .)
+RELEASE_PAYLOAD="{\"tag_name\":\"${PUBLISH_VERSION}\",\"prerelease\": true,\"name\": \"Version ${PUBLISH_VERSION}\", \"body\": ${ESCAPED_NOTES}}"
+echo "payload: ${RELEASE_PAYLOAD}"
 curl -v -X POST \
     -H "Authorization: token ${DIST_GITHUB_TOKEN}" \
     -H "Accept: application/vnd.github.v3+json" \
     "${DISTRIBUTION_GITHUB_REPO}"/releases \
-    -d "{\"tag_name\":\"${PUBLISH_VERSION}\"}"
+    -d "${RELEASE_PAYLOAD}"
 
 step "Finished deploying ${PUBLISH_VERSION} in $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
