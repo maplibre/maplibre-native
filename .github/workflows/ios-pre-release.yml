@@ -3,8 +3,6 @@ name: ios-pre-release
 on:
   workflow_dispatch:
   push:
-    tags:
-      - ios-v*
     branches:
       - metal-support
     paths-ignore:
