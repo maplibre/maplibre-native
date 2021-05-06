@@ -8,6 +8,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### Bug Fixes
 
+## 9.4.2 - May 6, 2021
+
+### Bug Fixes
+
+Switching from mapbox-java libraries to [maplibre fork](https://github.com/maplibre/maplibre-java)
+
 ## 9.4.0 - March 12, 2021
 
 ### Bug Fixes
