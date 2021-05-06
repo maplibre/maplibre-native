@@ -34,8 +34,7 @@ uploadToGithub() {
     github-release upload \
         --tag "${version_tag}" \
         --name ${file_name} \
-        --file "${file_path}" > /dev/null \
-        --pre-release
+        --file "${file_path}" > /dev/null
 
     EXT_TARGET_GITHUB_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${version_tag}/${file_name}"
 }
@@ -131,7 +130,8 @@ fi
 github-release release \
     --tag "ios-v${PUBLISH_VERSION}" \
     --name "ios-v${PUBLISH_VERSION}" \
-    --description "${RELEASE_NOTES}"
+    --description "${RELEASE_NOTES}" \
+    --pre-release
 
 step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE} to github release [${VERSION_TAG}]"
 uploadToGithub "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${VERSION_TAG}"
