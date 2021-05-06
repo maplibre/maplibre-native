@@ -21,7 +21,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, petr]
+    runs-on: [self-hosted, vbox]
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
