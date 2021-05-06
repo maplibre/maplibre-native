@@ -34,7 +34,7 @@ uploadToGithub() {
     github-release upload \
         --tag "${version_tag}" \
         --name ${file_name} \
-        --file "${file_path}" > /dev/null
+        --file "${file_path}" > /dev/null \
         --pre-release
 
     EXT_TARGET_GITHUB_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${version_tag}/${file_name}"
