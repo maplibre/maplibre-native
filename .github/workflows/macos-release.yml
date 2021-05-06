@@ -2,12 +2,7 @@ name: macos-release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - macos-v*
-    paths-ignore:
-      - ".github/**"      
-      - "README.md"      
+ 
 jobs:
   build:
     runs-on: macos-10.15
