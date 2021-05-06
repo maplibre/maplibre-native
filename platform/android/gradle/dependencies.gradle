@@ -7,7 +7,7 @@ ext {
     ]
 
     versions = [
-            mapboxServices   : '5.3.0',
+            mapLibreServices : '5.9.0',
             mapboxCore       : '2.0.1',
             mapboxGestures   : '0.7.0',
             mapboxAccounts   : '0.7.0',
@@ -41,10 +41,10 @@ ext {
     ]
 
     dependenciesList = [
-            mapboxJavaGeoJSON      : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${versions.mapboxServices}",
-            mapboxAndroidGestures  : "com.mapbox.mapboxsdk:mapbox-android-gestures:${versions.mapboxGestures}",
-            mapboxAndroidAccounts  : "com.mapbox.mapboxsdk:mapbox-android-accounts:${versions.mapboxAccounts}",
-            mapboxJavaTurf         : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${versions.mapboxServices}",
+            mapboxJavaGeoJSON      : "org.maplibre.gl:android-sdk-geojson:${versions.mapLibreServices}",
+            mapboxAndroidGestures  : "org.maplibre.gl:mapbox-android-gestures:${versions.mapboxGestures}",
+            mapboxAndroidAccounts  : "org.maplibre.gl:mapbox-android-accounts:${versions.mapboxAccounts}",
+            mapboxJavaTurf         : "org.maplibre.gl:android-sdk-turf:${versions.mapboxServices}",
 
             junit                  : "junit:junit:${versions.junit}",
             mockito                : "org.mockito:mockito-core:${versions.mockito}",

@@ -1,6 +1,6 @@
 apply from: "${rootDir}/gradle/dependencies.gradle"
 
-def MAPBOX_JAVA_DIR = 'mapbox-java'
+def MAPBOX_JAVA_DIR = 'maplibre-java'
 def MAPBOX_JAVA_TAG_PREFIX = 'v'
 
 def MAPBOX_CORE_TAG_PREFIX = '-core-'
