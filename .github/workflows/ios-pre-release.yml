@@ -2,13 +2,7 @@ name: ios-pre-release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - metal-support
-    paths-ignore:
-      - ".github/**"
-      - "README.md"
-      - "platform/android/**"      
+    
 jobs:
   build:
     #runs-on: macos-10.15
