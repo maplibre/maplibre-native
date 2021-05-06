@@ -6,11 +6,30 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### Features
 
-## 5.12.0-pre.1 - April 21, 2021
+## 5.12.0-pre.1 - May 6, 2021
 
 ### Features
 
 * Migrating from OpenGL ES to Metal. This pre-release includes [Metal support](https://github.com/maplibre/maplibre-gl-native/issues/19), implemented using [MetalANGLE](https://github.com/kakashidinho/metalangle) library.
+
+> Warning: unstable release for test purposes only.
+
+### Known Issues
+
+* Map opens "zoomed in" when app brought to foreground with metal-support -branch [#76](https://github.com/maplibre/maplibre-gl-native/issues/76)
+* Fatal error in Swift UI apps with metal-support [#67](https://github.com/maplibre/maplibre-gl-native/issues/67)
+* Failed tests:
+  * MGLDocumentationExampleTests testMGLMapSnapshotter
+  * MGLMapSnapshotterTests testOverlayHandler
+  * MGLMapSnapshotterTests testDelegate
+  * MGLMapSnapshotterTests testRuntimeStyling
+  * MGLMapSnapshotterTests testLocalGlyphRendering
+* Failed Integration tests:
+  * MGLAnnotationViewIntegrationTests testSelectionMoveIntoView
+  * MGLAnnotationViewIntegrationTests testSelectionMoveIntoViewWithCallout
+  * MGLAnnotationViewIntegrationTests testSelectionMoveIntoViewWithBasicCallout
+  * MGLAnnotationViewIntegrationTests testSelectionMoveIntoViewWithCenterOffset
+  * MGLAnnotationViewIntegrationTests testShowingAnnotationThenSelectingAnimated
 
 ## 5.11.0 - March 12, 2021
 
