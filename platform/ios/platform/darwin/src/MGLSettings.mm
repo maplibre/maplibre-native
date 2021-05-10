@@ -5,18 +5,29 @@
 #import "NSProcessInfo+MGLAdditions.h"
 #endif
 
+
 NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 
 @interface MGLSettings ()
 
 @property (atomic) NSString *accessToken;
-@property (nonatomic) NSURL *apiBaseURL;
+@property (atomic) mbgl::TileServerOptions *tileServerOptions;
+@property (atomic) NSString *tileServerOptionsChangeToken;
 
 @end
 
 @implementation MGLSettings
 
 #pragma mark - Internal
+
+- (instancetype)init {
+    if (self = [super init]) {
+        auto options = mbgl::TileServerOptions::MapboxConfiguration();
+        self.tileServerOptions = new mbgl::TileServerOptions();
+        *self.tileServerOptions = options;
+    }
+    return self;
+}
 
 + (void)load {
     // Read the initial configuration from Info.plist.
@@ -30,6 +41,7 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     // If apiBaseURL is not a valid URL, [NSURL URLWithString:] will be `nil`.
     if (apiBaseURL.length && [NSURL URLWithString:apiBaseURL]) {
         [self setAPIBaseURL:[NSURL URLWithString:apiBaseURL]];
+        [self tileServerOptionsChanged];
     }
 }
 
@@ -72,11 +84,32 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 }
 
 + (void)setAPIBaseURL:(NSURL *)apiBaseURL {
-    [MGLSettings sharedSettings].apiBaseURL = apiBaseURL;
+    auto tileServerOptions = [MGLSettings sharedSettings].tileServerOptions;
+    NSString *baseUrlNSStr = apiBaseURL.absoluteString;
+    auto baseUrl = std::string([baseUrlNSStr UTF8String]);
+
+    [MGLSettings sharedSettings].tileServerOptions = &tileServerOptions->withBaseURL(baseUrl);
 }
 
 + (NSURL *)apiBaseURL {
-    return [MGLSettings sharedSettings].apiBaseURL;
+    auto baseUrl = [MGLSettings sharedSettings].tileServerOptions->baseURL();
+    NSString* baseUrlNSStr = [NSString stringWithUTF8String:baseUrl.c_str()];
+    NSURL *url = [NSURL URLWithString:baseUrlNSStr];
+    return url;
+}
+
++ (void)setTileServerOptions:(mbgl::TileServerOptions)options {
+    [MGLSettings sharedSettings].tileServerOptions = &options;
+    [self tileServerOptionsChanged];
+}
+
++ (mbgl::TileServerOptions)tileServerOptions {
+    auto options = [MGLSettings sharedSettings];
+    return options.tileServerOptions->clone();
+}
+
++ (void)tileServerOptionsChanged {
+    [MGLSettings sharedSettings].tileServerOptionsChangeToken = [[NSUUID UUID] UUIDString];
 }
 
 @end

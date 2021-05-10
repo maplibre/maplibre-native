@@ -164,10 +164,10 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, options);
         _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
         _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
-
+        
         // Observe for changes to the API base URL (and find out the current one).
         [[MGLSettings sharedSettings] addObserver:self
-                                            forKeyPath:@"apiBaseURL"
+                                            forKeyPath:@"tileServerOptionsChangeToken"
                                                options:(NSKeyValueObservingOptionInitial |
                                                               NSKeyValueObservingOptionNew)
                                                context:NULL];
@@ -184,7 +184,8 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"apiBaseURL"];
+    
+    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"tileServerOptionsChangeToken"];
     [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"accessToken"];
 
     for (MGLOfflinePack *pack in self.packs) {
@@ -199,10 +200,11 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         if (![accessToken isKindOfClass:[NSNull class]]) {
             _mbglOnlineFileSource->setProperty(mbgl::ACCESS_TOKEN_KEY, accessToken.UTF8String);
         }
-    } else if ([keyPath isEqualToString:@"apiBaseURL"] && object == [MGLSettings sharedSettings]) {
-        NSURL *apiBaseURL = change[NSKeyValueChangeNewKey];
-        if (![apiBaseURL isKindOfClass:[NSNull class]]) {
-            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL.absoluteString.UTF8String);
+    } else if ([keyPath isEqualToString:@"tileServerOptionsChangeToken"] && object == [MGLSettings sharedSettings]) {
+        auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+        auto apiBaseURL = tileServerOptions->baseURL();
+        if (!apiBaseURL.empty()) {
+            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL);
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

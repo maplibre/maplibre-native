@@ -23,7 +23,9 @@ namespace mbgl {
         
         // copyable
         TileServerOptions(const TileServerOptions&);
-        TileServerOptions& operator=(const TileServerOptions& options);
+        TileServerOptions& operator=(TileServerOptions& options);
+        
+        TileServerOptions clone() const;
 
         /**
          * @brief Sets the API base URL.
@@ -226,7 +228,6 @@ namespace mbgl {
         static TileServerOptions MapTilerConfiguration();
 
     private:
-
         class Impl;
         std::unique_ptr<Impl> impl_;
     };

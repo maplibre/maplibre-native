@@ -26,22 +26,24 @@ namespace mbgl {
         std::string accessTokenParameterName;
     };
 
-    // These requires the complete type of Impl.
+
     TileServerOptions::TileServerOptions() : impl_(std::make_unique<Impl>()) {}
     TileServerOptions::~TileServerOptions() = default;
 
     // movable
-    TileServerOptions::TileServerOptions(TileServerOptions&& ) noexcept = default;
+    TileServerOptions::TileServerOptions(TileServerOptions &&) noexcept = default;
     TileServerOptions& TileServerOptions::operator=(TileServerOptions &&) noexcept = default;
 
     // copyable
     TileServerOptions::TileServerOptions(const TileServerOptions& options)
         : impl_(std::make_unique<Impl>(*options.impl_)) {}
-    TileServerOptions& TileServerOptions::operator=(const TileServerOptions& options) {
-        if (this != &options) {
-            *impl_ = *options.impl_;
-        }
+    TileServerOptions& TileServerOptions::operator=(TileServerOptions& options) {
+        swap(impl_, options.impl_);
         return *this;
+    }
+
+    TileServerOptions TileServerOptions::clone() const {
+        return TileServerOptions(*this);
     }
 
     TileServerOptions& TileServerOptions::withBaseURL(std::string url) {

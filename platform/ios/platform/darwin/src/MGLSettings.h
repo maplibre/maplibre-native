@@ -36,6 +36,7 @@ MGL_EXPORT
  */
 @property (class, copy, nullable) NSString *accessToken;
 
+
 @end
 
 NS_ASSUME_NONNULL_END

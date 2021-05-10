@@ -33,7 +33,7 @@ static MGLNativeNetworkManager *instance = nil;
         // For testing. Since we get a `nil` return when SDK is modular, we use
         // this for testing requests.
         // Same as `[MGLNetworkConfiguration defaultSessionConfiguration]` in
-        // `MGLNetworkConfiguration.m`.
+        // `MGLNetworkConfiguration.mm`.
         configuration = [MGLNativeNetworkManager testSessionConfiguration];
     }
 
