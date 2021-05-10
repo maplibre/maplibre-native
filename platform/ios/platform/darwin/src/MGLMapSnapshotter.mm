@@ -16,6 +16,7 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLRendererConfiguration.h"
 #import "MGLMapSnapshotter_Private.h"
+#import "MGLSettings_Private.h"
 
 #if TARGET_OS_IPHONE
 #import "UIImage+MGLAdditions.h"
@@ -711,9 +712,13 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     // App-global configuration
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+    auto accessToken = [[MGLSettings sharedSettings] accessToken];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
+    resourceOptions.withTileServerOptions(tileServerOptions->clone())
+                   .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+                   .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String)
+                   .withAccessToken([accessToken UTF8String]);
 
     // Create the snapshotter
     auto localFontFamilyName = config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;

@@ -67,6 +67,7 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
+#import "MGLSettings_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -488,9 +489,13 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+    auto accessToken = [[MGLSettings sharedSettings] accessToken];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+    resourceOptions.withTileServerOptions(tileServerOptions->clone())
+                   .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
+                   .withAccessToken([accessToken UTF8String]);
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);

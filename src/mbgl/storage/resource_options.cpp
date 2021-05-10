@@ -34,7 +34,7 @@ const std::string& ResourceOptions::accessToken() const {
     return impl_->accessToken;
 }
 
-ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions& tileServerOptions) {
+ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions tileServerOptions) {
     impl_->tileServerOptions = std::move(tileServerOptions);
     return *this;
 }

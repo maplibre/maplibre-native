@@ -42,7 +42,7 @@
         "platform/ios/vendor/mapbox-events-ios/MapboxMobileEvents/MMEConfigurator.m",
         "platform/ios/vendor/mapbox-events-ios/MapboxMobileEvents/Categories/NSData+MMEGZIP.m",
         "platform/darwin/src/MGLAttributionInfo.mm",
-        "platform/darwin/src/NSBundle+MGLAdditions.mmm",
+        "platform/darwin/src/NSBundle+MGLAdditions.mm",
         "platform/ios/vendor/mapbox-events-ios/MapboxMobileEvents/MMEUINavigation.m",
         "platform/ios/src/MGLUserLocationHeadingArrowLayer.m",
         "platform/ios/src/MGLUserLocation.m",
