@@ -19,9 +19,7 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        auto options = mbgl::TileServerOptions::MapboxConfiguration();
-        self.tileServerOptions = new mbgl::TileServerOptions();
-        *self.tileServerOptions = options;
+        self.tileServerOptions = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapboxConfiguration());
     }
     return self;
 }
