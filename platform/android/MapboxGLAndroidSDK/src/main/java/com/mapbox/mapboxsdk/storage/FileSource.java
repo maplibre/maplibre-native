@@ -371,7 +371,7 @@ public class FileSource {
   private long nativePtr;
 
   private FileSource(String cachePath) {
-    initialize(Mapbox.getAccessToken(), cachePath);
+    initialize(Mapbox.getApiKey(), cachePath);
   }
 
   @Keep
@@ -384,11 +384,11 @@ public class FileSource {
   public native void deactivate();
 
   @Keep
-  public native void setAccessToken(String accessToken);
+  public native void setApiKey(String apiKey);
 
   @NonNull
   @Keep
-  public native String getAccessToken();
+  public native String getApiKey();
 
   @Keep
   public native void setApiBaseUrl(String baseUrl);
@@ -408,7 +408,7 @@ public class FileSource {
   private native void setResourceCachePath(String path, ResourcesCachePathChangeCallback callback);
 
   @Keep
-  private native void initialize(String accessToken, String cachePath);
+  private native void initialize(String apiKey, String cachePath);
 
   @Override
   @Keep

@@ -34,30 +34,30 @@ public final class Mapbox {
 
   private Context context;
   @Nullable
-  private String accessToken;
+  private String apiKey;
   @Nullable
   private AccountsManager accounts;
 
   /**
    * Get an instance of Mapbox.
    * <p>
-   * This class manages the Mapbox access token, application context, and connectivity state.
+   * This class manages the API key, application context, and connectivity state.
    * </p>
    *
    * @param context     Android context which holds or is an application context
-   * @param accessToken Mapbox access token
+   * @param apiKey api key
    * @return the single instance of Mapbox
    */
   @UiThread
   @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String accessToken) {
+  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Mapbox(appContext, accessToken);
-      if (isAccessTokenValid(accessToken)) {
+      INSTANCE = new Mapbox(appContext, apiKey);
+      if (isApiKeyValid(apiKey)) {
         INSTANCE.accounts = new AccountsManager();
       }
       ConnectivityReceiver.instance(appContext);
@@ -65,9 +65,9 @@ public final class Mapbox {
     return INSTANCE;
   }
 
-  Mapbox(@NonNull Context context, @Nullable String accessToken) {
+  Mapbox(@NonNull Context context, @Nullable String apiKey) {
     this.context = context;
-    this.accessToken = accessToken;
+    this.apiKey = apiKey;
   }
 
   /**
@@ -76,20 +76,20 @@ public final class Mapbox {
    * @return Mapbox access token
    */
   @Nullable
-  public static String getAccessToken() {
+  public static String getApiKey() {
     validateMapbox();
-    return INSTANCE.accessToken;
+    return INSTANCE.apiKey;
   }
 
   /**
-   * Set the current active accessToken.
+   * Set the current active apiKey.
    */
-  public static void setAccessToken(String accessToken) {
+  public static void setApiKey(String apiKey) {
     validateMapbox();
-    throwIfAccessTokenInvalid(accessToken);
-    INSTANCE.accessToken = accessToken;
+    throwIfApiKeyInvalid(apiKey);
+    INSTANCE.apiKey = apiKey;
     INSTANCE.accounts = new AccountsManager();
-    FileSource.getInstance(getApplicationContext()).setAccessToken(accessToken);
+    FileSource.getInstance(getApplicationContext()).setApiKey(apiKey);
   }
 
   /**
@@ -151,28 +151,25 @@ public final class Mapbox {
   /**
    * Runtime validation of Mapbox access token
    *
-   * @param accessToken the access token to validate
+   * @param apiKey the access token to validate
    * @return true is valid, false otherwise
    */
-  static boolean isAccessTokenValid(@Nullable String accessToken) {
-    if (accessToken == null) {
+  static boolean isApiKeyValid(@Nullable String apiKey) {
+    if (apiKey == null) {
       return false;
     }
 
-    accessToken = accessToken.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
-    return accessToken.length() != 0 && (accessToken.startsWith("pk.") || accessToken.startsWith("sk."));
+    apiKey = apiKey.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
+    return apiKey.length() != 0;
   }
 
   /**
    * Throws exception when access token is invalid
    */
-  public static void throwIfAccessTokenInvalid(@Nullable String accessToken) {
-    if (!isAccessTokenValid(accessToken)) {
+  public static void throwIfApiKeyInvalid(@Nullable String apiKey) {
+    if (!isApiKeyValid(apiKey)) {
       throw new MapboxConfigurationException(
-              "A valid access token parameter is required when using a Mapbox service."
-                      + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
-                      + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
-                      + "Currently provided token is: " + accessToken);
+              "A valid API key is required, currently provided key is: " + apiKey);
     }
   }
 

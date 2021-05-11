@@ -19,7 +19,7 @@ namespace android {
 
 // FileSource //
 
-FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const jni::String& _cachePath)
+FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::String& _cachePath)
 :activationCounter( optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
@@ -35,7 +35,7 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const 
             return assetFileSource;
         });
 
-    resourceOptions.withAccessToken(accessToken ? jni::Make<std::string>(_env, accessToken) : "")
+    resourceOptions.withApiKey(apiKey ? jni::Make<std::string>(_env, apiKey) : "")
             .withCachePath(path + DATABASE_FILE);
 
     // Create a core file sources
@@ -50,7 +50,7 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const 
 FileSource::~FileSource() {
 }
 
-jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
+jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
     if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
     }
@@ -59,7 +59,7 @@ jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
     return jni::Make<jni::String>(env, "");
 }
 
-void FileSource::setAccessToken(jni::JNIEnv& env, const jni::String& token) {
+void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
     if (onlineSource) {
         onlineSource->setProperty(mbgl::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
     } else {
@@ -217,8 +217,8 @@ void FileSource::registerNative(jni::JNIEnv& env) {
                                         jni::MakePeer<FileSource, const jni::String&, const jni::String&>,
                                         "initialize",
                                         "finalize",
-                                        METHOD(&FileSource::getAccessToken, "getAccessToken"),
-                                        METHOD(&FileSource::setAccessToken, "setAccessToken"),
+                                        METHOD(&FileSource::getApiKey, "getApiKey"),
+                                        METHOD(&FileSource::setApiKey, "setApiKey"),
                                         METHOD(&FileSource::setAPIBaseUrl, "setApiBaseUrl"),
                                         METHOD(&FileSource::setResourceTransform, "setResourceTransform"),
                                         METHOD(&FileSource::setResourceCachePath, "setResourceCachePath"),

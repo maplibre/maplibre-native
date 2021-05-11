@@ -46,9 +46,9 @@ public:
 
     ~FileSource();
 
-    jni::Local<jni::String> getAccessToken(jni::JNIEnv&);
+    jni::Local<jni::String> getApiKey(jni::JNIEnv&);
 
-    void setAccessToken(jni::JNIEnv&, const jni::String&);
+    void setApiKey(jni::JNIEnv&, const jni::String&);
 
     void setAPIBaseUrl(jni::JNIEnv&, const jni::String&);
 

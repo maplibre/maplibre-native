@@ -80,11 +80,11 @@ See [checkstyle guide](https://github.com/mapbox/mapbox-gl-native-android/wiki/S
 #### Resolving duplicate file entries
 With buck build support, Android Studio can complain about duplicate source files. To remove this warning, open `MapboxGLAndroidSDK.iml` find the list of `excludeFolder` entries and add `<excludeFolder url="file://$MODULE_DIR$/../../../misc/" />` line.
 
-##### Setting Mapbox Access Token
+##### Setting API Key
 
-_The test application (used for development purposes) uses Mapbox vector tiles, which require a Mapbox account and API access token. Obtain a free access token on the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/)._
+_The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key._
 
-With the first gradle invocation, gradle will take the value of the `MAPBOX_ACCESS_TOKEN` environment variable and save it to `MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your access token to the `mapbox_access_token` resource.  
+With the first gradle invocation, gradle will take the value of the `MGL_API_KEY` environment variable and save it to `MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your api key to the `api_key` resource.  
 
 ### Running project
 

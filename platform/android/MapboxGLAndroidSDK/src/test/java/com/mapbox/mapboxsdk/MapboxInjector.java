@@ -13,8 +13,8 @@ public class MapboxInjector {
   private static final String FIELD_INSTANCE = "INSTANCE";
   private static final String FIELD_ACCOUNTS = "accounts";
 
-  public static void inject(@NonNull Context context, @NonNull String accessToken) {
-    Mapbox mapbox = new Mapbox(context, accessToken);
+  public static void inject(@NonNull Context context, @NonNull String apiKey) {
+    Mapbox mapbox = new Mapbox(context, apiKey);
     try {
       Field instance = Mapbox.class.getDeclaredField(FIELD_INSTANCE);
       instance.setAccessible(true);

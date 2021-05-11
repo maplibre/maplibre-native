@@ -30,22 +30,23 @@ public class AttributionDialogManagerTest {
   private AttributionDialogManager attributionDialogManager;
   private CameraPosition cameraPosition;
 
-  private static final String ASSERT_MAPBOX_TOKEN = "TestAccessToken";
+  private static final String ASSERT_MAPBOX_TOKEN = "TestApiKey";
 
   private static final String ASSERT_MAPBOX_STYLE_URI = "mapbox://styles/mapbox/streets-v11";
   private static final String ASSERT_MAPBOX_LOCAL_STYLE_URI = "asset://style.json";
 
   private static final String ASSERT_MAPBOX_PACKAGE_NAME = "com.mapbox.attributionmanagertest";
 
+  //TODO:PP access_token=
   private static final String ASSERT_MAPBOX_FEEDBACK_FINAL_URL =
           "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&"
-                  + "access_token=TestAccessToken&owner=mapbox&id=streets-v11"
+                  + "access_token=TestApiKey&owner=mapbox&id=streets-v11"
                   + "#/22.200001/11.100000/12.000000/24.000000/5";
   private static final String ASSERT_MAPBOX_FEEDHACK_FINAL_URL_LOCAL_STYLE =
           "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&"
-                  + "access_token=TestAccessToken#/22.200001/11.100000/12.000000/24.000000/5";
+                  + "access_token=TestApiKey#/22.200001/11.100000/12.000000/24.000000/5";
   private static final String ASSERT_MAPBOX_FEEDBACL_FINAL_URL_NULL_CAMERA_POSITION =
-          "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&access_token=TestAccessToken";
+          "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&access_token=TestApiKey";
 
   @Before
   public void beforeTest() {
