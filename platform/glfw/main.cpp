@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(cacheDB).withAccessToken(token);
+    resourceOptions.withCachePath(cacheDB).withApiKey(token);
 
     GLFWView backend(fullscreen, benchmark, resourceOptions);
     view = &backend;

@@ -100,7 +100,7 @@ protected:
 
 // Property name to set / get an access token.
 // type: std::string
-constexpr const char* ACCESS_TOKEN_KEY = "access-token";
+constexpr const char* API_KEY_KEY = "api-tkey";
 
 // Property name to set / get base url.
 // type: std::string

@@ -23,7 +23,7 @@ namespace mbgl {
         std::string tileTemplate;
         std::string tileDomainName;
         optional<std::string> tileVersionPrefix;
-        std::string accessTokenParameterName;
+        std::string apiKeyParameterName;
     };
 
 
@@ -154,20 +154,20 @@ namespace mbgl {
         return impl_->tileVersionPrefix;
     }
 
-    TileServerOptions& TileServerOptions::withAccessTokenParameterName(std::string accessTokenParameterName) {
-        impl_->accessTokenParameterName = std::move(accessTokenParameterName);
+    TileServerOptions& TileServerOptions::withApiKeyParameterName(std::string apiKeyParameterName) {
+        impl_->apiKeyParameterName = std::move(apiKeyParameterName);
         return *this;
     }
 
-    const std::string& TileServerOptions::accessTokenParameterName() const {
-        return impl_->accessTokenParameterName;
+    const std::string& TileServerOptions::apiKeyParameterName() const {
+        return impl_->apiKeyParameterName;
     }
 
     TileServerOptions TileServerOptions::MapboxConfiguration() {
         TileServerOptions options = TileServerOptions()
             .withBaseURL("https://api.mapbox.com")
             .withUriSchemeAlias("mapbox")
-            .withAccessTokenParameterName("access_token")
+            .withApiKeyParameterName("access_token")
             .withSourceTemplate("/{domain}.json", {"/v4"})
             .withStyleTemplate("/styles/v1{path}", "styles", {})
             .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
@@ -180,7 +180,7 @@ namespace mbgl {
         TileServerOptions options = TileServerOptions()
             .withBaseURL("https://api.maptiler.com")
             .withUriSchemeAlias("maptiler")
-            .withAccessTokenParameterName("key")
+            .withApiKeyParameterName("key")
             .withSourceTemplate("/tiles/{path}/tiles.json", {})
             .withStyleTemplate("/maps/{path}", "maps", {})
             .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})

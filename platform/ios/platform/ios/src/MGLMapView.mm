@@ -490,12 +490,14 @@ public:
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
     auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
-    auto accessToken = [[MGLSettings sharedSettings] accessToken];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withTileServerOptions(tileServerOptions->clone())
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
-                   .withAccessToken([accessToken UTF8String]);
+                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
@@ -6899,7 +6901,7 @@ public:
 
     // Explanation
     UILabel *explanationLabel = [[UILabel alloc] init];
-    explanationLabel.text = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"DESIGNABLE", nil, nil, @"To display a Mapbox-hosted map here, set %@ to your access token in %@\n\nFor detailed instructions, see:", @"Instructions in Interface Builder designable; {key}, {plist file name}"), @"MGLMapboxAccessToken", @"Info.plist"];
+    explanationLabel.text = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"DESIGNABLE", nil, nil, @"To display a map which requires authoriaztion here, set %@ to your API key in %@", @"Instructions in Interface Builder designable; {key}, {plist file name}"), @"MGLApiKey", @"Info.plist"];
     explanationLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     explanationLabel.numberOfLines = 0;
     explanationLabel.translatesAutoresizingMaskIntoConstraints = NO;

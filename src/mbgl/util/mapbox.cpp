@@ -85,23 +85,23 @@ static bool equals(const std::string& str, const URL::Segment& segment, std::str
 
 std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
-                               const std::string& accessToken) {
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
-    if (accessToken.empty()) {
+    if (apiKey.empty()) {
         throw std::runtime_error(
             "You must provide a Mapbox API access token for Mapbox tile sources");
     }
 
     const URL url(str);
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken + "&secure";
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey + "&secure";
     return transformURL(tpl, str, url);
 }
 
 std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
                               const std::string& str,
-                              const std::string& accessToken) {
+                              const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -113,13 +113,13 @@ std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
         return str;
     }
     
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleVersionPrefix().value_or("") + tileServerOptions.styleTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleVersionPrefix().value_or("") + tileServerOptions.styleTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return transformURL(tpl, str, url);
 }
 
 std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
-                               const std::string& accessToken) {
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -131,13 +131,13 @@ std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesVersionPrefix().value_or("") + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesVersionPrefix().value_or("") + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return transformURL(tpl, str, url);
 }
 
 std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,
-                               const std::string& accessToken) {
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -149,13 +149,13 @@ std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsVersionPrefix().value_or("") + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.accessTokenParameterName() + "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsVersionPrefix().value_or("") + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.apiKeyParameterName() + "=" + apiKey;
     return transformURL(tpl, str, url);
 }
 
 std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
                              const std::string& str,
-                             const std::string& accessToken) {
+                             const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -167,7 +167,7 @@ std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileVersionPrefix().value_or("") + tileServerOptions.tileTemplate() + "?" + tileServerOptions.accessTokenParameterName() +  "=" + accessToken;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileVersionPrefix().value_or("") + tileServerOptions.tileTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return transformURL(tpl, str, url);
 }
 
@@ -205,9 +205,8 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
         while (idx != std::string::npos) {
             idx++; // skip & or ?
             auto ampersandIdx = str.find('&', idx);
-            //const char* accessToken = "access_token=";
-            const auto& accessToken = tileServerOptions.accessTokenParameterName() + "=";
-            if (str.compare(idx, accessToken.length(), accessToken) != 0) {
+            const auto& apiKey = tileServerOptions.apiKeyParameterName() + "=";
+            if (str.compare(idx, apiKey.length(), apiKey) != 0) {
                 result.append(1, hasQuery ? '&' : '?');
                 result.append(str, idx, ampersandIdx != std::string::npos ? ampersandIdx - idx
                                                                           : std::string::npos);

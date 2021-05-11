@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The `MGLSettings` object provides a global way to set SDK properties such
- as accessToken, backend URL, etc.
+ as apiKey, backend URL, etc.
  */
 MGL_EXPORT
 @interface MGLSettings : NSObject
@@ -14,27 +14,17 @@ MGL_EXPORT
 #pragma mark Authorizing Access
 
 /**
- The
- <a href="https://docs.mapbox.com/help/glossary/access-token/">Mapbox access token</a>
- used by all instances of `MGLMapView` in the current application.
-
- Mapbox-hosted vector tiles and styles require an API access token, which you
- can obtain from the
- <a href="https://www.mapbox.com/studio/account/tokens/">Mapbox account page</a>.
- Access tokens associate requests to Mapbox’s vector tile and style APIs with
- your Mapbox account. They also deter other developers from using your styles
- without your permission.
-
+ The API Key used by all instances of `MGLMapView` in the current application.
  Setting this property to a value of `nil` has no effect.
 
- @note You must set the access token before attempting to load any Mapbox-hosted
-    style. Therefore, you should generally set it before creating an instance of
-    `MGLMapView`. The recommended way to set an access token is to add an entry
-    to your application’s Info.plist file with the key `MGLMapboxAccessToken`
+ @note You must set the API key before attempting to load any style which
+    requires the token. Therefore, you should generally set it before creating an instance of
+    `MGLMapView`. The recommended way to set an api key is to add an entry
+    to your application’s Info.plist file with the key `MGLApiKey`
     and the type `String`. Alternatively, you may call this method from your
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
-@property (class, copy, nullable) NSString *accessToken;
+@property (class, copy, nullable) NSString *apiKey;
 
 
 @end

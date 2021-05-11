@@ -46,7 +46,7 @@ To build the SDK from source:
 
 1. Open the project editor, select your application target, then go to the General tab. Drag Mapbox.framework into the “Embedded Binaries” section. (Don’t drag it into the “Linked Frameworks and Libraries” section; Xcode will add it there automatically.) In the sheet that appears, make sure “Copy items if needed” is checked, then click Finish.
 
-1. Mapbox vector tiles require a Mapbox account and API access token. In the project editor, select the application target, then go to the Info tab. Under the “Custom macOS Application Target Properties” section, set `MGLMapboxAccessToken` to your access token. You can obtain an access token from the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/).
+1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom macOS Application Target Properties”” section, set `MGLApiKey` to your api key.
 
 ## Usage
 

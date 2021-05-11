@@ -40,7 +40,7 @@ PassRefPtr<FileSource> FileSourceManager::getFileSource(FileSourceType type, con
 
     const auto context = reinterpret_cast<uint64_t>(options.platformContext());
     std::string id =
-        options.tileServerOptions().baseURL() + '|' + options.accessToken() + '|' + options.cachePath() + '|' + util::toString(context);
+        options.tileServerOptions().baseURL() + '|' + options.apiKey() + '|' + options.cachePath() + '|' + util::toString(context);
 
     std::shared_ptr<FileSource> fileSource;
     auto fileSourceIt = std::find_if(impl->fileSources.begin(), impl->fileSources.end(), [type, &id](const auto& info) {

@@ -28,14 +28,14 @@ public:
      * @param token Mapbox access token.
      * @return ResourceOptions for chaining options together.
      */
-    ResourceOptions& withAccessToken(std::string token);
+    ResourceOptions& withApiKey(std::string token);
 
     /**
      * @brief Gets the previously set (or default) Mapbox access token.
      *
      * @return const std::string& Mapbox access token.
      */
-    const std::string& accessToken() const;
+    const std::string& apiKey() const;
 
     /**
      * @brief Sets the tile server options..

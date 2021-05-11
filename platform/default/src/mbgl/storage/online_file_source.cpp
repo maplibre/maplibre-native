@@ -185,8 +185,8 @@ public:
     void setAPIBaseURL(std::string t) { apiBaseURL = std::move(t); }
     const std::string& getAPIBaseURL() const { return apiBaseURL; }
 
-    void setAccessToken(std::string t) { accessToken = std::move(t); }
-    const std::string& getAccessToken() const { return accessToken; }
+    void setApiKey(std::string t) { apiKey = std::move(t); }
+    const std::string& getApiKey() const { return apiKey; }
 
 private:
     friend struct OnlineFileRequest;
@@ -294,7 +294,7 @@ private:
     uint32_t maximumConcurrentRequests;
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
-    std::string accessToken;
+    std::string apiKey;
     std::string apiBaseURL;     
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
 };
@@ -355,21 +355,21 @@ public:
         return cachedMaximumConcurrentRequests;
     }
 
-    void setAccessToken(const mapbox::base::Value& value) {
-        if (auto* accessToken = value.getString()) {
-            thread->actor().invoke(&OnlineFileSourceThread::setAccessToken, *accessToken);
+    void setApiKey(const mapbox::base::Value& value) {
+        if (auto* apiKey = value.getString()) {
+            thread->actor().invoke(&OnlineFileSourceThread::setApiKey, *apiKey);
             {
-                std::lock_guard<std::mutex> lock(cachedAccessTokenMutex);
-                cachedAccessToken = *accessToken;
+                std::lock_guard<std::mutex> lock(cachedApiKeyMutex);
+                cachedApiKey = *apiKey;
             }
         } else {
-            Log::Error(Event::General, "Invalid access-token property value type.");
+            Log::Error(Event::General, "Invalid apiKey property value type.");
         }
     }
 
-    std::string getAccessToken() const {
-        std::lock_guard<std::mutex> lock(cachedAccessTokenMutex);
-        return cachedAccessToken;
+    std::string getApiKey() const {
+        std::lock_guard<std::mutex> lock(cachedApiKeyMutex);
+        return cachedApiKey;
     }
 
     void setAPIBaseURL(const mapbox::base::Value& value) {
@@ -393,8 +393,8 @@ public:
     }
 
 private:
-    mutable std::mutex cachedAccessTokenMutex;
-    std::string cachedAccessToken;
+    mutable std::mutex cachedApiKeyMutex;
+    std::string cachedApiKey;
 
     mutable std::mutex resourceOptionsMutex;
     ResourceOptions cachedResourceOptions;
@@ -600,24 +600,24 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
 
         case Resource::Kind::Style:
             res.url =
-                mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getAccessToken());
+                mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Source:
-            res.url = util::mapbox::normalizeSourceURL(options, resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSourceURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Glyphs:
-            res.url = util::mapbox::normalizeGlyphsURL(options, resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeGlyphsURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::SpriteImage:
         case Resource::Kind::SpriteJSON:
-            res.url = util::mapbox::normalizeSpriteURL(options, resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSpriteURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Tile:
-            res.url = util::mapbox::normalizeTileURL(options, resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeTileURL(options, resource.url, impl->getApiKey());
             break;
     }
     return impl->request(std::move(callback), std::move(res));
@@ -638,8 +638,8 @@ void OnlineFileSource::resume() {
 }
 
 void OnlineFileSource::setProperty(const std::string& key, const mapbox::base::Value& value) {
-    if (key == ACCESS_TOKEN_KEY) {
-        impl->setAccessToken(value);
+    if (key == API_KEY_KEY) {
+        impl->setApiKey(value);
     } else if (key == API_BASE_URL_KEY) {
         impl->setAPIBaseURL(value);
     } else if (key == MAX_CONCURRENT_REQUESTS_KEY) {
@@ -656,8 +656,8 @@ void OnlineFileSource::setProperty(const std::string& key, const mapbox::base::V
 }
 
 mapbox::base::Value OnlineFileSource::getProperty(const std::string& key) const {
-    if (key == ACCESS_TOKEN_KEY) {
-        return impl->getAccessToken();
+    if (key == API_KEY_KEY) {
+        return impl->getApiKey();
     } else if (key == API_BASE_URL_KEY) {
         return impl->getAPIBaseURL();
     } else if (key == MAX_CONCURRENT_REQUESTS_KEY) {

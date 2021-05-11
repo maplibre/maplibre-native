@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {"help"});
 
     args::ValueFlag<std::string> backendValue(argumentParser, "Backend", "Rendering backend", {"backend"});
-    args::ValueFlag<std::string> tokenValue(argumentParser, "key", "Mapbox access token", {'t', "token"});
+    args::ValueFlag<std::string> apikeyValue(argumentParser, "key", "API key", {'t', "apikey"});
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> outputValue(argumentParser, "file", "Output file name", {'o', "output"});
     args::ValueFlag<std::string> cacheValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
@@ -67,9 +67,9 @@ int main(int argc, char *argv[]) {
     const std::string cache_file = cacheValue ? args::get(cacheValue) : "cache.sqlite";
     const std::string asset_root = assetsValue ? args::get(assetsValue) : ".";
 
-    // Try to load the token from the environment.
-    const char* tokenEnv = getenv("MAPBOX_ACCESS_TOKEN");
-    const std::string token = tokenValue ? args::get(tokenValue) : (tokenEnv ? tokenEnv : std::string());
+    // Try to load the apikey from the environment.
+    const char* apikeyEnv = getenv("MGL_API_KEY");
+    const std::string apikey = apikeyValue ? args::get(apikeyValue) : (apikeyEnv ? apikeyEnv : std::string());
 
     const bool debug = debugFlag ? args::get(debugFlag) : false;
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     HeadlessFrontend frontend({ width, height }, pixelRatio);
     Map map(frontend, MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio),
-            ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withAccessToken(std::string(token)));
+            ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withApiKey(std::string(apikey)));
 
     if (style.find("://") == std::string::npos) {
         style = std::string("file://") + style;

@@ -174,7 +174,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
         // Observe for changes to the global access token (and find out the current one).
         [[MGLSettings sharedSettings] addObserver:self
-                                            forKeyPath:@"accessToken"
+                                            forKeyPath:@"apiKey"
                                                options:(NSKeyValueObservingOptionInitial |
                                                         NSKeyValueObservingOptionNew)
                                                context:NULL];
@@ -186,7 +186,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"tileServerOptionsChangeToken"];
-    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"accessToken"];
+    [[MGLSettings sharedSettings] removeObserver:self forKeyPath:@"apiKey"];
 
     for (MGLOfflinePack *pack in self.packs) {
         [pack invalidate];
@@ -195,10 +195,10 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context {
     // Synchronize the file source’s access token with the global one in MGLSettings.
-    if ([keyPath isEqualToString:@"accessToken"] && object == [MGLSettings sharedSettings]) {
-        NSString *accessToken = change[NSKeyValueChangeNewKey];
-        if (![accessToken isKindOfClass:[NSNull class]]) {
-            _mbglOnlineFileSource->setProperty(mbgl::ACCESS_TOKEN_KEY, accessToken.UTF8String);
+    if ([keyPath isEqualToString:@"apiKey"] && object == [MGLSettings sharedSettings]) {
+        NSString *apiKey = change[NSKeyValueChangeNewKey];
+        if (![apiKey isKindOfClass:[NSNull class]]) {
+            _mbglOnlineFileSource->setProperty(mbgl::API_KEY_KEY, apiKey.UTF8String);
         }
     } else if ([keyPath isEqualToString:@"tileServerOptionsChangeToken"] && object == [MGLSettings sharedSettings]) {
         auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];

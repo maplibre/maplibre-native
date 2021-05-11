@@ -10,11 +10,11 @@
 @implementation MGLAttributionInfoTests
 
 - (void)setUp {
-    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
 }
 
 - (void)tearDown {
-    [MGLSettings setAccessToken:nil];
+    [MGLSettings setApiKey:nil];
 }
 
 - (void)testParsing {

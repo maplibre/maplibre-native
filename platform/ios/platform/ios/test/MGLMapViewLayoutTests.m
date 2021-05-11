@@ -48,7 +48,7 @@
 - (void)setUp {
     [super setUp];
 
-    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
 
     self.superView = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
@@ -89,7 +89,7 @@
 - (void)tearDown {
     self.styleLoadingExpectation = nil;
     self.mapView = nil;
-    [MGLSettings setAccessToken:nil];
+    [MGLSettings setApiKey:nil];
 
     [super tearDown];
 }

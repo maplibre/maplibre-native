@@ -702,7 +702,7 @@ CA
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                         <connections>
-                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLMapboxAccessToken" id="iJE-S2-ALY"/>
+                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLApiKey" id="iJE-S2-ALY"/>
                         </connections>
                     </textField>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="c3S-LC-PoX">
@@ -714,9 +714,6 @@ CA
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="smallSystem"/>
                         </buttonCell>
-                        <connections>
-                            <action selector="openAccessTokenManager:" target="-1" id="1LX-4G-roC"/>
-                        </connections>
                     </button>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="7IZ-zl-iT1">
                         <rect key="frame" x="18" y="18" width="109" height="18"/>

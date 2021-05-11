@@ -175,7 +175,8 @@
             [queryItems addObjectsFromArray:@[
                 [NSURLQueryItem queryItemWithName:@"owner" value:stylePathComponents[1]],
                 [NSURLQueryItem queryItemWithName:@"id" value:stylePathComponents[2]],
-                [NSURLQueryItem queryItemWithName:@"access_token" value:[MGLSettings accessToken]],
+                //TODO:PP
+                [NSURLQueryItem queryItemWithName:@"access_token" value:[MGLSettings apiKey]],
                 [NSURLQueryItem queryItemWithName:@"map_sdk_version" value:[NSBundle mgl_frameworkInfoDictionary][@"MGLSemanticVersionString"]],
             ]];
         }

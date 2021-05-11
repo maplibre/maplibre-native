@@ -5,12 +5,9 @@
 #import "NSProcessInfo+MGLAdditions.h"
 #endif
 
-
-NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
-
 @interface MGLSettings ()
 
-@property (atomic) NSString *accessToken;
+@property (atomic) NSString *apiKey;
 @property (atomic) mbgl::TileServerOptions *tileServerOptions;
 @property (atomic) NSString *tileServerOptionsChangeToken;
 
@@ -31,12 +28,12 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
 
 + (void)load {
     // Read the initial configuration from Info.plist.
-    NSString *accessToken = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MGLMapboxAccessToken"];
-    if (accessToken.length) {
-        self.accessToken = accessToken;
+    NSString *apiKey = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MGLApiKey"];
+    if (apiKey.length) {
+        self.apiKey = apiKey;
     }
 
-    NSString *apiBaseURL = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MGLMapboxAPIBaseURL"];
+    NSString *apiBaseURL = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MGLTileServerBaseURL"];
     
     // If apiBaseURL is not a valid URL, [NSURL URLWithString:] will be `nil`.
     if (apiBaseURL.length && [NSURL URLWithString:apiBaseURL]) {
@@ -69,18 +66,18 @@ NSString * const MGLMapboxAccountTypeKey = @"MGLMapboxAccountType";
     return _sharedSettings;
 }
 
-+ (void)setAccessToken:(NSString *)accessToken {
-    accessToken = [accessToken stringByTrimmingCharactersInSet:
-                   [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (!accessToken.length) {
++ (void)setApiKey:(NSString *)apiKey {
+    apiKey = [apiKey stringByTrimmingCharactersInSet:
+             [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (!apiKey.length) {
         return;
     }
 
-    [MGLSettings sharedSettings].accessToken = accessToken;
+    [MGLSettings sharedSettings].apiKey = apiKey;
 }
 
-+ (NSString *)accessToken {
-    return [MGLSettings sharedSettings].accessToken;
++ (NSString *)apiKey {
+    return [MGLSettings sharedSettings].apiKey;
 }
 
 + (void)setAPIBaseURL:(NSURL *)apiBaseURL {

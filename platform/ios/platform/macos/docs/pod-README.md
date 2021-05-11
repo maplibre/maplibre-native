@@ -48,7 +48,7 @@ where _x.y_ is the current version. In Terminal, run `pod install`.
 
 ## Usage
 
-Mapbox vector tiles require a Mapbox account and API access token. In the project editor, select the application target, then go to the Info tab. Under the “Custom macOS Application Target Properties” section, set `MGLMapboxAccessToken` to your access token. You can obtain an access token from the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/).
+Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the Info section, Under the “Custom macOS Application Target Properties” section, set `MGLApiKey` to your api key.
 
 Then, in a storyboard or XIB:
 

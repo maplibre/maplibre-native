@@ -205,17 +205,17 @@ namespace mbgl {
         /**
          * @brief Sets the access token parameter name.
          *
-         * @param accessTokenParameterName The parameter name.
+         * @param apiKeyParameterName The parameter name.
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withAccessTokenParameterName(std::string accessTokenParameterName);
+        TileServerOptions& withApiKeyParameterName(std::string apiKeyParameterName);
 
         /**
-         * @brief Gets the previously set (or default) accessTokenParameterName.
+         * @brief Gets the previously set (or default) apiKeyParameterName.
          *
-         * @return const std::string& accessTokenParameterName.
+         * @return const std::string& apiKeyParameterName.
          */
-        const std::string& accessTokenParameterName() const;
+        const std::string& apiKeyParameterName() const;
 
         /**
          * @brief Get the tile server options configured for Mapbox.

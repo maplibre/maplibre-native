@@ -1,6 +1,6 @@
 #import <Mapbox/Mapbox.h>
 
-extern NSString * const MGLMapboxAccessTokenDefaultsKey;
+extern NSString * const MGLApiKeyDefaultsKey;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 

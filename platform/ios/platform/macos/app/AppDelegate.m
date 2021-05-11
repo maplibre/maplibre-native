@@ -2,7 +2,7 @@
 
 #import "MapDocument.h"
 
-NSString * const MGLMapboxAccessTokenDefaultsKey = @"MGLMapboxAccessToken";
+NSString * const MGLApiKeyDefaultsKey = @"MGLApiKey";
 NSString * const MGLLastMapCameraDefaultsKey = @"MGLLastMapCamera";
 NSString * const MGLLastMapStyleURLDefaultsKey = @"MGLLastMapStyleURL";
 NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
@@ -84,18 +84,18 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 
 + (void)load {
     // Set access token, unless MGLSettings already read it in from Info.plist.
-    if (![MGLSettings accessToken]) {
-        NSString *accessToken = [NSProcessInfo processInfo].environment[@"MAPBOX_ACCESS_TOKEN"];
-        if (accessToken) {
+    if (![MGLSettings apiKey]) {
+        NSString *apiKey = [NSProcessInfo processInfo].environment[@"MGL_API_KEY"];
+        if (apiKey) {
             // Store to preferences so that we can launch the app later on without having to specify
             // token.
-            [[NSUserDefaults standardUserDefaults] setObject:accessToken forKey:MGLMapboxAccessTokenDefaultsKey];
+            [[NSUserDefaults standardUserDefaults] setObject:apiKey forKey:MGLApiKeyDefaultsKey];
         } else {
             // Try to retrieve from preferences, maybe we've stored them there previously and can reuse
             // the token.
-            accessToken = [[NSUserDefaults standardUserDefaults] stringForKey:MGLMapboxAccessTokenDefaultsKey];
+            apiKey = [[NSUserDefaults standardUserDefaults] stringForKey:MGLApiKeyDefaultsKey];
         }
-        [MGLSettings setAccessToken:accessToken];
+        [MGLSettings setApiKey:apiKey];
     }
 }
 
@@ -122,7 +122,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Set access token, unless MGLSettings already read it in from Info.plist.
-    if (![MGLSettings accessToken]) {
+    if (![MGLSettings apiKey]) {
         NSAlert *alert = [[NSAlert alloc] init];
         alert.messageText = @"Access token required";
         alert.informativeText = @"To load Mapbox-hosted tiles and styles, enter your Mapbox access token in Preferences.";
@@ -313,10 +313,6 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
         MGLMapView *mapView = [(MapDocument *)currentDocument mapView];
         [mapView print:sender];
     }
-}
-
-- (IBAction)openAccessTokenManager:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.mapbox.com/studio/account/tokens/"]];
 }
 
 #pragma mark User interface validation

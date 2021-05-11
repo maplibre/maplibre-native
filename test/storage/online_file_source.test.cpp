@@ -425,20 +425,20 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitDefault)) {
     loop.run();
 }
 
-TEST(OnlineFileSource, GetBaseURLAndAccessTokenWhilePaused) {
+TEST(OnlineFileSource, GetBaseURLAndApiKeyWhilePaused) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default());
 
     fs->pause();
 
     auto baseURL = "http://url";
-    auto accessToken = "access_token";
+    auto apiKey = "api_key";
 
     fs->setProperty(API_BASE_URL_KEY, baseURL);
-    fs->setProperty(ACCESS_TOKEN_KEY, accessToken);
+    fs->setProperty(API_KEY_KEY, apiKey);
 
     EXPECT_EQ(*fs->getProperty(API_BASE_URL_KEY).getString(), baseURL);
-    EXPECT_EQ(*fs->getProperty(ACCESS_TOKEN_KEY).getString(), accessToken);
+    EXPECT_EQ(*fs->getProperty(API_KEY_KEY).getString(), apiKey);
 }
 
 TEST(OnlineFileSource, ChangeAPIBaseURL){

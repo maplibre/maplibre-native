@@ -156,8 +156,8 @@ int main(int argc, char *argv[]) {
         }
     }();
 
-    const char* tokenEnv = getenv("MAPBOX_ACCESS_TOKEN");
-    const std::string token = tokenValue ? args::get(tokenValue) : (tokenEnv ? tokenEnv : std::string());
+    const char* apiEnv = getenv("MGL_API_KEY");
+    const std::string apiKey = tokenValue ? args::get(tokenValue) : (apiEnv ? apiEnv : std::string());
     
     const std::string apiBaseURL = apiBaseValue ? args::get(apiBaseValue) : mbgl::util::API_BASE_URL;
 
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<DatabaseFileSource> fileSource = std::static_pointer_cast<DatabaseFileSource>(
         std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
             FileSourceType::Database,
-            ResourceOptions().withAccessToken(token).withBaseURL(apiBaseURL).withCachePath(output))));
+            ResourceOptions().withApiKey(apiKey).withBaseURL(apiBaseURL).withCachePath(output))));
 
     std::unique_ptr<OfflineRegion> region;
 

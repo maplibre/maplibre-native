@@ -91,6 +91,6 @@ for OUTPUT in ${LIST[@]} ; do
     if [ ! -f "${OUTPUT}" ] ; then
         mkdir -p "`dirname "${OUTPUT}"`"
         echo "Downloading tile '${OUTPUT}'"
-        curl -# "https://a.tiles.mapbox.com/v4/${OUTPUT}?access_token=${MAPBOX_ACCESS_TOKEN}" | gunzip > "${OUTPUT}"
+        curl -# "https://a.tiles.mapbox.com/v4/${OUTPUT}?access_token=${MGL_API_KEY}" | gunzip > "${OUTPUT}"
     fi
 done

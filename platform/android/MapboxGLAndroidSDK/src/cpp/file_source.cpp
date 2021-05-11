@@ -51,7 +51,7 @@ FileSource::~FileSource() {
 }
 
 jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
-    if (auto* token = onlineSource->getProperty(mbgl::ACCESS_TOKEN_KEY).getString()) {
+    if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
     }
 
@@ -61,7 +61,7 @@ jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
 
 void FileSource::setAccessToken(jni::JNIEnv& env, const jni::String& token) {
     if (onlineSource) {
-        onlineSource->setProperty(mbgl::ACCESS_TOKEN_KEY, token ? jni::Make<std::string>(env, token) : "");
+        onlineSource->setProperty(mbgl::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }

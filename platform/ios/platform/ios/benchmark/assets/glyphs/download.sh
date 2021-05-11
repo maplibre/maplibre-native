@@ -24,6 +24,6 @@ for i in ${LIST[@]} ; do
     if [ ! -f "${OUTPUT}" ] ; then
         mkdir -p "`dirname "${OUTPUT}"`"
         echo "Downloading glyph '${OUTPUT}'"
-        curl -# "https://api.tiles.mapbox.com/v4/fontstack/${i}?access_token=${MAPBOX_ACCESS_TOKEN}" | gunzip > "${OUTPUT}"
+        curl -# "https://api.tiles.mapbox.com/v4/fontstack/${i}?access_token=${MGL_API_KEY}" | gunzip > "${OUTPUT}"
     fi
 done

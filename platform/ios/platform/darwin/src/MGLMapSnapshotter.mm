@@ -713,12 +713,14 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
     auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
-    auto accessToken = [[MGLSettings sharedSettings] accessToken];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withTileServerOptions(tileServerOptions->clone())
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String)
-                   .withAccessToken([accessToken UTF8String]);
+                   .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }                   
 
     // Create the snapshotter
     auto localFontFamilyName = config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;

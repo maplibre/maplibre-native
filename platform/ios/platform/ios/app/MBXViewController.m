@@ -1904,12 +1904,13 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
     
-    /// Style that does not require an `accessToken` nor any further configuration
+    /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"Zeroconf Style"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://raw.githubusercontent.com/roblabs/openmaptiles-ios-demo/master/OSM2VectorTiles/styles/geography-class.GitHub.json"]];
 
-    /// Add Mapbox Styles if an `accessToken` exists
-    if ([MGLSettings accessToken].length)
+    /// Add Mapbox Styles if an `apiKey` exists
+    //TODO:PP
+    if ([MGLSettings apiKey].length)
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{

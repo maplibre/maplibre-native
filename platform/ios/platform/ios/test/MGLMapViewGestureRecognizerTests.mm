@@ -39,7 +39,7 @@
 - (void)setUp {
     [super setUp];
     
-    [MGLSettings setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     self.screenBounds = UIScreen.mainScreen.bounds;
     self.mapView = [[MGLMapView alloc] initWithFrame:self.screenBounds styleURL:styleURL];

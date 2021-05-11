@@ -58,6 +58,7 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLReachability.h"
+#import "MGLSettings_Private.h"
 
 class MGLAnnotationContext;
 
@@ -292,9 +293,16 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+    resourceOptions.withTileServerOptions(tileServerOptions->clone())
+                   .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+    
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }                     
 
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
 
@@ -638,7 +646,8 @@ public:
     }
     MGLLogDebug(@"Setting styleURL: %@", styleURL);
     // An access token is required to load any default style, including Streets.
-    if (![MGLSettings accessToken] && [styleURL.scheme isEqualToString:@"mapbox"]) {
+    //TODO:PP
+    if (![MGLSettings apiKey] && [styleURL.scheme isEqualToString:@"mapbox"]) {
         NSLog(@"Cannot set the style URL to %@ because no access token has been specified.", styleURL);
         return;
     }

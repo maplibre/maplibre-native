@@ -738,7 +738,7 @@ void TestRunner::run(TestMetadata& metadata) {
     if (maps.find(key) == maps.end()) {
         maps[key] = std::make_unique<TestRunner::Impl>(
             metadata,
-            mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withAccessToken(manifest.getAccessToken()));
+            mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()));
     }
 
     ctx.runnerImpl = maps[key].get();

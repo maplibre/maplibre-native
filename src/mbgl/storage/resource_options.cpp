@@ -6,7 +6,7 @@ namespace mbgl {
 
 class ResourceOptions::Impl {
 public:
-    std::string accessToken;
+    std::string apiKey;
     TileServerOptions tileServerOptions = TileServerOptions::MapboxConfiguration(); // temporary. Should be changed to MapLibre after tests will be migrated
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
@@ -25,13 +25,13 @@ ResourceOptions ResourceOptions::clone() const {
     return ResourceOptions(*this);
 }
 
-ResourceOptions& ResourceOptions::withAccessToken(std::string token) {
-    impl_->accessToken = std::move(token);
+ResourceOptions& ResourceOptions::withApiKey(std::string token) {
+    impl_->apiKey = std::move(token);
     return *this;
 }
 
-const std::string& ResourceOptions::accessToken() const {
-    return impl_->accessToken;
+const std::string& ResourceOptions::apiKey() const {
+    return impl_->apiKey;
 }
 
 ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions tileServerOptions) {
