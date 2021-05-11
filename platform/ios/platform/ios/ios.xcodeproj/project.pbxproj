@@ -2628,7 +2628,7 @@
 				DA1DC9461CB6C1C2006E619F /* Sources */,
 				DA1DC9471CB6C1C2006E619F /* Frameworks */,
 				DA1DC9481CB6C1C2006E619F /* Resources */,
-				074A7F0B2277BD67001A62D1 /* Insert Mapbox Access Token */,
+				074A7F0B2277BD67001A62D1 /* Insert API Key */,
 				CA0FA9E62379C39C00C9F3C9 /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -2951,7 +2951,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		074A7F0B2277BD67001A62D1 /* Insert Mapbox Access Token */ = {
+		074A7F0B2277BD67001A62D1 /* Insert API Key */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2961,7 +2961,7 @@
 			inputPaths = (
 				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "Insert Mapbox Access Token";
+			name = "Insert API Key";
 			outputFileListPaths = (
 			);
 			outputPaths = (
