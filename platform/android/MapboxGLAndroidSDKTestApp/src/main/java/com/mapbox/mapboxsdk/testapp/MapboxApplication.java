@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.WellKnownTileServer;
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.testapp.utils.TileLoadingMeasurementUtils;
 import com.mapbox.mapboxsdk.testapp.utils.TimberLogger;
@@ -76,7 +77,7 @@ public class MapboxApplication extends Application {
   private void initializeMapbox() {
     String apiKey = ApiKeyUtils.getApiKey(getApplicationContext());
     validateApiKey(apiKey);
-    Mapbox.getInstance(getApplicationContext(), apiKey);
+    Mapbox.getInstance(getApplicationContext(), apiKey, WellKnownTileServer.Mapbox);
     TileLoadingMeasurementUtils.setUpTileLoadingMeasurement();
 
     MapStrictMode.setStrictModeEnabled(true);

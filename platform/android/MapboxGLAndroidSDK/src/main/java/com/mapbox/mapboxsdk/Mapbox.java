@@ -17,9 +17,9 @@ import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
 /**
- * The entry point to initialize the Mapbox Android SDK.
+ * The entry point to initialize the MapLibre Android SDK.
  * <p>
- * Obtain a reference by calling {@link #getInstance(Context, String)}. Usually this class is configured in
+ * Obtain a reference by calling {@link #getInstance(Context, String, WellKnownTileServer)}. Usually this class is configured in
  * Application#onCreate() and is responsible for the active access token, application context, and
  * connectivity state.
  * </p>
@@ -51,7 +51,8 @@ public final class Mapbox {
    */
   @UiThread
   @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey) {
+  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey,
+                                                WellKnownTileServer tileServer) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
@@ -59,7 +60,7 @@ public final class Mapbox {
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
-      INSTANCE.tileServerOptions = TileServerOptions.Default();
+      INSTANCE.tileServerOptions = TileServerOptions.For(tileServer);
     }
     return INSTANCE;
   }

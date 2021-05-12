@@ -7,6 +7,9 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mapbox.mapboxsdk.WellKnownTileServer;
+import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
+
 /**
  * Tile server options - baseUrl and similar properties
  */
@@ -325,16 +328,15 @@ public class TileServerOptions implements Parcelable {
     out.writeString(apiKeyParameterName);
   }
 
-  public static TileServerOptions Default() {
-      return defaultConfiguration();
-  }
-
-  public static TileServerOptions Mapbox() {
-      return mapboxConfiguration();
-  }
-
-  public static TileServerOptions MapTiler() {
-      return mapTilerConfiguration();
+  public static TileServerOptions For(WellKnownTileServer tileServer){
+    switch (tileServer) {
+      case Mapbox:
+        return mapboxConfiguration();
+      case MapTiler:
+        return mapTilerConfiguration();
+      default:
+        throw new MapboxConfigurationException("Unknown tile server");
+    }
   }
 
   @Keep
