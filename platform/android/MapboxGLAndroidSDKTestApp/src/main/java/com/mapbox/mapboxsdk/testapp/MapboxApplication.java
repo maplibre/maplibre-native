@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.testapp.utils.TileLoadingMeasurementUtils;
 import com.mapbox.mapboxsdk.testapp.utils.TimberLogger;
 import com.mapbox.mapboxsdk.testapp.utils.ApiKeyUtils;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;

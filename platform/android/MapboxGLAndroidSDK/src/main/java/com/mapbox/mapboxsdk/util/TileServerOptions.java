@@ -334,6 +334,14 @@ public class TileServerOptions implements Parcelable {
   private native static TileServerOptions defaultConfiguration();
 
   @Keep
+  @NonNull
+  private native static TileServerOptions mapboxConfiguration();
+
+  @Keep
+  @NonNull
+  private native static TileServerOptions mapTilerConfiguration();
+
+  @Keep
   private native void initialize();
 
   @Override

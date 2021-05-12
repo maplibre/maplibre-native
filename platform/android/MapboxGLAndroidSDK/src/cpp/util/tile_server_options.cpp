@@ -42,6 +42,16 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::DefaultConfigurati
     return TileServerOptions::New(env, options);
 }
 
+jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapboxConfiguration(jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
+    auto options = mbgl::TileServerOptions::MapboxConfiguration();
+    return TileServerOptions::New(env, options);
+}
+
+jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapTilerConfiguration(jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
+    auto options = mbgl::TileServerOptions::MapTilerConfiguration();
+    return TileServerOptions::New(env, options);
+}
+
 mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env, const jni::Object<TileServerOptions>& options) {
     auto opts = mbgl::TileServerOptions();
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
@@ -111,9 +121,14 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
 void TileServerOptions::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
     jni::RegisterNatives(env,
-                        *javaClass,
-                        jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"));
-
+        *javaClass,
+        jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"));
+    jni::RegisterNatives(env,
+        *javaClass,
+        jni::MakeNativeMethod<decltype(&TileServerOptions::MapboxConfiguration), &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"));
+    jni::RegisterNatives(env,
+        *javaClass,
+        jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration), &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"));                
 }
 
 } // namespace android
