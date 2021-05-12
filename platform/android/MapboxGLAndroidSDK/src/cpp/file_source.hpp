@@ -9,6 +9,8 @@
 
 #include <jni/jni.hpp>
 
+#include "util/tile_server_options.hpp"
+
 namespace mbgl {
 
 template <typename T> class Actor;
@@ -42,7 +44,7 @@ public:
                               const jni::String&);
     };
 
-    FileSource(jni::JNIEnv&, const jni::String&, const jni::String&);
+    FileSource(jni::JNIEnv&, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&);
 
     ~FileSource();
 

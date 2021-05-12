@@ -163,6 +163,10 @@ namespace mbgl {
         return impl_->apiKeyParameterName;
     }
 
+    TileServerOptions TileServerOptions::DefaultConfiguration() {
+        return MapboxConfiguration();
+    }
+
     TileServerOptions TileServerOptions::MapboxConfiguration() {
         TileServerOptions options = TileServerOptions()
             .withBaseURL("https://api.mapbox.com")

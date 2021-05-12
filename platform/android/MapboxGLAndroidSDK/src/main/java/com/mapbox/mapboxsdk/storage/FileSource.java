@@ -16,6 +16,7 @@ import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.FileUtils;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
@@ -371,7 +372,8 @@ public class FileSource {
   private long nativePtr;
 
   private FileSource(String cachePath) {
-    initialize(Mapbox.getApiKey(), cachePath);
+    TileServerOptions options = Mapbox.getTileServerOptions();
+    initialize(Mapbox.getApiKey(), cachePath, options);
   }
 
   @Keep
@@ -408,7 +410,7 @@ public class FileSource {
   private native void setResourceCachePath(String path, ResourcesCachePathChangeCallback callback);
 
   @Keep
-  private native void initialize(String apiKey, String cachePath);
+  private native void initialize(String apiKey, String cachePath, TileServerOptions options);
 
   @Override
   @Keep

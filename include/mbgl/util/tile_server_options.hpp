@@ -218,6 +218,11 @@ namespace mbgl {
         const std::string& apiKeyParameterName() const;
 
         /**
+         * @brief Get the default configuration
+         */
+        static TileServerOptions DefaultConfiguration();
+
+        /**
          * @brief Get the tile server options configured for Mapbox.
          */
         static TileServerOptions MapboxConfiguration();

@@ -24,3 +24,6 @@
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
 /new_offline.db
 /.vscode
+/platform/android/node_modules
+/platform/android/.java-version
+*.hprof

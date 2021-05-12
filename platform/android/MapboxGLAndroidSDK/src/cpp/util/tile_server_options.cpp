@@ -11,13 +11,6 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::String, jni::String, jni::String, jni::String, jni::String, 
         jni::String, jni::String>(env);
     
-    std::string test;
-
-    //  jni::Make<jni::String>(env, value.id.is<mbgl::NullValue>() ? std::string {} : value.id.match(FeatureIdVisitor())));
-
-    //  optional<std::string> url = source.as<style::GeoJSONSource>()->getURL();
-    // return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
-
     optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
     optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
     optional<std::string> spritesVersionPrefixValue = tileServerOptions.spritesVersionPrefix();
@@ -42,6 +35,11 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::Make<jni::String>(env, tileServerOptions.tileDomainName()),
         tileVersionPrefixValue ? jni::Make<jni::String>(env, *tileVersionPrefixValue) : jni::Local<jni::String>(),
         jni::Make<jni::String>(env, tileServerOptions.apiKeyParameterName()));
+}
+
+jni::Local<jni::Object<TileServerOptions>> TileServerOptions::DefaultConfiguration(jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
+    auto options = mbgl::TileServerOptions::DefaultConfiguration();
+    return TileServerOptions::New(env, options);
 }
 
 mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env, const jni::Object<TileServerOptions>& options) {
@@ -111,7 +109,11 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
 }
 
 void TileServerOptions::registerNative(jni::JNIEnv& env) {
-    jni::Class<TileServerOptions>::Singleton(env);
+    static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
+    jni::RegisterNatives(env,
+                        *javaClass,
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"));
+
 }
 
 } // namespace android

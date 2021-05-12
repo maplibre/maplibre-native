@@ -66,12 +66,6 @@ public class TileServerOptions implements Parcelable {
   private String apiKeyParameterName;
 
   /**
-   * Construct a new empty TileServerOptions
-   */
-  public TileServerOptions() {
-  }
-
-  /**
    * Construct a new TileServerOptions given string arguments
    *
    * @param baseURL              tile server base url
@@ -97,19 +91,19 @@ public class TileServerOptions implements Parcelable {
           String baseURL,
           String uriSchemeAlias,
           String sourceTemplate,
-          String sourceVersionPrefix,
+          @Nullable String sourceVersionPrefix,
           String styleTemplate,
           String styleDomainName,
-          String styleVersionPrefix,
+          @Nullable String styleVersionPrefix,
           String spritesTemplate,
           String spritesDomainName,
-          String spritesVersionPrefix,
+          @Nullable String spritesVersionPrefix,
           String glyphsTemplate,
           String glyphsDomainName,
-          String glyphsVersionPrefix,
+          @Nullable String glyphsVersionPrefix,
           String tileTemplate,
           String tileDomainName,
-          String tileVersionPrefix,
+          @Nullable String tileVersionPrefix,
           String apiKeyParameterName
   ) {
     setBaseURL(baseURL);
@@ -330,4 +324,19 @@ public class TileServerOptions implements Parcelable {
     out.writeString(tileVersionPrefix);
     out.writeString(apiKeyParameterName);
   }
+
+  public static TileServerOptions Default() {
+      return defaultConfiguration();
+  }
+
+  @Keep
+  @NonNull
+  private native static TileServerOptions defaultConfiguration();
+
+  @Keep
+  private native void initialize();
+
+  @Override
+  @Keep
+  protected native void finalize() throws Throwable;
 }

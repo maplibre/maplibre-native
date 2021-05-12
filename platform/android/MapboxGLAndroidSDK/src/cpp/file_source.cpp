@@ -19,7 +19,7 @@ namespace android {
 
 // FileSource //
 
-FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::String& _cachePath)
+FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::String& _cachePath, const jni::Object<TileServerOptions>& _options)
 :activationCounter( optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
@@ -35,7 +35,10 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::
             return assetFileSource;
         });
 
-    resourceOptions.withApiKey(apiKey ? jni::Make<std::string>(_env, apiKey) : "")
+    auto tileServerOptions = TileServerOptions::getTileServerOptions(_env, _options);
+    resourceOptions
+            .withTileServerOptions(tileServerOptions)
+            .withApiKey(apiKey ? jni::Make<std::string>(_env, apiKey) : "")
             .withCachePath(path + DATABASE_FILE);
 
     // Create a core file sources
@@ -214,7 +217,7 @@ void FileSource::registerNative(jni::JNIEnv& env) {
     jni::RegisterNativePeer<FileSource>(env,
                                         javaClass,
                                         "nativePtr",
-                                        jni::MakePeer<FileSource, const jni::String&, const jni::String&>,
+                                        jni::MakePeer<FileSource, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&>,
                                         "initialize",
                                         "finalize",
                                         METHOD(&FileSource::getApiKey, "getApiKey"),

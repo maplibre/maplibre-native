@@ -13,6 +13,7 @@ import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.storage.FileSource;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
 /**
@@ -37,6 +38,8 @@ public final class Mapbox {
   private String apiKey;
   @Nullable
   private AccountsManager accounts;
+  @Nullable
+  private TileServerOptions tileServerOptions;
 
   /**
    * Get an instance of Mapbox.
@@ -61,6 +64,7 @@ public final class Mapbox {
         INSTANCE.accounts = new AccountsManager();
       }
       ConnectivityReceiver.instance(appContext);
+      INSTANCE.tileServerOptions = TileServerOptions.Default();
     }
     return INSTANCE;
   }
@@ -90,6 +94,11 @@ public final class Mapbox {
     INSTANCE.apiKey = apiKey;
     INSTANCE.accounts = new AccountsManager();
     FileSource.getInstance(getApplicationContext()).setApiKey(apiKey);
+  }
+
+  @Nullable
+  public static TileServerOptions getTileServerOptions() {
+    return INSTANCE.tileServerOptions;
   }
 
   /**

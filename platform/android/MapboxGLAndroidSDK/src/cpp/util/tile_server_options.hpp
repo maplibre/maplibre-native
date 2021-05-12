@@ -15,9 +15,12 @@ public:
 
     static jni::Local<jni::Object<TileServerOptions>> New(jni::JNIEnv&, const mbgl::TileServerOptions&);
 
+    static jni::Local<jni::Object<TileServerOptions>> DefaultConfiguration(jni::JNIEnv&, const jni::Class<TileServerOptions>&);
+
     static mbgl::TileServerOptions getTileServerOptions(jni::JNIEnv&, const jni::Object<TileServerOptions>&);
 
     static void registerNative(jni::JNIEnv&);
+
 };
 
 
