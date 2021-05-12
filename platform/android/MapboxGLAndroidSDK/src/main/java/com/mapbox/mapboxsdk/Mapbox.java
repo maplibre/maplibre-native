@@ -58,38 +58,8 @@ public final class Mapbox {
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);
+      ConnectivityReceiver.instance(appContext);
       INSTANCE.tileServerOptions = TileServerOptions.Default();
-      ConnectivityReceiver.instance(appContext);
-    } else {
-      throw new MapboxConfigurationException("MapBox is already initialized.");
-    }
-    return INSTANCE;
-  }
-
-  /**
-   * Get an instance of Mapbox.
-   * <p>
-   * This class manages the API key, application context, and connectivity state.
-   * </p>
-   *
-   * @param context     Android context which holds or is an application context
-   * @param apiKey api key
-   * @param tileServerOptions tile server options such as base url anc canonical URL properties
-   * @return the single instance of Mapbox
-   */
-  @UiThread
-  @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey, TileServerOptions tileServerOptions) {
-    ThreadUtils.init(context);
-    ThreadUtils.checkThread(TAG);
-    if (INSTANCE == null) {
-      Context appContext = context.getApplicationContext();
-      FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Mapbox(appContext, apiKey);
-      INSTANCE.tileServerOptions = tileServerOptions;
-      ConnectivityReceiver.instance(appContext);
-    } else {
-      throw new MapboxConfigurationException("MapBox is already initialized.");
     }
     return INSTANCE;
   }

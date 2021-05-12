@@ -121,14 +121,10 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
 void TileServerOptions::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
     jni::RegisterNatives(env,
-        *javaClass,
-        jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"));
-    jni::RegisterNatives(env,
-        *javaClass,
-        jni::MakeNativeMethod<decltype(&TileServerOptions::MapboxConfiguration), &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"));
-    jni::RegisterNatives(env,
-        *javaClass,
-        jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration), &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"));                
+                        *javaClass,
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"),
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::MapboxConfiguration), &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"),
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration), &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"));
 }
 
 } // namespace android
