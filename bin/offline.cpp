@@ -159,14 +159,18 @@ int main(int argc, char *argv[]) {
     const char* apiEnv = getenv("MGL_API_KEY");
     const std::string apiKey = tokenValue ? args::get(tokenValue) : (apiEnv ? apiEnv : std::string());
     
-    const std::string apiBaseURL = apiBaseValue ? args::get(apiBaseValue) : mbgl::util::API_BASE_URL;
-
+    auto tileServerOptions = TileServerOptions::DefaultConfiguration();
+    if (apiBaseValue) {
+        tileServerOptions.withBaseURL(args::get(apiBaseValue));
+    }
 
     util::RunLoop loop;
     std::shared_ptr<DatabaseFileSource> fileSource = std::static_pointer_cast<DatabaseFileSource>(
         std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
             FileSourceType::Database,
-            ResourceOptions().withApiKey(apiKey).withBaseURL(apiBaseURL).withCachePath(output))));
+            ResourceOptions().withApiKey(apiKey)
+              .withTileServerOptions(tileServerOptions)
+              .withCachePath(output))));
 
     std::unique_ptr<OfflineRegion> region;
 
