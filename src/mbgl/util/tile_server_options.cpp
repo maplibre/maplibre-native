@@ -24,6 +24,7 @@ namespace mbgl {
         std::string tileDomainName;
         optional<std::string> tileVersionPrefix;
         std::string apiKeyParameterName;
+        std::vector<const mbgl::util::DefaultStyle> defaultStyles;   
     };
 
 
@@ -163,11 +164,30 @@ namespace mbgl {
         return impl_->apiKeyParameterName;
     }
 
+    const std::vector<const mbgl::util::DefaultStyle> TileServerOptions::defaultStyles() const {
+        return impl_->defaultStyles;
+    }
+
+    TileServerOptions& TileServerOptions::withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles) {
+        impl_->defaultStyles = std::move(styles);
+        return *this;
+    }    
+
     TileServerOptions TileServerOptions::DefaultConfiguration() {
         return MapboxConfiguration();
     }
 
     TileServerOptions TileServerOptions::MapboxConfiguration() {
+        std::vector<const mbgl::util::DefaultStyle> styles {
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/streets-v11", "Streets", 11),
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/outdoors-v11", "Outdoors", 11),
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/light-v10", "Light", 10),
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/dark-v10", "Dark", 10),
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/satellite-v9", "Satellite", 9),
+                mbgl::util::DefaultStyle("mapbox://styles/mapbox/satellite-streets-v11",
+                                       "Satellite Streets", 11)
+        };
+
         TileServerOptions options = TileServerOptions()
             .withBaseURL("https://api.mapbox.com")
             .withUriSchemeAlias("mapbox")
@@ -176,11 +196,23 @@ namespace mbgl {
             .withStyleTemplate("/styles/v1{path}", "styles", {})
             .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
             .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
-            .withTileTemplate("{path}", "tiles", {"/v4"});
+            .withTileTemplate("{path}", "tiles", {"/v4"})
+            .withDefaultStyles(styles);
         return options;
     }
 
     TileServerOptions TileServerOptions::MapTilerConfiguration() {
+
+        std::vector<const mbgl::util::DefaultStyle> styles{
+                mbgl::util::DefaultStyle("maptiler://maps/streets", "Streets", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/outdoor", "Outdoor", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/basic", "Basic", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/bright", "Bright", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/pastel", "Pastel", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/hybrid", "Satellite Hybrid", 1),
+                mbgl::util::DefaultStyle("maptiler://maps/topo", "Satellite Topo", 1)
+        };
+
         TileServerOptions options = TileServerOptions()
             .withBaseURL("https://api.maptiler.com")
             .withUriSchemeAlias("maptiler")
@@ -189,7 +221,8 @@ namespace mbgl {
             .withStyleTemplate("/maps/{path}", "maps", {})
             .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})
             .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
-            .withTileTemplate("/tiles/{path}", "tiles", {});
+            .withTileTemplate("/tiles/{path}", "tiles", {})
+            .withDefaultStyles(styles);
         return options;
     }
 

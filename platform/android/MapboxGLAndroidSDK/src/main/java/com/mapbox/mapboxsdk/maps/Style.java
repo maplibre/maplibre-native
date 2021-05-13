@@ -11,11 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import com.mapbox.mapboxsdk.style.light.Light;
 import com.mapbox.mapboxsdk.style.sources.Source;
+import com.mapbox.mapboxsdk.util.DefaultStyle;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
 import java.lang.annotation.Retention;
@@ -1421,70 +1423,24 @@ public class Style {
   //
 
   /**
-   * Indicates the parameter accepts one of the values from Style. Using one of these
-   * constants means your map style will always use the latest version and may change as we
-   * improve the style
+   * Get predefined styles
+   *
+   *  @return The list of predefined styles
    */
-  @StringDef( {MAPBOX_STREETS, OUTDOORS, LIGHT, DARK, SATELLITE, SATELLITE_STREETS, TRAFFIC_DAY, TRAFFIC_NIGHT})
-  @Retention(RetentionPolicy.SOURCE)
-  public @interface StyleUrl {
-  }
-
-  // IMPORTANT: If you change any of these you also need to edit them in strings.xml
+  public static DefaultStyle[] getPredefindStyles() {
+    return Mapbox.getPredefinedStyles();
+  };
 
   /**
-   * Mapbox Streets: A complete basemap, perfect for incorporating your own data. Using this
-   * constant means your map style will always use the latest version and may change as we
-   * improve the style.
+   * Get predefined style by name
+   *
+   *  @return The predefined style definition
    */
-  public static final String MAPBOX_STREETS = "mapbox://styles/mapbox/streets-v11";
-
-  /**
-   * Outdoors: A general-purpose style tailored to outdoor activities. Using this constant means
-   * your map style will always use the latest version and may change as we improve the style.
-   */
-  public static final String OUTDOORS = "mapbox://styles/mapbox/outdoors-v11";
-
-  /**
-   * Light: Subtle light backdrop for data visualizations. Using this constant means your map
-   * style will always use the latest version and may change as we improve the style.
-   */
-  public static final String LIGHT = "mapbox://styles/mapbox/light-v10";
-
-  /**
-   * Dark: Subtle dark backdrop for data visualizations. Using this constant means your map style
-   * will always use the latest version and may change as we improve the style.
-   */
-  public static final String DARK = "mapbox://styles/mapbox/dark-v10";
-
-  /**
-   * Satellite: A beautiful global satellite and aerial imagery layer. Using this constant means
-   * your map style will always use the latest version and may change as we improve the style.
-   */
-  public static final String SATELLITE = "mapbox://styles/mapbox/satellite-v9";
-
-  /**
-   * Satellite Streets: Global satellite and aerial imagery with unobtrusive labels. Using this
-   * constant means your map style will always use the latest version and may change as we
-   * improve the style.
-   */
-  public static final String SATELLITE_STREETS = "mapbox://styles/mapbox/satellite-streets-v11";
-
-  /**
-   * Traffic Day: Color-coded roads based on live traffic congestion data. Traffic data is currently
-   * available in
-   * <a href="https://www.mapbox.com/help/how-directions-work/#traffic-data">these select
-   * countries</a>. Using this constant means your map style will always use the latest version and
-   * may change as we improve the style.
-   */
-  public static final String TRAFFIC_DAY = "mapbox://styles/mapbox/traffic-day-v2";
-
-  /**
-   * Traffic Night: Color-coded roads based on live traffic congestion data, designed to maximize
-   * legibility in low-light situations. Traffic data is currently available in
-   * <a href="https://www.mapbox.com/help/how-directions-work/#traffic-data">these select
-   * countries</a>. Using this constant means your map style will always use the latest version and
-   * may change as we improve the style.
-   */
-  public static final String TRAFFIC_NIGHT = "mapbox://styles/mapbox/traffic-night-v2";
+  public static String getPredefindStyle(String name) {
+    DefaultStyle style = Mapbox.getPredefinedStyle(name);
+    if (style != null) {
+      return style.getUrl();
+    }
+    return null;
+  };
 }

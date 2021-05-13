@@ -165,6 +165,7 @@ void registerNatives(JavaVM *vm) {
     Mapbox::registerNative(env);
 
     // Util
+    DefaultStyle::registerNative(env);
     TileServerOptions::registerNative(env);
 }
 

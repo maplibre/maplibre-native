@@ -325,14 +325,14 @@ public class MapSnapshotter {
      */
     @Deprecated
     public String getStyleUrl() {
-      return builder == null ? Style.MAPBOX_STREETS : builder.getUri();
+      return builder == null ? null : builder.getUri();
     }
 
     /**
      * @return the style uri
      */
     public String getStyleUri() {
-      return builder == null ? Style.MAPBOX_STREETS : builder.getUri();
+      return builder == null ? null : builder.getUri();
     }
 
     /**

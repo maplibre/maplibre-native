@@ -9,7 +9,7 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::String, jni::String, jni::String, jni::String, jni::String, 
         jni::String, jni::String, jni::String, jni::String, jni::String,
         jni::String, jni::String, jni::String, jni::String, jni::String, 
-        jni::String, jni::String>(env);
+        jni::String, jni::String, jni::Array<jni::Object<DefaultStyle>>>(env);
     
     optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
     optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
@@ -34,7 +34,20 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::Make<jni::String>(env, tileServerOptions.tileTemplate()),
         jni::Make<jni::String>(env, tileServerOptions.tileDomainName()),
         tileVersionPrefixValue ? jni::Make<jni::String>(env, *tileVersionPrefixValue) : jni::Local<jni::String>(),
-        jni::Make<jni::String>(env, tileServerOptions.apiKeyParameterName()));
+        jni::Make<jni::String>(env, tileServerOptions.apiKeyParameterName()),
+        TileServerOptions::NewStyles(env, tileServerOptions.defaultStyles())
+    );
+}
+
+jni::Local<jni::Array<jni::Object<DefaultStyle>>> TileServerOptions::NewStyles(jni::JNIEnv& env, const std::vector<const mbgl::util::DefaultStyle> nativeStyles) {
+
+    auto retVal = jni::Array<jni::Object<DefaultStyle>>::New(env,  nativeStyles.size());
+    for (auto it = begin(nativeStyles); it != end(nativeStyles); ++it) {
+        auto converted = DefaultStyle::New(env, *it);
+        retVal.Set(env, it - nativeStyles.begin(), converted);
+    }
+
+    return retVal;
 }
 
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::DefaultConfiguration(jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
@@ -81,6 +94,9 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
 
     static auto apiKeyParameterNameField = javaClass.GetField<jni::String>(env, "apiKeyParameterName");
 
+    static auto defaultStylesField = javaClass.GetField<jni::Array<jni::Object<DefaultStyle>>>(env, "defaultStyles");
+    std::vector<const mbgl::util::DefaultStyle> defaultStyles = TileServerOptions::getDefaultStyles(env, options.Get(env, defaultStylesField));
+
     auto retVal = mbgl::TileServerOptions()
         .withBaseURL(jni::Make<std::string>(env, options.Get(env, baseURLField)))
         .withUriSchemeAlias(jni::Make<std::string>(env, options.Get(env, uriSchemeAliasField)))
@@ -115,7 +131,22 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
             jni::Make<std::string>(env, options.Get(env, tileDomainNameField)),
             tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue): optional<std::string>{});
 
+    retVal.withDefaultStyles(defaultStyles);
+
     return retVal;
+}
+
+std::vector<const mbgl::util::DefaultStyle> TileServerOptions::getDefaultStyles(jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_) {
+
+    std::size_t length = styles_.Length(env);
+    std::vector<const mbgl::util::DefaultStyle> convertedStyles;
+    //convertedStyles.reserve(length);
+    for (std::size_t i = 0; i < length; i++) {
+        const mbgl::util::DefaultStyle converted = DefaultStyle::getDefaultStyle(env, styles_.Get(env, i));
+        convertedStyles.push_back(converted);
+    }
+
+    return convertedStyles;
 }
 
 void TileServerOptions::registerNative(jni::JNIEnv& env) {

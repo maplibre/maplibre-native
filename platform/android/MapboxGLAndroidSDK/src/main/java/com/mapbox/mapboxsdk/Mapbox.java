@@ -13,6 +13,7 @@ import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.storage.FileSource;
+import com.mapbox.mapboxsdk.util.DefaultStyle;
 import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
@@ -71,9 +72,9 @@ public final class Mapbox {
   }
 
   /**
-   * Get the current active access token for this application.
+   * Get the current active API key for this application.
    *
-   * @return Mapbox access token
+   * @return API key
    */
   @Nullable
   public static String getApiKey() {
@@ -91,12 +92,49 @@ public final class Mapbox {
     FileSource.getInstance(getApplicationContext()).setApiKey(apiKey);
   }
 
+  /**
+   * Get tile server configuration.
+   */
   @Nullable
   public static TileServerOptions getTileServerOptions() {
+    validateMapbox();
     return INSTANCE.tileServerOptions;
   }
 
   /**
+   * Get all pre-defined styles
+   *
+   * @return List of predefined styles
+   */
+  @Nullable
+  public static DefaultStyle[] getPredefinedStyles() {
+    validateMapbox();
+    if (INSTANCE.tileServerOptions != null){
+      return INSTANCE.tileServerOptions.getDefaultStyles();  
+    }
+    return null;    
+  }
+
+  /**
+   * Get predefined style by name
+   *
+   * @return Predefined style if found
+   */
+  @Nullable
+  public static DefaultStyle getPredefinedStyle(String name) {
+    validateMapbox();
+    if (INSTANCE.tileServerOptions != null){
+      DefaultStyle[] styles = INSTANCE.tileServerOptions.getDefaultStyles();
+      for (DefaultStyle style : styles) {
+        if (style.getName().equalsIgnoreCase("name")){
+          return style;
+        }
+      }
+    }
+    return null;
+  }
+
+   /**
    * Application context
    *
    * @return the application context

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <mbgl/util/default_style.hpp>
 #include <mbgl/util/optional.hpp>
 
 namespace mbgl {
@@ -216,6 +217,19 @@ namespace mbgl {
          * @return const std::string& apiKeyParameterName.
          */
         const std::string& apiKeyParameterName() const;
+
+        /**
+         * @brief Gets the default styles.
+         */
+        const std::vector<const mbgl::util::DefaultStyle> defaultStyles() const;    
+
+        /**
+         * @brief Sets the collection default styles.
+         *
+         * @param styles The style set.
+         * @return TileServerOptions for chaining options together.
+         */
+        TileServerOptions& withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles);       
 
         /**
          * @brief Get the default configuration

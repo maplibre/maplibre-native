@@ -1,5 +1,8 @@
 package com.mapbox.mapboxsdk.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -67,6 +70,8 @@ public class TileServerOptions implements Parcelable {
   private String tileVersionPrefix;
   @Keep
   private String apiKeyParameterName;
+  @Keep
+  private DefaultStyle[] defaultStyles;
 
   /**
    * Construct a new TileServerOptions given string arguments
@@ -88,6 +93,7 @@ public class TileServerOptions implements Parcelable {
    * @param tileDomainName       the name of the tile domain in canonical url
    * @param tileVersionPrefix    the tile version prefix;
    * @param apiKeyParameterName  the name of api key parameter;
+   * @param defaultStyles        the list of default styles
    */
   @Keep
   public TileServerOptions(
@@ -107,7 +113,8 @@ public class TileServerOptions implements Parcelable {
           String tileTemplate,
           String tileDomainName,
           @Nullable String tileVersionPrefix,
-          String apiKeyParameterName
+          String apiKeyParameterName,
+          DefaultStyle[] defaultStyles
   ) {
     setBaseURL(baseURL);
     setUriSchemeAlias(uriSchemeAlias);
@@ -126,6 +133,7 @@ public class TileServerOptions implements Parcelable {
     setTileDomainName(tileDomainName);
     setTileVersionPrefix(tileVersionPrefix);
     setApiKeyParameterName(apiKeyParameterName);
+    setDefaultStyles(defaultStyles);
   }
 
   public void setBaseURL(String baseURL) {
@@ -264,6 +272,14 @@ public class TileServerOptions implements Parcelable {
     return this.apiKeyParameterName;
   }
 
+  public void setDefaultStyles(DefaultStyle[] defaultStyles) {
+    this.defaultStyles = defaultStyles;
+  }
+
+  public DefaultStyle[] getDefaultStyles() {
+    return this.getDefaultStyles();
+  }
+
   /**
    * Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.
    *
@@ -273,8 +289,6 @@ public class TileServerOptions implements Parcelable {
   public int describeContents() {
     return 0;
   }
-
-  //TODO:PP parcelable for optionals
 
   /**
    * Constructs a new tile server options tuple given a parcel.
@@ -299,6 +313,7 @@ public class TileServerOptions implements Parcelable {
     setTileDomainName(in.readString());
     setTileVersionPrefix(in.readString());
     setApiKeyParameterName(in.readString());
+    in.createTypedArray(DefaultStyle.CREATOR);
   }
 
   /**
@@ -326,6 +341,7 @@ public class TileServerOptions implements Parcelable {
     out.writeString(tileDomainName);
     out.writeString(tileVersionPrefix);
     out.writeString(apiKeyParameterName);
+    out.writeTypedArray(defaultStyles, 0);
   }
 
   public static TileServerOptions For(WellKnownTileServer tileServer){
@@ -351,10 +367,12 @@ public class TileServerOptions implements Parcelable {
   @NonNull
   private native static TileServerOptions mapTilerConfiguration();
 
-  @Keep
-  private native void initialize();
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+  //TODO:PP
+//
+//  @Keep
+//  private native void initialize();
+//
+//  @Override
+//  @Keep
+//  protected native void finalize() throws Throwable;
 }
