@@ -57,7 +57,7 @@ static void API_renderStill_reuse_map(::benchmark::State& state) {
     HeadlessFrontend frontend { size, pixelRatio };
     Map map { frontend, MapObserver::nullObserver(),
               MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-              ResourceOptions().withCachePath(cachePath).withAccessToken("foobar") };
+              ResourceOptions().withCachePath(cachePath).withApiKey("foobar") };
     prepare(map);
 
     for (auto _ : state) {
@@ -70,7 +70,7 @@ static void API_renderStill_reuse_map_formatted_labels(::benchmark::State& state
     HeadlessFrontend frontend { size, pixelRatio };
     Map map { frontend, MapObserver::nullObserver(),
               MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-              ResourceOptions().withCachePath(cachePath).withAccessToken("foobar") };
+              ResourceOptions().withCachePath(cachePath).withApiKey("foobar") };
     prepare(map, util::read_file("benchmark/fixtures/api/style_formatted_labels.json"));
 
     for (auto _ : state) {
@@ -83,7 +83,7 @@ static void API_renderStill_reuse_map_switch_styles(::benchmark::State& state) {
     HeadlessFrontend frontend { size, pixelRatio };
     Map map { frontend, MapObserver::nullObserver(),
               MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-              ResourceOptions().withCachePath(cachePath).withAccessToken("foobar") };
+              ResourceOptions().withCachePath(cachePath).withApiKey("foobar") };
 
     for (auto _ : state) {
         prepare(map, { "{}" });
@@ -100,7 +100,7 @@ static void API_renderStill_recreate_map(::benchmark::State& state) {
         HeadlessFrontend frontend { size, pixelRatio };
         Map map { frontend, MapObserver::nullObserver(),
                   MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-                  ResourceOptions().withCachePath(cachePath).withAccessToken("foobar") };
+                  ResourceOptions().withCachePath(cachePath).withApiKey("foobar") };
         prepare(map);
         frontend.render(map);
     }
@@ -114,7 +114,7 @@ static void API_renderStill_recreate_map_2(::benchmark::State& state) {
         Map map{frontend,
                 MapObserver::nullObserver(),
                 MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-                ResourceOptions().withCachePath(cachePath).withAccessToken("foobar")};
+                ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
         prepare_map2(map);
         frontend.render(map);
     }
@@ -127,7 +127,7 @@ static void API_renderStill_multiple_sources(::benchmark::State& state) {
     Map map{frontend,
             MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-            ResourceOptions().withCachePath(cachePath).withAccessToken("foobar")};
+            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
     prepare(map);
     auto& style = map.getStyle();
     const int kSourcesCount = 50;
