@@ -126,7 +126,7 @@ public final class Mapbox {
     if (INSTANCE.tileServerOptions != null){
       DefaultStyle[] styles = INSTANCE.tileServerOptions.getDefaultStyles();
       for (DefaultStyle style : styles) {
-        if (style.getName().equalsIgnoreCase("name")){
+        if (style.getName().equalsIgnoreCase(name)){
           return style;
         }
       }
