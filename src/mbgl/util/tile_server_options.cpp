@@ -217,11 +217,11 @@ namespace mbgl {
             .withBaseURL("https://api.maptiler.com")
             .withUriSchemeAlias("maptiler")
             .withApiKeyParameterName("key")
-            .withSourceTemplate("/tiles/{path}/tiles.json", {})
-            .withStyleTemplate("/maps/{path}", "maps", {})
+            .withSourceTemplate("/tiles{path}/tiles.json", {})
+            .withStyleTemplate("/maps{path}/style.json", "maps", {})
             .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})
             .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
-            .withTileTemplate("/tiles/{path}", "tiles", {})
+            .withTileTemplate("/tiles/{path}", "tiles", {"v3"})
             .withDefaultStyles(styles);
         return options;
     }

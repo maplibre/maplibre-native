@@ -77,7 +77,11 @@ public class MapboxApplication extends Application {
   private void initializeMapbox() {
     String apiKey = ApiKeyUtils.getApiKey(getApplicationContext());
     validateApiKey(apiKey);
+
     Mapbox.getInstance(getApplicationContext(), apiKey, WellKnownTileServer.Mapbox);
+    //TODO:PP remove
+    //Mapbox.getInstance(getApplicationContext(), "uwvyvzaF2P7UWbyOEvjU", WellKnownTileServer.MapTiler);
+
     TileLoadingMeasurementUtils.setUpTileLoadingMeasurement();
 
     MapStrictMode.setStrictModeEnabled(true);

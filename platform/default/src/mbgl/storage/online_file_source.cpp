@@ -74,7 +74,7 @@ struct OnlineFileRequest {
 
 class OnlineFileSourceThread {
 public:
-    OnlineFileSourceThread(const ResourceOptions& options): httpFileSource(options) {
+    OnlineFileSourceThread(const ResourceOptions& options): resourceOptions(options.clone()), httpFileSource(options) {
         NetworkStatus::Subscribe(&reachability);
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
@@ -164,8 +164,13 @@ public:
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
-    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
-    const ResourceOptions& getResourceOptions() const { return resourceOptions; }
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    }
+
+    const ResourceOptions& getResourceOptions() const {
+        return resourceOptions;
+    }
 
     void setOnlineStatus(bool status) {
         online = status;
@@ -302,6 +307,7 @@ private:
 class OnlineFileSource::Impl {
 public:
     Impl(const ResourceOptions& options) :
+        cachedResourceOptions(options.clone()),
         thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", options.clone())) {}
 
@@ -322,7 +328,7 @@ public:
     }
 
     void setResourceOptions(ResourceOptions options) {
-        thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, std::move(options));
+        thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, options.clone());
         {
             std::lock_guard<std::mutex> lock(resourceOptionsMutex);
             cachedResourceOptions = options;
