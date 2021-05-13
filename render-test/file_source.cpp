@@ -22,7 +22,7 @@ ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoad
         std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database, options);
         dbfs->setProperty(READ_ONLY_MODE_KEY, true);
     }
-}
+} 
 
 ProxyFileSource::~ProxyFileSource() = default;
 
@@ -74,6 +74,15 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
         callback(response);
     });
 }
+
+void ProxyFileSource::setResourceOptions(ResourceOptions options) {
+   resourceOptions = options;
+}
+
+ResourceOptions& ProxyFileSource::getResourceOptions() {
+    return resourceOptions;
+}
+
 
 // static
 void ProxyFileSource::setOffline(bool status) {
