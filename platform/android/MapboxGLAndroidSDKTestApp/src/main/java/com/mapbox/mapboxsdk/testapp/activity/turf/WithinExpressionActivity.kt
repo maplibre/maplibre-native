@@ -90,10 +90,10 @@ class WithinExpressionActivity : AppCompatActivity() {
         val bufferedRouteGeometry = bufferLineStringGeometry(routeLineString)
 
         // Setup style with additional layers,
-        // using Style.MAPBOX_STREETS as a base style
+        // using streets as a base style
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.MAPBOX_STREETS)
+                .fromUri(Style.getPredefindStyle("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,

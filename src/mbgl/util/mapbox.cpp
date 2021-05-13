@@ -178,10 +178,7 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
         return str;
     }
 
-    //TODO:PP remove
-    // std::string result = "mapbox://tiles/";
     std::string result = tileServerOptions.uriSchemeAlias() + "://" + tileServerOptions.tileDomainName();
-    //auto str = "http://" + baseUrlWithoutSubdomains(str);
     
     const URL url(str);
     const Path path(str, url.path.first, url.path.second);

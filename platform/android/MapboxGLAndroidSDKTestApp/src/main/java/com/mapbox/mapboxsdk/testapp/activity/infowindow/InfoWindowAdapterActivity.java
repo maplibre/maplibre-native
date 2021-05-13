@@ -36,7 +36,7 @@ public class InfoWindowAdapterActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      map.setStyle(Style.MAPBOX_STREETS, style -> {
+      map.setStyle(Style.getPredefindStyle("Streets"), style -> {
         addMarkers();
         addCustomInfoWindowAdapter();
       });

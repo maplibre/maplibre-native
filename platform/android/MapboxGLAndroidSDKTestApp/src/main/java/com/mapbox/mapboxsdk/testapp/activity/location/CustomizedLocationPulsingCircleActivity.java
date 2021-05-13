@@ -113,7 +113,7 @@ public class CustomizedLocationPulsingCircleActivity extends AppCompatActivity i
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
-    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+    mapboxMap.setStyle(Style.getPredefindStyle("Streets"), style -> {
       locationComponent = mapboxMap.getLocationComponent();
 
       LocationComponentOptions locationComponentOptions =

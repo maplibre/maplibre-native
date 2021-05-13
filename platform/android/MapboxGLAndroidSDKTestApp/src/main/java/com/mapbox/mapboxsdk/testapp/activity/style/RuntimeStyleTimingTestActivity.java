@@ -46,7 +46,7 @@ public class RuntimeStyleTimingTestActivity extends AppCompatActivity {
 
       VectorSource museums = new VectorSource("museums_source", "mapbox://mapbox.2opop9hr");
       mapboxMap.setStyle(new Style.Builder()
-        .fromUri(Style.MAPBOX_STREETS)
+        .fromUri(Style.getPredefindStyle("Streets"))
         .withSource(museums)
         .withLayer(museumsLayer));
     });

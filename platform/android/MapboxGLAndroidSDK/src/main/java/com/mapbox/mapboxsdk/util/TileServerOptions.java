@@ -277,7 +277,7 @@ public class TileServerOptions implements Parcelable {
   }
 
   public DefaultStyle[] getDefaultStyles() {
-    return this.getDefaultStyles();
+    return this.defaultStyles;
   }
 
   /**
@@ -366,13 +366,4 @@ public class TileServerOptions implements Parcelable {
   @Keep
   @NonNull
   private native static TileServerOptions mapTilerConfiguration();
-
-  //TODO:PP
-//
-//  @Keep
-//  private native void initialize();
-//
-//  @Override
-//  @Keep
-//  protected native void finalize() throws Throwable;
 }

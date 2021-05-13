@@ -77,7 +77,7 @@ public class AnimatedSymbolLayerActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       this.mapboxMap = map;
-      map.setStyle(Style.MAPBOX_STREETS, style -> {
+      map.setStyle(Style.getPredefindStyle("Streets"), style -> {
         this.style = style;
         setupCars();
         animateRandomRoutes();

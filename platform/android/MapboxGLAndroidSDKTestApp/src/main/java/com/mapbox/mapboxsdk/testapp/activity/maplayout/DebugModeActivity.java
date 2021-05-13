@@ -47,15 +47,12 @@ public class DebugModeActivity extends AppCompatActivity implements OnMapReadyCa
   private boolean isReportFps = true;
 
   private static final String[] STYLES = new String[] {
-    Style.MAPBOX_STREETS,
-    Style.OUTDOORS,
-    Style.LIGHT,
-    Style.DARK,
-    Style.SATELLITE,
-    Style.SATELLITE_STREETS,
-    Style.TRAFFIC_DAY,
-    Style.TRAFFIC_NIGHT
-  };
+    Style.getPredefindStyle("Streets"),
+    Style.getPredefindStyle("Outdoors"),
+    Style.getPredefindStyle("Light"),
+    Style.getPredefindStyle("Dark"),
+    Style.getPredefindStyle("Satellite"),
+    Style.getPredefindStyle("Satellite Streets")  };
   private TextView fpsView;
 
   @Override

@@ -121,7 +121,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
       mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.379189, 4.899431), 1));
       mapboxMap.setStyle(
         new Style.Builder()
-          .fromUri(Style.MAPBOX_STREETS)
+          .fromUri(Style.getPredefindStyle("Streets"))
           // set custom transition
           .withTransition(new TransitionOptions(250, 50)), style -> {
           styleLoaded = true;

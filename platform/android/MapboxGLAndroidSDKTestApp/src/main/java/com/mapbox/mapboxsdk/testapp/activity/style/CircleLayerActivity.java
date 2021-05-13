@@ -75,7 +75,7 @@ public class CircleLayerActivity extends AppCompatActivity implements View.OnCli
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      mapboxMap.setStyle(Style.SATELLITE_STREETS);
+      mapboxMap.setStyle(Style.getPredefindStyle("Satellite Streets"));
       mapView.addOnDidFinishLoadingStyleListener(() -> {
         Style style = mapboxMap.getStyle();
         addBusStopSource(style);
@@ -276,12 +276,12 @@ public class CircleLayerActivity extends AppCompatActivity implements View.OnCli
 
   private static class Data {
     private static final String[] STYLES = new String[] {
-      Style.MAPBOX_STREETS,
-      Style.OUTDOORS,
-      Style.LIGHT,
-      Style.DARK,
-      Style.SATELLITE,
-      Style.SATELLITE_STREETS
+      Style.getPredefindStyle("Streets"),
+      Style.getPredefindStyle("Outdoors"),
+      Style.getPredefindStyle("Light"),
+      Style.getPredefindStyle("Dark"),
+      Style.getPredefindStyle("Satellite"),
+      Style.getPredefindStyle("Satellite Streets")
     };
   }
 }

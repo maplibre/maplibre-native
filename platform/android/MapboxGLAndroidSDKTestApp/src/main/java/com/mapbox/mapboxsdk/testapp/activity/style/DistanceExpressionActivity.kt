@@ -52,10 +52,10 @@ class DistanceExpressionActivity : AppCompatActivity() {
         val center = Point.fromLngLat(lon, lat)
         val circle = TurfTransformation.circle(center, 150.0, TurfConstants.UNIT_METRES)
         // Setup style with additional layers,
-        // using Style.MAPBOX_STREETS as a base style
+        // using Streets as a base style
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.MAPBOX_STREETS)
+                .fromUri(Style.getPredefindStyle("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
