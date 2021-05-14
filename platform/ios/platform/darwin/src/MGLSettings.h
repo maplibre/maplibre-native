@@ -12,6 +12,13 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLSettings : NSObject
 
+#pragma mark Tile Server Configuration
+
+/**
+ Tile server options
+ */
+@property (class, copy, nullable) MGLTileServerOptions* tileServerOptions;
+
 #pragma mark Authorizing Access
 
 /**
@@ -26,13 +33,6 @@ MGL_EXPORT
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
 @property (class, copy, nullable) NSString *apiKey;
-
-#pragma mark Tile Server Configuration
-
-/**
- Tile server options
- */
-@property (class, copy, nullable) MGLTileServerOptions* tileServerOptions;
 
 @end
 

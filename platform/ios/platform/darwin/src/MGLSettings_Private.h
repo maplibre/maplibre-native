@@ -13,10 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// The current global access token.
 @property (atomic, nullable) NSString *apiKey;
 
-/// The API base URL that is used to access Mapbox resources. The default base URL is `https://api.mapbox.com`. If `nil`, the Mapbox default base API URL is in use.
-@property (atomic, readwrite, nullable) NSURL *apiBaseURL;
-
+/// internal access to tile server options
 @property (atomic, readwrite, nullable) mbgl::TileServerOptions *tileServerOptionsInternal;
+
+/// tile server base url
+@property (atomic, readwrite, nullable) NSURL *apiBaseURL;
 
 /// Used for observing tiile server configuration changes
 @property (atomic, nullable) NSString *tileServerOptionsChangeToken;

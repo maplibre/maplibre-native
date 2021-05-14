@@ -234,10 +234,6 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    MGLTileServerOptions* tileServerOptions = [MGLSettings tileServerOptions];
-    NSLog(@"%@", tileServerOptions.baseURL);
-    
 
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
@@ -1914,13 +1910,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     [self.styleURLs addObject:[NSURL URLWithString:@"https://raw.githubusercontent.com/roblabs/openmaptiles-ios-demo/master/OSM2VectorTiles/styles/geography-class.GitHub.json"]];
 
     /// Add Mapbox Styles if an `apiKey` exists
-    //TODO:PP
     NSString* apiKey = [MGLSettings apiKey];
-    MGLTileServerOptions* test = [MGLSettings tileServerOptions];
-    if (test) {
-        NSLog(@"%@", test.baseURL);
-    }
-    
     if (apiKey.length)
     {
         static dispatch_once_t onceToken;

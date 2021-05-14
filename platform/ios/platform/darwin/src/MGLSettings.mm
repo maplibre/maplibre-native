@@ -8,7 +8,7 @@
 @interface MGLSettings ()
 
 @property (atomic) NSString *apiKey;
-@property (atomic) mbgl::TileServerOptions *tileServerOptions;
+@property (atomic) mbgl::TileServerOptions *tileServerOptionsInternal;
 @property (atomic) NSString *tileServerOptionsChangeToken;
 
 @end
@@ -19,7 +19,7 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        self.tileServerOptions = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapboxConfiguration());
+        self.tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapboxConfiguration());
     }
     return self;
 }
@@ -79,28 +79,28 @@
 }
 
 + (void)setAPIBaseURL:(NSURL *)apiBaseURL {
-    auto tileServerOptions = [MGLSettings sharedSettings].tileServerOptions;
+    auto tileServerOptions = [MGLSettings sharedSettings].tileServerOptionsInternal;
     NSString *baseUrlNSStr = apiBaseURL.absoluteString;
     auto baseUrl = std::string([baseUrlNSStr UTF8String]);
 
-    [MGLSettings sharedSettings].tileServerOptions = &tileServerOptions->withBaseURL(baseUrl);
+    [MGLSettings sharedSettings].tileServerOptionsInternal = &tileServerOptions->withBaseURL(baseUrl);
 }
 
 + (NSURL *)apiBaseURL {
-    auto baseUrl = [MGLSettings sharedSettings].tileServerOptions->baseURL();
+    auto baseUrl = [MGLSettings sharedSettings].tileServerOptionsInternal->baseURL();
     NSString* baseUrlNSStr = [NSString stringWithUTF8String:baseUrl.c_str()];
     NSURL *url = [NSURL URLWithString:baseUrlNSStr];
     return url;
 }
 
 + (void)setTileServerOptionsInternal:(mbgl::TileServerOptions)options {
-    [MGLSettings sharedSettings].tileServerOptions = &options;
+    [MGLSettings sharedSettings].tileServerOptionsInternal = &options;
     [self tileServerOptionsChanged];
 }
 
 + (mbgl::TileServerOptions)tileServerOptionsInternal {
     auto options = [MGLSettings sharedSettings];
-    return options.tileServerOptions->clone();
+    return options.tileServerOptionsInternal->clone();
 }
 
 + (void)tileServerOptionsChanged {
@@ -156,7 +156,7 @@
 }
 
 + (MGLTileServerOptions*)tileServerOptions {
-    auto cppOpts = [MGLSettings sharedSettings].tileServerOptions;
+    auto cppOpts = [MGLSettings sharedSettings].tileServerOptionsInternal;
     if (cppOpts) {
         
         MGLTileServerOptions* retVal = [[MGLTileServerOptions alloc] init];

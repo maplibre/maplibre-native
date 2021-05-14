@@ -489,12 +489,14 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
-    auto apiKey = [[MGLSettings sharedSettings] apiKey];
-    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
+
+    mbgl::TileServerOptions* tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withTileServerOptions(tileServerOptions->clone())
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+    
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
