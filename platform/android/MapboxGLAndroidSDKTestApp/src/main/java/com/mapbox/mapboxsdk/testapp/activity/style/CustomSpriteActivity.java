@@ -49,7 +49,7 @@ public class CustomSpriteActivity extends AppCompatActivity {
     mapView.getMapAsync(map -> {
       mapboxMap = map;
 
-      map.setStyle(Style.getPredefindStyle("Streets"), style -> {
+      map.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setColorFilter(ContextCompat.getColor(CustomSpriteActivity.this, R.color.primary));
         fab.setOnClickListener(new View.OnClickListener() {

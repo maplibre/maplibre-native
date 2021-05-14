@@ -72,7 +72,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
             mapboxMap.setStyle(
                 Style.Builder()
-                    .fromUri(Style.getPredefindStyle("Streets"))
+                    .fromUri(Style.getPredefinedStyle("Streets"))
                     .withImage(markerImageId, IconFactory.getInstance(this).defaultMarker().bitmap)
                     .withSource(source)
                     .withLayer(layer)

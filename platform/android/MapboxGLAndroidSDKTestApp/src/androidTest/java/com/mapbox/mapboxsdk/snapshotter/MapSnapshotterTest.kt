@@ -38,7 +38,7 @@ class MapSnapshotterTest {
             val options = MapSnapshotter.Options(512, 512)
                 .withPixelRatio(1.0f)
                 .withStyleBuilder(
-                    Style.Builder().fromUri(Style.getPredefindStyle("Satellite Streets"))
+                    Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Streets"))
                         .withLayerAbove(bg, "country-label")
                 )
                 .withCameraPosition(

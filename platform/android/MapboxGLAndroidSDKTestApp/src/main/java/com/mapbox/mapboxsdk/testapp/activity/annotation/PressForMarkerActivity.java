@@ -55,7 +55,7 @@ public class PressForMarkerActivity extends AppCompatActivity {
         return false;
       });
 
-      mapboxMap.setStyle(Style.getPredefindStyle("Streets"));
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
 
       if (savedInstanceState != null) {
         markerList = savedInstanceState.getParcelableArrayList(STATE_MARKER_LIST);

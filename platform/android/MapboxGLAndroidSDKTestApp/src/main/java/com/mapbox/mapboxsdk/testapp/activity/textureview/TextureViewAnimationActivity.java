@@ -60,7 +60,7 @@ public class TextureViewAnimationActivity extends AppCompatActivity {
     mapView.getMapAsync(mapboxMap -> {
       TextureViewAnimationActivity.this.mapboxMap = mapboxMap;
 
-      mapboxMap.setStyle(Style.getPredefindStyle("Streets"));
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
 
       setFpsView(mapboxMap);
 

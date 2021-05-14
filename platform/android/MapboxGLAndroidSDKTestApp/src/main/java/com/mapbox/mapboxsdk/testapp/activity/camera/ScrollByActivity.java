@@ -63,7 +63,7 @@ public class ScrollByActivity extends AppCompatActivity implements OnMapReadyCal
   @Override
   public void onMapReady(@NonNull MapboxMap map) {
     mapboxMap = map;
-    mapboxMap.setStyle(Style.getPredefindStyle("Dark"));
+    mapboxMap.setStyle(Style.getPredefinedStyle("Dark"));
 
     UiSettings uiSettings = mapboxMap.getUiSettings();
     uiSettings.setLogoEnabled(false);

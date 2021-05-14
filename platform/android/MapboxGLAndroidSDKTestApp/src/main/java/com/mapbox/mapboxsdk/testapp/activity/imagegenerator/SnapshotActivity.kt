@@ -40,7 +40,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefindStyle("Outdoors"))) { mapView.addOnDidFinishRenderingFrameListener(idleListener) }
+        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoors"))) { mapView.addOnDidFinishRenderingFrameListener(idleListener) }
     }
 
     override fun onStart() {

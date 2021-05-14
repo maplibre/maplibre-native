@@ -60,7 +60,7 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
 
             mapboxMap.setStyle(
                 Style.Builder()
-                    .fromUri(Style.getPredefindStyle("Satellite Streets"))
+                    .fromUri(Style.getPredefinedStyle("Satellite Streets"))
                     .withLayer(
                         FillLayer(LAYER_ID, SOURCE_ID).withProperties(
                             fillColor(

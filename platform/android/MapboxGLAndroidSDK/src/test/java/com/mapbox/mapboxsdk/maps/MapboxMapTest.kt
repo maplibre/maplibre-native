@@ -36,7 +36,7 @@ class MapboxMapTest {
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.nativePtr } returns 5
         mapboxMap.injectLocationComponent(spyk())
-        mapboxMap.setStyle(Style.getPredefindStyle("Streets"))
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
         mapboxMap.onFinishLoadingStyle()
     }
 

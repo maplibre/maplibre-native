@@ -45,7 +45,7 @@ public class QuerySourceFeaturesActivity extends AppCompatActivity {
     mapView.getMapAsync(map -> {
       this.mapboxMap = map;
       mapboxMap.getStyle(this::initStyle);
-      mapboxMap.setStyle(Style.getPredefindStyle("Streets"));
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
     });
   }
 

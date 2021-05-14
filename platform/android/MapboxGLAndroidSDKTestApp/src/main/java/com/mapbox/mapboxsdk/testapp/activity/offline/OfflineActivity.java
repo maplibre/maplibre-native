@@ -45,7 +45,7 @@ public class OfflineActivity extends AppCompatActivity
   public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
 
   // Style URL
-  public static final String STYLE_URL = Style.getPredefindStyle("Streets");
+  public static final String STYLE_URL = Style.getPredefinedStyle("Streets");
 
   /*
    * UI elements

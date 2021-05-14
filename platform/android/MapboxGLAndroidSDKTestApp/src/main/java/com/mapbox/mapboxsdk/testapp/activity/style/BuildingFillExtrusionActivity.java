@@ -48,7 +48,7 @@ public class BuildingFillExtrusionActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      mapboxMap.setStyle(Style.getPredefindStyle("Streets"), style -> {
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         setupBuildings(style);
         setupLight();
       });

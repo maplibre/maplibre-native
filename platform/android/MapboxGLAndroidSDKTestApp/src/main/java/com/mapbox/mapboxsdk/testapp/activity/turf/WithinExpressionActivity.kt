@@ -93,7 +93,7 @@ class WithinExpressionActivity : AppCompatActivity() {
         // using streets as a base style
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefindStyle("Streets"))
+                .fromUri(Style.getPredefinedStyle("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,

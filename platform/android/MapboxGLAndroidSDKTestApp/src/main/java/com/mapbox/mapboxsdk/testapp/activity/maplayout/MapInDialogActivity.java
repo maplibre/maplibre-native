@@ -59,7 +59,7 @@ public class MapInDialogActivity extends AppCompatActivity {
       super.onViewCreated(view, savedInstanceState);
       mapView = view.findViewById(R.id.mapView);
       mapView.onCreate(savedInstanceState);
-      mapView.getMapAsync(mapboxMap -> mapboxMap.setStyle(Style.getPredefindStyle("Outdoors")));
+      mapView.getMapAsync(mapboxMap -> mapboxMap.setStyle(Style.getPredefinedStyle("Outdoors")));
     }
 
     @Override

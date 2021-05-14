@@ -126,7 +126,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         // using streets as a base style
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefindStyle("Streets"))
+                .fromUri(Style.getPredefinedStyle("Streets"))
         ) {
             mapView.addOnCameraDidChangeListener(cameraListener)
         }
@@ -136,7 +136,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
             .withPixelRatio(2.0f)
             .withStyleBuilder(
                 Style.Builder()
-                    .fromUri(Style.getPredefindStyle("Streets"))
+                    .fromUri(Style.getPredefinedStyle("Streets"))
                     .withSources(
                         GeoJsonSource(
                             POINT_ID,

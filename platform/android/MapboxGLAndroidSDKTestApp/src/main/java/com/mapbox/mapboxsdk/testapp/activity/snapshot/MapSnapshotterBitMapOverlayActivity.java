@@ -53,7 +53,7 @@ public class MapSnapshotterBitMapOverlayActivity extends AppCompatActivity
             getApplicationContext(),
             new MapSnapshotter
               .Options(Math.min(container.getMeasuredWidth(), 1024), Math.min(container.getMeasuredHeight(), 1024))
-              .withStyleBuilder(new Style.Builder().fromUri(Style.getPredefindStyle("Outdoors")))
+              .withStyleBuilder(new Style.Builder().fromUri(Style.getPredefinedStyle("Outdoors")))
               .withCameraPosition(new CameraPosition.Builder().target(new LatLng(52.090737, 5.121420)).zoom(15).build())
           );
           mapSnapshotter.start(MapSnapshotterBitMapOverlayActivity.this);

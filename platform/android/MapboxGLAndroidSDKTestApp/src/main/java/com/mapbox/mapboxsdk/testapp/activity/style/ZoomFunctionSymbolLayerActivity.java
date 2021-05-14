@@ -84,7 +84,7 @@ public class ZoomFunctionSymbolLayerActivity extends AppCompatActivity {
     mapView.getMapAsync(map -> {
       mapboxMap = map;
 
-      map.setStyle(Style.getPredefindStyle("Streets"), style -> {
+      map.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         updateSource(style);
         addLayer(style);
         map.addOnMapClickListener(mapClickListener);

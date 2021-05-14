@@ -35,9 +35,9 @@ class StyleTest {
 
     @Test
     fun testFromUrl() {
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets"))
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
     }
 
     @Test
@@ -117,9 +117,9 @@ class StyleTest {
     fun testWithFromLoadingSource() {
         val source = mockk<GeoJsonSource>()
         every { source.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withSource(source)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addSource(source) }
     }
@@ -128,9 +128,9 @@ class StyleTest {
     fun testWithFromLoadingLayer() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withLayer(layer)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayer(layer)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, MapboxConstants.LAYER_ID_ANNOTATIONS) }
     }
@@ -139,9 +139,9 @@ class StyleTest {
     fun testWithFromLoadingLayerAt() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withLayerAt(layer, 1)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayerAt(layer, 1)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerAt(layer, 1) }
     }
@@ -150,9 +150,9 @@ class StyleTest {
     fun testWithFromLoadingLayerBelow() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withLayerBelow(layer, "below")
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayerBelow(layer, "below")
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, "below") }
     }
@@ -161,9 +161,9 @@ class StyleTest {
     fun testWithFromLoadingLayerAbove() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withLayerBelow(layer, "below")
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayerBelow(layer, "below")
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, "below") }
     }
@@ -171,9 +171,9 @@ class StyleTest {
     @Test
     fun testWithFromLoadingTransitionOptions() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withTransition(transitionOptions)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withTransition(transitionOptions)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.transitionOptions = transitionOptions }
     }
@@ -182,9 +182,9 @@ class StyleTest {
     fun testFromCallback() {
         val callback = mockk<Style.OnStyleLoaded>()
         every { callback.onStyleLoaded(any()) } answers {}
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets"))
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
         mapboxMap.setStyle(builder, callback)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
     }
@@ -237,9 +237,9 @@ class StyleTest {
         mapboxMap.getStyle(callback)
         val source = mockk<GeoJsonSource>()
         every { source.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withSource(source)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Streets") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addSource(source) }
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
@@ -253,7 +253,7 @@ class StyleTest {
     @Test
     fun testGetNullWhileLoading() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets")).withTransition(transitionOptions)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withTransition(transitionOptions)
         mapboxMap.setStyle(builder)
         Assert.assertNull(mapboxMap.style)
         mapboxMap.notifyStyleLoaded()
@@ -271,26 +271,26 @@ class StyleTest {
         mapboxMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleJson = "{}" }
         mapboxMap.notifyStyleLoaded()
-        mapboxMap.setStyle(Style.getPredefindStyle("Streets"))
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
     }
 
     @Test(expected = IllegalStateException::class)
     fun testIllegalStateExceptionWithStyleReload() {
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Streets"))
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
         mapboxMap.setStyle(builder)
         mapboxMap.notifyStyleLoaded()
         val style = mapboxMap.style
-        mapboxMap.setStyle(Style.Builder().fromUrl(Style.getPredefindStyle("Light")))
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Light")))
         style!!.addLayer(mockk<SymbolLayer>())
     }
 
     @Test
     fun testAddImage() {
         val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Satellite")).withImage("id", bitmap)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Satellite")).withImage("id", bitmap)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Satellite") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addImages(any()) }
@@ -301,9 +301,9 @@ class StyleTest {
         val drawable = ShapeDrawable()
         drawable.intrinsicHeight = 10
         drawable.intrinsicWidth = 10
-        val builder = Style.Builder().fromUrl(Style.getPredefindStyle("Satellite")).withImage("id", drawable)
+        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Satellite")).withImage("id", drawable)
         mapboxMap.setStyle(builder)
-        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefindStyle("Satellite") }
+        verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }
         mapboxMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addImages(any()) }

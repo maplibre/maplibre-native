@@ -35,7 +35,7 @@ public class ManualZoomActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
       ManualZoomActivity.this.mapboxMap = mapboxMap;
-      mapboxMap.setStyle(new Style.Builder().fromUri(Style.getPredefindStyle("Satellite")));
+      mapboxMap.setStyle(new Style.Builder().fromUri(Style.getPredefinedStyle("Satellite")));
       UiSettings uiSettings = ManualZoomActivity.this.mapboxMap.getUiSettings();
       uiSettings.setAllGesturesEnabled(false);
     });

@@ -65,7 +65,7 @@ public class InfoWindowActivity extends AppCompatActivity
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setStyle(Style.getPredefindStyle("Streets"), style -> {
+    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
       addMarkers();
       addInfoWindowListeners();
     });

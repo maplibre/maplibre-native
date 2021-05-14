@@ -69,7 +69,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
 
     private fun createTestRegionDefinition(): OfflineRegionDefinition {
         return OfflineGeometryRegionDefinition(
-            Style.getPredefindStyle("Streets"),
+            Style.getPredefinedStyle("Streets"),
             Point.fromLngLat(50.847857, 4.360137),
             17.0,
             17.0,

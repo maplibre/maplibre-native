@@ -94,7 +94,7 @@ public class MapSnapshotterActivity extends AppCompatActivity {
   private void startSnapShot(final int row, final int column) {
     // Optionally the style
     Style.Builder builder = new Style.Builder()
-      .fromUri((column + row) % 2 == 0 ? Style.getPredefindStyle("Streets") : Style.getPredefindStyle("Dark"));
+      .fromUri((column + row) % 2 == 0 ? Style.getPredefinedStyle("Streets") : Style.getPredefinedStyle("Dark"));
 
     // Define the dimensions
     MapSnapshotter.Options options = new MapSnapshotter.Options(

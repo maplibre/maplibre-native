@@ -47,7 +47,7 @@ open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
     class ItemAdapter(private val activity: GLSurfaceRecyclerViewActivity, private val inflater: LayoutInflater) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
         private val items = listOf(
-            "one", "two", "three", MapItem(Style.getPredefindStyle("Streets")), "four", "five", MapItem(Style.getPredefindStyle("Dark")), "seven", "eight", "nine", "ten",
+            "one", "two", "three", MapItem(Style.getPredefinedStyle("Streets")), "four", "five", MapItem(Style.getPredefinedStyle("Dark")), "seven", "eight", "nine", "ten",
             "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
             "nineteen", "twenty", "twenty-one"
         )

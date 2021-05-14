@@ -68,7 +68,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
     private fun loadStyle(featureCollection: FeatureCollection) {
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefindStyle("Streets"))
+                .fromUri(Style.getPredefinedStyle("Streets"))
                 .withLayer(
                     SymbolLayer("symbol", "symbol")
                         .withProperties(

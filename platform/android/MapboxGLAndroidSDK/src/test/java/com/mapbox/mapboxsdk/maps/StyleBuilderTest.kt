@@ -20,7 +20,7 @@ class StyleBuilderTest {
 
     @Test
     fun testFromUrl() {
-        val expected = Style.getPredefindStyle("Streets")
+        val expected = Style.getPredefinedStyle("Streets")
         val builder = Style.Builder()
         builder.fromUrl(expected)
         assertEquals(expected, builder.uri)

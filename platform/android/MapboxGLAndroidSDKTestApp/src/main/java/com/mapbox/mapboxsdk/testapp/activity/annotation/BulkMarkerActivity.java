@@ -52,7 +52,7 @@ public class BulkMarkerActivity extends AppCompatActivity implements AdapterView
 
   private void initMap(MapboxMap mapboxMap) {
     this.mapboxMap =  mapboxMap;
-    mapboxMap.setStyle(Style.getPredefindStyle("Streets"));
+    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
   }
 
   @Override

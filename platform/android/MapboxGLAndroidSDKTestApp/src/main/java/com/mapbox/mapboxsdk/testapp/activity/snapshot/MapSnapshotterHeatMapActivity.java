@@ -65,7 +65,7 @@ public class MapSnapshotterHeatMapActivity extends AppCompatActivity implements 
 
           Timber.i("Starting snapshot");
 
-          Style.Builder builder = new Style.Builder().fromUri(Style.getPredefindStyle("Outdoors"))
+          Style.Builder builder = new Style.Builder().fromUri(Style.getPredefinedStyle("Outdoors"))
             .withSource(getEarthquakeSource())
             .withLayerAbove(getHeatmapLayer(), "waterway-label");
 

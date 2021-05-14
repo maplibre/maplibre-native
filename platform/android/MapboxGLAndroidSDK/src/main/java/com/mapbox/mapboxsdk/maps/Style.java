@@ -1427,7 +1427,7 @@ public class Style {
    *
    *  @return The list of predefined styles
    */
-  public static DefaultStyle[] getPredefindStyles() {
+  public static DefaultStyle[] getPredefinedStyles() {
     return Mapbox.getPredefinedStyles();
   };
 
@@ -1436,7 +1436,7 @@ public class Style {
    *
    *  @return The predefined style definition
    */
-  public static String getPredefindStyle(String name) {
+  public static String getPredefinedStyle(String name) {
     DefaultStyle style = Mapbox.getPredefinedStyle(name);
     if (style != null) {
       return style.getUrl();

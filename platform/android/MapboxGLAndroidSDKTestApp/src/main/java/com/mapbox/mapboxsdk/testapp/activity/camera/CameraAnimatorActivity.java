@@ -79,7 +79,7 @@ public class CameraAnimatorActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMapReady(@NonNull final MapboxMap map) {
     mapboxMap = map;
-    map.setStyle(Style.getPredefindStyle("Streets"));
+    map.setStyle(Style.getPredefinedStyle("Streets"));
     initFab();
   }
 
