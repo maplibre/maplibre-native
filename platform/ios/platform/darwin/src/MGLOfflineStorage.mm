@@ -201,7 +201,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
             _mbglOnlineFileSource->setProperty(mbgl::API_KEY_KEY, apiKey.UTF8String);
         }
     } else if ([keyPath isEqualToString:@"tileServerOptionsChangeToken"] && object == [MGLSettings sharedSettings]) {
-        auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+        auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
         auto apiBaseURL = tileServerOptions->baseURL();
         if (!apiBaseURL.empty()) {
             _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL);

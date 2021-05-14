@@ -712,7 +712,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     // App-global configuration
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
-    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withTileServerOptions(tileServerOptions->clone())
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)

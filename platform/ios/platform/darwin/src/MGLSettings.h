@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 
 #import "MGLFoundation.h"
+#import "MGLTileServerOptions.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -26,6 +27,12 @@ MGL_EXPORT
  */
 @property (class, copy, nullable) NSString *apiKey;
 
+#pragma mark Tile Server Configuration
+
+/**
+ Tile server options
+ */
+@property (class, copy, nullable) MGLTileServerOptions* tileServerOptions;
 
 @end
 

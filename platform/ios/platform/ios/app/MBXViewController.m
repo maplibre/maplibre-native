@@ -12,6 +12,7 @@
 #import "MBXOrnamentsViewController.h"
 #import "MBXStateManager.h"
 #import "MBXState.h"
+#import "MGLSettings.h"
 
 #import "MBXFrameTimeGraphView.h"
 #import "../src/MGLMapView_Experimental.h"
@@ -233,6 +234,10 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    MGLTileServerOptions* tileServerOptions = [MGLSettings tileServerOptions];
+    NSLog(@"%@", tileServerOptions.baseURL);
+    
 
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
@@ -1910,7 +1915,13 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 
     /// Add Mapbox Styles if an `apiKey` exists
     //TODO:PP
-    if ([MGLSettings apiKey].length)
+    NSString* apiKey = [MGLSettings apiKey];
+    MGLTileServerOptions* test = [MGLSettings tileServerOptions];
+    if (test) {
+        NSLog(@"%@", test.baseURL);
+    }
+    
+    if (apiKey.length)
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
