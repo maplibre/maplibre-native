@@ -59,25 +59,37 @@ bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::stri
 
     // Make sure that we are dealing with a valid tile URL.
     // Has to be with the tile template prefix, with a valid filename + extension
-    const URL baseURL(tileServerOptions.baseURL());
-    auto domain = str.substr(url.domain.first, url.domain.second);
     
     if (tileServerOptions.uriSchemeAlias() == "mapbox") {
-        replace(domain, ".cn", ".com"); // hack for mapbox china
-    }
+        const URL baseURL(tileServerOptions.baseURL());
+        auto domain = str.substr(url.domain.first, url.domain.second);
     
-    auto refDomain = tileServerOptions.baseURL().substr(baseURL.domain.first, baseURL.domain.second);
-    const auto refDomainIdx = nthOccurrenceFromEnd(refDomain, ".", 2);
-    refDomain = refDomain.substr(refDomainIdx + 1, refDomain.length() - refDomainIdx - 1);
-   
-    if (!endsWith(domain, refDomain) || path.filename.second == 0 || path.extension.second <= 1) {
-        // Not a proper tile URL.
-        return false;
+        replace(domain, ".cn", ".com"); // hack for mapbox china
+    
+        auto refDomain = tileServerOptions.baseURL().substr(baseURL.domain.first, baseURL.domain.second);
+        const auto refDomainIdx = nthOccurrenceFromEnd(refDomain, ".", 2);
+        refDomain = refDomain.substr(refDomainIdx + 1, refDomain.length() - refDomainIdx - 1);
+        
+        if (!endsWith(domain, refDomain) || path.filename.second == 0 || path.extension.second <= 1) {
+            // Not a proper tile URL.
+            return false;
+        }
+    }
+    else {
+        if (path.filename.second == 0 || path.extension.second <= 1) {
+            // Not a proper tile URL.
+            return false;
+        }
     }
     
     return true;
 }
 
+std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
+    const std::string queryString = tileServerOptions.apiKeyParameterName().empty() ?
+        "" : "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
+    return queryString;
+}
 
 static bool equals(const std::string& str, const URL::Segment& segment, std::string& ref) {
     return str.compare(segment.first, segment.second, ref) == 0;
@@ -89,13 +101,9 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
-    if (apiKey.empty()) {
-        throw std::runtime_error(
-            "You must provide a Mapbox API access token for Mapbox tile sources");
-    }
 
     const URL url(str);
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey + "&secure";
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + makeQueryString(tileServerOptions, apiKey) + "&secure";
     return transformURL(tpl, str, url);
 }
 
@@ -113,7 +121,9 @@ std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
         return str;
     }
     
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleVersionPrefix().value_or("") + tileServerOptions.styleTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.styleVersionPrefix().value_or("") + tileServerOptions.styleTemplate() + makeQueryString(tileServerOptions, apiKey);
+
+        
     return transformURL(tpl, str, url);
 }
 
@@ -131,7 +141,7 @@ std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesVersionPrefix().value_or("") + tileServerOptions.spritesTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.spritesVersionPrefix().value_or("") + tileServerOptions.spritesTemplate() + makeQueryString(tileServerOptions, apiKey);
     return transformURL(tpl, str, url);
 }
 
@@ -149,7 +159,7 @@ std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsVersionPrefix().value_or("") + tileServerOptions.glyphsTemplate() + "?" + tileServerOptions.apiKeyParameterName() + "=" + apiKey;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.glyphsVersionPrefix().value_or("") + tileServerOptions.glyphsTemplate() + makeQueryString(tileServerOptions, apiKey);
     return transformURL(tpl, str, url);
 }
 
@@ -167,7 +177,7 @@ std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
         return str;
     }
 
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileVersionPrefix().value_or("") + tileServerOptions.tileTemplate() + "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.tileVersionPrefix().value_or("") + tileServerOptions.tileTemplate() + makeQueryString(tileServerOptions, apiKey);
     return transformURL(tpl, str, url);
 }
 
