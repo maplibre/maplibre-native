@@ -293,7 +293,7 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
-    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptions];
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withTileServerOptions(tileServerOptions->clone())
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)

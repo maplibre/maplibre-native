@@ -187,11 +187,16 @@ public:
         maximumConcurrentRequests = maximumConcurrentRequests_;
     }
 
-    void setAPIBaseURL(std::string t) { apiBaseURL = std::move(t); }
-    const std::string& getAPIBaseURL() const { return apiBaseURL; }
+    void setAPIBaseURL(std::string t) {
+        auto tileServerOptions = resourceOptions.tileServerOptions();
+        tileServerOptions.withBaseURL(std::move(t));
+        resourceOptions.withTileServerOptions(tileServerOptions);
+    }
 
-    void setApiKey(std::string t) { apiKey = std::move(t); }
-    const std::string& getApiKey() const { return apiKey; }
+    const std::string& getAPIBaseURL() const { return resourceOptions.tileServerOptions().baseURL(); }
+
+    void setApiKey(std::string t) { resourceOptions.withApiKey(std::move(t)); }
+    const std::string& getApiKey() const { return resourceOptions.apiKey(); }
 
 private:
     friend struct OnlineFileRequest;
@@ -299,8 +304,6 @@ private:
     uint32_t maximumConcurrentRequests;
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
-    std::string apiKey;
-    std::string apiBaseURL;     
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
 };
 
@@ -365,8 +368,8 @@ public:
         if (auto* apiKey = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setApiKey, *apiKey);
             {
-                std::lock_guard<std::mutex> lock(cachedApiKeyMutex);
-                cachedApiKey = *apiKey;
+                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                cachedResourceOptions.withApiKey(*apiKey);
             }
         } else {
             Log::Error(Event::General, "Invalid apiKey property value type.");
@@ -374,8 +377,8 @@ public:
     }
 
     std::string getApiKey() const {
-        std::lock_guard<std::mutex> lock(cachedApiKeyMutex);
-        return cachedApiKey;
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return cachedResourceOptions.apiKey();
     }
 
     void setAPIBaseURL(const mapbox::base::Value& value) {
@@ -399,9 +402,6 @@ public:
     }
 
 private:
-    mutable std::mutex cachedApiKeyMutex;
-    std::string cachedApiKey;
-
     mutable std::mutex resourceOptionsMutex;
     ResourceOptions cachedResourceOptions;
 

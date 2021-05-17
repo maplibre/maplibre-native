@@ -174,8 +174,29 @@ namespace mbgl {
     }    
 
     TileServerOptions TileServerOptions::DefaultConfiguration() {
-        return MapboxConfiguration();
+        return MapLibreConfiguration();
     }
+
+    TileServerOptions TileServerOptions::MapLibreConfiguration() {
+        std::vector<const mbgl::util::DefaultStyle> styles {
+                // https://demotiles.maplibre.org/style.json
+                mbgl::util::DefaultStyle("maplibre://maps/style", "Basic", 1)
+        };
+
+        TileServerOptions options = TileServerOptions()
+                .withBaseURL("https://demotiles.maplibre.org")
+                .withUriSchemeAlias("maplibre")
+                .withApiKeyParameterName("")
+                .withSourceTemplate("/tiles{domain}.json", {})
+                .withStyleTemplate("/{path}.json", "maps", {})
+                .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
+                .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
+                .withTileTemplate("/tiles/{path}", "tiles", {})
+                .withDefaultStyles(styles);
+        return options;
+    }
+
+    //
 
     TileServerOptions TileServerOptions::MapboxConfiguration() {
         std::vector<const mbgl::util::DefaultStyle> styles {

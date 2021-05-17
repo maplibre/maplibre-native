@@ -21,7 +21,7 @@ TEST(Mapbox, SourceURL) {
         mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::tileServerOptions, "mapbox://user.map", "key"));
     EXPECT_EQ(
         "https://api.example.com/v4/user.map.json?access_token=key&secure",
-              mbgl::util::mapbox::normalizeSourceURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://user.map", "key"));
+        mbgl::util::mapbox::normalizeSourceURL(TileServerOptions(mapboxFixture::tileServerOptions).withBaseURL("https://api.example.com"), "mapbox://user.map", "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/v4/user.map.json?access_token=key&secure&style=mapbox://styles/mapbox/streets-v9@0",
         mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::tileServerOptions, "mapbox://user.map?style=mapbox://styles/mapbox/streets-v9@0", "key"));
@@ -223,4 +223,21 @@ TEST(Mapbox, CanonicalizeVectorTileset) {
     mbgl::util::mapbox::canonicalizeTileset(mapboxFixture::tileServerOptions, tileset, "mapbox://mapbox.streets", SourceType::Vector, 512);
 
     EXPECT_EQ("mapbox://tiles/mapbox.streets/{z}/{x}/{y}.vector.pbf", tileset.tiles[0]);
+}
+
+// MapLibre tests
+TEST(MapLibre, CanonicalURL) {
+    EXPECT_EQ(
+        "https://demotiles.maplibre.org/style.json",
+        mbgl::util::mapbox::normalizeStyleURL(mapboxFixture::tileServerOptions, "maplibre://maps/style", ""));
+    EXPECT_EQ(
+        "https://demotiles.maplibre.org/tiles/tiles.json",
+        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::tileServerOptions, "maplibre://tiles/tiles", ""));
+    EXPECT_EQ(
+        "https://demotiles.maplibre.org/font/Open%20Sans%20Semibold/0-255.pbf",
+        mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::tileServerOptions, "maplibre://fonts/Comic%20Sans/0-255.pbf", ""));
+
+    EXPECT_EQ(
+        "maplibre://maps/style",
+        mbgl::util::mapbox::ca(mapboxFixture::tileServerOptions, "https://demotiles.maplibre.org/style.json"));
 }
