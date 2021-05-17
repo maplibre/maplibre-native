@@ -13,7 +13,7 @@ MGL_EXPORT
 /**
 The style URL
  */
-@property (nonatomic,retain) NSString* url;
+@property (nonatomic,retain) NSURL* url;
 
 /**
 The style name

@@ -152,7 +152,7 @@ private:
     {
         if ( !styleURL)
         {
-            styleURL = [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+            styleURL = [MGLStyle defaultStyleURL];
         }
         _styleURL = styleURL;
         _size = size;

@@ -632,7 +632,7 @@ public:
 
 - (nonnull NSURL *)styleURL {
     NSString *styleURLString = @(_mbglMap->getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
-    return styleURLString ? [NSURL URLWithString:styleURLString] : [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+    return styleURLString ? [NSURL URLWithString:styleURLString] : [MGLStyle defaultStyleURL];
 }
 
 - (void)setStyleURL:(nullable NSURL *)styleURL {
@@ -640,13 +640,12 @@ public:
         return;
     }
 
-    // Default to Streets.
     if (!styleURL) {
-        styleURL = [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+        styleURL = [MGLStyle defaultStyleURL];
     }
     MGLLogDebug(@"Setting styleURL: %@", styleURL);
+
     // An access token is required to load any default style, including Streets.
-    //TODO:PP
     if (![MGLSettings apiKey] && [styleURL.scheme isEqualToString:@"mapbox"]) {
         NSLog(@"Cannot set the style URL to %@ because no access token has been specified.", styleURL);
         return;

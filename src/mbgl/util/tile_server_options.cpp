@@ -24,7 +24,8 @@ namespace mbgl {
         std::string tileDomainName;
         optional<std::string> tileVersionPrefix;
         std::string apiKeyParameterName;
-        std::vector<const mbgl::util::DefaultStyle> defaultStyles;   
+        std::vector<const mbgl::util::DefaultStyle> defaultStyles;
+        std::string defaultStyle;
     };
 
 
@@ -171,7 +172,16 @@ namespace mbgl {
     TileServerOptions& TileServerOptions::withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles) {
         impl_->defaultStyles = std::move(styles);
         return *this;
-    }    
+    }
+
+    TileServerOptions& TileServerOptions::withDefaultStyle(std::string defaultStyle) {
+        impl_->defaultStyle = std::move(defaultStyle);
+        return *this;
+    }
+
+    const std::string& TileServerOptions::defaultStyle() const {
+        return impl_->defaultStyle;
+    }
 
     TileServerOptions TileServerOptions::DefaultConfiguration() {
         return MapLibreConfiguration();
@@ -192,7 +202,8 @@ namespace mbgl {
                 .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
                 .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
                 .withTileTemplate("/tiles/{path}", "tiles", {})
-                .withDefaultStyles(styles);
+                .withDefaultStyles(styles)
+                .withDefaultStyle("Basic");
         return options;
     }
 
@@ -218,7 +229,8 @@ namespace mbgl {
             .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
             .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
             .withTileTemplate("{path}", "tiles", {"/v4"})
-            .withDefaultStyles(styles);
+            .withDefaultStyles(styles)
+            .withDefaultStyle("Streets");
         return options;
     }
 
@@ -243,7 +255,8 @@ namespace mbgl {
             .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})
             .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
             .withTileTemplate("/tiles/{path}", "tiles", {"v3"})
-            .withDefaultStyles(styles);
+            .withDefaultStyles(styles)
+            .withDefaultStyle("Streets");
         return options;
     }
 

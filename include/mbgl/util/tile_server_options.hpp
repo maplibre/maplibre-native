@@ -229,7 +229,20 @@ namespace mbgl {
          * @param styles The style set.
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles);       
+        TileServerOptions& withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles);
+
+        /**
+         * @brief Sets the default style by name. The style name must exists in defaultStyles collection
+         *
+         * @param defaultStyle The style name
+         * @return TileServerOptions for chaining options together.
+         */
+        TileServerOptions& withDefaultStyle(std::string defaultStyle);
+
+        /**
+         * @brief Get the default style name
+         */
+        const std::string& defaultStyle() const;
 
         /**
          * @brief Get the default configuration

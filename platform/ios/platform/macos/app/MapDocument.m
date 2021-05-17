@@ -320,30 +320,8 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     } else if ([sender isKindOfClass:[NSPopUpButton class]]) {
         tag = [sender selectedTag];
     }
-    NSURL *styleURL;
-    switch (tag) {
-        case 1:
-            styleURL = [MGLStyle streetsStyleURL];
-            break;
-        case 2:
-            styleURL = [MGLStyle outdoorsStyleURL];
-            break;
-        case 3:
-            styleURL = [MGLStyle lightStyleURL];
-            break;
-        case 4:
-            styleURL = [MGLStyle darkStyleURL];
-            break;
-        case 5:
-            styleURL = [MGLStyle satelliteStyleURL];
-            break;
-        case 6:
-            styleURL = [MGLStyle satelliteStreetsStyleURL];
-            break;
-        default:
-            NSAssert(NO, @"Cannot set style from control with tag %li", (long)tag);
-            break;
-    }
+    NSURL *styleURL = [[[MGLStyle predefinedStyles] objectAtIndex:tag - 1] url];
+
     [self.undoManager removeAllActionsWithTarget:self];
     self.mapView.styleURL = styleURL;
     [self.window.toolbar validateVisibleItems];
@@ -1142,31 +1120,15 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if (menuItem.action == @selector(showStyle:)) {
         NSURL *styleURL = self.mapView.styleURL;
+        NSArray<MGLDefaultStyle*>* predefinedStyles = [MGLStyle predefinedStyles];
         NSCellStateValue state;
-        switch (menuItem.tag) {
-            case 1:
-                state = [styleURL isEqual:[MGLStyle streetsStyleURL]];
-                break;
-            case 2:
-                state = [styleURL isEqual:[MGLStyle outdoorsStyleURL]];
-                break;
-            case 3:
-                state = [styleURL isEqual:[MGLStyle lightStyleURL]];
-                break;
-            case 4:
-                state = [styleURL isEqual:[MGLStyle darkStyleURL]];
-                break;
-            case 5:
-                state = [styleURL isEqual:[MGLStyle satelliteStyleURL]];
-                break;
-            case 6:
-                state = [styleURL isEqual:[MGLStyle satelliteStreetsStyleURL]];
-                break;
-            default:
-                return NO;
+        if (menuItem.tag >= 1 && menuItem.tag <= (unsigned)[predefinedStyles count]) {
+            NSURL* refStyleURL = [predefinedStyles objectAtIndex:menuItem.tag - 1].url;
+            state = [styleURL isEqual:refStyleURL];
+            menuItem.state = state;
+            return YES;
         }
-        menuItem.state = state;
-        return YES;
+        return NO;
     }
     if (menuItem.action == @selector(chooseCustomStyle:)) {
         menuItem.state = self.indexOfStyleInToolbarItem == NSNotFound;
@@ -1330,18 +1292,11 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (NSUInteger)indexOfStyleInToolbarItem {
-    if (![MGLSettings apiKey]) {
-        return NSNotFound;
-    }
 
-    NSArray *styleURLs = @[
-        [MGLStyle streetsStyleURL],
-        [MGLStyle outdoorsStyleURL],
-        [MGLStyle lightStyleURL],
-        [MGLStyle darkStyleURL],
-        [MGLStyle satelliteStyleURL],
-        [MGLStyle satelliteStreetsStyleURL],
-    ];
+    NSMutableArray* styleURLs = [[NSMutableArray alloc] init];
+    for (MGLDefaultStyle* defaultStyle in [MGLStyle predefinedStyles]) {
+        [styleURLs addObject:defaultStyle.url];
+    }
     return [styleURLs indexOfObject:self.mapView.styleURL];
 }
 

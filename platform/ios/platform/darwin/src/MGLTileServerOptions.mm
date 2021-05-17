@@ -25,5 +25,6 @@
 @synthesize tileVersionPrefix;
 @synthesize apiKeyParameterName;
 @synthesize defaultStyles;
+@synthesize defaultStyle;
 
 @end

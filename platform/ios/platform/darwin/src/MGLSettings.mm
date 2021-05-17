@@ -142,7 +142,7 @@
     if (options.defaultStyles) {
         for (MGLDefaultStyle* objCStyle in options.defaultStyles) {
             mbgl::util::DefaultStyle cppStyle(
-              std::string([objCStyle.url UTF8String]),
+              std::string([objCStyle.url.absoluteString  UTF8String]),
               std::string([objCStyle.name UTF8String]),
               objCStyle.version
             );
@@ -150,7 +150,7 @@
         }
     }
     opts.withDefaultStyles(defaultStyles);
-
+    opts.withDefaultStyle(std::string([options.defaultStyle.name UTF8String]));
     
     self.tileServerOptionsInternal = opts;
 }
@@ -185,17 +185,24 @@
       
         std::vector<const mbgl::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
         
+        
         NSMutableArray<MGLDefaultStyle*>* mglStyles = [[NSMutableArray<MGLDefaultStyle*> alloc] init];
         for (auto it = begin(cppDefaultStyles); it != end(cppDefaultStyles); ++it) {
+            NSString* url = [NSString stringWithUTF8String:it->getUrl().c_str()];
+            
             auto* mglDefaultStyle = [[MGLDefaultStyle alloc] init];
-            mglDefaultStyle.url = [NSString stringWithUTF8String:it->getUrl().c_str()];
+            mglDefaultStyle.url = [NSURL URLWithString:url];
             mglDefaultStyle.name = [NSString stringWithUTF8String:it->getName().c_str()];
             mglDefaultStyle.version = it->getCurrentVersion();
             [mglStyles addObject:mglDefaultStyle];
+            
+            // set default style name
+            if (it->getName() == cppOpts->defaultStyle()) {
+                retVal.defaultStyle = mglDefaultStyle;
+            }
         }
         
         retVal.defaultStyles = mglStyles;
-        
         return retVal;
     }
     

@@ -99,7 +99,12 @@ MGL_EXPORT
 /**
 * Default styles.
 */
-@property (nonatomic, retain) NSArray<MGLDefaultStyle*>* defaultStyles;  
+@property (nonatomic, retain) NSArray<MGLDefaultStyle*>* defaultStyles;
+
+/**
+ * Default style
+ */
+@property (nonatomic, retain) MGLDefaultStyle* defaultStyle;
 
 @end
 
