@@ -1,22 +1,13 @@
 ext {
-    mapboxArtifactGroupId = 'org.maplibre.gl'
-    mapboxArtifactId = 'android-sdk'
-    mapboxArtifactTitle = 'MapLibre Maps SDK for Android'
-    mapboxArtifactDescription = 'MapLibre Maps SDK for Android'
-    mapboxDeveloperName = 'MapLibre'
-    mapboxDeveloperId = 'maplibre'
-    mapboxArtifactUrl = 'https://github.com/maplibre/maplibre-gl-native'
-    mapboxArtifactVcsUrl = 'https://github.com/maplibre/maplibre-gl-native.git'
-    mapboxArtifactScmUrl = 'scm:git@github.com:maplibre/maplibre-gl-native.git'
-    mapboxArtifactLicenseName = 'BSD'
-    mapboxArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    mapboxPackageRepository = 'https://maven.pkg.github.com/maptiler/maplibre-gl-native'
+    mapLibreArtifactGroupId = 'org.maplibre.gl'
+    mapLibreArtifactId = 'android-sdk'
+    mapLibreArtifactTitle = 'MapLibre Maps SDK for Android'
+    mapLibreArtifactDescription = 'MapLibre Maps SDK for Android'
+    mapLibreDeveloperName = 'MapLibre'
+    mapLibreDeveloperId = 'maplibre'
+    mapLibreArtifactUrl = 'https://github.com/maplibre/maplibre-gl-native'
+    mapLibreArtifactScmUrl = 'scm:git@github.com:maplibre/maplibre-gl-native.git'
+    mapLibreArtifactLicenseName = 'BSD'
+    mapLibreArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
     versionName = project.hasProperty('VERSION_NAME') ? project.property('VERSION_NAME') : System.getenv('VERSION_NAME')
-
-    mapboxBintrayUserOrg = 'maplibre'
-    mapboxBintrayRepoName = 'maplibre-gl-native'
-    mapboxBintrayPackageName = 'org.maplibre.gl:android-sdk'
-    mapboxBintrayUser = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
-    mapboxBintrayApiKey = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
-    mapboxGpgPassphrase = project.hasProperty('GPG_PASSPHRASE') ? project.property('GPG_PASSPHRASE') : System.getenv('GPG_PASSPHRASE')
 }

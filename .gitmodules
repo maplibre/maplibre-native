@@ -40,9 +40,9 @@
 [submodule "vendor/mapbox-gl-native-curl"]
 	path = vendor/mapbox-gl-native-curl
 	url = https://github.com/mapbox/mapbox-gl-native-curl.git
-[submodule "platform/android/vendor/mapbox-java"]
-	path = platform/android/vendor/mapbox-java
-	url = https://github.com/mapbox/mapbox-java.git
+[submodule "platform/android/vendor/maplibre-java"]
+	path = platform/android/vendor/maplibre-java
+	url = https://github.com/maplibre/maplibre-java
 [submodule "platform/android/vendor/mapbox-gestures-android"]
 	path = platform/android/vendor/mapbox-gestures-android
 	url = https://github.com/mapbox/mapbox-gestures-android.git
