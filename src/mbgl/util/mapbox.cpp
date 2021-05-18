@@ -99,7 +99,7 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
     }
 
     std::string suffix = "";
-    if (tileServerOptions.uriSchemeAlias() == "mapbox://"){
+    if (tileServerOptions.uriSchemeAlias() == "mapbox") {
         suffix = "&secure";
     }
     const URL url(str);
