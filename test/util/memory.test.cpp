@@ -56,7 +56,7 @@ private:
     }
 
     std::string getType(const Resource& res) {
-        if (res.url.find("satellite") != std::string::npos) {
+        if (res.url.find("hybrid") != std::string::npos) {
             return "raster";
         } else {
             return "vector";
@@ -74,7 +74,7 @@ TEST(Memory, Vector) {
     MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.jumpTo(CameraOptions().withZoom(16));
-    map.getStyle().loadURL("mapbox://streets");
+    map.getStyle().loadURL("maptiler://streets");
 
     frontend.render(map);
 }
@@ -86,7 +86,7 @@ TEST(Memory, Raster) {
     HeadlessFrontend frontend { { 256, 256 }, ratio };
     MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
-    map.getStyle().loadURL("mapbox://satellite");
+    map.getStyle().loadURL("maptiler://hybrid");
 
     frontend.render(map);
 }
@@ -135,8 +135,8 @@ TEST(Memory, Footprint) {
 
     // Warm up buffers and cache.
     for (unsigned i = 0; i < 10; ++i) {
-        FrontendAndMap(test, "mapbox://streets");
-        FrontendAndMap(test, "mapbox://satellite");
+        FrontendAndMap(test, "maptiler://streets");
+        FrontendAndMap(test, "maptiler://hybrid");
     }
 
     // Process close callbacks, mostly needed by
@@ -148,14 +148,14 @@ TEST(Memory, Footprint) {
 
     long vectorInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
-        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "mapbox://streets"));
+        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://streets"));
     }
 
     double vectorFootprint = (mbgl::test::getCurrentRSS() - vectorInitialRSS) / double(runs);
 
     long rasterInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
-        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "mapbox://satellite"));
+        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://hybrid"));
     }
 
     double rasterFootprint = (mbgl::test::getCurrentRSS() - rasterInitialRSS) / double(runs);

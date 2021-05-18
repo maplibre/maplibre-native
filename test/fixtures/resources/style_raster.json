@@ -1,1 +1,36 @@
-{"version":8,"name":"Satellite","metadata":{"mapbox:autocomposite":true,"mapbox:type":"default"},"sources":{"mapbox":{"type":"raster","url":"mapbox://mapbox.satellite","tileSize":256}},"sprite":"mapbox://sprites/mapbox/satellite-v9","glyphs":"mapbox://fonts/mapbox/{fontstack}/{range}.pbf","layers":[{"id":"background","type":"background","paint":{"background-color":"rgb(4,7,14)"}},{"id":"satellite","type":"raster","source":"mapbox","source-layer":"mapbox_satellite_full"}],"created":0,"modified":0,"owner":"mapbox","id":"satellite-v9","draft":false}
+{
+    "id": "hybrid",
+    "name": "Satellite Hybrid",
+    "zoom": 1,
+    "pitch": 0,
+    "center": [],
+    "glyphs": "maptiler://fonts/{fontstack}/{range}.pbf",
+    "layers": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+    ],
+    "bearing": 0,
+    "sources": {
+        "satellite": {
+            "url": "maptiler://tiles/tiles/satellite",
+            "type": "raster",
+            "tileSize": 256
+        },
+        "openmaptiles": {
+            "url": "maptiler://tiles/v3/tiles",
+            "type": "vector"
+        }
+    },
+    "version": 8,
+    "metadata": {}
+}
