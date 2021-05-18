@@ -125,8 +125,8 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     // Set access token, unless MGLSettings already read it in from Info.plist.
     if (![MGLSettings apiKey]) {
         NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"Access token required";
-        alert.informativeText = @"To load Mapbox-hosted tiles and styles, enter your Mapbox access token in Preferences.";
+        alert.messageText = @"API key required";
+        alert.informativeText = @"To load tiles and styles, enter your API key in Preferences.";
         [alert addButtonWithTitle:@"Open Preferences"];
         [alert runModal];
         [self showPreferences:nil];
@@ -292,7 +292,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 
 - (IBAction)showShortcuts:(id)sender {
     NSAlert *alert = [[NSAlert alloc] init];
-    alert.messageText = @"Mapbox GL Help";
+    alert.messageText = @"MapLibre GL Help";
     alert.informativeText = @"\
 • To scroll, swipe with two fingers on a trackpad, or drag the cursor, or press the arrow keys.\n\
 • To zoom in, pinch two fingers apart on a trackpad, or double-click, or hold down Shift while dragging the cursor down, or hold down Option while pressing the up key.\n\

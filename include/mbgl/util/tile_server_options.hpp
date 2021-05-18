@@ -217,7 +217,15 @@ namespace mbgl {
          * @return const std::string& apiKeyParameterName.
          */
         const std::string& apiKeyParameterName() const;
+        
+        TileServerOptions& setRequiresApiKey(bool requires);
 
+        /**
+         * @brief Whether the tile server requires API key
+         *
+         * @return const bool true if API key is required
+         */
+        bool requiresApiKey() const;
         /**
          * @brief Gets the default styles.
          */

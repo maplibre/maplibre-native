@@ -59,7 +59,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 @implementation MGLVectorTileSource (MBXAdditions)
 
-//TODO:PP
 - (BOOL)isMapboxTerrain {
     NSURL *url = self.configurationURL;
     if (![url.scheme isEqualToString:@"mapbox"]) {
@@ -860,6 +859,10 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (IBAction)enhanceTerrain:(id)sender {
+    // Works only with Mapbox tileserver
+    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox://"])
+        return;
+    
     // Find all the identifiers of Mapbox Terrain sources used in the style.
     NSMutableSet *terrainSourceIdentifiers = [NSMutableSet set];
     for (MGLVectorTileSource *source in self.mapView.style.sources) {

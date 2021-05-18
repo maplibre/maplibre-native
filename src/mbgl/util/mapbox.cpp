@@ -86,7 +86,7 @@ bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::stri
 }
 
 std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
-    const std::string queryString = tileServerOptions.apiKeyParameterName().empty() ?
+    const std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty()) ?
         "" : "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return queryString;
 }

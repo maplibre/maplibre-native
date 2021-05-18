@@ -24,6 +24,7 @@ namespace mbgl {
         std::string tileDomainName;
         optional<std::string> tileVersionPrefix;
         std::string apiKeyParameterName;
+        bool apiKeyRequired;
         std::vector<const mbgl::util::DefaultStyle> defaultStyles;
         std::string defaultStyle;
     };
@@ -165,6 +166,15 @@ namespace mbgl {
         return impl_->apiKeyParameterName;
     }
 
+    TileServerOptions& TileServerOptions::setRequiresApiKey(bool requires) {
+        impl_->apiKeyRequired = requires;
+        return *this;
+    }
+
+    bool TileServerOptions::requiresApiKey() const {
+        return impl_->apiKeyRequired;
+    }
+
     const std::vector<const mbgl::util::DefaultStyle> TileServerOptions::defaultStyles() const {
         return impl_->defaultStyles;
     }
@@ -203,7 +213,8 @@ namespace mbgl {
                 .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
                 .withTileTemplate("/tiles/{path}", "tiles", {})
                 .withDefaultStyles(styles)
-                .withDefaultStyle("Basic");
+                .withDefaultStyle("Basic")
+                .setRequiresApiKey(false);
         return options;
     }
 
@@ -230,7 +241,8 @@ namespace mbgl {
             .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
             .withTileTemplate("{path}", "tiles", {"/v4"})
             .withDefaultStyles(styles)
-            .withDefaultStyle("Streets");
+            .withDefaultStyle("Streets")
+            .setRequiresApiKey(true);
         return options;
     }
 
@@ -256,7 +268,8 @@ namespace mbgl {
             .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
             .withTileTemplate("/tiles/{path}", "tiles", {"v3"})
             .withDefaultStyles(styles)
-            .withDefaultStyle("Streets");
+            .withDefaultStyle("Streets")
+            .setRequiresApiKey(true);
         return options;
     }
 
