@@ -6699,7 +6699,9 @@ static void *windowScreenContext = &windowScreenContext;
         return;
     }
 
+#ifdef MBGL_ENABLE_MAP_SNAPSHOTS
     [self queueBackgroundSnapshot];
+#endif
 
     if ([self.delegate respondsToSelector:@selector(mapViewDidBecomeIdle:)]) {
         [self.delegate mapViewDidBecomeIdle:self];
