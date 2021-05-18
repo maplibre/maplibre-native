@@ -211,7 +211,7 @@ namespace mbgl {
                 .withStyleTemplate("{path}.json", "maps", {})
                 .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
                 .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
-                .withTileTemplate("/tiles/{path}", "tiles", {})
+                .withTileTemplate("/tiles{path}", "tiles", {})
                 .withDefaultStyles(styles)
                 .withDefaultStyle("Basic")
                 .setRequiresApiKey(false);
@@ -265,8 +265,8 @@ namespace mbgl {
             .withSourceTemplate("/tiles{path}/tiles.json", {})
             .withStyleTemplate("/maps{path}/style.json", "maps", {})
             .withSpritesTemplate("/maps/{path}/sprite{scale}.{format}", "", {})
-            .withGlyphsTemplate("/fonts/{fontstack}/{start}-{end}.pbf", "fonts", {})
-            .withTileTemplate("/tiles/{path}", "tiles", {"v3"})
+            .withGlyphsTemplate("/fonts{path}", "fonts", {})
+            .withTileTemplate("{path}", "tiles", {})
             .withDefaultStyles(styles)
             .withDefaultStyle("Streets")
             .setRequiresApiKey(true);

@@ -45,14 +45,6 @@ bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::strin
     return url.compare(0, protocol.length(), protocol) == 0;
 }
 
-//std::string baseUrlWithoutSubdomains(const std::string& baseUrl) {
-//    const URL url(baseUrl);
-//    const auto domainAndScheme = baseUrl.substr(0, url.domain.first + url.domain.second);
-//    const auto lastSubdomainIdx = nthOccurrenceFromEnd(domainAndScheme, ".", 2);
-//    auto str = baseUrl.substr(lastSubdomainIdx + 1, baseUrl.length() - 1);
-//    return str;
-//}
-
 bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
     const URL url(str);
     const Path path(str, url.path.first, url.path.second);
@@ -86,7 +78,7 @@ bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::stri
 }
 
 std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
-    const std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty()) ?
+    const std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty() || apiKey.empty()) ?
         "" : "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return queryString;
 }
@@ -106,8 +98,12 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
             "You must provide API key for tile sources");
     }
 
+    std::string suffix = "";
+    if (tileServerOptions.uriSchemeAlias() == "mapbox://"){
+        suffix = "&secure";
+    }
     const URL url(str);
-    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + makeQueryString(tileServerOptions, apiKey) + "&secure";
+    const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + makeQueryString(tileServerOptions, apiKey) + suffix;
     return transformURL(tpl, str, url);
 }
 
@@ -202,6 +198,7 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
     if (versionPrefix.has_value()){
         versionPrefixLen = static_cast<int>(versionPrefix.value().length());
     }
+    
     result.append(str, path.directory.first + versionPrefixLen, path.directory.second - versionPrefixLen);
     result.append(str, path.filename.first, path.filename.second);
     if (type == style::SourceType::Raster || type == style::SourceType::RasterDEM) {
