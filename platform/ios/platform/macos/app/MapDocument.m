@@ -59,6 +59,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 @implementation MGLVectorTileSource (MBXAdditions)
 
+//TODO:PP
 - (BOOL)isMapboxTerrain {
     NSURL *url = self.configurationURL;
     if (![url.scheme isEqualToString:@"mapbox"]) {
@@ -245,6 +246,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [style addLayer:lineLayer];
 }
 
+//TODO:PP
 - (IBAction)takeSnapshot:(id)sender {
     MGLMapCamera *camera = self.mapView.camera;
     
@@ -327,6 +329,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [self.window.toolbar validateVisibleItems];
 }
 
+//TODO:PP
 - (IBAction)chooseCustomStyle:(id)sender {
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = @"Apply custom style";
@@ -961,6 +964,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }
 }
 
+//TODO:PP
 - (IBAction)manipulateStyle:(id)sender {
     MGLTransition transition = { .duration = 5, .delay = 1 };
     self.mapView.style.transition = transition;
@@ -1171,6 +1175,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         menuItem.state = menuItem.tag == _isLocalizingLabels ? NSOnState: NSOffState;
         if (menuItem.tag) {
             NSLocale *locale = [NSLocale localeWithLocaleIdentifier:[NSBundle mainBundle].developmentLocalization];
+            // TODO:PP
             NSString *preferredLanguage = [MGLVectorTileSource preferredMapboxStreetsLanguage] ?: @"en";
             menuItem.title = [locale displayNameForKey:NSLocaleIdentifier value:preferredLanguage];
         }

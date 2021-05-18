@@ -385,29 +385,34 @@
                                     <action selector="showStyle:" target="-1" id="BGu-va-ftr"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Outdoors" tag="2" keyEquivalent="2" id="BBa-Qa-SQr">
+                            <menuItem title="Outdoor" tag="2" keyEquivalent="2" id="BBa-Qa-SQr">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="sQ3-b6-G1A"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Light" tag="3" keyEquivalent="3" id="HWe-7u-UVJ">
+                            <menuItem title="Basic" tag="3" keyEquivalent="3" id="HWe-7u-UVJ">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="jMN-oR-sbZ"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Dark" tag="4" keyEquivalent="4" id="6HI-q6-AeV">
+                            <menuItem title="Bright" tag="4" keyEquivalent="4" id="6HI-q6-AeV">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="xgf-Sq-eJw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Satellite" tag="5" keyEquivalent="5" id="h0J-5X-kgF">
+                            <menuItem title="Pastel" tag="5" keyEquivalent="5" id="h0J-5X-kgF">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="YyE-2C-Vhj"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Satellite Streets" tag="6" keyEquivalent="6" id="9BL-00-HFt">
+                            <menuItem title="Satellite Hybrid" tag="6" keyEquivalent="6" id="9BL-00-HFt">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="NTT-Y1-EqU"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Satellite Topo" tag="7" keyEquivalent="7" id="K7C-Sq-3zl">
+                                <connections>
+                                    <action selector="showStyle:" target="-1" id="oaR-08-VOQ"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Custom Style…" id="L0h-86-2cU">
@@ -673,6 +678,7 @@ CA
                     </menu>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="620" y="72"/>
         </menu>
         <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="Preferences" animationBehavior="default" id="UWc-yQ-qda">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>

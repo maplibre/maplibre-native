@@ -6,6 +6,24 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ Well-known tile servers
+ */
+typedef NS_ENUM(NSUInteger, MGLWellKnownTileServer) {
+    /**
+     Maptiler
+     */
+    MGLMapTiler,
+    /**
+     MapLibre
+     */
+    MGLMapLibre,
+    /**
+     Mapbox
+     */
+    MGLMapbox
+};
+
+/**
  The `MGLSettings` object provides a global way to set SDK properties such
  as apiKey, backend URL, etc.
  */
@@ -33,6 +51,11 @@ MGL_EXPORT
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
 @property (class, copy, nullable) NSString *apiKey;
+
+/**
+ Instructs the SDk to use the give tile server
+ */
++ (void)useWellKnownTileServer:(MGLWellKnownTileServer)tileServer;
 
 @end
 

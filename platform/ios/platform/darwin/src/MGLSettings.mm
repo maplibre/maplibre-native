@@ -94,7 +94,8 @@
 }
 
 + (void)setTileServerOptionsInternal:(mbgl::TileServerOptions)options {
-    [MGLSettings sharedSettings].tileServerOptionsInternal = &options;
+    [MGLSettings sharedSettings].tileServerOptionsInternal = new mbgl::TileServerOptions();
+    *[MGLSettings sharedSettings].tileServerOptionsInternal = options.clone();
     [self tileServerOptionsChanged];
 }
 
@@ -105,6 +106,22 @@
 
 + (void)tileServerOptionsChanged {
     [MGLSettings sharedSettings].tileServerOptionsChangeToken = [[NSUUID UUID] UUIDString];
+}
+
++ (void)useWellKnownTileServer:(MGLWellKnownTileServer)tileServer {
+    switch(tileServer){
+        case MGLMapTiler:
+            [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapTilerConfiguration()];
+            break;
+        case MGLMapLibre:
+            [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapLibreConfiguration()];
+            break;
+        case MGLMapbox:
+            [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapLibreConfiguration()];
+            break;
+        default:
+            [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::DefaultConfiguration()];
+    }
 }
 
 + (void)setTileServerOptions:(MGLTileServerOptions*)options {

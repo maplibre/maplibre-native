@@ -199,15 +199,18 @@
                                 <menu key="menu" id="xf3-qk-IhF">
                                     <items>
                                         <menuItem title="Streets" state="on" tag="1" id="wvt-tP-O3a"/>
-                                        <menuItem title="Outdoors" tag="2" id="RkE-lp-fL9"/>
-                                        <menuItem title="Light" tag="3" id="R4X-kt-HHb"/>
-                                        <menuItem title="Dark" tag="4" id="jUC-5X-0Zx">
+                                        <menuItem title="Outdoor" tag="2" id="RkE-lp-fL9"/>
+                                        <menuItem title="Basic" tag="3" id="R4X-kt-HHb"/>
+                                        <menuItem title="Bright" tag="4" id="jUC-5X-0Zx">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="Satellite" tag="5" id="CTe-e2-o42">
+                                        <menuItem title="Pastel" tag="5" id="CTe-e2-o42">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="Satellite Streets" tag="6" id="7ly-oA-0ND">
+                                        <menuItem title="Satellite Hybrid" tag="6" id="7ly-oA-0ND">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Satellite Topo" tag="7" id="JSO-um-gzu">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
                                     </items>

@@ -83,6 +83,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 #pragma mark Lifecycle
 
 + (void)load {
+    [MGLSettings useWellKnownTileServer:MGLMapTiler];
     // Set access token, unless MGLSettings already read it in from Info.plist.
     if (![MGLSettings apiKey]) {
         NSString *apiKey = [NSProcessInfo processInfo].environment[@"MGL_API_KEY"];
