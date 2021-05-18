@@ -158,9 +158,11 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     MGLInitializeRunLoop();
 
     if (self = [super init]) {
+        mbgl::TileServerOptions* tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
         mbgl::ResourceOptions options;
         options.withCachePath(self.databasePath.UTF8String)
-               .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+               .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
+               .withTileServerOptions(tileServerOptions->clone());
         _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, options);
         _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
         _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
