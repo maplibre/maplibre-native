@@ -101,6 +101,10 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
+    if (tileServerOptions.requiresApiKey() && apiKey.empty()) {
+        throw std::runtime_error(
+            "You must provide API key for tile sources");
+    }
 
     const URL url(str);
     const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + makeQueryString(tileServerOptions, apiKey) + "&secure";
