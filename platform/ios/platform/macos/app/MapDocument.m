@@ -245,7 +245,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [style addLayer:lineLayer];
 }
 
-//TODO:PP
 - (IBAction)takeSnapshot:(id)sender {
     MGLMapCamera *camera = self.mapView.camera;
     
@@ -328,7 +327,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [self.window.toolbar validateVisibleItems];
 }
 
-//TODO:PP
 - (IBAction)chooseCustomStyle:(id)sender {
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = @"Apply custom style";
@@ -860,7 +858,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 - (IBAction)enhanceTerrain:(id)sender {
     // Works only with Mapbox tileserver
-    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox://"])
+    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox"])
         return;
     
     // Find all the identifiers of Mapbox Terrain sources used in the style.
@@ -967,8 +965,11 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }
 }
 
-//TODO:PP
 - (IBAction)manipulateStyle:(id)sender {
+    // Works only with Mapbox tileserver
+    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox"])
+        return;
+
     MGLTransition transition = { .duration = 5, .delay = 1 };
     self.mapView.style.transition = transition;
 
@@ -1178,7 +1179,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         menuItem.state = menuItem.tag == _isLocalizingLabels ? NSOnState: NSOffState;
         if (menuItem.tag) {
             NSLocale *locale = [NSLocale localeWithLocaleIdentifier:[NSBundle mainBundle].developmentLocalization];
-            // TODO:PP
             NSString *preferredLanguage = [MGLVectorTileSource preferredMapboxStreetsLanguage] ?: @"en";
             menuItem.title = [locale displayNameForKey:NSLocaleIdentifier value:preferredLanguage];
         }
@@ -1286,9 +1286,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     if (menuItem.action == @selector(addOfflinePack:)) {
         NSURL *styleURL = self.mapView.styleURL;
         return !styleURL.isFileURL;
-    }
-    if (menuItem.action == @selector(giveFeedback:)) {
-        return YES;
     }
     if (menuItem.action == @selector(import:)) {
         return YES;

@@ -1888,27 +1888,6 @@ public:
     [self setDirection:-sender.doubleValue animated:YES];
 }
 
-- (IBAction)giveFeedback:(id)sender {
-    MGLMapCamera *camera = self.camera;
-    double zoomLevel = self.zoomLevel;
-    NSMutableArray *urls = [NSMutableArray array];
-    for (MGLAttributionInfo *info in [self.style attributionInfosWithFontSize:0 linkColor:nil]) {
-        NSURL *url = [info feedbackURLForStyleURL:self.styleURL
-                               atCenterCoordinate:camera.centerCoordinate
-                                        zoomLevel:zoomLevel
-                                        direction:camera.heading
-                                            pitch:camera.pitch];
-        if (url) {
-            [urls addObject:url];
-        }
-    }
-    [[NSWorkspace sharedWorkspace] openURLs:urls
-                    withAppBundleIdentifier:nil
-                                    options:0
-             additionalEventParamDescriptor:nil
-                          launchIdentifiers:nil];
-}
-
 #pragma mark Annotations
 
 - (nullable NSArray<id <MGLAnnotation>> *)annotations {
@@ -2921,9 +2900,6 @@ public:
 #pragma mark User interface validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    if (menuItem.action == @selector(giveFeedback:)) {
-        return YES;
-    }
     return NO;
 }
 

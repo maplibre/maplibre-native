@@ -2746,28 +2746,6 @@ public:
 
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize]
                                                                linkColor:nil];
-    for (MGLAttributionInfo *info in attributionInfos)
-    {
-        UIAlertAction *action = [UIAlertAction actionWithTitle:[info.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
-                                                         style:UIAlertActionStyleDefault
-                                                       handler:^(UIAlertAction * _Nonnull actionBlock) {
-            NSURL *url = info.URL;
-            if (url)
-            {
-                if (info.feedbackLink)
-                {
-                    MGLMapCamera *camera = self.camera;
-                    url = [info feedbackURLForStyleURL:self.styleURL
-                                    atCenterCoordinate:camera.centerCoordinate
-                                             zoomLevel:self.zoomLevel
-                                             direction:camera.heading
-                                                 pitch:camera.pitch];
-                }
-                [[UIApplication sharedApplication] openURL:url];
-            }
-        }];
-        [attributionController addAction:action];
-    }
     
     NSString *cancelTitle = NSLocalizedStringWithDefaultValue(@"CANCEL", nil, nil, @"Cancel", @"Title of button for dismissing attribution action sheet");
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelTitle

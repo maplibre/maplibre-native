@@ -667,13 +667,6 @@ CA
                                     <action selector="showShortcuts:" target="-1" id="hNZ-sm-X2q"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="EpY-wQ-SjH"/>
-                            <menuItem title="Improve This Map" id="xu5-WN-qYK">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="giveFeedback:" target="-1" id="cil-i9-r39"/>
-                                </connections>
-                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

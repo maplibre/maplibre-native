@@ -65,19 +65,6 @@ MGL_EXPORT
 @property (nonatomic, getter=isFeedbackLink) BOOL feedbackLink;
 
 /**
- Returns a copy of the `URL` property modified to account for the given center
- coordinate and zoom level.
-
- @param centerCoordinate The map’s center coordinate.
- @param zoomLevel The map’s zoom level. See the `MGLMapView.zoomLevel` property
-    for more information.
- @return A modified URL containing a fragment that points to the specified
-    viewport. If the `feedbackLink` property is set to `NO`, this method returns
-    `nil`.
- */
-- (nullable NSURL *)feedbackURLAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel;
-
-/**
  Returns a copy of the current `title` formatted accordingly to `style`.
  
  Example: If the `style` property is set to `MGLAttributionInfoStyleShort` and the
