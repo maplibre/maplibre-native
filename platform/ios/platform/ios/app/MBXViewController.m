@@ -283,7 +283,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
         UIWindow *helperWindow = [[UIWindow alloc] initWithFrame:helperScreen.bounds];
         helperWindow.screen = helperScreen;
         UIViewController *helperViewController = [[UIViewController alloc] init];
-        MGLMapView *helperMapView = [[MGLMapView alloc] initWithFrame:helperWindow.bounds styleURL:MGLStyle.satelliteStreetsStyleURL];
+        MGLMapView *helperMapView = [[MGLMapView alloc] initWithFrame:helperWindow.bounds styleURL:[[MGLStyle predefinedStyle:@"Hybrid"] url]];
         helperMapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         helperMapView.camera = self.mapView.camera;
         helperMapView.compassView.hidden = YES;
@@ -1906,8 +1906,8 @@ CLLocationCoordinate2D randomWorldCoordinate() {
     self.styleURLs = [NSMutableArray array];
     
     /// Style that does not require an `apiKey` nor any further configuration
-    [self.styleNames addObject:@"Zeroconf Style"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://raw.githubusercontent.com/roblabs/openmaptiles-ios-demo/master/OSM2VectorTiles/styles/geography-class.GitHub.json"]];
+    [self.styleNames addObject:@"MapLibre Basic"];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
     /// Add Mapbox Styles if an `apiKey` exists
     NSString* apiKey = [MGLSettings apiKey];
@@ -1916,23 +1916,10 @@ CLLocationCoordinate2D randomWorldCoordinate() {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             
-            [self.styleNames addObject:@"Streets"];
-            [self.styleURLs addObject:[MGLStyle streetsStyleURL]];
-            
-            [self.styleNames addObject:@"Outdoors"];
-            [self.styleURLs addObject:[MGLStyle outdoorsStyleURL]];
-            
-            [self.styleNames addObject:@"Light"];
-            [self.styleURLs addObject:[MGLStyle lightStyleURL]];
-            
-            [self.styleNames addObject:@"Dark"];
-            [self.styleURLs addObject:[MGLStyle darkStyleURL]];
-            
-            [self.styleNames addObject:@"Satellite"];
-            [self.styleURLs addObject:[MGLStyle satelliteStyleURL]];
-            
-            [self.styleNames addObject:@"Satellite Streets"];
-            [self.styleURLs addObject:[MGLStyle satelliteStreetsStyleURL]];
+            for (MGLDefaultStyle* predefinedStyle in [MGLStyle predefinedStyles]){
+                [self.styleNames addObject:predefinedStyle.name];
+                [self.styleURLs addObject:predefinedStyle.url];
+            }
         });
     }
     
