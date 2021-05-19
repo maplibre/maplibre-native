@@ -5,34 +5,18 @@
 
 @implementation MGLStyleURLIntegrationTest
 
-- (void)internalTestWithStyleSelector:(SEL)selector {
-    self.mapView.styleURL = [MGLStyle performSelector:selector];
-    [self waitForMapViewToFinishLoadingStyleWithTimeout:5];
+- (void)setUp {
+    [super setUp];
+    [MGLSettings useWellKnownTileServer:MGLMapTiler];
 }
 
-
-- (void)testLoadingStreetsStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(streetsStyleURL)];
-}
-
-- (void)testLoadingOutdoorsStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(outdoorsStyleURL)];
-}
-
-- (void)testLoadingLightStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(lightStyleURL)];
-}
-
-- (void)testLoadingDarkStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(darkStyleURL)];
-}
-
-- (void)testLoadingSatelliteStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(satelliteStyleURL)];
-}
-
-- (void)testLoadingSatelliteStreetsStyleURL🔒 {
-    [self internalTestWithStyleSelector:@selector(satelliteStreetsStyleURL)];
+- (void)predefinedStylesLoadingTest {
+    
+    for (MGLDefaultStyle* style in [MGLStyle predefinedStyles]) {
+        NSString* styleName = style.name;
+        self.mapView.styleURL = [[MGLStyle predefinedStyle:styleName] url];
+        [self waitForMapViewToFinishLoadingStyleWithTimeout:5];
+    }
 }
 
 @end

@@ -15,7 +15,7 @@ MGLMapSnapshotter* snapshotterWithCoordinates(CLLocationCoordinate2D coordinates
     MGLMapCamera* mapCamera    = [[MGLMapCamera alloc] init];
     mapCamera.pitch            = 20;
     mapCamera.centerCoordinate = coordinates;
-    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[MGLStyle satelliteStreetsStyleURL]
+    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[[MGLStyle predefinedStyle:@"Hybrid"] url]
                                                                               camera:mapCamera
                                                                                 size:size];
     options.zoomLevel = 10;
@@ -28,7 +28,7 @@ MGLMapSnapshotter* snapshotterWithCoordinates(CLLocationCoordinate2D coordinates
 MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size) {
 
     MGLMapCamera* mapCamera = [[MGLMapCamera alloc] init];
-    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[MGLStyle satelliteStreetsStyleURL]
+    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[[MGLStyle predefinedStyle:@"Hybrid"] url]
                                                                               camera:mapCamera
                                                                                 size:size];
     options.coordinateBounds = bounds;
@@ -41,6 +41,11 @@ MGLMapSnapshotter* snapshotterWithBounds(MGLCoordinateBounds bounds, CGSize size
 
 
 @implementation MGLMapSnapshotterTest
+
+- (void)setUp {
+    [super setUp];
+    [MGLSettings useWellKnownTileServer:MGLMapTiler];
+}
 
 - (void)testMultipleSnapshotsWithASingleSnapshotter🔒 {
     CGSize size = self.mapView.bounds.size;

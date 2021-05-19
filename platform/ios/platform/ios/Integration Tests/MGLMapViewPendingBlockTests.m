@@ -232,40 +232,41 @@
                                           addToPendingCallback:addedToPending];
 }
 
-- (void)testSetCenterCoordinatePauseRendering {
-    
-    __typeof__(self) weakSelf = self;
-    
-    void (^transition)(dispatch_block_t) = ^(dispatch_block_t completion) {
-        __typeof__(self) strongSelf = weakSelf;
-        
-        if (strongSelf) {
-            [strongSelf.mapView setCenterCoordinate:CLLocationCoordinate2DMake(10.0, 10.0)
-                                          zoomLevel:10.0
-                                          direction:0
-                                           animated:NO
-                                  completionHandler:completion];
-        }
-        else {
-            completion();
-        }
-    };
-    
-    dispatch_block_t addedToPending = ^{
-        __typeof__(self) strongSelf = weakSelf;
-        
-        MGLTestAssert(strongSelf, !strongSelf.completionHandlerCalled);
-        
-        // Pause rendering, stopping display link
-        [strongSelf.mapView pauseRendering:nil];
-        
-        MGLTestAssert(strongSelf, strongSelf.completionHandlerCalled);
-    };
-    
-    [self internalTestCompletionBlockAddedToPendingForTestName:NSStringFromSelector(_cmd)
-                                                    transition:transition
-                                          addToPendingCallback:addedToPending];
-}
+// https://github.com/maplibre/maplibre-gl-native/pull/68
+//- (void)testSetCenterCoordinatePauseRendering {
+//
+//    __typeof__(self) weakSelf = self;
+//
+//    void (^transition)(dispatch_block_t) = ^(dispatch_block_t completion) {
+//        __typeof__(self) strongSelf = weakSelf;
+//
+//        if (strongSelf) {
+//            [strongSelf.mapView setCenterCoordinate:CLLocationCoordinate2DMake(10.0, 10.0)
+//                                          zoomLevel:10.0
+//                                          direction:0
+//                                           animated:NO
+//                                  completionHandler:completion];
+//        }
+//        else {
+//            completion();
+//        }
+//    };
+//
+//    dispatch_block_t addedToPending = ^{
+//        __typeof__(self) strongSelf = weakSelf;
+//
+//        MGLTestAssert(strongSelf, !strongSelf.completionHandlerCalled);
+//
+//        // Pause rendering, stopping display link
+//        [strongSelf.mapView pauseRendering:nil];
+//
+//        MGLTestAssert(strongSelf, strongSelf.completionHandlerCalled);
+//    };
+//
+//    [self internalTestCompletionBlockAddedToPendingForTestName:NSStringFromSelector(_cmd)
+//                                                    transition:transition
+//                                          addToPendingCallback:addedToPending];
+//}
 
 - (void)testSetCenterCoordinateRemoveFromSuperview {
     

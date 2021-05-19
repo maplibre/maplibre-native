@@ -159,7 +159,7 @@
         { .latitude = 42.360, .longitude = -71.056 },
         { .latitude = 42.358, .longitude = -71.053 },
     };
-    NSURL *styleURL = [MGLStyle lightStyleURLWithVersion:8];
+    NSURL *styleURL = [[MGLStyle predefinedStyle:@"Bright"] url];
     MGLTilePyramidOfflineRegion *region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:styleURL
                                                                                          bounds:bounds
                                                                                   fromZoomLevel:20
