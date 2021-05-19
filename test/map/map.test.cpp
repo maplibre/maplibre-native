@@ -523,7 +523,7 @@ TEST(Map, StyleFresh) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("maptiler://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -541,7 +541,7 @@ TEST(Map, StyleExpired) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("maptiler://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -577,7 +577,7 @@ TEST(Map, StyleExpiredWithAnnotations) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("maptiler://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -601,7 +601,7 @@ TEST(Map, StyleExpiredWithRender) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("maptiler://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -623,7 +623,7 @@ TEST(Map, StyleEarlyMutation) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("maptiler://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     test.map.getStyle().addLayer(std::make_unique<style::BackgroundLayer>("bg"));
 
     Response response;
@@ -1443,7 +1443,7 @@ TEST(Map, KeepRenderData) {
     test.fileSource->spriteImageResponse = makeResponse("sprite.png");
 
     test.map.jumpTo(CameraOptions().withZoom(10));
-    test.map.getStyle().loadURL("maptiler://streets");
+    test.map.getStyle().loadURL("maptiler://maps/streets");
     const int iterations = 3;
     const int resourcesCount = 4 /*tiles*/ + 3 /*fonts*/;
     // Keep render data.
@@ -1484,7 +1484,7 @@ TEST(Map, PlacedSymbolData) {
 
     // Camera options will give exactly one tile (12/1171/1566)
     test.map.jumpTo(CameraOptions().withZoom(12).withCenter(LatLng{38.917982, -77.037603}));
-    test.map.getStyle().loadURL("maptiler://streets");
+    test.map.getStyle().loadURL("maptiler://maps/streets");
     Size viewportSize = test.frontend.getSize();
     test.frontend.getRenderer()->collectPlacedSymbolData(true);
     test.frontend.render(test.map);
