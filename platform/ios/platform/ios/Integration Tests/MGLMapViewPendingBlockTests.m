@@ -3,7 +3,7 @@
 
 @interface MGLMapView (MGLMapViewPendingBlockTests)
 @property (nonatomic) NSMutableArray *pendingCompletionBlocks;
-- (void)pauseRendering:(__unused NSNotification *)notification;
+- (void)stopDisplayLink;
 @end
 
 @interface MGLMapViewPendingBlockTests : MGLMapViewIntegrationTest
@@ -256,9 +256,9 @@
         
         MGLTestAssert(strongSelf, !strongSelf.completionHandlerCalled);
         
-        // Pause rendering, stopping display link
-        [strongSelf.mapView pauseRendering:nil];
-        
+        // Stopping display link, should trigger the pending blocks
+        [strongSelf.mapView stopDisplayLink];
+
         MGLTestAssert(strongSelf, strongSelf.completionHandlerCalled);
     };
     
