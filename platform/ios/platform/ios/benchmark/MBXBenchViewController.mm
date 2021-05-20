@@ -34,8 +34,8 @@
     [super viewDidLoad];
 
     // Use a local style and local assets if they’ve been downloaded.
-    NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v6" withExtension:nil subdirectory:@"tiles"];
-    NSURL *url = [NSURL URLWithString:tileSourceURL ? @"asset://styles/streets-v8.json" : @"mapbox://styles/mapbox/streets-v8"];
+    NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"streets" withExtension:nil subdirectory:@"tiles"];
+    NSURL *url = [NSURL URLWithString:tileSourceURL ? @"asset://styles/maptiler.json" : @"maptiler://maps/streets"];
     self.mapView = [[MGLMapView alloc] initWithFrame:self.view.bounds styleURL:url];
     self.mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapView.delegate = self;
