@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: macos-latest
     env:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
