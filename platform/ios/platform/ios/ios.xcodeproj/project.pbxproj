@@ -224,6 +224,7 @@
 		40F887701D7A1E58008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40F887711D7A1E59008ECB67 /* MGLShapeSource_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */; };
 		40FDA76B1CCAAA6800442548 /* MBXAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 40FDA76A1CCAAA6800442548 /* MBXAnnotationView.m */; };
+		4B8A425B2656ED62008E725A /* insert_access_token.sh in Resources */ = {isa = PBXBuildFile; fileRef = 4B8A425A2656ED62008E725A /* insert_access_token.sh */; };
 		4BAB4DA4264E6DCA00F015C1 /* MGLTileServerOptions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4BAB4DA2264E6DCA00F015C1 /* MGLTileServerOptions.mm */; };
 		4BAB4DA5264E6DCA00F015C1 /* MGLTileServerOptions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4BAB4DA2264E6DCA00F015C1 /* MGLTileServerOptions.mm */; };
 		4BAB4DA6264E6DCA00F015C1 /* MGLTileServerOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BAB4DA3264E6DCA00F015C1 /* MGLTileServerOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -936,6 +937,7 @@
 		40F8876F1D7A1DB8008ECB67 /* MGLShapeSource_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLShapeSource_Private.h; sourceTree = "<group>"; };
 		40FDA7691CCAAA6800442548 /* MBXAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBXAnnotationView.h; sourceTree = "<group>"; };
 		40FDA76A1CCAAA6800442548 /* MBXAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBXAnnotationView.m; sourceTree = "<group>"; };
+		4B8A425A2656ED62008E725A /* insert_access_token.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = insert_access_token.sh; sourceTree = "<group>"; };
 		4BAB4DA2264E6DCA00F015C1 /* MGLTileServerOptions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLTileServerOptions.mm; sourceTree = "<group>"; };
 		4BAB4DA3264E6DCA00F015C1 /* MGLTileServerOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLTileServerOptions.h; sourceTree = "<group>"; };
 		4BAB4DAF264E6DE200F015C1 /* MGLDefaultStyle.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLDefaultStyle.mm; sourceTree = "<group>"; };
@@ -2077,6 +2079,7 @@
 		DABCABA91CB80692000A7C39 /* Benchmarking App */ = {
 			isa = PBXGroup;
 			children = (
+				4B8A425A2656ED62008E725A /* insert_access_token.sh */,
 				DABCABAD1CB80692000A7C39 /* MBXBenchAppDelegate.h */,
 				DABCABAE1CB80692000A7C39 /* MBXBenchAppDelegate.m */,
 				DABCABB01CB80692000A7C39 /* MBXBenchViewController.h */,
@@ -2746,8 +2749,8 @@
 				DABCABA41CB80692000A7C39 /* Sources */,
 				DABCABA51CB80692000A7C39 /* Frameworks */,
 				DABCABA61CB80692000A7C39 /* Resources */,
+				07796BA2227908CB0059CAF1 /* Insert API Key */,
 				DAA4E40C1CBB6C9600178DFB /* Embed Frameworks */,
-				07796BA2227908CB0059CAF1 /* Insert Mapbox Access Token */,
 			);
 			buildRules = (
 			);
@@ -2970,6 +2973,7 @@
 				DA89633A1CC549A100684375 /* tiles in Resources */,
 				DA8963391CC549A100684375 /* styles in Resources */,
 				DABCABBA1CB80692000A7C39 /* LaunchScreen.storyboard in Resources */,
+				4B8A425B2656ED62008E725A /* insert_access_token.sh in Resources */,
 				DA8963381CC549A100684375 /* sprites in Resources */,
 				DABCABB71CB80692000A7C39 /* Assets.xcassets in Resources */,
 				DA8963371CC549A100684375 /* glyphs in Resources */,
@@ -2998,7 +3002,7 @@
 			shellPath = /bin/sh;
 			shellScript = "$SRCROOT/app/insert_access_token.sh\n";
 		};
-		07796BA2227908CB0059CAF1 /* Insert Mapbox Access Token */ = {
+		07796BA2227908CB0059CAF1 /* Insert API Key */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3006,17 +3010,16 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/$(INFOPLIST_PATH)",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "Insert Mapbox Access Token";
+			name = "Insert API Key";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/(INFOPLIST_PATH)",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/app/insert_access_token.sh\n";
+			shellScript = "$SRCROOT/benchmark/insert_access_token.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

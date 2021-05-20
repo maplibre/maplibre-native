@@ -7,6 +7,7 @@ else
   token_file2=~/maplibre
   token="$(cat $token_file 2>/dev/null || cat $token_file2 2>/dev/null)"
   if [ "$token" ]; then
+    echo "Inserting token: $token into $TARGET_BUILD_DIR/$INFOPLIST_PATH"
     plutil -replace MGLApiKey -string $token "$TARGET_BUILD_DIR/$INFOPLIST_PATH"
     echo "API key insertion successful"
   else
