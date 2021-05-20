@@ -29,7 +29,6 @@
 #import "MGLLoggingConfiguration_Private.h"
 
 #include <mbgl/map/map.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/light.hpp>

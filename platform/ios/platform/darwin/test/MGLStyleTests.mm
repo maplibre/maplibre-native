@@ -3,8 +3,6 @@
 #import "NSBundle+MGLAdditions.h"
 #import "MGLVectorTileSource_Private.h"
 
-#import <mbgl/util/default_styles.hpp>
-
 #import <XCTest/XCTest.h>
 #if TARGET_OS_IPHONE
     #import <UIKit/UIKit.h>

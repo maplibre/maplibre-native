@@ -53,10 +53,7 @@
 "PARSE_STYLE_FAILED_DESC" = "Die Karte konnte nicht geladen werden, da diese Form beschädigt ist.";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK for iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "Mapbox Maps SDK for iOS Version %@ ist ab sofort verfügbar.";
+"SDK_NAME" = "MapLibre Maps SDK for iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Die Karte konnte nicht geladen werden, da diese Form nicht gefunden werden kann oder nicht kompatibel ist.";

@@ -79,9 +79,6 @@
 /* Action sheet title */
 "SDK_NAME" = "Mapas Mapbox SDK para iOS";
 
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "Mapas Mapbox SDK para iOS na versão %@ está agora disponível:";
-
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Não foi possível carregar o mapa porque o estilo não foi encontrado ou é incompatível.";
 

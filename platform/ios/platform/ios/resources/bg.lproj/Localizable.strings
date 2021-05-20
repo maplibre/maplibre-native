@@ -74,10 +74,7 @@
 "ROAD_REF_A11Y_FMT" = "Маршрут %@";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK за iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "Mapbox Maps SDK за iOS версия %@ е вече налична:";
+"SDK_NAME" = "mapLibre Maps SDK за iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Картата не се зареди поради неоткрит или несъвместим стил.";

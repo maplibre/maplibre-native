@@ -53,10 +53,7 @@
 "PARSE_STYLE_FAILED_DESC" = "The map failed to load because the style is corrupted.";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK for iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "Mapbox Maps SDK for iOS version %@ is now available:";
+"SDK_NAME" = "MapLibre Maps SDK for iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "The map failed to load because the style can’t be found or is incompatible.";

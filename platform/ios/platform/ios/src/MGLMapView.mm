@@ -20,7 +20,6 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/projection.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>

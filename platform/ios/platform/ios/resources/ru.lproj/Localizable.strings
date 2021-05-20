@@ -77,10 +77,7 @@
 "ROAD_REF_A11Y_FMT" = "Трасса %@";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK для iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "Доступна версия Mapbox Maps SDK %@ для iOS:";
+"SDK_NAME" = "MapLibre Maps SDK для iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Не удалось загрузить карту, так как стиль не найден или несовместим.";
