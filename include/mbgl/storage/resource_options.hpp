@@ -48,9 +48,9 @@ public:
     /**
      * @brief Gets the previously set (or default) TileServerOptions.
      *
-     * @return const TileServerOptions& tile server options.
+     * @return const TileServerOptions tile server options.
      */
-    const TileServerOptions& tileServerOptions() const;
+    const TileServerOptions tileServerOptions() const;
 
     /**
      * @brief Sets the cache path.

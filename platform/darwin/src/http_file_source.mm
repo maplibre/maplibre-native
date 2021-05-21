@@ -93,7 +93,7 @@ public:
     }
 
     void setResourceOptions(ResourceOptions options);
-    ResourceOptions& getResourceOptions();
+    ResourceOptions getResourceOptions();
 
     NSURLSession* session = nil;
     NSString* userAgent = nil;
@@ -108,8 +108,8 @@ void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
     resourceOptions = options;
 }
 
-ResourceOptions& HTTPFileSource::Impl::getResourceOptions() {
-    return resourceOptions;
+ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
+    return resourceOptions.clone();
 }
 
 NSString *HTTPFileSource::Impl::getUserAgent() const {
@@ -399,7 +399,7 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
     impl->setResourceOptions(options.clone());
 }
 
-ResourceOptions& HTTPFileSource::getResourceOptions() {
+ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 

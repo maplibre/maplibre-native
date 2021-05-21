@@ -24,7 +24,7 @@ namespace mbgl {
         
         // copyable
         TileServerOptions(const TileServerOptions&);
-        TileServerOptions& operator=(TileServerOptions& options);
+
         
         TileServerOptions clone() const;
 

@@ -40,10 +40,6 @@ namespace mbgl {
     // copyable
     TileServerOptions::TileServerOptions(const TileServerOptions& options)
         : impl_(std::make_unique<Impl>(*options.impl_)) {}
-    TileServerOptions& TileServerOptions::operator=(TileServerOptions& options) {
-        swap(impl_, options.impl_);
-        return *this;
-    }
 
     TileServerOptions TileServerOptions::clone() const {
         return TileServerOptions(*this);

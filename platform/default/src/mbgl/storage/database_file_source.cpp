@@ -172,9 +172,9 @@ public:
         resourceOptions = options;
     }
 
-    ResourceOptions& getResourceOptions() {
+    ResourceOptions getResourceOptions() {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-        return resourceOptions;
+        return resourceOptions.clone();
     }
 
 private:
@@ -318,7 +318,7 @@ void DatabaseFileSource::setResourceOptions(ResourceOptions options) {
     impl->setResourceOptions(options.clone());
 }
 
-ResourceOptions& DatabaseFileSource::getResourceOptions() {
+ResourceOptions DatabaseFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 

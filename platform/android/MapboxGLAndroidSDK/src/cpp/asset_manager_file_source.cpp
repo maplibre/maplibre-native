@@ -42,7 +42,7 @@ public:
         resourceOptions = options;
     }
 
-    ResourceOptions& getResourceOptions() {
+    ResourceOptions getResourceOptions() {
         return resourceOptions;
     }
 

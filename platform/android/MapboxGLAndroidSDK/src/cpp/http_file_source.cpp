@@ -22,7 +22,7 @@ public:
     android::UniqueEnv env { android::AttachEnv() };
 
     void setResourceOptions(ResourceOptions options) {resourceOptions = options;};
-    ResourceOptions& getResourceOptions() {return resourceOptions; };
+    ResourceOptions getResourceOptions() {return resourceOptions; };
 
 private:
     ResourceOptions resourceOptions;

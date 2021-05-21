@@ -20,7 +20,7 @@ public:
     void resume() override;
 
     void setResourceOptions(ResourceOptions) override;
-    ResourceOptions& getResourceOptions() override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;

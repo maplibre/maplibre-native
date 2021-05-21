@@ -65,7 +65,7 @@ public:
     std::queue<CURL *> handles;
 
     void setResourceOptions(ResourceOptions options);
-    ResourceOptions& getResourceOptions();
+    ResourceOptions getResourceOptions();
 
 private:
     mutable std::mutex resourceOptionsMutex;

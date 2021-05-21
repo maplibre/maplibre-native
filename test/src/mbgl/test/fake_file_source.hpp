@@ -70,8 +70,8 @@ public:
     void setResourceOptions(ResourceOptions options) override {
         resourceOptions = options;
     }
-    ResourceOptions& getResourceOptions() override {
-        return resourceOptions;
+    ResourceOptions getResourceOptions() override {
+        return resourceOptions.clone();
     }
 
 private:

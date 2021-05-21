@@ -45,7 +45,7 @@ public:
     ResponseFunction imageResponse;
 
     void setResourceOptions(ResourceOptions options) override;
-    ResourceOptions& getResourceOptions() override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     friend class StubOnlineFileSource;

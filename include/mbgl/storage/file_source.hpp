@@ -90,7 +90,7 @@ public:
     // sets the resource options
     virtual void setResourceOptions(ResourceOptions) = 0;
     // gets the resource options
-    virtual ResourceOptions& getResourceOptions() = 0;
+    virtual ResourceOptions getResourceOptions() = 0;
 
 protected:
     FileSource() = default;

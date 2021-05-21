@@ -234,7 +234,7 @@ public:
     virtual void setOfflineMapboxTileCountLimit(uint64_t) const;
 
     void setResourceOptions(ResourceOptions) override;
-    ResourceOptions& getResourceOptions() override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;

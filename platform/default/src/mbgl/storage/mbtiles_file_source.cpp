@@ -265,9 +265,9 @@ public:
             resourceOptions = options;
     }
 
-    ResourceOptions& getResourceOptions() {
+    ResourceOptions getResourceOptions() {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-        return resourceOptions;
+        return resourceOptions.clone();
     }
 
 private:
@@ -335,7 +335,7 @@ void MaptilerFileSource::setResourceOptions(ResourceOptions options) {
     thread->actor().invoke(&Impl::setResourceOptions, options.clone());
 }
 
-ResourceOptions& MaptilerFileSource::getResourceOptions() {
+ResourceOptions MaptilerFileSource::getResourceOptions() {
     return thread->actor().ask(&Impl::getResourceOptions).get();
 }
 

@@ -39,8 +39,8 @@ ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions tileSe
     return *this;
 }
 
-const TileServerOptions& ResourceOptions::tileServerOptions() const {
-    return impl_->tileServerOptions;
+const TileServerOptions ResourceOptions::tileServerOptions() const {
+    return impl_->tileServerOptions.clone();
 }
 
 ResourceOptions& ResourceOptions::withCachePath(std::string path) {
@@ -80,8 +80,7 @@ void* ResourceOptions::platformContext() const {
 }
 
 ResourceOptions ResourceOptions::Default() {
-    TileServerOptions options = TileServerOptions::MapboxConfiguration();
-    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(options);
+    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(TileServerOptions::DefaultConfiguration());
     return resourceOptions;
 }
 

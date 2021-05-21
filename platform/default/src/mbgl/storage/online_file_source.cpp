@@ -188,9 +188,7 @@ public:
     }
 
     void setAPIBaseURL(std::string t) {
-        auto tileServerOptions = resourceOptions.tileServerOptions();
-        tileServerOptions.withBaseURL(std::move(t));
-        resourceOptions.withTileServerOptions(tileServerOptions);
+        resourceOptions.withTileServerOptions(TileServerOptions().withBaseURL(std::move(t)));
     }
 
     const std::string& getAPIBaseURL() const { return resourceOptions.tileServerOptions().baseURL(); }
@@ -338,9 +336,9 @@ public:
         }
     }
 
-    ResourceOptions& getResourceOptions() {
+    ResourceOptions getResourceOptions() {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-        return cachedResourceOptions;
+        return cachedResourceOptions.clone();
     }
 
     void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
@@ -386,10 +384,7 @@ public:
             thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
             {
                 std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-                ResourceOptions newResOpts = cachedResourceOptions.clone();
-                TileServerOptions newTileServerOpts = cachedResourceOptions.tileServerOptions();
-                newTileServerOpts = newTileServerOpts.withBaseURL(*baseURL);
-                cachedResourceOptions = newResOpts.withTileServerOptions(newTileServerOpts);
+                cachedResourceOptions.withTileServerOptions(cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
             }
         } else {
             Log::Error(Event::General, "Invalid base-url property value type.");
@@ -597,7 +592,7 @@ OnlineFileSource::~OnlineFileSource() = default;
 
 std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
     Resource res = resource;
-    const TileServerOptions& options = impl->getResourceOptions().tileServerOptions();
+    const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 
     switch (resource.kind) {
         case Resource::Kind::Unknown:
@@ -682,7 +677,7 @@ void OnlineFileSource::setResourceOptions(ResourceOptions options) {
     impl->setResourceOptions(options.clone());
 }
 
-ResourceOptions& OnlineFileSource::getResourceOptions() {
+ResourceOptions OnlineFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 

@@ -118,8 +118,8 @@ void StubFileSource::setResourceOptions(ResourceOptions options) {
     resourceOptions = options;
 }
 
-ResourceOptions& StubFileSource::getResourceOptions() {
-    return resourceOptions;
+ResourceOptions StubFileSource::getResourceOptions() {
+    return resourceOptions.clone();
 }
 
 } // namespace mbgl

@@ -11,7 +11,7 @@ public:
     OnlineFileSource(const ResourceOptions& options);
     ~OnlineFileSource() override;
     void setResourceOptions(ResourceOptions) override;
-    ResourceOptions& getResourceOptions() override;    
+    ResourceOptions getResourceOptions() override;    
 
 private:
     // FileSource overrides

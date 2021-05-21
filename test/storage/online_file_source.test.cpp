@@ -444,12 +444,57 @@ TEST(OnlineFileSource, GetBaseURLAndApiKeyWhilePaused) {
 TEST(OnlineFileSource, ChangeAPIBaseURL){
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default());
-    const TileServerOptions& tileServerOptions = TileServerOptions::MapboxConfiguration();
-
-    EXPECT_EQ(tileServerOptions.baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
+    EXPECT_EQ(ResourceOptions::Default().tileServerOptions().baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
     const std::string customURL = "test.domain";
     fs->setProperty(API_BASE_URL_KEY, customURL);
     EXPECT_EQ(customURL, *fs->getProperty(API_BASE_URL_KEY).getString());
+
+    auto updatedTileServerOptions = fs->getResourceOptions().tileServerOptions();
+    EXPECT_EQ(customURL, updatedTileServerOptions.baseURL());
+}
+
+TEST(OnlineFileSource, ChangeTileServerOptions){
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default());
+    
+    TileServerOptions tileServerOptsChanged;
+    tileServerOptsChanged.withApiKeyParameterName("apiKeyChanged")
+        .withBaseURL("baseURLChanged")
+        .withDefaultStyle("defaultStyleChanged")
+        .withGlyphsTemplate("defaultGlyphsTemplateChanged", "glyphsDomainChanged", {})
+    .withSourceTemplate("sourceTemplateChanged", {})
+        .withSpritesTemplate("spritesTemplateChanged", "spritesDomainChanged", {})
+        .withStyleTemplate("styleTemplateChanged", "styleDomainChanged", {})
+        .withTileTemplate("tileTemplateChanged", "tileDomainChanged", {})
+        .withUriSchemeAlias("uriSchemeAliasChanged");
+    ResourceOptions resOpts;
+    resOpts.withApiKey("changedAPIKey")
+        .withTileServerOptions(tileServerOptsChanged);
+
+    fs->setResourceOptions(resOpts.clone());
+
+    auto actualResourceOpts = fs->getResourceOptions();
+
+    EXPECT_EQ(tileServerOptsChanged.baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
+    EXPECT_EQ(actualResourceOpts.apiKey(), *fs->getProperty(API_KEY_KEY).getString());
+
+    EXPECT_EQ(resOpts.apiKey(), actualResourceOpts.apiKey());
+    EXPECT_EQ(resOpts.tileServerOptions().defaultStyle(), tileServerOptsChanged.defaultStyle());
+    EXPECT_EQ(resOpts.tileServerOptions().baseURL(), tileServerOptsChanged.baseURL());
+    EXPECT_EQ(resOpts.tileServerOptions().glyphsTemplate(), tileServerOptsChanged.glyphsTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().glyphsDomainName(), tileServerOptsChanged.glyphsDomainName());
+    EXPECT_EQ(resOpts.tileServerOptions().glyphsVersionPrefix(), tileServerOptsChanged.glyphsVersionPrefix());
+    EXPECT_EQ(resOpts.tileServerOptions().sourceTemplate(), tileServerOptsChanged.sourceTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().sourceVersionPrefix(), tileServerOptsChanged.sourceVersionPrefix());
+    EXPECT_EQ(resOpts.tileServerOptions().spritesTemplate(), tileServerOptsChanged.spritesTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().spritesDomainName(), tileServerOptsChanged.spritesDomainName());
+    EXPECT_EQ(resOpts.tileServerOptions().spritesVersionPrefix(), tileServerOptsChanged.spritesVersionPrefix());
+    EXPECT_EQ(resOpts.tileServerOptions().tileTemplate(), tileServerOptsChanged.tileTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().tileDomainName(), tileServerOptsChanged.tileDomainName());
+    EXPECT_EQ(resOpts.tileServerOptions().tileVersionPrefix(), tileServerOptsChanged.tileVersionPrefix());
+    EXPECT_EQ(resOpts.tileServerOptions().styleTemplate(), tileServerOptsChanged.styleTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().styleDomainName(), tileServerOptsChanged.styleDomainName());
+    EXPECT_EQ(resOpts.tileServerOptions().styleVersionPrefix(), tileServerOptsChanged.styleVersionPrefix());
 }
 
 

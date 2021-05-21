@@ -295,7 +295,7 @@ public:
 
     auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withTileServerOptions(tileServerOptions->clone())
+    resourceOptions.withTileServerOptions(*tileServerOptions)
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
     

@@ -44,7 +44,7 @@ public:
     static size_t getTransferredSize();
 
     void setResourceOptions(ResourceOptions) override;
-    ResourceOptions& getResourceOptions() override;
+    ResourceOptions getResourceOptions() override;
 private:
     std::shared_ptr<FileSource> defaultResourceLoader;
     ResourceOptions resourceOptions;

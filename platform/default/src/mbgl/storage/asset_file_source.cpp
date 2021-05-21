@@ -44,9 +44,9 @@ public:
         resourceOptions = options;
     }
 
-    ResourceOptions& getResourceOptions() {
+    ResourceOptions getResourceOptions() {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-        return resourceOptions;
+        return resourceOptions.clone();
     }
 
 private:
@@ -86,7 +86,7 @@ void AssetFileSource::setResourceOptions(ResourceOptions options) {
     impl->actor().invoke(&Impl::setResourceOptions, options.clone());
 }
 
-ResourceOptions& AssetFileSource::getResourceOptions() {
+ResourceOptions AssetFileSource::getResourceOptions() {
     return impl->actor().ask(&Impl::getResourceOptions).get();
 }
 

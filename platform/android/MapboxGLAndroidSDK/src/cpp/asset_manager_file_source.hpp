@@ -22,7 +22,7 @@ public:
     bool canRequest(const Resource&) const override;
 
     void setResourceOptions(ResourceOptions options) override;
-    ResourceOptions& getResourceOptions() override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;
