@@ -1429,7 +1429,7 @@ public class Style {
    */
   public static DefaultStyle[] getPredefinedStyles() {
     return Mapbox.getPredefinedStyles();
-  };
+  }
 
   /**
    * Get predefined style by name
@@ -1442,5 +1442,5 @@ public class Style {
       return style.getUrl();
     }
     return null;
-  };
+  }
 }

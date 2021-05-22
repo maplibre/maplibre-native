@@ -20,9 +20,9 @@ import com.mapbox.mapboxsdk.utils.ThreadUtils;
 /**
  * The entry point to initialize the MapLibre Android SDK.
  * <p>
- * Obtain a reference by calling {@link #getInstance(Context, String, WellKnownTileServer)}. Usually this class is configured in
- * Application#onCreate() and is responsible for the active access token, application context, and
- * connectivity state.
+ * Obtain a reference by calling {@link #getInstance(Context, String, WellKnownTileServer)}.
+ * Usually this class is configured in Application#onCreate() and is responsible for the
+ * active API key, application context, and connectivity state.
  * </p>
  */
 @UiThread
@@ -109,10 +109,10 @@ public final class Mapbox {
   @Nullable
   public static DefaultStyle[] getPredefinedStyles() {
     validateMapbox();
-    if (INSTANCE.tileServerOptions != null){
-      return INSTANCE.tileServerOptions.getDefaultStyles();  
+    if (INSTANCE.tileServerOptions != null) {
+      return INSTANCE.tileServerOptions.getDefaultStyles();
     }
-    return null;    
+    return null;
   }
 
   /**
@@ -123,10 +123,10 @@ public final class Mapbox {
   @Nullable
   public static DefaultStyle getPredefinedStyle(String name) {
     validateMapbox();
-    if (INSTANCE.tileServerOptions != null){
+    if (INSTANCE.tileServerOptions != null) {
       DefaultStyle[] styles = INSTANCE.tileServerOptions.getDefaultStyles();
       for (DefaultStyle style : styles) {
-        if (style.getName().equalsIgnoreCase(name)){
+        if (style.getName().equalsIgnoreCase(name)) {
           return style;
         }
       }
@@ -134,7 +134,7 @@ public final class Mapbox {
     return null;
   }
 
-   /**
+  /**
    * Application context
    *
    * @return the application context

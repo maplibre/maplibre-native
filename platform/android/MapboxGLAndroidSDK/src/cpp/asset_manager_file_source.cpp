@@ -43,7 +43,7 @@ public:
     }
 
     ResourceOptions getResourceOptions() {
-        return resourceOptions;
+        return resourceOptions.clone();
     }
 
 private:
@@ -79,7 +79,7 @@ void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
     impl->actor().invoke(&Impl::setResourceOptions, options.clone());
 }
 
-ResourceOptions& AssetManagerFileSource::getResourceOptions() {
+ResourceOptions AssetManagerFileSource::getResourceOptions() {
     return impl->actor().ask(&Impl::getResourceOptions).get();
 }
 } // namespace mbgl

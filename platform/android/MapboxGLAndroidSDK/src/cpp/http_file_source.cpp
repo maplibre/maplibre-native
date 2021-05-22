@@ -22,7 +22,7 @@ public:
     android::UniqueEnv env { android::AttachEnv() };
 
     void setResourceOptions(ResourceOptions options) {resourceOptions = options;};
-    ResourceOptions getResourceOptions() {return resourceOptions; };
+    ResourceOptions getResourceOptions() {return resourceOptions.clone(); };
 
 private:
     ResourceOptions resourceOptions;
@@ -205,7 +205,7 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
     impl->setResourceOptions(options.clone());
 }
 
-ResourceOptions& HTTPFileSource::getResourceOptions() {
+ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 

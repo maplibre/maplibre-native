@@ -344,7 +344,7 @@ public class TileServerOptions implements Parcelable {
     out.writeTypedArray(defaultStyles, 0);
   }
 
-  public static TileServerOptions For(WellKnownTileServer tileServer){
+  public static TileServerOptions For(WellKnownTileServer tileServer) {
     switch (tileServer) {
       case Mapbox:
         return mapboxConfiguration();
@@ -357,13 +357,13 @@ public class TileServerOptions implements Parcelable {
 
   @Keep
   @NonNull
-  private native static TileServerOptions defaultConfiguration();
+  private static native TileServerOptions defaultConfiguration();
 
   @Keep
   @NonNull
-  private native static TileServerOptions mapboxConfiguration();
+  private static native TileServerOptions mapboxConfiguration();
 
   @Keep
   @NonNull
-  private native static TileServerOptions mapTilerConfiguration();
+  private static native TileServerOptions mapTilerConfiguration();
 }
