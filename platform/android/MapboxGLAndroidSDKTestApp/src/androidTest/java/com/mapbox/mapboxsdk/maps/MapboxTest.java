@@ -61,18 +61,6 @@ public class MapboxTest extends AppCenter {
 
   @Test
   @UiThreadTest
-  public void setInvalidApiKey() {
-    final String invalidApiKey = "xyz";
-    expectedException.expect(MapboxConfigurationException.class);
-    expectedException.expectMessage(
-      "A valid API key is required, currently provided key is: " + invalidApiKey
-    );
-
-    Mapbox.setApiKey(invalidApiKey);
-  }
-
-  @Test
-  @UiThreadTest
   public void setNullApiKey() {
     expectedException.expect(MapboxConfigurationException.class);
     expectedException.expectMessage(
