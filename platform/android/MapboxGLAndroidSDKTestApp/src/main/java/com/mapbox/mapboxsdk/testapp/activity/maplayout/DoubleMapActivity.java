@@ -90,7 +90,7 @@ public class DoubleMapActivity extends AppCompatActivity {
             .build()
           )
         );
-        mapboxMap.setStyle(new Style.Builder().fromUri(Style.getPredefinedStyle("Light")));
+        mapboxMap.setStyle(new Style.Builder().fromUri(Style.getPredefinedStyle("Bright")));
 
         UiSettings uiSettings = mapboxMap.getUiSettings();
         uiSettings.setAllGesturesEnabled(false);

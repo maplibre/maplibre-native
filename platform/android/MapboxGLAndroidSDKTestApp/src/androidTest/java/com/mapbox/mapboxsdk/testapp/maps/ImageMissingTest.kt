@@ -70,9 +70,9 @@ class ImageMissingTest : AppCenter() {
             """
     {
       "version": 8,
-      "name": "Mapbox Streets",
-      "sprite": "mapbox://sprites/mapbox/streets-v8",
-      "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+      "name": "Streets",
+      "sprite": "maptiler://sprites/streets/sprite",
+      "glyphs": "maptiler://fonts/{fontstack}/{range}.pbf",
       "sources": {
         "point": {
           "type": "geojson",
@@ -114,9 +114,9 @@ class ImageMissingTest : AppCenter() {
             """
     {
       "version": 8,
-      "name": "Mapbox Streets",
-      "sprite": "asset://sprites/mapbox/invalid",
-      "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+      "name": "Streets",
+      "sprite": "maptiler://sprites/streets/sprite",
+      "glyphs": "maptiler://fonts/{fontstack}/{range}.pbf",
       "sources": {
         "point": {
           "type": "geojson",

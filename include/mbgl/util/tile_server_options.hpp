@@ -218,7 +218,7 @@ namespace mbgl {
          */
         const std::string& apiKeyParameterName() const;
         
-        TileServerOptions& setRequiresApiKey(bool requires);
+        TileServerOptions& setRequiresApiKey(bool apiKeyRequired);
 
         /**
          * @brief Whether the tile server requires API key

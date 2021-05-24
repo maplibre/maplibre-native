@@ -162,8 +162,8 @@ namespace mbgl {
         return impl_->apiKeyParameterName;
     }
 
-    TileServerOptions& TileServerOptions::setRequiresApiKey(bool requires) {
-        impl_->apiKeyRequired = requires;
+    TileServerOptions& TileServerOptions::setRequiresApiKey(bool apiKeyRequired) {
+        impl_->apiKeyRequired = apiKeyRequired;
         return *this;
     }
 
@@ -260,7 +260,7 @@ namespace mbgl {
             .withApiKeyParameterName("key")
             .withSourceTemplate("/tiles{path}/tiles.json", {})
             .withStyleTemplate("/maps{path}/style.json", "maps", {})
-            .withSpritesTemplate("/maps{path}/sprite", "sprites", {})
+            .withSpritesTemplate("/maps{path}", "sprites", {})
             .withGlyphsTemplate("/fonts{path}", "fonts", {})
             .withTileTemplate("{path}", "tiles", {})
             .withDefaultStyles(styles)

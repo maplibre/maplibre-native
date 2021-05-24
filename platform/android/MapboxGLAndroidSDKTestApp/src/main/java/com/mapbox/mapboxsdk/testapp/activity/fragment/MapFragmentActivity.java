@@ -77,7 +77,7 @@ public class MapFragmentActivity extends AppCompatActivity implements MapFragmen
   @Override
   public void onMapReady(@NonNull MapboxMap map) {
     mapboxMap = map;
-    mapboxMap.setStyle(Style.getPredefinedStyle("Outdoors"));
+    mapboxMap.setStyle(Style.getPredefinedStyle("Outdoor"));
   }
 
   @Override

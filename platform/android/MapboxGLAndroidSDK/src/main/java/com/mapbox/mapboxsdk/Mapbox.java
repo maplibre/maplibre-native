@@ -71,6 +71,12 @@ public final class Mapbox {
     this.apiKey = apiKey;
   }
 
+  Mapbox(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
+    this.context = context;
+    this.apiKey = apiKey;
+    this.tileServerOptions = options;
+  }
+
   /**
    * Get the current active API key for this application.
    *

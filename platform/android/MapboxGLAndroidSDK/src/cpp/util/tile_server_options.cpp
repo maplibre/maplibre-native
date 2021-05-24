@@ -9,7 +9,7 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::String, jni::String, jni::String, jni::String, jni::String, 
         jni::String, jni::String, jni::String, jni::String, jni::String,
         jni::String, jni::String, jni::String, jni::String, jni::String, 
-        jni::String, jni::String, jni::Array<jni::Object<DefaultStyle>>>(env);
+        jni::String, jni::String, jni::jboolean, jni::String, jni::Array<jni::Object<DefaultStyle>>>(env);
     
     optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
     optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
@@ -35,6 +35,8 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::Make<jni::String>(env, tileServerOptions.tileDomainName()),
         tileVersionPrefixValue ? jni::Make<jni::String>(env, *tileVersionPrefixValue) : jni::Local<jni::String>(),
         jni::Make<jni::String>(env, tileServerOptions.apiKeyParameterName()),
+        jni::jboolean(tileServerOptions.requiresApiKey()),
+        jni::Make<jni::String>(env, tileServerOptions.defaultStyle()),
         TileServerOptions::NewStyles(env, tileServerOptions.defaultStyles())
     );
 }
@@ -93,6 +95,9 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     static auto tileVersionPrefixField = javaClass.GetField<jni::String>(env, "tileVersionPrefix");
 
     static auto apiKeyParameterNameField = javaClass.GetField<jni::String>(env, "apiKeyParameterName");
+    static auto apiKeyRequiredField = javaClass.GetField<jni::jboolean>(env, "apiKeyRequired");
+
+    static auto defaultStyleField = javaClass.GetField<jni::String>(env, "defaultStyle");
 
     static auto defaultStylesField = javaClass.GetField<jni::Array<jni::Object<DefaultStyle>>>(env, "defaultStyles");
     std::vector<const mbgl::util::DefaultStyle> defaultStyles = TileServerOptions::getDefaultStyles(env, options.Get(env, defaultStylesField));
@@ -100,7 +105,8 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     auto retVal = mbgl::TileServerOptions()
         .withBaseURL(jni::Make<std::string>(env, options.Get(env, baseURLField)))
         .withUriSchemeAlias(jni::Make<std::string>(env, options.Get(env, uriSchemeAliasField)))
-        .withApiKeyParameterName(jni::Make<std::string>(env, options.Get(env, apiKeyParameterNameField)));
+        .withApiKeyParameterName(jni::Make<std::string>(env, options.Get(env, apiKeyParameterNameField)))
+        .setRequiresApiKey(options.Get(env, apiKeyRequiredField));
     
     auto sourcePrefixValue = options.Get(env, sourceVersionPrefixField);
     retVal.withSourceTemplate(
@@ -131,6 +137,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
             jni::Make<std::string>(env, options.Get(env, tileDomainNameField)),
             tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue): optional<std::string>{});
 
+    retVal.withDefaultStyle(jni::Make<std::string>(env, options.Get(env, defaultStyleField)));
     retVal.withDefaultStyles(defaultStyles);
 
     return retVal;

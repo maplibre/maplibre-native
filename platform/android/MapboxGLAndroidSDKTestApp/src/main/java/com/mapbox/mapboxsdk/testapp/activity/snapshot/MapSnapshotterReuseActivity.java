@@ -81,15 +81,15 @@ public class MapSnapshotterReuseActivity extends AppCompatActivity implements Ma
   public String getRandomStyle() {
     switch (random.nextInt(5)) {
       case 0:
-        return Style.getPredefinedStyle("Dark");
+        return Style.getPredefinedStyle("Pastel");
       case 1:
-        return Style.getPredefinedStyle("Light");
+        return Style.getPredefinedStyle("Bright");
       case 2:
         return Style.getPredefinedStyle("Streets");
       case 3:
-        return Style.getPredefinedStyle("Outdoors");
+        return Style.getPredefinedStyle("Outdoor");
       case 4:
-        return Style.getPredefinedStyle("Satellite");
+        return Style.getPredefinedStyle("Satellite Hybrid");
       default:
         return Style.getPredefinedStyle("Streets");
     }

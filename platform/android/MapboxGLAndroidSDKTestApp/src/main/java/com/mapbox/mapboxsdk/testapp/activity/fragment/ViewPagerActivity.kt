@@ -89,9 +89,9 @@ fun SupportMapFragment.getMapAsync(index: Int) {
         it.setStyle(
             when (index) {
                 0 -> Style.getPredefinedStyle("Streets")
-                1 -> Style.getPredefinedStyle("Dark")
-                2 -> Style.getPredefinedStyle("Satellite")
-                3 -> Style.getPredefinedStyle("Light")
+                1 -> Style.getPredefinedStyle("Pastel")
+                2 -> Style.getPredefinedStyle("Satellite Hybrid")
+                3 -> Style.getPredefinedStyle("Bright")
                 else -> Style.getPredefinedStyle("Streets")
             }
         )

@@ -119,7 +119,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
                     2 -> {
                         options.camera(CameraPosition.Builder().target(LatLng(62.326440, 92.764913)).zoom(3.0).build())
                         val fragment = SupportMapFragment.newInstance(options)
-                        fragment.getMapAsync { mapboxMap -> mapboxMap.setStyle(Style.getPredefinedStyle("Dark")) }
+                        fragment.getMapAsync { mapboxMap -> mapboxMap.setStyle(Style.getPredefinedStyle("Pastel")) }
                         return fragment
                     }
                     3 -> {
@@ -128,7 +128,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
                     4 -> {
                         options.camera(CameraPosition.Builder().target(LatLng(-25.007786, 133.623852)).zoom(3.0).build())
                         val fragment = SupportMapFragment.newInstance(options)
-                        fragment.getMapAsync { mapboxMap -> mapboxMap.setStyle(Style.getPredefinedStyle("Satellite")) }
+                        fragment.getMapAsync { mapboxMap -> mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) }
                         return fragment
                     }
                     5 -> {

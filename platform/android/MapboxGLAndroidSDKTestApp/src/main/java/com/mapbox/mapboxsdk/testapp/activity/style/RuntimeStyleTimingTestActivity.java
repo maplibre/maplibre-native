@@ -44,6 +44,7 @@ public class RuntimeStyleTimingTestActivity extends AppCompatActivity {
         circleColor(Color.argb(1, 55, 148, 179))
       );
 
+      //TODO:Migrate
       VectorSource museums = new VectorSource("museums_source", "mapbox://mapbox.2opop9hr");
       mapboxMap.setStyle(new Style.Builder()
         .fromUri(Style.getPredefinedStyle("Streets"))

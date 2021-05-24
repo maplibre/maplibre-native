@@ -78,9 +78,7 @@ public class MapboxApplication extends Application {
     String apiKey = ApiKeyUtils.getApiKey(getApplicationContext());
     validateApiKey(apiKey);
 
-    Mapbox.getInstance(getApplicationContext(), apiKey, WellKnownTileServer.Mapbox);
-    //TODO:PP remove
-    //Mapbox.getInstance(getApplicationContext(), "uwvyvzaF2P7UWbyOEvjU", WellKnownTileServer.MapTiler);
+    Mapbox.getInstance(getApplicationContext(), apiKey, WellKnownTileServer.MapTiler);
 
     TileLoadingMeasurementUtils.setUpTileLoadingMeasurement();
 

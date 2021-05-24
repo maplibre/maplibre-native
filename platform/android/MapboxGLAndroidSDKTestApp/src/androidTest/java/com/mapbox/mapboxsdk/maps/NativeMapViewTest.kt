@@ -6,6 +6,8 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
+import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.WellKnownTileServer
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
@@ -41,6 +43,7 @@ class NativeMapViewTest : AppCenter() {
     @UiThreadTest
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
+        Mapbox.getInstance(context, "abcdef", WellKnownTileServer.MapTiler)
         nativeMapView = NativeMapView(context, 2.0f, false, null, null, DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }
@@ -54,7 +57,7 @@ class NativeMapViewTest : AppCenter() {
     @Test
     @UiThreadTest
     fun testSetStyleUrl() {
-        val expected = Style.DARK
+        val expected = Style.getPredefinedStyle("Pastel")
         nativeMapView.styleUri = expected
         val actual = nativeMapView.styleUri
         assertEquals("Style URL should match", expected, actual)

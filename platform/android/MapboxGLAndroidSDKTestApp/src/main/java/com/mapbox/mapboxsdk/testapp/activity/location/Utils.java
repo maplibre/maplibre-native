@@ -16,10 +16,10 @@ public class Utils {
 
   private static final String[] STYLES = new String[] {
     Style.getPredefinedStyle("Streets"),
-    Style.getPredefinedStyle("Outdoors"),
-    Style.getPredefinedStyle("Light"),
-    Style.getPredefinedStyle("Dark"),
-    Style.getPredefinedStyle("Satellite Streets")
+    Style.getPredefinedStyle("Outdoor"),
+    Style.getPredefinedStyle("Bright"),
+    Style.getPredefinedStyle("Pastel"),
+    Style.getPredefinedStyle("Satellite Hybrid")
   };
 
   private static int index;

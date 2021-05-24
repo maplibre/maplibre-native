@@ -21,9 +21,9 @@ public class MultiMapActivity extends AppCompatActivity {
 
     FragmentManager fragmentManager = getSupportFragmentManager();
     initFragmentStyle(fragmentManager, R.id.map1, Style.getPredefinedStyle("Streets"));
-    initFragmentStyle(fragmentManager, R.id.map2, Style.getPredefinedStyle("Light"));
-    initFragmentStyle(fragmentManager, R.id.map3, Style.getPredefinedStyle("Satellite Streets"));
-    initFragmentStyle(fragmentManager, R.id.map4, Style.getPredefinedStyle("Dark"));
+    initFragmentStyle(fragmentManager, R.id.map2, Style.getPredefinedStyle("Bright"));
+    initFragmentStyle(fragmentManager, R.id.map3, Style.getPredefinedStyle("Satellite Hybrid"));
+    initFragmentStyle(fragmentManager, R.id.map4, Style.getPredefinedStyle("Pastel"));
   }
 
   private void initFragmentStyle(FragmentManager fragmentManager, int fragmentId, String styleId) {

@@ -2,5 +2,6 @@ package com.mapbox.mapboxsdk;
 
 public enum WellKnownTileServer {
   Mapbox,
-  MapTiler;
+  MapTiler,
+  MapLibre;
 }

@@ -28,25 +28,6 @@ public class AttributionDialogManagerTest {
   Style style = mock(Style.class);
 
   private AttributionDialogManager attributionDialogManager;
-  private CameraPosition cameraPosition;
-
-  private static final String ASSERT_MAPBOX_TOKEN = "TestApiKey";
-
-  private static final String ASSERT_MAPBOX_STYLE_URI = "mapbox://styles/mapbox/streets-v11";
-  private static final String ASSERT_MAPBOX_LOCAL_STYLE_URI = "asset://style.json";
-
-  private static final String ASSERT_MAPBOX_PACKAGE_NAME = "com.mapbox.attributionmanagertest";
-
-  //TODO:PP access_token=
-  private static final String ASSERT_MAPBOX_FEEDBACK_FINAL_URL =
-          "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&"
-                  + "access_token=TestApiKey&owner=mapbox&id=streets-v11"
-                  + "#/22.200001/11.100000/12.000000/24.000000/5";
-  private static final String ASSERT_MAPBOX_FEEDHACK_FINAL_URL_LOCAL_STYLE =
-          "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&"
-                  + "access_token=TestApiKey#/22.200001/11.100000/12.000000/24.000000/5";
-  private static final String ASSERT_MAPBOX_FEEDBACL_FINAL_URL_NULL_CAMERA_POSITION =
-          "https://apps.mapbox.com/feedback?referrer=com.mapbox.attributionmanagertest&access_token=TestApiKey";
 
   @Before
   public void beforeTest() {
@@ -59,42 +40,4 @@ public class AttributionDialogManagerTest {
   public void testSanity() {
     assertNotNull("AttributionDialogManager should not be null", attributionDialogManager);
   }
-
-  @Test
-  public void testBuildMapFeedbackMapUrl() {
-    when(context.getApplicationContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn(ASSERT_MAPBOX_PACKAGE_NAME);
-    when(style.getUri()).thenReturn(ASSERT_MAPBOX_STYLE_URI);
-    when(mapboxMap.getCameraPosition()).thenReturn(cameraPosition);
-    when(mapboxMap.getStyle()).thenReturn(style);
-
-    Assert.assertEquals(ASSERT_MAPBOX_FEEDBACK_FINAL_URL,
-            attributionDialogManager.buildMapFeedbackMapUrl(ASSERT_MAPBOX_TOKEN));
-  }
-
-  @Test
-  public void testBuildMapFeedbackMapUrlWithLocalStyleJson() {
-    when(context.getApplicationContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn(ASSERT_MAPBOX_PACKAGE_NAME);
-    when(style.getUri()).thenReturn(ASSERT_MAPBOX_LOCAL_STYLE_URI);
-    when(mapboxMap.getCameraPosition()).thenReturn(cameraPosition);
-    when(mapboxMap.getStyle()).thenReturn(style);
-
-    Assert.assertEquals(ASSERT_MAPBOX_FEEDHACK_FINAL_URL_LOCAL_STYLE,
-            attributionDialogManager.buildMapFeedbackMapUrl(ASSERT_MAPBOX_TOKEN));
-  }
-
-  @Test
-  public void testBuildMapFeedbackMapUrlWithNullCameraPosition() {
-    when(context.getApplicationContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn(ASSERT_MAPBOX_PACKAGE_NAME);
-    when(style.getUri()).thenReturn(ASSERT_MAPBOX_LOCAL_STYLE_URI);
-    when(mapboxMap.getCameraPosition()).thenReturn(null);
-    when(mapboxMap.getStyle()).thenReturn(style);
-
-    Assert.assertEquals(ASSERT_MAPBOX_FEEDBACL_FINAL_URL_NULL_CAMERA_POSITION,
-            attributionDialogManager.buildMapFeedbackMapUrl(ASSERT_MAPBOX_TOKEN));
-  }
-
-
 }

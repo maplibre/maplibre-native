@@ -240,9 +240,9 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
     }
 
     mapboxMap.getStyle(style -> {
-      String styleUrl = Style.getPredefinedStyle("Light").equals(style.getUri())
-        ? Style.getPredefinedStyle("Light")
-        : Style.getPredefinedStyle("Dark");
+      String styleUrl = Style.getPredefinedStyle("Bright").equals(style.getUri())
+        ? Style.getPredefinedStyle("Bright")
+        : Style.getPredefinedStyle("Pastel");
       mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
     });
   }

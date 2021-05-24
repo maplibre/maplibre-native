@@ -71,6 +71,10 @@ public class TileServerOptions implements Parcelable {
   @Keep
   private String apiKeyParameterName;
   @Keep
+  private boolean apiKeyRequired;
+  @Keep
+  private String defaultStyle;
+  @Keep
   private DefaultStyle[] defaultStyles;
 
   /**
@@ -91,8 +95,10 @@ public class TileServerOptions implements Parcelable {
    * @param glyphsVersionPrefix  the glyphs version prefix
    * @param tileTemplate         tile url template
    * @param tileDomainName       the name of the tile domain in canonical url
-   * @param tileVersionPrefix    the tile version prefix;
-   * @param apiKeyParameterName  the name of api key parameter;
+   * @param tileVersionPrefix    the tile version prefix
+   * @param apiKeyParameterName  the name of api key parameter
+   * @param apiKeyRequired       indicates if API key is required
+   * @param defaultStyle         the name of the default style
    * @param defaultStyles        the list of default styles
    */
   @Keep
@@ -114,6 +120,8 @@ public class TileServerOptions implements Parcelable {
           String tileDomainName,
           @Nullable String tileVersionPrefix,
           String apiKeyParameterName,
+          boolean apiKeyRequired,
+          String defaultStyle,
           DefaultStyle[] defaultStyles
   ) {
     setBaseURL(baseURL);
@@ -134,6 +142,8 @@ public class TileServerOptions implements Parcelable {
     setTileVersionPrefix(tileVersionPrefix);
     setApiKeyParameterName(apiKeyParameterName);
     setDefaultStyles(defaultStyles);
+    setDefaultStyle(defaultStyle);
+    setApiKeyRequired(apiKeyRequired);
   }
 
   public void setBaseURL(String baseURL) {
@@ -272,12 +282,28 @@ public class TileServerOptions implements Parcelable {
     return this.apiKeyParameterName;
   }
 
+  public void setApiKeyRequired(boolean isRequired) {
+    this.apiKeyRequired = isRequired;
+  }
+
+  public boolean getApiKeyRequired() {
+    return this.apiKeyRequired;
+  }
+
   public void setDefaultStyles(DefaultStyle[] defaultStyles) {
     this.defaultStyles = defaultStyles;
   }
 
   public DefaultStyle[] getDefaultStyles() {
     return this.defaultStyles;
+  }
+
+  public void setDefaultStyle(String defaultStyleName) {
+    this.defaultStyle = defaultStyleName;
+  }
+
+  public String getDefaultStyle() {
+    return this.defaultStyle;
   }
 
   /**
@@ -313,6 +339,8 @@ public class TileServerOptions implements Parcelable {
     setTileDomainName(in.readString());
     setTileVersionPrefix(in.readString());
     setApiKeyParameterName(in.readString());
+    setApiKeyRequired(in.readByte() != 0);
+    setDefaultStyle(in.readString());
     in.createTypedArray(DefaultStyle.CREATOR);
   }
 
@@ -341,6 +369,8 @@ public class TileServerOptions implements Parcelable {
     out.writeString(tileDomainName);
     out.writeString(tileVersionPrefix);
     out.writeString(apiKeyParameterName);
+    out.writeByte((byte) (apiKeyRequired ? 1 : 0));
+    out.writeString(defaultStyle);
     out.writeTypedArray(defaultStyles, 0);
   }
 
@@ -350,6 +380,8 @@ public class TileServerOptions implements Parcelable {
         return mapboxConfiguration();
       case MapTiler:
         return mapTilerConfiguration();
+      case MapLibre:
+        return mapLibreConfiguration();
       default:
         throw new MapboxConfigurationException("Unknown tile server");
     }
@@ -366,4 +398,8 @@ public class TileServerOptions implements Parcelable {
   @Keep
   @NonNull
   private static native TileServerOptions mapTilerConfiguration();
+
+  @Keep
+  @NonNull
+  private static native TileServerOptions mapLibreConfiguration();
 }

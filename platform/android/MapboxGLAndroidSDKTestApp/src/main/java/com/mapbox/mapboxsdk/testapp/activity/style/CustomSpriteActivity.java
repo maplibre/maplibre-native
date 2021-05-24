@@ -81,7 +81,7 @@ public class CustomSpriteActivity extends AppCompatActivity {
               );
 
               // lets add a circle below labels!
-              mapboxMap.getStyle().addLayerBelow(layer, "waterway-label");
+              mapboxMap.getStyle().addLayerBelow(layer, "water_intermittent");
 
               fab.setImageResource(R.drawable.ic_directions_car_black);
             } else {

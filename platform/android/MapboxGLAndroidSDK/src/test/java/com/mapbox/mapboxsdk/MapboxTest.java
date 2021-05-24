@@ -8,6 +8,7 @@ import android.util.DisplayMetrics;
 
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.utils.ConfigUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,13 +46,13 @@ public class MapboxTest {
   @Test
   public void testGetApiKey() {
     final String apiKey = "pk.0000000001";
-    MapboxInjector.inject(context, apiKey);
+    MapboxInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
     assertSame(apiKey, Mapbox.getApiKey());
   }
 
   @Test
   public void testApplicationContext() {
-    MapboxInjector.inject(context, "pk.0000000001");
+    MapboxInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
     assertNotNull(Mapbox.getApplicationContext());
     assertNotEquals(context, appContext);
     assertEquals(appContext, appContext);

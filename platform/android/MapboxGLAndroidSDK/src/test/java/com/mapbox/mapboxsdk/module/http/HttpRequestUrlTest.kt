@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.module.http
 
 import com.mapbox.mapboxsdk.MapboxInjector
 import com.mapbox.mapboxsdk.http.HttpRequestUrl
+import com.mapbox.mapboxsdk.utils.ConfigUtils
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
 import org.junit.After
@@ -15,7 +16,7 @@ class HttpRequestUrlTest {
 
     @Before
     fun setUp() {
-        MapboxInjector.inject(mockk(relaxed = true), "pk.foobar")
+        MapboxInjector.inject(mockk(relaxed = true), "pk.foobar", ConfigUtils.getMockedOptions())
     }
 
     @Test
