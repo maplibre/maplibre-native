@@ -260,13 +260,43 @@ TEST(MapTiler, CanonicalURL) {
         mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/outdoor", "abcdef"));
     EXPECT_EQ(
         "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf",
-        mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://fonts/{fontstack}/{range}.pbf", ""));
+        mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://fonts/{fontstack}/{range}.pbf", "")); 
+    EXPECT_EQ(
+        "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=abcdef",
+        mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://fonts/{fontstack}/{range}.pbf", "abcdef")); 
+    EXPECT_EQ(
+        "https://api.maptiler.com/maps/streets/sprite",
+        mbgl::util::mapbox::normalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sprites/streets", ""));
     EXPECT_EQ(
         "https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=abcdef",
         mbgl::util::mapbox::normalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/tiles/contours/{z}/{x}/{y}.pbf", "abcdef"));
+    EXPECT_EQ(
+        "https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=abcdef",
+        mbgl::util::mapbox::normalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/tiles/v3/{z}/{x}/{y}.pbf", "abcdef"));
     
     EXPECT_EQ(
         "maptiler://tiles/tiles/contours/{z}/{x}/{y}.pbf",
         mbgl::util::mapbox::canonicalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=abcdef", SourceType::Vector, 512));
+}
 
+TEST(MapTiler, CanonicalizeRasterTileset) {
+    mbgl::Tileset tileset;
+    tileset.tiles = {
+        "https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=abcdef"
+    };
+
+    mbgl::util::mapbox::canonicalizeTileset(mapboxFixture::mapTilerTileServerOptions, tileset, "maptiler://tiles/satellite", SourceType::Raster, 256);
+
+    EXPECT_EQ("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", tileset.tiles[0]);
+}
+
+TEST(MapTiler, CanonicalizeVectorTileset) {
+    mbgl::Tileset tileset;
+    tileset.tiles = {
+        "https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=abcdef"
+    };
+
+    mbgl::util::mapbox::canonicalizeTileset(mapboxFixture::mapTilerTileServerOptions, tileset, "maptiler://tiles/streets", SourceType::Vector, 512);
+
+    EXPECT_EQ("maptiler://tiles/tiles/v3/{z}/{x}/{y}.pbf", tileset.tiles[0]);
 }
