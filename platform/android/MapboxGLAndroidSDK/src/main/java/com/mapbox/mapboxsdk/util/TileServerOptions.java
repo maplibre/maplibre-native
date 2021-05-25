@@ -38,6 +38,8 @@ public class TileServerOptions implements Parcelable {
   @Keep
   private String sourceTemplate;
   @Keep
+  private String sourceDomainName;
+  @Keep
   @Nullable
   private String sourceVersionPrefix;
   @Keep
@@ -83,6 +85,7 @@ public class TileServerOptions implements Parcelable {
    * @param baseURL              tile server base url
    * @param uriSchemeAlias       scheme alias such as maplibre://
    * @param sourceTemplate       tile source url template
+   * @param sourceDomainName     tile source domain name
    * @param sourceVersionPrefix  tile source version prefix
    * @param styleTemplate        style url template
    * @param styleDomainName      the name of style domain in canonical url
@@ -106,6 +109,7 @@ public class TileServerOptions implements Parcelable {
           String baseURL,
           String uriSchemeAlias,
           String sourceTemplate,
+          String sourceDomainName,
           @Nullable String sourceVersionPrefix,
           String styleTemplate,
           String styleDomainName,
@@ -127,6 +131,7 @@ public class TileServerOptions implements Parcelable {
     setBaseURL(baseURL);
     setUriSchemeAlias(uriSchemeAlias);
     setSourceTemplate(sourceTemplate);
+    setSourceDomainName(sourceDomainName);
     setSourceVersionPrefix(sourceVersionPrefix);
     setStyleTemplate(styleTemplate);
     setStyleDomainName(styleDomainName);
@@ -170,11 +175,19 @@ public class TileServerOptions implements Parcelable {
     return this.sourceTemplate;
   }
 
+  public void setSourceDomainName(String domainName) {
+    this.sourceDomainName = domainName;
+  }
+
+  public String getSourceDomainName() {
+    return this.sourceDomainName;
+  }
+
   public void setSourceVersionPrefix(String sourceVersionPrefix) {
     this.sourceVersionPrefix = sourceVersionPrefix;
   }
 
-  public String getSsourceVersionPrefix() {
+  public String getSourceVersionPrefix() {
     return this.sourceVersionPrefix;
   }
 
@@ -325,6 +338,7 @@ public class TileServerOptions implements Parcelable {
     setBaseURL(in.readString());
     setUriSchemeAlias(in.readString());
     setSourceTemplate(in.readString());
+    setSourceDomainName(in.readString());
     setSourceVersionPrefix(in.readString());
     setStyleTemplate(in.readString());
     setStyleDomainName(in.readString());
@@ -355,6 +369,7 @@ public class TileServerOptions implements Parcelable {
     out.writeString(baseURL);
     out.writeString(uriSchemeAlias);
     out.writeString(sourceTemplate);
+    out.writeString(sourceDomainName);
     out.writeString(sourceVersionPrefix);
     out.writeString(styleTemplate);
     out.writeString(styleDomainName);

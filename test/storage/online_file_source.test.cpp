@@ -462,7 +462,7 @@ TEST(OnlineFileSource, ChangeTileServerOptions){
         .withBaseURL("baseURLChanged")
         .withDefaultStyle("defaultStyleChanged")
         .withGlyphsTemplate("defaultGlyphsTemplateChanged", "glyphsDomainChanged", {})
-    .withSourceTemplate("sourceTemplateChanged", {})
+        .withSourceTemplate("sourceTemplateChanged", "sourceDomainChanged", {})
         .withSpritesTemplate("spritesTemplateChanged", "spritesDomainChanged", {})
         .withStyleTemplate("styleTemplateChanged", "styleDomainChanged", {})
         .withTileTemplate("tileTemplateChanged", "tileDomainChanged", {})
@@ -485,6 +485,7 @@ TEST(OnlineFileSource, ChangeTileServerOptions){
     EXPECT_EQ(resOpts.tileServerOptions().glyphsDomainName(), tileServerOptsChanged.glyphsDomainName());
     EXPECT_EQ(resOpts.tileServerOptions().glyphsVersionPrefix(), tileServerOptsChanged.glyphsVersionPrefix());
     EXPECT_EQ(resOpts.tileServerOptions().sourceTemplate(), tileServerOptsChanged.sourceTemplate());
+    EXPECT_EQ(resOpts.tileServerOptions().sourceDomainName(), tileServerOptsChanged.sourceDomainName());
     EXPECT_EQ(resOpts.tileServerOptions().sourceVersionPrefix(), tileServerOptsChanged.sourceVersionPrefix());
     EXPECT_EQ(resOpts.tileServerOptions().spritesTemplate(), tileServerOptsChanged.spritesTemplate());
     EXPECT_EQ(resOpts.tileServerOptions().spritesDomainName(), tileServerOptsChanged.spritesDomainName());

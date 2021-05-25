@@ -62,9 +62,10 @@ namespace mbgl {
          * @brief Sets the template for sources.
          *
          * @param sourceTemplate The source template.
+         * @param domainName  The domain name.
          * @return TileServerOptions for chaining options together.
          */
-        TileServerOptions& withSourceTemplate(std::string sourceTemplate, optional<std::string> versionPrefix);
+        TileServerOptions& withSourceTemplate(std::string sourceTemplate, std::string domainName, optional<std::string> versionPrefix);
 
         /**
          * @brief Gets the previously set (or default) source template.
@@ -72,6 +73,13 @@ namespace mbgl {
          * @return const std::string& source template.
          */
         const std::string& sourceTemplate() const;
+        
+        /**
+         * @brief Gets the previously set (or default) source domain name
+         *
+         * @return const std::string& source domain name.
+         */
+        const std::string& sourceDomainName() const;
         
         /**
          * @brief Gets the previously set (or default) version prefix

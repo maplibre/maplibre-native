@@ -6493,11 +6493,11 @@
         "source-layer": "housenumber"
       }
     ],
-    "sprite": "maptiler://sprites/streets",
+    "sprite": "maptiler://sprites/streets/sprite",
     "bearing": 0,
     "sources": {
       "openmaptiles": {
-        "url": "maptiler://tiles/v3",
+        "url": "maptiler://sources/v3",
         "type": "vector"
       },
       "maptiler_attribution": {

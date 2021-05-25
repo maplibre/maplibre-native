@@ -129,8 +129,10 @@ public class MapSnapshotterActivity extends AppCompatActivity {
     }
     if (row == 0 && column == 0) {
       // Add a source
-      Source source = new RasterSource("my-raster-source", "maptiler://tiles/satellite", 512);
-      builder.withLayerAbove(new RasterLayer("satellite-layer", "my-raster-source"), (column + row) % 2 == 0 ? "country_1" : "country_label");
+      Source source = new RasterSource("my-raster-source", "maptiler://sources/satellite", 512);
+      builder.withLayerAbove(
+        new RasterLayer("satellite-layer", "my-raster-source"),
+        (column + row) % 2 == 0 ? "country_1" : "country_label");
       builder.withSource(source);
     } else if (row == 0 && column == 2) {
 

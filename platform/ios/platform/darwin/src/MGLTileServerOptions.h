@@ -25,6 +25,11 @@ MGL_EXPORT
 * URL template for sources.
 */
 @property (nonatomic,retain) NSString* sourceTemplate;
+
+/**
+* source domain name.
+*/
+@property (nonatomic,retain) NSString* sourceDomainName;
         
 /**
 * source version prefix

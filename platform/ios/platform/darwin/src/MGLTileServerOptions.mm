@@ -10,6 +10,7 @@
 @synthesize baseURL;
 @synthesize uriSchemeAlias;
 @synthesize sourceTemplate;
+@synthesize sourceDomainName;
 @synthesize sourceVersionPrefix;
 @synthesize styleTemplate;
 @synthesize styleDomainName;

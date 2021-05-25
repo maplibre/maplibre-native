@@ -21,13 +21,14 @@ class ConfigUtils {
             return TileServerOptions(
                 "https://api.maptiler.com",
                 "maptiler",
-                "/tiles{path}/tiles.json",
+                "{path}",
+                "sources",
                 null,
                 "/maps{path}/style.json",
                 "maps",
                 null,
-                "/maps/{path}/sprite{scale}.{format}",
-                "",
+                "/maps{path}",
+                "sprites",
                 null,
                 "/fonts{path}",
                 "fonts",
@@ -36,6 +37,7 @@ class ConfigUtils {
                 "tiles",
                 null,
                 "key",
+                true,
                 defaultStyle,
                 defaultStyles
             )

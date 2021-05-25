@@ -621,6 +621,10 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
             res.url = util::mapbox::normalizeTileURL(options, resource.url, impl->getApiKey());
             break;
     }
+
+//    Log::Error(Event::General, "Original: " + resource.url);
+//    Log::Error(Event::General, "Normalized: " + res.url);
+
     return impl->request(std::move(callback), std::move(res));
 }
 

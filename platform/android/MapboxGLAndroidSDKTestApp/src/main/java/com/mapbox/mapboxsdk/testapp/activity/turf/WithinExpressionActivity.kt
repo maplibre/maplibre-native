@@ -159,7 +159,7 @@ class WithinExpressionActivity : AppCompatActivity() {
         // Hide other types of labels to highlight POI labels
         (style.getLayer("road_label") as SymbolLayer).setProperties(visibility(NONE))
         (style.getLayer("airport-label-major") as SymbolLayer).setProperties(visibility(NONE))
-        (style.getLayer("poi_transit") as SymbolLayer).setProperties(visibility(NONE))        
+        (style.getLayer("poi_transit") as SymbolLayer).setProperties(visibility(NONE))
     }
 
     override fun onStart() {

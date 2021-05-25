@@ -804,11 +804,6 @@ public class Style {
      * </p>
      * {@code url} can take the following forms:
      * <ul>
-     * <li>{@code Style#StyleUrl}: load one of the bundled styles in {@link Style}.</li>
-     * <li>{@code mapbox://styles/<user>/<style>}:
-     * loads the style from a <a href="https://www.mapbox.com/account/">Mapbox account.</a>
-     * {@code user} is your username. {@code style} is the ID of your custom
-     * style created in <a href="https://www.mapbox.com/studio">Mapbox Studio</a>.</li>
      * <li>{@code http://...} or {@code https://...}:
      * loads the style over the Internet from any web server.</li>
      * <li>{@code asset://...}:
@@ -818,7 +813,6 @@ public class Style {
      * loads the style from a file path. This is used to load a style from disk.
      * </li>
      * </li>
-     * <li>{@code null}: loads the default {@link Style#MAPBOX_STREETS} style.</li>
      * </ul>
      * <p>
      * This method is asynchronous and will return before the style finishes loading.
@@ -847,11 +841,6 @@ public class Style {
      * </p>
      * {@code uri} can take the following forms:
      * <ul>
-     * <li>{@code Style#StyleUrl}: load one of the bundled styles in {@link Style}.</li>
-     * <li>{@code mapbox://styles/<user>/<style>}:
-     * loads the style from a <a href="https://www.mapbox.com/account/">Mapbox account.</a>
-     * {@code user} is your username. {@code style} is the ID of your custom
-     * style created in <a href="https://www.mapbox.com/studio">Mapbox Studio</a>.</li>
      * <li>{@code http://...} or {@code https://...}:
      * loads the style over the Internet from any web server.</li>
      * <li>{@code asset://...}:
@@ -861,7 +850,6 @@ public class Style {
      * loads the style from a file path. This is used to load a style from disk.
      * </li>
      * </li>
-     * <li>{@code null}: loads the default {@link Style#MAPBOX_STREETS} style.</li>
      * </ul>
      * <p>
      * This method is asynchronous and will return before the style finishes loading.
@@ -1436,11 +1424,12 @@ public class Style {
    *
    *  @return The predefined style definition
    */
+  @NonNull
   public static String getPredefinedStyle(String name) {
     DefaultStyle style = Mapbox.getPredefinedStyle(name);
     if (style != null) {
       return style.getUrl();
     }
-    return null;
+    throw new IllegalArgumentException("Could not find layer " + name);
   }
 }

@@ -6,7 +6,7 @@ namespace android {
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& env, const mbgl::TileServerOptions& tileServerOptions) {
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<
-        jni::String, jni::String, jni::String, jni::String, jni::String, 
+        jni::String, jni::String, jni::String, jni::String, jni::String, jni::String,
         jni::String, jni::String, jni::String, jni::String, jni::String,
         jni::String, jni::String, jni::String, jni::String, jni::String, 
         jni::String, jni::String, jni::jboolean, jni::String, jni::Array<jni::Object<DefaultStyle>>>(env);
@@ -21,6 +21,7 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::Make<jni::String>(env, tileServerOptions.baseURL()),
         jni::Make<jni::String>(env, tileServerOptions.uriSchemeAlias()),
         jni::Make<jni::String>(env, tileServerOptions.sourceTemplate()),
+        jni::Make<jni::String>(env, tileServerOptions.sourceDomainName()),
         sourceVersionPrefixValue ? jni::Make<jni::String>(env, *sourceVersionPrefixValue) : jni::Local<jni::String>(),
         jni::Make<jni::String>(env, tileServerOptions.styleTemplate()),
         jni::Make<jni::String>(env, tileServerOptions.styleDomainName()),
@@ -76,6 +77,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     static auto uriSchemeAliasField = javaClass.GetField<jni::String>(env, "uriSchemeAlias");
 
     static auto sourceTemplateField = javaClass.GetField<jni::String>(env, "sourceTemplate");
+    static auto sourceDomainNameField = javaClass.GetField<jni::String>(env, "sourceDomainName");
     static auto sourceVersionPrefixField = javaClass.GetField<jni::String>(env, "sourceVersionPrefix");
 
     static auto styleTemplateField = javaClass.GetField<jni::String>(env, "styleTemplate");
@@ -111,6 +113,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     auto sourcePrefixValue = options.Get(env, sourceVersionPrefixField);
     retVal.withSourceTemplate(
         jni::Make<std::string>(env, options.Get(env, sourceTemplateField)),
+        jni::Make<std::string>(env, options.Get(env, sourceDomainNameField)),
         sourcePrefixValue ? jni::Make<std::string>(env, sourcePrefixValue): optional<std::string>{});
 
     auto styleVersionPrefixValue = options.Get(env, styleVersionPrefixField);

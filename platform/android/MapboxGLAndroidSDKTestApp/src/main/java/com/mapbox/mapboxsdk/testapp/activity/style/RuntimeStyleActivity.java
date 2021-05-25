@@ -437,7 +437,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
 
   private void addTerrainLayer() {
     // Add a source
-    Source source = new VectorSource("my-terrain-source", "maptiler://tiles/hillshades");
+    Source source = new VectorSource("my-terrain-source", "maptiler://sources/hillshades");
     mapboxMap.getStyle().addSource(source);
 
     LineLayer layer = new LineLayer("terrainLayer", "my-terrain-source");
@@ -483,7 +483,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
 
   private void addSatelliteLayer() {
     // Add a source
-    Source source = new RasterSource("my-raster-source", "maptiler://tiles/satellite", 512);
+    Source source = new RasterSource("my-raster-source", "maptiler://sources/satellite", 512);
     mapboxMap.getStyle().addSource(source);
 
     // Add a layer

@@ -246,34 +246,45 @@ TEST(MapLibre, CanonicalURL) {
 
 // MapTiler tests
 TEST(MapTiler, CanonicalURL) {
+    //Styles
     EXPECT_EQ(
         "https://api.maptiler.com/maps/basic/style.json",
         mbgl::util::mapbox::normalizeStyleURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://maps/basic", ""));
     EXPECT_EQ(
         "https://api.maptiler.com/maps/basic/style.json?key=abcdef",
         mbgl::util::mapbox::normalizeStyleURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://maps/basic", "abcdef"));
+    
+    // Sources
     EXPECT_EQ(
         "https://api.maptiler.com/tiles/v3/tiles.json?key=abcdef",
-        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/v3", "abcdef"));
+        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sources/v3", "abcdef"));
     EXPECT_EQ(
         "https://api.maptiler.com/tiles/outdoor/tiles.json?key=abcdef",
-        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/outdoor", "abcdef"));
+        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sources/outdoor", "abcdef"));
+    EXPECT_EQ(
+        "https://api.maptiler.com/tiles/7ac429c7-c96e-46dd-8c3e-13d48988986a/tiles.json?key=abcdef",
+        mbgl::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a", "abcdef"));
+    
+    // Glyphs
     EXPECT_EQ(
         "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf",
         mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://fonts/{fontstack}/{range}.pbf", "")); 
     EXPECT_EQ(
         "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=abcdef",
         mbgl::util::mapbox::normalizeGlyphsURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://fonts/{fontstack}/{range}.pbf", "abcdef")); 
+    
+    // Sprites
     EXPECT_EQ(
         "https://api.maptiler.com/maps/streets/sprite",
-        mbgl::util::mapbox::normalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sprites/streets", ""));
+        mbgl::util::mapbox::normalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://sprites/streets/sprite", ""));
+    
+    // Tiles
     EXPECT_EQ(
         "https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=abcdef",
         mbgl::util::mapbox::normalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/tiles/contours/{z}/{x}/{y}.pbf", "abcdef"));
     EXPECT_EQ(
         "https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=abcdef",
         mbgl::util::mapbox::normalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/tiles/v3/{z}/{x}/{y}.pbf", "abcdef"));
-    
     EXPECT_EQ(
         "maptiler://tiles/tiles/contours/{z}/{x}/{y}.pbf",
         mbgl::util::mapbox::canonicalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=abcdef", SourceType::Vector, 512));

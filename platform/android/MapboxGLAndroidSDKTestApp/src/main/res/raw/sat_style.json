@@ -749,12 +749,12 @@
   "bearing": 0,
   "sources": {
       "satellite": {
-          "url": "maptiler://tiles/satellite",
+          "url": "maptiler://sources/satellite",
           "type": "raster",
           "tileSize": 256
       },
       "openmaptiles": {
-          "url": "maptiler://tiles/v3/tiles",
+          "url": "maptiler://sources/v3",
           "type": "vector"
       }
   },

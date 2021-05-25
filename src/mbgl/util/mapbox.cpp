@@ -103,6 +103,12 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
         suffix = "&secure";
     }
     const URL url(str);
+    auto domainName = tileServerOptions.sourceDomainName();
+    if (!domainName.empty() && !equals(str, url.domain, domainName)) {
+        Log::Error(Event::ParseStyle, "Invalid source URL");
+        return str;
+    }
+    
     const auto tpl = tileServerOptions.baseURL() + tileServerOptions.sourceVersionPrefix().value_or("") + tileServerOptions.sourceTemplate() + makeQueryString(tileServerOptions, apiKey) + suffix;
     return transformURL(tpl, str, url);
 }

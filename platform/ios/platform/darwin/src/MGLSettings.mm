@@ -133,6 +133,7 @@
 
     opts.withSourceTemplate(
             std::string([options.sourceTemplate UTF8String]),
+            std::string([options.sourceDomainName UTF8String]),
             options.sourceVersionPrefix ? std::string([options.sourceVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
 
     opts.withStyleTemplate(
@@ -182,6 +183,7 @@
         retVal.apiKeyParameterName = [NSString stringWithUTF8String:cppOpts->apiKeyParameterName().c_str()];
         
         retVal.sourceTemplate = [NSString stringWithUTF8String:cppOpts->sourceTemplate().c_str()];
+        retVal.sourceDomainName = [NSString stringWithUTF8String:cppOpts->sourceDomainName().c_str()];
         retVal.sourceVersionPrefix = cppOpts->sourceVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->sourceVersionPrefix().value().c_str()] : nil;
         
         retVal.styleTemplate = [NSString stringWithUTF8String:cppOpts->styleTemplate().c_str()];

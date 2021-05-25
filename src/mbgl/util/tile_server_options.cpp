@@ -9,22 +9,30 @@ namespace mbgl {
         std::string baseURL;
         optional<std::string> versionPrefix;
         std::string uriSchemeAlias;
+        
         std::string sourceTemplate;
+        std::string sourceDomainName;
         optional<std::string> sourceVersionPrefix;
+        
         std::string styleTemplate;
         std::string styleDomainName;
         optional<std::string> styleVersionPrefix;
+        
         std::string spritesTemplate;
         std::string spritesDomainName;
         optional<std::string> spritesVersionPrefix;
+        
         std::string glyphsTemplate;
         std::string glyphsDomainName;
         optional<std::string> glyphsVersionPrefix;
+        
         std::string tileTemplate;
         std::string tileDomainName;
         optional<std::string> tileVersionPrefix;
+        
         std::string apiKeyParameterName;
         bool apiKeyRequired;
+        
         std::vector<const mbgl::util::DefaultStyle> defaultStyles;
         std::string defaultStyle;
     };
@@ -63,14 +71,19 @@ namespace mbgl {
         return impl_->uriSchemeAlias;
     }
 
-    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate, std::string domainName, optional<std::string> versionPrefix) {
         impl_->sourceTemplate = std::move(sourceTemplate);
         impl_->sourceVersionPrefix = std::move(versionPrefix);
+        impl_->sourceDomainName = std::move(domainName);
         return *this;
     }
 
     const std::string& TileServerOptions::sourceTemplate() const {
         return impl_->sourceTemplate;
+    }
+
+    const std::string& TileServerOptions::sourceDomainName() const {
+        return impl_->sourceDomainName;
     }
 
     const optional<std::string>& TileServerOptions::sourceVersionPrefix() const {
@@ -203,7 +216,7 @@ namespace mbgl {
                 .withBaseURL("https://demotiles.maplibre.org")
                 .withUriSchemeAlias("maplibre")
                 .withApiKeyParameterName("")
-                .withSourceTemplate("/tiles/{domain}.json", {})
+                .withSourceTemplate("/tiles/{domain}.json", "", {})
                 .withStyleTemplate("{path}.json", "maps", {})
                 .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
                 .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
@@ -231,7 +244,7 @@ namespace mbgl {
             .withBaseURL("https://api.mapbox.com")
             .withUriSchemeAlias("mapbox")
             .withApiKeyParameterName("access_token")
-            .withSourceTemplate("/{domain}.json", {"/v4"})
+            .withSourceTemplate("/{domain}.json", "", {"/v4"})
             .withStyleTemplate("/styles/v1{path}", "styles", {})
             .withSpritesTemplate("/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
             .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
@@ -258,7 +271,7 @@ namespace mbgl {
             .withBaseURL("https://api.maptiler.com")
             .withUriSchemeAlias("maptiler")
             .withApiKeyParameterName("key")
-            .withSourceTemplate("/tiles{path}/tiles.json", {})
+            .withSourceTemplate("/tiles{path}/tiles.json", "sources", {})
             .withStyleTemplate("/maps{path}/style.json", "maps", {})
             .withSpritesTemplate("/maps{path}", "sprites", {})
             .withGlyphsTemplate("/fonts{path}", "fonts", {})

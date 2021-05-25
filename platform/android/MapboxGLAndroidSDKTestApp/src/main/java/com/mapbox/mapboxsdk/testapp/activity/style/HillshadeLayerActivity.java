@@ -19,7 +19,7 @@ public class HillshadeLayerActivity extends AppCompatActivity {
   private static final String LAYER_ID = "hillshade";
   private static final String LAYER_BELOW_ID = "water_intermittent";
   private static final String SOURCE_ID = "terrain-rgb";
-  private static final String SOURCE_URL = "maptiler://tiles/terrain-rgb";
+  private static final String SOURCE_URL = "maptiler://sources/terrain-rgb";
 
   private MapView mapView;
   private MapboxMap mapboxMap;

@@ -6468,7 +6468,7 @@
   "bearing": 0,
   "sources": {
     "openmaptiles": {
-      "url": "maptiler://tiles/v3",
+      "url": "maptiler://sources/v3",
       "type": "vector"
     },
     "maptiler_attribution": {
