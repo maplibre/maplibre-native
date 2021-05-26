@@ -533,7 +533,7 @@
 
         NSNumber *fileSizeNumber = [fileAttributes objectForKey:NSFileSize];
         long long fileSize = [fileSizeNumber longLongValue];
-        long long databaseFileSize = 73728;
+        long long databaseFileSize = 19218432;
         // Merging databases creates an empty file if the file does not exist at the given path.
         XCTAssertEqual(fileSize, databaseFileSize, @"The database file size must be:%lld actual size:%lld", databaseFileSize, fileSize);
 
