@@ -44,7 +44,7 @@ namespace mbgl {
         const std::string& baseURL() const;
         
         /**
-         * @brief Sets the scheme alias for the tile server. For example mapbox:// for Mapbox.
+         * @brief Sets the scheme alias for the tile server. For example maptiler:// for MapTiler.
          *
          * @param alias The URI alias.
          * @return TileServerOptions for chaining options together.

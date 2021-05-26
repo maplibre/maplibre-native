@@ -41,12 +41,10 @@ private:
 TEST(SyncFileSource, LoadSyncRender) {
     util::RunLoop loop;
     auto fs = std::make_shared<SyncFileSource>();
-    fs->add("mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7",
+    fs->add("maptiler://maps/streets",
             util::read_file("test/fixtures/resources/source_vector.json"));
-    fs->add("mapbox://sprites/mapbox/streets-v9.png",
+    fs->add("maptiler://sprites/streets/sprite",
             util::read_file("test/fixtures/resources/sprite.png"));
-    fs->add("mapbox://sprites/mapbox/streets-v9.json",
-            util::read_file("test/fixtures/resources/sprite.json"));
     HeadlessFrontend frontend{ { 512, 512 }, 1.0 };
     MapAdapter map{ frontend, MapObserver::nullObserver(), fs, MapOptions() };
     map.getStyle().loadJSON(util::read_file("test/fixtures/resources/style_vector.json"));

@@ -20,7 +20,7 @@ public:
 };
 
 StubFileSource::StubFileSource(ResponseType type_):
-    StubFileSource::StubFileSource(ResourceOptions::Default(), type_) {}
+    StubFileSource::StubFileSource(ResourceOptions().withTileServerOptions(TileServerOptions::MapTilerConfiguration()), type_) {}
 
 StubFileSource::StubFileSource(const ResourceOptions& options, ResponseType type_)
         : type(type_), resourceOptions(options.clone()) {

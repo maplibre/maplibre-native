@@ -622,8 +622,8 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
             break;
     }
 
-//    Log::Error(Event::General, "Original: " + resource.url);
-//    Log::Error(Event::General, "Normalized: " + res.url);
+    // Log::Error(Event::General, "Original: " + resource.url);
+    // Log::Error(Event::General, "Normalized: " + res.url);
 
     return impl->request(std::move(callback), std::move(res));
 }

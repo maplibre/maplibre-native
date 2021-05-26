@@ -1063,7 +1063,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 
 - (void)styleRasterLayer
 {
-    NSURL *rasterURL = [NSURL URLWithString:@"mapbox://mapbox.satellite"];
+    NSURL *rasterURL = [NSURL URLWithString:@"maptiler://sources/hybrid"];
     MGLRasterTileSource *rasterTileSource = [[MGLRasterTileSource alloc] initWithIdentifier:@"my-raster-tile-source" configurationURL:rasterURL tileSize:512];
     [self.mapView.style addSource:rasterTileSource];
 
@@ -1389,7 +1389,7 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 
 - (void)styleVectorTileSource
 {
-    NSURL *url = [[NSURL alloc] initWithString:@"mapbox://mapbox.mapbox-terrain-v2"];
+    NSURL *url = [[NSURL alloc] initWithString:@"maptiler://source/hillshade"];
     MGLVectorTileSource *vectorTileSource = [[MGLVectorTileSource alloc] initWithIdentifier:@"style-vector-tile-source-id" configurationURL:url];
     [self.mapView.style addSource:vectorTileSource];
 

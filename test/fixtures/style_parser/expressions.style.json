@@ -3,7 +3,7 @@
   "sources": {
     "source": {
       "type": "vector",
-      "url": "mapbox://mapbox.mapbox-streets-v5"
+      "url": "maptiler://sources/streets"
     }
   },
   "layers": [

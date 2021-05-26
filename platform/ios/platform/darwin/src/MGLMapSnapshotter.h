@@ -66,9 +66,8 @@ MGL_EXPORT
 /**
  Creates a set of options with the minimum required information.
  
- @param styleURL URL of the map style to snapshot. The URL may be a full HTTP or
-    HTTPS URL, a Mapbox style URL 
-    (`mapbox://styles/{user}/{style}`), or a path to a local file relative to
+ @param styleURL URL of the map style to snapshot. The URL may be a full HTTP,
+    HTTPS URL, canonical URL or a path to a local file relative to
     the application’s resource path. Specify `nil` for the default style.
  @param size The image size.
  */

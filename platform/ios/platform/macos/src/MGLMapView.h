@@ -84,8 +84,7 @@ MGL_EXPORT IB_DESIGNABLE
 
  @param frame The frame for the view, measured in points.
  @param styleURL URL of the map style to display. The URL may be a full HTTP or
-    HTTPS URL, a Mapbox style URL
-    (`mapbox://styles/<user>/<style>`), or a path to a local file relative to
+    HTTPS URL, a canonical URL, or a path to a local file relative to
     the application’s resource path. Specify `nil` for the default style.
  @return An initialized map view.
  */
@@ -130,9 +129,8 @@ MGL_EXPORT IB_DESIGNABLE
 /**
  URL of the style currently displayed in the receiver.
 
- The URL may be a full HTTP or HTTPS URL, a Mapbox
- style URL (`mapbox://styles/<user>/<style>`), or a path to a local file relative
- to the application’s resource path.
+ The URL may be a full HTTP or HTTPS URL, a canonical URL, or a path to
+ a local file relative to the application’s resource path.
 
  If you set this property to `nil`, the receiver will use the default style and
  this property will automatically be set to that style’s URL.

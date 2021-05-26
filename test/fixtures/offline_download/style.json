@@ -2,7 +2,7 @@
   "version": 8,
   "name": "Water",
   "sources": {
-    "mapbox": {
+    "maptiler": {
       "type": "vector",
       "url": "http://127.0.0.1:3000/streets.json"
     },
@@ -28,7 +28,7 @@
   }, {
     "id": "water",
     "type": "fill",
-    "source": "mapbox",
+    "source": "maptiler",
     "source-layer": "water",
     "paint": {
       "fill-pattern": "noise"
@@ -36,7 +36,7 @@
   }, {
     "id": "admin",
     "type": "symbol",
-    "source": "mapbox",
+    "source": "maptiler",
     "source-layer": "admin",
     "layout": {
       "text-font": ["Helvetica"],

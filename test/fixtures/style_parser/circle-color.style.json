@@ -1,16 +1,16 @@
 {
   "version": 8,
   "sources": {
-    "mapbox": {
+    "source": {
       "type": "vector",
-      "url": "mapbox://mapbox.mapbox-terrain-v1,mapbox.mapbox-streets-v5",
+      "url": "maptiler://sources/streets",
       "maxzoom": 14
     }
   },
   "layers": [{
     "id": "circle_color_example",
     "type": "circle",
-    "source": "mapbox",
+    "source": "source",
     "paint": {
       "circle-color": 1
     }

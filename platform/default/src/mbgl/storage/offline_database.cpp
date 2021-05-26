@@ -879,8 +879,9 @@ OfflineDatabase::mergeDatabase(const std::string& sideDatabasePath) {
                 "st.x = t.x AND "
                 "st.y = t.y "
             "WHERE t.id IS NULL "
-            "AND st.url_template LIKE 'mapbox://%' ") };
+            "AND st.url_template LIKE ?1 || '%'") };
         // clang-format on
+        queryTiles.bind(1, tileServerOptions.uriSchemeAlias() + "://");
         queryTiles.run();
         auto countOfTilesToMerge = queryTiles.get<int64_t>(0);
         if ((countOfTilesToMerge + currentTileCount) > offlineMapboxTileCountLimit) {
@@ -1395,9 +1396,9 @@ uint64_t OfflineDatabase::getOfflineMapboxTileCount() try {
         "SELECT COUNT(DISTINCT id) "
         "FROM region_tiles, tiles "
         "WHERE tile_id = tiles.id "
-        "AND url_template LIKE 'mapbox://%' ") };
+        "AND url_template LIKE ?1 || '%'") };
     // clang-format on
-
+    query.bind(1, tileServerOptions.uriSchemeAlias() + "://");
     query.run();
 
     offlineMapboxTileCount = query.get<int64_t>(0);

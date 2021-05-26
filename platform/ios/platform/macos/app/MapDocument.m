@@ -893,8 +893,8 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         return;
     }
     
-    // Add a Mapbox Terrain-RGB source.
-    NSURL *terrainRGBURL = [NSURL URLWithString:@"mapbox://mapbox.terrain-rgb"];
+    // Add terrain-RGB source.
+    NSURL *terrainRGBURL = [NSURL URLWithString:@"maptiler://sources/terrain-rgb"];
     MGLRasterDEMSource *terrainRGBSource = [[MGLRasterDEMSource alloc] initWithIdentifier:@"terrain" configurationURL:terrainRGBURL];
     [self.mapView.style addSource:terrainRGBSource];
     

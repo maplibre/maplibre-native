@@ -1,7 +1,7 @@
 {
   "version": 8,
   "sources": {
-    "mapbox": {
+    "source": {
       "type": "geojson",
       "data": 24
     }

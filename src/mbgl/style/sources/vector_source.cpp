@@ -51,7 +51,9 @@ void VectorSource::loadDescription(FileSource& fileSource) {
         return;
     }
 
-    const auto& url = urlOrTileset.get<std::string>();
+    const auto& rawURL = urlOrTileset.get<std::string>();
+    const auto& url = util::mapbox::canonicalizeSourceURL(fileSource.getResourceOptions().tileServerOptions(), rawURL);
+    
     req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {
         if (res.error) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));

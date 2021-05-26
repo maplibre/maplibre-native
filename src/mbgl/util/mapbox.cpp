@@ -7,7 +7,9 @@
 
 #include <stdexcept>
 #include <vector>
+#include <map>
 #include <cstring>
+#include <regex>
 
 namespace mbgl {
 namespace util {
@@ -41,8 +43,80 @@ inline void replace(std::string& str, const std::string& search, const std::stri
 }
 
 bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::string& url) {
+    if (tileServerOptions.uriSchemeAlias().empty() || tileServerOptions.baseURL().empty()) {
+        return false;
+    }
+    
     const auto& protocol = tileServerOptions.uriSchemeAlias() + "://";
     return url.compare(0, protocol.length(), protocol) == 0;
+}
+
+std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate, const std::string& url) {
+    const URL parsedUrl(url);
+    
+    // e.g. tiles/satellite/tiles.json
+    auto path = url.substr(parsedUrl.path.first, parsedUrl.path.second);
+    
+    // --- find tokens in the urlTemplate (such as {path}, ...)
+    std::regex r(R"(\{(domain|path|directory|filename|extension)\})");
+    std::vector<std::pair<std::string, std::string>> tokenList;
+    for(std::sregex_iterator i = std::sregex_iterator(urlTemplate.begin(), urlTemplate.end(), r);
+                             i != std::sregex_iterator();
+                             ++i)
+    {
+        std::smatch m = *i;
+        if (m.size() > 0) {
+            auto captureGroupValue = m[1].str();
+            if (!captureGroupValue.empty()){
+                std::pair<std::string, std::string> tokenInfo;
+                tokenInfo.first = captureGroupValue;
+                tokenList.push_back(tokenInfo);
+            }
+        }
+    }
+    
+    // --- extract token values
+    // /tiles{path}/tiles.json in tiles/satellite/tiles.json
+    // e.g. path = /satelite
+    std::regex tokenPattern (R"(\{domain\}|\{path\}|\{directory\}|\{filename\}|\{extension\})");
+    std::string templatePattern = std::regex_replace (urlTemplate, tokenPattern, "(.+)", std::regex_constants::match_any);
+    std::regex r2(templatePattern);
+    int idx = 0;
+    for(std::sregex_iterator i = std::sregex_iterator(path.begin(), path.end(), r2);
+                             i != std::sregex_iterator();
+                             ++i)
+    {
+        std::smatch m = *i;
+        if (m.size() > 0) {
+            auto captureGroupValue = m[1].str();
+            if (!captureGroupValue.empty()){
+                tokenList[idx].second = captureGroupValue;
+                idx++;
+            }
+        }
+    }
+    
+    std::map<std::string, std::string> tokenMap;
+    std::copy(tokenList.begin(), tokenList.end(),
+              std::inserter(tokenMap, tokenMap.begin()));
+    
+    return tokenMap;
+}
+
+bool isNormalizedSourceURL(const std::string& baseURL, const std::string& urlTemplate, const std::string& url) {
+    if (baseURL.empty() || urlTemplate.empty()){
+        return false;
+    }
+    
+    std::regex tokenPattern (R"(\{.+\})");
+    std::string urlPattern = std::regex_replace (urlTemplate, tokenPattern, "(.+)", std::regex_constants::match_any)+"(.*)";
+    std::string pattern (baseURL + urlPattern);
+    
+    if (std::regex_match (url, std::regex(pattern))){
+        return true;
+    }
+    
+    return false;
 }
 
 bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
@@ -230,18 +304,108 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
         }
     }
 
-    //mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf
     return result;
 }
 
 void canonicalizeTileset(const TileServerOptions& tileServerOptions, Tileset& tileset,
                          const std::string& sourceURL, style::SourceType type, uint16_t tileSize) {
-    // TODO: Remove this hack by delivering proper URLs in the TileJSON to begin with.
-    if (isCanonicalURL(tileServerOptions, sourceURL)) {
+    if (isCanonicalURL(tileServerOptions, sourceURL) ||
+        isNormalizedSourceURL(tileServerOptions.baseURL(), tileServerOptions.sourceTemplate(), sourceURL)) {
         for (auto& url : tileset.tiles) {
             url = canonicalizeTileURL(tileServerOptions, url, type, tileSize);
         }
     }
+}
+
+std::string canonicalizeSourceURL(const TileServerOptions& tileServerOptions, const std::string& url){
+    if (url.empty())
+        return url;
+    
+    if (isNormalizedSourceURL(tileServerOptions.baseURL(), tileServerOptions.sourceTemplate(), url)) {
+        auto tokenMap = createTokenMap(tileServerOptions.sourceTemplate(), url);
+        
+        auto retVal = tileServerOptions.uriSchemeAlias() + "://";
+        if (tokenMap.find("domain") != tokenMap.end()) {
+            retVal += tokenMap.at("domain");
+        } else {
+            if (!tileServerOptions.sourceDomainName().empty()) retVal += tileServerOptions.sourceDomainName();
+        }
+        
+        if (tileServerOptions.sourceVersionPrefix().has_value()) retVal += tileServerOptions.sourceVersionPrefix().value();
+
+        if (tokenMap.find("path") != tokenMap.end()) {
+            retVal += tokenMap.at("path");
+        } else {
+            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
+            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
+            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+        }
+        
+        return retVal;
+    }
+    return url;
+}
+
+std::string canonicalizeSpriteURL(const TileServerOptions& tileServerOptions, const std::string& url){
+    if (url.empty())
+        return url;
+    
+    if (isNormalizedSourceURL(tileServerOptions.baseURL(), tileServerOptions.spritesTemplate(), url)) {
+        auto tokenMap = createTokenMap(tileServerOptions.spritesTemplate(), url);
+        
+        auto retVal = tileServerOptions.uriSchemeAlias() + "://";
+        if (tokenMap.find("domain") != tokenMap.end()) {
+            retVal += tokenMap.at("domain");
+        } else {
+            if (!tileServerOptions.spritesDomainName().empty()) retVal += tileServerOptions.spritesDomainName();
+        }
+        
+        if (tileServerOptions.spritesVersionPrefix().has_value()) retVal += tileServerOptions.spritesVersionPrefix().value();
+        
+        if (tokenMap.find("path") != tokenMap.end()) {
+            retVal += tokenMap.at("path");
+        } else {
+            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
+            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
+            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+        }
+        
+        return retVal;
+    }
+    
+    return url;
+}
+
+std::string canonicalizeGlyphURL(const TileServerOptions& tileServerOptions, const std::string& url){
+    if (url.empty())
+        return url;
+    
+    // "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=uwvyvzaF2P7UWbyOEvjU"
+    if (isNormalizedSourceURL(tileServerOptions.baseURL(), tileServerOptions.glyphsTemplate(), url)) {
+        auto tokenMap = createTokenMap(tileServerOptions.glyphsTemplate(), url);
+        
+        auto retVal = tileServerOptions.uriSchemeAlias() + "://";
+        if (tokenMap.find("domain") != tokenMap.end()) {
+            retVal += tokenMap.at("domain");
+        } else {
+            if (!tileServerOptions.glyphsDomainName().empty()) retVal += tileServerOptions.glyphsDomainName();
+        }
+        
+        if (tileServerOptions.glyphsVersionPrefix().has_value()) retVal += tileServerOptions.glyphsVersionPrefix().value();
+        
+        if (tokenMap.find("path") != tokenMap.end()) {
+            retVal += tokenMap.at("path");
+        } else {
+            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
+            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
+            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+        }
+        
+        return retVal;
+    }
+    
+    
+    return url;
 }
 
 const uint64_t DEFAULT_OFFLINE_TILE_COUNT_LIMIT = 6000;

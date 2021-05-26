@@ -2046,7 +2046,6 @@
         "maptiler:copyright": "This style was generated on MapTiler Cloud. Usage outside of MapTiler Cloud requires valid OpenMapTiles Production Package: https://openmaptiles.com/production-package/ -- please contact us.",
         "mapbox:autocomposite": false,
         "openmaptiles:version": "3.x",
-        "openmaptiles:mapbox:owner": "openmaptiles",
-        "openmaptiles:mapbox:source:url": "mapbox://openmaptiles.4qljc88t"
+        "openmaptiles:mapbox:owner": "openmaptiles"
     }
 }

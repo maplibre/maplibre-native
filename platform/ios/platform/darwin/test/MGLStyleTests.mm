@@ -89,8 +89,8 @@
 }
 
 - (void)testAddingSourcesWithDuplicateIdentifiers {
-    MGLVectorTileSource *source1 = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"mapbox://mapbox.mapbox-terrain-v2"]];
-    MGLVectorTileSource *source2 = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"mapbox://mapbox.mapbox-terrain-v2"]];
+    MGLVectorTileSource *source1 = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"maptiler://sources/hillshades"]];
+    MGLVectorTileSource *source2 = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"maptiler://sources/hillshades"]];
 
     [self.style addSource: source1];
     XCTAssertThrowsSpecificNamed([self.style addSource: source2], NSException, MGLRedundantSourceIdentifierException);
@@ -216,7 +216,7 @@
 
 - (void)testAddingLayersWithDuplicateIdentifiers {
     // Just some source
-    MGLVectorTileSource *source = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"mapbox://mapbox.mapbox-terrain-v2"]];
+    MGLVectorTileSource *source = [[MGLVectorTileSource alloc] initWithIdentifier:@"my-source" configurationURL:[NSURL URLWithString:@"maptiler://sources/hillshades"]];
     [self.style addSource: source];
 
     // Add initial layer

@@ -1,17 +1,17 @@
 {
   "version": 8,
   "sources": {
-    "mapbox": {
+    "source": {
       "type": "vector",
-      "url": "mapbox://mapbox.mapbox-terrain-v1,mapbox.mapbox-streets-v5",
+      "url": "maptiler://sources/streets",
       "maxzoom": 14
     }
   },
   "layers": [{
     "id": "country_label",
     "type": "symbol",
-    "source": "mapbox",
-    "source-layer": "country_label",
+    "source": "source",
+    "source-layer": "place",
     "filter": ["==", "$type", "Point"],
     "layout": {
       "text-size": "no"

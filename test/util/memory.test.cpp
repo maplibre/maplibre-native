@@ -26,9 +26,19 @@ using namespace std::literals::string_literals;
 class MemoryTest {
 public:
     MemoryTest() {
-        fileSource->styleResponse = [&](const Resource& res) { return response("style_" + getType(res) + ".json");};
-        fileSource->tileResponse = [&](const Resource& res) { return response(getType(res) + ".tile"); };
-        fileSource->sourceResponse = [&](const Resource& res) { return response("source_" + getType(res) + ".json"); };
+        fileSource->styleResponse = [&](const Resource& res) {
+            auto resName = "style_" + getType(res) + ".json";
+            return response(resName);
+        };
+        fileSource->tileResponse = [&](const Resource& res) {
+            auto resName = getType(res) + ".tile";
+            return response(resName);
+        };
+        fileSource->sourceResponse = [&](const Resource& res) {
+            auto resName = "source_" + getType(res) + ".json";
+            return response(resName);
+            
+        };
         fileSource->glyphsResponse = [&](const Resource&) { return response("glyphs.pbf"); };
         fileSource->spriteJSONResponse = [&](const Resource&) { return response("sprite.json"); };
         fileSource->spriteImageResponse = [&](const Resource&) { return response("sprite.png"); };
@@ -56,7 +66,7 @@ private:
     }
 
     std::string getType(const Resource& res) {
-        if (res.url.find("hybrid") != std::string::npos) {
+        if (res.url.find("hybrid") != std::string::npos || res.url.find("satellite") != std::string::npos) {
             return "raster";
         } else {
             return "vector";
@@ -86,7 +96,7 @@ TEST(Memory, Raster) {
     HeadlessFrontend frontend { { 256, 256 }, ratio };
     MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
-    map.getStyle().loadURL("mapbox://satellite");
+    map.getStyle().loadURL("maptiler://maps/hybrid");
 
     frontend.render(map);
 }
