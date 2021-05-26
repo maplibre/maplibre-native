@@ -2,9 +2,6 @@ package com.mapbox.mapboxsdk.maps;
 
 import android.content.Context;
 
-import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 public class AttributionDialogManagerTest {
@@ -29,8 +27,6 @@ public class AttributionDialogManagerTest {
   @Before
   public void beforeTest() {
     attributionDialogManager = new AttributionDialogManager(context, mapboxMap);
-    cameraPosition = new CameraPosition.Builder(CameraPosition.DEFAULT)
-            .tilt(5.0f).zoom(12).bearing(24.0f).target(new LatLng(11.1f, 22.2f)).build();
   }
 
   @Test
