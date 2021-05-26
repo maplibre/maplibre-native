@@ -61,7 +61,7 @@ public final class Mapbox {
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
-      INSTANCE.tileServerOptions = TileServerOptions.For(tileServer);
+      INSTANCE.tileServerOptions = TileServerOptions.get(tileServer);
     }
     return INSTANCE;
   }

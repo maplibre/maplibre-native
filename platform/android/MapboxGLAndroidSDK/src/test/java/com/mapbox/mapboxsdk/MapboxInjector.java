@@ -8,8 +8,6 @@ import com.mapbox.mapboxsdk.util.TileServerOptions;
 
 import java.lang.reflect.Field;
 
-import static org.mockito.Mockito.mock;
-
 public class MapboxInjector {
 
   private static final String FIELD_INSTANCE = "INSTANCE";

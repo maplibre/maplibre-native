@@ -1,8 +1,5 @@
 package com.mapbox.mapboxsdk.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -389,7 +386,7 @@ public class TileServerOptions implements Parcelable {
     out.writeTypedArray(defaultStyles, 0);
   }
 
-  public static TileServerOptions For(WellKnownTileServer tileServer) {
+  public static TileServerOptions get(WellKnownTileServer tileServer) {
     switch (tileServer) {
       case Mapbox:
         return mapboxConfiguration();
