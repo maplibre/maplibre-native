@@ -62,7 +62,10 @@ public final class Mapbox {
     } else {
       TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
       INSTANCE.tileServerOptions = tileServerOptions;
-      FileSource.getInstance(context).setTileServerOptions(tileServerOptions);
+      INSTANCE.apiKey = null;
+      FileSource fileSource = FileSource.getInstance(context);
+      fileSource.setTileServerOptions(tileServerOptions);
+      fileSource.setApiKey(null);
     }
     return INSTANCE;
   }
@@ -98,7 +101,9 @@ public final class Mapbox {
 
     TileServerOptions tileServerOptions = TileServerOptions.get(tileServer);
     INSTANCE.tileServerOptions = tileServerOptions;
-    FileSource.getInstance(context).setTileServerOptions(tileServerOptions);
+    FileSource fileSource = FileSource.getInstance(context);
+    fileSource.setTileServerOptions(tileServerOptions);
+    fileSource.setApiKey(apiKey);
     return INSTANCE;
   }
 
