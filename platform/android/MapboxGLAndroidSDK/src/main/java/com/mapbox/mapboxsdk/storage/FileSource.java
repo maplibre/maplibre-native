@@ -377,6 +377,9 @@ public class FileSource {
   }
 
   @Keep
+  public native void setTileServerOptions(TileServerOptions tileServerOptions);
+
+  @Keep
   public native boolean isActivated();
 
   @Keep
@@ -394,6 +397,10 @@ public class FileSource {
 
   @Keep
   public native void setApiBaseUrl(String baseUrl);
+
+  @NonNull
+  @Keep
+  public native String getApiBaseUrl();
 
   /**
    * Sets a callback for transforming URLs requested from the internet

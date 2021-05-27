@@ -47,7 +47,38 @@ public final class Mapbox {
    * </p>
    *
    * @param context Android context which holds or is an application context
+   * @return the single instance of Mapbox
+   */
+  @UiThread
+  @NonNull
+  public static synchronized Mapbox getInstance(@NonNull Context context) {
+    ThreadUtils.init(context);
+    ThreadUtils.checkThread(TAG);
+    if (INSTANCE == null) {
+      Context appContext = context.getApplicationContext();
+      FileSource.initializeFileDirsPaths(appContext);
+      INSTANCE = new Mapbox(appContext, null);
+      ConnectivityReceiver.instance(appContext);
+    } else {
+      TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
+      INSTANCE.tileServerOptions = tileServerOptions;
+      FileSource.getInstance(context).setTileServerOptions(tileServerOptions);
+    }
+    return INSTANCE;
+  }
+
+  /**
+   * Get an instance of Mapbox.
+   * <p>
+   * This class manages the API key, application context, and connectivity state.
+   * </p>
+   *
+   * @param context Android context which holds or is an application context
    * @param apiKey api key
+   * @param tileServer the tile server whose predefined configuration will be used to
+   *                   bootstrap the SDK. The predefined configuration includes
+   *                   rules for converting resource URLs between normal and canonical forms
+   *                   and set of predefined styles available on the server.
    * @return the single instance of Mapbox
    */
   @UiThread
@@ -61,8 +92,13 @@ public final class Mapbox {
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
-      INSTANCE.tileServerOptions = TileServerOptions.get(tileServer);
+    } else {
+      INSTANCE.apiKey = apiKey;
     }
+
+    TileServerOptions tileServerOptions = TileServerOptions.get(tileServer);
+    INSTANCE.tileServerOptions = tileServerOptions;
+    FileSource.getInstance(context).setTileServerOptions(tileServerOptions);
     return INSTANCE;
   }
 

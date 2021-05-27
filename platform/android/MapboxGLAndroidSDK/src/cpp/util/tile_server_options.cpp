@@ -68,6 +68,11 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapTilerConfigurat
     return TileServerOptions::New(env, options);
 }
 
+jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapLibreConfiguration(jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
+    auto options = mbgl::TileServerOptions::MapLibreConfiguration();
+    return TileServerOptions::New(env, options);
+}
+
 mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env, const jni::Object<TileServerOptions>& options) {
     auto opts = mbgl::TileServerOptions();
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
@@ -165,7 +170,8 @@ void TileServerOptions::registerNative(jni::JNIEnv& env) {
                         *javaClass,
                         jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration), &TileServerOptions::DefaultConfiguration>("defaultConfiguration"),
                         jni::MakeNativeMethod<decltype(&TileServerOptions::MapboxConfiguration), &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"),
-                        jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration), &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"));
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration), &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"),
+                        jni::MakeNativeMethod<decltype(&TileServerOptions::MapLibreConfiguration), &TileServerOptions::MapLibreConfiguration>("mapLibreConfiguration"));
 }
 
 } // namespace android

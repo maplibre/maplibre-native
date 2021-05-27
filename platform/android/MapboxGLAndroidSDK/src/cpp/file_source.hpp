@@ -48,9 +48,13 @@ public:
 
     ~FileSource();
 
+    void setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options);
+
     jni::Local<jni::String> getApiKey(jni::JNIEnv&);
 
     void setApiKey(jni::JNIEnv&, const jni::String&);
+
+    jni::Local<jni::String> getAPIBaseUrl(jni::JNIEnv&);
 
     void setAPIBaseUrl(jni::JNIEnv&, const jni::String&);
 

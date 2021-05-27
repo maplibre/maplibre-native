@@ -25,6 +25,8 @@ import static timber.log.Timber.DebugTree;
  */
 public class MapboxApplication extends Application {
 
+  public static final WellKnownTileServer TILE_SERVER = WellKnownTileServer.MapTiler;
+
   private static final String DEFAULT_API_KEY = "YOUR_API_KEY_GOES_HERE";
   private static final String API_KEY_NOT_SET_MESSAGE = "In order to run the Test App you need to set a valid "
     + "API key. During development, you can set the MGL_API_KEY environment variable for the SDK to "
@@ -77,7 +79,7 @@ public class MapboxApplication extends Application {
     String apiKey = ApiKeyUtils.getApiKey(getApplicationContext());
     validateApiKey(apiKey);
 
-    Mapbox.getInstance(getApplicationContext(), apiKey, WellKnownTileServer.MapTiler);
+    Mapbox.getInstance(getApplicationContext(), apiKey, TILE_SERVER);
 
     TileLoadingMeasurementUtils.setUpTileLoadingMeasurement();
 

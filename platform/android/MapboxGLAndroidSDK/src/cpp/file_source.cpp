@@ -53,6 +53,14 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::
 FileSource::~FileSource() {
 }
 
+void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options) {
+    auto tileServerOptions = TileServerOptions::getTileServerOptions(_env, _options);
+    resourceOptions.withTileServerOptions(tileServerOptions);
+    resourceLoader->setResourceOptions(resourceOptions.clone());
+    databaseSource->setResourceOptions(resourceOptions.clone());
+    onlineSource->setResourceOptions(resourceOptions.clone());
+}
+
 jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
     if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
@@ -76,6 +84,15 @@ void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }
+}
+
+jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
+    if (auto* url = onlineSource->getProperty(mbgl::API_BASE_URL_KEY).getString()) {
+        return jni::Make<jni::String>(env, *url);
+    }
+
+    ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
+    return jni::Make<jni::String>(env, "");
 }
 
 void FileSource::setResourceTransform(jni::JNIEnv& env, const jni::Object<FileSource::ResourceTransformCallback>& transformCallback) {
@@ -220,9 +237,11 @@ void FileSource::registerNative(jni::JNIEnv& env) {
                                         jni::MakePeer<FileSource, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&>,
                                         "initialize",
                                         "finalize",
+                                        METHOD(&FileSource::setTileServerOptions, "setTileServerOptions"),
                                         METHOD(&FileSource::getApiKey, "getApiKey"),
                                         METHOD(&FileSource::setApiKey, "setApiKey"),
                                         METHOD(&FileSource::setAPIBaseUrl, "setApiBaseUrl"),
+                                        METHOD(&FileSource::getAPIBaseUrl, "getApiBaseUrl"),
                                         METHOD(&FileSource::setResourceTransform, "setResourceTransform"),
                                         METHOD(&FileSource::setResourceCachePath, "setResourceCachePath"),
                                         METHOD(&FileSource::resume, "activate"),
