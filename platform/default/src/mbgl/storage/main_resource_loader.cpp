@@ -182,6 +182,11 @@ public:
     void setResourceOptions(ResourceOptions options) {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
         resourceOptions = options;
+        assetFileSource->setResourceOptions(options.clone());
+        databaseFileSource->setResourceOptions(options.clone());
+        localFileSource->setResourceOptions(options.clone());
+        onlineFileSource->setResourceOptions(options.clone());
+        maptilerFileSource->setResourceOptions(options.clone());
     }
 
     ResourceOptions getResourceOptions() {

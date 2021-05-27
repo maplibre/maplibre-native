@@ -168,7 +168,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, options);
         _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, options)));
         
-        // Observe for changes to the API base URL (and find out the current one).
+        // Observe for changes to the tile server options (and find out the current one).
         [[MGLSettings sharedSettings] addObserver:self
                                             forKeyPath:@"tileServerOptionsChangeToken"
                                                options:(NSKeyValueObservingOptionInitial |
@@ -206,9 +206,8 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     } else if ([keyPath isEqualToString:@"tileServerOptionsChangeToken"] && object == [MGLSettings sharedSettings]) {
         auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
         auto apiBaseURL = tileServerOptions->baseURL();
-        if (!apiBaseURL.empty()) {
-            _mbglOnlineFileSource->setProperty(mbgl::API_BASE_URL_KEY, apiBaseURL);
-        }
+        auto resourceOptions = _mbglOnlineFileSource->getResourceOptions().clone();
+         _mbglOnlineFileSource->setResourceOptions(resourceOptions.withTileServerOptions(*tileServerOptions).clone());
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
