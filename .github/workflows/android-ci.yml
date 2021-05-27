@@ -96,12 +96,12 @@ jobs:
 
       - name: Build Test APK
         run: |
-          MAPBOX_DEVELOPER_CONFIG_XML='${{ secrets.MAPBOX_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPBOX_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
             make android-ui-test-arm-v8
           else
-            echo "No secrets.MAPBOX_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
+            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
         shell: bash        
 
