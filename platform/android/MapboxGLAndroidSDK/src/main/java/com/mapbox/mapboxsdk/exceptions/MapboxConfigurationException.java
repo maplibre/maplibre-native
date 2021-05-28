@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 /**
  * A MapboxConfigurationException is thrown by MapboxMap when the SDK hasn't been properly initialised.
  * <p>
- * This occurs either when {@link com.mapbox.mapboxsdk.Mapbox} is not correctly initialised or the provided access token
+ * This occurs either when {@link com.mapbox.mapboxsdk.Mapbox} is not correctly initialised or the provided apiKey
  * through {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String)} isn't valid.
  * </p>
  *

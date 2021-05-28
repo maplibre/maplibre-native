@@ -39,12 +39,14 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count())
+            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+        )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url)
+            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+        )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl,  tileServerOptions.baseURL);
+        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
     }
 
     @Test
@@ -57,13 +59,15 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapTiler)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count())
+            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+        )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url)
+            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+        )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl,  tileServerOptions.baseURL);
-        Assert.assertEquals(fileSource.apiKey,  key);
+        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
+        Assert.assertEquals(fileSource.apiKey, key)
     }
 
     @Test
@@ -79,13 +83,14 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.Mapbox)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count())
+            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+        )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url)
+            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+        )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl,  tileServerOptions.baseURL);
-        Assert.assertEquals(fileSource.apiKey,  key);
+        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
+        Assert.assertEquals(fileSource.apiKey, key)
     }
-
 }
