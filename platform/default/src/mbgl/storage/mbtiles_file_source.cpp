@@ -310,7 +310,7 @@ std::unique_ptr<AsyncRequest> MaptilerFileSource::request(const Resource &resour
             thread->actor().invoke(&Impl::request_tilejson, resource, req->actor());
         }
     }
-    return std::move(req);
+    return req;
 }
 
 bool MaptilerFileSource::canRequest(const Resource& resource) const {
