@@ -1863,6 +1863,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegionTooManyExistingTiles) {
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
+#ifndef WIN32 // Windows cannot copy a folder as a file
 TEST(OfflineDatabase, MergeDatabaseWithInvalidPath) {
     FixtureLog log;
 
@@ -1877,6 +1878,7 @@ TEST(OfflineDatabase, MergeDatabaseWithInvalidPath) {
     EXPECT_EQ(1u, log.count({ EventSeverity::Error, Event::Database, -1, "Merge database has incorrect user_version" }));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+#endif
 
 TEST(OfflineDatabase, MergeDatabaseWithInvalidDb) {
     FixtureLog log;
@@ -1920,7 +1922,9 @@ TEST(OfflineDatabase, ChangePath) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     db.changePath(newPath);
     mapbox::sqlite::Database::open(newPath, mapbox::sqlite::ReadOnly);
+#ifndef WIN32 // Windows will fail to delete an open file
     util::deleteFile(newPath);
+#endif WIN32
 }
 
 TEST(OfflineDatabase, ResetDatabase) {
