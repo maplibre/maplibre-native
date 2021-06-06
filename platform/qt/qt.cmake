@@ -1,10 +1,12 @@
 # Note: Using Sqlite instead of QSqlDatabase for better compatibility.
 
-find_package(Qt6Gui REQUIRED)
-find_package(Qt6Network REQUIRED)
-find_package(Qt6OpenGL REQUIRED)
-find_package(Qt6OpenGLWidgets REQUIRED)
-find_package(Qt6Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}
+             COMPONENTS Gui
+                        Network
+                        OpenGL
+                        OpenGLWidgets
+                        Widgets
+             REQUIRED)
 
 if(MSVC)
     add_definitions("/DQT_COMPILING_QIMAGE_COMPAT_CPP")
@@ -93,11 +95,10 @@ target_link_libraries(
     PRIVATE
         $<$<NOT:$<PLATFORM_ID:Windows>>:z>
         $<$<NOT:$<PLATFORM_ID:Windows>>:mbgl-vendor-icu>
-        Qt6::Core
-        Qt6::Gui
-        Qt6::Network
-        Qt6::OpenGL
-        Qt6::OpenGLWidgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::OpenGL
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
@@ -141,8 +142,8 @@ target_compile_definitions(
 target_link_libraries(
     qmapboxgl
     PRIVATE
-        Qt6::Core
-        Qt6::Gui
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
         mbgl-compiler-options
         mbgl-core
 )
@@ -161,9 +162,9 @@ set_property(TARGET mbgl-qt PROPERTY CXX_STANDARD 98)
 target_link_libraries(
     mbgl-qt
     PRIVATE
-        Qt6::Widgets
-        Qt6::Gui
-        Qt6::OpenGLWidgets
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::OpenGLWidgets
         mbgl-compiler-options
         qmapboxgl
 )
@@ -187,18 +188,18 @@ if (MSVC)
     target_link_libraries(
         mbgl-test-runner
         PRIVATE
-            Qt6::Widgets
-            Qt6::Gui
-            Qt6::OpenGL
+            Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::Gui
+            Qt${QT_VERSION_MAJOR}::OpenGL
             mbgl-compiler-options
     )
 else()
     target_link_libraries(
         mbgl-test-runner
         PRIVATE
-            Qt6::Widgets
-            Qt6::Gui
-            Qt6::OpenGL
+            Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::Gui
+            Qt${QT_VERSION_MAJOR}::OpenGL
             mbgl-compiler-options
             pthread
     )
