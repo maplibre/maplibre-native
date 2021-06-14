@@ -989,7 +989,7 @@ public:
 
 - (void)renderSync
 {
-    if ( ! self.dormant && _rendererFrontend)
+    if (!self.dormant && _rendererFrontend && !CGRectIsEmpty(self.frame))
     {
         _rendererFrontend->render();
     }
