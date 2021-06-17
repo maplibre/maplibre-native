@@ -414,6 +414,7 @@
 		D741238426290D1900572FE7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D741238326290D1900572FE7 /* ContentView.swift */; };
 		D741238626290D1B00572FE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D741238526290D1B00572FE7 /* Assets.xcassets */; };
 		D741238926290D1B00572FE7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D741238826290D1B00572FE7 /* Preview Assets.xcassets */; };
+		D7654486267BD5FB00779E5A /* MapView OSLog Extensions in Frameworks */ = {isa = PBXBuildFile; productRef = D7654485267BD5FB00779E5A /* MapView OSLog Extensions */; };
 		D79D3AA92629165C001AF3D1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79D3AA82629165C001AF3D1 /* SceneDelegate.swift */; };
 		D7A66C7F262A6CE1009B1147 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A66C7E262A6CE1009B1147 /* AppDelegate.swift */; };
 		D7B237B326435E50000A0D86 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8847D21CBAF91600AB86E3 /* Mapbox.framework */; };
@@ -1367,6 +1368,7 @@
 			files = (
 				D7B237B626435E51000A0D86 /* MetalANGLE.framework in Frameworks */,
 				D7B237B326435E50000A0D86 /* Mapbox.framework in Frameworks */,
+				D7654486267BD5FB00779E5A /* MapView OSLog Extensions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2617,6 +2619,9 @@
 				D74123C626290D4300572FE7 /* PBXTargetDependency */,
 			);
 			name = "iosapp-swiftui";
+			packageProductDependencies = (
+				D7654485267BD5FB00779E5A /* MapView OSLog Extensions */,
+			);
 			productName = SwiftUI;
 			productReference = D741237F26290D1900572FE7 /* iosapp-swiftui.app */;
 			productType = "com.apple.product-type.application";
@@ -2819,6 +2824,9 @@
 				gl,
 			);
 			mainGroup = DA1DC9411CB6C1C2006E619F;
+			packageReferences = (
+				D7654484267BD5FB00779E5A /* XCRemoteSwiftPackageReference "mapview-log-extensions" */,
+			);
 			productRefGroup = DA1DC94B1CB6C1C2006E619F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -4191,6 +4199,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D7654484267BD5FB00779E5A /* XCRemoteSwiftPackageReference "mapview-log-extensions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/roblabs/mapview-log-extensions.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D7654485267BD5FB00779E5A /* MapView OSLog Extensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7654484267BD5FB00779E5A /* XCRemoteSwiftPackageReference "mapview-log-extensions" */;
+			productName = "MapView OSLog Extensions";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DA1DC9421CB6C1C2006E619F /* Project object */;
 }
