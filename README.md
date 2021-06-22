@@ -73,6 +73,27 @@ git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.gi
 
 ### Build
 
+MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancments or debugging.
+
+You can list available tags by issuing the command `git tag`, then use the result
+
+```bash
+# 1. Obtain a list of tags, which matches to release versions
+git tag
+
+# 2.  Set a convenience variable with the desired TAG
+# TAG=android-v9.2.1
+# TAG=android-v9.4.2
+TAG=ios-v5.11.0
+# TAG=ios-v5.12.0-pre.1
+
+# 3.  Check out a particular TAG
+git checkout tags/$TAG -b $TAG
+
+# 4. build, debug or enhance features based on the tag
+# clean, if you need to troubleshoot build dependencies by using `make clean`
+```
+
 #### Android
 
 > Make sure you have set Android SDK path in platform/android/local.properties, variable sdk.dir
