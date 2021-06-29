@@ -2,11 +2,15 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
-## master
+## 9.5.0 - June 29, 2021
 
 ### Features
 
-### Bug Fixes
+* Replacing hardcoded configuration with configurable API and removing Mapbox assets and dependencies [#90](https://github.com/maplibre/maplibre-gl-native/pull/90)
+
+### Other
+
+* Migration from bintray [#77](https://github.com/maplibre/maplibre-gl-native/pull/77)
 
 ## 9.4.2 - May 6, 2021
 

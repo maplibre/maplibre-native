@@ -2,9 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
-## master
+## 5.12.0 - June 29, 2021
 
 ### Features
+
+* Added allowScrollGesturesDuringRotateOrZoom [#60](https://github.com/maplibre/maplibre-gl-native/pull/62)
+* Replacing hardcoded configuration with configurable API and removing Mapbox assets and dependencies [#90](https://github.com/maplibre/maplibre-gl-native/pull/90)
+
+### Bug Fixes
+
+* Fix map stuttering by switching render call to use setNeedsDisplay [#60](https://github.com/maplibre/maplibre-gl-native/pull/60)
+* Dispatch to main queue, rather than global [#64](https://github.com/maplibre/maplibre-gl-native/pull/64)
+* Use DisplayLink to prevent crashes in willResignActive [#68](https://github.com/maplibre/maplibre-gl-native/pull/68)
+* Ignore sizing and positioning for hidden elements in assertions [#80](https://github.com/maplibre/maplibre-gl-native/pull/80)
+* Disable map snapshots by default [#83](https://github.com/maplibre/maplibre-gl-native/pull/83)
 
 ## 5.11.0 - March 12, 2021
 
