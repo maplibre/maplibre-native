@@ -15,7 +15,7 @@ int runTests(int argc, char *argv[]) {
     
     // In order to run specific tests
     // testing::GTEST_FLAG(filter) = "TileServerOptions*";
-    // testing::GTEST_FLAG(filter) = "MainResourceLoader.CachedResourceLowPriority";
+    // testing::GTEST_FLAG(filter) = "MainResourceLoader.ResourceOptions";
 
     return RUN_ALL_TESTS();
 }
