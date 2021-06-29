@@ -883,7 +883,7 @@ public final class MapboxMap {
    * @param style The bundled style
    * @see Style
    */
-  public void setStyle(@Style.StyleUrl String style) {
+  public void setStyle(String style) {
     this.setStyle(style, null);
   }
 
@@ -899,7 +899,7 @@ public final class MapboxMap {
    * @param callback The callback to be invoked when the style has loaded
    * @see Style
    */
-  public void setStyle(@Style.StyleUrl String style, final Style.OnStyleLoaded callback) {
+  public void setStyle(String style, final Style.OnStyleLoaded callback) {
     this.setStyle(new Style.Builder().fromUri(style), callback);
   }
 

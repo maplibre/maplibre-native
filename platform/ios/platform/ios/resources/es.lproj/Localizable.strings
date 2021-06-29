@@ -77,10 +77,7 @@
 "ROAD_REF_A11Y_FMT" = "Ruta %@";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK para iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "La versión %@ de Mapbox Maps SDK para iOS está disponible:";
+"SDK_NAME" = "MapLibre Maps SDK para iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "No se pudo cargar el mapa debido a que no se encuentra el estilo o está incompleto.";

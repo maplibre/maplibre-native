@@ -5,6 +5,8 @@
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/database_file_source.hpp>
 
+#include "MGLSettings_Private.h"
+
 #include <memory>
 
 NS_ASSUME_NONNULL_BEGIN

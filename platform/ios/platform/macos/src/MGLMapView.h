@@ -84,8 +84,7 @@ MGL_EXPORT IB_DESIGNABLE
 
  @param frame The frame for the view, measured in points.
  @param styleURL URL of the map style to display. The URL may be a full HTTP or
-    HTTPS URL, a Mapbox style URL
-    (`mapbox://styles/<user>/<style>`), or a path to a local file relative to
+    HTTPS URL, a canonical URL, or a path to a local file relative to
     the application’s resource path. Specify `nil` for the default style.
  @return An initialized map view.
  */
@@ -130,9 +129,8 @@ MGL_EXPORT IB_DESIGNABLE
 /**
  URL of the style currently displayed in the receiver.
 
- The URL may be a full HTTP or HTTPS URL, a Mapbox
- style URL (`mapbox://styles/<user>/<style>`), or a path to a local file relative
- to the application’s resource path.
+ The URL may be a full HTTP or HTTPS URL, a canonical URL, or a path to
+ a local file relative to the application’s resource path.
 
  If you set this property to `nil`, the receiver will use the default style and
  this property will automatically be set to that style’s URL.
@@ -1235,25 +1233,6 @@ MGL_EXPORT IB_DESIGNABLE
  @return The distance in meters spanned by a single point.
  */
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude;
-
-#pragma mark Giving Feedback to Improve the Map
-
-/**
- Opens one or more webpages in the default Web browser in which the user can
- provide feedback about the map data.
-
- You should add a menu item to the Help menu of your application that invokes
- this method. Title it “Improve This Map” or similar. Set its target to the
- first responder and its action to `giveFeedback:`.
-
- This map view searches the current style’s sources for webpages to open.
- Specifically, each source’s tile set has an `attribution` property containing
- HTML code; if an <code>&lt;a></code> tag (link) within that code has an
- <code>class</code> attribute set to <code>mapbox-improve-map</code>, its
- <code>href</code> attribute defines the URL to open. Such links are omitted
- from the attribution view.
- */
-- (IBAction)giveFeedback:(id)sender;
 
 #pragma mark Debugging the Map
 

@@ -103,7 +103,7 @@ class LocationFragmentActivity : AppCompatActivity() {
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync {
                 mapboxMap = it
-                it.setStyle(Style.MAPBOX_STREETS) { style ->
+                it.setStyle(Style.getPredefinedStyle("Streets")) { style ->
                     val component = mapboxMap.locationComponent
 
                     component.activateLocationComponent(

@@ -94,7 +94,7 @@ public class MapSnapshotterActivity extends AppCompatActivity {
   private void startSnapShot(final int row, final int column) {
     // Optionally the style
     Style.Builder builder = new Style.Builder()
-      .fromUri((column + row) % 2 == 0 ? Style.MAPBOX_STREETS : Style.DARK);
+      .fromUri((column + row) % 2 == 0 ? Style.getPredefinedStyle("Streets") : Style.getPredefinedStyle("Pastel"));
 
     // Define the dimensions
     MapSnapshotter.Options options = new MapSnapshotter.Options(
@@ -129,8 +129,10 @@ public class MapSnapshotterActivity extends AppCompatActivity {
     }
     if (row == 0 && column == 0) {
       // Add a source
-      Source source = new RasterSource("my-raster-source", "mapbox://mapbox.satellite", 512);
-      builder.withLayerAbove(new RasterLayer("satellite-layer", "my-raster-source"), "country-label");
+      Source source = new RasterSource("my-raster-source", "maptiler://sources/satellite", 512);
+      builder.withLayerAbove(
+        new RasterLayer("satellite-layer", "my-raster-source"),
+        (column + row) % 2 == 0 ? "country_1" : "country_label");
       builder.withSource(source);
     } else if (row == 0 && column == 2) {
 

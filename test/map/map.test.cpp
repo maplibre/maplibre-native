@@ -49,7 +49,7 @@ public:
     MapAdapter map;
 
     MapTest(float pixelRatio = 1, MapMode mode = MapMode::Static)
-        : fileSource(std::make_shared<FileSource>())
+        : fileSource(std::make_shared<FileSource>(ResourceOptions::Default()))
         , frontend(pixelRatio)
         , map(frontend, observer, fileSource,
               MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
@@ -66,6 +66,17 @@ public:
             MapMode mode = MapMode::Static,
             typename std::enable_if<std::is_same<T, MainResourceLoader>::value>::type* = nullptr)
         : fileSource(std::make_shared<T>(ResourceOptions().withCachePath(cachePath).withAssetPath(assetPath))),
+          frontend(pixelRatio),
+          map(frontend,
+              observer,
+              fileSource,
+              MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
+    
+    template <typename T = FileSource>
+    MapTest(const ResourceOptions& options,
+            float pixelRatio = 1,
+            MapMode mode = MapMode::Static)
+        : fileSource(std::make_shared<T>(options)),
           frontend(pixelRatio),
           map(frontend,
               observer,
@@ -349,7 +360,7 @@ TEST(Map, Offline) {
     NetworkStatus::Set(NetworkStatus::Status::Offline);
     const std::string prefix = "http://127.0.0.1:3000/";
     std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{});
+    FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{});
     dbfs->forward(Resource::style(prefix + "style.json"), expiredItem("style.json"), [] {});
     dbfs->forward(Resource::source(prefix + "streets.json"), expiredItem("streets.json"), [] {});
     dbfs->forward(Resource::spriteJSON(prefix + "sprite", 1.0), expiredItem("sprite.json"), [] {});
@@ -495,7 +506,7 @@ TEST(Map, SetStyleInvalidURL) {
         test.runLoop.stop();
     };
 
-    test.map.getStyle().loadURL("mapbox://bar");
+    test.map.getStyle().loadURL("maptiler://bar");
 
     test.runLoop.run();
 }
@@ -512,7 +523,7 @@ TEST(Map, StyleFresh) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("mapbox://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -530,7 +541,7 @@ TEST(Map, StyleExpired) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("mapbox://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -566,7 +577,7 @@ TEST(Map, StyleExpiredWithAnnotations) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("mapbox://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -590,7 +601,7 @@ TEST(Map, StyleExpiredWithRender) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("mapbox://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
     Response response;
@@ -612,7 +623,7 @@ TEST(Map, StyleEarlyMutation) {
 
     MapTest<FakeFileSource> test;
 
-    test.map.getStyle().loadURL("mapbox://styles/test");
+    test.map.getStyle().loadURL("maptiler://maps/test");
     test.map.getStyle().addLayer(std::make_unique<style::BackgroundLayer>("bg"));
 
     Response response;
@@ -664,7 +675,7 @@ TEST(Map, StyleLoadedSignal) {
 
 // Test for https://github.com/mapbox/mapbox-gl-native/issues/7902
 TEST(Map, TEST_REQUIRES_SERVER(StyleNetworkErrorRetry)) {
-    MapTest<OnlineFileSource> test;
+    MapTest<OnlineFileSource> test(ResourceOptions::Default());
 
     test.map.getStyle().loadURL("http://127.0.0.1:3000/style-fail-once-500");
 
@@ -676,7 +687,7 @@ TEST(Map, TEST_REQUIRES_SERVER(StyleNetworkErrorRetry)) {
 }
 
 TEST(Map, TEST_REQUIRES_SERVER(StyleNotFound)) {
-    MapTest<OnlineFileSource> test;
+    MapTest<OnlineFileSource> test(ResourceOptions::Default());
 
     test.map.getStyle().loadURL("http://127.0.0.1:3000/style-fail-once-404");
 
@@ -1432,9 +1443,9 @@ TEST(Map, KeepRenderData) {
     test.fileSource->spriteImageResponse = makeResponse("sprite.png");
 
     test.map.jumpTo(CameraOptions().withZoom(10));
-    test.map.getStyle().loadURL("mapbox://streets");
+    test.map.getStyle().loadURL("maptiler://maps/streets");
     const int iterations = 3;
-    const int resourcesCount = 4 /*tiles*/ + 3 /*fonts*/;
+    const int resourcesCount = 4 /*tiles*/;
     // Keep render data.
     for (int i = 1; i <= iterations; ++i) {
         test.frontend.render(test.map);
@@ -1461,7 +1472,8 @@ bool isInsideTile(const mapbox::geometry::box<float>& box, float padding, Size v
 
 } // namespace
 
-TEST(Map, PlacedSymbolData) {
+// Disabled intentionally, no symbol placement occurs in MapTiler streets style
+TEST(Map, DISABLED_PlacedSymbolData) {
     MapTest<> test{std::move(MapOptions().withMapMode(MapMode::Tile))};
 
     test.fileSource->tileResponse = makeResponse("vector.tile", true);
@@ -1472,8 +1484,9 @@ TEST(Map, PlacedSymbolData) {
     test.fileSource->spriteImageResponse = makeResponse("sprite.png");
 
     // Camera options will give exactly one tile (12/1171/1566)
-    test.map.jumpTo(CameraOptions().withZoom(12).withCenter(LatLng{38.917982, -77.037603}));
-    test.map.getStyle().loadURL("mapbox://streets");
+    test.map.jumpTo(CameraOptions().withZoom(16).withCenter(LatLng{50.072317, 14.444827}));
+    
+    test.map.getStyle().loadURL("maptiler://maps/streets");
     Size viewportSize = test.frontend.getSize();
     test.frontend.getRenderer()->collectPlacedSymbolData(true);
     test.frontend.render(test.map);
@@ -1489,15 +1502,14 @@ TEST(Map, PlacedSymbolData) {
 
     int placedTotal = 0;
 
-    const std::set<std::string> symbolLayers{"place-city-lg-s",
-                                             "place-neighbourhood",
-                                             "place-suburb",
-                                             "poi-scalerank2",
-                                             "poi-scalerank3",
-                                             "poi-parks-scalerank1",
-                                             "poi-parks-scalerank2",
-                                             "poi-parks-scalerank3",
-                                             "rail-label"};
+    std::set<std::string> symbolLayers;
+    auto layers = test.map.getStyle().getLayers();
+    for (auto l : layers) {
+        auto layerType = l->getTypeInfo()->type;
+        if (strcmp(layerType, "symbol") == 0) {
+            symbolLayers.insert(l->getID());
+        }
+    }
 
     for (const auto& placedSymbol : placedSymbols) {
         EXPECT_NE(0u, symbolLayers.count(placedSymbol.layer));

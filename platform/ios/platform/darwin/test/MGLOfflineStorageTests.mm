@@ -37,6 +37,7 @@
 
 - (void)setUp {
     [super setUp];
+    [MGLSettings useWellKnownTileServer:MGLMapTiler];
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -72,7 +73,7 @@
 - (void)testAddPackForBounds {
     NSUInteger countOfPacks = [MGLOfflineStorage sharedOfflineStorage].packs.count;
 
-    NSURL *styleURL = [MGLStyle lightStyleURLWithVersion:8];
+    NSURL *styleURL = [[MGLStyle predefinedStyle:@"Bright"] url];
     /// Somewhere near Grape Grove, Ohio, United States.
     MGLCoordinateBounds bounds = {
         { .latitude = 39.70358155855172, .longitude = -83.69506472545841 },
@@ -161,7 +162,7 @@
 - (void)testAddPackForGeometry {
     NSUInteger countOfPacks = [MGLOfflineStorage sharedOfflineStorage].packs.count;
 
-    NSURL *styleURL = [MGLStyle lightStyleURLWithVersion:8];
+    NSURL *styleURL = [[MGLStyle predefinedStyle:@"Bright"] url];
     double zoomLevel = 20;
     NSString *geojson = @"{ \"type\": \"Polygon\", \"coordinates\": [ [ [ 5.1299285888671875, 52.10365839097971 ], [ 5.103063583374023, 52.110037078604236 ], [ 5.080232620239258, 52.09548601177304 ], [ 5.106925964355469, 52.07987524347506 ], [ 5.1299285888671875, 52.10365839097971 ] ] ]}";
     NSError *error;
@@ -306,7 +307,7 @@
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"added packs"];
 
-    NSURL *styleURL = [MGLStyle lightStyleURLWithVersion:8];
+    NSURL *styleURL = [[MGLStyle predefinedStyle:@"Bright"] url];
 
     MGLCoordinateBounds bounds[] = {
         {{51.5, -0.2},   {51.6, -0.1}},     // London
@@ -532,7 +533,7 @@
 
         NSNumber *fileSizeNumber = [fileAttributes objectForKey:NSFileSize];
         long long fileSize = [fileSizeNumber longLongValue];
-        long long databaseFileSize = 73728;
+        long long databaseFileSize = 19218432;
         // Merging databases creates an empty file if the file does not exist at the given path.
         XCTAssertEqual(fileSize, databaseFileSize, @"The database file size must be:%lld actual size:%lld", databaseFileSize, fileSize);
 

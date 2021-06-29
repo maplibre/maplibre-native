@@ -1,14 +1,17 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 
 class OnlineFileSource : public FileSource {
 public:
-    OnlineFileSource();
+    OnlineFileSource(const ResourceOptions& options);
     ~OnlineFileSource() override;
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;    
 
 private:
     // FileSource overrides

@@ -133,7 +133,8 @@ private:
 
 class MainResourceLoader::Impl {
 public:
-    Impl(std::shared_ptr<FileSource> assetFileSource_,
+    Impl(const ResourceOptions& options,
+         std::shared_ptr<FileSource> assetFileSource_,
          std::shared_ptr<FileSource> databaseFileSource_,
          std::shared_ptr<FileSource> localFileSource_,
          std::shared_ptr<FileSource> onlineFileSource_,
@@ -151,7 +152,8 @@ public:
               databaseFileSource,
               localFileSource,
               onlineFileSource,
-              maptilerFileSource)) {}
+              maptilerFileSource)),
+          resourceOptions (options.clone()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -177,6 +179,21 @@ public:
 
     void resume() { thread->resume(); }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+        assetFileSource->setResourceOptions(options.clone());
+        databaseFileSource->setResourceOptions(options.clone());
+        localFileSource->setResourceOptions(options.clone());
+        onlineFileSource->setResourceOptions(options.clone());
+        maptilerFileSource->setResourceOptions(options.clone());
+    }
+
+    ResourceOptions getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions.clone();
+    }
+
 private:
     const std::shared_ptr<FileSource> assetFileSource;
     const std::shared_ptr<FileSource> databaseFileSource;
@@ -185,14 +202,17 @@ private:
     const std::shared_ptr<FileSource> maptilerFileSource;
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
-MainResourceLoader::MainResourceLoader(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-                                  FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
+MainResourceLoader::MainResourceLoader(const ResourceOptions& options):
+    impl(std::make_unique<Impl>(options.clone(),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
+                              FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 
@@ -214,6 +234,14 @@ void MainResourceLoader::pause() {
 
 void MainResourceLoader::resume() {
     impl->resume();
+}
+
+void MainResourceLoader::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions MainResourceLoader::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

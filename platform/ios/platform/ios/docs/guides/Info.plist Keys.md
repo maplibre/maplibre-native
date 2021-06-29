@@ -2,14 +2,11 @@
 
 The Mapbox Maps SDK for iOS supports custom `Info.plist` keys in your application in order to configure various settings.
 
-## MGLMapboxAccessToken
+## MGLApiKey
 
-Set the [Mapbox access token](https://www.mapbox.com/help/define-access-token/) to be used by all instances of `MGLMapView` in the current application.
+If it is required by the tileserver you use, set the API key to be used by all instances of `MGLMapView` in the current application.
 
-Mapbox-hosted vector tiles and styles require an API access token, which you can obtain from the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/). Access tokens associate requests to Mapbox’s vector tile and style APIs with your Mapbox account. They also deter other developers from using your styles without your permission.
-
-As an alternative, you can use `MGLAccountManager.accessToken` to set a token in code. See [our guide](https://www.mapbox.com/help/ios-private-access-token/) for some tips on keeping access tokens in open source code private.
-
+As an alternative, you can use `MGLSettings.accessToken` to set a token in code.
 ## MGLAccuracyAuthorizationDescription
 
 Set the Mapbox accuracy authorization description string as an element of `NSLocationTemporaryUsageDescriptionDictionary` to be used by the map to request authorization when the `MGLLocationManager.accuracyAuthorization` is set to `CLAccuracyAuthorizationReducedAccuracy`. Requesting accuracy authorization is available for devices running iOS 14.0 and above.

@@ -32,7 +32,7 @@ public class VisibilityChangeActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      mapboxMap.setStyle(Style.MAPBOX_STREETS);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
       mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
         new LatLng(55.754020, 37.620948), 12), 9000);
     });

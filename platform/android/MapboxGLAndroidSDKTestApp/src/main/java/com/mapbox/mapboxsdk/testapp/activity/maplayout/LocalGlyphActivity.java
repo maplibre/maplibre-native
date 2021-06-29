@@ -26,7 +26,7 @@ public class LocalGlyphActivity extends AppCompatActivity {
     mapView = findViewById(R.id.mapView);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.MAPBOX_STREETS);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
       // Set initial position to Suzhou
       mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
         new CameraPosition.Builder()

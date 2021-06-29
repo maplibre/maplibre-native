@@ -9,6 +9,8 @@
 
 #include <jni/jni.hpp>
 
+#include "util/tile_server_options.hpp"
+
 namespace mbgl {
 
 template <typename T> class Actor;
@@ -42,13 +44,17 @@ public:
                               const jni::String&);
     };
 
-    FileSource(jni::JNIEnv&, const jni::String&, const jni::String&);
+    FileSource(jni::JNIEnv&, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&);
 
     ~FileSource();
 
-    jni::Local<jni::String> getAccessToken(jni::JNIEnv&);
+    void setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options);
 
-    void setAccessToken(jni::JNIEnv&, const jni::String&);
+    jni::Local<jni::String> getApiKey(jni::JNIEnv&);
+
+    void setApiKey(jni::JNIEnv&, const jni::String&);
+
+    jni::Local<jni::String> getAPIBaseUrl(jni::JNIEnv&);
 
     void setAPIBaseUrl(jni::JNIEnv&, const jni::String&);
 

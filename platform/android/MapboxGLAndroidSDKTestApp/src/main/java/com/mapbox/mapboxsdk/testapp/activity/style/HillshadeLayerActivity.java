@@ -16,10 +16,10 @@ import com.mapbox.mapboxsdk.testapp.R;
  */
 public class HillshadeLayerActivity extends AppCompatActivity {
 
-  private static final String LAYER_ID = "hillshade-layer";
-  private static final String LAYER_BELOW_ID = "waterway-river-canal";
-  private static final String SOURCE_ID = "hillshade-source";
-  private static final String SOURCE_URL = "mapbox://mapbox.terrain-rgb";
+  private static final String LAYER_ID = "hillshade";
+  private static final String LAYER_BELOW_ID = "water_intermittent";
+  private static final String SOURCE_ID = "terrain-rgb";
+  private static final String SOURCE_URL = "maptiler://sources/terrain-rgb";
 
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -37,7 +37,7 @@ public class HillshadeLayerActivity extends AppCompatActivity {
       RasterDemSource rasterDemSource = new RasterDemSource(SOURCE_ID, SOURCE_URL);
       HillshadeLayer hillshadeLayer = new HillshadeLayer(LAYER_ID, SOURCE_ID);
       mapboxMap.setStyle(new Style.Builder()
-        .fromUri(Style.MAPBOX_STREETS)
+        .fromUri(Style.getPredefinedStyle("Streets"))
         .withLayerBelow(hillshadeLayer, LAYER_BELOW_ID)
         .withSource(rasterDemSource)
       );

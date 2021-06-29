@@ -65,7 +65,7 @@ public class DataDrivenStyleActivity extends AppCompatActivity {
       // Store for later
       mapboxMap = map;
 
-      mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         // Add a parks layer
         addParksLayer();
 

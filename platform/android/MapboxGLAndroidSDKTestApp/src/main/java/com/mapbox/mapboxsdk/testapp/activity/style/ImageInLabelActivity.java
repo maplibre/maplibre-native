@@ -48,7 +48,7 @@ public class ImageInLabelActivity extends AppCompatActivity implements OnMapRead
 
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
       Bitmap us = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.ic_us));
       Bitmap android = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.ic_android));
 

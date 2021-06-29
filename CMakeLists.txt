@@ -267,6 +267,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/timer.hpp
@@ -529,7 +531,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_parser.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_parser.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/asset_file_source.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/mbtiles_file_source.hpp    
+    ${PROJECT_SOURCE_DIR}/src/mbgl/storage/mbtiles_file_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/file_source_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/http_file_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/local_file_source.hpp
@@ -810,6 +812,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_range.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/default_style.cpp    
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_server_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/token.hpp

@@ -6,14 +6,15 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <mbgl/storage/offline_schema.hpp>
 #include <mbgl/storage/merge_sideloaded.hpp>
 
 namespace mbgl {
 
-OfflineDatabase::OfflineDatabase(std::string path_)
-    : path(std::move(path_)) {
+OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)
+    : path(std::move(path_)), tileServerOptions(options) {
     try {
         initialize();
     } catch (...) {
@@ -878,8 +879,9 @@ OfflineDatabase::mergeDatabase(const std::string& sideDatabasePath) {
                 "st.x = t.x AND "
                 "st.y = t.y "
             "WHERE t.id IS NULL "
-            "AND st.url_template LIKE 'mapbox://%' ") };
+            "AND st.url_template LIKE ?1 || '%'") };
         // clang-format on
+        queryTiles.bind(1, tileServerOptions.uriSchemeAlias() + "://");
         queryTiles.run();
         auto countOfTilesToMerge = queryTiles.get<int64_t>(0);
         if ((countOfTilesToMerge + currentTileCount) > offlineMapboxTileCountLimit) {
@@ -1050,7 +1052,7 @@ uint64_t OfflineDatabase::putRegionResourceInternal(int64_t regionID, const Reso
 
     if (offlineMapboxTileCount
         && resource.kind == Resource::Kind::Tile
-        && util::mapbox::isMapboxURL(resource.url)
+        && util::mapbox::isCanonicalURL(tileServerOptions, resource.url)
         && previouslyUnused) {
         *offlineMapboxTileCount += 1;
     }
@@ -1394,9 +1396,9 @@ uint64_t OfflineDatabase::getOfflineMapboxTileCount() try {
         "SELECT COUNT(DISTINCT id) "
         "FROM region_tiles, tiles "
         "WHERE tile_id = tiles.id "
-        "AND url_template LIKE 'mapbox://%' ") };
+        "AND url_template LIKE ?1 || '%'") };
     // clang-format on
-
+    query.bind(1, tileServerOptions.uriSchemeAlias() + "://");
     query.run();
 
     offlineMapboxTileCount = query.get<int64_t>(0);
@@ -1408,7 +1410,7 @@ uint64_t OfflineDatabase::getOfflineMapboxTileCount() try {
 
 bool OfflineDatabase::exceedsOfflineMapboxTileCountLimit(const Resource& resource) {
     return resource.kind == Resource::Kind::Tile
-        && util::mapbox::isMapboxURL(resource.url)
+        && util::mapbox::isCanonicalURL(tileServerOptions, resource.url)
         && offlineMapboxTileCountLimitExceeded();
 }
 

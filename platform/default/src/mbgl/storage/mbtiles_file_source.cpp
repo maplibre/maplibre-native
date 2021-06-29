@@ -31,7 +31,7 @@ using namespace rapidjson;
 
 class MaptilerFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl>&) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): resourceOptions (options.clone()) {}
 
     std::vector<double> &split(const std::string &s, char delim, std::vector<double> &elems) {
         std::stringstream ss(s);
@@ -260,6 +260,16 @@ public:
         req.invoke(&FileSourceRequest::setResponse, response);
     }
 
+    void setResourceOptions(ResourceOptions options) {
+            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+            resourceOptions = options;
+    }
+
+    ResourceOptions getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions.clone();
+    }
+
 private:
     std::map<std::string, mapbox::sqlite::Database> db_cache;
 
@@ -284,13 +294,15 @@ private:
         auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(path, mapbox::sqlite::Database::open(path.c_str(), mapbox::sqlite::ReadOnly)));
         return ptr2.first->second;
     }
+
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 
-
-MaptilerFileSource::MaptilerFileSource() :
+MaptilerFileSource::MaptilerFileSource(const ResourceOptions& options) :
     thread(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MaptilerFileSource")) {}
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MaptilerFileSource", options.clone())) {}
 
 
 std::unique_ptr<AsyncRequest> MaptilerFileSource::request(const Resource &resource, FileSource::Callback callback) {
@@ -319,5 +331,12 @@ bool MaptilerFileSource::canRequest(const Resource& resource) const {
 
 MaptilerFileSource::~MaptilerFileSource() = default;
 
+void MaptilerFileSource::setResourceOptions(ResourceOptions options) {
+    thread->actor().invoke(&Impl::setResourceOptions, options.clone());
+}
+
+ResourceOptions MaptilerFileSource::getResourceOptions() {
+    return thread->actor().ask(&Impl::getResourceOptions).get();
+}
 
 }

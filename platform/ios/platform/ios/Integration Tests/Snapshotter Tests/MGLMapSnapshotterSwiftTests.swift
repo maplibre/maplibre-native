@@ -6,13 +6,18 @@ class MGLMapSnapshotterSwiftTests: MGLMapViewIntegrationTest {
     private class func snapshotterOptions(size: CGSize) -> MGLMapSnapshotOptions {
         let camera = MGLMapCamera()
 
-        let options = MGLMapSnapshotOptions(styleURL: MGLStyle.satelliteStreetsStyleURL, camera: camera, size: size)
+        let options = MGLMapSnapshotOptions(styleURL: MGLStyle.predefinedStyle("Hybrid").url  , camera: camera, size: size)
 
         let sw = CLLocationCoordinate2D(latitude: 52.3, longitude: 13.0)
         let ne = CLLocationCoordinate2D(latitude: 52.5, longitude: 13.2)
         options.coordinateBounds = MGLCoordinateBounds(sw:sw, ne:ne)
 
         return options
+    }
+    
+    public override func setUp() {
+        super.setUp()
+        MGLSettings.use(MGLWellKnownTileServer.mapTiler)
     }
 
     func testCapturingSnapshotterInSnapshotCompletion🔒() {

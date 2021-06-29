@@ -47,7 +47,7 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
     HttpRequestUtil.setOkHttpClient(okHttpClient);
 
     mapView.getMapAsync(mapboxMap -> mapboxMap.setStyle(
-      new Style.Builder().fromUri(Style.MAPBOX_STREETS)));
+      new Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))));
   }
 
 

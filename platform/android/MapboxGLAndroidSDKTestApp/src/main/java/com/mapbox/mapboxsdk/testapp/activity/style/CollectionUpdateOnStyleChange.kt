@@ -112,7 +112,7 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
     companion object {
 
-        private val STYLES = arrayOf(Style.MAPBOX_STREETS, Style.OUTDOORS, Style.LIGHT, Style.DARK, Style.SATELLITE, Style.SATELLITE_STREETS, Style.TRAFFIC_DAY, Style.TRAFFIC_NIGHT)
+        private val STYLES = arrayOf(Style.getPredefinedStyle("Streets"), Style.getPredefinedStyle("Outdoor"), Style.getPredefinedStyle("Bright"), Style.getPredefinedStyle("Pastel"), Style.getPredefinedStyle("Satellite Hybrid"), Style.getPredefinedStyle("Satellite Hybrid"))
 
         private val featureCollection: FeatureCollection
 

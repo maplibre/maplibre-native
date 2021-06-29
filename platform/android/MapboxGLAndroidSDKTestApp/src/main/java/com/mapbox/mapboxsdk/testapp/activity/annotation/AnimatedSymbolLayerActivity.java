@@ -50,7 +50,7 @@ public class AnimatedSymbolLayerActivity extends AppCompatActivity {
   private static final String RANDOM_CAR_SOURCE = "random-car-source";
   private static final String RANDOM_CAR_IMAGE_ID = "random-car";
   private static final String PROPERTY_BEARING = "bearing";
-  private static final String WATERWAY_LAYER_ID = "waterway-label";
+  private static final String WATERWAY_LAYER_ID = "water_intermittent";
   private static final int DURATION_RANDOM_MAX = 1500;
   private static final int DURATION_BASE = 3000;
 
@@ -77,7 +77,7 @@ public class AnimatedSymbolLayerActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       this.mapboxMap = map;
-      map.setStyle(Style.MAPBOX_STREETS, style -> {
+      map.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         this.style = style;
         setupCars();
         animateRandomRoutes();

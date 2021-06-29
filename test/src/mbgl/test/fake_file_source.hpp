@@ -4,9 +4,11 @@
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/util/async_request.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 #include <algorithm>
 #include <list>
+
 
 namespace mbgl {
 
@@ -40,6 +42,9 @@ public:
         }
     };
 
+    FakeFileSource(const ResourceOptions& options): resourceOptions(options.clone()) {}
+    FakeFileSource(): FakeFileSource(ResourceOptions::Default()) {}
+
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
         return std::make_unique<FakeFileRequest>(resource, callback, requests);
     }
@@ -62,10 +67,22 @@ public:
 
     std::list<FakeFileRequest*> requests;
 
+    void setResourceOptions(ResourceOptions options) override {
+        resourceOptions = options;
+    }
+    ResourceOptions getResourceOptions() override {
+        return resourceOptions.clone();
+    }
+
+private:
+    ResourceOptions resourceOptions;
 };
 
 class FakeOnlineFileSource : public FakeFileSource {
 public:
+    FakeOnlineFileSource(): FakeOnlineFileSource(ResourceOptions::Default()) {}
+    FakeOnlineFileSource(const ResourceOptions& options): FakeFileSource(options) {}
+
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
         return FakeFileSource::request(resource, callback);
     }
@@ -78,7 +95,7 @@ public:
         return onlineFs->getProperty(property);
     }
 
-    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>();
+    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default());
 };
 
 } // namespace mbgl

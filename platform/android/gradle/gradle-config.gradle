@@ -2,22 +2,22 @@
 // Configuration file for gradle build execution.
 //
 
-task accessToken {
+task apiKey {
     def tokenFile = new File("${projectDir}/src/main/res/values/developer-config.xml")
     if (!tokenFile.exists()) {
-        String mapboxAccessToken = "$System.env.MAPBOX_ACCESS_TOKEN"
-        if (mapboxAccessToken == "null") {
-            System.out.println("You should set the MAPBOX_ACCESS_TOKEN environment variable.")
-            mapboxAccessToken = "YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE"
+        String apiKey = "$System.env.MGL_API_KEY"
+        if (apiKey == "null") {
+            System.out.println("You should set the MGL_API_KEY environment variable.")
+            apiKey = "YOUR_API_KEY_GOES_HERE"
         }
         String tokenFileContents = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<resources>\n" +
-                "    <string name=\"mapbox_access_token\">" + mapboxAccessToken + "</string>\n" +
+                "    <string name=\"api_key\">" + apiKey + "</string>\n" +
                 "</resources>"
         tokenFile.write(tokenFileContents)
     }
 }
 
 gradle.projectsEvaluated {
-    preBuild.dependsOn('accessToken')
+    preBuild.dependsOn('apiKey')
 }

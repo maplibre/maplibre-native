@@ -19,24 +19,27 @@ namespace android {
 
 // FileSource //
 
-FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const jni::String& _cachePath)
+FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::String& _cachePath, const jni::Object<TileServerOptions>& _options)
 :activationCounter( optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions&) {
+        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions& opts) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
             if (android::Mapbox::hasInstance(*env)) {
                 auto assetManager = android::Mapbox::getAssetManager(*env);
-                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager);
+                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager, opts.clone());
             }
             return assetFileSource;
         });
 
-    resourceOptions.withAccessToken(accessToken ? jni::Make<std::string>(_env, accessToken) : "")
-        .withCachePath(path + DATABASE_FILE);
+    auto tileServerOptions = TileServerOptions::getTileServerOptions(_env, _options);
+    resourceOptions
+            .withTileServerOptions(tileServerOptions)
+            .withApiKey(apiKey ? jni::Make<std::string>(_env, apiKey) : "")
+            .withCachePath(path + DATABASE_FILE);
 
     // Create a core file sources
     // TODO: Split Android FileSource API to smaller interfaces
@@ -50,8 +53,16 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& accessToken, const 
 FileSource::~FileSource() {
 }
 
-jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
-    if (auto* token = onlineSource->getProperty(mbgl::ACCESS_TOKEN_KEY).getString()) {
+void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options) {
+    auto tileServerOptions = TileServerOptions::getTileServerOptions(_env, _options);
+    resourceOptions.withTileServerOptions(tileServerOptions);
+    resourceLoader->setResourceOptions(resourceOptions.clone());
+    databaseSource->setResourceOptions(resourceOptions.clone());
+    onlineSource->setResourceOptions(resourceOptions.clone());
+}
+
+jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
+    if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
     }
 
@@ -59,9 +70,9 @@ jni::Local<jni::String> FileSource::getAccessToken(jni::JNIEnv& env) {
     return jni::Make<jni::String>(env, "");
 }
 
-void FileSource::setAccessToken(jni::JNIEnv& env, const jni::String& token) {
+void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
     if (onlineSource) {
-        onlineSource->setProperty(mbgl::ACCESS_TOKEN_KEY, token ? jni::Make<std::string>(env, token) : "");
+        onlineSource->setProperty(mbgl::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }
@@ -73,6 +84,15 @@ void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }
+}
+
+jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
+    if (auto* url = onlineSource->getProperty(mbgl::API_BASE_URL_KEY).getString()) {
+        return jni::Make<jni::String>(env, *url);
+    }
+
+    ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
+    return jni::Make<jni::String>(env, "");
 }
 
 void FileSource::setResourceTransform(jni::JNIEnv& env, const jni::Object<FileSource::ResourceTransformCallback>& transformCallback) {
@@ -214,12 +234,14 @@ void FileSource::registerNative(jni::JNIEnv& env) {
     jni::RegisterNativePeer<FileSource>(env,
                                         javaClass,
                                         "nativePtr",
-                                        jni::MakePeer<FileSource, const jni::String&, const jni::String&>,
+                                        jni::MakePeer<FileSource, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&>,
                                         "initialize",
                                         "finalize",
-                                        METHOD(&FileSource::getAccessToken, "getAccessToken"),
-                                        METHOD(&FileSource::setAccessToken, "setAccessToken"),
+                                        METHOD(&FileSource::setTileServerOptions, "setTileServerOptions"),
+                                        METHOD(&FileSource::getApiKey, "getApiKey"),
+                                        METHOD(&FileSource::setApiKey, "setApiKey"),
                                         METHOD(&FileSource::setAPIBaseUrl, "setApiBaseUrl"),
+                                        METHOD(&FileSource::getAPIBaseUrl, "getApiBaseUrl"),
                                         METHOD(&FileSource::setResourceTransform, "setResourceTransform"),
                                         METHOD(&FileSource::setResourceCachePath, "setResourceCachePath"),
                                         METHOD(&FileSource::resume, "activate"),

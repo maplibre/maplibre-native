@@ -58,7 +58,7 @@ You can alternatively install the SDK as a static framework:
 
 ## Configuration
 
-1. Mapbox vector tiles require a Mapbox account and API access token. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MGLMapboxAccessToken` to your access token. You can obtain an access token from the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/).
+1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MGLApiKey` to your api key.
 
 1. In order to show the user’s current location on the map, the SDK must ask for the user’s permission to access Location Services. Go to the Info tab of the project editor. If your application supports iOS 7, set the `NSLocationUsageDescription` key to a message that explains to the user what their location is used for. If your application supports iOS 8 and above, set the `NSLocationAlwaysUsageDescription` and/or `NSLocationWhenInUseUsageDescription` key to this message instead.
 

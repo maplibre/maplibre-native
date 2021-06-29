@@ -59,7 +59,7 @@ public:
 
 class OfflineTest {
 public:
-    OfflineTest(const std::string& path = ":memory:") : db(path) {
+    OfflineTest(const std::string& path = ":memory:") : db(path, TileServerOptions::MapTilerConfiguration()) {
     }
 
     util::RunLoop loop;
@@ -542,6 +542,10 @@ TEST(OfflineDownload, TileCountLimitExceededNoTileResponse) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
         return test.response("mapbox_source.style.json");
     };
+//    test.fileSource.tileResponse = [&] (const Resource& resource) {
+//        EXPECT_EQ("maptiler://0-0-0.vector.pbf", resource.url);
+//        return test.response("0-0-0.vector.pbf");
+//    };
 
     auto observer = std::make_unique<MockObserver>();
     bool mapboxTileCountLimitExceededCalled = false;
@@ -588,7 +592,7 @@ TEST(OfflineDownload, TileCountLimitExceededWithTileResponse) {
 
     test.fileSource.tileResponse = [&] (const Resource& resource) {
         const Resource::TileData& tile = *resource.tileData;
-        EXPECT_EQ("mapbox://{z}-{x}-{y}.vector.pbf", tile.urlTemplate);
+        EXPECT_EQ("maptiler://{z}-{x}-{y}.vector.pbf", tile.urlTemplate);
         EXPECT_EQ(1, tile.pixelRatio);
         EXPECT_EQ(0, tile.x);
         EXPECT_EQ(0, tile.y);

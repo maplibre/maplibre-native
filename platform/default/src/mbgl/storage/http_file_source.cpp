@@ -1,4 +1,6 @@
 #include <mbgl/storage/http_file_source.hpp>
+#include <mbgl/storage/file_source_impl_base.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/logging.hpp>
@@ -36,7 +38,7 @@ namespace mbgl {
 
 class HTTPFileSource::Impl {
 public:
-    Impl();
+    Impl(const ResourceOptions& options);
     ~Impl();
 
     static int handleSocket(CURL *handle, curl_socket_t s, int action, void *userp, void *socketp);
@@ -58,9 +60,16 @@ public:
     // CURL share handles are used for sharing session state (e.g.)
     CURLSH *share = nullptr;
 
-    // A queue that we use for storing resuable CURL easy handles to avoid creating and destroying
+    // A queue that we use for storing reusable CURL easy handles to avoid creating and destroying
     // them all the time.
     std::queue<CURL *> handles;
+
+    void setResourceOptions(ResourceOptions options);
+    ResourceOptions getResourceOptions();
+
+private:
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 class HTTPRequest : public AsyncRequest {
@@ -91,7 +100,7 @@ private:
     char error[CURL_ERROR_SIZE] = { 0 };
 };
 
-HTTPFileSource::Impl::Impl() {
+HTTPFileSource::Impl::Impl(const ResourceOptions& options): resourceOptions (options.clone()) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         throw std::runtime_error("Could not init cURL");
     }
@@ -222,6 +231,16 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
         std::bind(&Impl::onTimeout, context));
 
     return 0;
+}
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    resourceOptions = options;
+}
+
+ResourceOptions& HTTPFileSource::getResourceOptions() {
+    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    return resourceOptions;
 }
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
@@ -406,14 +425,22 @@ void HTTPRequest::handleResult(CURLcode code) {
     callback_(response_);
 }
 
-HTTPFileSource::HTTPFileSource()
-    : impl(std::make_unique<Impl>()) {
+HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
+    : impl(std::make_unique<Impl>(options)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
 
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
+}
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions& HTTPFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

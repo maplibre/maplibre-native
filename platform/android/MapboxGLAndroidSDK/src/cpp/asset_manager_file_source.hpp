@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 #include "asset_manager.hpp"
 
@@ -14,11 +15,14 @@ template <typename T> class Thread;
 
 class AssetManagerFileSource : public FileSource {
 public:
-    AssetManagerFileSource(jni::JNIEnv&, const jni::Object<android::AssetManager>&);
+    AssetManagerFileSource(jni::JNIEnv&, const jni::Object<android::AssetManager>&, const ResourceOptions);
     ~AssetManagerFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override;
+
+    void setResourceOptions(ResourceOptions options) override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;

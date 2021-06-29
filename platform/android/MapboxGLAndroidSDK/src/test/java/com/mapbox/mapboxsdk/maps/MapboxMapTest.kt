@@ -1,16 +1,21 @@
 package com.mapbox.mapboxsdk.maps
 
+import android.content.Context
+import com.mapbox.mapboxsdk.MapboxInjector
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.constants.MapboxConstants
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
+import com.mapbox.mapboxsdk.utils.ConfigUtils
 import io.mockk.*
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -26,8 +31,15 @@ class MapboxMapTest {
 
     private lateinit var developerAnimationListener: MapboxMap.OnDeveloperAnimationListener
 
+    @Mock
+    private lateinit var context: Context
+    @Mock
+    private lateinit var appContext: Context
+
     @Before
     fun setup() {
+        MockitoAnnotations.initMocks(this)
+        MapboxInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         cameraChangeDispatcher = spyk()
         developerAnimationListener = mockk(relaxed = true)
         nativeMapView = mockk(relaxed = true)
@@ -36,7 +48,7 @@ class MapboxMapTest {
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.nativePtr } returns 5
         mapboxMap.injectLocationComponent(spyk())
-        mapboxMap.setStyle(Style.MAPBOX_STREETS)
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
         mapboxMap.onFinishLoadingStyle()
     }
 

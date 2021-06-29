@@ -27,7 +27,7 @@ custom_categories:
       - Gesture Recognizers
   - name: Maps
     children:
-      - MGLAccountManager
+      - MGLSettings
       - MGLMapCamera
       - MGLMapView
       - MGLMapViewDelegate

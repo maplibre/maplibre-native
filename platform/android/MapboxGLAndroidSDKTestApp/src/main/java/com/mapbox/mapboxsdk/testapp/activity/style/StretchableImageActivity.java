@@ -62,7 +62,7 @@ public class StretchableImageActivity extends AppCompatActivity implements OnMap
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
       Bitmap popup = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.popup));
       Bitmap popupDebug = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.popup_debug));
 

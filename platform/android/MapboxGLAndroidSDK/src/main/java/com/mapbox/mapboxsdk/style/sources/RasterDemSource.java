@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URL;
 
 /**
- * A raster DEM source. Currently only supports Mapbox Terrain RGB (mapbox://mapbox.terrain-rgb)
+ * A raster DEM source.
  *
  * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#sources-raster-dem">The style specification</a>
  */

@@ -37,7 +37,7 @@ public class DynamicMarkerChangeActivity extends AppCompatActivity {
     mapView.setTag(false);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.MAPBOX_STREETS);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
 
       DynamicMarkerChangeActivity.this.mapboxMap = mapboxMap;
       // Create marker

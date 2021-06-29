@@ -40,7 +40,7 @@ public class MapChangeActivity extends AppCompatActivity {
     mapView.addOnWillStartRenderingMapListener(() -> Timber.v("OnWillStartRenderingMap"));
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.MAPBOX_STREETS);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
       mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
         new LatLng(55.754020, 37.620948), 12), 9000);
     });

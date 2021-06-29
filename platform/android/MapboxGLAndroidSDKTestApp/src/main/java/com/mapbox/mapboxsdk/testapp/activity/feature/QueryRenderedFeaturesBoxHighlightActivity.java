@@ -76,7 +76,7 @@ public class QueryRenderedFeaturesBoxHighlightActivity extends AppCompatActivity
       });
 
       mapboxMap.setStyle(new Style.Builder()
-        .fromUri(Style.MAPBOX_STREETS)
+        .fromUri(Style.getPredefinedStyle("Streets"))
         .withSource(source)
         .withLayer(layer)
       );

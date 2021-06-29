@@ -9,6 +9,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 using namespace mbgl;
 
@@ -822,4 +823,27 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoDoubleDispatch)) {
     });
 
     loop.run();
+}
+
+TEST(MainResourceLoader, ResourceOptions) {
+    MainResourceLoader fs(
+        ResourceOptions().withTileServerOptions(
+                TileServerOptions()
+                    .withBaseURL("originalBaseURL")
+                    .withUriSchemeAlias("originalAlias")
+                )
+    );
+    
+    fs.setResourceOptions(ResourceOptions()
+        .withTileServerOptions(
+              TileServerOptions()
+                  .withBaseURL("updatedBaseURL")
+                  .withUriSchemeAlias("updatedAlias")
+              ).clone()
+    );
+    
+    auto updatedOptions = fs.getResourceOptions().tileServerOptions();
+    
+    EXPECT_EQ(updatedOptions.baseURL(), "updatedBaseURL");
+    EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");  
 }

@@ -1,12 +1,13 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 namespace mbgl {
 
 class ResourceOptions::Impl {
 public:
-    std::string accessToken;
-    std::string baseURL = mbgl::util::API_BASE_URL;
+    std::string apiKey;
+    TileServerOptions tileServerOptions;
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
     uint64_t maximumSize = mbgl::util::DEFAULT_MAX_CACHE_SIZE;
@@ -18,27 +19,28 @@ ResourceOptions::ResourceOptions() : impl_(std::make_unique<Impl>()) {}
 ResourceOptions::~ResourceOptions() = default;
 ResourceOptions::ResourceOptions(ResourceOptions&&) noexcept = default;
 ResourceOptions::ResourceOptions(const ResourceOptions& other) : impl_(std::make_unique<Impl>(*other.impl_)) {}
+ResourceOptions& ResourceOptions::operator=(ResourceOptions& options) {swap(impl_, options.impl_); return *this; }
 
 ResourceOptions ResourceOptions::clone() const {
     return ResourceOptions(*this);
 }
 
-ResourceOptions& ResourceOptions::withAccessToken(std::string token) {
-    impl_->accessToken = std::move(token);
+ResourceOptions& ResourceOptions::withApiKey(std::string token) {
+    impl_->apiKey = std::move(token);
     return *this;
 }
 
-const std::string& ResourceOptions::accessToken() const {
-    return impl_->accessToken;
+const std::string& ResourceOptions::apiKey() const {
+    return impl_->apiKey;
 }
 
-ResourceOptions& ResourceOptions::withBaseURL(std::string url) {
-    impl_->baseURL = std::move(url);
+ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions tileServerOptions) {
+    impl_->tileServerOptions = std::move(tileServerOptions);
     return *this;
 }
 
-const std::string& ResourceOptions::baseURL() const {
-    return impl_->baseURL;
+const TileServerOptions ResourceOptions::tileServerOptions() const {
+    return impl_->tileServerOptions.clone();
 }
 
 ResourceOptions& ResourceOptions::withCachePath(std::string path) {
@@ -75,6 +77,11 @@ ResourceOptions& ResourceOptions::withPlatformContext(void* context) {
 
 void* ResourceOptions::platformContext() const {
     return impl_->platformContext;
+}
+
+ResourceOptions ResourceOptions::Default() {
+    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(TileServerOptions::DefaultConfiguration());
+    return resourceOptions;
 }
 
 }  // namespace mbgl

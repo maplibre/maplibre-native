@@ -2,12 +2,15 @@
 
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
+class ResourceOptions;
+
 class HTTPFileSource : public FileSource {
 public:
-    HTTPFileSource();
+    HTTPFileSource(const ResourceOptions& options);
     ~HTTPFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
@@ -15,10 +18,12 @@ public:
         return resource.hasLoadingMethod(Resource::LoadingMethod::Network);
     }
 
-    class Impl;
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;
 
 private:
-    std::unique_ptr<Impl> impl;
+    class Impl;
+    const std::unique_ptr<Impl> impl;
 };
 
 } // namespace mbgl

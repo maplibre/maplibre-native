@@ -60,7 +60,7 @@ public class CameraPositionActivity extends FragmentActivity implements OnMapRea
   @Override
   public void onMapReady(@NonNull final MapboxMap map) {
     mapboxMap = map;
-    map.setStyle(Style.SATELLITE_STREETS, style -> {
+    map.setStyle(Style.getPredefinedStyle("Satellite Hybrid"), style -> {
       // add a listener to FAB
       fab = findViewById(R.id.fab);
       fab.setColorFilter(ContextCompat.getColor(CameraPositionActivity.this, R.color.primary));

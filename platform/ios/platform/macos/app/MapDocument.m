@@ -146,9 +146,9 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
 - (void)userDefaultsDidChange:(NSNotification *)notification {
     NSUserDefaults *userDefaults = notification.object;
-    NSString *accessToken = [userDefaults stringForKey:MGLMapboxAccessTokenDefaultsKey];
-    if (![accessToken isEqualToString:[MGLAccountManager accessToken]]) {
-        [MGLAccountManager setAccessToken:accessToken];
+    NSString *apiKey = [userDefaults stringForKey:MGLApiKeyDefaultsKey];
+    if (![apiKey isEqualToString:[MGLSettings apiKey]]) {
+        [MGLSettings setApiKey:apiKey];
         [self reload:self];
     }
 }
@@ -178,7 +178,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     MGLMapCamera *camera = self.mapView.camera;
     return [NSURL URLWithString:
             [NSString stringWithFormat:@"https://api.mapbox.com/styles/v1/%@/%@.html?access_token=%@#%.2f/%.5f/%.5f/%.f/%.f",
-             components[1], components[2], [MGLAccountManager accessToken],
+             components[1], components[2], [MGLSettings apiKey],
              self.mapView.zoomLevel, camera.centerCoordinate.latitude, camera.centerCoordinate.longitude,
              camera.heading, camera.pitch]];
 }
@@ -320,30 +320,8 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     } else if ([sender isKindOfClass:[NSPopUpButton class]]) {
         tag = [sender selectedTag];
     }
-    NSURL *styleURL;
-    switch (tag) {
-        case 1:
-            styleURL = [MGLStyle streetsStyleURL];
-            break;
-        case 2:
-            styleURL = [MGLStyle outdoorsStyleURL];
-            break;
-        case 3:
-            styleURL = [MGLStyle lightStyleURL];
-            break;
-        case 4:
-            styleURL = [MGLStyle darkStyleURL];
-            break;
-        case 5:
-            styleURL = [MGLStyle satelliteStyleURL];
-            break;
-        case 6:
-            styleURL = [MGLStyle satelliteStreetsStyleURL];
-            break;
-        default:
-            NSAssert(NO, @"Cannot set style from control with tag %li", (long)tag);
-            break;
-    }
+    NSURL *styleURL = [[[MGLStyle predefinedStyles] objectAtIndex:tag - 1] url];
+
     [self.undoManager removeAllActionsWithTarget:self];
     self.mapView.styleURL = styleURL;
     [self.window.toolbar validateVisibleItems];
@@ -879,6 +857,10 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (IBAction)enhanceTerrain:(id)sender {
+    // Works only with Mapbox tileserver
+    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox"])
+        return;
+    
     // Find all the identifiers of Mapbox Terrain sources used in the style.
     NSMutableSet *terrainSourceIdentifiers = [NSMutableSet set];
     for (MGLVectorTileSource *source in self.mapView.style.sources) {
@@ -911,8 +893,8 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         return;
     }
     
-    // Add a Mapbox Terrain-RGB source.
-    NSURL *terrainRGBURL = [NSURL URLWithString:@"mapbox://mapbox.terrain-rgb"];
+    // Add terrain-RGB source.
+    NSURL *terrainRGBURL = [NSURL URLWithString:@"maptiler://sources/terrain-rgb"];
     MGLRasterDEMSource *terrainRGBSource = [[MGLRasterDEMSource alloc] initWithIdentifier:@"terrain" configurationURL:terrainRGBURL];
     [self.mapView.style addSource:terrainRGBSource];
     
@@ -984,6 +966,10 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (IBAction)manipulateStyle:(id)sender {
+    // Works only with Mapbox tileserver
+    if (![[MGLSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox"])
+        return;
+
     MGLTransition transition = { .duration = 5, .delay = 1 };
     self.mapView.style.transition = transition;
 
@@ -1142,31 +1128,15 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if (menuItem.action == @selector(showStyle:)) {
         NSURL *styleURL = self.mapView.styleURL;
+        NSArray<MGLDefaultStyle*>* predefinedStyles = [MGLStyle predefinedStyles];
         NSCellStateValue state;
-        switch (menuItem.tag) {
-            case 1:
-                state = [styleURL isEqual:[MGLStyle streetsStyleURL]];
-                break;
-            case 2:
-                state = [styleURL isEqual:[MGLStyle outdoorsStyleURL]];
-                break;
-            case 3:
-                state = [styleURL isEqual:[MGLStyle lightStyleURL]];
-                break;
-            case 4:
-                state = [styleURL isEqual:[MGLStyle darkStyleURL]];
-                break;
-            case 5:
-                state = [styleURL isEqual:[MGLStyle satelliteStyleURL]];
-                break;
-            case 6:
-                state = [styleURL isEqual:[MGLStyle satelliteStreetsStyleURL]];
-                break;
-            default:
-                return NO;
+        if (menuItem.tag >= 1 && menuItem.tag <= (unsigned)[predefinedStyles count]) {
+            NSURL* refStyleURL = [predefinedStyles objectAtIndex:menuItem.tag - 1].url;
+            state = [styleURL isEqual:refStyleURL];
+            menuItem.state = state;
+            return YES;
         }
-        menuItem.state = state;
-        return YES;
+        return NO;
     }
     if (menuItem.action == @selector(chooseCustomStyle:)) {
         menuItem.state = self.indexOfStyleInToolbarItem == NSNotFound;
@@ -1317,9 +1287,6 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         NSURL *styleURL = self.mapView.styleURL;
         return !styleURL.isFileURL;
     }
-    if (menuItem.action == @selector(giveFeedback:)) {
-        return YES;
-    }
     if (menuItem.action == @selector(import:)) {
         return YES;
     }
@@ -1330,18 +1297,11 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 }
 
 - (NSUInteger)indexOfStyleInToolbarItem {
-    if (![MGLAccountManager accessToken]) {
-        return NSNotFound;
-    }
 
-    NSArray *styleURLs = @[
-        [MGLStyle streetsStyleURL],
-        [MGLStyle outdoorsStyleURL],
-        [MGLStyle lightStyleURL],
-        [MGLStyle darkStyleURL],
-        [MGLStyle satelliteStyleURL],
-        [MGLStyle satelliteStreetsStyleURL],
-    ];
+    NSMutableArray* styleURLs = [[NSMutableArray alloc] init];
+    for (MGLDefaultStyle* defaultStyle in [MGLStyle predefinedStyles]) {
+        [styleURLs addObject:defaultStyle.url];
+    }
     return [styleURLs indexOfObject:self.mapView.styleURL];
 }
 
@@ -1353,7 +1313,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     SEL action = toolbarItem.action;
     if (action == @selector(showShareMenu:)) {
         [(NSButton *)toolbarItem.view sendActionOn:NSLeftMouseDownMask];
-        if (![MGLAccountManager accessToken]) {
+        if (![MGLSettings apiKey]) {
             return NO;
         }
         NSURL *styleURL = self.mapView.styleURL;

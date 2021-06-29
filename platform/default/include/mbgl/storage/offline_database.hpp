@@ -2,6 +2,7 @@
 
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/offline.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/optional.hpp>
 #include <mbgl/util/constants.hpp>
@@ -37,7 +38,7 @@ struct MapboxTileLimitExceededException :  util::Exception {
 
 class OfflineDatabase {
 public:
-    OfflineDatabase(std::string path);
+    OfflineDatabase(std::string path, const TileServerOptions& options);
     ~OfflineDatabase();
 
     void changePath(const std::string&);
@@ -151,6 +152,8 @@ private:
     optional<uint64_t> offlineMapboxTileCount;
 
     bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats);
+
+    TileServerOptions tileServerOptions;
 
     class DatabaseSizeChangeStats {
     public:

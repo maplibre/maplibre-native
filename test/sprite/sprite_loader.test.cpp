@@ -93,7 +93,7 @@ TEST(SpriteLoader, LoadingSuccess) {
     };
 
     test.observer.spriteLoaded = [&](std::vector<Immutable<style::Image::Impl>> images) {
-        EXPECT_EQ(images.size(), 367u);
+        EXPECT_EQ(images.size(), 418u);
         test.end();
     };
 

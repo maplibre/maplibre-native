@@ -1,7 +1,7 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-#import "MGLAccountManager_Private.h"
+#import "MGLSettings_Private.h"
 #endif
 
 #import "MGLReachability.h"

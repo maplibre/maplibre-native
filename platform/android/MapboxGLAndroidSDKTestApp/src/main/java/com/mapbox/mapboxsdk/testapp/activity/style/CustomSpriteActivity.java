@@ -49,7 +49,7 @@ public class CustomSpriteActivity extends AppCompatActivity {
     mapView.getMapAsync(map -> {
       mapboxMap = map;
 
-      map.setStyle(Style.MAPBOX_STREETS, style -> {
+      map.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setColorFilter(ContextCompat.getColor(CustomSpriteActivity.this, R.color.primary));
         fab.setOnClickListener(new View.OnClickListener() {
@@ -81,7 +81,7 @@ public class CustomSpriteActivity extends AppCompatActivity {
               );
 
               // lets add a circle below labels!
-              mapboxMap.getStyle().addLayerBelow(layer, "waterway-label");
+              mapboxMap.getStyle().addLayerBelow(layer, "water_intermittent");
 
               fab.setImageResource(R.drawable.ic_directions_car_black);
             } else {

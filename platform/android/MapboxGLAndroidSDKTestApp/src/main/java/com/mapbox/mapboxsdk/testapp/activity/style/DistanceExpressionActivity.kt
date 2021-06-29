@@ -52,10 +52,10 @@ class DistanceExpressionActivity : AppCompatActivity() {
         val center = Point.fromLngLat(lon, lat)
         val circle = TurfTransformation.circle(center, 150.0, TurfConstants.UNIT_METRES)
         // Setup style with additional layers,
-        // using Style.MAPBOX_STREETS as a base style
+        // using Streets as a base style
         mapboxMap.setStyle(
             Style.Builder()
-                .fromUri(Style.MAPBOX_STREETS)
+                .fromUri(Style.getPredefinedStyle("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
@@ -73,7 +73,7 @@ class DistanceExpressionActivity : AppCompatActivity() {
                 )
         ) { style ->
             // Show only POI labels inside circle radius using distance expression
-            val symbolLayer = style.getLayer("poi-label") as SymbolLayer
+            val symbolLayer = style.getLayer("poi_z16") as SymbolLayer
             symbolLayer.setFilter(
                 lt(
                     distance(
@@ -84,9 +84,9 @@ class DistanceExpressionActivity : AppCompatActivity() {
             )
 
             // Hide other types of labels to highlight POI labels
-            (style.getLayer("road-label") as SymbolLayer).setProperties(visibility(NONE))
-            (style.getLayer("transit-label") as SymbolLayer).setProperties(visibility(NONE))
-            (style.getLayer("road-number-shield") as SymbolLayer).setProperties(visibility(NONE))
+            (style.getLayer("road_label") as SymbolLayer).setProperties(visibility(NONE))
+            (style.getLayer("airport-label-major") as SymbolLayer).setProperties(visibility(NONE))
+            (style.getLayer("poi_transit") as SymbolLayer).setProperties(visibility(NONE))
         }
     }
 

@@ -36,19 +36,19 @@ public class RuntimeStyleTimingTestActivity extends AppCompatActivity {
     mapView.getMapAsync(mapboxMap -> {
       RuntimeStyleTimingTestActivity.this.mapboxMap = mapboxMap;
 
-      CircleLayer museumsLayer = new CircleLayer("museums", "museums_source");
-      museumsLayer.setSourceLayer("museum-cusco");
-      museumsLayer.setProperties(
+      CircleLayer parksLayer = new CircleLayer("parks", "parks_source");
+      parksLayer.setSourceLayer("parks");
+      parksLayer.setProperties(
         visibility(VISIBLE),
         circleRadius(8f),
         circleColor(Color.argb(1, 55, 148, 179))
       );
 
-      VectorSource museums = new VectorSource("museums_source", "mapbox://mapbox.2opop9hr");
+      VectorSource parks = new VectorSource("parks_source", "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a");
       mapboxMap.setStyle(new Style.Builder()
-        .fromUri(Style.MAPBOX_STREETS)
-        .withSource(museums)
-        .withLayer(museumsLayer));
+        .fromUri(Style.getPredefinedStyle("Streets"))
+        .withSource(parks)
+        .withLayer(parksLayer));
     });
   }
 

@@ -4,27 +4,21 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import java.lang.reflect.Field;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 
-import static org.mockito.Mockito.mock;
+import java.lang.reflect.Field;
 
 public class MapboxInjector {
 
   private static final String FIELD_INSTANCE = "INSTANCE";
-  private static final String FIELD_ACCOUNTS = "accounts";
 
-  public static void inject(@NonNull Context context, @NonNull String accessToken) {
-    Mapbox mapbox = new Mapbox(context, accessToken);
+  public static void inject(@NonNull Context context, @NonNull String apiKey,
+                            @NonNull TileServerOptions options) {
+    Mapbox mapbox = new Mapbox(context, apiKey, options);
     try {
       Field instance = Mapbox.class.getDeclaredField(FIELD_INSTANCE);
       instance.setAccessible(true);
       instance.set(mapbox, mapbox);
-
-      Field accounts = Mapbox.class.getDeclaredField(FIELD_ACCOUNTS);
-      accounts.setAccessible(true);
-
-      AccountsManager manager = mock(AccountsManager.class);
-      accounts.set(mapbox, manager);
     } catch (Exception exception) {
       throw new AssertionError();
     }

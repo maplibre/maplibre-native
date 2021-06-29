@@ -20,7 +20,6 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/projection.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
@@ -67,6 +66,7 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
+#import "MGLSettings_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -413,7 +413,7 @@ public:
 {
     if ( ! styleURL)
     {
-        styleURL = [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+        styleURL = [MGLStyle defaultStyleURL];
     }
     MGLLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
@@ -492,9 +492,17 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
+
+    mbgl::TileServerOptions* tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+                   .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
+                   .withTileServerOptions(*tileServerOptions);
+    
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
@@ -2735,31 +2743,6 @@ public:
         attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MGLSemanticVersionString"]];
     }
 
-    NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize]
-                                                               linkColor:nil];
-    for (MGLAttributionInfo *info in attributionInfos)
-    {
-        UIAlertAction *action = [UIAlertAction actionWithTitle:[info.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
-                                                         style:UIAlertActionStyleDefault
-                                                       handler:^(UIAlertAction * _Nonnull actionBlock) {
-            NSURL *url = info.URL;
-            if (url)
-            {
-                if (info.feedbackLink)
-                {
-                    MGLMapCamera *camera = self.camera;
-                    url = [info feedbackURLForStyleURL:self.styleURL
-                                    atCenterCoordinate:camera.centerCoordinate
-                                             zoomLevel:self.zoomLevel
-                                             direction:camera.heading
-                                                 pitch:camera.pitch];
-                }
-                [[UIApplication sharedApplication] openURL:url];
-            }
-        }];
-        [attributionController addAction:action];
-    }
-    
     NSString *cancelTitle = NSLocalizedStringWithDefaultValue(@"CANCEL", nil, nil, @"Cancel", @"Title of button for dismissing attribution action sheet");
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelTitle
                                                            style:UIAlertActionStyleCancel
@@ -7097,7 +7080,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     // Explanation
     UILabel *explanationLabel = [[UILabel alloc] init];
-    explanationLabel.text = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"DESIGNABLE", nil, nil, @"To display a Mapbox-hosted map here, set %@ to your access token in %@\n\nFor detailed instructions, see:", @"Instructions in Interface Builder designable; {key}, {plist file name}"), @"MGLMapboxAccessToken", @"Info.plist"];
+    explanationLabel.text = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"DESIGNABLE", nil, nil, @"To display a map which requires authoriaztion here, set %@ to your API key in %@", @"Instructions in Interface Builder designable; {key}, {plist file name}"), @"MGLApiKey", @"Info.plist"];
     explanationLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     explanationLabel.numberOfLines = 0;
     explanationLabel.translatesAutoresizingMaskIntoConstraints = NO;

@@ -26,7 +26,7 @@ class PixelTestActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap.setStyle(Style.MAPBOX_STREETS)
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
     }
 
     public override fun onResume() {

@@ -108,13 +108,13 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
     Attribution[] attributions = attributionSet.toArray(new Attribution[attributionSet.size()]);
     String url = attributions[which].getUrl();
     if (url.contains(MAP_FEEDBACK_URL_OLD) || url.contains(MAP_FEEDBACK_URL)) {
-      url = buildMapFeedbackMapUrl(Mapbox.getAccessToken());
+      url = buildMapFeedbackMapUrl(Mapbox.getApiKey());
     }
     showWebPage(url);
   }
 
   @NonNull
-  String buildMapFeedbackMapUrl(@Nullable String accessToken) {
+  String buildMapFeedbackMapUrl(@Nullable String apiKey) {
     // TODO Add Android Maps SDK version to the query parameter, currently the version API is not available.
     // TODO Keep track of this issue at [#15632](https://github.com/mapbox/mapbox-gl-native/issues/15632)
 
@@ -132,8 +132,9 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
       builder.appendQueryParameter("referrer", packageName);
     }
 
-    if (accessToken != null) {
-      builder.appendQueryParameter("access_token", accessToken);
+    if (apiKey != null) {
+      //TODO:PP
+      builder.appendQueryParameter("access_token", apiKey);
     }
 
     Style style = mapboxMap.getStyle();

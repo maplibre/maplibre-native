@@ -11,7 +11,7 @@
     XCTestSuite *newTestSuite = [XCTestSuite testSuiteWithName:defaultTestSuite.name];
 
     BOOL runPendingTests = [[[NSProcessInfo processInfo] environment][@"MAPBOX_RUN_PENDING_TESTS"] boolValue];
-    NSString *accessToken = [[NSProcessInfo processInfo] environment][@"MAPBOX_ACCESS_TOKEN"];
+    NSString *apiKey = [[NSProcessInfo processInfo] environment][@"MGL_API_KEY"];
 
     for (XCTest *test in tests) {
 
@@ -26,8 +26,8 @@
 
         // Check for tests that require a valid access token
         if ([test.name containsString:@"🔒"]) {
-            if (!accessToken) {
-                printf("warning: MAPBOX_ACCESS_TOKEN env var is required for test '%s' - skipping.\n", test.name.UTF8String);
+            if (!apiKey) {
+                printf("warning: MGL_API_KEY env var is required for test '%s' - skipping.\n", test.name.UTF8String);
                 continue;
             }
         }
@@ -41,16 +41,16 @@
 - (void)setUp {
     [super setUp];
 
-    NSString *accessToken;
+    NSString *apiKey;
 
     if ([self.name containsString:@"🔒"]) {
-        accessToken = [[NSProcessInfo processInfo] environment][@"MAPBOX_ACCESS_TOKEN"];
+        apiKey = [[NSProcessInfo processInfo] environment][@"MGL_API_KEY"];
 
-        if (!accessToken) {
-            printf("warning: MAPBOX_ACCESS_TOKEN env var is required for test '%s' - trying anyway.\n", self.name.UTF8String);
+        if (!apiKey) {
+            printf("warning: MGL_API_KEY env var is required for test '%s' - trying anyway.\n", self.name.UTF8String);
         }
     }
 
-    [MGLAccountManager setAccessToken:accessToken ?: @"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setApiKey:apiKey ?: @"pk.feedcafedeadbeefbadebede"];
 }
 @end

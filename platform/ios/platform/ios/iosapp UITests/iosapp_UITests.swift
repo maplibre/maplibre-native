@@ -29,7 +29,7 @@ class iosapp_UITests: XCTestCase {
     /// Launch `iosapp`, reset to XYZ = (0, 0, 0) and take a screenshot
     func test_iosappScheme() throws {
         /// Launch and take a screenshot
-        app.navigationBars["Zeroconf Style"].buttons["Map settings"].tap()
+        app.navigationBars["MapLibre Basic"].buttons["Map settings"].tap()
         app.tables/*@START_MENU_TOKEN@*/.staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         sleep(1)
         add(screenshot())
@@ -41,7 +41,7 @@ class iosapp_UITests: XCTestCase {
 
         app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
         
-        let mapSettingsButton = app.navigationBars["Zeroconf Style"].buttons["Map settings"]
+        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
         mapSettingsButton.tap()
         
         /// setup initial conditions for position (0,0) and debug settings

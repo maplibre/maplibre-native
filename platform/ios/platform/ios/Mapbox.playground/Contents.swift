@@ -50,8 +50,8 @@ panel.addSubview(pitchSwitch)
 /*:
  Put your access token into a plain text file called `token`. Then select the “token” placeholder below, go to Editor ‣ Insert File Literal, and select the `token` file.
  */
-var accessToken = try String(contentsOfURL: <#token#>)
-MGLAccountManager.accessToken = accessToken
+var apiKey = try String(contentsOfURL: <#token#>)
+MGLSettings.apiKey = apiKey
 
 class PlaygroundAnnotationView: MGLAnnotationView {
     

@@ -40,7 +40,7 @@ public class StyleFileActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         FloatingActionButton fab = findViewById(R.id.fab_file);
         fab.setColorFilter(ContextCompat.getColor(StyleFileActivity.this, R.color.primary));
         fab.setOnClickListener(view -> new CreateStyleFileTask(view.getContext(), mapboxMap).execute());

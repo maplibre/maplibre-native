@@ -62,9 +62,9 @@ public class HeatmapLayerActivity extends AppCompatActivity {
 
       try {
         mapboxMap.setStyle(new Style.Builder()
-          .fromUri(Style.DARK)
+          .fromUri(Style.getPredefinedStyle("Pastel"))
           .withSource(createEarthquakeSource())
-          .withLayerAbove(createHeatmapLayer(), "waterway-label")
+          .withLayerAbove(createHeatmapLayer(), "country_label")
           .withLayerBelow(createCircleLayer(), HEATMAP_LAYER_ID)
         );
       } catch (URISyntaxException exception) {

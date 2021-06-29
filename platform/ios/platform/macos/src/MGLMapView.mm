@@ -16,7 +16,7 @@
 #import "MGLStyle_Private.h"
 #import "MGLShape_Private.h"
 
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 #import "MGLMapCamera.h"
 #import "MGLPolygon.h"
 #import "MGLPolyline.h"
@@ -58,6 +58,7 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLReachability.h"
+#import "MGLSettings_Private.h"
 
 class MGLAnnotationContext;
 
@@ -292,9 +293,16 @@ public:
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(enableCrossSourceCollisions);
 
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+    resourceOptions.withTileServerOptions(*tileServerOptions)
+                   .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
+    
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }                     
 
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
 
@@ -624,7 +632,7 @@ public:
 
 - (nonnull NSURL *)styleURL {
     NSString *styleURLString = @(_mbglMap->getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
-    return styleURLString ? [NSURL URLWithString:styleURLString] : [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+    return styleURLString ? [NSURL URLWithString:styleURLString] : [MGLStyle defaultStyleURL];
 }
 
 - (void)setStyleURL:(nullable NSURL *)styleURL {
@@ -632,14 +640,14 @@ public:
         return;
     }
 
-    // Default to Streets.
     if (!styleURL) {
-        styleURL = [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+        styleURL = [MGLStyle defaultStyleURL];
     }
     MGLLogDebug(@"Setting styleURL: %@", styleURL);
+
     // An access token is required to load any default style, including Streets.
-    if (![MGLAccountManager accessToken] && [styleURL.scheme isEqualToString:@"mapbox"]) {
-        NSLog(@"Cannot set the style URL to %@ because no access token has been specified.", styleURL);
+    if ([[MGLSettings sharedSettings] tileServerOptionsInternal]->requiresApiKey() && ![MGLSettings apiKey]) {
+        NSLog(@"Cannot set the style URL to %@ because no API key has been specified.", styleURL);
         return;
     }
 
@@ -1880,27 +1888,6 @@ public:
     [self setDirection:-sender.doubleValue animated:YES];
 }
 
-- (IBAction)giveFeedback:(id)sender {
-    MGLMapCamera *camera = self.camera;
-    double zoomLevel = self.zoomLevel;
-    NSMutableArray *urls = [NSMutableArray array];
-    for (MGLAttributionInfo *info in [self.style attributionInfosWithFontSize:0 linkColor:nil]) {
-        NSURL *url = [info feedbackURLForStyleURL:self.styleURL
-                               atCenterCoordinate:camera.centerCoordinate
-                                        zoomLevel:zoomLevel
-                                        direction:camera.heading
-                                            pitch:camera.pitch];
-        if (url) {
-            [urls addObject:url];
-        }
-    }
-    [[NSWorkspace sharedWorkspace] openURLs:urls
-                    withAppBundleIdentifier:nil
-                                    options:0
-             additionalEventParamDescriptor:nil
-                          launchIdentifiers:nil];
-}
-
 #pragma mark Annotations
 
 - (nullable NSArray<id <MGLAnnotation>> *)annotations {
@@ -2913,9 +2900,6 @@ public:
 #pragma mark User interface validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    if (menuItem.action == @selector(giveFeedback:)) {
-        return YES;
-    }
     return NO;
 }
 

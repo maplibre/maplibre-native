@@ -16,6 +16,7 @@
 #import "MGLLoggingConfiguration_Private.h"
 #import "MGLRendererConfiguration.h"
 #import "MGLMapSnapshotter_Private.h"
+#import "MGLSettings_Private.h"
 
 #if TARGET_OS_IPHONE
 #import "UIImage+MGLAdditions.h"
@@ -151,7 +152,7 @@ private:
     {
         if ( !styleURL)
         {
-            styleURL = [MGLStyle streetsStyleURLWithVersion:MGLStyleDefaultVersion];
+            styleURL = [MGLStyle defaultStyleURL];
         }
         _styleURL = styleURL;
         _size = size;
@@ -711,9 +712,16 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     // App-global configuration
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
+    auto tileServerOptions = [[MGLSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
-                   .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
+    resourceOptions
+        .withTileServerOptions(*tileServerOptions)
+        .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+        .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
+    auto apiKey = [[MGLSettings sharedSettings] apiKey];
+    if (apiKey) {
+        resourceOptions.withApiKey([apiKey UTF8String]);
+    }                   
 
     // Create the snapshotter
     auto localFontFamilyName = config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;

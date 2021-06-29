@@ -121,11 +121,11 @@ public class RuntimeStyleActivity extends AppCompatActivity {
       mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.379189, 4.899431), 1));
       mapboxMap.setStyle(
         new Style.Builder()
-          .fromUri(Style.MAPBOX_STREETS)
+          .fromUri(Style.getPredefinedStyle("Streets"))
           // set custom transition
           .withTransition(new TransitionOptions(250, 50)), style -> {
           styleLoaded = true;
-          SymbolLayer laber = (SymbolLayer) style.getLayer("country-label");
+          SymbolLayer laber = (SymbolLayer) style.getLayer("country_1");
           laber.setProperties(
             textOpacity(switchCase(within(polygon), literal(1.0f), literal(0.5f)))
           );
@@ -437,7 +437,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
 
   private void addTerrainLayer() {
     // Add a source
-    Source source = new VectorSource("my-terrain-source", "mapbox://mapbox.mapbox-terrain-v2");
+    Source source = new VectorSource("my-terrain-source", "maptiler://sources/hillshades");
     mapboxMap.getStyle().addSource(source);
 
     LineLayer layer = new LineLayer("terrainLayer", "my-terrain-source");
@@ -483,7 +483,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
 
   private void addSatelliteLayer() {
     // Add a source
-    Source source = new RasterSource("my-raster-source", "mapbox://mapbox.satellite", 512);
+    Source source = new RasterSource("my-raster-source", "maptiler://sources/satellite", 512);
     mapboxMap.getStyle().addSource(source);
 
     // Add a layer
@@ -515,6 +515,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
   }
 
   private void addCustomTileSource() {
+    //TODO: migrate
     // Add a source
     TileSet tileSet = new TileSet("2.1.0", "https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt");
     tileSet.setMinZoom(0);

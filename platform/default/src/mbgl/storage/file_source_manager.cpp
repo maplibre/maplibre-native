@@ -17,7 +17,7 @@ public:
         });
 
         registerFileSourceFactory(FileSourceType::Asset, [](const ResourceOptions& options) {
-            return std::make_unique<AssetFileSource>(options.assetPath());
+            return std::make_unique<AssetFileSource>(options);
         });
 
         registerFileSourceFactory(FileSourceType::Database, [](const ResourceOptions& options) {
@@ -25,15 +25,13 @@ public:
         });
 
         registerFileSourceFactory(FileSourceType::FileSystem,
-                                  [](const ResourceOptions&) { return std::make_unique<LocalFileSource>(); });
+                                  [](const ResourceOptions& options) { return std::make_unique<LocalFileSource>(options); });
 
         registerFileSourceFactory(FileSourceType::Mbtiles,
-                                  [](const ResourceOptions&) { return std::make_unique<MaptilerFileSource>(); });                                  
+                                  [](const ResourceOptions& options) { return std::make_unique<MaptilerFileSource>(options); });
 
         registerFileSourceFactory(FileSourceType::Network, [](const ResourceOptions& options) {
-            std::unique_ptr<FileSource> networkSource = std::make_unique<OnlineFileSource>();
-            networkSource->setProperty(ACCESS_TOKEN_KEY, options.accessToken());
-            networkSource->setProperty(API_BASE_URL_KEY, options.baseURL());
+            std::unique_ptr<FileSource> networkSource = std::make_unique<OnlineFileSource>(options);
             return networkSource;
         });
     }

@@ -14,6 +14,7 @@
 #ifndef MGL_DISABLE_LOGGING
     [MGLLoggingConfiguration sharedConfiguration].loggingLevel = MGLLoggingLevelFault;
 #endif
+    [MGLSettings useWellKnownTileServer:MGLMapTiler];
 
     return YES;
 }

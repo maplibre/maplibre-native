@@ -75,7 +75,7 @@ public class CircleLayerActivity extends AppCompatActivity implements View.OnCli
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(map -> {
       mapboxMap = map;
-      mapboxMap.setStyle(Style.SATELLITE_STREETS);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"));
       mapView.addOnDidFinishLoadingStyleListener(() -> {
         Style style = mapboxMap.getStyle();
         addBusStopSource(style);
@@ -101,7 +101,7 @@ public class CircleLayerActivity extends AppCompatActivity implements View.OnCli
       circleColor(Color.parseColor("#FF9800")),
       circleRadius(2.0f)
     );
-    style.addLayerBelow(layer, "waterway-label");
+    style.addLayerBelow(layer, "water_intermittent");
   }
 
   private void initFloatingActionButtons() {
@@ -276,12 +276,12 @@ public class CircleLayerActivity extends AppCompatActivity implements View.OnCli
 
   private static class Data {
     private static final String[] STYLES = new String[] {
-      Style.MAPBOX_STREETS,
-      Style.OUTDOORS,
-      Style.LIGHT,
-      Style.DARK,
-      Style.SATELLITE,
-      Style.SATELLITE_STREETS
+      Style.getPredefinedStyle("Streets"),
+      Style.getPredefinedStyle("Outdoor"),
+      Style.getPredefinedStyle("Bright"),
+      Style.getPredefinedStyle("Pastel"),
+      Style.getPredefinedStyle("Satellite Hybrid"),
+      Style.getPredefinedStyle("Satellite Hybrid")
     };
   }
 }

@@ -2,6 +2,7 @@
 
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 
@@ -33,7 +34,6 @@ enum FileSourceType : uint8_t {
 // GeoJSONSource, RasterSource, VectorSource, CustomGeometrySource and other *Sources.
 class FileSource {
 public:
-    FileSource(const FileSource&) = delete;
     FileSource& operator=(const FileSource&) = delete;
     virtual ~FileSource() = default;
 
@@ -87,6 +87,11 @@ public:
     // When supported, sets the modifier of the requested resources.
     virtual void setResourceTransform(ResourceTransform) {} // NOLINT(performance-unnecessary-value-param)
 
+    // sets the resource options
+    virtual void setResourceOptions(ResourceOptions) = 0;
+    // gets the resource options
+    virtual ResourceOptions getResourceOptions() = 0;
+
 protected:
     FileSource() = default;
 };
@@ -95,7 +100,7 @@ protected:
 
 // Property name to set / get an access token.
 // type: std::string
-constexpr const char* ACCESS_TOKEN_KEY = "access-token";
+constexpr const char* API_KEY_KEY = "api-tkey";
 
 // Property name to set / get base url.
 // type: std::string

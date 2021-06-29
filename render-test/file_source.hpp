@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/file_source.hpp> 
 
 namespace mbgl {
 
@@ -43,8 +43,11 @@ public:
      */
     static size_t getTransferredSize();
 
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;
 private:
     std::shared_ptr<FileSource> defaultResourceLoader;
+    ResourceOptions resourceOptions;
 };
 
 } // namespace mbgl

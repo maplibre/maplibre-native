@@ -8,6 +8,7 @@ import android.util.DisplayMetrics;
 
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.utils.ConfigUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,43 +44,33 @@ public class MapboxTest {
   }
 
   @Test
-  public void testGetAccessToken() {
-    final String accessToken = "pk.0000000001";
-    MapboxInjector.inject(context, accessToken);
-    assertSame(accessToken, Mapbox.getAccessToken());
+  public void testGetApiKey() {
+    final String apiKey = "pk.0000000001";
+    MapboxInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
+    assertSame(apiKey, Mapbox.getApiKey());
   }
 
   @Test
   public void testApplicationContext() {
-    MapboxInjector.inject(context, "pk.0000000001");
+    MapboxInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
     assertNotNull(Mapbox.getApplicationContext());
     assertNotEquals(context, appContext);
     assertEquals(appContext, appContext);
   }
 
   @Test
-  public void testPkTokenValid() {
-    assertTrue(Mapbox.isAccessTokenValid("pk.0000000001"));
-  }
-
-  @Test
-  public void testSkTokenValid() {
-    assertTrue(Mapbox.isAccessTokenValid("sk.0000000001"));
+  public void testPlainTokenValid() {
+    assertTrue(Mapbox.isApiKeyValid("apiKey"));
   }
 
   @Test
   public void testEmptyToken() {
-    assertFalse(Mapbox.isAccessTokenValid(""));
+    assertFalse(Mapbox.isApiKeyValid(""));
   }
 
   @Test
   public void testNullToken() {
-    assertFalse(Mapbox.isAccessTokenValid(null));
-  }
-
-  @Test
-  public void testBlaBlaToken() {
-    assertFalse(Mapbox.isAccessTokenValid("blabla"));
+    assertFalse(Mapbox.isApiKeyValid(null));
   }
 
   @Test
@@ -94,10 +85,8 @@ public class MapboxTest {
 
     expectedException.expect(MapboxConfigurationException.class);
     expectedException.expectMessage(
-      "\nUsing MapView requires calling Mapbox.getInstance(Context context, String accessToken) before "
-        + "inflating or creating the view. The access token parameter is required when using a Mapbox service."
-        + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
-        + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
+      "\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey) before "
+      + "inflating or creating the view."
     );
     new MapView(context);
   }

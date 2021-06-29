@@ -4,6 +4,7 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/expected.hpp>
 #include <mbgl/util/optional.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
@@ -231,6 +232,9 @@ public:
      * by the Mapbox Terms of Service.
      */
     virtual void setOfflineMapboxTileCountLimit(uint64_t) const;
+
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;

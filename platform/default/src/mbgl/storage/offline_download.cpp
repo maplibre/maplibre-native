@@ -241,7 +241,11 @@ void OfflineDownload::activateDownload() {
 
         style::Parser parser;
         parser.parse(*styleResponse.data);
-
+        
+        auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
+        parser.spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, parser.spriteURL);
+        parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
+        
         for (const auto& source : parser.sources) {
             SourceType type = source->getType();
 
@@ -249,7 +253,9 @@ void OfflineDownload::activateDownload() {
                 if (urlOrTileset.is<Tileset>()) {
                     queueTiles(type, tileSize, urlOrTileset.get<Tileset>());
                 } else {
-                    const auto& url = urlOrTileset.get<std::string>();
+                    const auto& rawUrl = urlOrTileset.get<std::string>();
+                    const auto& url = util::mapbox::canonicalizeSourceURL(tileServerOptions, rawUrl);
+                    
                     status.requiredResourceCountIsPrecise = false;
                     status.requiredResourceCount++;
                     requiredSourceURLs.insert(url);
@@ -262,7 +268,8 @@ void OfflineDownload::activateDownload() {
                         style::conversion::Error error;
                         optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
                         if (tileset) {
-                            util::mapbox::canonicalizeTileset(*tileset, url, type, tileSize);
+                            auto resourceOptions = onlineFileSource.getResourceOptions();
+                            util::mapbox::canonicalizeTileset(resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
                             queueTiles(type, tileSize, *tileset);
 
                             requiredSourceURLs.erase(url);

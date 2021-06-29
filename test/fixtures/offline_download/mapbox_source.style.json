@@ -5,7 +5,7 @@
       "type": "vector",
       "maxzoom": 15,
       "minzoom": 0,
-      "tiles": [ "mapbox://{z}-{x}-{y}.vector.pbf" ]
+      "tiles": [ "maptiler://{z}-{x}-{y}.vector.pbf" ]
     }
   },
   "layers": [{

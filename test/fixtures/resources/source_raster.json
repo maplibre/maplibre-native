@@ -1,1 +1,38 @@
-{"attribution":"<a href=\"https://www.mapbox.com/about/maps/\" target=\"_blank\">&copy; Mapbox</a> <a href=\"http://www.openstreetmap.org/about/\" target=\"_blank\">&copy; OpenStreetMap</a> <a class=\"mapbox-improve-map\" href=\"https://apps.mapbox.com/feedback/\" target=\"_blank\">Improve this map</a> <a href=\"https://www.digitalglobe.com/\" target=\"_blank\">&copy; DigitalGlobe</a>","autoscale":true,"bounds":[-180,-85,180,85],"cacheControl":"max-age=43200,s-maxage=604800","center":[0,0,3],"created":1358310600000,"description":"","id":"mapbox.satellite","maxzoom":22,"minzoom":0,"modified":1446150592060,"name":"Mapbox Satellite","private":false,"scheme":"xyz","tilejson":"2.0.0","tiles":["https://a.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.accesstoken","https://b.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.accesstoken"],"webpage":"https://a.tiles.mapbox.com/v4/mapbox.satellite/page.html?access_token=pk.accesstoken"}
+{
+    "tilejson": "2.0.0",
+    "name": "Satellite",
+    "type": "baselayer",
+    "color": "#0C1C2B",
+    "scale": "1.0000",
+    "bounds": [
+        -180,
+        -85.051129,
+        180,
+        85.05112900000002
+    ],
+    "format": "jpg",
+    "maxzoom": 20,
+    "minzoom": 0,
+    "profile": "mercator",
+    "version": "2.0",
+    "generator": "MapTiler Desktop Pro 10.0",
+    "attribution": "<a href=\"https://www.maptiler.com/copyright/\" target=\"_blank\">&copy; MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>",
+    "format_arguments": "-f jpeg ",
+    "crs": "EPSG:3857",
+    "crs_wkt": "PROJCS[\"WGS 84 / Pseudo-Mercator\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Mercator_1SP\"],PARAMETER[\"central_meridian\",0],PARAMETER[\"scale_factor\",1],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs\"],AUTHORITY[\"EPSG\",\"3857\"]]",
+    "extent": [
+        -20037508.342789244,
+        -20037508.6269291,
+        20037508.342789244,
+        20037508.626929108
+    ],
+    "tile_grid": "mercator",
+    "center": [
+        0,
+        2.5444437451708134e-14,
+        1
+    ],
+    "tiles": [
+        "maptiler://tiles/satellite/{z}/{x}/{y}.jpg"
+    ]
+}

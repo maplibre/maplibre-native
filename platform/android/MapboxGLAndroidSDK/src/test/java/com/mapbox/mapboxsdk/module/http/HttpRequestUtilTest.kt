@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.module.http
 
 import com.mapbox.mapboxsdk.MapboxInjector
+import com.mapbox.mapboxsdk.utils.ConfigUtils
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
 import okhttp3.OkHttpClient
@@ -13,7 +14,7 @@ class HttpRequestUtilTest {
 
     @Test
     fun replaceHttpClient() {
-        MapboxInjector.inject(mockk(relaxed = true), "")
+        MapboxInjector.inject(mockk(relaxed = true), "", ConfigUtils.getMockedOptions())
 
         assertEquals(HttpRequestImpl.DEFAULT_CLIENT, HttpRequestImpl.client)
 

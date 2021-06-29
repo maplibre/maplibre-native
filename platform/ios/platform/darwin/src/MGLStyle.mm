@@ -29,7 +29,6 @@
 #import "MGLLoggingConfiguration_Private.h"
 
 #include <mbgl/map/map.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/light.hpp>
@@ -87,35 +86,34 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
 
 @implementation MGLStyle
 
-#pragma mark Default style URLs
+#pragma mark Predefined style URLs
 
-/// @param name The style’s marketing name, written in lower camelCase.
-/// @param fileName The last path component in the style’s URL, excluding the version suffix.
-#define MGL_DEFINE_STYLE(name, fileName) \
-    static NSURL *MGLStyleURL_##name; \
-    + (NSURL *)name##StyleURL { \
-        static dispatch_once_t onceToken; \
-        dispatch_once(&onceToken, ^{ \
-            MGLStyleURL_##name = [self name##StyleURLWithVersion:mbgl::util::default_styles::name.currentVersion]; \
-        }); \
-        return MGLStyleURL_##name; \
-    } \
-    \
-    + (NSURL *)name##StyleURL##WithVersion:(NSInteger)version { \
-        return [NSURL URLWithString:[@"mapbox://styles/mapbox/" #fileName "-v" stringByAppendingFormat:@"%li", (long)version]]; \
++ (NSArray<MGLDefaultStyle*>*) predefinedStyles {
+    return MGLSettings.tileServerOptions.defaultStyles;
+}
+
++ (MGLDefaultStyle*) defaultStyle {
+    MGLTileServerOptions* opts = MGLSettings.tileServerOptions;
+    return opts.defaultStyle;
+}
+
++ (NSURL*) defaultStyleURL {
+    MGLDefaultStyle* styleDefinition = [MGLStyle defaultStyle];
+    if (styleDefinition != nil){
+        return styleDefinition.url;
     }
+    
+    return nil;
+}
 
-MGL_DEFINE_STYLE(streets, streets)
-MGL_DEFINE_STYLE(outdoors, outdoors)
-MGL_DEFINE_STYLE(light, light)
-MGL_DEFINE_STYLE(dark, dark)
-MGL_DEFINE_STYLE(satellite, satellite)
-MGL_DEFINE_STYLE(satelliteStreets, satellite-streets)
-
-// Make sure all the styles listed in mbgl::util::default_styles::orderedStyles
-// are defined above and also declared in MGLStyle.h.
-static_assert(6 == mbgl::util::default_styles::numOrderedStyles,
-              "mbgl::util::default_styles::orderedStyles and MGLStyle have different numbers of styles.");
++ (MGLDefaultStyle*) predefinedStyle:(NSString*)withStyleName {
+    for (MGLDefaultStyle* style in MGLSettings.tileServerOptions.defaultStyles) {
+        if ([style.name isEqualToString:withStyleName]) {
+            return style;
+        }
+    }
+    return nil;
+}
 
 #pragma mark -
 

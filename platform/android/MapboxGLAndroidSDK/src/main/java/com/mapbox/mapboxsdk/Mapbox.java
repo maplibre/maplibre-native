@@ -13,14 +13,16 @@ import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.storage.FileSource;
+import com.mapbox.mapboxsdk.util.DefaultStyle;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
 /**
- * The entry point to initialize the Mapbox Android SDK.
+ * The entry point to initialize the MapLibre Android SDK.
  * <p>
- * Obtain a reference by calling {@link #getInstance(Context, String)}. Usually this class is configured in
- * Application#onCreate() and is responsible for the active access token, application context, and
- * connectivity state.
+ * Obtain a reference by calling {@link #getInstance(Context, String, WellKnownTileServer)}.
+ * Usually this class is configured in Application#onCreate() and is responsible for the
+ * active API key, application context, and connectivity state.
  * </p>
  */
 @UiThread
@@ -34,62 +36,149 @@ public final class Mapbox {
 
   private Context context;
   @Nullable
-  private String accessToken;
+  private String apiKey;
   @Nullable
-  private AccountsManager accounts;
+  private TileServerOptions tileServerOptions;
 
   /**
    * Get an instance of Mapbox.
    * <p>
-   * This class manages the Mapbox access token, application context, and connectivity state.
+   * This class manages the API key, application context, and connectivity state.
    * </p>
    *
-   * @param context     Android context which holds or is an application context
-   * @param accessToken Mapbox access token
+   * @param context Android context which holds or is an application context
    * @return the single instance of Mapbox
    */
   @UiThread
   @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String accessToken) {
+  public static synchronized Mapbox getInstance(@NonNull Context context) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Mapbox(appContext, accessToken);
-      if (isAccessTokenValid(accessToken)) {
-        INSTANCE.accounts = new AccountsManager();
-      }
+      INSTANCE = new Mapbox(appContext, null);
       ConnectivityReceiver.instance(appContext);
+    } else {
+      TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
+      INSTANCE.tileServerOptions = tileServerOptions;
+      INSTANCE.apiKey = null;
+      FileSource fileSource = FileSource.getInstance(context);
+      fileSource.setTileServerOptions(tileServerOptions);
+      fileSource.setApiKey(null);
     }
     return INSTANCE;
   }
 
-  Mapbox(@NonNull Context context, @Nullable String accessToken) {
+  /**
+   * Get an instance of Mapbox.
+   * <p>
+   * This class manages the API key, application context, and connectivity state.
+   * </p>
+   *
+   * @param context Android context which holds or is an application context
+   * @param apiKey api key
+   * @param tileServer the tile server whose predefined configuration will be used to
+   *                   bootstrap the SDK. The predefined configuration includes
+   *                   rules for converting resource URLs between normal and canonical forms
+   *                   and set of predefined styles available on the server.
+   * @return the single instance of Mapbox
+   */
+  @UiThread
+  @NonNull
+  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey,
+                                                WellKnownTileServer tileServer) {
+    ThreadUtils.init(context);
+    ThreadUtils.checkThread(TAG);
+    if (INSTANCE == null) {
+      Context appContext = context.getApplicationContext();
+      FileSource.initializeFileDirsPaths(appContext);
+      INSTANCE = new Mapbox(appContext, apiKey);
+      ConnectivityReceiver.instance(appContext);
+    } else {
+      INSTANCE.apiKey = apiKey;
+    }
+
+    TileServerOptions tileServerOptions = TileServerOptions.get(tileServer);
+    INSTANCE.tileServerOptions = tileServerOptions;
+    FileSource fileSource = FileSource.getInstance(context);
+    fileSource.setTileServerOptions(tileServerOptions);
+    fileSource.setApiKey(apiKey);
+    return INSTANCE;
+  }
+
+  Mapbox(@NonNull Context context, @Nullable String apiKey) {
     this.context = context;
-    this.accessToken = accessToken;
+    this.apiKey = apiKey;
+  }
+
+  Mapbox(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
+    this.context = context;
+    this.apiKey = apiKey;
+    this.tileServerOptions = options;
   }
 
   /**
-   * Get the current active access token for this application.
+   * Get the current active API key for this application.
    *
-   * @return Mapbox access token
+   * @return API key
    */
   @Nullable
-  public static String getAccessToken() {
+  public static String getApiKey() {
     validateMapbox();
-    return INSTANCE.accessToken;
+    return INSTANCE.apiKey;
   }
 
   /**
-   * Set the current active accessToken.
+   * Set the current active apiKey.
    */
-  public static void setAccessToken(String accessToken) {
+  public static void setApiKey(String apiKey) {
     validateMapbox();
-    throwIfAccessTokenInvalid(accessToken);
-    INSTANCE.accessToken = accessToken;
-    INSTANCE.accounts = new AccountsManager();
-    FileSource.getInstance(getApplicationContext()).setAccessToken(accessToken);
+    throwIfApiKeyInvalid(apiKey);
+    INSTANCE.apiKey = apiKey;
+    FileSource.getInstance(getApplicationContext()).setApiKey(apiKey);
+  }
+
+  /**
+   * Get tile server configuration.
+   */
+  @Nullable
+  public static TileServerOptions getTileServerOptions() {
+    validateMapbox();
+    return INSTANCE.tileServerOptions;
+  }
+
+  /**
+   * Get all pre-defined styles
+   *
+   * @return List of predefined styles
+   */
+  @Nullable
+  public static DefaultStyle[] getPredefinedStyles() {
+    validateMapbox();
+    if (INSTANCE.tileServerOptions != null) {
+      return INSTANCE.tileServerOptions.getDefaultStyles();
+    }
+    return null;
+  }
+
+  /**
+   * Get predefined style by name
+   *
+   * @return Predefined style if found
+   */
+  @Nullable
+  public static DefaultStyle getPredefinedStyle(String name) {
+    validateMapbox();
+    if (INSTANCE.tileServerOptions != null) {
+      DefaultStyle[] styles = INSTANCE.tileServerOptions.getDefaultStyles();
+      for (DefaultStyle style : styles) {
+        if (style.getName().equalsIgnoreCase(name)) {
+          return style;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -151,28 +240,25 @@ public final class Mapbox {
   /**
    * Runtime validation of Mapbox access token
    *
-   * @param accessToken the access token to validate
+   * @param apiKey the access token to validate
    * @return true is valid, false otherwise
    */
-  static boolean isAccessTokenValid(@Nullable String accessToken) {
-    if (accessToken == null) {
+  static boolean isApiKeyValid(@Nullable String apiKey) {
+    if (apiKey == null) {
       return false;
     }
 
-    accessToken = accessToken.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
-    return accessToken.length() != 0 && (accessToken.startsWith("pk.") || accessToken.startsWith("sk."));
+    apiKey = apiKey.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
+    return apiKey.length() != 0;
   }
 
   /**
    * Throws exception when access token is invalid
    */
-  public static void throwIfAccessTokenInvalid(@Nullable String accessToken) {
-    if (!isAccessTokenValid(accessToken)) {
+  public static void throwIfApiKeyInvalid(@Nullable String apiKey) {
+    if (!isApiKeyValid(apiKey)) {
       throw new MapboxConfigurationException(
-              "A valid access token parameter is required when using a Mapbox service."
-                      + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
-                      + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
-                      + "Currently provided token is: " + accessToken);
+              "A valid API key is required, currently provided key is: " + apiKey);
     }
   }
 

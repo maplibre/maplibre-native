@@ -183,7 +183,11 @@ add_library(mapbox-gl SHARED
             ${PROJECT_SOURCE_DIR}/style/transition_options.cpp
             ${PROJECT_SOURCE_DIR}/style/transition_options.hpp
             ${PROJECT_SOURCE_DIR}/style/value.cpp
-            ${PROJECT_SOURCE_DIR}/style/value.hpp)
+            ${PROJECT_SOURCE_DIR}/style/value.hpp
+            ${PROJECT_SOURCE_DIR}/util/default_style.cpp    
+            ${PROJECT_SOURCE_DIR}/util/tile_server_options.cpp
+            ${PROJECT_SOURCE_DIR}/util/default_style.hpp
+            ${PROJECT_SOURCE_DIR}/util/tile_server_options.hpp)
 
 target_include_directories(
   mapbox-gl

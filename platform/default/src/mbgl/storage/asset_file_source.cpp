@@ -4,6 +4,7 @@
 #include <mbgl/storage/local_file_request.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
@@ -19,7 +20,9 @@ namespace mbgl {
 
 class AssetFileSource::Impl {
 public:
-    Impl(const ActorRef<Impl>&, std::string root_) : root(std::move(root_)) {}
+    Impl(const ActorRef<Impl>&, const ResourceOptions& options):
+        root (options.assetPath()),
+        resourceOptions (options.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -36,13 +39,26 @@ public:
         requestLocalFile(path, req);
     }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions.clone();
+    }
+
 private:
     std::string root;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
-AssetFileSource::AssetFileSource(const std::string& root)
-    : impl(std::make_unique<util::Thread<Impl>>(
-          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", root)) {}
+AssetFileSource::AssetFileSource(const ResourceOptions& options)
+        : impl(std::make_unique<util::Thread<Impl>>(
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", options.clone())) {}
+
 
 AssetFileSource::~AssetFileSource() = default;
 
@@ -65,5 +81,14 @@ void AssetFileSource::pause() {
 void AssetFileSource::resume() {
     impl->resume();
 }
+
+void AssetFileSource::setResourceOptions(ResourceOptions options) {
+    impl->actor().invoke(&Impl::setResourceOptions, options.clone());
+}
+
+ResourceOptions AssetFileSource::getResourceOptions() {
+    return impl->actor().ask(&Impl::getResourceOptions).get();
+}
+
 
 } // namespace mbgl

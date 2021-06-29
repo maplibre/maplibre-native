@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
@@ -17,6 +18,9 @@ public:
     bool canRequest(const Resource&) const override;
     void pause() override;
     void resume() override;
+
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;
 
 private:
     class Impl;

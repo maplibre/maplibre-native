@@ -96,12 +96,12 @@ jobs:
 
       - name: Build Test APK
         run: |
-          MAPBOX_DEVELOPER_CONFIG_XML='${{ secrets.MAPBOX_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPBOX_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
             make android-ui-test-arm-v8
           else
-            echo "No secrets.MAPBOX_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
+            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
         shell: bash        
 
@@ -127,7 +127,7 @@ jobs:
               --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
               --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
               --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir mapbox-android-sdk-${CIRCLE_BUILD_NUM}
+              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
           fi

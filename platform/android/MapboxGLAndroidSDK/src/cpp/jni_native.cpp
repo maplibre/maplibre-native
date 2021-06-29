@@ -34,6 +34,7 @@
 #include "map_renderer_runnable.hpp"
 #include "mapbox.hpp"
 #include "native_map_view.hpp"
+#include "util/tile_server_options.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
 #include "offline/offline_manager.hpp"
 #include "offline/offline_region.hpp"
@@ -162,6 +163,10 @@ void registerNatives(JavaVM *vm) {
 
     // AssetManager
     Mapbox::registerNative(env);
+
+    // Util
+    DefaultStyle::registerNative(env);
+    TileServerOptions::registerNative(env);
 }
 
 } // namespace android

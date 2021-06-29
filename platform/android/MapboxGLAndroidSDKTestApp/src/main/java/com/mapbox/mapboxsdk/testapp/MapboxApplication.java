@@ -6,10 +6,11 @@ import android.text.TextUtils;
 
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.WellKnownTileServer;
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.testapp.utils.TileLoadingMeasurementUtils;
 import com.mapbox.mapboxsdk.testapp.utils.TimberLogger;
-import com.mapbox.mapboxsdk.testapp.utils.TokenUtils;
+import com.mapbox.mapboxsdk.testapp.utils.ApiKeyUtils;
 import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;
@@ -24,9 +25,11 @@ import static timber.log.Timber.DebugTree;
  */
 public class MapboxApplication extends Application {
 
-  private static final String DEFAULT_MAPBOX_ACCESS_TOKEN = "YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE";
-  private static final String ACCESS_TOKEN_NOT_SET_MESSAGE = "In order to run the Test App you need to set a valid "
-    + "access token. During development, you can set the MAPBOX_ACCESS_TOKEN environment variable for the SDK to "
+  public static final WellKnownTileServer TILE_SERVER = WellKnownTileServer.MapTiler;
+
+  private static final String DEFAULT_API_KEY = "YOUR_API_KEY_GOES_HERE";
+  private static final String API_KEY_NOT_SET_MESSAGE = "In order to run the Test App you need to set a valid "
+    + "API key. During development, you can set the MGL_API_KEY environment variable for the SDK to "
     + "automatically include it in the Test App. Otherwise, you can manually include it in the "
     + "res/values/developer-config.xml file in the MapboxGLAndroidSDKTestApp folder.";
 
@@ -73,17 +76,19 @@ public class MapboxApplication extends Application {
   }
 
   private void initializeMapbox() {
-    String accessToken = TokenUtils.getMapboxAccessToken(getApplicationContext());
-    validateAccessToken(accessToken);
-    Mapbox.getInstance(getApplicationContext(), accessToken);
+    String apiKey = ApiKeyUtils.getApiKey(getApplicationContext());
+    validateApiKey(apiKey);
+
+    Mapbox.getInstance(getApplicationContext(), apiKey, TILE_SERVER);
+
     TileLoadingMeasurementUtils.setUpTileLoadingMeasurement();
 
     MapStrictMode.setStrictModeEnabled(true);
   }
 
-  private static void validateAccessToken(String accessToken) {
-    if (TextUtils.isEmpty(accessToken) || accessToken.equals(DEFAULT_MAPBOX_ACCESS_TOKEN)) {
-      Timber.e(ACCESS_TOKEN_NOT_SET_MESSAGE);
+  private static void validateApiKey(String apiKey) {
+    if (TextUtils.isEmpty(apiKey) || apiKey.equals(DEFAULT_API_KEY)) {
+      Timber.e(API_KEY_NOT_SET_MESSAGE);
     }
   }
 }

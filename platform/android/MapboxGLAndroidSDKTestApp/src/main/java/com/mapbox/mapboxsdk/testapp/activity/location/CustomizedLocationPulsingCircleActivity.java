@@ -58,7 +58,7 @@ public class CustomizedLocationPulsingCircleActivity extends AppCompatActivity i
   private static final String SAVED_STATE_LOCATION = "saved_state_location";
   private static final String SAVED_STATE_LOCATION_CIRCLE_PULSE_COLOR = "saved_state_color";
   private static final String SAVED_STATE_LOCATION_CIRCLE_PULSE_DURATION = "saved_state_duration";
-  private static final String LAYER_BELOW_ID = "waterway-label";
+  private static final String LAYER_BELOW_ID = "poi_transit";
 
   private Location lastLocation;
   private MapView mapView;
@@ -113,7 +113,7 @@ public class CustomizedLocationPulsingCircleActivity extends AppCompatActivity i
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
-    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
       locationComponent = mapboxMap.getLocationComponent();
 
       LocationComponentOptions locationComponentOptions =

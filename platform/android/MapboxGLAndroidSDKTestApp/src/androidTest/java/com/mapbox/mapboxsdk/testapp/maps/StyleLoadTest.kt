@@ -23,7 +23,7 @@ class StyleLoadTest : EspressoTest() {
             val layer = SymbolLayer("id", "id")
             mapboxMap.setStyle(Style.Builder().withSource(source).withLayer(layer))
             TestingAsyncUtils.waitForLayer(uiController, mapView)
-            mapboxMap.setStyle(Style.Builder().fromUrl(Style.MAPBOX_STREETS))
+            mapboxMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")))
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             source.setGeoJson("{}")
         }

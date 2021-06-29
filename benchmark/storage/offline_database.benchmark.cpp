@@ -56,7 +56,7 @@ public:
     }
 
     mbgl::Response response;
-    mbgl::OfflineDatabase db{":memory:"};
+    mbgl::OfflineDatabase db{":memory:", mbgl::TileServerOptions::DefaultConfiguration()};
 
     const unsigned tileCount = 100;
     int64_t regionID = 0;

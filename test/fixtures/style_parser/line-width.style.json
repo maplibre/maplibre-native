@@ -1,16 +1,16 @@
 {
   "version": 8,
   "sources": {
-    "mapbox": {
+    "source": {
       "type": "vector",
-      "url": "mapbox://mapbox.mapbox-terrain-v1,mapbox.mapbox-streets-v5",
+      "url": "maptiler://sources/streets",
       "maxzoom": 14
     }
   },
   "layers": [{
     "id": "waterway_river_canal",
     "type": "line",
-    "source": "mapbox",
+    "source": "source",
     "source-layer": "waterway",
     "filter": ["in", "type", "river", "canal"],
     "paint": {

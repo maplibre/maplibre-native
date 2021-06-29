@@ -5,8 +5,7 @@
 CREATE TABLE resources (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,   -- Primary key.
 
-  url TEXT NOT NULL,                               -- The URL of the resource without the access token. If a Mapbox
-                                                   -- resource, will be stored using the mapbox:// schema. Must be
+  url TEXT NOT NULL,                               -- The URL of the resource without the access token.Must be
                                                    -- unique and that is enforced by the database schema.
 
   kind INTEGER NOT NULL,                           -- Type of the resource, taken from Resource::Kind enumeration:
@@ -50,9 +49,7 @@ CREATE TABLE tiles (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,   -- Primary key.
 
   url_template TEXT NOT NULL,                      -- The URL of the resource without the access token and without
-                                                   -- the tiles id substituted. Mapbox tiles will be stored using
-                                                   -- the mapbox:// schema. Example:
-                                                   -- mapbox://tiles/user.dataset/{z}/{x}/{y}.vector.pbf
+                                                   -- the tiles id substituted.
 
   pixel_ratio INTEGER NOT NULL,                    -- The tile pixel ratio, typically 1 for vector tiles.
 
@@ -105,7 +102,7 @@ CREATE TABLE tiles (
 --     "max_zoom": 15.0,
 --     "min_zoom": 0.0,
 --     "pixel_ratio": 1.0,
---     "style_url": "mapbox://styles/mapbox/streets-v11"
+--     "style_url": "maptiler://maps/streets"
 -- }
 --
 -- The semantic definition of the region is up to the user and

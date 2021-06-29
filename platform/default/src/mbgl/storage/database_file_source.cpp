@@ -18,7 +18,10 @@ namespace mbgl {
 class DatabaseFileSourceThread {
 public:
     DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
-        : db(std::make_unique<OfflineDatabase>(cachePath)), onlineFileSource(std::move(onlineFileSource_)) {}
+        : db(std::make_unique<OfflineDatabase>(
+            cachePath,
+            onlineFileSource_->getResourceOptions().tileServerOptions())
+        ), onlineFileSource(std::move(onlineFileSource_)) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
         optional<Response> offlineResponse =
@@ -151,25 +154,39 @@ private:
 
 class DatabaseFileSource::Impl {
 public:
-    Impl(std::shared_ptr<FileSource> onlineFileSource, const std::string& cachePath)
-        : thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
+    Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& options) :
+        thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              cachePath)) {}
+              options.cachePath())),
+        resourceOptions(options.clone()) {}
 
     ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
 
     void pause() { thread->pause(); }
     void resume() { thread->resume(); }
 
+    void setResourceOptions(ResourceOptions options) {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
+    }
+
+    ResourceOptions getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return resourceOptions.clone();
+    }
+
 private:
     const std::unique_ptr<util::Thread<DatabaseFileSourceThread>> thread;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions resourceOptions;
 };
 
 DatabaseFileSource::DatabaseFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-                                  options.cachePath())) {}
+    : impl(std::make_unique<Impl>(
+            FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
+            options)) {}
 
 DatabaseFileSource::~DatabaseFileSource() = default;
 
@@ -295,6 +312,14 @@ void DatabaseFileSource::pause() {
 
 void DatabaseFileSource::resume() {
     impl->resume();
+}
+
+void DatabaseFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions DatabaseFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

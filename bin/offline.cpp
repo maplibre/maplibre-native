@@ -1,4 +1,3 @@
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/geojson.hpp>
@@ -6,6 +5,7 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <args.hxx>
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     args::ArgumentParser argumentParser("Mapbox GL offline tool");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
 
-    args::ValueFlag<std::string> tokenValue(argumentParser, "key", "Mapbox access token", {'t', "token"});
+    args::ValueFlag<std::string> tokenValue(argumentParser, "key", "API Key", {'t', "token"});
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> outputValue(argumentParser, "file", "Output database file name", {'o', "output"});
     args::ValueFlag<std::string> apiBaseValue(argumentParser, "URL", "API Base URL", {'a', "apiBaseURL"});
@@ -120,8 +120,11 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
-    std::string style = styleValue ? args::get(styleValue) : mbgl::util::default_styles::streets.url;
-
+    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
+    
+    std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
+    std::cout << " Style: " << style << std::endl;
+    
     mbgl::optional<std::string> mergePath = {};
     if (mergePathValue) mergePath = args::get(mergePathValue);
     mbgl::optional<std::string> inputDb = {};
@@ -156,17 +159,20 @@ int main(int argc, char *argv[]) {
         }
     }();
 
-    const char* tokenEnv = getenv("MAPBOX_ACCESS_TOKEN");
-    const std::string token = tokenValue ? args::get(tokenValue) : (tokenEnv ? tokenEnv : std::string());
+    const char* apiEnv = getenv("MGL_API_KEY");
+    const std::string apiKey = tokenValue ? args::get(tokenValue) : (apiEnv ? apiEnv : std::string());
     
-    const std::string apiBaseURL = apiBaseValue ? args::get(apiBaseValue) : mbgl::util::API_BASE_URL;
-
+    if (apiBaseValue) {
+        mapTilerConfiguration.withBaseURL(args::get(apiBaseValue));
+    }
 
     util::RunLoop loop;
     std::shared_ptr<DatabaseFileSource> fileSource = std::static_pointer_cast<DatabaseFileSource>(
         std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
             FileSourceType::Database,
-            ResourceOptions().withAccessToken(token).withBaseURL(apiBaseURL).withCachePath(output))));
+            ResourceOptions().withApiKey(apiKey)
+              .withTileServerOptions(mapTilerConfiguration)
+              .withCachePath(output))));
 
     std::unique_ptr<OfflineRegion> region;
 

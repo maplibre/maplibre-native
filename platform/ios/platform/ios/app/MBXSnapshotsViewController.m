@@ -46,7 +46,7 @@
     MGLMapCamera* mapCamera = [[MGLMapCamera alloc] init];
     mapCamera.pitch = 20;
     mapCamera.centerCoordinate = coordinates;
-    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[MGLStyle satelliteStreetsStyleURL] camera:mapCamera size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height)];
+    MGLMapSnapshotOptions* options = [[MGLMapSnapshotOptions alloc] initWithStyleURL:[[MGLStyle predefinedStyle:@"Hybrid"] url] camera:mapCamera size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height)];
     options.zoomLevel = 10;
     
     // Create and start the snapshotter

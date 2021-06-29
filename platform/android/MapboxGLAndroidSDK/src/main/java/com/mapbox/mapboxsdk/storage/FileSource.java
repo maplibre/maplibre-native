@@ -16,6 +16,7 @@ import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
+import com.mapbox.mapboxsdk.util.TileServerOptions;
 import com.mapbox.mapboxsdk.utils.FileUtils;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
@@ -371,8 +372,12 @@ public class FileSource {
   private long nativePtr;
 
   private FileSource(String cachePath) {
-    initialize(Mapbox.getAccessToken(), cachePath);
+    TileServerOptions options = Mapbox.getTileServerOptions();
+    initialize(Mapbox.getApiKey(), cachePath, options);
   }
+
+  @Keep
+  public native void setTileServerOptions(TileServerOptions tileServerOptions);
 
   @Keep
   public native boolean isActivated();
@@ -384,14 +389,18 @@ public class FileSource {
   public native void deactivate();
 
   @Keep
-  public native void setAccessToken(String accessToken);
+  public native void setApiKey(String apiKey);
 
   @NonNull
   @Keep
-  public native String getAccessToken();
+  public native String getApiKey();
 
   @Keep
   public native void setApiBaseUrl(String baseUrl);
+
+  @NonNull
+  @Keep
+  public native String getApiBaseUrl();
 
   /**
    * Sets a callback for transforming URLs requested from the internet
@@ -408,7 +417,7 @@ public class FileSource {
   private native void setResourceCachePath(String path, ResourcesCachePathChangeCallback callback);
 
   @Keep
-  private native void initialize(String accessToken, String cachePath);
+  private native void initialize(String apiKey, String cachePath, TileServerOptions options);
 
   @Override
   @Keep

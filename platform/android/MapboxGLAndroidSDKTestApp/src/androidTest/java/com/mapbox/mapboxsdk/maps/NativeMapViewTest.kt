@@ -6,12 +6,15 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
+import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.WellKnownTileServer
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters
 import com.mapbox.mapboxsdk.maps.renderer.MapRenderer
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
+import com.mapbox.mapboxsdk.testapp.MapboxApplication
 import com.mapbox.mapboxsdk.testapp.utils.TestConstants
 import junit.framework.Assert.*
 import org.junit.After
@@ -41,6 +44,8 @@ class NativeMapViewTest : AppCenter() {
     @UiThreadTest
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
+        val apiKey = Mapbox.getApiKey()
+        Mapbox.getInstance(context, apiKey, WellKnownTileServer.MapTiler)
         nativeMapView = NativeMapView(context, 2.0f, false, null, null, DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }
@@ -48,13 +53,16 @@ class NativeMapViewTest : AppCenter() {
     @After
     @UiThreadTest
     fun after() {
+        val context = InstrumentationRegistry.getInstrumentation().context
+        val apiKey = Mapbox.getApiKey()
+        Mapbox.getInstance(context, apiKey, MapboxApplication.TILE_SERVER)
         nativeMapView.destroy()
     }
 
     @Test
     @UiThreadTest
     fun testSetStyleUrl() {
-        val expected = Style.DARK
+        val expected = Style.getPredefinedStyle("Pastel")
         nativeMapView.styleUri = expected
         val actual = nativeMapView.styleUri
         assertEquals("Style URL should match", expected, actual)

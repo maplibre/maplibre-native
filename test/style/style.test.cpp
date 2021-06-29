@@ -65,10 +65,10 @@ TEST(Style, DuplicateSource) {
 
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
-    style.addSource(std::make_unique<VectorSource>("sourceId", "mapbox://mapbox.mapbox-terrain-v2"));
-
+    style.addSource(std::make_unique<VectorSource>("sourceId", "mptiler://tiles/contours"));
+    
     try {
-        style.addSource(std::make_unique<VectorSource>("sourceId", "mapbox://mapbox.mapbox-terrain-v2"));
+        style.addSource(std::make_unique<VectorSource>("sourceId", "mptiler://tiles/contours"));
         FAIL() << "Should not have been allowed to add a duplicate source id";
     } catch (const std::runtime_error&) {
         // Expected
@@ -86,7 +86,7 @@ TEST(Style, RemoveSourceInUse) {
 
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
-    style.addSource(std::make_unique<VectorSource>("sourceId", "mapbox://mapbox.mapbox-terrain-v2"));
+    style.addSource(std::make_unique<VectorSource>("sourceId", "mptiler://tiles/contours"));
     style.addLayer(std::make_unique<LineLayer>("layerId", "sourceId"));
 
     // Should not remove the source
@@ -109,9 +109,9 @@ TEST(Style, SourceImplsOrder) {
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0};
 
-    style.addSource(std::make_unique<VectorSource>("c", "mapbox://mapbox.mapbox-terrain-v2"));
-    style.addSource(std::make_unique<VectorSource>("b", "mapbox://mapbox.mapbox-terrain-v2"));
-    style.addSource(std::make_unique<VectorSource>("a", "mapbox://mapbox.mapbox-terrain-v2"));
+    style.addSource(std::make_unique<VectorSource>("c", "mptiler://tiles/contours"));
+    style.addSource(std::make_unique<VectorSource>("b", "mptiler://tiles/contours"));
+    style.addSource(std::make_unique<VectorSource>("a", "mptiler://tiles/contours"));
 
     auto sources = style.getSources();
     ASSERT_EQ(3u, sources.size());

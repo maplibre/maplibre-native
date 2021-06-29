@@ -3,6 +3,7 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/timer.hpp>
 
 #include <map>
@@ -17,6 +18,7 @@ public:
         Synchronous
     };
 
+    StubFileSource(const ResourceOptions&, ResponseType = ResponseType::Asynchronous);
     StubFileSource(ResponseType = ResponseType::Asynchronous);
     ~StubFileSource() override;
 
@@ -42,6 +44,9 @@ public:
     ResponseFunction spriteImageResponse;
     ResponseFunction imageResponse;
 
+    void setResourceOptions(ResourceOptions options) override;
+    ResourceOptions getResourceOptions() override;
+
 private:
     friend class StubOnlineFileSource;
 
@@ -52,6 +57,8 @@ private:
     ResponseType type;
     util::Timer timer;
     std::map<std::string, mapbox::base::Value> properties;
+
+    ResourceOptions resourceOptions;
 };
 
 } // namespace mbgl

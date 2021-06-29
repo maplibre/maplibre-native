@@ -43,7 +43,7 @@ class FragmentBackStackActivity : AppCompatActivity() {
     }
 
     private fun initMap(mapboxMap: MapboxMap) {
-        mapboxMap.setStyle(Style.SATELLITE) {
+        mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) {
             mapboxMap.setPadding(300, 300, 300, 300)
         }
     }

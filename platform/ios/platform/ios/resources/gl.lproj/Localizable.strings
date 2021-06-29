@@ -71,10 +71,7 @@
 "ROAD_REF_A11Y_FMT" = "Rota %@";
 
 /* Action sheet title */
-"SDK_NAME" = "Mapbox Maps SDK para o iOS";
-
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "A versión %@ do Mapbox Maps SDK para o iOS está dispoñíbel:";
+"SDK_NAME" = "MapLibre Maps SDK para o iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Non se puido cargar o mapa por mor de que non se atopa o estilo ou non está completo.";

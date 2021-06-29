@@ -70,7 +70,7 @@ public class LocationComponentActivationActivity extends AppCompatActivity imple
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setStyle(Style.DARK,
+    mapboxMap.setStyle(Style.getPredefinedStyle("Bright"),
       style -> activateLocationComponent(style));
   }
 

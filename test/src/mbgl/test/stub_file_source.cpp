@@ -1,5 +1,6 @@
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/util/async_request.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
@@ -18,8 +19,11 @@ public:
     StubFileSource& fileSource;
 };
 
-StubFileSource::StubFileSource(ResponseType type_)
-        : type(type_) {
+StubFileSource::StubFileSource(ResponseType type_):
+    StubFileSource::StubFileSource(ResourceOptions().withTileServerOptions(TileServerOptions::MapTilerConfiguration()), type_) {}
+
+StubFileSource::StubFileSource(const ResourceOptions& options, ResponseType type_)
+        : type(type_), resourceOptions(options.clone()) {
     if (type == ResponseType::Synchronous) {
         return;
     }
@@ -108,6 +112,14 @@ optional<Response> StubFileSource::defaultResponse(const Resource& resource) {
 
     // The above switch is exhaustive, but placate GCC nonetheless:
     return Response();
+}
+
+void StubFileSource::setResourceOptions(ResourceOptions options) {
+    resourceOptions = options;
+}
+
+ResourceOptions StubFileSource::getResourceOptions() {
+    return resourceOptions.clone();
 }
 
 } // namespace mbgl

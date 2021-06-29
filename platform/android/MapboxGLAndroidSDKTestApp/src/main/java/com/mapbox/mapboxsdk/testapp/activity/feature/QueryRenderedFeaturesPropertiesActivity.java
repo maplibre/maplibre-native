@@ -71,7 +71,7 @@ public class QueryRenderedFeaturesPropertiesActivity extends AppCompatActivity {
     mapView = (MapView) findViewById(R.id.mapView);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
         QueryRenderedFeaturesPropertiesActivity.this.mapboxMap = mapboxMap;
 
         // Add custom window adapter

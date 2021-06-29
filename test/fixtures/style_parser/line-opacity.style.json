@@ -1,16 +1,16 @@
 {
   "version": 8,
   "sources": {
-    "mapbox": {
+    "source": {
       "type": "vector",
-      "url": "mapbox://mapbox.mapbox-terrain-v1,mapbox.mapbox-streets-v5",
+      "url": "maptiler://sources/outdoor",
       "maxzoom": 14
     }
   },
   "layers": [{
     "id": "contour_line_loud",
     "type": "line",
-    "source": "mapbox",
+    "source": "source",
     "source-layer": "contour",
     "filter": ["==", "index", 5],
     "paint": {

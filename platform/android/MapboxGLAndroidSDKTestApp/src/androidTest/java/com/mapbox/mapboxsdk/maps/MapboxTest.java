@@ -21,8 +21,8 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class MapboxTest extends AppCenter {
 
-  private static final String ACCESS_TOKEN = "pk.0000000001";
-  private static final String ACCESS_TOKEN_2 = "pk.0000000002";
+  private static final String API_KEY = "pk.0000000001";
+  private static final String API_KEY_2 = "pk.0000000002";
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -31,7 +31,7 @@ public class MapboxTest extends AppCenter {
 
   @Before
   public void setup() {
-    realToken = Mapbox.getAccessToken();
+    realToken = Mapbox.getApiKey();
   }
 
   @Test
@@ -52,44 +52,26 @@ public class MapboxTest extends AppCenter {
 
   @Test
   @UiThreadTest
-  public void setAccessToken() {
-    Mapbox.setAccessToken(ACCESS_TOKEN);
-    assertSame(ACCESS_TOKEN, Mapbox.getAccessToken());
-    Mapbox.setAccessToken(ACCESS_TOKEN_2);
-    assertSame(ACCESS_TOKEN_2, Mapbox.getAccessToken());
+  public void setApiKey() {
+    Mapbox.setApiKey(API_KEY);
+    assertSame(API_KEY, Mapbox.getApiKey());
+    Mapbox.setApiKey(API_KEY_2);
+    assertSame(API_KEY_2, Mapbox.getApiKey());
   }
 
   @Test
   @UiThreadTest
-  public void setInvalidAccessToken() {
-    final String invalidAccessToken = "xyz";
+  public void setNullApiKey() {
     expectedException.expect(MapboxConfigurationException.class);
     expectedException.expectMessage(
-      "A valid access token parameter is required when using a Mapbox service."
-        + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
-        + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
-        + "Currently provided token is: " + invalidAccessToken
+      "A valid API key is required, currently provided key is: " + null
     );
 
-    Mapbox.setAccessToken(invalidAccessToken);
-  }
-
-  @Test
-  @UiThreadTest
-  public void setNullAccessToken() {
-    expectedException.expect(MapboxConfigurationException.class);
-    expectedException.expectMessage(
-      "A valid access token parameter is required when using a Mapbox service."
-        + "\nPlease see https://www.mapbox.com/help/create-api-access-token/ to learn how to create one."
-        + "\nMore information in this guide https://www.mapbox.com/help/first-steps-android-sdk/#access-tokens."
-        + "Currently provided token is: " + null
-    );
-
-    Mapbox.setAccessToken(null);
+    Mapbox.setApiKey(null);
   }
 
   @After
   public void tearDown() {
-    Mapbox.setAccessToken(realToken);
+    Mapbox.setApiKey(realToken);
   }
 }

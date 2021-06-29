@@ -52,8 +52,10 @@ void RasterSource::loadDescription(FileSource& fileSource) {
         return;
     }
 
-    const auto& url = urlOrTileset.get<std::string>();
-    req = fileSource.request(Resource::source(url), [this, url](const Response& res) {
+    const auto& rawURL = urlOrTileset.get<std::string>();
+    const auto& url = util::mapbox::canonicalizeSourceURL(fileSource.getResourceOptions().tileServerOptions(), rawURL);
+    
+    req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {
         if (res.error) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
@@ -67,8 +69,8 @@ void RasterSource::loadDescription(FileSource& fileSource) {
                 observer->onSourceError(*this, std::make_exception_ptr(util::StyleParseException(error.message)));
                 return;
             }
-
-            util::mapbox::canonicalizeTileset(*tileset, url, getType(), getTileSize());
+            const auto& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
+            util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);

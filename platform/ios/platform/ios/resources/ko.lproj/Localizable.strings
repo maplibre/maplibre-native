@@ -79,9 +79,6 @@
 /* Action sheet title */
 "SDK_NAME" = "iOS를 위한 맵박스 지도 SDK";
 
-/* Developer-only SDK update notification; {latest version, in format x.x.x} */
-"SDK_UPDATE_AVAILABLE" = "iOS버전 맵박스 지도 %@가 사용 가능합니다:";
-
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "형식을 찾을 수 없거나 호환이 되지 않아, 맵 로드에 실패하였습니다.";
 

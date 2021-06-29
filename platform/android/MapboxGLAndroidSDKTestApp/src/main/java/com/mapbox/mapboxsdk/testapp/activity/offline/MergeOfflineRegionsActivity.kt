@@ -17,7 +17,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
     companion object {
         private const val LOG_TAG = "Mbgl-MergeOfflineRegionsActivity"
         private const val TEST_DB_FILE_NAME = "offline_test.db"
-        private const val TEST_STYLE = Style.SATELLITE
+        private var TEST_STYLE = Style.getPredefinedStyle("Satellite Hybrid")
     }
 
     private val onFileCopiedListener = object : FileUtils.OnFileCopiedFromAssetsListener {

@@ -1,5 +1,6 @@
 #include <mbgl/storage/http_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
 
 #include <mbgl/util/http_header.hpp>
@@ -82,7 +83,7 @@ private:
 
 class HTTPFileSource::Impl {
 public:
-    Impl() {
+    Impl(const ResourceOptions& options): resourceOptions(options.clone()) {
         @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MGLNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
@@ -91,13 +92,25 @@ public:
         }
     }
 
+    void setResourceOptions(ResourceOptions options);
+    ResourceOptions getResourceOptions();
+
     NSURLSession* session = nil;
     NSString* userAgent = nil;
 
 private:
     NSString* getUserAgent() const;
     NSBundle* getSDKBundle() const;
+    ResourceOptions resourceOptions;
 };
+
+void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
+    resourceOptions = options;
+}
+
+ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
+    return resourceOptions.clone();
+}
 
 NSString *HTTPFileSource::Impl::getUserAgent() const {
     NSMutableArray *userAgentComponents = [NSMutableArray array];
@@ -180,8 +193,8 @@ NSBundle *HTTPFileSource::Impl::getSDKBundle() const {
     return bundle;
 }
 
-HTTPFileSource::HTTPFileSource()
-    : impl(std::make_unique<Impl>()) {
+HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
+    : impl(std::make_unique<Impl>(options)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -381,5 +394,14 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
 
     return std::move(request);
 }
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions HTTPFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
+}
+
 
 }

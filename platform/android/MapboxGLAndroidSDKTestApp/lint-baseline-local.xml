@@ -3,8 +3,8 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.mapbox_access_token` appears to be unused"
-        errorLine1="    &lt;string name=&quot;mapbox_access_token&quot;>YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE&lt;/string>"
+        message="The resource `R.string.api_key` appears to be unused"
+        errorLine1="    &lt;string name=&quot;api_key&quot;>YOUR_API_KEY_GOES_HERE&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/developer-config.xml"

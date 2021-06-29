@@ -15,11 +15,11 @@ import timber.log.Timber;
 public class Utils {
 
   private static final String[] STYLES = new String[] {
-    Style.MAPBOX_STREETS,
-    Style.OUTDOORS,
-    Style.LIGHT,
-    Style.DARK,
-    Style.SATELLITE_STREETS
+    Style.getPredefinedStyle("Streets"),
+    Style.getPredefinedStyle("Outdoor"),
+    Style.getPredefinedStyle("Bright"),
+    Style.getPredefinedStyle("Pastel"),
+    Style.getPredefinedStyle("Satellite Hybrid")
   };
 
   private static int index;

@@ -25,4 +25,13 @@
 /new_offline.db
 *.gpg
 /.vscode
+/platform/android/node_modules
 /platform/android/signing-key.text
+/platform/android/.java-version
+*.hprof
+/platform/ios/platform/ios/benchmark/assets/tiles/tiles
+/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Regular,Noto Sans Regular
+/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Medium,Noto Sans Regular
+/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Condensed Italic,Noto Sans Italic
+/platform/ios/platform/ios/benchmark/assets/glyphs/Noto Sans Regular
+/platform/android/key.json

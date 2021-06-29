@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -56,7 +56,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="388" y="211" width="642" height="480"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="TuG-C5-zLS">
                 <rect key="frame" x="0.0" y="0.0" width="642" height="480"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -73,14 +73,13 @@
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" autosaveColumns="NO" id="Mm4-6F-qEb">
                                             <rect key="frame" x="0.0" y="0.0" width="163" height="480"/>
-                                            <autoresizingMask key="autoresizingMask"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
                                                 <tableColumn editable="NO" width="16" minWidth="16" maxWidth="1000" id="P3U-a3-c8q">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                        <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
@@ -97,7 +96,6 @@
                                                 </tableColumn>
                                                 <tableColumn editable="NO" width="141" minWidth="40" maxWidth="1000" id="BwD-ww-7uw">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                        <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
@@ -201,15 +199,18 @@
                                 <menu key="menu" id="xf3-qk-IhF">
                                     <items>
                                         <menuItem title="Streets" state="on" tag="1" id="wvt-tP-O3a"/>
-                                        <menuItem title="Outdoors" tag="2" id="RkE-lp-fL9"/>
-                                        <menuItem title="Light" tag="3" id="R4X-kt-HHb"/>
-                                        <menuItem title="Dark" tag="4" id="jUC-5X-0Zx">
+                                        <menuItem title="Outdoor" tag="2" id="RkE-lp-fL9"/>
+                                        <menuItem title="Basic" tag="3" id="R4X-kt-HHb"/>
+                                        <menuItem title="Bright" tag="4" id="jUC-5X-0Zx">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="Satellite" tag="5" id="CTe-e2-o42">
+                                        <menuItem title="Pastel" tag="5" id="CTe-e2-o42">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="Satellite Streets" tag="6" id="7ly-oA-0ND">
+                                        <menuItem title="Satellite Hybrid" tag="6" id="7ly-oA-0ND">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Satellite Topo" tag="7" id="JSO-um-gzu">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
                                     </items>
@@ -261,6 +262,7 @@
                 </binding>
                 <outlet property="delegate" destination="-2" id="HEo-Qf-o6o"/>
             </connections>
+            <point key="canvasLocation" x="140" y="139"/>
         </window>
         <menu title="Map View" id="XbX-6a-Mgy">
             <items>
@@ -307,18 +309,19 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="yvb-NB-VGl"/>
             </connections>
+            <point key="canvasLocation" x="684" y="129"/>
         </menu>
         <window title="Add Offline Pack" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="NmZ-Tf-v2O">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="109" y="131" width="392" height="221"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
-            <view key="contentView" id="Aqq-bl-feU">
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+            <view key="contentView" misplaced="YES" id="Aqq-bl-feU">
                 <rect key="frame" x="0.0" y="0.0" width="392" height="221"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xjw-df-oAz">
-                        <rect key="frame" x="98" y="184" width="276" height="17"/>
+                        <rect key="frame" x="98" y="182" width="276" height="16"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" title="Add offline pack" id="Iec-RB-iqn">
                             <font key="font" metaFont="systemBold"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -326,7 +329,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sui-dp-hbb">
-                        <rect key="frame" x="98" y="107" width="44" height="17"/>
+                        <rect key="frame" x="98" y="106" width="44" height="16"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Name:" id="2El-Zw-T6E">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -334,7 +337,7 @@
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="D3l-hX-2Dh">
-                        <rect key="frame" x="98" y="134" width="276" height="42"/>
+                        <rect key="frame" x="98" y="132" width="276" height="42"/>
                         <textFieldCell key="cell" selectable="YES" title="Mapbox GL will download all the resources needed for viewing the currently visible coordinate bounds in the current style." id="3Gw-Zy-sBT">
                             <font key="font" metaFont="smallSystem"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -342,7 +345,7 @@
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tUU-DX-RxU">
-                        <rect key="frame" x="148" y="104" width="224" height="22"/>
+                        <rect key="frame" x="148" y="103" width="224" height="21"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="lwQ-N1-PTI">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -353,7 +356,7 @@
                         </connections>
                     </textField>
                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="p5T-3H-wqL">
-                        <rect key="frame" x="20" y="137" width="64" height="64"/>
+                        <rect key="frame" x="20" y="134" width="64" height="64"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="64" id="2Xy-pC-rE3"/>
                             <constraint firstAttribute="width" constant="64" id="SWY-Rg-9R8"/>
@@ -361,7 +364,7 @@
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSApplicationIcon" id="cww-fO-sNX"/>
                     </imageView>
                     <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xo1-tZ-WQ6">
-                        <rect key="frame" x="148" y="78" width="96" height="22"/>
+                        <rect key="frame" x="148" y="78" width="96" height="21"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="96" id="8Rw-FU-HGV"/>
                         </constraints>
@@ -378,7 +381,7 @@
                         </connections>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8r0-F0-e5i">
-                        <rect key="frame" x="250" y="81" width="20" height="17"/>
+                        <rect key="frame" x="250" y="81" width="20" height="16"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="to:" id="RBS-Uj-AVT">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -386,7 +389,7 @@
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5sj-XD-neD">
-                        <rect key="frame" x="276" y="78" width="96" height="22"/>
+                        <rect key="frame" x="276" y="78" width="96" height="21"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="96" id="faj-tE-bfc"/>
                         </constraints>
@@ -413,7 +416,7 @@
                         </connections>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hhq-J9-mzB">
-                        <rect key="frame" x="98" y="81" width="44" height="17"/>
+                        <rect key="frame" x="98" y="81" width="44" height="16"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="From:" id="fkO-YX-Yzt">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>

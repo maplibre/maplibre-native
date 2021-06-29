@@ -3,6 +3,7 @@
 #include <mbgl/platform/settings.hpp>
 #include <mbgl/storage/file_source_request.hpp>
 #include <mbgl/storage/resource.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
@@ -15,8 +16,9 @@ namespace mbgl {
 
 class AssetManagerFileSource::Impl {
 public:
-    Impl(ActorRef<Impl>, AAssetManager* assetManager_) : assetManager(assetManager_) {
-    }
+    Impl(ActorRef<Impl>, AAssetManager* assetManager_, const ResourceOptions options) :
+        resourceOptions(options.clone()),
+        assetManager(assetManager_) {}
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
         // Note: AssetManager already prepends "assets" to the filename.
@@ -36,17 +38,28 @@ public:
         req.invoke(&FileSourceRequest::setResponse, response);
     }
 
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    }
+
+    ResourceOptions getResourceOptions() {
+        return resourceOptions.clone();
+    }
+
 private:
     AAssetManager* assetManager;
+    ResourceOptions resourceOptions;
 };
 
 AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
-                                               const jni::Object<android::AssetManager>& assetManager_)
+                                               const jni::Object<android::AssetManager>& assetManager_,
+                                               const ResourceOptions options)
     : assetManager(jni::NewGlobal(env, assetManager_)),
       impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetManagerFileSource",
-          AAssetManager_fromJava(&env, jni::Unwrap(assetManager.get())))) {}
+          AAssetManager_fromJava(&env, jni::Unwrap(assetManager.get())),
+          options.clone())) {}
 
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 
@@ -62,4 +75,11 @@ bool AssetManagerFileSource::canRequest(const Resource& resource) const {
     return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
 }
 
+void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
+    impl->actor().invoke(&Impl::setResourceOptions, options.clone());
+}
+
+ResourceOptions AssetManagerFileSource::getResourceOptions() {
+    return impl->actor().ask(&Impl::getResourceOptions).get();
+}
 } // namespace mbgl

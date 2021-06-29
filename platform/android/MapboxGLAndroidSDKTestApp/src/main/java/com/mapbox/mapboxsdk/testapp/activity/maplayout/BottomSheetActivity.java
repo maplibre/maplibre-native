@@ -120,12 +120,12 @@ public class BottomSheetActivity extends AppCompatActivity {
   public static class MainMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String[] STYLES = new String[] {
-      Style.MAPBOX_STREETS,
-      Style.SATELLITE_STREETS,
-      Style.LIGHT,
-      Style.DARK,
-      Style.SATELLITE,
-      Style.OUTDOORS
+      Style.getPredefinedStyle("Streets"),
+      Style.getPredefinedStyle("Satellite Hybrid"),
+      Style.getPredefinedStyle("Bright"),
+      Style.getPredefinedStyle("Pastel"),
+      Style.getPredefinedStyle("Satellite Hybrid"),
+      Style.getPredefinedStyle("Outdoor")
     };
 
     private MapView map;
@@ -236,7 +236,7 @@ public class BottomSheetActivity extends AppCompatActivity {
     @Override
     public void onMapReady(@NonNull MapboxMap mapboxMap) {
       mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.760545, -122.436055), 15));
-      mapboxMap.setStyle(Style.LIGHT);
+      mapboxMap.setStyle(Style.getPredefinedStyle("Bright"));
     }
 
     @Override

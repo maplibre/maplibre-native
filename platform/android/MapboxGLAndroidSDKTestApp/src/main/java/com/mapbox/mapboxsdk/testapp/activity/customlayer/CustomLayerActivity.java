@@ -41,7 +41,7 @@ public class CustomLayerActivity extends AppCompatActivity {
     mapView.getMapAsync(map -> {
       mapboxMap = map;
       mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(39.91448, -243.60947), 10));
-      mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> initFab());
+      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> initFab());
     });
   }
 

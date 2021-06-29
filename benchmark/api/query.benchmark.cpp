@@ -32,7 +32,7 @@ public:
     HeadlessFrontend frontend { { 1000, 1000 }, 1 };
     Map map { frontend, MapObserver::nullObserver(),
               MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-              ResourceOptions().withCachePath("benchmark/fixtures/api/cache.db").withAssetPath(".").withAccessToken("foobar") };
+              ResourceOptions().withCachePath("benchmark/fixtures/api/cache.db").withAssetPath(".").withApiKey("foobar") };
     ScreenBox box{{ 0, 0 }, { 1000, 1000 }};
 };
 

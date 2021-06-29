@@ -248,10 +248,10 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     private fun initSpinner() {
         val styles = ArrayList<String>()
-        styles.add(Style.MAPBOX_STREETS)
-        styles.add(Style.DARK)
-        styles.add(Style.LIGHT)
-        styles.add(Style.OUTDOORS)
+        styles.add(Style.getPredefinedStyle("Streets"))
+        styles.add(Style.getPredefinedStyle("Pastel"))
+        styles.add(Style.getPredefinedStyle("Bright"))
+        styles.add(Style.getPredefinedStyle("Outdoor"))
         val spinnerArrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, styles)
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerStyleUrl.adapter = spinnerArrayAdapter

@@ -1,7 +1,7 @@
 #import <XCTest/XCTest.h>
 #import "MGLMapView.h"
 #import "MGLMapViewDelegate.h"
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 
 #import "MGLScaleBar.h"
 #import "UIView+MGLAdditions.h"
@@ -48,7 +48,7 @@
 - (void)setUp {
     [super setUp];
 
-    [MGLAccountManager setAccessToken:@"pk.feedcafedeadbeefbadebede"];
+    [MGLSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
 
     self.superView = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
@@ -89,7 +89,7 @@
 - (void)tearDown {
     self.styleLoadingExpectation = nil;
     self.mapView = nil;
-    [MGLAccountManager setAccessToken:nil];
+    [MGLSettings setApiKey:nil];
 
     [super tearDown];
 }

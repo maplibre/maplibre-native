@@ -109,7 +109,7 @@ public class GridSourceActivity extends AppCompatActivity implements OnMapReadyC
     );
 
     map.setStyle(new Style.Builder()
-      .fromUri(Style.MAPBOX_STREETS)
+      .fromUri(Style.getPredefinedStyle("Streets"))
       .withLayer(layer)
       .withSource(source)
     );

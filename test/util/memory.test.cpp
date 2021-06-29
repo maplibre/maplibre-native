@@ -26,9 +26,19 @@ using namespace std::literals::string_literals;
 class MemoryTest {
 public:
     MemoryTest() {
-        fileSource->styleResponse = [&](const Resource& res) { return response("style_" + getType(res) + ".json");};
-        fileSource->tileResponse = [&](const Resource& res) { return response(getType(res) + ".tile"); };
-        fileSource->sourceResponse = [&](const Resource& res) { return response("source_" + getType(res) + ".json"); };
+        fileSource->styleResponse = [&](const Resource& res) {
+            auto resName = "style_" + getType(res) + ".json";
+            return response(resName);
+        };
+        fileSource->tileResponse = [&](const Resource& res) {
+            auto resName = getType(res) + ".tile";
+            return response(resName);
+        };
+        fileSource->sourceResponse = [&](const Resource& res) {
+            auto resName = "source_" + getType(res) + ".json";
+            return response(resName);
+            
+        };
         fileSource->glyphsResponse = [&](const Resource&) { return response("glyphs.pbf"); };
         fileSource->spriteJSONResponse = [&](const Resource&) { return response("sprite.json"); };
         fileSource->spriteImageResponse = [&](const Resource&) { return response("sprite.png"); };
@@ -56,7 +66,7 @@ private:
     }
 
     std::string getType(const Resource& res) {
-        if (res.url.find("satellite") != std::string::npos) {
+        if (res.url.find("hybrid") != std::string::npos || res.url.find("satellite") != std::string::npos) {
             return "raster";
         } else {
             return "vector";
@@ -74,7 +84,7 @@ TEST(Memory, Vector) {
     MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.jumpTo(CameraOptions().withZoom(16));
-    map.getStyle().loadURL("mapbox://streets");
+    map.getStyle().loadURL("maptiler://maps/streets");
 
     frontend.render(map);
 }
@@ -86,7 +96,7 @@ TEST(Memory, Raster) {
     HeadlessFrontend frontend { { 256, 256 }, ratio };
     MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
-    map.getStyle().loadURL("mapbox://satellite");
+    map.getStyle().loadURL("maptiler://maps/hybrid");
 
     frontend.render(map);
 }
@@ -135,8 +145,8 @@ TEST(Memory, Footprint) {
 
     // Warm up buffers and cache.
     for (unsigned i = 0; i < 10; ++i) {
-        FrontendAndMap(test, "mapbox://streets");
-        FrontendAndMap(test, "mapbox://satellite");
+        FrontendAndMap(test, "maptiler://maps/streets");
+        FrontendAndMap(test, "maptiler://maps/hybrid");
     }
 
     // Process close callbacks, mostly needed by
@@ -148,14 +158,14 @@ TEST(Memory, Footprint) {
 
     long vectorInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
-        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "mapbox://streets"));
+        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/streets"));
     }
 
     double vectorFootprint = (mbgl::test::getCurrentRSS() - vectorInitialRSS) / double(runs);
 
     long rasterInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
-        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "mapbox://satellite"));
+        maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/hybrid"));
     }
 
     double rasterFootprint = (mbgl::test::getCurrentRSS() - rasterInitialRSS) / double(runs);

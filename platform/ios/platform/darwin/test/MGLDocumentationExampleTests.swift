@@ -189,7 +189,7 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         }
         
         //#-example-code
-        let terrainRGBURL = URL(string: "mapbox://mapbox.terrain-rgb")!
+        let terrainRGBURL = URL(string: "maptiler://sources/terrain-rgb")!
         let source = MGLRasterDEMSource(identifier: "hills", configurationURL: terrainRGBURL)
         mapView.style?.addSource(source)
         //#-end-example-code

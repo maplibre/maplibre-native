@@ -12,6 +12,10 @@ int runTests(int argc, char *argv[]) {
 #endif
 
     testing::InitGoogleTest(&argc, argv);
+    
+    // In order to run specific tests
+    // testing::GTEST_FLAG(filter) = "TileServerOptions*";
+    // testing::GTEST_FLAG(filter) = "MainResourceLoader.ResourceOptions";
 
     return RUN_ALL_TESTS();
 }

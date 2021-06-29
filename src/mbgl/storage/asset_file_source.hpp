@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
@@ -10,7 +11,7 @@ template <typename T> class Thread;
 
 class AssetFileSource : public FileSource {
 public:
-    AssetFileSource(const std::string& root);
+    AssetFileSource(const ResourceOptions& options);
     ~AssetFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
@@ -18,9 +19,11 @@ public:
     void pause() override;
     void resume() override;
 
+    void setResourceOptions(ResourceOptions) override;
+    ResourceOptions getResourceOptions() override;
+
 private:
     class Impl;
-
     std::unique_ptr<util::Thread<Impl>> impl;
 };
 

@@ -77,7 +77,7 @@ public class PolygonActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onMapReady(@NonNull MapboxMap map) {
     mapboxMap = map;
-    map.setStyle(Style.MAPBOX_STREETS);
+    map.setStyle(Style.getPredefinedStyle("Streets"));
 
     map.setOnPolygonClickListener(polygon -> Toast.makeText(
       PolygonActivity.this,

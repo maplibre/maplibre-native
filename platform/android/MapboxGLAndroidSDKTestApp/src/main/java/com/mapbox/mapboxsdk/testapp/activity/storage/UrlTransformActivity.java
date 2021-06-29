@@ -48,7 +48,7 @@ public class UrlTransformActivity extends AppCompatActivity {
 
     mapView.getMapAsync(map -> {
       Timber.i("Map loaded");
-      map.setStyle(Style.MAPBOX_STREETS);
+      map.setStyle(Style.getPredefinedStyle("Streets"));
     });
   }
 

@@ -6,6 +6,8 @@
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/util/async_task.hpp>
@@ -72,7 +74,7 @@ struct OnlineFileRequest {
 
 class OnlineFileSourceThread {
 public:
-    OnlineFileSourceThread() {
+    OnlineFileSourceThread(const ResourceOptions& options): resourceOptions(options.clone()), httpFileSource(options) {
         NetworkStatus::Subscribe(&reachability);
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
@@ -162,6 +164,14 @@ public:
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    }
+
+    const ResourceOptions& getResourceOptions() const {
+        return resourceOptions;
+    }
+
     void setOnlineStatus(bool status) {
         online = status;
         if (online) {
@@ -177,11 +187,14 @@ public:
         maximumConcurrentRequests = maximumConcurrentRequests_;
     }
 
-    void setAPIBaseURL(std::string t) { apiBaseURL = std::move(t); }
-    const std::string& getAPIBaseURL() const { return apiBaseURL; }
+    void setAPIBaseURL(std::string t) {
+        resourceOptions.withTileServerOptions(TileServerOptions().withBaseURL(std::move(t)));
+    }
 
-    void setAccessToken(std::string t) { accessToken = std::move(t); }
-    const std::string& getAccessToken() const { return accessToken; }
+    const std::string& getAPIBaseURL() const { return resourceOptions.tileServerOptions().baseURL(); }
+
+    void setApiKey(std::string t) { resourceOptions.withApiKey(std::move(t)); }
+    const std::string& getApiKey() const { return resourceOptions.apiKey(); }
 
 private:
     friend struct OnlineFileRequest;
@@ -266,6 +279,8 @@ private:
 
     ResourceTransform resourceTransform;
 
+    ResourceOptions resourceOptions;
+
     /**
      * The lifetime of a request is:
      *
@@ -287,16 +302,15 @@ private:
     uint32_t maximumConcurrentRequests;
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
-    std::string accessToken;
-    std::string apiBaseURL = mbgl::util::API_BASE_URL;
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
 };
 
 class OnlineFileSource::Impl {
 public:
-    Impl()
-        : thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
-              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource")) {}
+    Impl(const ResourceOptions& options) :
+        cachedResourceOptions(options.clone()),
+        thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
+              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", options.clone())) {}
 
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -305,7 +319,7 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::request, req.get(), std::move(res), req->actor());
         return req;
     }
-
+ 
     void pause() { thread->pause(); }
 
     void resume() { thread->resume(); }
@@ -314,33 +328,29 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::setResourceTransform, std::move(transform));
     }
 
-    void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
-
-    void setAPIBaseURL(const mapbox::base::Value& value) {
-        if (auto* baseURL = value.getString()) {
-            thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
-            {
-                std::lock_guard<std::mutex> lock(cachedBaseURLMutex);
-                cachedBaseURL = *baseURL;
-            }
-        } else {
-            Log::Error(Event::General, "Invalid api-base-url property value type.");
+    void setResourceOptions(ResourceOptions options) {
+        thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, options.clone());
+        {
+            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+            cachedResourceOptions = options;
         }
     }
 
-    std::string getAPIBaseURL() const {
-        std::lock_guard<std::mutex> lock(cachedBaseURLMutex);
-        return cachedBaseURL;
+    ResourceOptions getResourceOptions() {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return cachedResourceOptions.clone();
     }
+
+    void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
 
     void setMaximumConcurrentRequests(const mapbox::base::Value& value) {
         if (auto* maximumConcurrentRequests = value.getUint()) {
             assert(*maximumConcurrentRequests < std::numeric_limits<uint32_t>::max());
-            const auto maxConcurretnRequests = static_cast<uint32_t>(*maximumConcurrentRequests);
-            thread->actor().invoke(&OnlineFileSourceThread::setMaximumConcurrentRequests, maxConcurretnRequests);
+            const auto maxConcurrentRequests = static_cast<uint32_t>(*maximumConcurrentRequests);
+            thread->actor().invoke(&OnlineFileSourceThread::setMaximumConcurrentRequests, maxConcurrentRequests);
             {
                 std::lock_guard<std::mutex> lock(maximumConcurrentRequestsMutex);
-                cachedMaximumConcurrentRequests = maxConcurretnRequests;
+                cachedMaximumConcurrentRequests = maxConcurrentRequests;
             }
         } else {
             Log::Error(Event::General, "Invalid max-concurrent-requests property value type.");
@@ -352,28 +362,44 @@ public:
         return cachedMaximumConcurrentRequests;
     }
 
-    void setAccessToken(const mapbox::base::Value& value) {
-        if (auto* accessToken = value.getString()) {
-            thread->actor().invoke(&OnlineFileSourceThread::setAccessToken, *accessToken);
+    void setApiKey(const mapbox::base::Value& value) {
+        if (auto* apiKey = value.getString()) {
+            thread->actor().invoke(&OnlineFileSourceThread::setApiKey, *apiKey);
             {
-                std::lock_guard<std::mutex> lock(cachedAccessTokenMutex);
-                cachedAccessToken = *accessToken;
+                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                cachedResourceOptions.withApiKey(*apiKey);
             }
         } else {
-            Log::Error(Event::General, "Invalid access-token property value type.");
+            Log::Error(Event::General, "Invalid apiKey property value type.");
         }
     }
 
-    std::string getAccessToken() const {
-        std::lock_guard<std::mutex> lock(cachedAccessTokenMutex);
-        return cachedAccessToken;
+    std::string getApiKey() const {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return cachedResourceOptions.apiKey();
+    }
+
+    void setAPIBaseURL(const mapbox::base::Value& value) {
+        if (auto* baseURL = value.getString()) {
+            thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
+            {
+                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                cachedResourceOptions.withTileServerOptions(cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
+            }
+        } else {
+            Log::Error(Event::General, "Invalid base-url property value type.");
+        }
+    }
+
+    std::string getAPIBaseURL() const {
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        return cachedResourceOptions.tileServerOptions().baseURL();
     }
 
 private:
-    mutable std::mutex cachedAccessTokenMutex;
-    std::string cachedAccessToken;
-    mutable std::mutex cachedBaseURLMutex;
-    std::string cachedBaseURL = util::API_BASE_URL;
+    mutable std::mutex resourceOptionsMutex;
+    ResourceOptions cachedResourceOptions;
+
     mutable std::mutex maximumConcurrentRequestsMutex;
     uint32_t cachedMaximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
@@ -560,12 +586,13 @@ void OnlineFileRequest::onCancel(std::function<void()> callback_) {
     cancelCallback = std::move(callback_);
 }
 
-OnlineFileSource::OnlineFileSource() : impl(std::make_unique<Impl>()) {}
+OnlineFileSource::OnlineFileSource(const ResourceOptions& options) : impl(std::make_unique<Impl>(options)) {}
 
 OnlineFileSource::~OnlineFileSource() = default;
 
 std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
     Resource res = resource;
+    const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 
     switch (resource.kind) {
         case Resource::Kind::Unknown:
@@ -574,26 +601,29 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
 
         case Resource::Kind::Style:
             res.url =
-                mbgl::util::mapbox::normalizeStyleURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+                mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Source:
-            res.url = util::mapbox::normalizeSourceURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSourceURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Glyphs:
-            res.url = util::mapbox::normalizeGlyphsURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeGlyphsURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::SpriteImage:
         case Resource::Kind::SpriteJSON:
-            res.url = util::mapbox::normalizeSpriteURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeSpriteURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Tile:
-            res.url = util::mapbox::normalizeTileURL(impl->getAPIBaseURL(), resource.url, impl->getAccessToken());
+            res.url = util::mapbox::normalizeTileURL(options, resource.url, impl->getApiKey());
             break;
     }
+
+    // Log::Error(Event::General, "Original: " + resource.url);
+    // Log::Error(Event::General, "Normalized: " + res.url);
 
     return impl->request(std::move(callback), std::move(res));
 }
@@ -613,8 +643,8 @@ void OnlineFileSource::resume() {
 }
 
 void OnlineFileSource::setProperty(const std::string& key, const mapbox::base::Value& value) {
-    if (key == ACCESS_TOKEN_KEY) {
-        impl->setAccessToken(value);
+    if (key == API_KEY_KEY) {
+        impl->setApiKey(value);
     } else if (key == API_BASE_URL_KEY) {
         impl->setAPIBaseURL(value);
     } else if (key == MAX_CONCURRENT_REQUESTS_KEY) {
@@ -631,8 +661,8 @@ void OnlineFileSource::setProperty(const std::string& key, const mapbox::base::V
 }
 
 mapbox::base::Value OnlineFileSource::getProperty(const std::string& key) const {
-    if (key == ACCESS_TOKEN_KEY) {
-        return impl->getAccessToken();
+    if (key == API_KEY_KEY) {
+        return impl->getApiKey();
     } else if (key == API_BASE_URL_KEY) {
         return impl->getAPIBaseURL();
     } else if (key == MAX_CONCURRENT_REQUESTS_KEY) {
@@ -645,6 +675,14 @@ mapbox::base::Value OnlineFileSource::getProperty(const std::string& key) const 
 
 void OnlineFileSource::setResourceTransform(ResourceTransform transform) {
     impl->setResourceTransform(std::move(transform));
+}
+
+void OnlineFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions OnlineFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

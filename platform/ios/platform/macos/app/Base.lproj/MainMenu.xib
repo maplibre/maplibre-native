@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14269.14" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14269.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -385,29 +385,34 @@
                                     <action selector="showStyle:" target="-1" id="BGu-va-ftr"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Outdoors" tag="2" keyEquivalent="2" id="BBa-Qa-SQr">
+                            <menuItem title="Outdoor" tag="2" keyEquivalent="2" id="BBa-Qa-SQr">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="sQ3-b6-G1A"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Light" tag="3" keyEquivalent="3" id="HWe-7u-UVJ">
+                            <menuItem title="Basic" tag="3" keyEquivalent="3" id="HWe-7u-UVJ">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="jMN-oR-sbZ"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Dark" tag="4" keyEquivalent="4" id="6HI-q6-AeV">
+                            <menuItem title="Bright" tag="4" keyEquivalent="4" id="6HI-q6-AeV">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="xgf-Sq-eJw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Satellite" tag="5" keyEquivalent="5" id="h0J-5X-kgF">
+                            <menuItem title="Pastel" tag="5" keyEquivalent="5" id="h0J-5X-kgF">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="YyE-2C-Vhj"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Satellite Streets" tag="6" keyEquivalent="6" id="9BL-00-HFt">
+                            <menuItem title="Satellite Hybrid" tag="6" keyEquivalent="6" id="9BL-00-HFt">
                                 <connections>
                                     <action selector="showStyle:" target="-1" id="NTT-Y1-EqU"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Satellite Topo" tag="7" keyEquivalent="7" id="K7C-Sq-3zl">
+                                <connections>
+                                    <action selector="showStyle:" target="-1" id="oaR-08-VOQ"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Custom Style…" id="L0h-86-2cU">
@@ -662,29 +667,23 @@ CA
                                     <action selector="showShortcuts:" target="-1" id="hNZ-sm-X2q"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="EpY-wQ-SjH"/>
-                            <menuItem title="Improve This Map" id="xu5-WN-qYK">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="giveFeedback:" target="-1" id="cil-i9-r39"/>
-                                </connections>
-                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="620" y="72"/>
         </menu>
         <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="Preferences" animationBehavior="default" id="UWc-yQ-qda">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="109" y="131" width="350" height="84"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="eA4-n3-qPe">
                 <rect key="frame" x="0.0" y="0.0" width="350" height="84"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0IK-AW-Gg3">
-                        <rect key="frame" x="18" y="45" width="89" height="17"/>
+                        <rect key="frame" x="18" y="45" width="89" height="16"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Access token:" id="Ptd-FI-M5A">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -702,7 +701,7 @@ CA
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                         <connections>
-                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLMapboxAccessToken" id="iJE-S2-ALY"/>
+                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLApiKey" id="iJE-S2-ALY"/>
                         </connections>
                     </textField>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="c3S-LC-PoX">
@@ -714,9 +713,6 @@ CA
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="smallSystem"/>
                         </buttonCell>
-                        <connections>
-                            <action selector="openAccessTokenManager:" target="-1" id="1LX-4G-roC"/>
-                        </connections>
                     </button>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="7IZ-zl-iT1">
                         <rect key="frame" x="18" y="18" width="109" height="18"/>
@@ -754,7 +750,7 @@ CA
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="830" y="430" width="400" height="300"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="8ha-hw-zOD">
                 <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -763,18 +759,17 @@ CA
                         <rect key="frame" x="-1" y="20" width="402" height="281"/>
                         <clipView key="contentView" id="J9U-Yx-o2S">
                             <rect key="frame" x="1" y="0.0" width="400" height="265"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" autosaveColumns="NO" headerView="MAZ-Iq-hBi" id="Ato-Vu-HYT">
                                     <rect key="frame" x="0.0" y="0.0" width="423" height="242"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
                                         <tableColumn editable="NO" width="16" minWidth="10" maxWidth="3.4028234663852886e+38" id="xtw-hQ-8C5" userLabel="State">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </tableHeaderCell>
@@ -786,7 +781,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="116" minWidth="40" maxWidth="1000" id="2hD-LN-h0L">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Name">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                             </tableHeaderCell>
@@ -806,7 +800,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="50" minWidth="40" maxWidth="1000" id="pkI-c7-xoD">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Downloaded Resources">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                             </tableHeaderCell>
@@ -823,7 +816,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="50" minWidth="10" maxWidth="3.4028234663852886e+38" id="Rrd-A9-jqc">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Total Resources">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </tableHeaderCell>
@@ -840,7 +832,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="50" minWidth="40" maxWidth="1000" id="kCO-Cd-bQt">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Downloaded Tiles">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                             </tableHeaderCell>
@@ -861,7 +852,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="60" minWidth="10" maxWidth="3.4028234663852886e+38" id="WO5-Ci-HgG">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Downloaded Tiles Size">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </tableHeaderCell>
@@ -882,7 +872,6 @@ CA
                                         </tableColumn>
                                         <tableColumn editable="NO" width="60" minWidth="10" maxWidth="3.4028234663852886e+38" id="h7m-6l-KaS">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Downloaded Resources Size">
-                                                <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </tableHeaderCell>

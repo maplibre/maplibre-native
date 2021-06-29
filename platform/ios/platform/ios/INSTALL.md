@@ -191,11 +191,7 @@ If you require a build with debug symbols pre-stripped, use [this feed URL](http
 
 ### Configuration
 
-1. Mapbox vector tiles require a Mapbox account and API access token. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MGLMapboxAccessToken` to your access token. You can obtain an access token from the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/).
-
-1. _(Optional)_ Mapbox Telemetry is a [powerful location analytics platform](https://www.mapbox.com/telemetry/) included in this SDK. By default, anonymized location and usage data is sent to Mapbox whenever the host application causes it to be gathered. This SDK provides users with a way to individually opt out of Mapbox Telemetry. You can also add this opt-out setting to your application’s Settings screen using a Settings bundle. An example Settings.bundle is available in the `build/ios/pkg/` directory; drag it into the Project navigator, checking “Copy items if needed” when prompted. In the project editor, verify that the following change occurred automatically:
-
-   - In the General tab, Settings.bundle is listed in the “Copy Bundle Resources” build phase.
+1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MGLApiKey` to your api key..
 
 ### Usage
 

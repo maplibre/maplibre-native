@@ -6,7 +6,7 @@
     #import <Cocoa/Cocoa.h>
 #endif
 
-#import "MGLAccountManager.h"
+#import "MGLSettings.h"
 #import "MGLMapCamera.h"
 #import "NSArray+MGLAdditions.h"
 #import "NSBundle+MGLAdditions.h"
@@ -150,39 +150,6 @@
     info.feedbackLink = _feedbackLink;
     
     return info;
-}
-
-- (nullable NSURL *)feedbackURLAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel {
-    return [self feedbackURLForStyleURL:nil atCenterCoordinate:centerCoordinate zoomLevel:zoomLevel direction:0 pitch:0];
-}
-
-- (nullable NSURL *)feedbackURLForStyleURL:(nullable NSURL *)styleURL atCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction pitch:(CGFloat)pitch {
-    if (!self.feedbackLink) {
-        return nil;
-    }
-    
-    NSURLComponents *components = [NSURLComponents componentsWithString:@"https://apps.mapbox.com/feedback/"];
-    components.fragment = [NSString stringWithFormat:@"/%.5f/%.5f/%.2f/%.1f/%i",
-                           centerCoordinate.longitude, centerCoordinate.latitude, zoomLevel,
-                           direction, (int)round(pitch)];
-    
-    NSURLQueryItem *referrerQueryItem = [NSURLQueryItem queryItemWithName:@"referrer"
-                                                                    value:[NSBundle mgl_applicationBundleIdentifier]];
-    NSMutableArray<NSURLQueryItem *> *queryItems = [NSMutableArray arrayWithObject:referrerQueryItem];
-    if ([styleURL.scheme isEqualToString:@"mapbox"] && [styleURL.host isEqualToString:@"styles"]) {
-        NSArray<NSString *> *stylePathComponents = styleURL.pathComponents;
-        if (stylePathComponents.count >= 3) {
-            [queryItems addObjectsFromArray:@[
-                [NSURLQueryItem queryItemWithName:@"owner" value:stylePathComponents[1]],
-                [NSURLQueryItem queryItemWithName:@"id" value:stylePathComponents[2]],
-                [NSURLQueryItem queryItemWithName:@"access_token" value:[MGLAccountManager accessToken]],
-                [NSURLQueryItem queryItemWithName:@"map_sdk_version" value:[NSBundle mgl_frameworkInfoDictionary][@"MGLSemanticVersionString"]],
-            ]];
-        }
-    }
-    components.queryItems = queryItems;
-    
-    return components.URL;
 }
 
 - (NSAttributedString *)titleWithStyle:(MGLAttributionInfoStyle)style

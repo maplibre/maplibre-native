@@ -71,9 +71,8 @@ MGL_EXPORT
  After initializing and configuring the source, add it to a map view’s style
  using the `-[MGLStyle addSource:]` method.
 
- The URL may be a full HTTP or HTTPS URL or, for tilesets hosted by Mapbox, a
- Mapbox URL indicating a tileset ID (`mapbox://<tilesetid>`). The URL should
- point to a JSON file that conforms to the
+ The URL may be a full HTTP or HTTPS URL or a canonical
+ URL. The URL should point to a JSON file that conforms to the
  <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
 
  @param identifier A string that uniquely identifies the source in the style to
