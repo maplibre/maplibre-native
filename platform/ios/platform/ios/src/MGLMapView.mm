@@ -4382,7 +4382,7 @@ public:
     newAnnotationContainerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     newAnnotationContainerView.contentMode = UIViewContentModeCenter;
     [newAnnotationContainerView addSubviews:annotationViews];
-    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:0];
+    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:1];
     self.annotationContainerView = newAnnotationContainerView;
     
     [self updatePresentsWithTransaction];
