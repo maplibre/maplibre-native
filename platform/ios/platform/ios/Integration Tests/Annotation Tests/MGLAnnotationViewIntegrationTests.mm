@@ -292,8 +292,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     [self internalRunTests:tests];
 }
 
-// fails in metal-angle branch
-- (void)skipped_testSelectionMoveIntoView  {
+- (void)testSelectionMoveIntoView  {
     // Tests moveIntoView:YES
     // without a callout
     
@@ -329,8 +328,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     [self internalRunTests:tests];
 }
 
-// caused crash in metal-angle branch
-- (void)skipped_testSelectionMoveIntoViewWithCallout  {
+- (void)testSelectionMoveIntoViewWithCallout  {
     // Tests moveIntoView:YES
     // WITH the default callout (implements marginshint)
     
@@ -377,8 +375,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     [self internalRunTests:tests];
 }
 
-// failed in metal-angle branch
-- (void)skipped_testSelectionMoveIntoViewWithBasicCallout  {
+- (void)testSelectionMoveIntoViewWithBasicCallout  {
     // Tests moveIntoView:YES
     // WITH a callout that DOES NOT implement marginshint
     
@@ -418,8 +415,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
 #pragma mark - Selection with an offset
 
-// fails in metal-angle branch
-- (void)skipped_testSelectingAnnotationWithCenterOffset {
+- (void)testSelectingAnnotationWithCenterOffset {
 
     for (CGFloat dx = -100.0; dx <= 100.0; dx += 100.0 ) {
         for (CGFloat dy = -100.0; dy <= 100.0; dy += 100.0 ) {
@@ -620,8 +616,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 }
 
 
-// fails in metal-angle branch
-- (void)skipped_testShowingAnnotationsThenSelectingAnimated {
+- (void)testShowingAnnotationsThenSelectingAnimated {
     [self internalTestShowingAnnotationsThenSelectingAnimated:YES];
 }
 
