@@ -2,9 +2,22 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
-## master
+## 5.13.0-pre.1 (metal support - June 30, 2021
 
-### Features
+> Warning: unstable release for test purposes only.
+### Bug Fixes
+
+* Displaying view annotations [#98](https://github.com/maplibre/maplibre-gl-native/pull/98)
+* Not render MapView if frame is empty [#67](https://github.com/maplibre/maplibre-gl-native/pull/97)
+
+### Known Issues
+
+* Failed tests:
+  * MGLDocumentationExampleTests testMGLMapSnapshotter
+  * MGLMapSnapshotterTests testOverlayHandler
+  * MGLMapSnapshotterTests testDelegate
+  * MGLMapSnapshotterTests testRuntimeStyling
+  * MGLMapSnapshotterTests testLocalGlyphRendering
 
 ## 5.12.0-pre.1 - May 6, 2021
 
