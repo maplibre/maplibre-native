@@ -1,7 +1,6 @@
 #include "qmapbox.hpp"
 
 #include <mbgl/storage/network_status.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/projection.hpp>
@@ -201,26 +200,6 @@ NetworkMode networkMode()
 void setNetworkMode(NetworkMode mode)
 {
     mbgl::NetworkStatus::Set(static_cast<mbgl::NetworkStatus::Status>(mode));
-}
-
-/*!
-    \fn QVector<QPair<QString, QString> >& QMapbox::defaultStyles()
-
-    Returns a list containing a pair of string objects, representing the style
-    URL and name, respectively.
-*/
-QVector<QPair<QString, QString> >& defaultStyles()
-{
-    static QVector<QPair<QString, QString>> styles;
-
-    if (styles.isEmpty()) {
-        for (auto style : mbgl::util::default_styles::orderedStyles) {
-            styles.append(QPair<QString, QString>(
-                QString::fromStdString(style.url), QString::fromStdString(style.name)));
-        }
-    }
-
-    return styles;
 }
 
 /*!

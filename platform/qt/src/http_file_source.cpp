@@ -11,7 +11,9 @@
 
 namespace mbgl {
 
-HTTPFileSource::Impl::Impl() : m_manager(new QNetworkAccessManager(this))
+HTTPFileSource::Impl::Impl(const ResourceOptions& options)
+    : m_manager(new QNetworkAccessManager(this)),
+      m_resourceOptions(options.clone())
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 }
@@ -87,8 +89,18 @@ void HTTPFileSource::Impl::onReplyFinished()
     reply->deleteLater();
 }
 
-HTTPFileSource::HTTPFileSource()
-    : impl(std::make_unique<Impl>()) {
+void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options)
+{
+    m_resourceOptions = options;
+}
+
+ResourceOptions HTTPFileSource::Impl::getResourceOptions()
+{
+    return m_resourceOptions.clone();
+}
+
+HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
+    : impl(std::make_unique<Impl>(options)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -96,6 +108,14 @@ HTTPFileSource::~HTTPFileSource() = default;
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback)
 {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
+}
+
+void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+    impl->setResourceOptions(options.clone());
+}
+
+ResourceOptions HTTPFileSource::getResourceOptions() {
+    return impl->getResourceOptions();
 }
 
 } // namespace mbgl

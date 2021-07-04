@@ -46,6 +46,7 @@
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 #include <mbgl/util/traits.hpp>
 
 #include <QGuiApplication>
@@ -218,8 +219,8 @@ QMapboxGLSettings::QMapboxGLSettings()
     , m_cacheMaximumSize(mbgl::util::DEFAULT_MAX_CACHE_SIZE)
     , m_cacheDatabasePath(":memory:")
     , m_assetPath(QCoreApplication::applicationDirPath())
-    , m_accessToken(qgetenv("MAPBOX_ACCESS_TOKEN"))
-    , m_apiBaseUrl(mbgl::util::API_BASE_URL)
+    , m_apiKey(qgetenv("MGL_API_KEY"))
+    , m_tileServerOptionsInternal(new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration()))
 {
 }
 
@@ -373,28 +374,24 @@ void QMapboxGLSettings::setAssetPath(const QString &path)
 }
 
 /*!
-    Returns the access token.
+    Returns the API key.
 
-    By default, it is taken from the environment variable \c MAPBOX_ACCESS_TOKEN
+    By default, it is taken from the environment variable \c MGL_API_KEY
     or empty if the variable is not set.
 */
-QString QMapboxGLSettings::accessToken() const {
-    return m_accessToken;
+QString QMapboxGLSettings::apiKey() const {
+    return m_apiKey;
 }
 
 /*!
-    Sets the access \a token.
+    Sets the API key.
 
-    Mapbox-hosted vector tiles and styles require an API
-    \l {https://www.mapbox.com/help/define-access-token/}{access token}, which you
-    can obtain from the \l {https://www.mapbox.com/studio/account/tokens/}
-    {Mapbox account page}. Access tokens associate requests to Mapbox's vector tile
-    and style APIs with your Mapbox account. They also deter other developers from
-    using your styles without your permission.
+    MapTiler-hosted and Mapbox-hosted vector tiles and styles require an API
+    key or access token.
 */
-void QMapboxGLSettings::setAccessToken(const QString &token)
+void QMapboxGLSettings::setApiKey(const QString &key)
 {
-    m_accessToken = token;
+    m_apiKey = key;
 }
 
 /*!
@@ -402,7 +399,7 @@ void QMapboxGLSettings::setAccessToken(const QString &token)
 */
 QString QMapboxGLSettings::apiBaseUrl() const
 {
-    return m_apiBaseUrl;
+    return QString::fromStdString(m_tileServerOptionsInternal->baseURL());
 }
 
 /*!
@@ -414,7 +411,7 @@ QString QMapboxGLSettings::apiBaseUrl() const
 */
 void QMapboxGLSettings::setApiBaseUrl(const QString& url)
 {
-    m_apiBaseUrl = url;
+    m_tileServerOptionsInternal = &m_tileServerOptionsInternal->withBaseURL(url.toStdString());
 }
 
 /*!
@@ -455,6 +452,10 @@ std::function<std::string(const std::string &)> QMapboxGLSettings::resourceTrans
 */
 void QMapboxGLSettings::setResourceTransform(const std::function<std::string(const std::string &)> &transform) {
     m_resourceTransform = transform;
+}
+
+mbgl::TileServerOptions *QMapboxGLSettings::tileServerOptionsInternal() const {
+    return m_tileServerOptionsInternal;
 }
 
 /*!
@@ -1656,6 +1657,15 @@ void QMapboxGL::connectionEstablished()
 }
 
 /*!
+    Returns a list containing a pair of string objects, representing the style
+    URL and name, respectively.
+*/
+const QVector<QPair<QString, QString>> &QMapboxGL::defaultStyles() const
+{
+    return d_ptr->defaultStyles;
+}
+
+/*!
     \fn void QMapboxGL::needsRendering()
 
     This signal is emitted when the visual contents of the map have changed
@@ -1710,9 +1720,9 @@ mbgl::MapOptions mapOptionsFromQMapboxGLSettings(const QMapboxGLSettings &settin
 
 mbgl::ResourceOptions resourceOptionsFromQMapboxGLSettings(const QMapboxGLSettings &settings) {
     return std::move(mbgl::ResourceOptions()
-        .withAccessToken(settings.accessToken().toStdString())
+        .withApiKey(settings.apiKey().toStdString())
         .withAssetPath(settings.assetPath().toStdString())
-        .withBaseURL(settings.apiBaseUrl().toStdString())
+        .withTileServerOptions(*settings.tileServerOptionsInternal())
         .withCachePath(settings.cacheDatabasePath().toStdString())
         .withMaximumCacheSize(settings.cacheDatabaseMaximumSize()));
 }
@@ -1733,6 +1743,10 @@ QMapboxGLPrivate::QMapboxGLPrivate(QMapboxGL *q, const QMapboxGLSettings &settin
     connect(m_mapObserver.get(), SIGNAL(copyrightsChanged(QString)), q, SIGNAL(copyrightsChanged(QString)));
 
     auto resourceOptions = resourceOptionsFromQMapboxGLSettings(settings);
+    for (auto style : resourceOptions.tileServerOptions().defaultStyles()) {
+        defaultStyles.append(QPair<QString, QString>(
+            QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
+    }
 
     // Setup the Map object.
     mapObj = std::make_unique<mbgl::Map>(*this, *m_mapObserver,

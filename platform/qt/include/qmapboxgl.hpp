@@ -16,6 +16,12 @@ class QMapboxGLPrivate;
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
+// TODO: this will be wrapped at some point
+namespace mbgl
+{
+    class TileServerOptions;
+}
+
 class Q_MAPBOXGL_EXPORT QMapboxGLSettings
 {
 public:
@@ -63,8 +69,8 @@ public:
     QString assetPath() const;
     void setAssetPath(const QString &);
 
-    QString accessToken() const;
-    void setAccessToken(const QString &);
+    QString apiKey() const;
+    void setApiKey(const QString &);
 
     QString apiBaseUrl() const;
     void setApiBaseUrl(const QString &);
@@ -75,6 +81,8 @@ public:
     std::function<std::string(const std::string &)> resourceTransform() const;
     void setResourceTransform(const std::function<std::string(const std::string &)> &);
 
+    mbgl::TileServerOptions *tileServerOptionsInternal() const;
+
 private:
     GLContextMode m_contextMode;
     MapMode m_mapMode;
@@ -84,10 +92,11 @@ private:
     unsigned m_cacheMaximumSize;
     QString m_cacheDatabasePath;
     QString m_assetPath;
-    QString m_accessToken;
-    QString m_apiBaseUrl;
+    QString m_apiKey;
     QString m_localFontFamily;
     std::function<std::string(const std::string &)> m_resourceTransform;
+
+    mbgl::TileServerOptions *m_tileServerOptionsInternal{};
 };
 
 struct Q_MAPBOXGL_EXPORT QMapboxGLCameraOptions {
@@ -251,6 +260,8 @@ public:
     void createRenderer();
     void destroyRenderer();
     void setFramebufferObject(quint32 fbo, const QSize &size);
+
+    const QVector<QPair<QString, QString>> &defaultStyles() const;
 
 public slots:
     void render();
