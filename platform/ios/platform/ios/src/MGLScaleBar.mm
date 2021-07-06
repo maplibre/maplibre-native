@@ -196,6 +196,8 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     [self addZeroLabel];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resetLabelImageCache) name:NSCurrentLocaleDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(redrawLabelWithUpdatedTraits) name:@"scaleBarTraitCollectionUpdated" object:nil];
+    
 }
 
 - (void)dealloc {
@@ -205,6 +207,15 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
 - (void)resetLabelImageCache {
     self.labelImageCache = [[NSMutableDictionary alloc] init];
     [self addZeroLabel];
+}
+
+- (void)redrawLabelWithUpdatedTraits {
+    
+    _labelImageCache              = [[NSMutableDictionary alloc] init];
+    _prototypeLabel               = [[MGLScaleBarLabel alloc] init];
+    _prototypeLabel.font          = [UIFont systemFontOfSize:8 weight:UIFontWeightMedium];
+    _prototypeLabel.clipsToBounds = NO;
+    
 }
 
 #pragma mark - Dimensions
