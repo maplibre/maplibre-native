@@ -220,7 +220,7 @@ namespace mbgl {
                 .withStyleTemplate("{path}.json", "maps", {})
                 .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
                 .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
-                .withTileTemplate("/tiles{path}", "tiles", {})
+                .withTileTemplate("/{path}", "tiles", {})
                 .withDefaultStyles(styles)
                 .withDefaultStyle("Basic")
                 .setRequiresApiKey(false);
