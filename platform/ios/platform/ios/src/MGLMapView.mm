@@ -6280,11 +6280,9 @@ static void *windowScreenContext = &windowScreenContext;
         if (@available(iOS 14, *)) {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
             if (self.userTrackingMode != MGLUserTrackingModeNone &&
-                [manager respondsToSelector:@selector(authorizationStatus)] &&
                 (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
                  manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
                  manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
-                [manager respondsToSelector:@selector(accuracyAuthorization)] &&
                 manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
                 [self accuracyDescriptionString] != nil ) {
                 [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:@"MGLAccuracyAuthorizationDescription"];

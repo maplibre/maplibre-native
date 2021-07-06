@@ -2338,7 +2338,9 @@ CLLocationCoordinate2D randomWorldCoordinate() {
 - (void)mapView:(nonnull MGLMapView *)mapView didChangeLocationManagerAuthorization:(nonnull id<MGLLocationManager>)manager {
     if (@available(iOS 14, *)) {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-        if (manager.authorizationStatus == kCLAuthorizationStatusDenied || manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy) {
+        if (mapView.userTrackingMode != MGLUserTrackingModeNone
+                     && (manager.authorizationStatus == kCLAuthorizationStatusDenied
+                     || manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy)) {
             [self alertAccuracyChanges];
         }
 #endif
