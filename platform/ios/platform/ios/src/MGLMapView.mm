@@ -285,9 +285,6 @@ public:
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
 
-@property (nonatomic, assign) NSInteger numberOfRenderCalls;
-@property (nonatomic, assign) NSInteger numberOfRenderCallsMoreThanOneSecond;
-
 // Display Link
 @property (nonatomic, weak) UIScreen *displayLinkScreen;
 @property (nonatomic) CADisplayLink *displayLink;
@@ -1030,18 +1027,9 @@ public:
         [self updateViewsWithCurrentUpdateParameters];
       
         if (_rendererFrontend) {
-            _numberOfRenderCalls++;
-
-            CFTimeInterval before = CACurrentMediaTime();
+            
             _rendererFrontend->render();
-            CFTimeInterval after = CACurrentMediaTime();
 
-            if (after - before >= 1.0) {
-                // See https://github.com/mapbox/mapbox-gl-native/issues/14232
-                // and https://github.com/mapbox/mapbox-gl-native-ios/issues/350
-                // This will be reported later
-                _numberOfRenderCallsMoreThanOneSecond++;
-            }
         }
         
     }
@@ -1301,8 +1289,6 @@ public:
     
     if (self.needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
     {
-        self.needsDisplayRefresh = NO;
-
         // UIView update logic has moved into `renderSync` above, which now gets
         // triggered by a call to setNeedsDisplay.
         // See MGLMapViewOpenGLImpl::display() for more details
@@ -1780,9 +1766,6 @@ public:
     // Note: We do not remove the snapshot view (if there is one) until we have become
     // active.
     [self validateLocationServices];
-    
-    self.numberOfRenderCalls = 0;
-    self.numberOfRenderCallsMoreThanOneSecond = 0;
     
 }
 
