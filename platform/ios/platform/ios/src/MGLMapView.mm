@@ -285,6 +285,9 @@ public:
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
 
+@property (nonatomic, assign) NSInteger numberOfRenderCalls;
+@property (nonatomic, assign) NSInteger numberOfRenderCallsMoreThanOneSecond;
+
 // Display Link
 @property (nonatomic, weak) UIScreen *displayLinkScreen;
 @property (nonatomic) CADisplayLink *displayLink;
@@ -989,7 +992,7 @@ public:
     }
 }
 
-- (void)updateViewsPostMapRendering {
+- (void)updateViewsWithCurrentUpdateParameters {
     // Update UIKit elements, prior to rendering
     [self updateUserLocationAnnotationView];
     [self updateAnnotationViews];
@@ -1003,17 +1006,56 @@ public:
     [self processPendingBlocks];
 }
 
-- (void)renderSync
+- (BOOL)renderSync
 {
-    if ( ! self.dormant && _rendererFrontend)
-    {
-        _rendererFrontend->render();
+    BOOL hasPendingBlocks = (self.pendingCompletionBlocks.count > 0);
+
+    if (!self.needsDisplayRefresh && !hasPendingBlocks) {
+        return NO;
     }
 
-    // TODO: This should be moved from what's essentially the UIView rendering
-    // To do this, add view models that can be updated separately, before the
-    // UIViews can be updated to match
-    [self updateViewsPostMapRendering];
+    BOOL needsRender = self.needsDisplayRefresh;
+
+    self.needsDisplayRefresh = NO;
+
+    if (!self.dormant && needsRender)
+    {
+        // It's important to call this *before* `_rendererFrontend->render()`, as
+        // that function saves the current `updateParameters` before rendering. If this
+        // occurs after then the views will be a frame behind.
+        //
+        // The update parameters will have been updated earlier, for example by
+        // calls to easeTo, flyTo, called from gesture handlers.
+        
+        [self updateViewsWithCurrentUpdateParameters];
+      
+        if (_rendererFrontend) {
+            _numberOfRenderCalls++;
+
+            CFTimeInterval before = CACurrentMediaTime();
+            _rendererFrontend->render();
+            CFTimeInterval after = CACurrentMediaTime();
+
+            if (after - before >= 1.0) {
+                // See https://github.com/mapbox/mapbox-gl-native/issues/14232
+                // and https://github.com/mapbox/mapbox-gl-native-ios/issues/350
+                // This will be reported later
+                _numberOfRenderCallsMoreThanOneSecond++;
+            }
+        }
+        
+    }
+
+    if (hasPendingBlocks) {
+        // Call any pending completion blocks. This is primarily to ensure
+        // that annotations are in the expected position after core rendering
+        // and map update.
+        //
+        // TODO: Consider using this same mechanism for delegate callbacks.
+        [self processPendingBlocks];
+    }
+
+    return YES;
 }
 
 // This gets called when the view dimension changes, e.g. because the device is being rotated.
@@ -1738,6 +1780,10 @@ public:
     // Note: We do not remove the snapshot view (if there is one) until we have become
     // active.
     [self validateLocationServices];
+    
+    self.numberOfRenderCalls = 0;
+    self.numberOfRenderCallsMoreThanOneSecond = 0;
+    
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
