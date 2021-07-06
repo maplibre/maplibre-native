@@ -111,11 +111,19 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     CGContextSetLineJoin(context, kCGLineJoinRound);
     
     CGContextSetTextDrawingMode(context, kCGTextStroke);
-    self.textColor = [UIColor whiteColor];
+    if (@available(iOS 13.0, *)) {
+        self.textColor = [UIColor systemBackgroundColor];
+    } else {
+        self.textColor = [UIColor whiteColor];
+    }
     [super drawTextInRect:rect];
     
     CGContextSetTextDrawingMode(context, kCGTextFill);
-    self.textColor = [UIColor blackColor];
+    if (@available(iOS 13.0, *)) {
+        self.textColor = [UIColor labelColor];
+    } else {
+        self.textColor = [UIColor blackColor];
+    }
     self.shadowOffset = CGSizeMake(0, 0);
     [super drawTextInRect:rect];
     
