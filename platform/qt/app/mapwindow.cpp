@@ -61,7 +61,7 @@ void MapWindow::changeStyle()
 {
     static uint8_t currentStyleIndex;
 
-    auto& styles = QMapbox::defaultStyles();
+    auto& styles = m_map->defaultStyles();
 
     m_map->setStyleUrl(styles[currentStyleIndex].first);
     setWindowTitle(QString("Mapbox GL: ") + styles[currentStyleIndex].second);
@@ -467,14 +467,14 @@ void MapWindow::initializeGL()
     connect(m_map.data(), SIGNAL(needsRendering()), this, SLOT(update()));
 
     // Set default location to Helsinki.
-    m_map->setCoordinateZoom(QMapbox::Coordinate(60.170448, 24.942046), 14);
+    m_map->setCoordinateZoom(QMapbox::Coordinate(60.170448, 24.942046), 5);
 
-    QString styleUrl = qgetenv("MAPBOX_STYLE_URL");
+    QString styleUrl = qgetenv("MGL_STYLE_URL");
     if (styleUrl.isEmpty()) {
         changeStyle();
     } else {
         m_map->setStyleUrl(styleUrl);
-        setWindowTitle(QString("Mapbox GL: ") + styleUrl);
+        setWindowTitle(QString("MapLibre GL: ") + styleUrl);
     }
 
     m_bearingAnimation = new QPropertyAnimation(m_map.data(), "bearing");

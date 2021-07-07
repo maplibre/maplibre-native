@@ -40,6 +40,7 @@ public:
 
     mbgl::EdgeInsets margins;
     std::unique_ptr<mbgl::Map> mapObj;
+    QVector<QPair<QString, QString>> defaultStyles;
 
 public slots:
     void requestRendering();

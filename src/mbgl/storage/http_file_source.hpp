@@ -21,8 +21,9 @@ public:
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;
 
-private:
     class Impl;
+
+private:
     const std::unique_ptr<Impl> impl;
 };
 
