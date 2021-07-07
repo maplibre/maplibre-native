@@ -42,7 +42,11 @@ void HTTPFileSource::Impl::request(HTTPRequest* req)
 
     data.first = m_manager->get(networkRequest);
     connect(data.first, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    connect(data.first, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
+#else
     connect(data.first, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
+#endif
 }
 
 void HTTPFileSource::Impl::cancel(HTTPRequest* req)

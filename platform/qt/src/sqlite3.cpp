@@ -176,7 +176,11 @@ void Database::exec(const std::string &sql) {
 }
 
 void DatabaseImpl::exec(const std::string& sql) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList statements = QString::fromStdString(sql).split(';', Qt::SkipEmptyParts);
+#else
     QStringList statements = QString::fromStdString(sql).split(';', QString::SkipEmptyParts);
+#endif
     statements.removeAll("\n");
     for (QString statement : statements) {
         if (!statement.endsWith(';')) {
