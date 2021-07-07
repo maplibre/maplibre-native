@@ -9,4 +9,7 @@
 // Sets whether the scale uses styles that make it easier to read on a dark styled map
 @property (nonatomic, assign) BOOL shouldShowDarkStyles;
 
+// Sets whether the scale uses metric
+@property (nonatomic, assign) BOOL usesMetricSystem;
+
 @end

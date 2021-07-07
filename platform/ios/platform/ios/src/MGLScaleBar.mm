@@ -169,6 +169,10 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     self.clipsToBounds = NO;
     self.hidden = YES;
     
+    // Default to current local
+    NSLocale *locale = [NSLocale currentLocale];
+    _usesMetricSystem = [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
+    
     _containerView                     = [[UIView alloc] init];
     _containerView.clipsToBounds       = YES;
     _containerView.backgroundColor     = _secondaryColor;
@@ -266,11 +270,6 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     return [UIView userInterfaceLayoutDirectionForSemanticContentAttribute:self.superview.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft;
 }
 
-- (BOOL)usesMetricSystem {
-    NSLocale *locale = [NSLocale currentLocale];
-    return [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
-}
-
 - (MGLRow)preferredRow {
     CLLocationDistance maximumDistance = [self maximumWidth] * [self unitsPerPoint];
     
@@ -320,6 +319,25 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
 
 
 #pragma mark - Setters
+
+- (void)setUsesMetricSystem:(BOOL)usesMetricSystem {
+    
+    if (_usesMetricSystem != usesMetricSystem) {
+        
+        _usesMetricSystem = usesMetricSystem;
+        
+        // Set the distance formatter locale using Germany for metric and United States for imperial.
+        self.formatter.numberFormatter.locale = usesMetricSystem ? [NSLocale localeWithLocaleIdentifier:@"de_DE"] : [NSLocale localeWithLocaleIdentifier:@"en_US"];
+       
+        [self resetLabelImageCache];
+        [self updateVisibility];
+        
+        self.recalculateSize = YES;
+        [self invalidateIntrinsicContentSize];
+        
+    }
+    
+}
 
 - (void)setMetersPerPoint:(CLLocationDistance)metersPerPoint {
     if (_metersPerPoint == metersPerPoint) {
