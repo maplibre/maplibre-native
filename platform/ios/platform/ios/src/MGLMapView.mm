@@ -994,13 +994,6 @@ public:
     [self updateUserLocationAnnotationView];
     [self updateAnnotationViews];
     [self updateCalloutView];
-
-    // Call any pending completion blocks. This is primarily to ensure
-    // that annotations are in the expected position after core rendering
-    // and map update.
-    //
-    // TODO: Consider using this same mechanism for delegate callbacks.
-    [self processPendingBlocks];
 }
 
 - (BOOL)renderSync
