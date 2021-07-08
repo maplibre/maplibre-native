@@ -989,31 +989,54 @@ public:
     }
 }
 
-- (void)updateViewsPostMapRendering {
+- (void)updateViewsWithCurrentUpdateParameters {
     // Update UIKit elements, prior to rendering
     [self updateUserLocationAnnotationView];
     [self updateAnnotationViews];
     [self updateCalloutView];
-
-    // Call any pending completion blocks. This is primarily to ensure
-    // that annotations are in the expected position after core rendering
-    // and map update.
-    //
-    // TODO: Consider using this same mechanism for delegate callbacks.
-    [self processPendingBlocks];
 }
 
-- (void)renderSync
+- (BOOL)renderSync
 {
-    if ( ! self.dormant && _rendererFrontend)
-    {
-        _rendererFrontend->render();
+    BOOL hasPendingBlocks = (self.pendingCompletionBlocks.count > 0);
+
+    if (!self.needsDisplayRefresh && !hasPendingBlocks) {
+        return NO;
     }
 
-    // TODO: This should be moved from what's essentially the UIView rendering
-    // To do this, add view models that can be updated separately, before the
-    // UIViews can be updated to match
-    [self updateViewsPostMapRendering];
+    BOOL needsRender = self.needsDisplayRefresh;
+
+    self.needsDisplayRefresh = NO;
+
+    if (!self.dormant && needsRender)
+    {
+        // It's important to call this *before* `_rendererFrontend->render()`, as
+        // that function saves the current `updateParameters` before rendering. If this
+        // occurs after then the views will be a frame behind.
+        //
+        // The update parameters will have been updated earlier, for example by
+        // calls to easeTo, flyTo, called from gesture handlers.
+        
+        [self updateViewsWithCurrentUpdateParameters];
+      
+        if (_rendererFrontend) {
+            
+            _rendererFrontend->render();
+
+        }
+        
+    }
+
+    if (hasPendingBlocks) {
+        // Call any pending completion blocks. This is primarily to ensure
+        // that annotations are in the expected position after core rendering
+        // and map update.
+        //
+        // TODO: Consider using this same mechanism for delegate callbacks.
+        [self processPendingBlocks];
+    }
+
+    return YES;
 }
 
 // This gets called when the view dimension changes, e.g. because the device is being rotated.
@@ -1259,8 +1282,6 @@ public:
     
     if (self.needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
     {
-        self.needsDisplayRefresh = NO;
-
         // UIView update logic has moved into `renderSync` above, which now gets
         // triggered by a call to setNeedsDisplay.
         // See MGLMapViewOpenGLImpl::display() for more details
@@ -1738,6 +1759,7 @@ public:
     // Note: We do not remove the snapshot view (if there is one) until we have become
     // active.
     [self validateLocationServices];
+    
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
