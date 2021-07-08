@@ -326,8 +326,26 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
         
         _usesMetricSystem = usesMetricSystem;
         
-        // Set the distance formatter locale using Germany for metric and United States for imperial.
-        self.formatter.numberFormatter.locale = usesMetricSystem ? [NSLocale localeWithLocaleIdentifier:@"de_DE"] : [NSLocale localeWithLocaleIdentifier:@"en_US"];
+        // Find the current locale for the system, then check if we need to override this. E.g. Locale is in the United States but we want to see metric.
+        NSLocale *locale = [NSLocale currentLocale];
+        BOOL currentLocaleUsesMetric = [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
+        if (currentLocaleUsesMetric && !usesMetricSystem) {
+            
+            // Our current locale is metric, but for some reason we don't want to show metric here, so we need to force a locale that isn't metric.
+            self.formatter.numberFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US"];
+            
+        } else if (!currentLocaleUsesMetric && usesMetricSystem) {
+            
+            // Our current locale is not metric, but we want to use the metric system for the scale bar.
+            // Use Canada as the identifier as they use a period as a decimal seperator
+            self.formatter.numberFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_CA"];
+            
+        } else if ((currentLocaleUsesMetric && usesMetricSystem) || (!currentLocaleUsesMetric && !usesMetricSystem)) {
+            
+            // Fallback to the system locale.
+            self.formatter.numberFormatter.locale = locale;
+            
+        }
        
         [self resetLabelImageCache];
         [self updateVisibility];
