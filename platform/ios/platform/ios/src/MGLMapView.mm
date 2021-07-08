@@ -2979,6 +2979,20 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
+- (void)setScaleBarShouldShowDarkStyles:(BOOL)scaleBarShouldShowDarkStyles {
+    
+    _scaleBarShouldShowDarkStyles = scaleBarShouldShowDarkStyles;
+    [(MGLScaleBar *)self.scaleBar setShouldShowDarkStyles:scaleBarShouldShowDarkStyles];
+    
+}
+
+- (void)setScaleBarUsesMetricSystem:(BOOL)scaleBarUsesMetricSystem {
+    
+    _scaleBarUsesMetricSystem = scaleBarUsesMetricSystem;
+    [(MGLScaleBar *)self.scaleBar setUsesMetricSystem:scaleBarUsesMetricSystem];
+    
+}
+
 - (void)setPrefetchesTiles:(BOOL)prefetchesTiles
 {
     self.mbglMap.setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);

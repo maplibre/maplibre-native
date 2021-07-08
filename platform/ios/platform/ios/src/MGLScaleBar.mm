@@ -98,10 +98,21 @@ static const CGFloat MGLScaleBarLabelWidthHint = 30.0;
 static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
 
 @interface MGLScaleBarLabel : UILabel
-
+@property (nonatomic) BOOL shouldShowDarkStyles;
 @end
 
 @implementation MGLScaleBarLabel
+
+- (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
+    
+    if (_shouldShowDarkStyles != shouldShowDarkStyles) {
+        _shouldShowDarkStyles = shouldShowDarkStyles;
+        
+        // Redraw labels
+        [self setNeedsDisplay];
+        
+    }
+}
 
 - (void)drawTextInRect:(CGRect)rect {
     CGSize shadowOffset = self.shadowOffset;
@@ -111,11 +122,19 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     CGContextSetLineJoin(context, kCGLineJoinRound);
     
     CGContextSetTextDrawingMode(context, kCGTextStroke);
-    self.textColor = [UIColor whiteColor];
+    if (_shouldShowDarkStyles) {
+        self.textColor = [UIColor blackColor];
+    } else {
+        self.textColor = [UIColor whiteColor];
+    }
     [super drawTextInRect:rect];
     
     CGContextSetTextDrawingMode(context, kCGTextFill);
-    self.textColor = [UIColor blackColor];
+    if (self.shouldShowDarkStyles) {
+        self.textColor = [UIColor whiteColor];
+    } else {
+        self.textColor = [UIColor blackColor];
+    }
     self.shadowOffset = CGSizeMake(0, 0);
     [super drawTextInRect:rect];
     
@@ -150,6 +169,10 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     self.clipsToBounds = NO;
     self.hidden = YES;
     
+    // Default to current local
+    NSLocale *locale = [NSLocale currentLocale];
+    _usesMetricSystem = [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
+    
     _containerView                     = [[UIView alloc] init];
     _containerView.clipsToBounds       = YES;
     _containerView.backgroundColor     = _secondaryColor;
@@ -168,6 +191,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     _prototypeLabel               = [[MGLScaleBarLabel alloc] init];
     _prototypeLabel.font          = [UIFont systemFontOfSize:8 weight:UIFontWeightMedium];
     _prototypeLabel.clipsToBounds = NO;
+    _prototypeLabel.shouldShowDarkStyles = _shouldShowDarkStyles;
 
     NSUInteger numberOfLabels = 4;
     NSMutableArray *labelViews = [NSMutableArray arrayWithCapacity:numberOfLabels];
@@ -246,11 +270,6 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     return [UIView userInterfaceLayoutDirectionForSemanticContentAttribute:self.superview.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft;
 }
 
-- (BOOL)usesMetricSystem {
-    NSLocale *locale = [NSLocale currentLocale];
-    return [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
-}
-
 - (MGLRow)preferredRow {
     CLLocationDistance maximumDistance = [self maximumWidth] * [self unitsPerPoint];
     
@@ -282,7 +301,43 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     return *table;
 }
 
+
+#pragma mark - Dark Mode Changes
+
+- (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
+    
+    if (_shouldShowDarkStyles != shouldShowDarkStyles) {
+        _shouldShowDarkStyles = shouldShowDarkStyles;
+        
+        // Redraw labels
+        _prototypeLabel.shouldShowDarkStyles = shouldShowDarkStyles;
+        [self resetLabelImageCache];
+        [self updateLabels];
+        
+    }
+}
+
+
 #pragma mark - Setters
+
+- (void)setUsesMetricSystem:(BOOL)usesMetricSystem {
+    
+    if (_usesMetricSystem != usesMetricSystem) {
+        
+        _usesMetricSystem = usesMetricSystem;
+        
+        // Set the distance formatter locale using Germany for metric and United States for imperial.
+        self.formatter.numberFormatter.locale = usesMetricSystem ? [NSLocale localeWithLocaleIdentifier:@"de_DE"] : [NSLocale localeWithLocaleIdentifier:@"en_US"];
+       
+        [self resetLabelImageCache];
+        [self updateVisibility];
+        
+        self.recalculateSize = YES;
+        [self invalidateIntrinsicContentSize];
+        
+    }
+    
+}
 
 - (void)setMetersPerPoint:(CLLocationDistance)metersPerPoint {
     if (_metersPerPoint == metersPerPoint) {
