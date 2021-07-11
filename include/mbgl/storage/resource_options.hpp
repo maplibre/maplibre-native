@@ -18,7 +18,8 @@ public:
     ~ResourceOptions();
 
     ResourceOptions(ResourceOptions&&) noexcept;
-    ResourceOptions& operator=(ResourceOptions& options);
+    ResourceOptions& operator=(const ResourceOptions& options);
+    ResourceOptions& operator=(ResourceOptions&& options);
 
     ResourceOptions clone() const;
 

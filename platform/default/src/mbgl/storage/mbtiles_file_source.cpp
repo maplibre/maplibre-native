@@ -73,7 +73,7 @@ public:
     // Some Mbtiles store GZIP-ed tile data, this function is used for decompression
     std::string decompress_string(const std::string &data) {
 
-        uint32_t OUT_SIZE = 8192;
+        constexpr uint32_t OUT_SIZE = 8192;
 
         int ret;
         char outbuffer[OUT_SIZE];

@@ -99,13 +99,13 @@ static void populateNames(std::vector<std::string>& names) {
 
 #if defined(_MSC_VER) && !defined(__clang__)
     style_directory += "/*";
-    WIN32_FIND_DATA ffd;
-    HANDLE hFind = FindFirstFile(style_directory.c_str(), &ffd);
+    WIN32_FIND_DATAA ffd;
+    HANDLE hFind = FindFirstFileA(style_directory.c_str(), &ffd);
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             const std::string name = ffd.cFileName;
             testName(name);
-        } while (FindNextFile(hFind, &ffd) != 0);
+        } while (FindNextFileA(hFind, &ffd) != 0);
         FindClose(hFind);
     }
 #else

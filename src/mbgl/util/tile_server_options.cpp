@@ -33,7 +33,7 @@ namespace mbgl {
         std::string apiKeyParameterName;
         bool apiKeyRequired;
         
-        std::vector<const mbgl::util::DefaultStyle> defaultStyles;
+        std::vector<mbgl::util::DefaultStyle> defaultStyles;
         std::string defaultStyle;
     };
 
@@ -184,11 +184,11 @@ namespace mbgl {
         return impl_->apiKeyRequired;
     }
 
-    const std::vector<const mbgl::util::DefaultStyle> TileServerOptions::defaultStyles() const {
+    const std::vector<mbgl::util::DefaultStyle> TileServerOptions::defaultStyles() const {
         return impl_->defaultStyles;
     }
 
-    TileServerOptions& TileServerOptions::withDefaultStyles(std::vector<const mbgl::util::DefaultStyle> styles) {
+    TileServerOptions& TileServerOptions::withDefaultStyles(std::vector<mbgl::util::DefaultStyle> styles) {
         impl_->defaultStyles = std::move(styles);
         return *this;
     }
@@ -207,7 +207,7 @@ namespace mbgl {
     }
 
     TileServerOptions TileServerOptions::MapLibreConfiguration() {
-        std::vector<const mbgl::util::DefaultStyle> styles {
+        std::vector<mbgl::util::DefaultStyle> styles {
                 // https://demotiles.maplibre.org/style.json
                 mbgl::util::DefaultStyle("maplibre://maps/style", "Basic", 1)
         };
@@ -230,7 +230,7 @@ namespace mbgl {
     //
 
     TileServerOptions TileServerOptions::MapboxConfiguration() {
-        std::vector<const mbgl::util::DefaultStyle> styles {
+        std::vector<mbgl::util::DefaultStyle> styles {
                 mbgl::util::DefaultStyle("mapbox://styles/mapbox/streets-v11", "Streets", 11),
                 mbgl::util::DefaultStyle("mapbox://styles/mapbox/outdoors-v11", "Outdoors", 11),
                 mbgl::util::DefaultStyle("mapbox://styles/mapbox/light-v10", "Light", 10),
@@ -257,7 +257,7 @@ namespace mbgl {
 
     TileServerOptions TileServerOptions::MapTilerConfiguration() {
 
-        std::vector<const mbgl::util::DefaultStyle> styles{
+        std::vector<mbgl::util::DefaultStyle> styles{
                 mbgl::util::DefaultStyle("maptiler://maps/streets", "Streets", 1),
                 mbgl::util::DefaultStyle("maptiler://maps/outdoor", "Outdoor", 1),
                 mbgl::util::DefaultStyle("maptiler://maps/basic", "Basic", 1),
