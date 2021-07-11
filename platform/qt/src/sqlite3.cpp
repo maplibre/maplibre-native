@@ -295,7 +295,7 @@ void Query::bind(int offset, const char* value, std::size_t length, bool /* reta
     }
 
     // Field numbering starts at 0.
-    stmt.impl->query.bindValue(offset - 1, QString(QByteArray(value, length)), QSql::In);
+    stmt.impl->query.bindValue(offset - 1, QString(QByteArray(value, static_cast<int>(length))), QSql::In);
 
     checkQueryError(stmt.impl->query);
 }
@@ -313,8 +313,8 @@ void Query::bindBlob(int offset, const void* value_, std::size_t length, bool re
     }
 
     // Field numbering starts at 0.
-    stmt.impl->query.bindValue(offset - 1, retain ? QByteArray(value, length) :
-            QByteArray::fromRawData(value, length), QSql::In | QSql::Binary);
+    stmt.impl->query.bindValue(offset - 1, retain ? QByteArray(value, static_cast<int>(length)) :
+            QByteArray::fromRawData(value, static_cast<int>(length)), QSql::In | QSql::Binary);
 
     checkQueryError(stmt.impl->query);
 }

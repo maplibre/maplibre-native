@@ -276,11 +276,11 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 // for when glyph is rotated and translated.
 
                 const Point<float> center{-halfAdvance, halfAdvance - Shaping::yOffset};
-                const float verticalRotation = -M_PI_2;
+                const float verticalRotation = static_cast<float>(-M_PI_2);
 
                 // xHalfWidhtOffsetcorrection is a difference between full-width and half-width
                 // advance, should be 0 for full-width glyphs and will pull up half-width glyphs.
-                const float xHalfWidhtOffsetcorrection = util::ONE_EM / 2 - halfAdvance;
+                const float xHalfWidhtOffsetcorrection = util::ONE_EM / 2.f - halfAdvance;
                 const float yImageOffsetCorrection = positionedGlyph.imageID ? xHalfWidhtOffsetcorrection : 0.0f;
                 const Point<float> xOffsetCorrection{5.0f - Shaping::yOffset - xHalfWidhtOffsetcorrection,
                                                      -yImageOffsetCorrection};

@@ -86,13 +86,13 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -64.4444427);
+        EXPECT_FLOAT_EQ(quad.tl.x, -64.4444427f);
         EXPECT_FLOAT_EQ(quad.tl.y, 0);
-        EXPECT_FLOAT_EQ(quad.tr.x, 24.4444427);
+        EXPECT_FLOAT_EQ(quad.tr.x, 24.4444427f);
         EXPECT_FLOAT_EQ(quad.tr.y, 0);
-        EXPECT_FLOAT_EQ(quad.bl.x, -64.4444427);
+        EXPECT_FLOAT_EQ(quad.bl.x, -64.4444427f);
         EXPECT_FLOAT_EQ(quad.bl.y, 20);
-        EXPECT_FLOAT_EQ(quad.br.x, 24.4444427);
+        EXPECT_FLOAT_EQ(quad.br.x, 24.4444427f);
         EXPECT_FLOAT_EQ(quad.br.y, 20);
     }
 
@@ -105,13 +105,13 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -32.2222214);
+        EXPECT_FLOAT_EQ(quad.tl.x, -32.2222214f);
         EXPECT_FLOAT_EQ(quad.tl.y, -5);
-        EXPECT_FLOAT_EQ(quad.tr.x, 12.2222214);
+        EXPECT_FLOAT_EQ(quad.tr.x, 12.2222214f);
         EXPECT_FLOAT_EQ(quad.tr.y, -5);
-        EXPECT_FLOAT_EQ(quad.bl.x, -32.2222214);
+        EXPECT_FLOAT_EQ(quad.bl.x, -32.2222214f);
         EXPECT_FLOAT_EQ(quad.bl.y, 15);
-        EXPECT_FLOAT_EQ(quad.br.x, 12.2222214);
+        EXPECT_FLOAT_EQ(quad.br.x, 12.2222214f);
         EXPECT_FLOAT_EQ(quad.br.y, 15);
     }
 
@@ -124,13 +124,13 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -43.3333321);
+        EXPECT_FLOAT_EQ(quad.tl.x, -43.3333321f);
         EXPECT_FLOAT_EQ(quad.tl.y, -5);
-        EXPECT_FLOAT_EQ(quad.tr.x, 23.3333321);
+        EXPECT_FLOAT_EQ(quad.tr.x, 23.3333321f);
         EXPECT_FLOAT_EQ(quad.tr.y, -5);
-        EXPECT_FLOAT_EQ(quad.bl.x, -43.3333321);
+        EXPECT_FLOAT_EQ(quad.bl.x, -43.3333321f);
         EXPECT_FLOAT_EQ(quad.bl.y, 15);
-        EXPECT_FLOAT_EQ(quad.br.x, 23.3333321);
+        EXPECT_FLOAT_EQ(quad.br.x, 23.3333321f);
         EXPECT_FLOAT_EQ(quad.br.y, 15);
     }
 
@@ -144,13 +144,13 @@ TEST(getIconQuads, style) {
         const auto& quad = quads[0];
 
         EXPECT_FLOAT_EQ(quad.tl.x, -30);
-        EXPECT_FLOAT_EQ(quad.tl.y, -12.2222214);
+        EXPECT_FLOAT_EQ(quad.tl.y, -12.2222214f);
         EXPECT_FLOAT_EQ(quad.tr.x, -10);
-        EXPECT_FLOAT_EQ(quad.tr.y, -12.2222214);
+        EXPECT_FLOAT_EQ(quad.tr.y, -12.2222214f);
         EXPECT_FLOAT_EQ(quad.bl.x, -30);
-        EXPECT_FLOAT_EQ(quad.bl.y, 32.2222214);
+        EXPECT_FLOAT_EQ(quad.bl.y, 32.2222214f);
         EXPECT_FLOAT_EQ(quad.br.x, -10);
-        EXPECT_FLOAT_EQ(quad.br.y, 32.2222214);
+        EXPECT_FLOAT_EQ(quad.br.y, 32.2222214f);
     }
 
     // height x textSize
@@ -164,13 +164,13 @@ TEST(getIconQuads, style) {
         const auto& quad = quads[0];
 
         EXPECT_FLOAT_EQ(quad.tl.x, -20);
-        EXPECT_FLOAT_EQ(quad.tl.y, -6.11111069);
+        EXPECT_FLOAT_EQ(quad.tl.y, -6.11111069f);
         EXPECT_FLOAT_EQ(quad.tr.x, 0);
-        EXPECT_FLOAT_EQ(quad.tr.y, -6.11111069);
+        EXPECT_FLOAT_EQ(quad.tr.y, -6.11111069f);
         EXPECT_FLOAT_EQ(quad.bl.x, -20);
-        EXPECT_FLOAT_EQ(quad.bl.y, 16.1111107);
+        EXPECT_FLOAT_EQ(quad.bl.y, 16.1111107f);
         EXPECT_FLOAT_EQ(quad.br.x, 0);
-        EXPECT_FLOAT_EQ(quad.br.y, 16.1111107);
+        EXPECT_FLOAT_EQ(quad.br.y, 16.1111107f);
     }
 
     // height x textSize + padding
@@ -183,13 +183,13 @@ TEST(getIconQuads, style) {
         const auto& quad = quads[0];
 
         EXPECT_FLOAT_EQ(quad.tl.x, -20);
-        EXPECT_FLOAT_EQ(quad.tl.y, -11.666666);
+        EXPECT_FLOAT_EQ(quad.tl.y, -11.666666f);
         EXPECT_FLOAT_EQ(quad.tr.x, 0);
-        EXPECT_FLOAT_EQ(quad.tr.y, -11.666666);
+        EXPECT_FLOAT_EQ(quad.tr.y, -11.666666f);
         EXPECT_FLOAT_EQ(quad.bl.x, -20);
-        EXPECT_FLOAT_EQ(quad.bl.y, 21.666666);
+        EXPECT_FLOAT_EQ(quad.bl.y, 21.666666f);
         EXPECT_FLOAT_EQ(quad.br.x, 0);
-        EXPECT_FLOAT_EQ(quad.br.y, 21.666666);
+        EXPECT_FLOAT_EQ(quad.br.y, 21.666666f);
     }
 
     // both
@@ -201,14 +201,14 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -64.4444427);
-        EXPECT_FLOAT_EQ(quad.tl.y, -12.2222214);
-        EXPECT_FLOAT_EQ(quad.tr.x, 24.4444427);
-        EXPECT_FLOAT_EQ(quad.tr.y, -12.2222214);
-        EXPECT_FLOAT_EQ(quad.bl.x, -64.4444427);
-        EXPECT_FLOAT_EQ(quad.bl.y, 32.2222214);
-        EXPECT_FLOAT_EQ(quad.br.x, 24.4444427);
-        EXPECT_FLOAT_EQ(quad.br.y, 32.2222214);
+        EXPECT_FLOAT_EQ(quad.tl.x, -64.4444427f);
+        EXPECT_FLOAT_EQ(quad.tl.y, -12.2222214f);
+        EXPECT_FLOAT_EQ(quad.tr.x, 24.4444427f);
+        EXPECT_FLOAT_EQ(quad.tr.y, -12.2222214f);
+        EXPECT_FLOAT_EQ(quad.bl.x, -64.4444427f);
+        EXPECT_FLOAT_EQ(quad.bl.y, 32.2222214f);
+        EXPECT_FLOAT_EQ(quad.br.x, 24.4444427f);
+        EXPECT_FLOAT_EQ(quad.br.y, 32.2222214f);
     }
 
     // both x textSize
@@ -220,14 +220,14 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -32.2222214);
-        EXPECT_FLOAT_EQ(quad.tl.y, -6.11111069);
-        EXPECT_FLOAT_EQ(quad.tr.x, 12.2222214);
-        EXPECT_FLOAT_EQ(quad.tr.y, -6.11111069);
-        EXPECT_FLOAT_EQ(quad.bl.x, -32.2222214);
-        EXPECT_FLOAT_EQ(quad.bl.y, 16.1111107);
-        EXPECT_FLOAT_EQ(quad.br.x, 12.2222214);
-        EXPECT_FLOAT_EQ(quad.br.y, 16.1111107);
+        EXPECT_FLOAT_EQ(quad.tl.x, -32.2222214f);
+        EXPECT_FLOAT_EQ(quad.tl.y, -6.11111069f);
+        EXPECT_FLOAT_EQ(quad.tr.x, 12.2222214f);
+        EXPECT_FLOAT_EQ(quad.tr.y, -6.11111069f);
+        EXPECT_FLOAT_EQ(quad.bl.x, -32.2222214f);
+        EXPECT_FLOAT_EQ(quad.bl.y, 16.1111107f);
+        EXPECT_FLOAT_EQ(quad.br.x, 12.2222214f);
+        EXPECT_FLOAT_EQ(quad.br.y, 16.1111107f);
     }
 
     // both x textSize + padding
@@ -239,14 +239,14 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -43.3333321);
-        EXPECT_FLOAT_EQ(quad.tl.y, -11.666666);
-        EXPECT_FLOAT_EQ(quad.tr.x, 23.3333321);
-        EXPECT_FLOAT_EQ(quad.tr.y, -11.666666);
-        EXPECT_FLOAT_EQ(quad.bl.x, -43.3333321);
-        EXPECT_FLOAT_EQ(quad.bl.y, 21.666666);
-        EXPECT_FLOAT_EQ(quad.br.x, 23.3333321);
-        EXPECT_FLOAT_EQ(quad.br.y, 21.666666);
+        EXPECT_FLOAT_EQ(quad.tl.x, -43.3333321f);
+        EXPECT_FLOAT_EQ(quad.tl.y, -11.666666f);
+        EXPECT_FLOAT_EQ(quad.tr.x, 23.3333321f);
+        EXPECT_FLOAT_EQ(quad.tr.y, -11.666666f);
+        EXPECT_FLOAT_EQ(quad.bl.x, -43.3333321f);
+        EXPECT_FLOAT_EQ(quad.bl.y, 21.666666f);
+        EXPECT_FLOAT_EQ(quad.br.x, 23.3333321f);
+        EXPECT_FLOAT_EQ(quad.br.y, 21.666666f);
     }
 
     // both x textSize + padding t/r/b/l
@@ -260,13 +260,13 @@ TEST(getIconQuads, style) {
         ASSERT_EQ(quads.size(), 1);
         const auto& quad = quads[0];
 
-        EXPECT_FLOAT_EQ(quad.tl.x, -48.3333321);
-        EXPECT_FLOAT_EQ(quad.tl.y, -6.66666603);
-        EXPECT_FLOAT_EQ(quad.tr.x, 18.3333321);
-        EXPECT_FLOAT_EQ(quad.tr.y, -6.66666603);
-        EXPECT_FLOAT_EQ(quad.bl.x, -48.3333321);
-        EXPECT_FLOAT_EQ(quad.bl.y, 26.666666);
-        EXPECT_FLOAT_EQ(quad.br.x, 18.3333321);
-        EXPECT_FLOAT_EQ(quad.br.y, 26.666666);
+        EXPECT_FLOAT_EQ(quad.tl.x, -48.3333321f);
+        EXPECT_FLOAT_EQ(quad.tl.y, -6.66666603f);
+        EXPECT_FLOAT_EQ(quad.tr.x, 18.3333321f);
+        EXPECT_FLOAT_EQ(quad.tr.y, -6.66666603f);
+        EXPECT_FLOAT_EQ(quad.bl.x, -48.3333321f);
+        EXPECT_FLOAT_EQ(quad.bl.y, 26.666666f);
+        EXPECT_FLOAT_EQ(quad.br.x, 18.3333321f);
+        EXPECT_FLOAT_EQ(quad.br.y, 26.666666f);
     }
 }

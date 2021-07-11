@@ -209,8 +209,8 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
 void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSymbol& placedSymbol) {
     auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
     for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
-        triangles.emplace_back(vertexIndex + 0, vertexIndex + 1, vertexIndex + 2);
-        triangles.emplace_back(vertexIndex + 1, vertexIndex + 2, vertexIndex + 3);
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0), static_cast<uint16_t>(vertexIndex + 1), static_cast<uint16_t>(vertexIndex + 2));
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1), static_cast<uint16_t>(vertexIndex + 2), static_cast<uint16_t>(vertexIndex + 3));
     }
 }
 

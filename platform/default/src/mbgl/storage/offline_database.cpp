@@ -137,7 +137,7 @@ void OfflineDatabase::handleError(const char* action) {
         handleError(ex, action);
     } catch (const util::IOException& ex) {
         handleError(ex, action);
-    } catch (const MapboxTileLimitExceededException& ex) {
+    } catch (const MapboxTileLimitExceededException&) {
         throw; // This is ours and must be handled on client side.
     } catch (const std::runtime_error& ex) {
         handleError(ex, action);

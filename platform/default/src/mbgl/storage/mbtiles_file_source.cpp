@@ -15,7 +15,12 @@
 #include <mbgl/util/chrono.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
+
+#if defined(__QT__) && defined(_WIN32) && !defined(__GNUC__)
+#include <QtZlib/zlib.h>
+#else
 #include <zlib.h>
+#endif
 
 namespace {
 //TODO: replace by mbgl::util::MBTILES_PROTOCOL

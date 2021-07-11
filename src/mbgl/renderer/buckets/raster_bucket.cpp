@@ -92,7 +92,7 @@ void RasterBucket::setMask(TileMask&& mask_) {
 
         auto& segment = segments.back();
         assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        const uint16_t offset = segment.vertexLength;
+        const auto offset = static_cast<uint16_t>(segment.vertexLength);
 
         // 0, 1, 2
         // 1, 2, 3

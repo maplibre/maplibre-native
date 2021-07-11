@@ -15,12 +15,12 @@ public:
     double base;
     
     double interpolationFactor(const Range<double>& inputLevels, const double input) const {
-        return util::interpolationFactor(base,
+        return util::interpolationFactor(static_cast<float>(base),
                                          Range<float> {
                                             static_cast<float>(inputLevels.min),
                                             static_cast<float>(inputLevels.max)
                                          },
-                                         input);
+                                         static_cast<float>(input));
     }
     
     bool operator==(const ExponentialInterpolator& rhs) const {
@@ -33,12 +33,12 @@ public:
     CubicBezierInterpolator(double x1_, double y1_, double x2_, double y2_) : ub(x1_, y1_, x2_, y2_) {}
     
     double interpolationFactor(const Range<double>& inputLevels, const double input) const {
-        return ub.solve(util::interpolationFactor(1.0,
+        return ub.solve(util::interpolationFactor(1.0f,
                                                   Range<float> {
                                                       static_cast<float>(inputLevels.min),
                                                       static_cast<float>(inputLevels.max)
                                                   },
-                                                  input),
+                                                  static_cast<float>(input)),
                         1e-6);
     }
     

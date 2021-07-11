@@ -74,7 +74,7 @@ public:
         return { size, readFramebuffer(size, format, flip) };
     }
 
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     template <typename Image>
     void drawPixels(const Image& image) {
         auto format = image.channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha;
@@ -154,7 +154,7 @@ public:
     State<value::PixelStorePack> pixelStorePack;
     State<value::PixelStoreUnpack> pixelStoreUnpack;
 
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     State<value::PixelZoom> pixelZoom;
     State<value::RasterPos> rasterPos;
     State<value::PixelTransferDepth> pixelTransferDepth;
@@ -183,7 +183,7 @@ private:
     State<value::CullFace> cullFace;
     State<value::CullFaceSide> cullFaceSide;
     State<value::CullFaceWinding> cullFaceWinding;
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     State<value::PointSize> pointSize;
 #endif // MBGL_USE_GLES2
 
@@ -198,7 +198,7 @@ private:
 
     UniqueFramebuffer createFramebuffer();
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     void drawPixels(Size size, const void* data, gfx::TexturePixelType);
 #endif // MBGL_USE_GLES2
 
@@ -227,7 +227,7 @@ public:
     // For testing
     bool disableVAOExtension = false;
 
-#if not defined(NDEBUG)
+#if !defined(NDEBUG)
 public:
     void visualizeStencilBuffer() override;
     void visualizeDepthBuffer(float depthRangeSize) override;

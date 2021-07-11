@@ -37,7 +37,7 @@ PremultipliedImage decodeImage(const std::string& string) {
 #endif
 
     QImage image =
-        QImage::fromData(data, size)
+        QImage::fromData(data, static_cast<int>(size))
         .rgbSwapped()
         .convertToFormat(QImage::Format_ARGB32_Premultiplied);
 

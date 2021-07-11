@@ -286,7 +286,7 @@ platform::GLenum Enum<gfx::TextureChannelDataType>::to(const gfx::TextureChannel
 template <>
 gfx::RenderbufferPixelType Enum<gfx::RenderbufferPixelType>::from(const platform::GLint value) {
     switch (value) {
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
         case GL_RGBA8: return gfx::RenderbufferPixelType::RGBA;
         case GL_DEPTH_COMPONENT: return gfx::RenderbufferPixelType::Depth;
         case GL_DEPTH24_STENCIL8: return gfx::RenderbufferPixelType::DepthStencil;
@@ -302,7 +302,7 @@ gfx::RenderbufferPixelType Enum<gfx::RenderbufferPixelType>::from(const platform
 template <>
 platform::GLenum Enum<gfx::RenderbufferPixelType>::to(const gfx::RenderbufferPixelType value) {
     switch (value) {
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
         case gfx::RenderbufferPixelType::RGBA: return GL_RGBA8;
         case gfx::RenderbufferPixelType::Depth: return GL_DEPTH_COMPONENT;
         case gfx::RenderbufferPixelType::DepthStencil: return GL_DEPTH24_STENCIL8;

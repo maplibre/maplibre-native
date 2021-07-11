@@ -974,7 +974,7 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     // coordinate in this polygon.
     auto& segment = buffer.segments.back();
     assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-    uint16_t index = segment.vertexLength;
+    auto index = static_cast<uint16_t>(segment.vertexLength);
 
     // coordinates (2 triangles)
     buffer.vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
@@ -1092,7 +1092,7 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 }
 
                 auto& segment = collisionBuffer.segments.back();
-                uint16_t index = segment.vertexLength;
+                auto index = static_cast<uint16_t>(segment.vertexLength);
 
                 collisionBuffer.vertices.emplace_back(CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, tl));
                 collisionBuffer.vertices.emplace_back(CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, tr));

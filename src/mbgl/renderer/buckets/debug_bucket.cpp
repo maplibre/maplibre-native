@@ -40,8 +40,8 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
                     vertices.emplace_back(FillProgram::layoutVertex(p));
 
                     if (prev) {
-                        indices.emplace_back(vertices.elements() - 2,
-                                             vertices.elements() - 1);
+                        indices.emplace_back(static_cast<uint16_t>(vertices.elements() - 2),
+                                             static_cast<uint16_t>(vertices.elements() - 1));
                     }
 
                     prev = p;

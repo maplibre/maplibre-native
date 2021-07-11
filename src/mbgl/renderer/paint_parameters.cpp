@@ -23,7 +23,7 @@ TransformParameters::TransformParameters(const TransformState& state_)
     // to a tenth of the far value, so as not to waste depth buffer precision on
     // very close empty space, for layer types (fill-extrusion) that use the
     // depth buffer to emulate real-world space.
-    state.getProjMatrix(nearClippedProjMatrix, 0.1 * state.getCameraToCenterDistance());
+    state.getProjMatrix(nearClippedProjMatrix, static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
 }
 
 PaintParameters::PaintParameters(gfx::Context& context_,

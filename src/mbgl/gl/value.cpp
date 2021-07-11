@@ -533,7 +533,7 @@ PixelStoreUnpack::Type PixelStoreUnpack::Get() {
     return value;
 }
 
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
 
 const constexpr PointSize::Type PointSize::Default;
 

@@ -698,7 +698,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
     auto coord = screenCoordinateToTileCoordinate(point, 0);
-    return Projection::unproject(coord.p, 1 / util::tileSize, wrapMode);
+    return Projection::unproject(coord.p, 1. / util::tileSize, wrapMode);
 }
 
 mat4 TransformState::coordinatePointMatrix(const mat4& projMatrix) const {
