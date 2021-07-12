@@ -256,7 +256,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     
     // Mimic glyph PBF metrics.
     metrics.left = Glyph::borderSize;
-    metrics.top = -1;
+    metrics.top = 4;
     
     // Move the text upward to avoid clipping off descenders.
     CGFloat descent;
