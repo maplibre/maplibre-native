@@ -31,11 +31,22 @@ void HTTPFileSource::Impl::request(HTTPRequest* req)
     }
 
     QNetworkRequest networkRequest = req->networkRequest();
+#if QT_VERSION < 0x060000
+#    if QT_VERSION >= 0x050900
+    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                                QNetworkRequest::NoLessSafeRedirectPolicy);
+#    elif QT_VERSION >= 0x050600
     networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+#    endif
+#endif
 
     data.first = m_manager->get(networkRequest);
     connect(data.first, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    connect(data.first, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
+#else
     connect(data.first, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
+#endif
 }
 
 void HTTPFileSource::Impl::cancel(HTTPRequest* req)
