@@ -1924,7 +1924,7 @@ TEST(OfflineDatabase, ChangePath) {
     mapbox::sqlite::Database::open(newPath, mapbox::sqlite::ReadOnly);
 #ifndef WIN32 // Windows will fail to delete an open file
     util::deleteFile(newPath);
-#endif WIN32
+#endif
 }
 
 TEST(OfflineDatabase, ResetDatabase) {
