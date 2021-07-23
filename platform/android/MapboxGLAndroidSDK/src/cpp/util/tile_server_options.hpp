@@ -27,8 +27,8 @@ public:
     
     static void registerNative(jni::JNIEnv&);
 
-    static jni::Local<jni::Array<jni::Object<DefaultStyle>>> NewStyles(jni::JNIEnv& env, const std::vector<const mbgl::util::DefaultStyle>);
-    static std::vector<const mbgl::util::DefaultStyle> getDefaultStyles(jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_);
+    static jni::Local<jni::Array<jni::Object<DefaultStyle>>> NewStyles(jni::JNIEnv& env, const std::vector<mbgl::util::DefaultStyle> &);
+    static std::vector<mbgl::util::DefaultStyle> getDefaultStyles(jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_);
     
 
 };

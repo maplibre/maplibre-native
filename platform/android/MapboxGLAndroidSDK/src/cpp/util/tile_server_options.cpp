@@ -42,7 +42,7 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
     );
 }
 
-jni::Local<jni::Array<jni::Object<DefaultStyle>>> TileServerOptions::NewStyles(jni::JNIEnv& env, const std::vector<const mbgl::util::DefaultStyle> nativeStyles) {
+jni::Local<jni::Array<jni::Object<DefaultStyle>>> TileServerOptions::NewStyles(jni::JNIEnv& env, const std::vector<mbgl::util::DefaultStyle> &nativeStyles) {
 
     auto retVal = jni::Array<jni::Object<DefaultStyle>>::New(env,  nativeStyles.size());
     for (auto it = begin(nativeStyles); it != end(nativeStyles); ++it) {
@@ -107,7 +107,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     static auto defaultStyleField = javaClass.GetField<jni::String>(env, "defaultStyle");
 
     static auto defaultStylesField = javaClass.GetField<jni::Array<jni::Object<DefaultStyle>>>(env, "defaultStyles");
-    std::vector<const mbgl::util::DefaultStyle> defaultStyles = TileServerOptions::getDefaultStyles(env, options.Get(env, defaultStylesField));
+    std::vector<mbgl::util::DefaultStyle> defaultStyles = TileServerOptions::getDefaultStyles(env, options.Get(env, defaultStylesField));
 
     auto retVal = mbgl::TileServerOptions()
         .withBaseURL(jni::Make<std::string>(env, options.Get(env, baseURLField)))
@@ -151,13 +151,13 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     return retVal;
 }
 
-std::vector<const mbgl::util::DefaultStyle> TileServerOptions::getDefaultStyles(jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_) {
+std::vector<mbgl::util::DefaultStyle> TileServerOptions::getDefaultStyles(jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_) {
 
     std::size_t length = styles_.Length(env);
-    std::vector<const mbgl::util::DefaultStyle> convertedStyles;
+    std::vector<mbgl::util::DefaultStyle> convertedStyles;
     //convertedStyles.reserve(length);
     for (std::size_t i = 0; i < length; i++) {
-        const mbgl::util::DefaultStyle converted = DefaultStyle::getDefaultStyle(env, styles_.Get(env, i));
+        mbgl::util::DefaultStyle converted = DefaultStyle::getDefaultStyle(env, styles_.Get(env, i));
         convertedStyles.push_back(converted);
     }
 

@@ -156,7 +156,7 @@
             std::string([options.tileDomainName UTF8String]),
             options.tileVersionPrefix ? std::string([options.tileVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
 
-    std::vector<const mbgl::util::DefaultStyle> defaultStyles;
+    std::vector<mbgl::util::DefaultStyle> defaultStyles;
     if (options.defaultStyles) {
         for (MGLDefaultStyle* objCStyle in options.defaultStyles) {
             mbgl::util::DefaultStyle cppStyle(
@@ -202,7 +202,7 @@
         retVal.tileDomainName = [NSString stringWithUTF8String:cppOpts->tileDomainName().c_str()];
         retVal.tileVersionPrefix = cppOpts->styleVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->tileVersionPrefix().value().c_str()] : nil;
       
-        std::vector<const mbgl::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
+        std::vector<mbgl::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
         
         
         NSMutableArray<MGLDefaultStyle*>* mglStyles = [[NSMutableArray<MGLDefaultStyle*> alloc] init];
