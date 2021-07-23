@@ -5,8 +5,9 @@
 
 #include <QOpenGLWidget>
 #include <QPropertyAnimation>
-#include <QScopedPointer>
 #include <QtGlobal>
+
+#include <memory>
 
 class QKeyEvent;
 class QMouseEvent;
@@ -43,7 +44,7 @@ private:
     QPointF m_lastPos;
 
     QMapboxGLSettings m_settings;
-    QScopedPointer<QMapboxGL> m_map;
+    std::unique_ptr<QMapboxGL> m_map{};
 
     QPropertyAnimation *m_bearingAnimation;
     QPropertyAnimation *m_zoomAnimation;

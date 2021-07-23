@@ -43,7 +43,7 @@ QMapboxGLMapRenderer::QMapboxGLMapRenderer(qreal pixelRatio, QMapboxGLSettings::
             mbgl::Scheduler::SetCurrent(scheduler);
         }
 
-        connect(scheduler, SIGNAL(needsProcessing()), this, SIGNAL(needsRendering()));
+        connect(scheduler, &QMapboxGLScheduler::needsProcessing, this, &QMapboxGLMapRenderer::needsRendering);
     }
 }
 

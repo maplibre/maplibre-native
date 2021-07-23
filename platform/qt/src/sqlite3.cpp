@@ -240,7 +240,11 @@ template <>
 void Query::bind(int offset, std::nullptr_t) {
     assert(stmt.impl);
     // Field numbering starts at 0.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    stmt.impl->query.bindValue(offset - 1, QVariant(), QSql::In);
+#else
     stmt.impl->query.bindValue(offset - 1, QVariant(QVariant::Invalid), QSql::In);
+#endif
     checkQueryError(stmt.impl->query);
 }
 

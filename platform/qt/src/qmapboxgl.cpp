@@ -1350,14 +1350,14 @@ void QMapboxGL::removeSource(const QString& id)
     this API and is not officially supported. Use at your own risk.
 */
 void QMapboxGL::addCustomLayer(const QString &id,
-        QScopedPointer<QMapbox::CustomLayerHostInterface>& host,
-        const QString& before)
+        std::unique_ptr<QMapbox::CustomLayerHostInterface> host,
+        const QString &before)
 {
     class HostWrapper : public mbgl::style::CustomLayerHost {
         public:
-        QScopedPointer<QMapbox::CustomLayerHostInterface> ptr;
-        HostWrapper(QScopedPointer<QMapbox::CustomLayerHostInterface>& p)
-         : ptr(p.take()) {
+        std::unique_ptr<QMapbox::CustomLayerHostInterface> ptr{};
+        HostWrapper(std::unique_ptr<QMapbox::CustomLayerHostInterface> p)
+         : ptr(std::move(p)) {
          }
 
         void initialize() {
@@ -1386,7 +1386,7 @@ void QMapboxGL::addCustomLayer(const QString &id,
 
     d_ptr->mapObj->getStyle().addLayer(std::make_unique<mbgl::style::CustomLayer>(
             id.toStdString(),
-            std::make_unique<HostWrapper>(host)),
+            std::make_unique<HostWrapper>(std::move(host))),
             before.isEmpty() ? mbgl::optional<std::string>() : mbgl::optional<std::string>(before.toStdString()));
 }
 
@@ -1743,9 +1743,9 @@ QMapboxGLPrivate::QMapboxGLPrivate(QMapboxGL *q, const QMapboxGLSettings &settin
 
     qRegisterMetaType<QMapboxGL::MapChange>("QMapboxGL::MapChange");
 
-    connect(m_mapObserver.get(), SIGNAL(mapChanged(QMapboxGL::MapChange)), q, SIGNAL(mapChanged(QMapboxGL::MapChange)));
-    connect(m_mapObserver.get(), SIGNAL(mapLoadingFailed(QMapboxGL::MapLoadingFailure,QString)), q, SIGNAL(mapLoadingFailed(QMapboxGL::MapLoadingFailure,QString)));
-    connect(m_mapObserver.get(), SIGNAL(copyrightsChanged(QString)), q, SIGNAL(copyrightsChanged(QString)));
+    connect(m_mapObserver.get(), &QMapboxGLMapObserver::mapChanged, q, &QMapboxGL::mapChanged);
+    connect(m_mapObserver.get(), &QMapboxGLMapObserver::mapLoadingFailed, q, &QMapboxGL::mapLoadingFailed);
+    connect(m_mapObserver.get(), &QMapboxGLMapObserver::copyrightsChanged, q, &QMapboxGL::copyrightsChanged);
 
     auto resourceOptions = resourceOptionsFromQMapboxGLSettings(settings);
     for (auto style : resourceOptions.tileServerOptions().defaultStyles()) {
@@ -1778,7 +1778,7 @@ QMapboxGLPrivate::QMapboxGLPrivate(QMapboxGL *q, const QMapboxGLSettings &settin
      }
 
     // Needs to be Queued to give time to discard redundant draw calls via the `renderQueued` flag.
-    connect(this, SIGNAL(needsRendering()), q, SIGNAL(needsRendering()), Qt::QueuedConnection);
+    connect(this, &QMapboxGLPrivate::needsRendering, q, &QMapboxGL::needsRendering, Qt::QueuedConnection);
 }
 
 QMapboxGLPrivate::~QMapboxGLPrivate()
@@ -1826,7 +1826,7 @@ void QMapboxGLPrivate::createRenderer()
         m_localFontFamily
     );
 
-    connect(m_mapRenderer.get(), SIGNAL(needsRendering()), this, SLOT(requestRendering()));
+    connect(m_mapRenderer.get(), &QMapboxGLMapRenderer::needsRendering, this, &QMapboxGLPrivate::requestRendering);
 
     m_mapRenderer->setObserver(m_rendererObserver);
 
@@ -1886,7 +1886,11 @@ bool QMapboxGLPrivate::setProperty(const PropertySetter& setter, const QString& 
 
     mbgl::optional<conversion::Error> result;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (value.typeId() == QMetaType::QString) {
+#else
     if (value.type() == QVariant::String) {
+#endif
         mbgl::JSDocument document;
         document.Parse<0>(value.toString().toStdString());
         if (!document.HasParseError()) {

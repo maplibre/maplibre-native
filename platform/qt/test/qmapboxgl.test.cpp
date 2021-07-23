@@ -11,10 +11,8 @@
 #include <mbgl/test/util.hpp>
 
 QMapboxGLTest::QMapboxGLTest() : size(512, 512), fbo((assert(widget.context()->isValid()), widget.makeCurrent(), size)), map(nullptr, settings, size) {
-    connect(&map, SIGNAL(mapChanged(QMapboxGL::MapChange)),
-            this, SLOT(onMapChanged(QMapboxGL::MapChange)));
-    connect(&map, SIGNAL(needsRendering()),
-            this, SLOT(onNeedsRendering()));
+    connect(&map, &QMapboxGL::mapChanged, this, &QMapboxGLTest::onMapChanged);
+    connect(&map, &QMapboxGL::needsRendering, this, &QMapboxGLTest::onNeedsRendering);
     map.resize(fbo.size());
     map.setFramebufferObject(fbo.handle(), fbo.size());
     map.setCoordinateZoom(QMapbox::Coordinate(60.170448, 24.942046), 14);

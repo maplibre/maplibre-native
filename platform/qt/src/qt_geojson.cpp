@@ -80,7 +80,11 @@ mbgl::Value asMapboxGLPropertyValue(const QVariant &value) {
         return mbglMap;
     };
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    switch (value.typeId()) {
+#else
     switch (value.type()) {
+#endif
     case QMetaType::UnknownType:
         return mbgl::NullValue {};
     case QMetaType::Bool:
@@ -104,7 +108,11 @@ mbgl::Value asMapboxGLPropertyValue(const QVariant &value) {
 }
 
 mbgl::FeatureIdentifier asMapboxGLFeatureIdentifier(const QVariant &id) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    switch (id.typeId()) {
+#else
     switch (id.type()) {
+#endif
     case QMetaType::UnknownType:
         return {};
     case QMetaType::ULongLong:

@@ -11,7 +11,7 @@ namespace util {
 AsyncTask::Impl::Impl(std::function<void()>&& fn)
     : runLoop(RunLoop::Get()),
       task(std::move(fn)) {
-    connect(this, SIGNAL(send(void)), this, SLOT(runTask(void)), Qt::QueuedConnection);
+    connect(this, &AsyncTask::Impl::send, this, &AsyncTask::Impl::runTask, Qt::QueuedConnection);
 }
 
 void AsyncTask::Impl::maySend() {
