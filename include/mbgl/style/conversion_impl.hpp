@@ -350,6 +350,11 @@ struct ValueFactory<Rotation> {
     static Value make(const Rotation& rotation) { return {rotation.getAngle()}; }
 };
 
+template <>
+struct ValueFactory<float> {
+    static Value make(float f) { return f; }
+};
+
 template <typename T>
 Value makeValue(T&& arg) {
     return ValueFactory<std::decay_t<T>>::make(std::forward<T>(arg));
