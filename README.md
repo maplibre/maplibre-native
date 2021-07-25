@@ -130,7 +130,7 @@ make ios-test
  make ios-uitest
 ```
 
-The packaging script will produce a `platform/ios/build/ios/pkg/dynamic`
+The packaging script will produce a `Mapbox.xcframework` in the  `platform/ios/build/ios/pkg/dynamic` folder.
 Please refer to [Mapbox Maps SDK for iOS](platform/ios/platform/ios/) for detailed instructions.
 
 
