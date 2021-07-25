@@ -59,14 +59,15 @@ public final class Mapbox {
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, null);
       ConnectivityReceiver.instance(appContext);
-    } else {
-      TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
-      INSTANCE.tileServerOptions = tileServerOptions;
-      INSTANCE.apiKey = null;
-      FileSource fileSource = FileSource.getInstance(context);
-      fileSource.setTileServerOptions(tileServerOptions);
-      fileSource.setApiKey(null);
     }
+
+    TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
+    INSTANCE.tileServerOptions = tileServerOptions;
+    INSTANCE.apiKey = null;
+    FileSource fileSource = FileSource.getInstance(context);
+    fileSource.setTileServerOptions(tileServerOptions);
+    fileSource.setApiKey(null);
+
     return INSTANCE;
   }
 
