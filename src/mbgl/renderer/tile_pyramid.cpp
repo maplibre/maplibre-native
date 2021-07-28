@@ -170,10 +170,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID);
             if (!tile) return nullptr;
+            tile->setObserver(observer);
+            tile->setLayers(layers);
         }
 
-        tile->setObserver(observer);
-        tile->setLayers(layers);
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
     };
 
