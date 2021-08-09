@@ -7,7 +7,6 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/style/style.hpp>
-#include <mbgl/util/default_styles.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
@@ -103,6 +102,7 @@ int main(int argc, char *argv[]) {
 
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(cacheDB).withApiKey(token);
+    auto orderedStyles = resourceOptions.tileServerOptions().defaultStyles();
 
     GLFWView backend(fullscreen, benchmark, resourceOptions);
     view = &backend;
@@ -150,18 +150,18 @@ int main(int argc, char *argv[]) {
         mbgl::Log::Info(mbgl::Event::Setup, "Application is %s. Press `O` to toggle online status.", settings.online ? "online" : "offline");
     });
 
-    view->setChangeStyleCallback([&map] () {
+    view->setChangeStyleCallback([&map,&orderedStyles] () {
         static uint8_t currentStyleIndex;
 
-        if (++currentStyleIndex == mbgl::util::default_styles::numOrderedStyles) {
+        if (++currentStyleIndex == orderedStyles.size()) {
             currentStyleIndex = 0;
         }
 
-        mbgl::util::default_styles::DefaultStyle newStyle = mbgl::util::default_styles::orderedStyles[currentStyleIndex];
-        map.getStyle().loadURL(newStyle.url);
-        view->setWindowTitle(newStyle.name);
+        mbgl::util::DefaultStyle newStyle = orderedStyles[currentStyleIndex];
+        map.getStyle().loadURL(newStyle.getUrl());
+        view->setWindowTitle(newStyle.getName());
 
-        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: %s", newStyle.name);
+        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: %s", newStyle.getName());
     });
 
     // Resource loader controls top-level request processing and can resume / pause all managed sources simultaneously.
@@ -194,9 +194,9 @@ int main(int argc, char *argv[]) {
     if (style.empty()) {
         const char *url = getenv("MAPBOX_STYLE_URL");
         if (url == nullptr) {
-            mbgl::util::default_styles::DefaultStyle newStyle = mbgl::util::default_styles::orderedStyles[0];
-            style = newStyle.url;
-            view->setWindowTitle(newStyle.name);
+            mbgl::util::DefaultStyle newStyle = orderedStyles[0];
+            style = newStyle.getUrl();
+            view->setWindowTitle(newStyle.getName());
         } else {
             style = url;
             view->setWindowTitle(url);

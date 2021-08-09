@@ -1,5 +1,4 @@
 #include <mbgl/storage/http_file_source.hpp>
-#include <mbgl/storage/file_source_impl_base.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
@@ -233,14 +232,14 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
     return 0;
 }
 
-void HTTPFileSource::setResourceOptions(ResourceOptions options) {
+void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
     std::lock_guard<std::mutex> lock(resourceOptionsMutex);
     resourceOptions = options;
 }
 
-ResourceOptions& HTTPFileSource::getResourceOptions() {
+ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
     std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-    return resourceOptions;
+    return resourceOptions.clone();
 }
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
@@ -439,7 +438,7 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
     impl->setResourceOptions(options.clone());
 }
 
-ResourceOptions& HTTPFileSource::getResourceOptions() {
+ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 

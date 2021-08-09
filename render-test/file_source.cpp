@@ -79,8 +79,8 @@ void ProxyFileSource::setResourceOptions(ResourceOptions options) {
    resourceOptions = options;
 }
 
-ResourceOptions& ProxyFileSource::getResourceOptions() {
-    return resourceOptions;
+ResourceOptions ProxyFileSource::getResourceOptions() {
+    return resourceOptions.clone();
 }
 
 

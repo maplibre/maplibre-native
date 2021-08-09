@@ -2,7 +2,6 @@
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/default_styles.hpp>
 
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
-    std::string style = styleValue ? args::get(styleValue) : mbgl::util::default_styles::streets.url;
+    std::string style = styleValue ? args::get(styleValue) : mbgl::ResourceOptions().tileServerOptions().defaultStyle();
     const double lat = latValue ? args::get(latValue) : 0;
     const double lon = lonValue ? args::get(lonValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
