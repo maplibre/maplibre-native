@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     args::ValueFlag<std::string> testDirValue(
         argumentParser, "directory", "Root directory for test generation", {"testDir"});
     args::ValueFlag<std::string> backendValue(argumentParser, "backend", "Rendering backend", {"backend"});
+    args::ValueFlag<std::string> apikeyValue(argumentParser, "key", "API key", {'t', "apikey"});
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> cacheDBValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
@@ -95,14 +96,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Set access token if present
-    std::string token(getenv("MAPBOX_ACCESS_TOKEN") ?: "");
-    if (token.empty()) {
-        mbgl::Log::Warning(mbgl::Event::Setup, "no access token set. mapbox.com tiles won't work.");
-    }
+    const char* apikeyEnv = getenv("MGL_API_KEY");
+    const std::string apikey = apikeyValue ? args::get(apikeyValue) : (apikeyEnv ? apikeyEnv : std::string());
 
+    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(cacheDB).withApiKey(token);
-    auto orderedStyles = resourceOptions.tileServerOptions().defaultStyles();
+    resourceOptions.withCachePath(cacheDB).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration);
+    auto orderedStyles = mapTilerConfiguration.defaultStyles();
 
     GLFWView backend(fullscreen, benchmark, resourceOptions);
     view = &backend;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         map.getStyle().loadURL(newStyle.getUrl());
         view->setWindowTitle(newStyle.getName());
 
-        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: %s", newStyle.getName());
+        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: %s", newStyle.getName().c_str());
     });
 
     // Resource loader controls top-level request processing and can resume / pause all managed sources simultaneously.
