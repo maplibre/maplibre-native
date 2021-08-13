@@ -77,7 +77,7 @@ std::string decompress(const std::string &raw) {
     memset(&inflate_stream, 0, sizeof(inflate_stream));
 
     // TODO: reuse z_streams
-    if (inflateInit(&inflate_stream) != Z_OK) {
+    if (inflateInit2(&inflate_stream, MAX_WBITS|32) != Z_OK) {
         throw std::runtime_error("failed to initialize inflate");
     }
 
