@@ -20,7 +20,7 @@ class StyleBuilderTest {
 
     @Test
     fun testFromUrl() {
-        val expected = Style.getPredefinedStyle("Streets")
+        val expected = "https://demotiles.maplibre.org/style.json"
         val builder = Style.Builder()
         builder.fromUrl(expected)
         assertEquals(expected, builder.uri)
