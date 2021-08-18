@@ -72,7 +72,7 @@ Immutability is an alternative to several other strategies for safe intra-thread
 
 Immutability is implemented by the `Immutable<T>` template, which acts as a non-nullable shared reference to a `const T`. It has behavior similar to `std::shared_ptr<const T>`, but indicates its intent as an immutable reference that is safe to share between threads.
 
-Immutability is core to the implementation, and yet one of the defining features of Mapbox GL is the ability to manipulate and mutate the style freely at runtime. How can this be possible if everything is immutable? The answer turns on the distinction mentioned in the previous section between public classes such as `Layer` and private implementations such as `Layer::Impl`. In Mapbox GL, the latter is immutable, but the former is not:
+Immutability is core to the implementation, and yet one of the defining features of Mapbox GL is the ability to manipulate and mutate the style freely at runtime. How can this be possible if everything is immutable? The answer turns on the distinction mentioned in the previous section between public classes such as `Layer` and private implementations such as `Layer::Impl`. In Mapbox GL the following private implementations are immutable, whereas their public counterparts are not:
 
 * **Mutable objects**: `Layer`, `Source`, `Image`, `Light`
 * **Immutable objects**: `Layer::Impl`, `Source::Impl`, `Image::Impl`, `Light::Impl`
