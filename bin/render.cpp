@@ -2,7 +2,6 @@
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/default_styles.hpp>
 
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
@@ -53,7 +52,6 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
-    std::string style = styleValue ? args::get(styleValue) : mbgl::util::default_styles::streets.url;
     const double lat = latValue ? args::get(latValue) : 0;
     const double lon = lonValue ? args::get(lonValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
@@ -75,12 +73,15 @@ int main(int argc, char *argv[]) {
 
     using namespace mbgl;
 
+    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
+    std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
+
     util::RunLoop loop;
 
     HeadlessFrontend frontend({ width, height }, pixelRatio);
     Map map(frontend, MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio),
-            ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withApiKey(std::string(apikey)));
+            ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration));
 
     if (style.find("://") == std::string::npos) {
         style = std::string("file://") + style;
