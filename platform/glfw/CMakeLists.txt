@@ -29,6 +29,13 @@ if(MBGL_WITH_OPENGL)
     )
 endif()
 
+if(MBGL_WITH_EGL)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MBGL_WITH_EGL=1
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE

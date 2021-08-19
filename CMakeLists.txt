@@ -21,6 +21,7 @@ option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
 option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
 option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
 add_library(
