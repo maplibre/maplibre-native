@@ -92,6 +92,27 @@ void VectorSource::loadDescription(FileSource& fileSource) {
     });
 }
 
+const std::vector<std::string> VectorSource::getTiles() {
+    auto tileset = impl().tileset;
+    if (tileset.has_value()) {
+        return tileset->tiles;
+    } else {
+        return {};
+    }
+}
+
+void VectorSource::setTiles(const std::vector<std::string> &newtiles) {
+    auto &tileset = impl().tileset;
+    Tileset newtileset(*tileset);
+    newtileset.tiles = newtiles;
+    bool changed = tileset->tiles != newtiles;
+    baseImpl = makeMutable<Impl>(impl(), newtileset);
+    observer->onSourceLoaded(*this);
+    if (changed) {
+        observer->onSourceChanged(*this);
+    }
+}
+
 bool VectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
     return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
 }
