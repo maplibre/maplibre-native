@@ -37,12 +37,12 @@ namespace util {
 // cause a link error.
 #undef compress
 
-std::string compress(const std::string &raw) {
+std::string compress(const std::string &raw, int windowBits) {
     z_stream deflate_stream;
     memset(&deflate_stream, 0, sizeof(deflate_stream));
 
     // TODO: reuse z_streams
-    if (deflateInit(&deflate_stream, Z_DEFAULT_COMPRESSION) != Z_OK) {
+    if (deflateInit2(&deflate_stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY) != Z_OK) {
         throw std::runtime_error("failed to initialize deflate");
     }
 
