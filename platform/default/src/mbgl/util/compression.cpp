@@ -72,12 +72,12 @@ std::string compress(const std::string &raw, int windowBits) {
     return result;
 }
 
-std::string decompress(const std::string &raw) {
+std::string decompress(const std::string &raw, int windowBits) {
     z_stream inflate_stream;
     memset(&inflate_stream, 0, sizeof(inflate_stream));
 
     // TODO: reuse z_streams
-    if (inflateInit2(&inflate_stream, MAX_WBITS|32) != Z_OK) {
+    if (inflateInit2(&inflate_stream, windowBits) != Z_OK) {
         throw std::runtime_error("failed to initialize inflate");
     }
 
