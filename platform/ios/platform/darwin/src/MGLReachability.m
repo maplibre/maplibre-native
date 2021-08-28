@@ -466,7 +466,7 @@ static void TMReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkRea
 - (NSString *) description
 {
     NSString *description = [NSString stringWithFormat:@"<%@: %p (%@)>",
-                             NSStringFromClass([self class]), (void *) self, [self currentReachabilityFlags]];
+                             NSStringFromClass([self class]), self, [self currentReachabilityFlags]];
     return description;
 }
 

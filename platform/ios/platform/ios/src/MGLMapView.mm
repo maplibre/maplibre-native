@@ -1381,21 +1381,7 @@ public:
         newFrameRate = _preferredFramesPerSecond;
     }
 
-    if (@available(iOS 10.0, *))
-    {
-        _displayLink.preferredFramesPerSecond = newFrameRate;
-    }
-    else
-    {
-        // CADisplayLink.frameInterval does not support more than 60 FPS (and
-        // no device that supports >60 FPS ever supported iOS 9).
-        NSInteger maximumFrameRate = 60;
-
-        // `0` is an alias for maximum frame rate.
-        newFrameRate = newFrameRate ?: maximumFrameRate;
-
-        _displayLink.preferredFramesPerSecond = maximumFrameRate / MIN(newFrameRate, maximumFrameRate);
-    }
+    _displayLink.preferredFramesPerSecond = newFrameRate;
 }
 
 - (void)setPreferredFramesPerSecond:(MGLMapViewPreferredFramesPerSecond)preferredFramesPerSecond
