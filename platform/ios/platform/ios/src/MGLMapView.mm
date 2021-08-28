@@ -1637,6 +1637,8 @@ public:
     // We want to pause the rendering
     [self stopDisplayLink];
 
+//    self.lastSnapshotImage = _mbglView->snapshot();
+    
     // For OpenGL this calls glFinish as recommended in
     // https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
     // reduceMemoryUse(), calls performCleanup(), which calls glFinish
@@ -7171,8 +7173,8 @@ static void *windowScreenContext = &windowScreenContext;
     NSTimeInterval now = CACurrentMediaTime();
 
     if (lastSnapshotTime == 0.0 || (now - lastSnapshotTime > MGLBackgroundSnapshotImageInterval)) {
-        MGLLogDebug(@"Taking snapshot");
-        self.lastSnapshotImage = _mbglView->snapshot();
+//        MGLLogDebug(@"Taking snapshot");
+//        self.lastSnapshotImage = _mbglView->snapshot();
         lastSnapshotTime = now;
     }
 }
