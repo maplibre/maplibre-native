@@ -31,7 +31,7 @@ public:
     }
 
     static QVariant arrayMember(const QVariant& value, std::size_t i) {
-        return value.toList()[i];
+        return value.toList()[static_cast<int>(i)];
     }
 
     static bool isObject(const QVariant& value) {

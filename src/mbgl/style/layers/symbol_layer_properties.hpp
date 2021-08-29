@@ -53,7 +53,7 @@ struct IconOptional : LayoutProperty<bool> {
 
 struct IconPadding : LayoutProperty<float> {
     static constexpr const char *name() { return "icon-padding"; }
-    static float defaultValue() { return 2; }
+    static float defaultValue() { return 2.f; }
 };
 
 struct IconPitchAlignment : LayoutProperty<AlignmentType> {
@@ -63,7 +63,7 @@ struct IconPitchAlignment : LayoutProperty<AlignmentType> {
 
 struct IconRotate : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "icon-rotate"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct IconRotationAlignment : LayoutProperty<AlignmentType> {
@@ -73,7 +73,7 @@ struct IconRotationAlignment : LayoutProperty<AlignmentType> {
 
 struct IconSize : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "icon-size"; }
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct IconTextFit : LayoutProperty<IconTextFitType> {
@@ -83,7 +83,7 @@ struct IconTextFit : LayoutProperty<IconTextFitType> {
 
 struct IconTextFitPadding : LayoutProperty<std::array<float, 4>> {
     static constexpr const char *name() { return "icon-text-fit-padding"; }
-    static std::array<float, 4> defaultValue() { return {{0, 0, 0, 0}}; }
+    static std::array<float, 4> defaultValue() { return {{0.f, 0.f, 0.f, 0.f}}; }
 };
 
 struct SymbolAvoidEdges : LayoutProperty<bool> {
@@ -98,12 +98,12 @@ struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
 
 struct SymbolSortKey : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "symbol-sort-key"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct SymbolSpacing : LayoutProperty<float> {
     static constexpr const char *name() { return "symbol-spacing"; }
-    static float defaultValue() { return 250; }
+    static float defaultValue() { return 250.f; }
 };
 
 struct SymbolZOrder : LayoutProperty<SymbolZOrderType> {
@@ -148,22 +148,22 @@ struct TextKeepUpright : LayoutProperty<bool> {
 
 struct TextLetterSpacing : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "text-letter-spacing"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct TextLineHeight : LayoutProperty<float> {
     static constexpr const char *name() { return "text-line-height"; }
-    static float defaultValue() { return 1.2; }
+    static float defaultValue() { return 1.2f; }
 };
 
 struct TextMaxAngle : LayoutProperty<float> {
     static constexpr const char *name() { return "text-max-angle"; }
-    static float defaultValue() { return 45; }
+    static float defaultValue() { return 45.f; }
 };
 
 struct TextMaxWidth : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "text-max-width"; }
-    static float defaultValue() { return 10; }
+    static float defaultValue() { return 10.f; }
 };
 
 struct TextOffset : DataDrivenLayoutProperty<std::array<float, 2>> {
@@ -178,7 +178,7 @@ struct TextOptional : LayoutProperty<bool> {
 
 struct TextPadding : LayoutProperty<float> {
     static constexpr const char *name() { return "text-padding"; }
-    static float defaultValue() { return 2; }
+    static float defaultValue() { return 2.f; }
 };
 
 struct TextPitchAlignment : LayoutProperty<AlignmentType> {
@@ -188,12 +188,12 @@ struct TextPitchAlignment : LayoutProperty<AlignmentType> {
 
 struct TextRadialOffset : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "text-radial-offset"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct TextRotate : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "text-rotate"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct TextRotationAlignment : LayoutProperty<AlignmentType> {
@@ -203,7 +203,7 @@ struct TextRotationAlignment : LayoutProperty<AlignmentType> {
 
 struct TextSize : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "text-size"; }
-    static float defaultValue() { return 16; }
+    static float defaultValue() { return 16.f; }
 };
 
 struct TextTransform : DataDrivenLayoutProperty<TextTransformType> {
@@ -226,7 +226,7 @@ struct IconColor : DataDrivenPaintProperty<Color, attributes::fill_color, unifor
 };
 
 struct IconHaloBlur : DataDrivenPaintProperty<float, attributes::halo_blur, uniforms::halo_blur> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct IconHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, uniforms::halo_color> {
@@ -234,15 +234,15 @@ struct IconHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, un
 };
 
 struct IconHaloWidth : DataDrivenPaintProperty<float, attributes::halo_width, uniforms::halo_width> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct IconOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct IconTranslate : PaintProperty<std::array<float, 2>> {
-    static std::array<float, 2> defaultValue() { return {{0, 0}}; }
+    static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
 };
 
 struct IconTranslateAnchor : PaintProperty<TranslateAnchorType> {
@@ -257,7 +257,7 @@ struct TextColor : DataDrivenPaintProperty<Color, attributes::fill_color, unifor
 };
 
 struct TextHaloBlur : DataDrivenPaintProperty<float, attributes::halo_blur, uniforms::halo_blur> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct TextHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, uniforms::halo_color> {
@@ -265,15 +265,15 @@ struct TextHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, un
 };
 
 struct TextHaloWidth : DataDrivenPaintProperty<float, attributes::halo_width, uniforms::halo_width> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct TextOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct TextTranslate : PaintProperty<std::array<float, 2>> {
-    static std::array<float, 2> defaultValue() { return {{0, 0}}; }
+    static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
 };
 
 struct TextTranslateAnchor : PaintProperty<TranslateAnchorType> {

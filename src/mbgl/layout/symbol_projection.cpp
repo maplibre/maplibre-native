@@ -169,10 +169,10 @@ namespace mbgl {
             // The label needs to be flipped to keep text upright.
             // Iterate in the reverse direction.
             dir *= -1;
-            angle = M_PI;
+            angle = static_cast<float>(M_PI);
         }
 
-        if (dir < 0) angle += M_PI;
+        if (dir < 0) angle += static_cast<float>(M_PI);
 
         int32_t currentIndex = dir > 0 ? anchorSegment : anchorSegment + 1;
 
@@ -248,10 +248,10 @@ namespace mbgl {
         const float firstGlyphOffset = symbol.glyphOffsets.front();
         const float lastGlyphOffset = symbol.glyphOffsets.back();;
 
-        optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, symbol.segment, symbol.line, symbol.tileDistances, labelPlaneMatrix,  returnTileDistance);
+        optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
         if (!firstPlacedGlyph) return {};
 
-        optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, symbol.segment, symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
+        optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
         if (!lastPlacedGlyph) return {};
 
         return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
@@ -316,7 +316,7 @@ namespace mbgl {
             for (size_t glyphIndex = 1; glyphIndex < symbol.glyphOffsets.size() - 1; glyphIndex++) {
                 const float glyphOffsetX = symbol.glyphOffsets[glyphIndex];
                 // Since first and last glyph fit on the line, we're sure that the rest of the glyphs can be placed
-                auto placedGlyph = placeGlyphAlongLine(glyphOffsetX * fontScale, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, symbol.segment, symbol.line, symbol.tileDistances, labelPlaneMatrix, false);
+                auto placedGlyph = placeGlyphAlongLine(glyphOffsetX * fontScale, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, false);
                 if (placedGlyph) {
                     placedGlyphs.push_back(*placedGlyph);
                 } else {
@@ -344,7 +344,7 @@ namespace mbgl {
                 }
             }
             const float glyphOffsetX = symbol.glyphOffsets.front();
-            optional<PlacedGlyph> singleGlyph = placeGlyphAlongLine(fontScale * glyphOffsetX, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, symbol.segment,
+            optional<PlacedGlyph> singleGlyph = placeGlyphAlongLine(fontScale * glyphOffsetX, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, static_cast<uint16_t>(symbol.segment),
                 symbol.line, symbol.tileDistances, labelPlaneMatrix, false);
             if (!singleGlyph)
                 return PlacementResult::NotEnoughRoom;

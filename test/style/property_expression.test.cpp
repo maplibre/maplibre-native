@@ -45,15 +45,15 @@ auto createOverride(expression::type::Type exprType,
 }
 
 TEST(PropertyExpression, Constant) {
-    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0), 0));
-    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8), 0));
-    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0), 0));
-    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0), 4));
-    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8), 4));
-    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0), 4));
-    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0), 22));
-    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8), 22));
-    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0), 22));
+    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0f), 0));
+    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8f), 0));
+    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0f), 0));
+    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0f), 4));
+    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8f), 4));
+    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0f), 4));
+    EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0f), 22));
+    EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8f), 22));
+    EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0f), 22));
 }
 
 TEST(PropertyExpression, Expression) {

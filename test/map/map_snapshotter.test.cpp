@@ -119,7 +119,7 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(runtimeStyling)) {
     observer.didFinishLoadingStyleCallback = [&snapshotter, &runLoop] {
         auto fillLayer = std::make_unique<style::FillLayer>("green_fill", "mapbox");
         fillLayer->setSourceLayer("water");
-        fillLayer->setFillColor(Color(0.25, 0.88, 0.82, 1.0));
+        fillLayer->setFillColor(Color(0.25f, 0.88f, 0.82f, 1.0f));
         snapshotter.getStyle().addLayer(std::move(fillLayer));
         snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
                                         mbgl::PremultipliedImage image,

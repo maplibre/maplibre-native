@@ -60,7 +60,7 @@ bool OffscreenTexture::isRenderable() {
     try {
         getResource<OffscreenTextureResource>().bind();
         return true;
-    } catch (const std::runtime_error& ex) {
+    } catch (const std::runtime_error&) {
         return false;
     }
 }

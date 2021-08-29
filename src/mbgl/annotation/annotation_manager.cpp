@@ -17,6 +17,11 @@
 // Note: LayerManager::annotationsEnabled is defined
 // at compile time, so that linker (with LTO on) is able
 // to optimize out the unreachable code.
+#define CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG() \
+if (!LayerManager::annotationsEnabled) {             \
+    assert(false);                                   \
+    return;                                          \
+}
 #define CHECK_ANNOTATIONS_ENABLED_AND_RETURN(result) \
 if (!LayerManager::annotationsEnabled) {             \
     assert(false);                                   \
@@ -38,12 +43,12 @@ AnnotationManager::AnnotationManager(Style& style_)
 AnnotationManager::~AnnotationManager() = default;
 
 void AnnotationManager::setStyle(Style& style_) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     style = style_;
 }
 
 void AnnotationManager::onStyleLoaded() {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     updateStyle();
 }
 
@@ -68,7 +73,7 @@ bool AnnotationManager::updateAnnotation(const AnnotationID& id, const Annotatio
 }
 
 void AnnotationManager::removeAnnotation(const AnnotationID& id) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     remove(id);
     dirty = true;
@@ -134,13 +139,13 @@ void AnnotationManager::update(const AnnotationID& id, const FillAnnotation& ann
 }
 
 void AnnotationManager::remove(const AnnotationID& id) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     if (symbolAnnotations.find(id) != symbolAnnotations.end()) {
         symbolTree.remove(symbolAnnotations.at(id));
         symbolAnnotations.erase(id);
     } else if (shapeAnnotations.find(id) != shapeAnnotations.end()) {
         auto it = shapeAnnotations.find(id);
-        *style.get().impl->removeLayer(it->second->layerID);
+        (void)*style.get().impl->removeLayer(it->second->layerID);
         shapeAnnotations.erase(it);
     } else {
         assert(false); // Should never happen
@@ -211,7 +216,7 @@ void AnnotationManager::updateStyle() {
 }
 
 void AnnotationManager::updateData() {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     if (dirty) {
         for (auto& tile : tiles) {
@@ -222,14 +227,14 @@ void AnnotationManager::updateData() {
 }
 
 void AnnotationManager::addTile(AnnotationTile& tile) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     tiles.insert(&tile);
     tile.setData(getTileData(tile.id.canonical));
 }
 
 void AnnotationManager::removeTile(AnnotationTile& tile) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     tiles.erase(&tile);
 }
@@ -241,7 +246,7 @@ static std::string prefixedImageID(const std::string& id) {
 }
 
 void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     const std::string id = prefixedImageID(image->getID());
     images.erase(id);
@@ -251,7 +256,7 @@ void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
 }
 
 void AnnotationManager::removeImage(const std::string& id_) {
-    CHECK_ANNOTATIONS_ENABLED_AND_RETURN();
+    CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::lock_guard<std::mutex> lock(mutex);
     const std::string id = prefixedImageID(id_);
     images.erase(id);

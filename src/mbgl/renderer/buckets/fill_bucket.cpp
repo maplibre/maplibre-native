@@ -75,14 +75,14 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
             auto& lineSegment = lineSegments.back();
             assert(lineSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-            uint16_t lineIndex = lineSegment.vertexLength;
+            const auto lineIndex = static_cast<uint16_t>(lineSegment.vertexLength);
 
             vertices.emplace_back(FillProgram::layoutVertex(ring[0]));
-            lines.emplace_back(lineIndex + nVertices - 1, lineIndex);
+            lines.emplace_back(static_cast<uint16_t>(lineIndex + nVertices - 1), lineIndex);
 
             for (std::size_t i = 1; i < nVertices; i++) {
                 vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
-                lines.emplace_back(lineIndex + i - 1, lineIndex + i);
+                lines.emplace_back(static_cast<uint16_t>(lineIndex + i - 1), static_cast<uint16_t>(lineIndex + i));
             }
 
             lineSegment.vertexLength += nVertices;
@@ -100,7 +100,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
         auto& triangleSegment = triangleSegments.back();
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        uint16_t triangleIndex = triangleSegment.vertexLength;
+        const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
         for (std::size_t i = 0; i < nIndicies; i += 3) {
             triangles.emplace_back(triangleIndex + indices[i],

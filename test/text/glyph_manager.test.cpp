@@ -255,7 +255,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
 
 TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
     GlyphManagerTest test;
-    int firstGlyphResponse = false;
+    bool firstGlyphResponse = false;
 
     test.fileSource.glyphsResponse = [&] (const Resource&) {
         firstGlyphResponse = true;

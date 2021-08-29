@@ -90,9 +90,9 @@ int32_t DEMData::get(const int32_t x, const int32_t y) const {
 
 const std::array<float, 4>& DEMData::getUnpackVector() const {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
-    static const std::array<float, 4> unpackMapbox = {{ 6553.6, 25.6, 0.1, 10000.0 }};
+    static const std::array<float, 4> unpackMapbox = {{ 6553.6f, 25.6f, 0.1f, 10000.0f }};
     // https://aws.amazon.com/public-datasets/terrain/
-    static const std::array<float, 4> unpackTerrarium = {{ 256.0, 1.0, 1.0 / 256.0, 32768.0 }};
+    static const std::array<float, 4> unpackTerrarium = {{ 256.0f, 1.0f, 1.0f / 256.0f, 32768.0f }};
 
     return encoding == Tileset::DEMEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
 }

@@ -32,7 +32,7 @@ struct LightAnchor : LightProperty<LightAnchorType> {
 
 struct LightPosition : LightProperty<Position> {
     static Position defaultValue() {
-        std::array<float, 3> default_ = { { 1.15, 210, 30 } };
+        std::array<float, 3> default_ = { { 1.15f, 210.f, 30.f } };
         return Position{ { default_ } };
     }
 };

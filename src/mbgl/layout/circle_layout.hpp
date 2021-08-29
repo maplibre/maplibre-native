@@ -130,7 +130,7 @@ private:
 
                 auto& segment = segments.back();
                 assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-                uint16_t index = segment.vertexLength;
+                auto index = static_cast<uint16_t>(segment.vertexLength);
 
                 // 1, 2, 3
                 // 1, 4, 3

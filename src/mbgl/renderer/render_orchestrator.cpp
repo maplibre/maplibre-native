@@ -322,7 +322,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                         if (zoomFitsLayer) {
                             sourceNeedsRendering = true;
                             renderItemsEmplaceHint =
-                                layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, source, index);
+                                layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
                         }
                     }
                 }
@@ -339,7 +339,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   // items.
                     }
                 }
-                renderItemsEmplaceHint = layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, nullptr, index);
+                renderItemsEmplaceHint = layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
             }
         }
         source->update(sourceImpl,

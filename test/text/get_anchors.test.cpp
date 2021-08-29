@@ -35,7 +35,7 @@ const float overscaling = 1.0f;
 
 TEST(getAnchors, NonContinuedLineShortLabels) {
     const Anchors anchors = getAnchors(
-        nonContinuedLine, bigSpacing, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
+        nonContinuedLine, bigSpacing, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
     const Anchors expected_anchors = {Anchor(1.0f, 2.0f, 1.570796371f, 1u),
                                       Anchor(1.0f, 5.0f, 1.570796371f, 4u),
                                       Anchor(1.0f, 8.0f, 1.570796371f, 7u)};
@@ -46,7 +46,7 @@ TEST(getAnchors, NonContinuedLineShortLabels) {
 TEST(getAnchors, NonContinuedLineLongLabels) {
     const Anchors anchors = getAnchors(nonContinuedLine,
                                        smallSpacing,
-                                       M_PI,
+                                       static_cast<float>(M_PI),
                                        textLeft,
                                        textRight,
                                        iconLeft,
@@ -63,7 +63,7 @@ TEST(getAnchors, NonContinuedLineLongLabels) {
 
 TEST(getAnchors, ContinuedLineShortLabels) {
     const Anchors anchors = getAnchors(
-        continuedLine, bigSpacing, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
+        continuedLine, bigSpacing, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
     const Anchors expected_anchors = {Anchor(1.0f, 2.0f, 1.570796371f, 1u),
                                       Anchor(1.0f, 5.0f, 1.570796371f, 4u),
                                       Anchor(1.0f, 8.0f, 1.570796371f, 7u)};
@@ -73,7 +73,7 @@ TEST(getAnchors, ContinuedLineShortLabels) {
 
 TEST(getAnchors, ContinuedLineLongLabels) {
     const Anchors anchors = getAnchors(
-        continuedLine, smallSpacing, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
+        continuedLine, smallSpacing, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
     const Anchors expected_anchors = {Anchor(1.0f, 1.0f, 1.570796371f, 1u),
                                       Anchor(1.0f, 4.0f, 1.570796371f, 3u),
                                       Anchor(1.0f, 6.0f, 1.570796371f, 6u)};
@@ -83,10 +83,10 @@ TEST(getAnchors, ContinuedLineLongLabels) {
 
 TEST(getAnchors, OverscaledAnchorsInParent) {
     const Anchors anchors = getAnchors(
-        nonContinuedLine, bigSpacing, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
+        nonContinuedLine, bigSpacing, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
     const Anchors childAnchors = getAnchors(nonContinuedLine,
                                             bigSpacing / 2,
-                                            M_PI,
+                                            static_cast<float>(M_PI),
                                             textLeft,
                                             textRight,
                                             iconLeft,
@@ -102,7 +102,7 @@ TEST(getAnchors, OverscaledAnchorsInParent) {
 TEST(getAnchors, UseMidpointForShortLine) {
     const GeometryCoordinates shortLine = {Point<int16_t>{1, 1}, Point<int16_t>{1, 3}};
     const Anchors anchors = getAnchors(
-        shortLine, smallSpacing, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
+        shortLine, smallSpacing, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale, overscaling);
     const Anchors expected_anchors = {Anchor(1.0f, 2.0f, 1.570796371f, 0u)};
 
     EXPECT_EQ(anchors, expected_anchors);
@@ -111,20 +111,20 @@ TEST(getAnchors, UseMidpointForShortLine) {
 TEST(getAnchors, GetCenterAnchor) {
     const GeometryCoordinates line = {
         Point<int16_t>{1, 1}, Point<int16_t>{1, 3}, Point<int16_t>{3, 6}, Point<int16_t>{4, 7}};
-    const auto anchor = getCenterAnchor(line, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
+    const auto anchor = getCenterAnchor(line, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
     EXPECT_TRUE(anchor);
     EXPECT_EQ(*anchor, Anchor(2.0f, 4.0f, .982793748f, 1u));
 }
 
 TEST(getAnchors, GetCenterAnchorOutsideTileBounds) {
     const GeometryCoordinates line = {Point<int16_t>{-10, -10}, Point<int16_t>{5, 5}};
-    const auto anchor = getCenterAnchor(line, M_PI, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
+    const auto anchor = getCenterAnchor(line, static_cast<float>(M_PI), textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
     EXPECT_TRUE(anchor);
     EXPECT_EQ(*anchor, Anchor(-3.0f, -3.0f, .785398185f, 0u));
 }
 
 TEST(getAnchors, GetCenterAnchorFailMaxAngle) {
     const GeometryCoordinates line = {Point<int16_t>{1, 1}, Point<int16_t>{1, 3}, Point<int16_t>{3, 3}};
-    const auto anchor = getCenterAnchor(line, M_PI / 4, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
+    const auto anchor = getCenterAnchor(line, static_cast<float>(M_PI) / 4, textLeft, textRight, iconLeft, iconRight, glyphSize, boxScale);
     EXPECT_FALSE(anchor);
 }

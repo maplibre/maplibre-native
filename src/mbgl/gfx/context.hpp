@@ -87,7 +87,7 @@ public:
 
     virtual const RenderingStats& renderingStats() const = 0;
 
-#if not defined(NDEBUG)
+#if !defined(NDEBUG)
 public:
     virtual void visualizeStencilBuffer() = 0;
     virtual void visualizeDepthBuffer(float depthRangeSize) = 0;

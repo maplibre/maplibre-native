@@ -472,7 +472,7 @@ protected:
 
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
-        const unsigned long numVtxCircumference = circle.size() - 1;
+        const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
         const float bearingStep = 360.0f / float(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);

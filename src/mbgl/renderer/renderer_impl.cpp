@@ -184,7 +184,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-#if not defined(NDEBUG)
+#if !defined(NDEBUG)
     if (parameters.debugOptions & MapDebugOptions::StencilClip) {
         // Render tile clip boundaries, using stencil buffer to calculate fill color.
         parameters.context.visualizeStencilBuffer();

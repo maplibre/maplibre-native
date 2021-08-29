@@ -1450,7 +1450,7 @@ QVector<QString> QMapboxGL::layerIds() const
     const auto &layers = d_ptr->mapObj->getStyle().getLayers();
 
     QVector<QString> layerIds;
-    layerIds.reserve(layers.size());
+    layerIds.reserve(static_cast<int>(layers.size()));
 
     for (const mbgl::style::Layer *layer : layers) {
         layerIds.append(QString::fromStdString(layer->getID()));
@@ -1543,7 +1543,7 @@ QVariant QVariantFromValue(const mbgl::Value &value) {
             return QColor(value_.r, value_.g, value_.b, value_.a);
         }, [&](const std::vector<mbgl::Value> &vector) {
             QVariantList list;
-            list.reserve(vector.size());
+            list.reserve(static_cast<int>(vector.size()));
             for (const auto &value_ : vector) {
                 list.push_back(QVariantFromValue(value_));
             }

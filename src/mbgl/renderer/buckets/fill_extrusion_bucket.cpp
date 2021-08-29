@@ -83,7 +83,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         auto& triangleSegment = triangleSegments.back();
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        uint16_t triangleIndex = triangleSegment.vertexLength;
+        auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
         assert(triangleIndex + (5 * (totalVertices - 1) + 1) <=
                std::numeric_limits<uint16_t>::max());
@@ -100,7 +100,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 const auto& p1 = ring[i];
 
                 vertices.emplace_back(
-                    FillExtrusionProgram::layoutVertex(p1, 0, 0, 1, 1, edgeDistance));
+                    FillExtrusionProgram::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -117,16 +117,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     }
 
                     vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 0, edgeDistance));
+                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
                     vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 1, edgeDistance));
+                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     edgeDistance += dist;
 
                     vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 0, edgeDistance));
+                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
                     vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 1, edgeDistance));
+                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     // ┌──────┐
                     // │ 0  1 │ Counter-Clockwise winding order.

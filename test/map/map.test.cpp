@@ -1300,7 +1300,7 @@ TEST(Map, PrefetchDeltaOverrideCustomSource) {
     };
 
     auto layer = test.map.getStyle().removeLayer("custom");
-    std::move(test.map.getStyle().removeSource("custom"));
+    test.map.getStyle().removeSource("custom");
     test.map.getStyle().addLayer(std::move(layer));
     test.map.getStyle().addSource(makeCustomSource());
     test.runLoop.run();

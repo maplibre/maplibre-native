@@ -161,14 +161,14 @@ TEST(Memory, Footprint) {
     std::vector<std::unique_ptr<FrontendAndMap>> maps;
     unsigned runs = 15;
 
-    long vectorInitialRSS = mbgl::test::getCurrentRSS();
+    size_t vectorInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
         maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/streets"));
     }
 
     double vectorFootprint = (mbgl::test::getCurrentRSS() - vectorInitialRSS) / double(runs);
 
-    long rasterInitialRSS = mbgl::test::getCurrentRSS();
+    size_t rasterInitialRSS = mbgl::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
         maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/hybrid"));
     }

@@ -52,7 +52,7 @@ bool RenderRasterLayer::hasCrossfade() const {
 
 static float saturationFactor(float saturation) {
     if (saturation > 0) {
-        return 1 - 1 / (1.001 - saturation);
+        return 1.f - 1.f / (1.001f - saturation);
     } else {
         return -saturation;
     }

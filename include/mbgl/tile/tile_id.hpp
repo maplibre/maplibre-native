@@ -2,6 +2,7 @@
 
 #include <mbgl/util/constants.hpp>
 
+#include <cmath>
 #include <cstdint>
 #include <array>
 #include <tuple>
@@ -199,7 +200,7 @@ inline OverscaledTileID OverscaledTileID::unwrapTo(int16_t newWrap) const {
 }
 
 inline UnwrappedTileID::UnwrappedTileID(uint8_t z_, int64_t x_, int64_t y_)
-    : wrap((x_ < 0 ? x_ - (1ll << z_) + 1 : x_) / (1ll << z_)),
+    : wrap(static_cast<int16_t>((x_ < 0 ? x_ - (1ll << z_) + 1 : x_) / (1ll << z_))),
       canonical(
           z_,
           static_cast<uint32_t>(x_ - wrap * (1ll << z_)),
@@ -247,7 +248,7 @@ inline OverscaledTileID UnwrappedTileID::overscaleTo(const uint8_t overscaledZ) 
 }
 
 inline float UnwrappedTileID::pixelsToTileUnits(const float pixelValue, const float zoom) const {
-    return pixelValue * (util::EXTENT / (util::tileSize * std::pow(2, zoom - canonical.z)));
+    return pixelValue * (static_cast<float>(util::EXTENT) / (static_cast<float>(util::tileSize) * std::pow(2.f, zoom - canonical.z)));
 }
 
 } // namespace mbgl
