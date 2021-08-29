@@ -94,13 +94,13 @@ void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& cb
 
     if (event == Event::Read || event == Event::ReadWrite) {
         auto notifier = std::make_unique<QSocketNotifier>(fd, QSocketNotifier::Read);
-        QObject::connect(notifier.get(), SIGNAL(activated(int)), impl.get(), SLOT(onReadEvent(int)));
+        QObject::connect(notifier.get(), &QSocketNotifier::activated, impl.get(), &RunLoop::Impl::onReadEvent);
         impl->readPoll[fd] = WatchPair(std::move(notifier), std::move(cb));
     }
 
     if (event == Event::Write || event == Event::ReadWrite) {
         auto notifier = std::make_unique<QSocketNotifier>(fd, QSocketNotifier::Write);
-        QObject::connect(notifier.get(), SIGNAL(activated(int)), impl.get(), SLOT(onWriteEvent(int)));
+        QObject::connect(notifier.get(), &QSocketNotifier::activated, impl.get(), &RunLoop::Impl::onWriteEvent);
         impl->writePoll[fd] = WatchPair(std::move(notifier), std::move(cb));
     }
 }

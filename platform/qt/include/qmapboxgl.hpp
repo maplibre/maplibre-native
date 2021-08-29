@@ -11,6 +11,7 @@
 #include <QStringList>
 
 #include <functional>
+#include <memory>
 
 class QMapboxGLPrivate;
 
@@ -245,8 +246,8 @@ public:
     void removeImage(const QString &name);
 
     void addCustomLayer(const QString &id,
-        QScopedPointer<QMapbox::CustomLayerHostInterface>& host,
-        const QString& before = QString());
+        std::unique_ptr<QMapbox::CustomLayerHostInterface> host,
+        const QString &before = QString());
     void addLayer(const QVariantMap &params, const QString& before = QString());
     bool layerExists(const QString &id);
     void removeLayer(const QString &id);

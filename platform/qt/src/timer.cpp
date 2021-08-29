@@ -10,7 +10,7 @@ namespace util {
 
 Timer::Impl::Impl() {
     timer.setTimerType(Qt::PreciseTimer);
-    connect(&timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+    connect(&timer, &QTimer::timeout, this, &Timer::Impl::timerFired);
 }
 
 void Timer::Impl::start(uint64_t timeout, uint64_t repeat_, std::function<void ()>&& cb) {

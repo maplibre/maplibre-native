@@ -23,7 +23,11 @@ public:
     }
 
     static bool isArray(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        return QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::QVariantList));
+#else
         return value.canConvert(QVariant::List);
+#endif
     }
 
     static std::size_t arrayLength(const QVariant& value) {
@@ -35,8 +39,13 @@ public:
     }
 
     static bool isObject(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        return QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::QVariantMap))
+            || value.typeId() == QMetaType::QByteArray
+#else
         return value.canConvert(QVariant::Map)
             || value.type() == QVariant::ByteArray
+#endif
             || QString(value.typeName()) == QStringLiteral("QMapbox::Feature")
             || value.userType() == qMetaTypeId<QVector<QMapbox::Feature>>()
             || value.userType() == qMetaTypeId<QList<QMapbox::Feature>>();
@@ -71,7 +80,11 @@ public:
     }
 
     static optional<bool> toBool(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (value.typeId() == QMetaType::Bool) {
+#else
         if (value.type() == QVariant::Bool) {
+#endif
             return value.toBool();
         } else {
             return {};
@@ -79,7 +92,11 @@ public:
     }
 
     static optional<float> toNumber(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::Double) {
+#else
         if (value.type() == QVariant::Int || value.type() == QVariant::Double) {
+#endif
             return value.toFloat();
         } else {
             return {};
@@ -87,7 +104,11 @@ public:
     }
 
     static optional<double> toDouble(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::Double) {
+#else
         if (value.type() == QVariant::Int || value.type() == QVariant::Double) {
+#endif
             return value.toDouble();
         } else {
             return {};
@@ -95,6 +116,15 @@ public:
     }
 
     static optional<std::string> toString(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (value.typeId() == QMetaType::QString) {
+            return value.toString().toStdString();
+        } else if (value.typeId() == QMetaType::QColor) {
+            return convertColor(value.value<QColor>());
+        } else {
+            return {};
+        }
+#else
         if (value.type() == QVariant::String) {
             return value.toString().toStdString();
         } else if (value.type() == QVariant::Color) {
@@ -102,9 +132,25 @@ public:
         } else {
             return {};
         }
+#endif
     }
 
     static optional<Value> toValue(const QVariant& value) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (value.typeId() == QMetaType::Bool) {
+            return { value.toBool() };
+        } else if (value.typeId() == QMetaType::QString) {
+            return { value.toString().toStdString() };
+        } else if (value.typeId() == QMetaType::QColor) {
+            return { convertColor(value.value<QColor>()) };
+        } else if (value.typeId() == QMetaType::Int) {
+            return { int64_t(value.toInt()) };
+        } else if (QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::Double))) {
+            return { value.toDouble() };
+        } else {
+            return {};
+        }
+#else
         if (value.type() == QVariant::Bool) {
             return { value.toBool() };
         } else if (value.type() == QVariant::String) {
@@ -118,6 +164,7 @@ public:
         } else {
             return {};
         }
+#endif
     }
 
     static optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
@@ -127,7 +174,11 @@ public:
             return featureCollectionToGeoJSON(value.value<QVector<QMapbox::Feature>>());
         } else if (value.userType() == qMetaTypeId<QList<QMapbox::Feature>>()) {
             return featureCollectionToGeoJSON(value.value<QList<QMapbox::Feature>>());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        } else if (value.typeId() != QMetaType::QByteArray) {
+#else
         } else if (value.type() != QVariant::ByteArray) {
+#endif
             error = { "JSON data must be in QByteArray" };
             return {};
         }
