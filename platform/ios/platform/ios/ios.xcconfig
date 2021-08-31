@@ -1,3 +1,8 @@
+// Xcode Configuration Settings `.xcconfig`
+//   [Add a build configuration (xcconfig) file](https://help.apple.com/xcode/mac/11.4/index.html?localePath=en.lproj#/deve97bde215?sub=dev40b8becae)
+//   [Configuration Settings File (xcconfig) format](https://help.apple.com/xcode/mac/11.4/index.html?localePath=en.lproj#/dev745c5c974?sub=dev40b8becae)
+//   [Map a configuration settings file to a build configuration](https://help.apple.com/xcode/mac/11.4/index.html?localePath=en.lproj#/deve97bde215?sub=dev40b8becae)
+
 #include "../darwin/darwin.xcconfig"
 
 LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(PROJECT_DIR)/vendor/mapbox-accounts-ios
