@@ -35,7 +35,7 @@ BOOL MGLEqualImages(MGLImage *leftImage, MGLImage *rightImage) {
 #endif
 }
 
-MGLImage *MGLImageFromCurrentContext() {
+MGLImage *MGLImageFromCurrentContext(void) {
 #if TARGET_OS_IPHONE
     return UIGraphicsGetImageFromCurrentImageContext();
 #else
