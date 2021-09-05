@@ -21,11 +21,13 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 @implementation MGLNetworkConfiguration
 {
     NSURLSessionConfiguration *_sessionConfig;
+    id<NSURLSessionDelegate> _sessionDelegate;
 }
 
 - (instancetype)init {
     if (self = [super init]) {
         self.sessionConfiguration = nil;
+        self.sessionDelegate = nil;
         _events = [NSMutableDictionary dictionary];
         _eventsQueue = dispatch_queue_create("com.mapbox.network-configuration", DISPATCH_QUEUE_CONCURRENT);
     }
@@ -102,6 +104,20 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
         } else {
             _sessionConfig = sessionConfiguration;
         }
+    }
+}
+
+- (id<NSURLSessionDelegate>)sessionDelegate {
+    id<NSURLSessionDelegate> sessionDelegate = nil;
+    @synchronized (self) {
+        sessionDelegate = _sessionDelegate;
+    }
+    return sessionDelegate;
+}
+
+- (void)setSessionDelegate:(id<NSURLSessionDelegate>)sessionDelegate {
+    @synchronized (self) {
+        _sessionDelegate = sessionDelegate;
     }
 }
 

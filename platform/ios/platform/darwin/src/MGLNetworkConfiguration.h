@@ -63,6 +63,15 @@ MGL_EXPORT
  */
 @property (atomic, strong, null_resettable) NSURLSessionConfiguration *sessionConfiguration;
 
+/**
+ The session delegate that is used by the `NSURLSession` objects
+ in this SDK.
+ 
+ Assign this object before instantiating any `MGLMapView` object, or using
+ `MGLOfflineStorage`.
+ */
+@property (atomic, strong, null_resettable) id<NSURLSessionDelegate> sessionDelegate;
+
 @end
 
 NS_ASSUME_NONNULL_END

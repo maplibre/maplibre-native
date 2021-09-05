@@ -86,7 +86,13 @@ public:
     Impl(const ResourceOptions& options): resourceOptions(options.clone()) {
         @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MGLNativeNetworkManager.sharedManager.sessionConfiguration;
-            session = [NSURLSession sessionWithConfiguration:sessionConfig];
+            id<NSURLSessionDelegate> sessionDelegate = MGLNativeNetworkManager.sharedManager.sessionDelegate;
+            
+            if (sessionDelegate) {
+                session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:sessionDelegate delegateQueue:nil];
+            } else {
+                session = [NSURLSession sessionWithConfiguration:sessionConfig];
+            }
 
             userAgent = getUserAgent();
         }

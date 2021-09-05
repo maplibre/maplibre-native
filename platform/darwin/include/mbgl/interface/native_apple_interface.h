@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSURLSessionConfiguration *)sessionConfiguration;
 
+- (id<NSURLSessionDelegate>)sessionDelegate;
+
 - (void)startDownloadEvent:(NSString *)event type:(NSString *)type;
 
 - (void)cancelDownloadEventForResponse:(NSURLResponse *)response;
@@ -35,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<MGLNativeNetworkDelegate> delegate;
 
 @property (nonatomic, readonly) NSURLSessionConfiguration *sessionConfiguration;
+
+@property (nonatomic, readonly) id<NSURLSessionDelegate> sessionDelegate;
 
 - (void)startDownloadEvent:(NSString *)event type:(NSString *)type;
 

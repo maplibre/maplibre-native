@@ -40,6 +40,10 @@ static MGLNativeNetworkManager *instance = nil;
     return configuration;
 }
 
+- (id<NSURLSessionDelegate>)sessionDelegate {
+    return self.delegate.sessionDelegate;
+}
+
 - (void)startDownloadEvent:(NSString *)event type:(NSString *)type {
     [self.delegate startDownloadEvent:event type:type];
 }
