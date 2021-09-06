@@ -2,6 +2,19 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 9.5.1 - September 06, 2021
+
+### Bug Fixes
+
+* Invalid tile url template for MapLibre style [#107](https://github.com/maplibre/maplibre-gl-native/pull/107)
+* Crash when inflating view on Android [#130](https://github.com/maplibre/maplibre-gl-native/pull/130)
+
+### Other
+
+* Fix perf regression in cached tiles of tile pyramid [#129](https://github.com/maplibre/maplibre-gl-native/pull/129)
+* Upgrade to newest protozero [#148](https://github.com/maplibre/maplibre-gl-native/pull/148)
+* Change NativeMapView.resizeView to use 0 instead of throwing IllegalArgumentException [#151](https://github.com/maplibre/maplibre-gl-native/pull/151)
+
 ## 9.5.0 - June 29, 2021
 
 ### Features
