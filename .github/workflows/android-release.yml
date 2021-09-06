@@ -128,7 +128,7 @@ jobs:
           if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
             gcloud firebase test android run --type robo \
               --app MapboxGLAndroidSDKTestApp/build/outputs/apk/release/MapboxGLAndroidSDKTestApp-release.apk \
-              --device-ids sailfish --os-version-ids "26" --locales en --orientations portrait --timeout 90s
+              --device-ids walleye --os-version-ids "27" --locales en --orientations portrait --timeout 90s
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping tests..."
           fi
