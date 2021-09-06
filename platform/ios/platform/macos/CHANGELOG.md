@@ -2,6 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 0.19.1 - September 06, 2021
+
+### Bug Fixes
+
+* Invalid tile url template for MapLibre style [#107](https://github.com/maplibre/maplibre-gl-native/pull/107)
+* Adjust local glyphs [#122](https://github.com/maplibre/maplibre-gl-native/pull/122)
+* Return correct Mapbox TileServerOptions [#132](https://github.com/maplibre/maplibre-gl-native/pull/132)
+
+### Other
+
+* Fix perf regression in cached tiles of tile pyramid [#129](https://github.com/maplibre/maplibre-gl-native/pull/129)
+* Upgrade to newest protozero [#148](https://github.com/maplibre/maplibre-gl-native/pull/148)
+* Fix build for Xcode 12.5 & 13-beta. [#153](https://github.com/maplibre/maplibre-gl-native/pull/153)
+
 ## 0.19.0 - June 29, 2021
 
 ### Features
