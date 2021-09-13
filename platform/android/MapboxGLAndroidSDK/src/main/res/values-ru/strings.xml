@@ -3,8 +3,8 @@
     <string name="mapbox_compassContentDescription">Компас. Активируйте, чтобы развернуть карту на север.</string>
     <string name="mapbox_attributionsIconContentDescription">Значок атрибутов. Активируйте, чтобы показать диалог.</string>
     <string name="mapbox_myLocationViewContentDescription">Местоположение. Отображает вашу позицию на карте.</string>
-    <string name="mapbox_mapActionDescription">Отображает карту, созданную при помощи Mapbox. Пролистывайте двумя пальцами. Меняйте масштаб сведением пальцев.</string>
-    <string name="mapbox_attributionsDialogTitle">Mapbox Maps SDK для Android</string>
+    <string name="mapbox_mapActionDescription">Отображает карту, созданную при помощи MapLibre. Пролистывайте двумя пальцами. Меняйте масштаб сведением пальцев.</string>
+    <string name="mapbox_attributionsDialogTitle">MapLibre Maps SDK для Android</string>
     <string name="mapbox_attributionErrorNoBrowser">На устройстве нет веб-браузера, нельзя показать веб-страницу.</string>
     <string name="mapbox_offline_error_region_definition_invalid">Запрошенный OfflineRegionDefinition не входит в допустимые границы: %s</string>
     </resources>

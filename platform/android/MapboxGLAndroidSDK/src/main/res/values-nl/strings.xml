@@ -3,8 +3,8 @@
     <string name="mapbox_compassContentDescription">Kompas van de map. Activeer om de map rotatie te herzetten naar het noorden.</string>
     <string name="mapbox_attributionsIconContentDescription">Attributie icoon. Activeer voor het tonen van het attributie dialoog. </string>
     <string name="mapbox_myLocationViewContentDescription">Locatie Element. Dit toont jouw locatie op de map.</string>
-    <string name="mapbox_mapActionDescription">Toont een map gemaakt met Mapbox. Scroll door het slepen met twee vingers. Zoom door vingers te nijpen.</string>
-    <string name="mapbox_attributionsDialogTitle">Mapbox Android SDK</string>
+    <string name="mapbox_mapActionDescription">Toont een map gemaakt met MapLibre. Scroll door het slepen met twee vingers. Zoom door vingers te nijpen.</string>
+    <string name="mapbox_attributionsDialogTitle">MapLibre Android SDK</string>
     <string name="mapbox_offline_error_region_definition_invalid">Aangeleverde OfflineRegionDefinition past niet in de wereld omtrek: %s</string>
 
     </resources>

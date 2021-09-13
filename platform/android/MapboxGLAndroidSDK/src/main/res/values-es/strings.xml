@@ -3,8 +3,8 @@
     <string name="mapbox_compassContentDescription">Brújula del mapa. Actívala para restablecer la rotación del mapa al norte.</string>
     <string name="mapbox_attributionsIconContentDescription">Ícono de atribución. Actívalo para mostrar el diálogo de atribución.</string>
     <string name="mapbox_myLocationViewContentDescription">Vista de ubicación. Muestra tu ubicación en el mapa.</string>
-    <string name="mapbox_mapActionDescription">Se está mostrando un mapa creado con Mapbox. Arrastra dos dedos para desplazarte o pellizca para acercar.</string>
-    <string name="mapbox_attributionsDialogTitle">Mapbox Maps SDK para Android</string>
+    <string name="mapbox_mapActionDescription">Se está mostrando un mapa creado con MapLibre. Arrastra dos dedos para desplazarte o pellizca para acercar.</string>
+    <string name="mapbox_attributionsDialogTitle">MapLibre Maps SDK para Android</string>
     <string name="mapbox_attributionErrorNoBrowser">No puede abrir la página Web porque no hay un navegador Web en el dispositivo.</string>
     <string name="mapbox_offline_error_region_definition_invalid">El parámetro OfflineRegionDefinition que se ingresó no coincide con los límites mundiales: %s</string>
     </resources>

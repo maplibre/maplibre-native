@@ -3,8 +3,8 @@
     <string name="mapbox_compassContentDescription">Kompas. Naciśnij, żeby skierować mapę na północ.</string>
     <string name="mapbox_attributionsIconContentDescription">Atrybucja. Aktywuj, żeby pokazać więcej informacji.</string>
     <string name="mapbox_myLocationViewContentDescription">Widok lokalizacji. Pokazuje twoją pozycję na mapie.</string>
-    <string name="mapbox_mapActionDescription">Pokazuje mapę stworzoną za pomocą biblioteki Mapbox. Przesuń mapę za pomocą przeciągnięcia dwoma palcami. Przybliż za pomocą uszczypnięcia dwoma palcami. </string>
-    <string name="mapbox_attributionsDialogTitle">Mapbox Maps SDK dla Androida</string>
+    <string name="mapbox_mapActionDescription">Pokazuje mapę stworzoną za pomocą biblioteki MapLibre. Przesuń mapę za pomocą przeciągnięcia dwoma palcami. Przybliż za pomocą uszczypnięcia dwoma palcami. </string>
+    <string name="mapbox_attributionsDialogTitle">MapLibre Maps SDK dla Androida</string>
     <string name="mapbox_attributionErrorNoBrowser">Nie potrafię otworzyć strony, brak przeglądarki internetowej zainstalowanej na urządzeniu.</string>
     <string name="mapbox_offline_error_region_definition_invalid">Wymagany region nie mieści się w granicach świata: %s</string>
     </resources>

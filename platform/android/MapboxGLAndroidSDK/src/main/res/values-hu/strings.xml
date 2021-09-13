@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mapbox_myLocationViewContentDescription">Hely nézet. Megmutatja, hol vagy a térképen.</string>
-    <string name="mapbox_mapActionDescription">Egy Mapbox-szal készült térkép megjelenítése. Húzd két ujjadat a görgetéshez. Csippentsd össze a nagyításhoz.</string>
-    <string name="mapbox_attributionsDialogTitle">Mapbox Maps SDK Androidhoz</string>
+    <string name="mapbox_mapActionDescription">Egy MapLibre-szal készült térkép megjelenítése. Húzd két ujjadat a görgetéshez. Csippentsd össze a nagyításhoz.</string>
+    <string name="mapbox_attributionsDialogTitle">MapLibre Maps SDK Androidhoz</string>
     <string name="mapbox_attributionErrorNoBrowser">Nincs webböngésző telepítve a készüléken, nem lehet megnyitni weboldalt.</string>
     <string name="mapbox_offline_error_region_definition_invalid">A megadott OfflineRegionDefinition nem fér bele a világ kereteibe: %s</string>
     </resources>

@@ -3,8 +3,8 @@
     <string name="mapbox_compassContentDescription">Compasso do mapa. Ativar para virar o mapa para Norte.</string>
     <string name="mapbox_attributionsIconContentDescription">Ícone de atribuição. Ativar para mostrar a janela de atribuição.</string>
     <string name="mapbox_myLocationViewContentDescription">Vista de localização. Isto mostra a sua localização no mapa.</string>
-    <string name="mapbox_mapActionDescription">A mostrar um Mapa criado com Mapbox. Desloque arrastanto com 2 dedos. Zoom afastando ou aproximando os 2 dedos.</string>
-    <string name="mapbox_attributionsDialogTitle">Mapas Mapbox SDK para Android</string>
+    <string name="mapbox_mapActionDescription">A mostrar um Mapa criado com MapLibre. Desloque arrastanto com 2 dedos. Zoom afastando ou aproximando os 2 dedos.</string>
+    <string name="mapbox_attributionsDialogTitle">Mapas MapLibre SDK para Android</string>
     <string name="mapbox_attributionErrorNoBrowser">Não está nenhum navegador de Internet instalado no dispositivo. Não é possível abrir a página web.</string>
     <string name="mapbox_offline_error_region_definition_invalid">O OfflineRegionDefinition não cabe nos limites do mundo: %s</string>
     </resources>
