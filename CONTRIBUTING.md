@@ -1,6 +1,6 @@
 # Contributing
 
-If you have a usage question for a product built on Mapbox GL (such as our iOS or Android SDKs), please visit https://www.mapbox.com/help/.
+If you have a usage question for a product built on MapLibre GL (such as our iOS or Android SDKs), please visit #maplibre Slack channel at [osmus.slack.com](https://osmus.slack.com/). Feel free to [join here](https://osmus-slack.herokuapp.com/).
 
 If you want to contribute code:
 
