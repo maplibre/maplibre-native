@@ -13,6 +13,7 @@
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
 #include <mbgl/util/chrono.hpp>
+#include <mbgl/util/compression.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
 
@@ -73,47 +74,6 @@ public:
 
     bool is_compressed(const std::string &v) {
         return (((uint8_t) v[0]) == 0x1f) && (((uint8_t) v[1]) == 0x8b);
-    }
-
-    // Some Mbtiles store GZIP-ed tile data, this function is used for decompression
-    std::string decompress_string(const std::string &data) {
-
-        constexpr uint32_t OUT_SIZE = 8192;
-
-        int ret;
-        char outbuffer[OUT_SIZE];
-        std::string outstring;
-
-        z_stream zs{};
-
-        // Init inflate to gzip mode
-        if (inflateInit2(&zs, (16 + MAX_WBITS)) != Z_OK)
-            return "";
-
-        zs.next_in = (Bytef *) data.data();
-        zs.avail_in = (unsigned int) data.size();
-
-
-        // get the decompressed bytes blockwise using repeated calls to inflate
-        do {
-            zs.next_out = reinterpret_cast<Bytef *>(outbuffer);
-            zs.avail_out = OUT_SIZE;
-
-            ret = inflate(&zs, 0);
-
-            if (outstring.size() < zs.total_out) {
-                outstring.append(outbuffer, zs.total_out - outstring.size());
-            }
-
-        } while (ret == Z_OK);
-
-        inflateEnd(&zs);
-
-        if (ret != Z_STREAM_END) { // an error occurred that was not EOF
-            return "";
-        }
-
-        return outstring;
     }
 
     // Generate a tilejson resource from .mbtiles file
@@ -258,7 +218,7 @@ public:
                 response.error.release();
 
                 if (is_compressed(*response.data)) {
-                    response.data = std::make_shared<std::string>(decompress_string(*response.data));
+                    response.data = std::make_shared<std::string>(util::decompress(*response.data));
                 }
             }
         }
