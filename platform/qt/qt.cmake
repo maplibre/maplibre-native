@@ -4,9 +4,13 @@ find_package(Qt${QT_VERSION_MAJOR}
              COMPONENTS Gui
                         Network
                         OpenGL
-                        OpenGLWidgets
                         Widgets
              REQUIRED)
+if(${QT_VERSION_MAJOR} GREATER 5)
+    find_package(Qt${QT_VERSION_MAJOR}
+             COMPONENTS OpenGLWidgets
+             REQUIRED)
+endif()
 
 if(MSVC)
     add_definitions("/DQT_COMPILING_QIMAGE_COMPAT_CPP")
@@ -164,7 +168,7 @@ target_link_libraries(
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Gui
-        Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+        Qt${QT_VERSION_MAJOR}::OpenGL$<$<VERSION_GREATER:${QT_VERSION_MAJOR},5>:Widgets> #Qt5::OpenGL or Qt6(+)::OpenGLWidgets
         mbgl-compiler-options
         qmapboxgl
 )
