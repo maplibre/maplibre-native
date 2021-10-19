@@ -33,10 +33,12 @@ using ValueBase = variant<NullValue,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {
     using ValueBase::ValueBase;
-    
+
+    VARIANT_INLINE Value() : ValueBase() {}
+
     template <typename T>
     VARIANT_INLINE Value(T&& val) : ValueBase(val) {}
-    
+
     // Javascript's Number.MAX_SAFE_INTEGER
     static uint64_t maxSafeInteger() { return 9007199254740991ULL; }
     

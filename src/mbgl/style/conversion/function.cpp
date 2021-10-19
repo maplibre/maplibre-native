@@ -80,7 +80,7 @@ std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& so
     case 0:
         return literal(source);
     case 1:
-        return toString(std::move(inputs[0]));
+        return expression::dsl::toString(std::move(inputs[0]));
     default:
         return concat(std::move(inputs));
     }
