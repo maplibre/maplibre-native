@@ -225,6 +225,7 @@ target_link_libraries(
 target_link_libraries(
     mbgl-test
     PUBLIC mbgl-vendor-googletest
+    $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>
 )
 
 set_property(TARGET mbgl-test PROPERTY FOLDER Core)

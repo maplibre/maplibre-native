@@ -3,7 +3,7 @@ if(MBGL_IOS_RENDER_TEST)
     initialize_ios_target(mbgl-vendor-zip-archive)
 
     if(MBGL_WITH_OPENGL)
-        message("-- Setting up test data for iOS render test with OpenGL renderer")
+        message(STATUS "Setting up test data for iOS render test with OpenGL renderer")
         set(PREPARE_CMD "${PROJECT_SOURCE_DIR}/render-test/ios/setup_test_data.sh")
     endif()
     add_custom_target(RenderTestApp-prepare COMMAND ${PREPARE_CMD} ${CMAKE_CURRENT_BINARY_DIR} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

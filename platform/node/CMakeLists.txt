@@ -1,5 +1,5 @@
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmake)
-    message("-- Not building node bindings, dependencies not found. Run 'npm update'.")
+    message(WARNING "Not building node bindings, dependencies not found. Run 'npm update'.")
     return()
 endif()
 

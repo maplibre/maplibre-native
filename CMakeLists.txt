@@ -1,4 +1,18 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
+option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
+option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
+option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
+option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
+option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
+option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
+
+if (MBGL_WITH_QT)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+endif()
+
 project("Mapbox GL Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -14,15 +28,6 @@ include(CTest)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
-
-option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
-option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
-option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
-option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
-option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
-option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
-option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
-option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
 add_library(
     mbgl-compiler-options INTERFACE
@@ -49,7 +54,7 @@ target_compile_options(
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
         $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<BOOL:${MBGL_WITH_RTTI}>>>:-fno-rtti>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MBGL_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wshadow>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wextra>
@@ -58,9 +63,15 @@ target_compile_options(
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=return-type>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=unknown-pragmas>
-        $<$<CXX_COMPILER_ID:AppleClang>:-Wno-error=deprecated-declarations>
-        $<$<CXX_COMPILER_ID:AppleClang>:-Wno-error=unused-parameter>
-        $<$<CXX_COMPILER_ID:AppleClang>:-Wno-error=unused-property-ivar>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=deprecated-declarations>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-parameter>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-property-ivar>
+        $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
+        # $<$<CXX_COMPILER_ID:MSVC>:/WX>    # all warnings as errors
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4068>  # pragma
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4244>  # types
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4828>  # encoding
+        $<$<CXX_COMPILER_ID:MSVC>:/D_CRT_SECURE_NO_WARNINGS>
 )
 
 target_link_libraries(
@@ -85,14 +96,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-
-if(MBGL_WITH_QT)
-    find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
-    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
-    
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-endif()
 
 add_library(
     mbgl-core STATIC
@@ -829,7 +832,7 @@ add_library(
 )
 
 if(MBGL_WITH_OPENGL)
-    message("-- Configuring GL-Native with OpenGL renderer backend")
+    message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
         PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
