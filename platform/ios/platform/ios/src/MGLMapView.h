@@ -1387,6 +1387,19 @@ MGL_EXPORT
 @property (nonatomic, assign) UIEdgeInsets contentInset;
 
 /**
+ The current edge insets of the current map view’s camera.
+
+ Camera edge insets are formed as accumulation of map view's content insets
+ and the edge padding passed to the method like `seCamera:...edgePadding:`,
+ `setVisibleCoordinates:...edgePadding:`, `showAnnotations:...edgePadding:` etc.
+
+ The camera edge insets influences the `centerCoordinate` of the viewport.
+ This value is read-only, in order to apply paddings,  use either persistent
+ `contentInset`, either transient `edgePadding` parameter of the `set...` methods.
+ */
+@property (nonatomic, readonly) UIEdgeInsets cameraEdgeInsets;
+
+/**
  Deprecated. Sets the distance from the edges of the map view’s frame to the edges
  of the map view’s logical viewport with an optional transition animation.
 

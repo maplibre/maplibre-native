@@ -72,8 +72,6 @@
                                                (self.screenBounds.size.height/2) + ((contentInset.top - contentInset.bottom) / 2));
     XCTAssertEqualWithAccuracy(shiftedPoint.x, expectedShiftedPoint.x, 0.01);
     XCTAssertEqualWithAccuracy(shiftedPoint.y, expectedShiftedPoint.y, 0.01);
-    
-  
 }
 
 - (void)testContentInsetOrnaments {
@@ -171,7 +169,6 @@
     y = self.screenBounds.size.height - attributionView.bounds.size.height - margin;
     expectedAttributionOrigin = CGPointMake(x, y);
     XCTAssertTrue(CGPointEqualToPoint(attributionView.frame.origin, expectedAttributionOrigin));
-    
 }
 
 @end
