@@ -2,6 +2,14 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 9.5.2 - December 02, 2021
+
+### Bug Fixes
+
+* raster layers stopped working in Android [#161](https://github.com/maplibre/maplibre-gl-native/pull/161)
+* remove Mapbox's in favor of MapLibre in attribution dialog [#160](https://github.com/maplibre/maplibre-gl-native/pull/160)
+* queryRenderedFeatures returns wrong results - issue #184, [#147](https://github.com/maplibre/maplibre-gl-native/pull/174)
+
 ## 9.5.1 - September 06, 2021
 
 ### Bug Fixes

@@ -2,6 +2,13 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 
+## 5.12.2 - December 02, 2021
+
+### Improvements
+
+* Exposes the windowBit value from zlib in the compress/decompress helper utils [#147](https://github.com/maplibre/maplibre-gl-native/pull/147)
+* Fix camera paddings reset on map view gestures performing [#188](https://github.com/maplibre/maplibre-gl-native/pull/188)
+
 ## 5.12.1 - September 06, 2021
 
 ### Bug Fixes
