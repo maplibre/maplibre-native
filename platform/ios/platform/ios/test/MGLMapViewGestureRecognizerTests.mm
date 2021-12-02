@@ -67,7 +67,7 @@
 }
 
 - (void)testHandlePinchGestureContentInset {
-    UIEdgeInsets contentInset = UIEdgeInsetsZero;
+    UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
     self.mapView.contentInset = contentInset;
     mbgl::EdgeInsets padding = MGLEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
     auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -75,7 +75,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -86,21 +86,22 @@
     pinchGesture.scale = 1.0;
     [self.mapView handlePinchGesture:pinchGesture];
     XCTAssertNotEqual(padding, cameraPadding);
-    
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+
     pinchGesture.state = UIGestureRecognizerStateChanged;
     [self.mapView handlePinchGesture:pinchGesture];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
-    
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
+
     pinchGesture.state = UIGestureRecognizerStateEnded;
     [self.mapView handlePinchGesture:pinchGesture];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
-    
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 - (void)testHandleRotateGestureContentInset {
-    UIEdgeInsets contentInset = UIEdgeInsetsZero;
+    UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
     self.mapView.contentInset = contentInset;
     mbgl::EdgeInsets padding = MGLEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
     auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -108,7 +109,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -119,17 +120,18 @@
     rotateGesture.rotation = 1;
     [self.mapView handleRotateGesture:rotateGesture];
     XCTAssertNotEqual(padding, cameraPadding);
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
     
     rotateGesture.state = UIGestureRecognizerStateChanged;
     [self.mapView handleRotateGesture:rotateGesture];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
     
     rotateGesture.state = UIGestureRecognizerStateEnded;
     [self.mapView handleRotateGesture:rotateGesture];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
-    
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 - (void)testHandleDoubleTapGestureContentInset {
@@ -141,7 +143,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -150,6 +152,8 @@
     UITapGestureRecognizerMock *doubleTapGesture = [[UITapGestureRecognizerMock alloc] initWithTarget:nil action:nil];
     doubleTapGesture.mockTappedView = self.mapView;
     doubleTapGesture.mockTappedPoint = CGPointMake(1.0, 1.0);
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
     
     [self.mapView handleDoubleTapGesture:doubleTapGesture];
     _doubleTapExpectation = [self expectationWithDescription:@"Double tap gesture animation."];
@@ -160,12 +164,11 @@
     [self waitForExpectationsWithTimeout:10 handler:nil];
 
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
-    
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 - (void)testHandleTwoFingerTapGesture {
-    UIEdgeInsets contentInset = UIEdgeInsetsZero;
+    UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
     self.mapView.contentInset = contentInset;
     mbgl::EdgeInsets padding = MGLEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
     auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -173,7 +176,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -190,13 +193,14 @@
         [self->_twoFingerExpectation fulfill];
     });
     [self waitForExpectationsWithTimeout:10 handler:nil];
-    
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 - (void)testHandleQuickZoomGesture {
-    UIEdgeInsets contentInset = UIEdgeInsetsZero;
+    UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
     self.mapView.contentInset = contentInset;
     mbgl::EdgeInsets padding = MGLEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
     auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -204,7 +208,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -224,18 +228,20 @@
         [self->_quickZoomExpectation fulfill];
     });
     [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
     
     quickZoom.state = UIGestureRecognizerStateEnded;
     [self.mapView handleQuickZoomGesture:quickZoom];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 - (void)testHandleTwoFingerDragGesture {
-    UIEdgeInsets contentInset = UIEdgeInsetsZero;
+    UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
     self.mapView.contentInset = contentInset;
     mbgl::EdgeInsets padding = MGLEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
     auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -243,7 +249,7 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     contentInset = UIEdgeInsetsMake(20, 20, 20, 20);
-    [self.mapView setCamera:self.mapView.camera withDuration:0.1 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
+    [self.mapView setCamera:self.mapView.camera withDuration:0.0 animationTimingFunction:nil edgePadding:contentInset completionHandler:nil];
     XCTAssertFalse(UIEdgeInsetsEqualToEdgeInsets(self.mapView.contentInset, contentInset));
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
@@ -267,14 +273,16 @@
         [self->_twoFingerDragExpectation fulfill];
     });
     [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    mbgl::EdgeInsets edgePadding = MGLEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
     
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
     
     twoFingerDrag.state = UIGestureRecognizerStateEnded;
     [self.mapView handleTwoFingerDragGesture:twoFingerDrag];
     cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-    XCTAssertEqual(padding, cameraPadding, @"When a gesture recognizer is performed contentInsets and camera padding should match.");
+    XCTAssertEqual(edgePadding, cameraPadding, @"When a gesture recognizer is performed camera paddings must not be changed.");
 }
 
 @end

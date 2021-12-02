@@ -108,6 +108,10 @@ NS_INLINE mbgl::EdgeInsets MGLEdgeInsetsFromNSEdgeInsets(MGLEdgeInsets insets) {
     return { insets.top, insets.left, insets.bottom, insets.right };
 }
 
+NS_INLINE MGLEdgeInsets NSEdgeInsetsFromMGLEdgeInsets(const mbgl::EdgeInsets& insets) {
+    return MGLEdgeInsetsMake(insets.top(), insets.left(), insets.bottom(), insets.right());
+}
+
 /// Returns the combination of two edge insets.
 NS_INLINE MGLEdgeInsets MGLEdgeInsetsInsetEdgeInset(MGLEdgeInsets base, MGLEdgeInsets inset) {
     return MGLEdgeInsetsMake(base.top + inset.top,
