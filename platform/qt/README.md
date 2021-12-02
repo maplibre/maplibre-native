@@ -41,10 +41,10 @@ export PATH=/usr/local/opt/qt5/bin:$PATH
 
 The Windows build will assume you have installed and on the default path:
 
-- Microsoft Visual Studio 2015
+- Microsoft Visual Studio 2019
 - [CMake 3.10.1+](https://cmake.org/download/)
-- [LLVM 5.0.0+](https://releases.llvm.org/download.html) (optional)
-- [Qt 5.4+](https://www.qt.io/download) with "msvc2015" (or later) support.
+- [Ninja](https://github.com/ninja-build/ninja/releases)
+- [Qt 5.4+](https://www.qt.io/download) with "msvc2019" (or later) support.
 
 At runtime, you will also need installed:
 
@@ -89,18 +89,19 @@ $ make run-qt-app  # Will build and run the test app
 
 #### Windows
 
-The Windows build bot will publish MSVC 2015 compatible binaries and headers on every build
-at the [artifacts](https://ci.appveyor.com/project/Mapbox/mapbox-gl-native/build/artifacts) tab.
-These binaries can be downloaded and used right away.
-
-In case of building from the sources:
-
 ```
 $ mkdir build
 $ cd build
-$ cmake -G "Visual Studio 14 2015 Win64" -T LLVM-vs2014 -DMBGL_PLATFORM=qt -DWITH_QT_DECODERS=ON -DWITH_QT_I18N=ON -DWITH_NODEJS=OFF ..
-$ cmake --build . --config Release --target qmapboxgl -- /m
+$ cmake -G Ninja -DMBGL_WITH_QT=ON -DCMAKE_BUILD_TYPE=Release ..
+$ ninja
 ```
+
+You may need to specify the path to Qt:
+
+```
+$ cmake -G Ninja -DMBGL_WITH_QT=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake ..
+```
+
 
 #### QNX 7.0
 
