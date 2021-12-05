@@ -9,17 +9,23 @@ message(STATUS "Version ${MBGL_QT_VERSION}")
 
 option(MBGL_QT_STATIC "Build Mapbox GL Qt bindings staticly" OFF)
 option(MBGL_QT_LIBRARY_ONLY "Build only libraries" OFF)
+option(MBGL_WITH_QT_HEADLESS "Build Mapbox GL Qt with headless support" ON)
 option(MBGL_QT_WITH_INTERNAL_SQLITE "Build Mapbox GL Qt bindings with internal sqlite" $<NOT:$<BOOL:${MBGL_QT_STATIC}>>)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR}
              COMPONENTS Gui
                         Network
-                        OpenGL
-                        Widgets
              REQUIRED)
 if (Qt6_FOUND)
     find_package(Qt${QT_VERSION_MAJOR}OpenGLWidgets REQUIRED)
+endif()
+
+if(MBGL_WITH_QT_HEADLESS OR NOT MBGL_QT_LIBRARY_ONLY)
+    find_package(Qt${QT_VERSION_MAJOR}
+                 COMPONENTS OpenGL
+                            Widgets
+                 REQUIRED)
 endif()
 
 if(NOT MBGL_QT_WITH_INTERNAL_SQLITE)
@@ -95,7 +101,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/gl_functions.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/headless_backend_qt.cpp
         $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/http_file_source.cpp>
         $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/http_file_source.hpp>
         $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/http_request.cpp>
@@ -113,6 +118,19 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utf.cpp
 )
 
+if(MBGL_WITH_QT_HEADLESS OR NOT MBGL_QT_LIBRARY_ONLY)
+    target_sources(
+        mbgl-core
+        PRIVATE
+           ${PROJECT_SOURCE_DIR}/platform/qt/src/headless_backend_qt.cpp
+    )
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+	   Qt${QT_VERSION_MAJOR}::OpenGL
+    )
+endif()
+
 target_compile_definitions(
     mbgl-core
     PRIVATE QT_IMAGE_DECODERS
@@ -124,16 +142,17 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
 )
 
+include(GNUInstallDirs)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 if(MBGL_QT_STATIC)
     install(TARGETS mbgl-vendor-csscolorparser
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     )
     install(TARGETS mbgl-vendor-nunicode
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     )
     install(TARGETS mbgl-vendor-parsedate
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     )
 endif()
 
@@ -146,7 +165,6 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
-        Qt${QT_VERSION_MAJOR}::OpenGL
         $<IF:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>,mbgl-vendor-sqlite,Qt${QT_VERSION_MAJOR}::Sql>
         $<$<PLATFORM_ID:Linux>:$<IF:$<BOOL:${MBGL_QT_WITH_INTERNAL_ICU}>,mbgl-vendor-icu,ICU::uc>>
         mbgl-vendor-nunicode
@@ -154,7 +172,7 @@ target_link_libraries(
 
 if(MBGL_QT_STATIC)
     install(TARGETS mbgl-core
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     )
 endif()
 
@@ -195,6 +213,7 @@ target_sources(
 set_target_properties(
     qmapboxgl PROPERTIES
     AUTOMOC ON
+    EXPORT_NAME QMapboxGL
     OUTPUT_NAME QMapboxGL
     VERSION ${MBGL_QT_VERSION}
     SOVERSION ${MBGL_QT_VERSION_COMPATIBILITY}
@@ -208,6 +227,30 @@ if (NOT MBGL_QT_STATIC)
     )
 endif()
 
+include(CMakePackageConfigHelpers)
+set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/qmapboxgl/)
+
+configure_package_config_file(
+	"platform/qt/QMapboxGLConfig.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfig.cmake"
+	INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+	PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_INCLUDEDIR
+	CMAKE_INSTALL_LIBDIR NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfigVersion.cmake
+	VERSION ${MBGL_QT_VERSION}
+	COMPATIBILITY AnyNewerVersion)
+
+install(EXPORT QMapboxGLTargets
+	DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+	COMPONENT development)
+
+install(FILES
+	"${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfig.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfigVersion.cmake"
+	DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+	COMPONENT development)
+
 # FIXME: Because of rapidjson conversion
 target_include_directories(
     qmapboxgl
@@ -216,7 +259,7 @@ target_include_directories(
 
 target_include_directories(
     qmapboxgl
-    PUBLIC ${PROJECT_SOURCE_DIR}/platform/qt/include
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/qt/include
 )
 
 target_compile_definitions(
@@ -243,24 +286,25 @@ if(MSVC)
         set_target_properties(mbgl-core PROPERTIES COMPILE_PDB_NAME mbgl-cored)
         set_target_properties(qmapboxgl PROPERTIES COMPILE_PDB_NAME QMapboxGLd)
 
-        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-csscolorparser>/mbgl-vendor-csscolorparserd.pdb CONFIGURATIONS "Debug" DESTINATION lib)
-        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-nunicode>/mbgl-vendor-nunicoded.pdb CONFIGURATIONS "Debug" DESTINATION lib)
-        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-parsedate>/mbgl-vendor-parsedated.pdb CONFIGURATIONS "Debug" DESTINATION lib)
+        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-csscolorparser>/mbgl-vendor-csscolorparserd.pdb CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-nunicode>/mbgl-vendor-nunicoded.pdb CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        install(FILES $<TARGET_FILE_DIR:mbgl-vendor-parsedate>/mbgl-vendor-parsedated.pdb CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
-        install(FILES $<TARGET_FILE_DIR:mbgl-core>/mbgl-cored.pdb CONFIGURATIONS "Debug" DESTINATION lib)
-        install(FILES $<TARGET_FILE_DIR:qmapboxgl>/QMapboxGLd.pdb CONFIGURATIONS "Debug" DESTINATION lib)
+        install(FILES $<TARGET_FILE_DIR:mbgl-core>/mbgl-cored.pdb CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        install(FILES $<TARGET_FILE_DIR:qmapboxgl>/QMapboxGLd.pdb CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     else()
-        install(FILES $<TARGET_PDB_FILE:qmapboxgl> CONFIGURATIONS "Debug" DESTINATION bin)
+        install(FILES $<TARGET_PDB_FILE:qmapboxgl> CONFIGURATIONS "Debug" DESTINATION "${CMAKE_INSTALL_BINDIR}")
     endif()
 endif()
 
 install(TARGETS qmapboxgl
-        RUNTIME DESTINATION bin
-        FRAMEWORK DESTINATION lib
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        INCLUDES DESTINATION include
-        PUBLIC_HEADER DESTINATION include
+        EXPORT QMapboxGLTargets
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        FRAMEWORK DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 if(NOT MBGL_QT_LIBRARY_ONLY)
