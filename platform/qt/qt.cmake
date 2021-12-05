@@ -251,6 +251,12 @@ install(FILES
 	DESTINATION ${CMAKECONFIG_INSTALL_DIR}
 	COMPONENT development)
 
+install(
+    DIRECTORY include/mbgl
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    COMPONENT development
+)
+
 # FIXME: Because of rapidjson conversion
 target_include_directories(
     qmapboxgl
