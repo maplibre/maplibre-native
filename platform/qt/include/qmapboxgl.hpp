@@ -49,6 +49,13 @@ public:
         FlippedYViewport
     };
 
+    enum SettingsTemplate {
+        DefaultSettings = 0,
+        MapLibreSettings,
+        MapTilerSettings,
+        MapboxSettings
+    };
+
     GLContextMode contextMode() const;
     void setContextMode(GLContextMode);
 
@@ -81,6 +88,10 @@ public:
 
     std::function<std::string(const std::string &)> resourceTransform() const;
     void setResourceTransform(const std::function<std::string(const std::string &)> &);
+
+    void resetToTemplate(SettingsTemplate);
+
+    QVector<QPair<QString, QString>> defaultStyles();
 
     mbgl::TileServerOptions *tileServerOptionsInternal() const;
 
