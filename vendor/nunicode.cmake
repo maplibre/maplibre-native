@@ -2,8 +2,14 @@ if(TARGET mbgl-vendor-nunicode)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-nunicode STATIC
+if(MBGL_QT_STATIC)
+    add_library(mbgl-vendor-nunicode OBJECT)
+else()
+    add_library(mbgl-vendor-nunicode STATIC)
+endif()
+
+target_sources(
+    mbgl-vendor-nunicode PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/nunicode/src/libnu/ducet.c
     ${CMAKE_CURRENT_LIST_DIR}/nunicode/src/libnu/strcoll.c
     ${CMAKE_CURRENT_LIST_DIR}/nunicode/src/libnu/strings.c
