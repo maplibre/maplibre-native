@@ -11,7 +11,7 @@ option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
 if (MBGL_WITH_QT)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
 project("Mapbox GL Native" LANGUAGES CXX C)
