@@ -260,6 +260,7 @@ target_link_libraries(
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
+        "$<BUILD_INTERFACE:mbgl-compiler-options>"
         "$<BUILD_INTERFACE:mbgl-core>"
         "$<BUILD_INTERFACE:mbgl-vendor-parsedate>"
         "$<BUILD_INTERFACE:mbgl-vendor-nunicode>"
