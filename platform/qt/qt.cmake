@@ -8,6 +8,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Version ${MBGL_QT_VERSION}")
 
 option(MBGL_QT_LIBRARY_ONLY "Build only libraries" OFF)
+option(MBGL_QT_INSIDE_QT_PLUGIN "Build qmapboxgl as OBJECT library, so it can be bundled into separate single plugin lib." OFF)
 option(MBGL_WITH_QT_HEADLESS "Build Mapbox GL Qt with headless support" ON)
 option(MBGL_QT_WITH_INTERNAL_SQLITE "Build Mapbox GL Qt bindings with internal sqlite" $<NOT:$<BOOL:${MBGL_QT_STATIC}>>)
 
@@ -166,7 +167,11 @@ set(qmapboxgl_headers
 )
 
 if(MBGL_QT_STATIC)
-    add_library(qmapboxgl STATIC)
+    if(MBGL_QT_INSIDE_QT_PLUGIN)
+        add_library(qmapboxgl OBJECT)
+    else()
+        add_library(qmapboxgl STATIC)
+    endif()
 else()
     add_library(qmapboxgl SHARED)
 endif()
@@ -257,9 +262,13 @@ target_compile_definitions(
 
 target_link_libraries(
     qmapboxgl
-    PRIVATE
+    PUBLIC
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Network
+        $<$<NOT:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
+    PRIVATE
+        "$<$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>"
         "$<BUILD_INTERFACE:mbgl-compiler-options>"
         "$<BUILD_INTERFACE:mbgl-core>"
         "$<BUILD_INTERFACE:mbgl-vendor-parsedate>"
