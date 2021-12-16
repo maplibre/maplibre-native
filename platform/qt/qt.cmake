@@ -266,9 +266,7 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
-        $<$<NOT:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
-        "$<$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>"
         "$<BUILD_INTERFACE:mbgl-compiler-options>"
         "$<BUILD_INTERFACE:mbgl-core>"
         "$<BUILD_INTERFACE:mbgl-vendor-parsedate>"
