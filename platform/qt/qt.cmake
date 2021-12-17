@@ -215,7 +215,7 @@ if (NOT MBGL_QT_STATIC)
 endif()
 
 include(CMakePackageConfigHelpers)
-set(CMAKECONFIG_INSTALL_DIR cmake)
+set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/QMapboxGL/)
 
 configure_package_config_file(
 	"platform/qt/QMapboxGLConfig.cmake.in"
