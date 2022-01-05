@@ -10,7 +10,7 @@ option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
-if (MBGL_WITH_QT)
+if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
