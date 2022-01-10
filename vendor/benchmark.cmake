@@ -16,6 +16,7 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/counter.cc
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/csv_reporter.cc
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/json_reporter.cc
+    ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/perf_counters.cc
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/reporter.cc
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/sleep.cc
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/statistics.cc
