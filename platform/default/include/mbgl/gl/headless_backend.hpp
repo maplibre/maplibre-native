@@ -27,6 +27,7 @@ public:
         virtual gl::ProcAddress getExtensionFunctionPointer(const char*) = 0;
         virtual void activateContext() = 0;
         virtual void deactivateContext() {}
+        virtual void getContext() {}
     };
 
 private:

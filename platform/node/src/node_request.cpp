@@ -2,6 +2,7 @@
 #include "node_map.hpp"
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/chrono.hpp>
+#include <iostream>
 
 #include <cmath>
 
@@ -26,7 +27,8 @@ NodeRequest::~NodeRequest() {
 
 Nan::Persistent<v8::Function> NodeRequest::constructor;
 
-void NodeRequest::Init() {
+void NodeRequest::Init(v8::Local<v8::Object> target) {
+    v8::Local<v8::Context> context = target->CreationContext();
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
 
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -34,7 +36,7 @@ void NodeRequest::Init() {
 
     Nan::SetPrototypeMethod(tpl, "respond", HandleCallback);
 
-    constructor.Reset(tpl->GetFunction());
+    constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
 }
 
 void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
@@ -49,7 +51,12 @@ void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::Set(info.This(), Nan::New("url").ToLocalChecked(), info[3]);
     Nan::Set(info.This(), Nan::New("kind").ToLocalChecked(), info[4]);
     v8::Local<v8::Value> argv[] = { info.This() };
-    request->asyncResource->runInAsyncScope(Nan::To<v8::Object>(target->handle()->GetInternalField(1)).ToLocalChecked(), "request", 1, argv);
+    request->asyncResource->runInAsyncScope(
+      Nan::To<v8::Object>(target->handle()->GetInternalField(1)).ToLocalChecked(),
+      "request",
+      1,
+      argv
+    );
     info.GetReturnValue().Set(info.This());
 }
 

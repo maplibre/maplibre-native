@@ -79,7 +79,7 @@ public:
         if (!value->IsBoolean()) {
             return {};
         }
-        return value->BooleanValue();
+        return Nan::To<bool>(value).ToChecked();
     }
 
     static optional<float> toNumber(const v8::Local<v8::Value>& value) {
@@ -87,7 +87,7 @@ public:
         if (!value->IsNumber()) {
             return {};
         }
-        return value->NumberValue();
+        return (float)Nan::To<double>(value).ToChecked();
     }
 
     static optional<double> toDouble(const v8::Local<v8::Value>& value) {
@@ -95,7 +95,7 @@ public:
         if (!value->IsNumber()) {
             return {};
         }
-        return value->NumberValue();
+        return Nan::To<double>(value).ToChecked();
     }
 
     static optional<std::string> toString(const v8::Local<v8::Value>& value) {
@@ -114,11 +114,11 @@ public:
         } else if (value->IsString()) {
             return { std::string(*Nan::Utf8String(value)) };
         } else if (value->IsUint32()) {
-            return { std::uint64_t(value->Uint32Value()) };
+            return { Nan::To<std::uint32_t>(value).ToChecked() };
         } else if (value->IsInt32()) {
-            return { std::int64_t(value->Int32Value()) };
+            return { Nan::To<std::int32_t>(value).ToChecked() };
         } else if (value->IsNumber()) {
-            return { value->NumberValue() };
+            return { Nan::To<double>(value).ToChecked() };
         } else {
             return {};
         }
@@ -126,8 +126,10 @@ public:
 
     static optional<GeoJSON> toGeoJSON(const v8::Local<v8::Value>& value, Error& error) {
         try {
-            Nan::JSON JSON;
-            std::string string = *Nan::Utf8String(JSON.Stringify(value->ToObject()).ToLocalChecked());
+            Nan::JSON NanJSON;
+            v8::Local<v8::Object> obj = Nan::To<v8::Object>(value).ToLocalChecked();
+            v8::Local<v8::String> stringified = NanJSON.Stringify(obj).ToLocalChecked();
+            std::string string = *Nan::Utf8String(stringified);
             return parseGeoJSON(string, error);
         } catch (const std::exception& ex) {
             error = { ex.what() };
