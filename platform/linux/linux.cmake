@@ -8,6 +8,34 @@ find_package(X11 REQUIRED)
 
 pkg_search_module(LIBUV libuv REQUIRED)
 
+add_library(mbgl-platform-loop STATIC)
+
+target_sources(
+    mbgl-platform-loop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
+)
+
+target_include_directories(
+    mbgl-platform-loop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/linux/include
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+        ${LIBUV_INCLUDE_DIRS}
+)
+
+target_link_libraries(
+    mbgl-platform-loop
+    PUBLIC
+        Mapbox::Base
+    PRIVATE
+        ${LIBUV_LIBRARIES}
+)
+
 target_sources(
     mbgl-core
     PRIVATE
@@ -34,7 +62,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
@@ -42,7 +69,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/string_stdlib.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
@@ -84,7 +110,6 @@ target_include_directories(
     PRIVATE
         ${CURL_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
-        ${LIBUV_INCLUDE_DIRS}
         ${X11_INCLUDE_DIRS}
 )
 
@@ -110,7 +135,6 @@ target_link_libraries(
     PRIVATE
         ${CURL_LIBRARIES}
         ${JPEG_LIBRARIES}
-        ${LIBUV_LIBRARIES}
         ${X11_LIBRARIES}
         $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::uc>

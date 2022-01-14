@@ -56,7 +56,7 @@ get_target_property(MBGL_CORE_PRIVATE_LIBRARIES mbgl-core LINK_LIBRARIES)
 
 target_link_libraries(
     mbgl-benchmark
-    PRIVATE ${MBGL_CORE_PRIVATE_LIBRARIES} mbgl-vendor-benchmark mbgl-compiler-options
+    PRIVATE ${MBGL_CORE_PRIVATE_LIBRARIES} mbgl-vendor-benchmark mbgl-compiler-options mbgl-platform-loop
     PUBLIC mbgl-core
 )
 

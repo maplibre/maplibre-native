@@ -9,6 +9,9 @@ set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[vari
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
 
+find_package(PkgConfig REQUIRED)
+pkg_search_module(LIBUV libuv REQUIRED STATIC)
+
 if(MBGL_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
 
@@ -20,7 +23,8 @@ if(MBGL_WITH_OPENGL)
         mbgl-core
         PRIVATE
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
-            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
+            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
     )
     target_link_libraries(
         mbgl-core
@@ -28,10 +32,37 @@ if(MBGL_WITH_OPENGL)
     )
 endif()
 
+add_library(mbgl-platform-loop STATIC)
+
+target_sources(
+    mbgl-platform-loop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src/timer.cpp
+)
+
+target_compile_options(mbgl-platform-loop PRIVATE -fobjc-arc)
+
+target_include_directories(
+    mbgl-platform-loop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/darwin/include
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src
+        ${PROJECT_SOURCE_DIR}/platform/macos/src
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+target_link_libraries(
+    mbgl-platform-loop
+    PUBLIC
+        Mapbox::Base
+)
+
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/collator.mm
         $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm>
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/image.mm
@@ -40,9 +71,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/native_apple_interface.m
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/nsthread.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/number_format.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/run_loop.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/string_nsstring.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -80,7 +109,9 @@ target_include_directories(
 target_include_directories(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/darwin/include ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
+        ${PROJECT_SOURCE_DIR}/platform/darwin/include
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src
+        ${PROJECT_SOURCE_DIR}/platform/macos/src
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)

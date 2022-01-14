@@ -53,6 +53,7 @@ target_link_libraries(
 target_link_libraries(
     mbgl-glfw
     PRIVATE
+        mbgl-platform-loop
         ${GLFW_LIBRARIES}
         Mapbox::Base::Extras::args
         Mapbox::Base::Extras::filesystem

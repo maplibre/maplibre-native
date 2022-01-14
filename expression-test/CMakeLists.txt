@@ -28,6 +28,7 @@ target_link_libraries(
         Mapbox::Base
         Mapbox::Base::Extras::args
         Mapbox::Base::Extras::filesystem
+        mbgl-platform-loop
         mbgl-core
 )
 

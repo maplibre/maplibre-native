@@ -56,6 +56,7 @@ target_link_libraries(
         Mapbox::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
+        mbgl-platform-loop
     PUBLIC mbgl-core
 )
 
