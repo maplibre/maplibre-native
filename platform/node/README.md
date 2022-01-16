@@ -36,9 +36,9 @@ var mbgl = require('@mapbox/mapbox-gl-native');
 var sharp = require('sharp');
 
 var options = {
-  request: function(req) {
+  request: function(req, callback) {
     fs.readFile(path.join(__dirname, 'test', req.url), function(err, data) {
-      req.respond(err, { data });
+      callback(err, { data: data });
     });
   },
   ratio: 1
