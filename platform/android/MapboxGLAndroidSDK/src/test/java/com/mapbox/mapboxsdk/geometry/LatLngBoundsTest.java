@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LatLngBoundsTest {
 
-  private static final double DELTA = 1e-15;
+  private static final double DELTA = 1e-13;
 
   private LatLngBounds latLngBounds;
   private static final LatLng LAT_LNG_NULL_ISLAND = new LatLng(0, 0);
