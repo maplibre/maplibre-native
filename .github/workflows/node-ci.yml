@@ -131,8 +131,9 @@ jobs:
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
       - name: Test
-        run: |
-          npm test
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npm test
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
