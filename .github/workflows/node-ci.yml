@@ -80,13 +80,14 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          apt-get update && apt-get dist-upgrade -y
-          apt-get install -y ca-certificates git gzip ssh tar colorized-logs python3-scipy
-          apt-get install -y awscli ccache clang-9 clang-format-9 clang-tidy-9 cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build nodejs npm pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
+          sudo apt-get update
+          sudo apt-get dist-upgrade -y
+          sudo apt-get install -y ca-certificates git gzip ssh tar colorized-logs python3-scipy
+          sudo apt-get install -y awscli ccache clang-9 clang-format-9 clang-tidy-9 cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build nodejs npm pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
           pip3 install cmake-format==0.5.5
-          apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg62-turbo-dev libpng-dev libuv1-dev zlib1g-dev
+          sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg62-turbo-dev libpng-dev libuv1-dev zlib1g-dev
           git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
-          apt-get install -y g++-10
+          sudo apt-get install -y g++-10
           /usr/sbin/update-ccache-symlinks
 
       - name: npm ci
