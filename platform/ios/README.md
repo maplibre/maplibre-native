@@ -1,14 +1,15 @@
-# Mapbox Maps SDKs for iOS and macOS
+# [Mapbox Maps SDK for iOS](https://docs.mapbox.com/ios/maps/)
 
-The Mapbox Maps SDK for iOS is an open-source framework for embedding interactive map views with scalable, customizable vector maps into Cocoa Touch applications on iOS 9.0 and above using Objective-C, Swift, or Interface Builder. It takes stylesheets that conform to the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/), applies them to vector tiles that conform to the [Mapbox Vector Tile Specification](https://www.mapbox.com/developers/vector-tiles/), and renders them using OpenGL. It is based on the [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native) library.
+[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native/tree/master)
 
-| SDK                                     | Languages                          | Build status                             |
-| --------------------------------------- | ---------------------------------- | ---------------------------------------- |
-| [Mapbox Maps SDK for iOS](platform/ios/)         | Objective-C or Swift               | [![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native-ios.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native-ios/tree/master) |
-| [Mapbox Maps SDK for macOS](platform/macos/)     | Objective-C, Swift, or AppleScript | [![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native-ios.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native-ios/tree/master) |
+A library based on [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native/blob/master/README.md) for embedding interactive map views with scalable, customizable vector maps into Cocoa Touch applications on iOS using Objective-C, Swift, or Interface Builder.
 
-## License
+This repository is for day-to-day development of the SDK. Building the SDK yourself requires [a number of dependencies and steps](../../INSTALL.md) that are unnecessary for developing production applications. For production applications, please consider installing an official, prebuilt release instead; see the [Mapbox Maps SDK for iOS website](https://docs.mapbox.com/ios/maps/) for installation instructions.
 
-Mapbox GL Native is licensed under the [2-Clause BSD license](LICENSE.md). The licenses of its dependencies are tracked via [FOSSA](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fmapbox-gl-native):
+This repository contains releases of the Mapbox Maps SDK from v5.5.0-alpha.3 on. Releases prior to Maps SDK for iOS v5.5.0-alpha.2 can be downloaded via CocoaPods, Carthage, and the [Mapbox GL Native releases page](https://github.com/mapbox/mapbox-gl-native/releases).
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fmapbox-gl-native.svg?type=large)](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fmapbox-gl-native)
+* [Integrate the Mapbox Maps SDK for iOS into your application](https://www.mapbox.com/install/ios/).
+* [Learn about custom builds](INSTALL.md)
+* [Contribute to the Mapbox Maps SDK for iOS](DEVELOPING.md)
+
+![](docs/img/screenshot.png)
