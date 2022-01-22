@@ -47,7 +47,7 @@ jobs:
           brew list qt || brew install qt
           brew list chargepoint/xcparse/xcparse || brew install chargepoint/xcparse/xcparse
           brew list pkg-config || brew install pkg-config
-          brew list google-cloud-sdk || brew cask install google-cloud-sdk
+          brew list google-cloud-sdk || brew install --cask google-cloud-sdk
           brew list glfw3 || brew install glfw3
           brew list libuv || brew install libuv
           pip install ansi2html scipy
