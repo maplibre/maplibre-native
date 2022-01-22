@@ -26,11 +26,11 @@ jobs:
         os:
           - macos-11.0
           - macos-10.15
+          - ubuntu-20.04
+          - ubuntu-18.04
     runs-on: ${{ matrix.os }}
     env:
       BUILDTYPE: Debug
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_INSTALL_CLEANUP: 1
 
     defaults:
       run:
@@ -50,15 +50,18 @@ jobs:
           cache-name: homebrew-v1
         with:
           path: /usr/local/Cellar
-          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
 
       - name: Install macos dependencies
         if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
@@ -72,6 +75,20 @@ jobs:
           brew list libuv || brew install libuv
           pip install ansi2html scipy
 
+      - name: Install linux dependencies
+        if: runner.os == 'Linux'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update && apt-get dist-upgrade -y
+          apt-get install -y ca-certificates git gzip ssh tar colorized-logs python3-scipy
+          apt-get install -y awscli ccache clang-9 clang-format-9 clang-tidy-9 cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build nodejs npm pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
+          pip3 install cmake-format==0.5.5
+          apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg62-turbo-dev libpng-dev libuv1-dev zlib1g-dev
+          git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
+          apt-get install -y g++-10
+          /usr/sbin/update-ccache-symlinks
+
       - name: npm ci
         run: npm ci --ignore-scripts
 
@@ -84,11 +101,11 @@ jobs:
           cache-name: ccache-v1
         with:
           path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
       - name: Clear ccache statistics
         run: |
@@ -97,10 +114,16 @@ jobs:
           ccache --show-stats
 
       - name: CMake
+        if: runner.os == 'macOS'
         run: |
           cmake . -B build -G Ninja -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
           sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
           sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
+
+      - name: CMake
+        if: runner.os == 'Linux'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 
       - name: Build
         run: |
@@ -112,7 +135,6 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
-        working-directory: ./platform/node
         if: github.ref != 'refs/heads/master'
         run: |
           npm pack
