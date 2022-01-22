@@ -8,6 +8,7 @@ on:
     paths-ignore:
       - "platform/android/**"
       - "platform/ios/**"
+      - "platform/qt/**"
       - ".gitignore"
     branches:
       - master
