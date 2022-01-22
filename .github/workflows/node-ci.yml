@@ -54,10 +54,8 @@ jobs:
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkgconfig || brew install pkgconfig
-          brew list qt || brew install qt
           brew list chargepoint/xcparse/xcparse || brew install chargepoint/xcparse/xcparse
           brew list pkg-config || brew install pkg-config
-          brew list google-cloud-sdk || brew install --cask google-cloud-sdk
           brew list glfw3 || brew install glfw3
           brew list libuv || brew install libuv
           pip install ansi2html scipy
@@ -69,7 +67,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get dist-upgrade -y
-          sudo apt-get install -y ca-certificates git gzip ssh tar colorized-logs python3-scipy
+          sudo apt-get install -y ca-certificates git gzip ssh tar python3-scipy
           sudo apt-get install -y awscli ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build nodejs npm pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
           pip3 install cmake-format==0.5.5
           sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev
