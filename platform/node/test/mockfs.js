@@ -24,13 +24,13 @@ function dataForRequest(req) {
         return sprite_json;
     } else if (req.url.indexOf('sprite') > -1 && req.url.endsWith('png')) {
         return sprite_png;
-    } else if (req.url.indexOf('fonts') > -1 && req.url.endsWith('pbf')) {
+    } else if ((req.url.includes('fonts') || req.url.includes('tiles/tiles')) && req.url.endsWith('pbf')) {
         return glyph;
     } else if (req.url.endsWith('mapbox.satellite')) {
         return source_raster;
     } else if (req.url.indexOf('satellite') > -1 && (req.url.endsWith('png') || req.url.endsWith('webp'))) {
         return tile_raster;
-    } else if (req.url.endsWith('mapbox.mapbox-streets-v7')) {
+    } else if (req.url.endsWith('tiles.json?key=uwvyvzaF2P7UWbyOEvjU')) {
         return source_vector;
     } else if (req.url.indexOf('streets') > -1 && req.url.endsWith('pbf')) {
         return tile_vector;
