@@ -1,0 +1,87 @@
+name: node-darwin-ci
+
+on:
+  workflow_dispatch:
+  push:
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/ios/**"
+      - ".gitignore"
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/ios/**"
+      - ".gitignore"
+
+jobs:
+  build:
+    runs-on: macos-10.15
+    env:
+      BUILDTYPE: Debug
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install macos dependencies
+        run: |
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkgconfig || brew install pkgconfig
+          brew list qt || brew install qt
+          brew list chargepoint/xcparse/xcparse || brew install chargepoint/xcparse/xcparse
+          brew list pkg-config || brew install pkg-config
+          brew list google-cloud-sdk || brew cask install google-cloud-sdk
+          brew list glfw3 || brew install glfw3
+          brew list libuv || brew install libuv
+          pip install ansi2html scipy
+
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Prepare ccache
+        run: ccache --clear
+
+      - name: Cache ccache
+        uses: actions/cache@v2
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache'
+          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats
+          ccache --max-size=2G
+          ccache --show-stats
+
+      - name: CMake
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
+          sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
+
+      - name: Build
+        run: |
+          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
