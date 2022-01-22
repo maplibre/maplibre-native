@@ -85,3 +85,7 @@ jobs:
       - name: Build
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: test
+        run: |
+          npm test
