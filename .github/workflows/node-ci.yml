@@ -89,6 +89,7 @@ jobs:
           git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
           sudo apt-get install -y g++-10
           /usr/sbin/update-ccache-symlinks
+          sudo apt-get install xvfb
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -131,7 +132,12 @@ jobs:
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
       - name: Test
-        uses: GabrielBB/xvfb-action@v1
+        if: runner.os == 'Linux'
+        with:
+          run: xvfb-run --auto-servernum npm test
+
+      - name: Test
+        if: runner.os == 'macOS'
         with:
           run: npm test
 
