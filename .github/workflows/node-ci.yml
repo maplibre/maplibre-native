@@ -1,4 +1,4 @@
-name: node-darwin-ci
+name: node-ci
 
 on:
   workflow_dispatch:
@@ -39,6 +39,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install macos dependencies
+        if: runner.os == 'macOS'
         run: |
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
