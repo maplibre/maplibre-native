@@ -21,7 +21,11 @@ on:
 
 jobs:
   build:
-    runs-on: macos-10.15
+    strategy:
+      matrix:
+        os:
+          - macos-11.0
+          - macos-10.15
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -37,6 +41,20 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Cache homebrew
+        uses: actions/cache@v2
+        if: runner.os == 'macOS'
+        env:
+          cache-name: homebrew-v1
+        with:
+          path: /usr/local/Cellar
+          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
+
 
       - name: Install macos dependencies
         if: runner.os == 'macOS'
@@ -87,6 +105,18 @@ jobs:
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
-      - name: test
+      - name: Test
         run: |
           npm test
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        working-directory: ./platform/node
+        if: github.ref != 'refs/heads/master'
+        run: |
+          npm pack
+
+      - name: Publish package
+        if: github.ref == 'refs/heads/master'
+        run: |
+          npm publish
