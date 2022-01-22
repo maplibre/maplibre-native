@@ -133,13 +133,11 @@ jobs:
 
       - name: Test
         if: runner.os == 'Linux'
-        with:
-          run: xvfb-run --auto-servernum npm test
+        run: xvfb-run --auto-servernum npm test
 
       - name: Test
         if: runner.os == 'macOS'
-        with:
-          run: npm test
+        run: npm test
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
