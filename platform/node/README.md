@@ -1,6 +1,7 @@
 # @maplibre/maplibre-gl-native
 
 [![NPM](https://nodei.co/npm/@maplibre/maplibre-gl-native.png)](https://npmjs.org/package/@maplibre/maplibre-gl-native)
+[![node-ci](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml)
 
 ## Installing
 
