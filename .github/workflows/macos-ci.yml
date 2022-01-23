@@ -6,20 +6,22 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
+      - "platform/android/**"
+      - "platform/qt/**"
+      - ".github/**"
       - "README.md"
-      - ".gitignore"              
+      - ".gitignore"
     branches:
       - master
   pull_request:
     branches:
-      - master  
+      - master
     paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
+      - "platform/android/**"
+      - "platform/qt/**"
+      - ".github/**"
       - "README.md"
-      - ".gitignore"       
+      - ".gitignore"
 
 jobs:
   build:
@@ -32,14 +34,14 @@ jobs:
     defaults:
       run:
         working-directory: platform/ios
-        shell: bash 
+        shell: bash
 
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
           fetch-depth: 0
-      
+
       - name: Install macos dependencies
         run: |
           brew list cmake || brew install cmake
@@ -60,28 +62,28 @@ jobs:
             ${{ runner.macos }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm install --ignore-scripts
 
       - name: Prepare ccache
-        run: ccache --clear       
+        run: ccache --clear
 
       - name: Cache ccache
         uses: actions/cache@v2
         env:
-          cache-name: ccache-v1     
+          cache-name: ccache-v1
         with:
           path: ~/.ccache'
           key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}  
+            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
 
       - name: Clear ccache statistics
         run: |
           ccache --zero-stats
           ccache --max-size=2G
-          ccache --show-stats            
+          ccache --show-stats
 
       - name: Build macos test
         run: |

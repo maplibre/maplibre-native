@@ -1,0 +1,159 @@
+name: qt-ci
+
+on:
+  workflow_dispatch:
+  push:
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - ".github/**"
+      - "README.md"
+      - ".gitignore"
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - ".github/**"
+      - "README.md"
+      - ".gitignore"
+
+jobs:
+  build-core:
+    strategy:
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            static: OFF
+            qt: 5.15.2
+            qt_target: desktop
+          - name: macOS_static
+            os: macos-latest
+            static: ON
+            qt: 5.15.2
+            qt_target: desktop
+          - name: iOS_static
+            os: macos-latest
+            static: ON
+            qt: 5.15.2
+            qt_target: ios
+          - name: macOS
+            os: macos-latest
+            static: ON
+            qt: 6.2.2
+            qt_target: desktop
+          - name: macOS_static
+            os: macos-latest
+            static: OFF
+            qt: 6.2.2
+            qt_target: desktop
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILD_TYPE: Debug
+      BUILD_MODE: ${{ matrix.static }}
+      QT_VERSION: ${{ matrix.qt }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: source
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Download Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: ${{ matrix.qt_target }}
+
+      - name: Prepare ccache
+        run: |
+          ccache --clear
+          ccache --set-config cache_dir=~/.ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v2
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats
+          ccache --max-size=2G
+          ccache --show-stats -v
+
+      - name: Build maplibre-gl-native (macOS)
+        if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
+        run: |
+          mkdir build && cd build
+          cmake ../source/ \
+            -G Ninja \
+            -DMBGL_WITH_QT=ON \
+            -DMBGL_QT_STATIC=${BUILD_MODE} \
+            -DMBGL_QT_WITH_INTERNAL_SQLITE=OFF \
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+            -DCMAKE_INSTALL_PREFIX=../install \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          ninja
+          ninja install
+
+      - name: Build maplibre-gl-native (iOS)
+        if: runner.os == 'macOS' && matrix.qt_target == 'ios'
+        run: |
+          mkdir build && cd build
+          cmake ../source/ \
+            -DCMAKE_TOOLCHAIN_FILE=../source/platform/ios/platform/ios/toolchain.cmake \
+            -G Xcode \
+            -DPLATFORM=OS64COMBINED \
+            -DDEPLOYMENT_TARGET=12.0 \
+            -DENABLE_BITCODE=ON \
+            -DMBGL_WITH_QT=ON \
+            -DMBGL_WITH_WERROR=OFF \
+            -DMBGL_QT_LIBRARY_ONLY=ON \
+            -DMBGL_QT_STATIC=${BUILD_MODE} \
+            -DMBGL_QT_WITH_INTERNAL_SQLITE=OFF \
+            -DMBGL_QT_WITH_IOS_CCACHE=ON \
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+            -DCMAKE_INSTALL_PREFIX=../install
+          cmake --build . --config Release
+          cmake --install . --config Release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt }}
+          path: install
+
+      - name: Show ccache statistics
+        run: |
+          ccache --show-stats -v

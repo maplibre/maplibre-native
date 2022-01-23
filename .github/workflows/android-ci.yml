@@ -1,16 +1,17 @@
 name: android-ci
 
-on: 
+on:
   workflow_dispatch:
   push:
     tags-ignore:
       - '**'
     paths-ignore:
       - "platform/ios/**"
-      - ".github/**" 
+      - "platform/qt/**"
+      - ".github/**"
       - "README.md"
       - ".gitignore"
-  
+
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -48,45 +49,45 @@ jobs:
             ${{ runner.os }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm install --ignore-scripts
         working-directory: platform/android
 
       - name: Prepare ccache
-        run: ccache --clear       
+        run: ccache --clear
 
       - name: Cache ccache
         uses: actions/cache@v2
         env:
-          cache-name: ccache-v1     
+          cache-name: ccache-v1
         with:
           path: ~/.ccache'
           key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
       - name: Clear ccache statistics
         run: |
           ccache --zero-stats
           ccache --max-size=2G
-          ccache --show-stats   
+          ccache --show-stats
 
       - name: restore-gradle-cache
         uses: actions/cache@v2
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'     
+          path: ~/.gradle'
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
           restore-keys: |
-            - ${{ env.cache-name }}    
+            - ${{ env.cache-name }}
 
       - name: Check code style
         run: make android-check
 
       - name: Run Android unit tests
-        run: make run-android-unit-test    
+        run: make run-android-unit-test
 
       - name: Build libmapbox-gl.so for arm-v8
         run: make android-lib-arm-v8
@@ -103,7 +104,7 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
-        shell: bash        
+        shell: bash
 
       - name: Log in to Google Cloud Platform
         run: |
@@ -116,7 +117,7 @@ jobs:
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
           fi
-        shell: bash          
+        shell: bash
 
       - name: Run instrumentation tests on Firebase
         run: |
@@ -131,7 +132,7 @@ jobs:
           else
             echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
           fi
-        shell: bash  
+        shell: bash
 
       - name: Store debug artifacts
         uses: actions/upload-artifact@v2

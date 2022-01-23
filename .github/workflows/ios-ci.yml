@@ -6,18 +6,20 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
+      - "platform/android/**"
+      - "platform/qt/**"
+      - ".github/**"
       - "README.md"
-      - ".gitignore"              
+      - ".gitignore"
   pull_request:
     branches:
-      - master  
+      - master
     paths-ignore:
-      - "platform/android/**" 
-      - ".github/**"  
+      - "platform/android/**"
+      - "platform/qt/**"
+      - ".github/**"
       - "README.md"
-      - ".gitignore"       
+      - ".gitignore"
 
 jobs:
   build:
@@ -29,14 +31,14 @@ jobs:
     defaults:
       run:
         working-directory: platform/ios
-        shell: bash 
+        shell: bash
 
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
           fetch-depth: 0
-      
+
       - name: Install macos dependencies
         run: |
           brew list cmake || brew install cmake
@@ -57,35 +59,35 @@ jobs:
             ${{ runner.os }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm install --ignore-scripts
 
       - name: Prepare ccache
-        run: ccache --clear       
+        run: ccache --clear
 
       - name: Cache ccache
         uses: actions/cache@v2
         env:
-          cache-name: ccache-v1     
+          cache-name: ccache-v1
         with:
           path: ~/.ccache'
           key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
       - name: Clear ccache statistics
         run: |
           ccache --zero-stats
           ccache --max-size=2G
-          ccache --show-stats            
+          ccache --show-stats
 
       - name: Install iOS packaging dependencies
         run: |
           ./platform/ios/scripts/install-packaging-dependencies.sh
         env:
           CILAUNCH: true
-      
+
       - name: Check debug symbols
         run: make darwin-check-public-symbols
 
@@ -99,7 +101,7 @@ jobs:
         run: make ios-uitest
 
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-        run: make ios-sanitize      
+        run: make ios-sanitize
 
       - name: Build and run SDK unit tests with address sanitizer
         run: make ios-sanitize-address
