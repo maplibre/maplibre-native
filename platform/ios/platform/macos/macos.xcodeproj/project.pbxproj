@@ -99,7 +99,6 @@
 		55CAF6342294409B00F17770 /* MGLMapView+OpenGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55CAF6332294409B00F17770 /* MGLMapView+OpenGL.mm */; };
 		55CF7533213EDADF00ED86C4 /* libmbgl-vendor-icu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */; };
 		55E2AD111E5B0A6900E8C587 /* MGLOfflineStorageTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E2AD101E5B0A6900E8C587 /* MGLOfflineStorageTests.mm */; };
-		567E3E2F279A031800E53E53 /* libmbgl-platform-loop.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 567E3E2E279A031800E53E53 /* libmbgl-platform-loop.a */; };
 		747ABE59219B2BDB00523B67 /* MGLFillExtrusionStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE54219B2BDA00523B67 /* MGLFillExtrusionStyleLayer_Private.h */; };
 		747ABE5A219B2BDB00523B67 /* MGLCircleStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE55219B2BDA00523B67 /* MGLCircleStyleLayer_Private.h */; };
 		747ABE5B219B2BDB00523B67 /* MGLBackgroundStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE56219B2BDB00523B67 /* MGLBackgroundStyleLayer_Private.h */; };
@@ -436,8 +435,6 @@
 		55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-vendor-icu.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		55D9B4B01D005D3900C1CCE2 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		55E2AD101E5B0A6900E8C587 /* MGLOfflineStorageTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MGLOfflineStorageTests.mm; path = ../../darwin/test/MGLOfflineStorageTests.mm; sourceTree = "<group>"; };
-		567E3E2C279A009B00E53E53 /* libmbgl-node-loop.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-node-loop.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		567E3E2E279A031800E53E53 /* libmbgl-platform-loop.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmbgl-platform-loop.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		747ABE54219B2BDA00523B67 /* MGLFillExtrusionStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLFillExtrusionStyleLayer_Private.h; sourceTree = "<group>"; };
 		747ABE55219B2BDA00523B67 /* MGLCircleStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLCircleStyleLayer_Private.h; sourceTree = "<group>"; };
 		747ABE56219B2BDB00523B67 /* MGLBackgroundStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLBackgroundStyleLayer_Private.h; sourceTree = "<group>"; };
@@ -760,7 +757,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				567E3E2F279A031800E53E53 /* libmbgl-platform-loop.a in Frameworks */,
 				5548BE781D09E718005DDE81 /* libmbgl-core.a in Frameworks */,
 				DA35D9C92409205B0013ECB0 /* libmbgl-vendor-csscolorparser.a in Frameworks */,
 				55CF7533213EDADF00ED86C4 /* libmbgl-vendor-icu.a in Frameworks */,
@@ -1184,8 +1180,6 @@
 		DAE6C31E1CC308BC00DB3429 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				567E3E2E279A031800E53E53 /* libmbgl-platform-loop.a */,
-				567E3E2C279A009B00E53E53 /* libmbgl-node-loop.a */,
 				DAE6C3451CC31D1200DB3429 /* libmbgl-core.a */,
 				DA35D9C82409205B0013ECB0 /* libmbgl-vendor-csscolorparser.a */,
 				55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */,
