@@ -67,14 +67,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get dist-upgrade -y
-          sudo apt-get install -y ca-certificates git gzip ssh tar python3-scipy
-          sudo apt-get install -y awscli ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build nodejs npm pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
+          sudo apt-get install -y ca-certificates git gzip tar python3-scipy
+          sudo apt-get install -y ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
           pip3 install cmake-format==0.5.5
-          sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev
+          sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev g++-10
           git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
-          sudo apt-get install -y g++-10
           /usr/sbin/update-ccache-symlinks
-          sudo apt-get install xvfb
 
       - name: npm ci
         run: npm ci --ignore-scripts
