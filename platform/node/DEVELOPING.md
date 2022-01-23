@@ -1,6 +1,6 @@
-# Developing the Mapbox GL Native Node.js module
+# Developing the Maplibre GL Native Node.js module
 
-This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Mapbox GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
+This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Maplibre GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
 
 ## Building
 
@@ -8,11 +8,63 @@ To develop these bindings, you’ll need to build them from source. Building req
 the [macOS](../macos/INSTALL.md#requirements) or [Linux](../linux/README.md#prerequisites) install documentation, depending
 on the target platform.
 
+First you'll need to install dependencies:
+
+
+#### MacOS
+
+```bash
+brew list cmake || brew install cmake
+brew list ccache || brew install ccache
+brew list ninja || brew install ninja
+brew list pkgconfig || brew install pkgconfig
+brew list chargepoint/xcparse/xcparse || brew install chargepoint/xcparse/xcparse
+brew list pkg-config || brew install pkg-config
+brew list glfw3 || brew install glfw3
+brew list libuv || brew install libuv
+pip install ansi2html scipy
+```
+
+#### Linux
+
+```bash
+sudo apt-get install -y ca-certificates git gzip tar python3-scipy
+sudo apt-get install -y ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
+pip3 install cmake-format==0.5.5
+sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev g++-10
+git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
+/usr/sbin/update-ccache-symlinks
+```
+
+### Compiling
+
 To compile the Node.js bindings and install module dependencies, from the repository root directory, first run:
 
+#### MacOS
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
 ```
-make distclean
+
+Then, as a temporary step until build system is changed, run:
+```bash
+sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
 ```
+
+#### Linux
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+```
+
+### Building
+
+Finally, build:
+```bash
+cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
+
 
 If you are rebuilding after time has passed.
 
