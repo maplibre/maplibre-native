@@ -78,7 +78,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Prepare ccache
-        run: ccache --clear
+        run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
         uses: actions/cache@v2
@@ -94,9 +94,9 @@ jobs:
 
       - name: Clear ccache statistics
         run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
+          ccache --zero-stats --set-config cache_dir=~/.ccache
+          ccache --max-size=2G --set-config cache_dir=~/.ccache
+          ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
         if: runner.os == 'macOS'
@@ -126,9 +126,11 @@ jobs:
       - name: Pack
         if: github.ref != 'refs/heads/master'
         run: |
-          npm pack
+          npm pack --dry-run
 
-      - name: Publish package
-        if: github.ref == 'refs/heads/master'
-        run: |
-          npm publish
+      # Uncomment to start publishing the package
+      # @TODO: Figure out the binary distribution method.
+      # - name: Publish package
+      #   if: github.ref == 'refs/heads/master'
+      #   run: |
+      #     npm publish
