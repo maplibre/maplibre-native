@@ -87,7 +87,7 @@ public:
         if (!value->IsNumber()) {
             return {};
         }
-        return (float)Nan::To<double>(value).ToChecked();
+        return static_cast<float>(Nan::To<double>(value).ToChecked());
     }
 
     static optional<double> toDouble(const v8::Local<v8::Value>& value) {
