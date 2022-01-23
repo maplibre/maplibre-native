@@ -2,7 +2,6 @@
 #include "node_map.hpp"
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/chrono.hpp>
-#include <iostream>
 
 #include <cmath>
 
