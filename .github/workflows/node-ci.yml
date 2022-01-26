@@ -72,8 +72,6 @@ jobs:
             libgl1-mesa-dev \
             libgles2-mesa-dev \
             libglfw3-dev \
-            libjpeg-turbo8-dev \
-            libpng-dev \
             libuv1-dev \
             zlib1g-dev \
             g++-10 \
