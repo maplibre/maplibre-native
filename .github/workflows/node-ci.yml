@@ -65,16 +65,12 @@ jobs:
           sudo apt-get install -y \
             ccache \
             cmake \
-            mesa-common-dev \
             ninja-build \
             pkg-config \
-            software-properties-common \
             xvfb \
-            libcurl4-openssl-dev \
             libgl1-mesa-dev \
             libgles2-mesa-dev \
             libglfw3-dev \
-            libicu-dev \
             libjpeg-turbo8-dev \
             libpng-dev \
             libuv1-dev \
