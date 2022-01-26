@@ -69,11 +69,8 @@ jobs:
             pkg-config \
             xvfb \
             libcurl4-openssl-dev \
-            libgl1-mesa-dev \
-            libgles2-mesa-dev \
             libglfw3-dev \
             libuv1-dev \
-            zlib1g-dev \
             g++-10 \
             libc++-9-dev \
             libc++abi-9-dev
