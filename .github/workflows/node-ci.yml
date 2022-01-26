@@ -68,6 +68,7 @@ jobs:
             ninja-build \
             pkg-config \
             xvfb \
+            libcurl4-openssl-dev \
             libgl1-mesa-dev \
             libgles2-mesa-dev \
             libglfw3-dev \
