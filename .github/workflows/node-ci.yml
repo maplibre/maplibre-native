@@ -115,7 +115,7 @@ jobs:
       - name: CMake
         if: runner.os == 'macOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{github.ref == 'refs/heads/master' && 'Release' || 'Debug'}} -DMBGL_WITH_COVERAGE=ON
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
           sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
           sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
 
