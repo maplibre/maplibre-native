@@ -62,7 +62,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get install -y
+          sudo apt-get install -y \
             ccache \
             cmake \
             doxygen \
