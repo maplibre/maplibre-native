@@ -62,8 +62,30 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get install -y ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
-          sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev g++-10
+          sudo apt-get install -y
+            ccache \
+            cmake \
+            doxygen \
+            fonts-noto \
+            mesa-common-dev \
+            ninja-build \
+            pkg-config \
+            software-properties-common \
+            valgrind \
+            xvfb \
+            zip \
+            libcurl4-openssl-dev \
+            libgl1-mesa-dev \
+            libgles2-mesa-dev \
+            libglfw3-dev \
+            libicu-dev \
+            libjpeg-turbo8-dev \
+            libpng-dev \
+            libuv1-dev \
+            zlib1g-dev \
+            g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: npm ci
