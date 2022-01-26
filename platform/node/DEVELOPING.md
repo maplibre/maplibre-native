@@ -14,25 +14,30 @@ First you'll need to install dependencies:
 #### MacOS
 
 ```bash
-brew list cmake || brew install cmake
-brew list ccache || brew install ccache
-brew list ninja || brew install ninja
-brew list pkgconfig || brew install pkgconfig
-brew list chargepoint/xcparse/xcparse || brew install chargepoint/xcparse/xcparse
-brew list pkg-config || brew install pkg-config
-brew list glfw3 || brew install glfw3
-brew list libuv || brew install libuv
-pip install ansi2html scipy
+brew install \
+  cmake \
+  ccache \
+  ninja \
+  pkg-config \
+  glfw3 \
+  libuv
 ```
 
-#### Linux
+#### Linux (Ubuntu)
 
 ```bash
-sudo apt-get install -y ca-certificates git gzip tar python3-scipy
-sudo apt-get install -y ccache cmake doxygen fonts-noto g++-10 libc++-9-dev libc++abi-9-dev mesa-common-dev ninja-build pkg-config python3-bs4 python3-pip python3-requests python3-git python3-github software-properties-common valgrind xvfb zip
-pip3 install cmake-format==0.5.5
-sudo apt-get install -y libcurl4-openssl-dev libgl1-mesa-dev libgles2-mesa-dev libglfw3-dev libicu-dev libjpeg-turbo8-dev libpng-dev libuv1-dev zlib1g-dev g++-10
-git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty && cd /tmp/bloaty && git checkout 3cf5c3feca15 && cmake . && make -j $(nproc) bloaty && cp bloaty /usr/local/bin/ && rm -rf /tmp/bloaty && rm -rf ~/.ccache
+sudo apt-get install -y \
+  ccache \
+  cmake \
+  ninja-build \
+  pkg-config \
+  xvfb \
+  libcurl4-openssl-dev \
+  libglfw3-dev \
+  libuv1-dev \
+  g++-10 \
+  libc++-9-dev \
+  libc++abi-9-dev
 /usr/sbin/update-ccache-symlinks
 ```
 
@@ -43,7 +48,7 @@ To compile the Node.js bindings and install module dependencies, from the reposi
 #### MacOS
 
 ```bash
-cmake . -B build -G Ninja -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
 ```
 
 Then, as a temporary step until build system is changed, run:

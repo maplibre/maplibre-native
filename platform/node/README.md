@@ -5,6 +5,8 @@
 
 ## Installing
 
+#### :warn: This package isn't live yet.
+
 Requires a modern C++ runtime that supports C++14.
 
 By default, installs binaries. On these platforms no additional dependencies are needed.
