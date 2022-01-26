@@ -58,7 +58,6 @@ jobs:
           brew list pkg-config || brew install pkg-config
           brew list glfw3 || brew install glfw3
           brew list libuv || brew install libuv
-          pip install ansi2html scipy
 
       - name: Install dependencies
         if: runner.os == 'Linux'
