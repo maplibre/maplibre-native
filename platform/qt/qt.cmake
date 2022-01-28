@@ -47,6 +47,13 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions("-D_USE_MATH_DEFINES")
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    option(MBGL_QT_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
+    if(MBGL_QT_WITH_IOS_CCACHE)
+        include(${PROJECT_SOURCE_DIR}/platform/ios/ccache.cmake)
+    endif()
+endif()
+
 if(ANDROID)
     message(STATUS "Building for ABI: ${ANDROID_ABI}")
     set(CMAKE_STATIC_LIBRARY_SUFFIX "_${ANDROID_ABI}.a")
