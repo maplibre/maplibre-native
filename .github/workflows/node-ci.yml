@@ -1,0 +1,138 @@
+name: node-ci
+
+on:
+  workflow_dispatch:
+  push:
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/ios/**"
+      - "platform/qt/**"
+      - ".gitignore"
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - "platform/android/**"
+      - "platform/ios/**"
+      - ".gitignore"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-11.0
+          - macos-10.15
+          - ubuntu-20.04
+          - ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILDTYPE: ${{github.ref == 'refs/heads/master' && 'Release' || 'Debug'}}
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkg-config || brew install pkg-config
+          brew list glfw3 || brew install glfw3
+          brew list libuv || brew install libuv
+
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get install -y \
+            ccache \
+            cmake \
+            ninja-build \
+            pkg-config \
+            xvfb \
+            libcurl4-openssl-dev \
+            libglfw3-dev \
+            libuv1-dev \
+            g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev
+          /usr/sbin/update-ccache-symlinks
+
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Prepare ccache
+        run: ccache --clear --set-config cache_dir=~/.ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v2
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache
+          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats --set-config cache_dir=~/.ccache
+          ccache --max-size=2G --set-config cache_dir=~/.ccache
+          ccache --show-stats --set-config cache_dir=~/.ccache
+
+      - name: CMake
+        if: runner.os == 'macOS'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
+          sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
+
+      - name: CMake
+        if: runner.os == 'Linux'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: Build
+        run: |
+          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: Test
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
+
+      - name: Test
+        if: runner.os == 'macOS'
+        run: npm test
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        if: github.ref != 'refs/heads/master'
+        run: |
+          npm pack --dry-run
+
+      # Uncomment to start publishing the package
+      # @TODO: Figure out the binary distribution method.
+      # - name: Publish package
+      #   if: github.ref == 'refs/heads/master'
+      #   run: |
+      #     npm publish

@@ -42,7 +42,7 @@ HeadlessBackend::HeadlessBackend(const Size size_,
     : mbgl::gl::RendererBackend(contextMode_), mbgl::gfx::HeadlessBackend(size_), swapBehaviour(swapBehaviour_) {}
 
 HeadlessBackend::~HeadlessBackend() {
-    gfx::BackendScope guard{*this};
+    gfx::BackendScope guard{ *this, gfx::BackendScope::ScopeType::Implicit };
     resource.reset();
     // Explicitly reset the context so that it is destructed and cleaned up before we destruct
     // the impl object.
@@ -106,5 +106,3 @@ std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::OpenGL
 
 } // namespace gfx
 } // namespace mbgl
-
-

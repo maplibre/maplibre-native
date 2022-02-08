@@ -1,8 +1,11 @@
-# node-mapbox-gl-native
+# @maplibre/maplibre-gl-native
 
-[![NPM](https://nodei.co/npm/@mapbox/mapbox-gl-native.png)](https://npmjs.org/package/@mapbox/mapbox-gl-native)
+[![NPM](https://nodei.co/npm/@maplibre/maplibre-gl-native.png)](https://npmjs.org/package/@maplibre/maplibre-gl-native)
+[![node-ci](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml)
 
 ## Installing
+
+#### :warn: This package isn't live yet.
 
 Requires a modern C++ runtime that supports C++14.
 
@@ -14,7 +17,7 @@ By default, installs binaries. On these platforms no additional dependencies are
 Run:
 
 ```
-npm install @mapbox/mapbox-gl-native
+npm install @maplibre/maplibre-gl-native
 ```
 
 Other platforms will fall back to a source compile with `make node`; see [DEVELOPING.md](DEVELOPING.md) for details on
@@ -32,7 +35,7 @@ npm run test-suite
 ```js
 var fs = require('fs');
 var path = require('path');
-var mbgl = require('@mapbox/mapbox-gl-native');
+var mbgl = require('@maplibre/maplibre-gl-native');
 var sharp = require('sharp');
 
 var options = {
@@ -106,7 +109,7 @@ The `request()` method handles a request for a resource. The `ratio` sets the sc
 }
 ```
 
-The `kind` is an enum and defined in [`mbgl.Resource`](https://github.com/mapbox/mapbox-gl-native/blob/master/include/mbgl/storage/resource.hpp):
+The `kind` is an enum and defined in [`mbgl.Resource`](https://github.com/maplibre/maplibre-gl-native/blob/master/include/mbgl/storage/resource.hpp):
 
 ```json
 {
@@ -150,7 +153,7 @@ This is a very barebones implementation and you'll probably want a better implem
 A sample implementation that uses [`request`](https://github.com/request/request) to fetch data from a remote source:
 
 ```js
-var mbgl = require('mapbox-gl-native');
+var mbgl = require('@maplibre/maplibre-gl-native');
 var request = require('request');
 
 var map = new mbgl.Map({
@@ -184,10 +187,10 @@ Stylesheets are free to use any protocols, but your implementation of `request` 
 
 ## Listening for log events
 
-The module imported with `require('mapbox-gl-native')` inherits from [`EventEmitter`](https://nodejs.org/api/events.html), and the `NodeLogObserver` will push log events to this. Log messages can have [`class`](https://github.com/mapbox/mapbox-gl-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L43-L60), [`severity`](https://github.com/mapbox/mapbox-gl-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L17-L23), `code` ([HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)), and `text` parameters.
+The module imported with `require('maplibre-gl-native')` inherits from [`EventEmitter`](https://nodejs.org/api/events.html), and the `NodeLogObserver` will push log events to this. Log messages can have [`class`](https://github.com/maplibre/maplibre-gl-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L43-L60), [`severity`](https://github.com/maplibre/maplibre-gl-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L17-L23), `code` ([HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)), and `text` parameters.
 
 ```js
-var mbgl = require('mapbox-gl-native');
+var mbgl = require('@maplibre/maplibre-gl-native');
 mbgl.on('message', function(msg) {
     t.ok(msg, 'emits error');
     t.equal(msg.class, 'Style');

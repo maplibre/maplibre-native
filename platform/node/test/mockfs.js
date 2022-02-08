@@ -20,19 +20,22 @@ var tile_vector   = readFixture('vector.tile');
 function dataForRequest(req) {
     if (req.url === null) {
         return null;
-    } else if (req.url.indexOf('sprite') > -1 && req.url.endsWith('json')) {
+    } else if (req.url.includes('sprite') && req.url.endsWith('.json')) {
         return sprite_json;
-    } else if (req.url.indexOf('sprite') > -1 && req.url.endsWith('png')) {
+    } else if (req.url.includes('sprite') && req.url.endsWith('.png')) {
         return sprite_png;
-    } else if (req.url.indexOf('fonts') > -1 && req.url.endsWith('pbf')) {
+    } else if (req.url.includes('fonts/') && req.url.endsWith('.pbf')) {
         return glyph;
-    } else if (req.url.endsWith('mapbox.satellite')) {
+    } else if (req.url.includes('sources/satellite')) {
         return source_raster;
-    } else if (req.url.indexOf('satellite') > -1 && (req.url.endsWith('png') || req.url.endsWith('webp'))) {
+    } else if (req.url.includes('tiles/satellite') && (req.url.endsWith('png') || req.url.endsWith('webp') || req.url.endsWith('jpg'))) {
         return tile_raster;
-    } else if (req.url.endsWith('mapbox.mapbox-streets-v7')) {
+    } else if (
+      req.url === 'https://api.maptiler.com/tiles/v3/tiles.json?key=uwvyvzaF2P7UWbyOEvjU' ||
+      req.url === 'maptiler://sources/v3'
+    ) {
         return source_vector;
-    } else if (req.url.indexOf('streets') > -1 && req.url.endsWith('pbf')) {
+    } else if (req.url.includes('tiles/tiles') && req.url.endsWith('pbf')) {
         return tile_vector;
     } else {
         return null;

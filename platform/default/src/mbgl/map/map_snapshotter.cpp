@@ -31,7 +31,9 @@ public:
 
     ~ForwardingRendererObserver() override { mailbox->close(); }
 
-    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
+    void onInvalidate() override {
+      delegate.invoke(&RendererObserver::onInvalidate);
+    }
 
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
@@ -62,7 +64,9 @@ public:
         frontend.reset();
     }
 
-    void onInvalidate() override { rendererObserver->onInvalidate(); }
+    void onInvalidate() override {
+      rendererObserver->onInvalidate();
+    }
 
     void onResourceError(std::exception_ptr err) override {
         hasPendingStillImageRequest = false;

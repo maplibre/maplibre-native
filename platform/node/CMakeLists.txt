@@ -9,17 +9,39 @@ include(${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmak
 add_node_module(
     mbgl-node
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.10.0
+    NAN_VERSION 2.14.2
     EXCLUDE_NODE_ABIS
         46
         47
         48
         51
-        59
-        67
-        72
-        79
-        83
+)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(LIBUV libuv REQUIRED)
+
+add_library(mbgl-node-loop STATIC)
+
+target_sources(
+    mbgl-node-loop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
+)
+
+target_include_directories(
+    mbgl-node-loop
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+        ${PROJECT_SOURCE_DIR}/src
+    PRIVATE ${LIBUV_INCLUDE_DIRS}
+)
+
+target_link_libraries(
+    mbgl-node-loop
+    PUBLIC
+        Mapbox::Base
 )
 
 target_sources(
@@ -42,6 +64,7 @@ target_sources(
 
 target_link_libraries(
     mbgl-node
+    INTERFACE mbgl-node-loop
     INTERFACE Mapbox::Map
 )
 

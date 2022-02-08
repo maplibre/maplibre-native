@@ -32,7 +32,7 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
       asyncInvalidate([this] {
           if (renderer && updateParameters) {
               auto startTime = mbgl::util::MonotonicTimer::now();
-              gfx::BackendScope guard{*getBackend()};
+              gfx::BackendScope guard {*getBackend()};
 
               // onStyleImageMissing might be called during a render. The user implemented method
               // could trigger a call to MGLRenderFrontend#update which overwrites `updateParameters`.
@@ -143,6 +143,7 @@ PremultipliedImage HeadlessFrontend::readStillImage() {
 HeadlessFrontend::RenderResult HeadlessFrontend::render(Map& map) {
     HeadlessFrontend::RenderResult result;
     std::exception_ptr error;
+    gfx::BackendScope guard { *getBackend() };
 
     map.renderStill([&](const std::exception_ptr& e) {
         if (e) {
