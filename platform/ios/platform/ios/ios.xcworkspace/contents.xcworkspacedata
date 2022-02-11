@@ -5,7 +5,7 @@
       location = "group:ios.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../../build/ios/Mapbox GL Native.xcodeproj">
+      location = "group:../../build/ios/mapbox-gl-native/Mapbox GL Native.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:vendor/metalangle/ios/xcode/OpenGLES.xcodeproj">
