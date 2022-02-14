@@ -4414,8 +4414,7 @@ public:
     newAnnotationContainerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     newAnnotationContainerView.contentMode = UIViewContentModeCenter;
     [newAnnotationContainerView addSubviews:annotationViews];
-//    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:1];
-    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:0];
+    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:1];
     self.annotationContainerView = newAnnotationContainerView;
     
     [self updatePresentsWithTransaction];
@@ -6760,7 +6759,12 @@ public:
 
     if ( ! annotationView.superview)
     {
-//        [_mbglView->getView() addSubview:annotationView];
+        /*
+         Adding a sublayer instead of a subview here really shouldn't be neccessary.
+         But the view heirarchy change brought by MetalANGLE neccessitates it.
+         Staying with `[_mbglView->getView() addSubview:annotationView];` drastically increases the
+         likelihood of hitch events.
+         */
         [_mbglView->getView().layer addSublayer:annotationView.layer];
         // Prevents the view from sliding in from the origin.
         annotationView.center = userPoint;
