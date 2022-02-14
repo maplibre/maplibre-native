@@ -38,11 +38,11 @@ jobs:
             static: ON
             qt: 5.15.2
             qt_target: desktop
-          - name: iOS_static
-            os: macos-latest
-            static: ON
-            qt: 5.15.2
-            qt_target: ios
+#          - name: iOS_static
+#            os: macos-latest
+#            static: ON
+#            qt: 5.15.2
+#            qt_target: ios
           - name: macOS
             os: macos-latest
             static: ON
@@ -133,7 +133,7 @@ jobs:
           mkdir build && cd build
           cmake ../source/ \
             -DCMAKE_TOOLCHAIN_FILE=../source/platform/ios/platform/ios/toolchain.cmake \
-            -G Xcode \
+            -G XCode \
             -DPLATFORM=OS64COMBINED \
             -DDEPLOYMENT_TARGET=12.0 \
             -DENABLE_BITCODE=ON \

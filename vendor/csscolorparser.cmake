@@ -2,8 +2,14 @@ if(TARGET mbgl-vendor-csscolorparser)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-csscolorparser STATIC
+if(MBGL_QT_STATIC)
+    add_library(mbgl-vendor-csscolorparser OBJECT)
+else()
+    add_library(mbgl-vendor-csscolorparser STATIC)
+endif()
+
+target_sources(
+    mbgl-vendor-csscolorparser PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/csscolorparser/csscolorparser.cpp
 )
 
