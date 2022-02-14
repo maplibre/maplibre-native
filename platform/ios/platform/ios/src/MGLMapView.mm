@@ -283,6 +283,8 @@ public:
 @property (nonatomic, assign) UIEdgeInsets safeMapViewContentInsets;
 @property (nonatomic, strong) NSNumber *automaticallyAdjustContentInsetHolder;
 
+@property (nonatomic, assign) BOOL needsDisplayRefresh;
+
 @end
 
 @implementation MGLMapView
@@ -314,7 +316,6 @@ public:
     CLLocationDegrees _pendingLongitude;
 
     CADisplayLink *_displayLink;
-    BOOL _needsDisplayRefresh;
 
     NSInteger _changeDelimiterSuppressionDepth;
 
@@ -1247,7 +1248,7 @@ public:
         return;
     }
     
-    if (_needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
+    if (self.needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
     {
         // UIView update logic has moved into `renderSync` above, which now gets
         // triggered by a call to setNeedsDisplay.
@@ -1281,7 +1282,7 @@ public:
 {
     MGLAssertIsMainThread();
 
-    _needsDisplayRefresh = YES;
+    self.needsDisplayRefresh = YES;
 }
 
 - (void)willTerminate
@@ -1311,7 +1312,7 @@ public:
         _displayLink = [self.window.screen displayLinkWithTarget:self selector:@selector(updateFromDisplayLink:)];
         [self updateDisplayLinkPreferredFramesPerSecond];
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-        _needsDisplayRefresh = YES;
+        self.needsDisplayRefresh = YES;
         [self updateFromDisplayLink:_displayLink];
     }
     else if ( ! isVisible && _displayLink)
@@ -1375,7 +1376,7 @@ public:
     BOOL hasEnoughViewAnnotations = (self.annotationContainerView.annotationViews.count > MGLPresentsWithTransactionAnnotationCount);
     BOOL hasAnAnchoredCallout = [self hasAnAnchoredAnnotationCalloutView];
     
-    _enablePresentsWithTransaction = (hasEnoughViewAnnotations || hasAnAnchoredCallout);
+    _enablePresentsWithTransaction = (hasEnoughViewAnnotations || hasAnAnchoredCallout  || self.userLocationVisible);
     
     // If the map is visible, change the layer property too
     if (self.window) {
@@ -4413,7 +4414,8 @@ public:
     newAnnotationContainerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     newAnnotationContainerView.contentMode = UIViewContentModeCenter;
     [newAnnotationContainerView addSubviews:annotationViews];
-    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:1];
+//    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:1];
+    [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:0];
     self.annotationContainerView = newAnnotationContainerView;
     
     [self updatePresentsWithTransaction];
@@ -6758,7 +6760,8 @@ public:
 
     if ( ! annotationView.superview)
     {
-        [_mbglView->getView() addSubview:annotationView];
+//        [_mbglView->getView() addSubview:annotationView];
+        [_mbglView->getView().layer addSublayer:annotationView.layer];
         // Prevents the view from sliding in from the origin.
         annotationView.center = userPoint;
     }
