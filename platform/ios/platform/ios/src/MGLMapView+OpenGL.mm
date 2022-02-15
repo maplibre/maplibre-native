@@ -85,30 +85,14 @@ void MGLMapViewOpenGLImpl::setOpaque(const bool opaque) {
 }
 
 void MGLMapViewOpenGLImpl::setPresentsWithTransaction(const bool value) {
-    // No-op on Metal.
+    auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
+    CAMetalLayer* metalLayer = MGL_OBJC_DYNAMIC_CAST(resource.glView.layer, CAMetalLayer);
+    metalLayer.presentsWithTransaction = value;
 }
 
 void MGLMapViewOpenGLImpl::display() {
     auto& resource = getResource<MGLMapViewOpenGLRenderableResource>();
-
-    // See https://github.com/mapbox/mapbox-gl-native/issues/14232
-    // glClear can be blocked for 1 second. This code is an "escape hatch",
-    // an attempt to detect this situation and rebuild the GL views.
-    if (mapView.enablePresentsWithTransaction && resource.atLeastiOS_12_2_0) {
-        CFTimeInterval before = CACurrentMediaTime();
-        [resource.glView display];
-        CFTimeInterval after = CACurrentMediaTime();
-
-        if (after - before >= 1.0) {
-#ifdef MGL_RECREATE_GL_IN_AN_EMERGENCY
-            dispatch_async(dispatch_get_main_queue(), ^{
-              emergencyRecreateGL();
-            });
-#endif
-        }
-    } else {
-        [resource.glView display];
-    }
+    [resource.glView setNeedsDisplay];
 }
 
 void MGLMapViewOpenGLImpl::createView() {
@@ -131,8 +115,6 @@ void MGLMapViewOpenGLImpl::createView() {
     resource.glView.drawableDepthFormat = MGLDrawableDepthFormat16;
     resource.glView.opaque = mapView.opaque;
     resource.glView.layer.opaque = mapView.opaque;
-    resource.glView.enableSetNeedsDisplay = NO;
-
     [mapView insertSubview:resource.glView atIndex:0];
 }
 

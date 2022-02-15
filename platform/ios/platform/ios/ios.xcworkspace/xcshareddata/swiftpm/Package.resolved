@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "MapView OSLog Extensions",
+        "repositoryURL": "https://github.com/roblabs/mapview-log-extensions.git",
+        "state": {
+          "branch": "main",
+          "revision": "ece5c14ca3147c445c0360169b6f76b73904fb50",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
