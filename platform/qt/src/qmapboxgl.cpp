@@ -487,7 +487,7 @@ void QMapboxGLSettings::resetToTemplate(SettingsTemplate settings_template)
 
     Return all styles that are defined in default settings.
 */
-QVector<QPair<QString, QString> > QMapboxGLSettings::defaultStyles(){
+QVector<QPair<QString, QString> > QMapboxGLSettings::defaultStyles() const {
     QVector<QPair<QString, QString>> styles;
     for (const auto &style : tileServerOptionsInternal()->defaultStyles()) {
         styles.append(QPair<QString, QString>(
