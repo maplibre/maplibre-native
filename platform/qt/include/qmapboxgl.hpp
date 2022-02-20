@@ -91,7 +91,7 @@ public:
 
     void resetToTemplate(SettingsTemplate);
 
-    QVector<QPair<QString, QString>> defaultStyles();
+    QVector<QPair<QString, QString>> defaultStyles() const;
 
     mbgl::TileServerOptions *tileServerOptionsInternal() const;
 
