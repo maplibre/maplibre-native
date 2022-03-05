@@ -90,7 +90,7 @@ npm test
 
 ## Merging your pull request
 
-To clean up your pull request and prepare it for merging, update your local `master` branch, then run `git rebase -i master` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `master` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
+To clean up your pull request and prepare it for merging, update your local `main` branch, then run `git rebase -i main` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `main` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
 
 ## Publishing
 
@@ -112,4 +112,4 @@ If everything looks good:
 
 ### Preleases
 
-Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is pretty much the same except that you'll be making your version number commit and `git tag node-v{VERSION}` (like `git tag node-v3.3.2-pre.1`) on a pull request branch before merging it rather than on `master`.
+Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is pretty much the same except that you'll be making your version number commit and `git tag node-v{VERSION}` (like `git tag node-v3.3.2-pre.1`) on a pull request branch before merging it rather than on `main`.
