@@ -11,10 +11,10 @@ on:
       - "platform/qt/**"
       - ".gitignore"
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - "platform/android/**"
       - "platform/ios/**"
@@ -31,7 +31,7 @@ jobs:
           - ubuntu-18.04
     runs-on: ${{ matrix.os }}
     env:
-      BUILDTYPE: ${{github.ref == 'refs/heads/master' && 'Release' || 'Debug'}}
+      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
     defaults:
       run:
@@ -127,13 +127,13 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
-        if: github.ref != 'refs/heads/master'
+        if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
 
       # Uncomment to start publishing the package
       # @TODO: Figure out the binary distribution method.
       # - name: Publish package
-      #   if: github.ref == 'refs/heads/master'
+      #   if: github.ref == 'refs/heads/main'
       #   run: |
       #     npm publish

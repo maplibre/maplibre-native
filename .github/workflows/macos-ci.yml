@@ -12,10 +12,10 @@ on:
       - "README.md"
       - ".gitignore"
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - "platform/android/**"
       - "platform/qt/**"

@@ -109,7 +109,7 @@ The `request()` method handles a request for a resource. The `ratio` sets the sc
 }
 ```
 
-The `kind` is an enum and defined in [`mbgl.Resource`](https://github.com/maplibre/maplibre-gl-native/blob/master/include/mbgl/storage/resource.hpp):
+The `kind` is an enum and defined in [`mbgl.Resource`](https://github.com/maplibre/maplibre-gl-native/blob/main/include/mbgl/storage/resource.hpp):
 
 ```json
 {

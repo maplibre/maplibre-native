@@ -1,6 +1,6 @@
 # Changelog for Mapbox Maps SDK for macOS
 
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/main/CONTRIBUTING.md) to get started.
 
 ## 0.19.1 - September 06, 2021
 

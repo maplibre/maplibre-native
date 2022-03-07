@@ -15,7 +15,7 @@ on:
       - ".gitignore"
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - "platform/android/**"
       - "platform/darwin/**"
