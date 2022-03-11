@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MGLAnnotationView;
 @class MGLAnnotationImage;
 @class MGLUserLocation;
+@class MGLMapProjection;
 @class MGLPolyline;
 @class MGLPolygon;
 @class MGLShape;
@@ -1532,6 +1533,12 @@ MGL_EXPORT
  @return The distance in meters spanned by a single point.
  */
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude;
+
+/**
+ Returns the new map projection instance initialized with the map view,
+ i.e. with the current camera state.
+ */
+- (MGLMapProjection*)mapProjection;
 
 #pragma mark Annotating the Map
 

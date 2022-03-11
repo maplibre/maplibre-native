@@ -426,6 +426,12 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
     return ret;
 }
 
+#pragma mark - Transform
+
+TransformState Map::getTransfromState() const {
+    return impl->transform.getState();
+}
+
 #pragma mark - Annotations
 
 void Map::addAnnotationImage(std::unique_ptr<style::Image> image) {
