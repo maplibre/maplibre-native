@@ -8,6 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
  converting between map view screen coordinates and geographical coordinates without
  changing the actual map view camera state.
 */
+MGL_EXPORT
 @interface MGLMapProjection : NSObject
 
 /**
