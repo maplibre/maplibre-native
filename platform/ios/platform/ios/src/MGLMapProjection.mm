@@ -1,11 +1,3 @@
-//
-//  MGLMapProjection.m
-//  ios
-//
-//  Created by Oleksandr Stepanov on 07.12.2021.
-//  Copyright © 2021 Mapbox. All rights reserved.
-//
-
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_projection.hpp>
 #include <mbgl/util/geo.hpp>
