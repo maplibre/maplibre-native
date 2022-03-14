@@ -67,6 +67,7 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
 #import "MGLSettings_Private.h"
+#import "MGLMapProjection.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -4358,6 +4359,10 @@ static void *windowScreenContext = &windowScreenContext;
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel
 {
     return mbgl::Projection::getMetersPerPixelAtLatitude(latitude, zoomLevel);
+}
+
+- (MGLMapProjection*)mapProjection {
+    return [[MGLMapProjection alloc] initWithMapView:self];
 }
 
 #pragma mark - Camera Change Reason -

@@ -134,6 +134,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/projection_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/clamp.hpp
@@ -375,6 +376,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_options.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.cpp

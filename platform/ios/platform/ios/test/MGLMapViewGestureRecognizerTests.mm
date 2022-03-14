@@ -3,13 +3,12 @@
 
 #import "../../darwin/src/MGLGeometry_Private.h"
 #import "MGLMockGestureRecognizers.h"
+#import "MGLMapView_Private.h"
 
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/camera.hpp>
 
 @interface MGLMapView (MGLMapViewGestureRecognizerTests)
-
-- (mbgl::Map &)mbglMap;
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch;
 - (void)handleRotateGesture:(UIRotationGestureRecognizer *)rotate;
