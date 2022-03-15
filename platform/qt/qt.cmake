@@ -150,7 +150,7 @@ set_property(TARGET mbgl-core PROPERTY AUTOMOC ON)
 target_link_libraries(
     mbgl-core
     PRIVATE
-        $<$<NOT:$<PLATFORM_ID:Windows>>:z>
+        $<$<NOT:$<PLATFORM_ID:Windows,Emscripten>>:z>
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
@@ -293,6 +293,10 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
         ${PROJECT_SOURCE_DIR}/platform/qt/app/mapwindow.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/resources/common.qrc
     )
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+        set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    endif()
 
     # Qt public API should keep compatibility with old compilers for legacy systems
     set_property(TARGET mbgl-qt PROPERTY CXX_STANDARD 98)
