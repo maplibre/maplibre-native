@@ -1,0 +1,11 @@
+{
+    "Keys": ["maplibregl"],
+    "Provider": "maplibregl",
+    "Version": 100,
+    "Experimental": false,
+    "Features": [
+        "OnlineMappingFeature",
+        "OfflineMappingFeature",
+        "LocalizedMappingFeature"
+    ]
+}
