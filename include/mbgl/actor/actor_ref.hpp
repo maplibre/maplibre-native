@@ -38,7 +38,7 @@ public:
     template <typename Fn, class... Args>
     auto ask(Fn fn, Args&&... args) const {
         // Result type is deduced from the function's return type
-        using ResultType = typename std::result_of<decltype(fn)(Object, Args...)>::type;
+        using ResultType = typename std::invoke_result<decltype(fn), Object, Args...>::type;
 
         std::promise<ResultType> promise;
         auto future = promise.get_future();
