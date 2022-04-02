@@ -18,7 +18,11 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
 #ifdef WORK_DIRECTORY
+#ifdef _MSC_VER
+    const int result = _chdir(xstr(WORK_DIRECTORY));
+#else
     const int result = chdir(xstr(WORK_DIRECTORY));
+#endif
     if (result != 0) {
         fprintf(stderr, "failed to change directory: %s\n", strerror(errno));
         return errno;

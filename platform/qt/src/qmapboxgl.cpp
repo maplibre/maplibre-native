@@ -68,6 +68,11 @@
 
 using namespace QMapbox;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4805)
+#endif
+
 // mbgl::GLContextMode
 static_assert(mbgl::underlying_type(QMapboxGLSettings::UniqueGLContext) == mbgl::underlying_type(mbgl::gfx::ContextMode::Unique), "error");
 static_assert(mbgl::underlying_type(QMapboxGLSettings::SharedGLContext) == mbgl::underlying_type(mbgl::gfx::ContextMode::Shared), "error");
@@ -90,6 +95,11 @@ static_assert(mbgl::underlying_type(QMapboxGL::NorthUpwards) == mbgl::underlying
 static_assert(mbgl::underlying_type(QMapboxGL::NorthRightwards) == mbgl::underlying_type(mbgl::NorthOrientation::Rightwards), "error");
 static_assert(mbgl::underlying_type(QMapboxGL::NorthDownwards) == mbgl::underlying_type(mbgl::NorthOrientation::Downwards), "error");
 static_assert(mbgl::underlying_type(QMapboxGL::NorthLeftwards) == mbgl::underlying_type(mbgl::NorthOrientation::Leftwards), "error");
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 namespace {
 
@@ -984,7 +994,7 @@ mbgl::optional<mbgl::Annotation> asMapboxGLAnnotation(const QMapbox::Annotation 
 */
 QMapbox::AnnotationID QMapboxGL::addAnnotation(const QMapbox::Annotation &annotation)
 {
-    return d_ptr->mapObj->addAnnotation(*asMapboxGLAnnotation(annotation));
+    return static_cast<QMapbox::AnnotationID>(d_ptr->mapObj->addAnnotation(*asMapboxGLAnnotation(annotation)));
 }
 
 /*!
