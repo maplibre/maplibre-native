@@ -47,18 +47,16 @@ T perp(const T& a) {
 
 template <typename T, typename S1, typename S2>
 T dist(const S1& a, const S2& b) {
-    T dx = b.x - a.x;
-    T dy = b.y - a.y;
-    T c = std::sqrt(dx * dx + dy * dy);
-    return c;
+    auto dx = b.x - a.x;
+    auto dy = b.y - a.y;
+    return static_cast<T>(std::sqrt(dx * dx + dy * dy));
 }
 
 template <typename T, typename S1, typename S2>
 T distSqr(const S1& a, const S2& b) {
-    T dx = b.x - a.x;
-    T dy = b.y - a.y;
-    T c = dx * dx + dy * dy;
-    return c;
+    auto dx = b.x - a.x;
+    auto dy = b.y - a.y;
+    return static_cast<T>(dx * dx + dy * dy);
 }
 
 template <typename T>
@@ -87,12 +85,12 @@ S unit(const S& a) {
 }
 
 template <typename T, typename S = double>
-T rotate(const T& a, S angle) {
+Point<T> rotate(const Point<T>& a, S angle) {
     S cos = std::cos(angle);
     S sin = std::sin(angle);
     S x = cos * a.x - sin * a.y;
     S y = sin * a.x + cos * a.y;
-    return T(x, y);
+    return Point<T>(static_cast<T>(x), static_cast<T>(y));
 }
 
 template <typename T>

@@ -658,12 +658,12 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
 
 LatLng getTileCenterCoordinates(const UnwrappedTileID& tileId) {
     double scale = (1 << tileId.canonical.z);
-    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize, (tileId.canonical.y + 0.5) * util::tileSize};
+    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D, (tileId.canonical.y + 0.5) * util::tileSize_D};
     return Projection::unproject(tileCenter, scale);
 }
 
 uint32_t getTileScreenPixelSize(float pixelRatio) {
-    return util::tileSize * pixelRatio;
+    return util::tileSize_D * pixelRatio;
 }
 
 uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float pixelRatio) {

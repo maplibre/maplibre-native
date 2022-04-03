@@ -13,13 +13,13 @@
 namespace mbgl {
 
 OpacityState::OpacityState(bool placed_, bool skipFade)
-    : opacity((skipFade && placed_) ? 1 : 0)
+    : opacity((skipFade && placed_) ? 1.0f : 0.0f)
     , placed(placed_)
 {
 }
 
 OpacityState::OpacityState(const OpacityState& prevState, float increment, bool placed_) :
-    opacity(::fmax(0, ::fmin(1, prevState.opacity + (prevState.placed ? increment : -increment)))),
+    opacity(::fmax(0.0f, ::fmin(1.0f, prevState.opacity + (prevState.placed ? increment : -increment)))),
     placed(placed_) {}
 
 bool OpacityState::isHidden() const {
@@ -78,8 +78,8 @@ public:
           renderTile(renderTile_),
           state(state_),
           pixelsToTileUnits(renderTile_.id.pixelsToTileUnits(1, placementZoom)),
-          scale(std::pow(2, placementZoom - getOverscaledID().overscaledZ)),
-          pixelRatio(util::tileSize * getOverscaledID().overscaleFactor() / util::EXTENT),
+          scale(static_cast<float>(std::pow(2, placementZoom - getOverscaledID().overscaledZ))),
+          pixelRatio(static_cast<float>(util::tileSize_D * getOverscaledID().overscaleFactor() / util::EXTENT)),
           collisionGroup(std::move(collisionGroup_)),
           partiallyEvaluatedTextSize(bucket_.textSizeBinder->evaluateForZoom(placementZoom)),
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
@@ -179,7 +179,7 @@ Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
       collisionIndex(updateParameters->transformState, updateParameters->mode),
       transitionOptions(updateParameters->transitionOptions),
       commitTime(updateParameters->timePoint),
-      placementZoom(updateParameters->transformState.getZoom()),
+      placementZoom(static_cast<float>(updateParameters->transformState.getZoom())),
       collisionGroups(updateParameters->crossSourceCollisions),
       prevPlacement(std::move(prevPlacement_)),
       showCollisionBoxes(updateParameters->debugOptions & MapDebugOptions::Collision) {
@@ -403,7 +403,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                           textBoxScale,
                                                           ctx.rotateTextWithMap,
                                                           ctx.pitchTextWithMap,
-                                                          ctx.getTransformState().getBearing());
+                                                          static_cast<float>(ctx.getTransformState().getBearing()));
                     textBoxes.clear();
                     if (!canPlaceAtVariableAnchor(
                             textBox, anchor, shift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
@@ -621,7 +621,7 @@ SymbolInstanceReferences getBucketSymbols(const SymbolBucket& bucket,
                                           const optional<SortKeyRange>& sortKeyRange,
                                           double bearing) {
     if (bucket.layout->get<style::SymbolZOrder>() == style::SymbolZOrderType::ViewportY) {
-        auto sortedSymbols = bucket.getSortedSymbols(float(bearing));
+        auto sortedSymbols = bucket.getSortedSymbols(static_cast<float>(bearing));
         // Place in the reverse order than draw i.e., starting from the foreground elements.
         std::reverse(std::begin(sortedSymbols), std::end(sortedSymbols));
         return sortedSymbols;
@@ -768,11 +768,11 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket, const Transfor
         bucket.text.dynamicVertices.clear();
         bucket.hasVariablePlacement = false;
 
-        const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(state.getZoom());
-        const float tileScale = std::pow(2, state.getZoom() - tile.getOverscaledTileID().overscaledZ);
+        const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom()));
+        const auto tileScale = static_cast<float>(std::pow(2, state.getZoom() - tile.getOverscaledTileID().overscaledZ));
         const bool rotateWithMap = layout.get<TextRotationAlignment>() == AlignmentType::Map;
         const bool pitchWithMap = layout.get<TextPitchAlignment>() == AlignmentType::Map;
-        const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0, state.getZoom());
+        const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
         const auto labelPlaneMatrix = getLabelPlaneMatrix(tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         std::unordered_map<std::size_t, std::pair<std::size_t, Point<float>>> placedTextShifts;
 
@@ -1020,7 +1020,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                                               variableOffset.textBoxScale,
                                                               rotateWithMap,
                                                               pitchWithMap,
-                                                              state.getBearing());
+                                                              static_cast<float>(state.getBearing()));
                     } else {
                         // No offset -> this symbol hasn't been placed since coming on-screen
                         // No single box is particularly meaningful and all of them would be too noisy
@@ -1074,7 +1074,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         }
     }
 
-    bucket.sortFeatures(state.getBearing());
+    bucket.sortFeatures(static_cast<float>(state.getBearing()));
     auto retainedData = retainedQueryData.find(bucket.bucketInstanceId);
     if (retainedData != retainedQueryData.end()) {
         retainedData->second.featureSortOrder = bucket.featureSortOrder;
@@ -1177,7 +1177,7 @@ float Placement::zoomAdjustment(const float zoom) const {
     // adjustment is used to reduce the fade duration for symbols while zooming out quickly.
     // It is also used to reduce the interval between placement calculations. Reducing the
     // interval between placements means collisions are discovered and eliminated sooner.
-    return std::max(0.0, (placementZoom - zoom) / 1.5);
+    return std::max(0.0f, (placementZoom - zoom) / 1.5f);
 }
 
 const JointPlacement* Placement::getSymbolPlacement(const SymbolInstance& symbol) const {
@@ -1423,7 +1423,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
         pitchTextWithMap = ctx.pitchTextWithMap,
         rotateTextWithMap = ctx.rotateTextWithMap,
         variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
-        bearing = ctx.getTransformState().getBearing()
+        bearing = static_cast<float>(ctx.getTransformState().getBearing())
     ](const SymbolInstance& symbol) noexcept->IntersectStatus {
         IntersectStatus result;
         if (!symbol.textCollisionFeature.boxes.empty()) {

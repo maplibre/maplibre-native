@@ -155,7 +155,7 @@ void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animatio
 }
 
 void Map::pitchBy(double pitch, const AnimationOptions& animation) {
-    easeTo(CameraOptions().withPitch((impl->transform.getPitch() * util::RAD2DEG) - pitch), animation);
+    easeTo(CameraOptions().withPitch((impl->transform.getPitch() * util::RAD2DEG_D) - pitch), animation);
 }
 
 void Map::scaleBy(double scale, const optional<ScreenCoordinate>& anchor, const AnimationOptions& animation) {
@@ -206,8 +206,8 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transfo
     // Calculate the zoom level.
     double minScale = INFINITY;
     if (width > 0 || height > 0) {
-        double scaleX = double(size.width) / width;
-        double scaleY = double(size.height) / height;
+        double scaleX = static_cast<double>(size.width) / width;
+        double scaleY = static_cast<double>(size.height) / height;
         scaleX -= (padding.left() + padding.right()) / width;
         scaleY -= (padding.top() + padding.bottom()) / height;
         minScale = util::min(scaleX, scaleY);
@@ -245,8 +245,8 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
     }
 
     return mbgl::cameraForLatLngs(latLngs, transform, padding)
-        .withBearing(-transform.getBearing() * util::RAD2DEG)
-        .withPitch(transform.getPitch() * util::RAD2DEG);
+        .withBearing(-transform.getBearing() * util::RAD2DEG_D)
+        .withPitch(transform.getPitch() * util::RAD2DEG_D);
 }
 
 CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
@@ -267,7 +267,7 @@ LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
     shallow.jumpTo(camera);
     return LatLngBounds::hull(
         shallow.screenCoordinateToLatLng({}),
-        shallow.screenCoordinateToLatLng({ double(size.width), double(size.height) })
+        shallow.screenCoordinateToLatLng({ static_cast<double>(size.width), static_cast<double>(size.height) })
     );
 }
 
@@ -277,10 +277,10 @@ LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) co
 
     shallow.jumpTo(camera);
     LatLng nw = shallow.screenCoordinateToLatLng({});
-    LatLng se = shallow.screenCoordinateToLatLng({double(size.width), double(size.height)});
-    LatLng ne = shallow.screenCoordinateToLatLng({double(size.width), 0.0});
-    LatLng sw = shallow.screenCoordinateToLatLng({0.0, double(size.height)});
-    LatLng center = shallow.screenCoordinateToLatLng({double(size.width) / 2, double(size.height) / 2});
+    LatLng se = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)});
+    LatLng ne = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), 0.0});
+    LatLng sw = shallow.screenCoordinateToLatLng({0.0, static_cast<double>(size.height)});
+    LatLng center = shallow.screenCoordinateToLatLng({static_cast<double>(size.width) / 2, static_cast<double>(size.height) / 2});
     nw.unwrapForShortestPath(center);
     se.unwrapForShortestPath(center);
     ne.unwrapForShortestPath(center);
@@ -345,8 +345,8 @@ BoundOptions Map::getBounds() const {
         .withLatLngBounds(impl->transform.getState().getLatLngBounds())
         .withMinZoom(impl->transform.getState().getMinZoom())
         .withMaxZoom(impl->transform.getState().getMaxZoom())
-        .withMinPitch(impl->transform.getState().getMinPitch() * util::RAD2DEG)
-        .withMaxPitch(impl->transform.getState().getMaxPitch() * util::RAD2DEG);
+        .withMinPitch(impl->transform.getState().getMinPitch() * util::RAD2DEG_D)
+        .withMaxPitch(impl->transform.getState().getMaxPitch() * util::RAD2DEG_D);
 }
 
 #pragma mark - Map options

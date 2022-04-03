@@ -474,7 +474,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         if (mapModeStr == "tile") {
             metadata.mapMode = mbgl::MapMode::Tile;
             // In the tile mode, map is showing exactly one tile.
-            metadata.size = {uint32_t(mbgl::util::tileSize), uint32_t(mbgl::util::tileSize)};
+            metadata.size = {mbgl::util::tileSize_I, mbgl::util::tileSize_I};
         } else if (mapModeStr == "continuous") {
             metadata.mapMode = mbgl::MapMode::Continuous;
             metadata.outputsImage = false;
@@ -974,7 +974,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             float tolerance = -1.0f;
             if (operationArray.Size() >= 3u) {
                 assert(operationArray[2].IsNumber());
-                tolerance = float(operationArray[2].GetDouble());
+                tolerance = static_cast<float>(operationArray[2].GetDouble());
             }
             result.emplace_back([mark, tolerance](TestContext& ctx) {
                 assert(AllocationIndex::isActive());

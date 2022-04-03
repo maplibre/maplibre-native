@@ -5,8 +5,17 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 #include <mapbox/geojsonvt.hpp>
 #include <supercluster.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <cmath>
 
@@ -82,12 +91,12 @@ T evaluateFeature(const mapbox::feature::feature<double>& f,
 std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
                                                  const Immutable<GeoJSONOptions>& options,
                                                  std::shared_ptr<Scheduler> scheduler) {
-    constexpr double scale = util::EXTENT / util::tileSize;
+    constexpr double scale = util::EXTENT / util::tileSize_D;
     if (options->cluster && geoJSON.is<Features>() && !geoJSON.get<Features>().empty()) {
         mapbox::supercluster::Options clusterOptions;
         clusterOptions.maxZoom = options->clusterMaxZoom;
         clusterOptions.extent = util::EXTENT;
-        clusterOptions.radius = ::round(scale * options->clusterRadius);
+        clusterOptions.radius = static_cast<uint16_t>(::round(scale * options->clusterRadius));
         auto feature = std::make_shared<Feature>();
         clusterOptions.map = [feature, options](const PropertyMap& properties) -> PropertyMap {
             PropertyMap ret{};
@@ -114,7 +123,7 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
     mapbox::geojsonvt::Options vtOptions;
     vtOptions.maxZoom = options->maxzoom;
     vtOptions.extent = util::EXTENT;
-    vtOptions.buffer = ::round(scale * options->buffer);
+    vtOptions.buffer = static_cast<uint16_t>(::round(scale * options->buffer));
     vtOptions.tolerance = scale * options->tolerance;
     vtOptions.lineMetrics = options->lineMetrics;
     if (!scheduler) scheduler = Scheduler::GetSequenced();

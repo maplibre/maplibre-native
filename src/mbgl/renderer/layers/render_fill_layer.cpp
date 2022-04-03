@@ -103,7 +103,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                     },
                     paintPropertyBinders,
                     evaluated,
-                    parameters.state.getZoom()
+                    static_cast<float>(parameters.state.getZoom())
                 );
                 const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
                     *bucket.vertexBuffer,
@@ -196,7 +196,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                     ),
                     paintPropertyBinders,
                     evaluated,
-                    parameters.state.getZoom()
+                    static_cast<float>(parameters.state.getZoom())
                 );
                 const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
                     *bucket.vertexBuffer,
@@ -254,7 +254,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
             queryGeometry,
             evaluated.get<style::FillTranslate>(),
             evaluated.get<style::FillTranslateAnchor>(),
-            transformState.getBearing(),
+            static_cast<float>(transformState.getBearing()),
             pixelsToTileUnits);
 
     return util::polygonIntersectsMultiPolygon(translatedQueryGeometry.value_or(queryGeometry), feature.getGeometries());

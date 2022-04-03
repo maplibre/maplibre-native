@@ -282,7 +282,7 @@ canonicalizeTileURL(const TileServerOptions& tileServerOptions, const std::strin
     result.append(str, path.directory.first + versionPrefixLen, path.directory.second - versionPrefixLen);
     result.append(str, path.filename.first, path.filename.second);
     if (type == style::SourceType::Raster || type == style::SourceType::RasterDEM) {
-        result += tileSize == util::tileSize ? "@2x" : "{ratio}";
+        result += tileSize == util::tileSize_I ? "@2x" : "{ratio}";
     }
     result.append(str, path.extension.first, path.extension.second);
 

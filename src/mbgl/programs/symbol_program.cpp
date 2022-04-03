@@ -49,7 +49,7 @@ Values makeValues(const bool isText,
     std::array<float, 2> extrudeScale;
 
     if (values.pitchAlignment == AlignmentType::Map) {
-        extrudeScale.fill(tile.id.pixelsToTileUnits(1, state.getZoom()));
+        extrudeScale.fill(tile.id.pixelsToTileUnits(1.f, static_cast<float>(state.getZoom())));
     } else {
         extrudeScale = {{
             pixelsToGLUnits[0] * state.getCameraToCenterDistance(),
@@ -57,7 +57,7 @@ Values makeValues(const bool isText,
         }};
     }
 
-    const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0, state.getZoom());
+    const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.f, static_cast<float>(state.getZoom()));
     const bool pitchWithMap = values.pitchAlignment == style::AlignmentType::Map;
     const bool rotateWithMap = values.rotationAlignment == style::AlignmentType::Map;
 
@@ -137,8 +137,8 @@ SymbolSDFProgram<Name, PaintProperties>::layoutUniformValues(const bool isText,
                                                        const float symbolFadeChange,
                                                        const SymbolSDFPart part) {
     const float gammaScale = (values.pitchAlignment == AlignmentType::Map
-                              ? std::cos(state.getPitch()) * state.getCameraToCenterDistance()
-                              : 1.0);
+                              ? static_cast<float>(std::cos(state.getPitch())) * state.getCameraToCenterDistance()
+                              : 1.0f);
 
     return makeValues<SymbolSDFProgram<Name, PaintProperties>::LayoutUniformValues>(
         isText,

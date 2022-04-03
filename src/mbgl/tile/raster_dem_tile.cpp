@@ -87,7 +87,7 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
     int32_t dx = static_cast<int32_t>(borderTile.id.canonical.x) - static_cast<int32_t>(id.canonical.x);
     const auto dy =
         static_cast<int8_t>(static_cast<int32_t>(borderTile.id.canonical.y) - static_cast<int32_t>(id.canonical.y));
-    const uint32_t dim = pow(2, id.canonical.z);
+    const auto dim = static_cast<uint32_t>(pow(2, id.canonical.z));
     if (dx == 0 && dy == 0) return;
     if (std::abs(dy) > 1) return;
     // neighbor is in another world wrap

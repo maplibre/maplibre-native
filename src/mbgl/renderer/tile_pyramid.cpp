@@ -82,7 +82,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         return;
     }
 
-    handleWrapJump(parameters.transformState.getLatLng().longitude());
+    handleWrapJump(static_cast<float>(parameters.transformState.getLatLng().longitude()));
 
     const auto type = sourceImpl.type;
     // Determine the overzooming/underzooming amounts and required tiles.
@@ -213,10 +213,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     }
 
     if (type != SourceType::Annotations) {
-        size_t conservativeCacheSize =
-            std::max(static_cast<float>(parameters.transformState.getSize().width) / tileSize, 1.0f) *
-            std::max(static_cast<float>(parameters.transformState.getSize().height) / tileSize, 1.0f) *
-            (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5;
+        auto conservativeCacheSize = static_cast<size_t>(
+            std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
+            std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
+            (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5
+        );
         cache.setSize(conservativeCacheSize);
     }
 
@@ -280,8 +281,8 @@ void TilePyramid::handleWrapJump(float lng) {
     // This enables us to reuse the tiles at more ideal locations and prevent flickering.
 
     const float lngDifference = lng - prevLng;
-    const float worldDifference = lngDifference / 360;
-    const int wrapDelta = std::round(worldDifference);
+    const float worldDifference = lngDifference / 360.f;
+    const auto wrapDelta = static_cast<int16_t>(std::round(worldDifference));
     prevLng = lng;
 
     if (wrapDelta) {
@@ -334,8 +335,8 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         const UnwrappedTileID& id = entry.first;
         Tile& tile = entry.second;
 
-        const float scale = transformState.getScale() / (1 << id.canonical.z); // equivalent to std::pow(2, transformState.getZoom() - id.canonical.z);
-        auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize / scale;
+        const auto scale = static_cast<float>(transformState.getScale() / (1 << id.canonical.z)); // equivalent to std::pow(2, transformState.getZoom() - id.canonical.z);
+        auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize_D / scale;
 
         GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(id, box.min);
         if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT || tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {

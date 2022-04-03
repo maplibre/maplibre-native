@@ -248,7 +248,7 @@ inline OverscaledTileID UnwrappedTileID::overscaleTo(const uint8_t overscaledZ) 
 }
 
 inline float UnwrappedTileID::pixelsToTileUnits(const float pixelValue, const float zoom) const {
-    return pixelValue * (static_cast<float>(util::EXTENT) / (static_cast<float>(util::tileSize) * std::pow(2.f, zoom - canonical.z)));
+    return pixelValue * (static_cast<float>(util::EXTENT) / (static_cast<float>(util::tileSize_D) * std::pow(2.f, zoom - canonical.z)));
 }
 
 } // namespace mbgl

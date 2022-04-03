@@ -26,7 +26,7 @@ Values makeValues(const style::LinePaintProperties::PossiblyEvaluated& propertie
                                   properties.get<LineTranslateAnchor>(),
                                   state)
         ),
-        uniforms::ratio::Value( 1.0f / tile.id.pixelsToTileUnits(1.0, state.getZoom()) ),
+        uniforms::ratio::Value( 1.0f / tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom())) ),
         uniforms::units_to_pixels::Value({ {1.0f / pixelsToGLUnits[0], 1.0f / pixelsToGLUnits[1]} }),
         uniforms::device_pixel_ratio::Value( pixelRatio ),
         std::forward<Args>(args)...

@@ -111,8 +111,8 @@ namespace mbgl {
     }
 
     bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
-        const float x = anchorPos[0] / anchorPos[3];
-        const float y = anchorPos[1] / anchorPos[3];
+        const double x = anchorPos[0] / anchorPos[3];
+        const double y = anchorPos[1] / anchorPos[3];
         const bool inPaddedViewport = (
                 x >= -clippingBuffer[0] &&
                 x <= clippingBuffer[0] &&
@@ -366,11 +366,11 @@ namespace mbgl {
 			const mat4& posMatrix, bool pitchWithMap, bool rotateWithMap, bool keepUpright,
             const RenderTile& tile, const SymbolSizeBinder& sizeBinder, const TransformState& state) {
 
-        const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(state.getZoom());
+        const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
         const std::array<double, 2> clippingBuffer = {{ 256.0 / state.getSize().width * 2.0 + 1.0, 256.0 / state.getSize().height * 2.0 + 1.0 }};
 
-        const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1, state.getZoom());
+        const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
 
         const mat4 labelPlaneMatrix = getLabelPlaneMatrix(posMatrix, pitchWithMap,
                 rotateWithMap, state, pixelsToTileUnits);
@@ -401,8 +401,8 @@ namespace mbgl {
                 continue;
             }
 
-            const float cameraToAnchorDistance = anchorPos[3];
-            const float perspectiveRatio = 0.5 + 0.5 * (cameraToAnchorDistance / state.getCameraToCenterDistance());
+            const auto cameraToAnchorDistance = static_cast<float>(anchorPos[3]);
+            const float perspectiveRatio = 0.5f + 0.5f * (cameraToAnchorDistance / state.getCameraToCenterDistance());
 
             const float fontSize = evaluateSizeForFeature(partiallyEvaluatedSize, placedSymbol);
             const float pitchScaledFontSize = pitchWithMap ?

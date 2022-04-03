@@ -12,7 +12,7 @@ namespace {
 
 double lat_(const uint8_t z, const int64_t y) {
     const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
-    return util::RAD2DEG * std::atan(0.5 * (std::exp(n) - std::exp(-n)));
+    return util::RAD2DEG_D * std::atan(0.5 * (std::exp(n) - std::exp(-n)));
 }
 
 double lon_(const uint8_t z, const int64_t x) {

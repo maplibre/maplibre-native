@@ -16,10 +16,10 @@ EvaluationResult Length::evaluate(const EvaluationContext& params) const {
     if (!value) return value;
     return value->match(
         [] (const std::string& s) {
-            return EvaluationResult { double(s.size()) };
+            return EvaluationResult { static_cast<double>(s.size()) };
         },
         [] (const std::vector<Value>& v) {
-            return EvaluationResult { double(v.size()) };
+            return EvaluationResult { static_cast<double>(v.size()) };
         },
         [&] (const auto&) -> EvaluationResult {
             return EvaluationError { "Expected value to be of type string or array, but found " + toString(typeOf(*value)) + " instead." };

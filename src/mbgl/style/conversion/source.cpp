@@ -43,7 +43,7 @@ static optional<std::unique_ptr<Source>> convertRasterSource(const std::string& 
         return nullopt;
     }
 
-    uint16_t tileSize = util::tileSize;
+    uint16_t tileSize = util::tileSize_I;
     auto tileSizeValue = objectMember(value, "tileSize");
     if (tileSizeValue) {
         optional<float> size = toNumber(*tileSizeValue);
@@ -51,7 +51,7 @@ static optional<std::unique_ptr<Source>> convertRasterSource(const std::string& 
             error.message = "invalid tileSize";
             return nullopt;
         }
-        tileSize = *size;
+        tileSize = static_cast<uint16_t>(*size);
     }
 
     return { std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize) };
@@ -65,7 +65,7 @@ static optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::strin
         return nullopt;
     }
 
-    uint16_t tileSize = util::tileSize;
+    uint16_t tileSize = util::tileSize_I;
     auto tileSizeValue = objectMember(value, "tileSize");
     if (tileSizeValue) {
         optional<float> size = toNumber(*tileSizeValue);
@@ -73,7 +73,7 @@ static optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::strin
             error.message = "invalid tileSize";
             return nullopt;
         }
-        tileSize = *size;
+        tileSize = static_cast<uint16_t>(*size);
     }
 
     return { std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize) };

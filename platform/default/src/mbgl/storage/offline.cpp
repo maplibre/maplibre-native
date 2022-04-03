@@ -80,7 +80,7 @@ OfflineRegionDefinition decodeOfflineRegionDefinition(const std::string& region)
     std::string styleURL { doc["style_url"].GetString(), doc["style_url"].GetStringLength() };
     double minZoom = doc["min_zoom"].GetDouble();
     double maxZoom = doc.HasMember("max_zoom") ? doc["max_zoom"].GetDouble() : INFINITY;
-    float pixelRatio = doc["pixel_ratio"].GetDouble();
+    auto pixelRatio = static_cast<float>(doc["pixel_ratio"].GetDouble());
     bool includeIdeographs = doc.HasMember("include_ideographs") ? doc["include_ideographs"].GetBool() : true;
     
     if (doc.HasMember("bounds")) {

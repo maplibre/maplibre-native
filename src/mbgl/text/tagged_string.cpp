@@ -16,7 +16,7 @@ void TaggedString::addTextSection(const std::u16string& sectionText,
                                   optional<Color> textColor) {
     styledText.first += sectionText;
     sections.emplace_back(scale, fontStack, std::move(textColor));
-    styledText.second.resize(styledText.first.size(), sections.size() - 1);
+    styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
     supportsVerticalWritingMode = nullopt;
 }
 

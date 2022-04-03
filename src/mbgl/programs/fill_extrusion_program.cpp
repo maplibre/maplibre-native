@@ -55,8 +55,8 @@ FillExtrusionPatternProgram::layoutUniformValues(mat4 matrix,
                                            const EvaluatedLight& light,
                                            const float verticalGradient) {
     const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
-    int32_t tileSizeAtNearestZoom = util::tileSize * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z);
-    int32_t pixelX = tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z));
+    int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
+    int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
     int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
 
     return {
@@ -65,8 +65,8 @@ FillExtrusionPatternProgram::layoutUniformValues(mat4 matrix,
         uniforms::scale::Value( {{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale}} ),
         uniforms::texsize::Value( atlasSize ),
         uniforms::fade::Value( crossfade.t ),
-        uniforms::pixel_coord_upper::Value( std::array<float, 2>{{ float(pixelX >> 16), float(pixelY >> 16) }} ),
-        uniforms::pixel_coord_lower::Value( std::array<float, 2>{{ float(pixelX & 0xFFFF), float(pixelY & 0xFFFF) }} ),
+        uniforms::pixel_coord_upper::Value( std::array<float, 2>{{ static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16) }} ),
+        uniforms::pixel_coord_lower::Value( std::array<float, 2>{{ static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF) }} ),
         uniforms::height_factor::Value( heightFactor ),
         uniforms::lightcolor::Value( lightColor(light) ),
         uniforms::lightpos::Value( lightPosition(light, state) ),
