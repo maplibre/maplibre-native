@@ -4,7 +4,17 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 #include <mapbox/pixelmatch.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 namespace mbgl {
 namespace test {
@@ -39,14 +49,14 @@ void checkImage(const std::string& base,
 
     ASSERT_EQ(expected.size, actual.size);
 
-    double pixels = mapbox::pixelmatch(actual.data.get(),
-                                       expected.data.get(),
-                                       expected.size.width,
-                                       expected.size.height,
-                                       diff.data.get(),
-                                       pixelThreshold);
+    uint64_t pixels = mapbox::pixelmatch(actual.data.get(),
+                                         expected.data.get(),
+                                         expected.size.width,
+                                         expected.size.height,
+                                         diff.data.get(),
+                                         pixelThreshold);
 
-    EXPECT_LE(pixels / (expected.size.width * expected.size.height), imageThreshold);
+    EXPECT_LE(static_cast<double>(pixels) / (expected.size.width * expected.size.height), imageThreshold);
 
 #if !TEST_READ_ONLY
     util::write_file(base + "/diff.png", encodePNG(diff));

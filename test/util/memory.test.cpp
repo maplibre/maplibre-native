@@ -175,8 +175,8 @@ TEST(Memory, Footprint) {
 
     double rasterFootprint = (mbgl::test::getCurrentRSS() - rasterInitialRSS) / double(runs);
     
-    RecordProperty("vectorFootprint", vectorFootprint);
-    RecordProperty("rasterFootprint", rasterFootprint);
+    RecordProperty("vectorFootprint", static_cast<int>(vectorFootprint));
+    RecordProperty("rasterFootprint", static_cast<int>(rasterFootprint));
 
     ASSERT_LT(vectorFootprint, 40 * 1024 * 1024) << "\
         mbgl::Map footprint over 65.2MB for vector styles.";

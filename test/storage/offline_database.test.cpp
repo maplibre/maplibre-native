@@ -669,7 +669,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
 namespace {
 std::list<std::tuple<Resource, Response>> generateResources(const std::string& tilePrefix,
                                                             const std::string& stylePrefix) {
-    static const auto responseData = randomString(.5 * 1024 * 1024);
+    static const auto responseData = randomString(512 * 1024);
     Response response;
     response.data = responseData;
     std::list<std::tuple<Resource, Response>> resources;
@@ -694,7 +694,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
 
     {
         Response response;
-        response.data = randomString(.5 * 1024 * 1024);
+        response.data = randomString(512 * 1024);
 
         OfflineDatabase db(filename, fixture::tileServerOptions);
 
@@ -753,7 +753,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
     db.runPackDatabaseAutomatically(false);
 
     Response response;
-    response.data = randomString(.5 * 1024 * 1024);
+    response.data = randomString(512 * 1024);
 
     for (unsigned i = 0; i < 50; ++i) {
         const Resource tile = Resource::tile("maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
@@ -975,7 +975,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
 
     {
         Response response;
-        response.data = randomString(.5 * 1024 * 1024);
+        response.data = randomString(512 * 1024);
 
         OfflineDatabase db(filename, fixture::tileServerOptions);
 

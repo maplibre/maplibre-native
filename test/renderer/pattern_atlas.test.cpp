@@ -47,7 +47,7 @@ TEST(PatternAtlas, Updates) {
     PremultipliedImage imageA({ 16, 12 });
     imageA.fill(255);
 
-    auto added = patternAtlas.addPattern(*makeMutable<style::Image::Impl>("one", std::move(imageA), 1));
+    auto added = patternAtlas.addPattern(*makeMutable<style::Image::Impl>("one", std::move(imageA), 1.0f));
     ASSERT_TRUE(added);
     auto found = patternAtlas.getPattern("one");
     ASSERT_TRUE(found);
@@ -63,7 +63,7 @@ TEST(PatternAtlas, Updates) {
     EXPECT_EQ(1.0f, a.pixelRatio);
     test::checkImage("test/fixtures/image_manager/updates_before", patternAtlas.getAtlasImageForTests());
 
-    auto imageB = makeMutable<style::Image::Impl>("one", PremultipliedImage({ 5, 5 }), 1);
+    auto imageB = makeMutable<style::Image::Impl>("one", PremultipliedImage({ 5, 5 }), 1.0f);
     EXPECT_FALSE(patternAtlas.addPattern(*imageB)); // Already added.
 
     patternAtlas.removePattern("one");

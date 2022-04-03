@@ -20,7 +20,11 @@ namespace {
 
 std::string toAbsoluteURL(const std::string& fileName) {
     char buff[PATH_MAX + 1];
+#ifdef _MSC_VER
+    char* cwd = _getcwd( buff, PATH_MAX + 1 );
+#else
     char* cwd = getcwd( buff, PATH_MAX + 1 );
+#endif
     std::string url = { "file://" + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName };
     assert(url.size() <= PATH_MAX);
     return url;

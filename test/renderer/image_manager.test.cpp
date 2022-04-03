@@ -38,9 +38,9 @@ TEST(ImageManager, AddRemove) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2));
-    imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({ 16, 16 }), 2));
-    imageManager.addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({ 16, 16 }), 2));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({ 16, 16 }), 2.0f));
 
     imageManager.removeImage("one");
     imageManager.removeImage("two");
@@ -54,9 +54,9 @@ TEST(ImageManager, Update) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
     EXPECT_EQ(0, imageManager.updatedImageVersions.size());
-    imageManager.updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2));
+    imageManager.updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
     EXPECT_EQ(1, imageManager.updatedImageVersions.size());
     imageManager.removeImage("one");
     EXPECT_EQ(0, imageManager.updatedImageVersions.size());
@@ -66,12 +66,12 @@ TEST(ImageManager, RemoveReleasesBinPackRect) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1));
+    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1.0f));
     EXPECT_TRUE(imageManager.getImage("big"));
 
     imageManager.removeImage("big");
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1));
+    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1.0f));
     EXPECT_TRUE(imageManager.getImage("big"));
     EXPECT_TRUE(log.empty());
 }
@@ -129,7 +129,7 @@ TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("one", ImageType::Icon);
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
     imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
 
     ASSERT_TRUE(notified);
@@ -252,9 +252,9 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
 
     observer.imageMissing = [&imageManager] (const std::string& id) {
         if (id == "1024px") {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 1024, 1024 }), 1));
+            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 1024, 1024 }), 1.0f));
         } else {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 16, 16 }), 1));
+            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 16, 16 }), 1.0f));
         }
     };
 
@@ -266,7 +266,7 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     };
 
     // Style sprite.
-    imageManager.addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({ 16, 16 }), 1));
+    imageManager.addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({ 16, 16 }), 1.0f));
 
     // Single requestor
     {
