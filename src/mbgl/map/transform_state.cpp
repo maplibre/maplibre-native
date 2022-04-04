@@ -16,11 +16,11 @@ LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wra
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
-const double kEpsilon = 1e-9;
+constexpr double kEpsilon = 1e-9;
 // To avoid flickering issue due to "zoom = 13.9999999..".
 double roundForAccuracy(double x) {
-    double round_x = round(x);
-    double diff = fabs(round_x - x);
+    double round_x = std::round(x);
+    double diff = std::abs(round_x - x);
     if (diff < kEpsilon && diff > 0 ){
         return round_x;
     } else {
