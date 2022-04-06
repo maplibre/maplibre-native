@@ -16,6 +16,17 @@ LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wra
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
+constexpr double kEpsilon = 1e-9;
+// To avoid flickering issue due to "zoom = 13.9999999..".
+double roundForAccuracy(double x) {
+    double round_x = std::round(x);
+    double diff = std::abs(round_x - x);
+    if (diff < kEpsilon && diff > 0 ){
+        return round_x;
+    } else {
+        return x;
+    }
+}
 } // namespace
 
 TransformState::TransformState(ConstrainMode constrainMode_, ViewportMode viewportMode_)
@@ -639,11 +650,11 @@ bool TransformState::isGestureInProgress() const {
 #pragma mark - Projection
 
 double TransformState::zoomScale(double zoom) const {
-    return std::pow(2.0, zoom);
+    return roundForAccuracy(std::pow(2.0, zoom));
 }
 
 double TransformState::scaleZoom(double s) const {
-    return util::log2(s);
+    return roundForAccuracy(util::log2(s));
 }
 
 ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng) const {
