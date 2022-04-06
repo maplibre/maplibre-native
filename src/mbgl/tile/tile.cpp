@@ -27,15 +27,16 @@ void Tile::setTriedCache() {
 void Tile::dumpDebugLogs() const {
     std::string kindString;
     switch (kind) {
-    case Kind::Geometry: kindString = "Geometry"; break;
-    case Kind::Raster: kindString = "Raster"; break;
-    case Kind::RasterDEM: kindString = "RasterDEM"; break;
-    default: kindString = "Unknown"; break;
+      case Kind::Geometry: kindString = "Geometry"; break;
+      case Kind::Raster: kindString = "Raster"; break;
+      case Kind::RasterDEM: kindString = "RasterDEM"; break;
+      default: kindString = "Unknown"; break;
     }
     Log::Info(Event::General, "Tile::Kind: %s", kindString.c_str());
     Log::Info(Event::General, "Tile::id: %s", util::toString(id).c_str());
     Log::Info(Event::General, "Tile::renderable: %s", isRenderable() ? "yes" : "no");
     Log::Info(Event::General, "Tile::complete: %s", isComplete() ? "yes" : "no");
+    Log::Info(Event::General, "Tile::loaded: %s", isLoaded() ? "yes" : "no");
 }
 
 void Tile::queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>&, const GeometryCoordinates&,

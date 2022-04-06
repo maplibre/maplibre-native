@@ -179,7 +179,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         // This guarantees that we have at least one function per tile called.
         // When only rendering layers via the stylesheet, it's possible that we don't
         // ever visit a tile during rendering.
-        for (const RenderItem& renderItem : sourceRenderItems) {           
+        for (const RenderItem& renderItem : sourceRenderItems) {
             renderItem.render(parameters);
         }
     }

@@ -415,6 +415,11 @@
 		CAFB3C15234505D500399265 /* MGLMapSnapshotter_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFB3C13234505D500399265 /* MGLMapSnapshotter_Private.h */; };
 		CF75A91522D85E860058A5C4 /* MGLLoggingConfiguration.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF75A91422D85E860058A5C4 /* MGLLoggingConfiguration.mm */; };
 		CF75A91622D85E860058A5C4 /* MGLLoggingConfiguration.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF75A91422D85E860058A5C4 /* MGLLoggingConfiguration.mm */; };
+		D42DE1E4275F7FEB00B4446E /* MGLMapProjection.h in Headers */ = {isa = PBXBuildFile; fileRef = D42DE1E2275F7FEB00B4446E /* MGLMapProjection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D42DE1E5275F7FEB00B4446E /* MGLMapProjection.h in Headers */ = {isa = PBXBuildFile; fileRef = D42DE1E2275F7FEB00B4446E /* MGLMapProjection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D42DE1E6275F7FEB00B4446E /* MGLMapProjection.mm in Sources */ = {isa = PBXBuildFile; fileRef = D42DE1E3275F7FEB00B4446E /* MGLMapProjection.mm */; };
+		D42DE1E7275F7FEB00B4446E /* MGLMapProjection.mm in Sources */ = {isa = PBXBuildFile; fileRef = D42DE1E3275F7FEB00B4446E /* MGLMapProjection.mm */; };
+		D4D7412E2760EEBA00102513 /* MGLMapProjectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D4D7412D2760EEBA00102513 /* MGLMapProjectionTests.m */; };
 		D717FE7A25F1955A0054E06E /* iosapp_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D717FE7925F1955A0054E06E /* iosapp_UITests.swift */; };
 		D717FECB25F19F520054E06E /* XCTestCase+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D717FECA25F19F520054E06E /* XCTestCase+Extensions.swift */; };
 		D7E7CE8825F2EF6A00C175FC /* bench_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E7CE8725F2EF6A00C175FC /* bench_UITests.swift */; };
@@ -1069,6 +1074,9 @@
 		CAE7AD5420F46EF5003B6782 /* MGLMapSnapshotterSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MGLMapSnapshotterSwiftTests.swift; sourceTree = "<group>"; };
 		CAFB3C13234505D500399265 /* MGLMapSnapshotter_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLMapSnapshotter_Private.h; sourceTree = "<group>"; };
 		CF75A91422D85E860058A5C4 /* MGLLoggingConfiguration.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLLoggingConfiguration.mm; sourceTree = "<group>"; };
+		D42DE1E2275F7FEB00B4446E /* MGLMapProjection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MGLMapProjection.h; sourceTree = "<group>"; };
+		D42DE1E3275F7FEB00B4446E /* MGLMapProjection.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLMapProjection.mm; sourceTree = "<group>"; };
+		D4D7412D2760EEBA00102513 /* MGLMapProjectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MGLMapProjectionTests.m; path = ../../darwin/test/MGLMapProjectionTests.m; sourceTree = "<group>"; };
 		D717FE7725F1955A0054E06E /* iosapp UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "iosapp UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D717FE7925F1955A0054E06E /* iosapp_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosapp_UITests.swift; sourceTree = "<group>"; };
 		D717FE7B25F1955A0054E06E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1903,6 +1911,7 @@
 				96381C0122C6F3950053497D /* MGLMapViewPitchTests.m */,
 				9658C154204761FC00D8A674 /* MGLMapViewScaleBarTests.m */,
 				076171C22139C70900668A35 /* MGLMapViewTests.m */,
+				D4D7412D2760EEBA00102513 /* MGLMapProjectionTests.m */,
 				9686D1BC22D9357700194EA0 /* MGLMapViewZoomTests.mm */,
 				1F95931C1E6DE2E900D5B294 /* MGLNSDateAdditionsTests.mm */,
 				96036A0520059BBA00510F3D /* MGLNSOrthographyAdditionsTests.m */,
@@ -2016,6 +2025,8 @@
 				DA737EE01D056A4E005BDA16 /* MGLMapViewDelegate.h */,
 				4BC5769125E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.h */,
 				4BC5769225E3D3D6006E06EB /* MGLUserLocationAnnotationViewStyle.m */,
+				D42DE1E2275F7FEB00B4446E /* MGLMapProjection.h */,
+				D42DE1E3275F7FEB00B4446E /* MGLMapProjection.mm */,
 			);
 			name = Kit;
 			path = src;
@@ -2358,6 +2369,7 @@
 				DA17BE301CC4BAC300402C41 /* MGLMapView_Private.h in Headers */,
 				DAD165781CF4CDFF001FF4B9 /* MGLShapeCollection.h in Headers */,
 				DAED38631D62D0FC00D7640F /* NSURL+MGLAdditions.h in Headers */,
+				D42DE1E4275F7FEB00B4446E /* MGLMapProjection.h in Headers */,
 				DA88481E1CBAFA6200AB86E3 /* MGLMultiPoint_Private.h in Headers */,
 				3566C7661D4A77BA008152BC /* MGLShapeSource.h in Headers */,
 				35CE61821D4165D9004F2359 /* UIColor+MGLAdditions.h in Headers */,
@@ -2519,6 +2531,7 @@
 				DABFB8681CBE99E500D62B32 /* MGLPolyline.h in Headers */,
 				96E516DF200054FB00A02306 /* MGLShape_Private.h in Headers */,
 				DABFB86F1CBE9A0F00D62B32 /* MGLMapView.h in Headers */,
+				D42DE1E5275F7FEB00B4446E /* MGLMapProjection.h in Headers */,
 				DA6408DC1DA4E7D300908C90 /* MGLVectorStyleLayer.h in Headers */,
 				353933F31D3FB753003F57D7 /* MGLCircleStyleLayer.h in Headers */,
 				558DE7A11E5615E400C7916D /* MGLFoundation_Private.h in Headers */,
@@ -3160,6 +3173,7 @@
 				DA0CD5901CF56F6A00A5F5A5 /* MGLFeatureTests.mm in Sources */,
 				556660D81E1D085500E2C41B /* MGLVersionNumber.m in Sources */,
 				4031ACFF1E9FD29F00A3EA26 /* MGLSDKTestHelpers.swift in Sources */,
+				D4D7412E2760EEBA00102513 /* MGLMapProjectionTests.m in Sources */,
 				16376B491FFEED010000563E /* MGLMapViewLayoutTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3189,6 +3203,7 @@
 				967C864D210A9D3C004DF794 /* UIDevice+MGLAdditions.m in Sources */,
 				400533021DB0862B0069F638 /* NSArray+MGLAdditions.mm in Sources */,
 				6F018BAE220031B8003E7269 /* UIView+MGLAdditions.m in Sources */,
+				D42DE1E6275F7FEB00B4446E /* MGLMapProjection.mm in Sources */,
 				96036A03200565C700510F3D /* NSOrthography+MGLAdditions.m in Sources */,
 				35136D421D42274500C20EFD /* MGLRasterStyleLayer.mm in Sources */,
 				3538AA1F1D542239008EC33D /* MGLForegroundStyleLayer.mm in Sources */,
@@ -3288,6 +3303,7 @@
 				35136D431D42274500C20EFD /* MGLRasterStyleLayer.mm in Sources */,
 				967C864E210A9D3C004DF794 /* UIDevice+MGLAdditions.m in Sources */,
 				96036A04200565C700510F3D /* NSOrthography+MGLAdditions.m in Sources */,
+				D42DE1E7275F7FEB00B4446E /* MGLMapProjection.mm in Sources */,
 				6F018BB1220031C1003E7269 /* UIView+MGLAdditions.m in Sources */,
 				3538AA201D542239008EC33D /* MGLForegroundStyleLayer.mm in Sources */,
 				DA00FC911D5EEB0D009AABC8 /* MGLAttributionInfo.mm in Sources */,

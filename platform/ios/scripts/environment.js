@@ -24,7 +24,7 @@ if (pr) {
 } else {
     const head = process.env['GITHUB_SHA'];
     for (const sha of execSync(`git rev-list --max-count=500 ${head}`).toString().trim().split('\n')) {
-        const base = execSync(`git branch -r --contains ${sha} origin/master origin/release-*`).toString().split('\n')[0].trim().replace(/^origin\//, '');
+        const base = execSync(`git branch -r --contains ${sha} origin/main origin/release-*`).toString().split('\n')[0].trim().replace(/^origin\//, '');
         if (base) {
             const mergeBase = execSync(`git merge-base origin/${base} ${head}`).toString().trim();
             console.log(`export GITHUB_TARGET_BRANCH=${base}`);

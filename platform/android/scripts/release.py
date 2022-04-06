@@ -3,31 +3,31 @@ Utility to schedule SDK builds on CircleCI.
 
 Examples:
 
-- Publish a snapshot from master (release.py uses the current branch)
+- Publish a snapshot from main (release.py uses the current branch)
 
 	$ git branch
-	* master
+	* main
 	  1234-fix-crash
 	$ python release.py --stage snapshot
 
 - Publish a snapshot from a feature branch (same as before, just switch branchs with git):
 
 	$ git branch
-	  master
+	  main
 	* 1234-fix-crash
 	$ python release.py --stage snapshot
 
 - Publish a beta from a pre-release branch:
 
 	$ git branch
-	  master
+	  main
 	* release-android-420-beta1
 	$ python release.py --stage beta --version 4.2.0-beta.1
 
 - Publish a beta from a release branch:
 
 	$ git branch
-	  master
+	  main
 	* release-android-420
 	$ python release.py --stage final --version 4.2.0
 
@@ -97,13 +97,13 @@ def validate_branch(stage):
 	branch = git_get_current_branch()
 	if not branch:
 		abort_with_message('The current folder is not a git repository.')
-	if branch == 'master' and stage != 'snapshot':
+	if branch == 'main' and stage != 'snapshot':
 		abort_with_message('You need to swtich to a release branch for a beta or a final release.')
 	return branch
 
 def validate_version(stage, branch, version):
-	if stage == 'snapshot' and branch == 'master' and version != CURRENT_VERSION_TAG:
-		abort_with_message('You cannot specify a custom version if you are building a snapshot from master.')
+	if stage == 'snapshot' and branch == 'main' and version != CURRENT_VERSION_TAG:
+		abort_with_message('You cannot specify a custom version if you are building a snapshot from main.')
 
 	if not version or version == CURRENT_VERSION_TAG:
 		version = get_current_version(file_path=GRADLE_PROPERTIES_PATH, file_var=GRADLE_TOKEN)
@@ -122,7 +122,7 @@ def validate_version(stage, branch, version):
 
 def publish_snapshot(branch, version):
 	click.echo('Publishing snapshot for branch: %s (version: %s).' % (branch, version))
-	if branch != 'master':
+	if branch != 'main':
 		dirty_gradle = update_current_version(file_path=GRADLE_PROPERTIES_PATH, file_var=GRADLE_TOKEN, version=version)
 		if dirty_gradle:
 			git_add(path=GRADLE_PROPERTIES_PATH)

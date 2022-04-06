@@ -2,8 +2,14 @@ if(TARGET mbgl-vendor-parsedate)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-parsedate STATIC
+if(MBGL_QT_STATIC)
+    add_library(mbgl-vendor-parsedate OBJECT)
+else()
+    add_library(mbgl-vendor-parsedate STATIC)
+endif()
+
+target_sources(
+    mbgl-vendor-parsedate PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/parsedate/parsedate.cpp
 )
 

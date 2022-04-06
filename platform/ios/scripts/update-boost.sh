@@ -23,7 +23,7 @@ popd
 
 echo "If everything works, run:"
 echo ""
-echo "    git -C vendor/boost checkout master"
+echo "    git -C vendor/boost checkout main"
 echo "    git -C vendor/boost commit -m \"update boost to ${VERSION/_/.}\""
 echo "    git -C vendor/boost push"
 echo "    git add vendor/boost"

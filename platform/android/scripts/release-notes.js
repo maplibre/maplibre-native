@@ -54,7 +54,7 @@ const bestReleaseNotesForCurrentVersion = semver.minSatisfying(versionsInRelease
 const currentReleaseNotes = _.find(releaseNotes, { version: bestReleaseNotesForCurrentVersion });
 
 if (!currentReleaseNotes) {
-    console.error('Could not find a release section satisfying %s in %s — did you forget to rename the "master" section to %s?', currentVersion, changelogPath, currentVersion.split("-")[0]);
+    console.error('Could not find a release section satisfying %s in %s — did you forget to rename the "main" section to %s?', currentVersion, changelogPath, currentVersion.split("-")[0]);
     process.exit(1);
 }
 

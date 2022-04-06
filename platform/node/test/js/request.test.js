@@ -4,7 +4,7 @@ var mockfs = require('../mockfs');
 var mbgl = require('../../index');
 var test = require('tape');
 
-[ 'sprite_png', 'sprite_json', 'source_vector', 'glyph' ].forEach(function (resource) {
+[ 'sprite_png', 'sprite_json', 'source_vector' ].forEach(function (resource) {
     test(`render reports an error when the request function responds with an error (${resource})`, function(t) {
         var map = new mbgl.Map({
             request: function(req, callback) {
@@ -144,7 +144,12 @@ test(`render does not report an error from rendering a previous style`, function
     var map = new mbgl.Map({
         request: function(req, callback) {
             var data = mockfs.dataForRequest(req);
-            if (mockfs.source_vector === data) {
+            if (
+              mockfs.source_vector === data &&
+              // By default tiles load sources/v3 as well, which is vector tile,
+              // messing things up.
+              req.url !== 'maptiler://sources/v3'
+            ) {
                 callback(new Error('message'));
             } else {
                 callback(null, { data: data });

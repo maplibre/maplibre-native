@@ -36,6 +36,7 @@ FOUNDATION_EXPORT MGL_EXPORT const unsigned char MapboxVersionString[];
 #import "MGLLocationManager.h"
 #import "MGLLoggingConfiguration.h"
 #import "MGLMapCamera.h"
+#import "MGLMapProjection.h"
 #import "MGLMapSnapshotter.h"
 #import "MGLMapView.h"
 #import "MGLMapViewDelegate.h"

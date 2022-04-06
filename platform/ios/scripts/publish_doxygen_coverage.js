@@ -67,7 +67,7 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
             }
         })];
 
-        if (process.env['CIRCLE_BRANCH'] === 'master') {
+        if (process.env['CIRCLE_BRANCH'] === 'main') {
             promises.push(new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify({
                     'created_at': date,

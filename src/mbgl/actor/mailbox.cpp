@@ -23,7 +23,7 @@ void Mailbox::open(Scheduler& scheduler_) {
     if (closed) {
         return;
     }
-    
+
     if (!queue.empty()) {
         auto guard = weakScheduler.lock();
         if (weakScheduler) weakScheduler->schedule(makeClosure(shared_from_this()));
