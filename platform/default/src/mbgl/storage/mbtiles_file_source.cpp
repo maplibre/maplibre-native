@@ -24,8 +24,6 @@
 #endif
 
 namespace {
-//TODO: replace by mbgl::util::MBTILES_PROTOCOL
-const std::string maptilerProtocol = "mbtiles://";
 bool acceptsURL(const std::string& url) {
     return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
 }
@@ -33,9 +31,8 @@ bool acceptsURL(const std::string& url) {
 
 namespace mbgl {
 using namespace rapidjson;
-//using namespace mapbox::sqlite;
 
-class MaptilerFileSource::Impl {
+class MBTilesFileSource::Impl {
 public:
     explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): resourceOptions (options.clone()) {}
 
@@ -65,7 +62,7 @@ public:
     }
 
     std::string url_to_path(const std::string &url) {
-        return mbgl::util::percentDecode(url.substr(maptilerProtocol.size()));
+        return mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::MBTILES_PROTOCOL)));
     }
 
     std::string db_path(const std::string &path) {
@@ -265,19 +262,19 @@ private:
 };
 
 
-MaptilerFileSource::MaptilerFileSource(const ResourceOptions& options) :
+MBTilesFileSource::MBTilesFileSource(const ResourceOptions& options) :
     thread(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MaptilerFileSource", options.clone())) {}
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MBTilesFileSource", options.clone())) {}
 
 
-std::unique_ptr<AsyncRequest> MaptilerFileSource::request(const Resource &resource, FileSource::Callback callback) {
+std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     if (resource.url.find(":///") == std::string::npos) {
         Response response;
         response.noContent = true;
         response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                           "MaptilerFileSource only supports absolute path urls");
+                                                           "MBTilesFileSource only supports absolute path urls");
         req->actor().invoke(&FileSourceRequest::setResponse, response);
 
     } else {
@@ -290,17 +287,17 @@ std::unique_ptr<AsyncRequest> MaptilerFileSource::request(const Resource &resour
     return req;
 }
 
-bool MaptilerFileSource::canRequest(const Resource& resource) const {
+bool MBTilesFileSource::canRequest(const Resource& resource) const {
     return acceptsURL(resource.url);
 }
 
-MaptilerFileSource::~MaptilerFileSource() = default;
+MBTilesFileSource::~MBTilesFileSource() = default;
 
-void MaptilerFileSource::setResourceOptions(ResourceOptions options) {
+void MBTilesFileSource::setResourceOptions(ResourceOptions options) {
     thread->actor().invoke(&Impl::setResourceOptions, options.clone());
 }
 
-ResourceOptions MaptilerFileSource::getResourceOptions() {
+ResourceOptions MBTilesFileSource::getResourceOptions() {
     return thread->actor().ask(&Impl::getResourceOptions).get();
 }
 
