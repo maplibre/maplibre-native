@@ -201,8 +201,6 @@ public:
 
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Connection,
-                                                           "Not found in mbtile database");
 
         for (mapbox::sqlite::Query q(stmt); q.run();) {
 
@@ -212,7 +210,6 @@ public:
                 response.noContent = false;
                 response.expires = Timestamp::max();
                 response.etag = resource.url;
-                response.error.release();
 
                 if (is_compressed(*response.data)) {
                     response.data = std::make_shared<std::string>(util::decompress(*response.data));
