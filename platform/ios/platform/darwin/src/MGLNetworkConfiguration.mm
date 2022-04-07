@@ -122,11 +122,21 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 }
 
 - (void)debugLog:(NSString *)format, ... {
-    MGLLogDebug(format);
+    va_list formatList;
+    va_start(formatList, format);
+    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
+    va_end(formatList);
+
+    MGLLogDebug(formattedMessage);
 }
 
 - (void)errorLog:(NSString *)format, ... {
-    MGLLogError(format);
+    va_list formatList;
+    va_start(formatList, format);
+    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
+    va_end(formatList);
+
+    MGLLogError(formattedMessage);
 }
 
 #pragma mark - Event management
