@@ -53,12 +53,12 @@ bool checkMaxAngle(const GeometryCoordinates& line,
         auto& current = line[index];
         auto& next = line[index + 1];
 
-        float angleDelta = util::angle_to(prev, current) - util::angle_to(current, next);
+        double angleDelta = util::angle_to(prev, current) - util::angle_to(current, next);
         // restrict angle to -pi..pi range
         angleDelta = std::fabs(std::fmod(angleDelta + 3 * M_PI, M_PI * 2) - M_PI);
 
-        recentCorners.emplace(anchorDistance, angleDelta);
-        recentAngleDelta += angleDelta;
+        recentCorners.emplace(anchorDistance, static_cast<float>(angleDelta));
+        recentAngleDelta +=  static_cast<float>(angleDelta);
 
         // remove corners that are far enough away from the list of recent anchors
         while (anchorDistance - recentCorners.front().distance > windowSize) {

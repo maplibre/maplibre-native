@@ -12,8 +12,8 @@ template <class T>
 GridIndex<T>::GridIndex(const float width_, const float height_, const uint32_t cellSize_) :
     width(width_),
     height(height_),
-    xCellCount(std::ceil(width / cellSize_)),
-    yCellCount(std::ceil(height / cellSize_)),
+    xCellCount(static_cast<size_t>(std::ceil(width / cellSize_))),
+    yCellCount(static_cast<size_t>(std::ceil(height / cellSize_))),
     xScale(xCellCount / width),
     yScale(yCellCount / height)
     {
@@ -263,12 +263,12 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool (const 
 
 template <class T>
 std::size_t GridIndex<T>::convertToXCellCoord(const float x) const {
-    return util::max(0.0, util::min(xCellCount - 1.0, std::floor(x * xScale)));
+    return util::max(size_t(0), util::min(xCellCount - 1, static_cast<size_t>(std::floor(x * xScale))));
 }
 
 template <class T>
 std::size_t GridIndex<T>::convertToYCellCoord(const float y) const {
-    return util::max(0.0, util::min(yCellCount - 1.0, std::floor(y * yScale)));
+    return util::max(size_t(0), util::min(yCellCount - 1, static_cast<size_t>(std::floor(y * yScale))));
 }
 
 template <class T>

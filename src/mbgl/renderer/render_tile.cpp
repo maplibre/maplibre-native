@@ -32,8 +32,8 @@ mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
     mat4 vtxMatrix;
 
     const float angle = inViewportPixelUnits ?
-        (anchor == TranslateAnchorType::Map ? state.getBearing() : 0) :
-        (anchor == TranslateAnchorType::Viewport ? -state.getBearing() : 0);
+        (anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f) :
+        (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing()) : 0.0f);
 
     Point<float> translate = util::rotate(Point<float>{ translation[0], translation[1] }, angle);
 
@@ -41,8 +41,8 @@ mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
         matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
     } else {
         matrix::translate(vtxMatrix, tileMatrix,
-                          id.pixelsToTileUnits(translate.x, state.getZoom()),
-                          id.pixelsToTileUnits(translate.y, state.getZoom()),
+                          id.pixelsToTileUnits(translate.x, static_cast<float>(state.getZoom())),
+                          id.pixelsToTileUnits(translate.y, static_cast<float>(state.getZoom())),
                           0);
     }
 
@@ -156,7 +156,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
                                                            uniforms::overlay_scale::Value(1.0f)},
                          paintAttributeData,
                          properties,
-                         parameters.state.getZoom()),
+                         static_cast<float>(parameters.state.getZoom())),
                      allAttributeBindings,
                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
                      "text-outline");
@@ -176,7 +176,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
                                                            uniforms::overlay_scale::Value(1.0f)},
                          paintAttributeData,
                          properties,
-                         parameters.state.getZoom()),
+                         static_cast<float>(parameters.state.getZoom())),
                      allAttributeBindings,
                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
                      "text");
@@ -203,7 +203,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
                                                   uniforms::overlay_scale::Value(1.0f)},
                 paintAttributeData,
                 properties,
-                parameters.state.getZoom()),
+                static_cast<float>(parameters.state.getZoom())),
             DebugProgram::computeAllAttributeBindings(
                 *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
             DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},

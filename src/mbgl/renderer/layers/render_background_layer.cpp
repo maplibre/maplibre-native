@@ -72,7 +72,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
             program.computeAllUniformValues(std::forward<decltype(uniformValues)>(uniformValues),
                                             paintAttributeData,
                                             properties,
-                                            parameters.state.getZoom());
+                                            static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings = program.computeAllAttributeBindings(
             *parameters.staticData.tileVertexBuffer,
             paintAttributeData,

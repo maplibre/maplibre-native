@@ -12,6 +12,11 @@ namespace gl {
 
 using namespace platform;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 UniformLocation uniformLocation(ProgramID id, const char* name) {
     return MBGL_CHECK_ERROR(glGetUniformLocation(id, name));
 }
@@ -91,6 +96,10 @@ template <>
 void bindUniform<std::array<uint16_t, 4>>(UniformLocation location, const std::array<uint16_t, 4>& t) {
     bindUniform(location, util::convert<float>(t));
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 // Add more as needed.
 

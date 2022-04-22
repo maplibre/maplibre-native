@@ -1,5 +1,17 @@
 #include <array>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4267)
+#endif
+
 #include <mapbox/cheap_ruler.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -67,7 +79,7 @@ protected:
 
         vec2(GLfloat x_, GLfloat y_) : x(x_), y(y_) {}
         vec2() = default;
-        explicit vec2(const Point<double>& p) : x(p.x), y(p.y) {}
+        explicit vec2(const Point<double>& p) : x(static_cast<GLfloat>(p.x)), y(static_cast<GLfloat>(p.y)) {}
         vec2(const vec2& o) = default;
         vec2(vec2&& o) = default;
         vec2& operator=(vec2&& o) = default;
@@ -84,15 +96,15 @@ protected:
         }
         float dot(const vec2& v2) const { return x * v2.x + y * v2.y; }
         vec2 rotated(float degrees) const {
-            const float cs = std::cos(degrees * util::DEG2RAD);
-            const float sn = std::sin(degrees * util::DEG2RAD);
+            const float cs = std::cos(degrees * util::DEG2RAD_F);
+            const float sn = std::sin(degrees * util::DEG2RAD_F);
             return vec2{x * cs + y * sn, x * sn + y * cs}.normalized();
         }
         float bearing() const {
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::wrap<float>(M_PI_2 - std::atan2(-norm.y, norm.x), 0, M_PI * 2.0) * util::RAD2DEG;
+            return util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) * util::RAD2DEG_F;
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -473,14 +485,14 @@ protected:
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
-        const float bearingStep = 360.0f / float(numVtxCircumference - 1); // first and last points are the same
+        const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
 
-        double mapBearing = util::wrap(util::RAD2DEG * params.bearing, 0.0, util::DEGREES_MAX);
+        const auto mapBearing = static_cast<float>(util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
         for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
-            const float bearing_ = float(i - 1) * bearingStep - mapBearing;
+            const float bearing_ = static_cast<float>(i - 1) * bearingStep - mapBearing;
             Point<double> poc = ruler.destination(centerPoint, params.errorRadiusMeters, bearing_);
             circle[i] = vec2(project(LatLng(poc.y, poc.x), s) - center);
         }
@@ -556,10 +568,10 @@ protected:
         // levels, so the extent has to be produced in mercator space
         const double tilt = s.getPitch();
 
-        // Point<double> verticalShiftAtCenter { float(std::sin(util::DEG2RAD * util::wrap<float>(-t.getBearing() *
+        // Point<double> verticalShiftAtCenter { float(std::sin(util::DEG2RAD_D * util::wrap<float>(-t.getBearing() *
         // util::RAD2DEG, 0.0f, 360.0f) )),
-        //                                      -float(std::cos(util::DEG2RAD * util::wrap<float>(-t.getBearing() *
-        //                                      util::RAD2DEG, 0.0f, 360.0f))) };
+        //                                      -float(std::cos(util::DEG2RAD_D * util::wrap<float>(-t.getBearing() *
+        //                                      util::RAD2DEG_D, 0.0f, 360.0f))) };
         // would be correct only in the vertical center of the map. As soon as position goes away from that line,
         // the shift direction is skewed by the perspective projection.
         // So the way to have a shift aligned to the screen vertical axis is to find this direction in screen space, and
@@ -584,10 +596,10 @@ protected:
                                  params.puckHatScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
 
         for (unsigned long i = 0; i < 4; ++i) {
-            const auto b = util::wrap<float>(params.puckBearing + bearings[i], 0.0f, 360.0f);
+            const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{float(std::sin(util::DEG2RAD * b)),
-                                                -float(std::cos(util::DEG2RAD * b))};
+            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b),
+                                                -std::cos(util::DEG2RAD_D * b)};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
@@ -806,7 +818,7 @@ void RenderLocationIndicatorLayer::prepare(const LayerPrepareParameters& p) {
     renderImpl->parameters.latitude = state.getLatLng().latitude();
     renderImpl->parameters.longitude = state.getLatLng().longitude();
     renderImpl->parameters.zoom = state.getZoom();
-    renderImpl->parameters.bearing = -state.getBearing() * util::RAD2DEG;
+    renderImpl->parameters.bearing = -state.getBearing() * util::RAD2DEG_D;
     renderImpl->parameters.pitch = state.getPitch();
     mat4 projMatrix;
     state.getProjMatrix(projMatrix);

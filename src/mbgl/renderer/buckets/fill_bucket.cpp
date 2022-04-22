@@ -5,7 +5,16 @@
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/util/math.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 #include <mapbox/earcut.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <cassert>
 

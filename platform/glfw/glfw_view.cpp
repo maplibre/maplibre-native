@@ -26,9 +26,19 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4267)
+#endif
+
 #include <mapbox/cheap_ruler.hpp>
 #include <mapbox/geometry.hpp>
 #include <mapbox/geojson.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #if MBGL_USE_GLES2
 #define GLFW_INCLUDE_ES2
@@ -294,11 +304,11 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             view->nextOrientation();
             break;
         case GLFW_KEY_Q: {
-            auto result = view->rendererFrontend->getRenderer()->queryPointAnnotations({ {}, { double(view->getSize().width), double(view->getSize().height) } });
+            auto result = view->rendererFrontend->getRenderer()->queryPointAnnotations({ {}, { static_cast<double>(view->getSize().width), static_cast<double>(view->getSize().height) } });
             printf("visible point annotations: %lu\n", result.size());
             auto features = view->rendererFrontend->getRenderer()->queryRenderedFeatures(
-                mbgl::ScreenBox{{double(view->getSize().width * 0.5), double(view->getSize().height * 0.5)},
-                                {double(view->getSize().width * 0.5 + 1), double(view->getSize().height * 0.5 + 1)}},
+                mbgl::ScreenBox{{view->getSize().width * 0.5, view->getSize().height * 0.5},
+                                {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
                 {});
             printf("Rendered features at the center of the screen: %lu\n", features.size());
         } break;
@@ -470,8 +480,8 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
         } break;
         case GLFW_KEY_U: {
             auto bounds = view->map->getBounds();
-            if (bounds.minPitch == mbgl::util::PITCH_MIN * mbgl::util::RAD2DEG &&
-                bounds.maxPitch == mbgl::util::PITCH_MAX * mbgl::util::RAD2DEG) {
+            if (bounds.minPitch == mbgl::util::PITCH_MIN * mbgl::util::RAD2DEG_D &&
+                bounds.maxPitch == mbgl::util::PITCH_MAX * mbgl::util::RAD2DEG_D) {
                 mbgl::Log::Info(mbgl::Event::General, "Limiting pitch bounds to [30, 40] degrees");
                 view->map->setBounds(mbgl::BoundOptions().withMinPitch(30).withMaxPitch(40));
             } else {
@@ -562,24 +572,24 @@ void GLFWView::updateFreeCameraDemo() {
 }
 
 mbgl::Color GLFWView::makeRandomColor() const {
-    const float r = 1.0f * float(std::rand()) / float(RAND_MAX);
-    const float g = 1.0f * float(std::rand()) / float(RAND_MAX);
-    const float b = 1.0f * float(std::rand()) / float(RAND_MAX);
+    const auto r = static_cast<float>(std::rand()) / RAND_MAX;
+    const auto g = static_cast<float>(std::rand()) / RAND_MAX;
+    const auto b = static_cast<float>(std::rand()) / RAND_MAX;
     return { r, g, b, 1.0f };
 }
 
 mbgl::Point<double> GLFWView::makeRandomPoint() const {
-    const double x = width * double(std::rand()) / RAND_MAX;
-    const double y = height * double(std::rand()) / RAND_MAX;
+    const double x = width * static_cast<double>(std::rand()) / RAND_MAX;
+    const double y = height * static_cast<double>(std::rand()) / RAND_MAX;
     mbgl::LatLng latLng = map->latLngForPixel({ x, y });
     return { latLng.longitude(), latLng.latitude() };
 }
 
 std::unique_ptr<mbgl::style::Image>
 GLFWView::makeImage(const std::string& id, int width, int height, float pixelRatio) {
-    const int r = 255 * (double(std::rand()) / RAND_MAX);
-    const int g = 255 * (double(std::rand()) / RAND_MAX);
-    const int b = 255 * (double(std::rand()) / RAND_MAX);
+    const int r = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
+    const int g = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
+    const int b = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
 
     const int w = std::ceil(pixelRatio * width);
     const int h = std::ceil(pixelRatio * height);
@@ -1100,7 +1110,7 @@ void GLFWView::onWillStartRenderingFrame() {
     puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
     if (puck) {
         uint64_t ns = mbgl::Clock::now().time_since_epoch().count();
-        const double bearing = double(ns % 2000000000) / 2000000000.0 * 360.0;
+        const double bearing = static_cast<double>(ns % 2000000000) / 2000000000.0 * 360.0;
         puck->setBearing(mbgl::style::Rotation(bearing));
     }
 #endif

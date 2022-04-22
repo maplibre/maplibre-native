@@ -68,7 +68,7 @@ TEST(Transform, InvalidBearing) {
     ASSERT_DOUBLE_EQ(0, transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(0, transform.getLatLng().longitude());
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
-    ASSERT_DOUBLE_EQ(-2.0 * util::DEG2RAD, transform.getBearing());
+    ASSERT_DOUBLE_EQ(-2.0 * util::DEG2RAD_D, transform.getBearing());
 
     const double invalid = NAN;
 
@@ -76,7 +76,7 @@ TEST(Transform, InvalidBearing) {
     ASSERT_DOUBLE_EQ(0, transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(0, transform.getLatLng().longitude());
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
-    ASSERT_DOUBLE_EQ(-2.0 * util::DEG2RAD, transform.getBearing());
+    ASSERT_DOUBLE_EQ(-2.0 * util::DEG2RAD_D, transform.getBearing());
 }
 
 TEST(Transform, IntegerZoom) {
@@ -272,24 +272,24 @@ TEST(Transform, Anchor) {
     ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
 
     transform.jumpTo(CameraOptions().withBearing(45.0).withAnchor(anchorPoint));
-    ASSERT_DOUBLE_EQ(-45.0 * util::DEG2RAD, transform.getBearing());
+    ASSERT_DOUBLE_EQ(-45.0 * util::DEG2RAD_D, transform.getBearing());
 
     // Anchor coordinates are imprecise because we are converting from an integer pixel.
     ASSERT_NEAR(anchorLatLng.latitude(), transform.getLatLng().latitude(), 0.5);
     ASSERT_NEAR(anchorLatLng.longitude(), transform.getLatLng().longitude(), 0.5);
 
     transform.jumpTo(CameraOptions().withCenter(latLng).withZoom(10.0).withPitch(10.0));
-    ASSERT_DOUBLE_EQ(10.0 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(10.0 * util::DEG2RAD_D, transform.getPitch());
     ASSERT_DOUBLE_EQ(latLng.latitude(), transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
 
     transform.jumpTo(CameraOptions().withPitch(15.0));
-    ASSERT_DOUBLE_EQ(15.0 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(15.0 * util::DEG2RAD_D, transform.getPitch());
     ASSERT_DOUBLE_EQ(latLng.latitude(), transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
 
     transform.jumpTo(CameraOptions().withPitch(20.0).withAnchor(anchorPoint));
-    ASSERT_DOUBLE_EQ(20.0 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(20.0 * util::DEG2RAD_D, transform.getPitch());
 
     // Anchor coordinates are imprecise because we are converting from an integer pixel.
     ASSERT_NEAR(anchorLatLng.latitude(), transform.getLatLng().latitude(), 0.5);
@@ -811,15 +811,15 @@ TEST(Transform, InvalidPitch) {
 
     transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(45));
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getPitch());
 
     const double invalid = NAN;
 
     transform.jumpTo(CameraOptions().withPitch(invalid));
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getPitch());
 
     transform.jumpTo(CameraOptions().withPitch(60));
-    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD_D, transform.getPitch());
 }
 
 TEST(Transform, MinMaxPitch) {
@@ -834,17 +834,17 @@ TEST(Transform, MinMaxPitch) {
     transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(60));
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD_D, transform.getPitch());
 
     transform.setMaxPitch(70);
     transform.jumpTo(CameraOptions().withPitch(70));
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(60 * util::DEG2RAD_D, transform.getPitch());
 
     transform.setMaxPitch(45);
     transform.jumpTo(CameraOptions().withPitch(60));
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getPitch());
 
     transform.jumpTo(CameraOptions().withPitch(0));
     ASSERT_DOUBLE_EQ(transform.getState().getMinPitch(), transform.getPitch());
@@ -858,18 +858,18 @@ TEST(Transform, MinMaxPitch) {
     transform.setMinPitch(15);
     transform.jumpTo(CameraOptions().withPitch(0));
     ASSERT_DOUBLE_EQ(transform.getState().getMinPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(15 * util::DEG2RAD, transform.getPitch());
+    ASSERT_DOUBLE_EQ(15 * util::DEG2RAD_D, transform.getPitch());
 
     transform.setMinPitch(45);
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getState().getMinPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getState().getMinPitch());
     transform.setMaxPitch(45);
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getState().getMaxPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getState().getMaxPitch());
 
     transform.setMaxPitch(10);
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getState().getMaxPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getState().getMaxPitch());
 
     transform.setMinPitch(60);
-    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD, transform.getState().getMinPitch());
+    ASSERT_DOUBLE_EQ(45 * util::DEG2RAD_D, transform.getState().getMinPitch());
 }
 
 static const double abs_double_error = 1e-5;
@@ -968,26 +968,26 @@ TEST(Transform, FreeCameraOptionsSetOrientation) {
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getX());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getY());
 
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, -60.0 * util::DEG2RAD).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, -60.0 * util::DEG2RAD_D).m;
     transform.setFreeCameraOptions(options);
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getBearing());
-    EXPECT_DOUBLE_EQ(60.0 * util::DEG2RAD, transform.getState().getPitch());
+    EXPECT_DOUBLE_EQ(60.0 * util::DEG2RAD_D, transform.getState().getPitch());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getX());
     EXPECT_DOUBLE_EQ(206.0, transform.getState().getY());
 
-    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, 56.0 * util::DEG2RAD).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, 56.0 * util::DEG2RAD_D).m;
     transform.setFreeCameraOptions(options);
-    EXPECT_DOUBLE_EQ(-56.0 * util::DEG2RAD, transform.getState().getBearing());
+    EXPECT_DOUBLE_EQ(-56.0 * util::DEG2RAD_D, transform.getState().getBearing());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getPitch());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getX());
     EXPECT_NEAR(152.192378, transform.getState().getY(), 1e-6);
 
-    options.orientation = Quaternion::fromEulerAngles(0.0, 0.0, -179.0 * util::DEG2RAD)
-                              .multiply(Quaternion::fromEulerAngles(-30.0 * util::DEG2RAD, 0.0, 0.0))
+    options.orientation = Quaternion::fromEulerAngles(0.0, 0.0, -179.0 * util::DEG2RAD_D)
+                              .multiply(Quaternion::fromEulerAngles(-30.0 * util::DEG2RAD_D, 0.0, 0.0))
                               .m;
     transform.setFreeCameraOptions(options);
-    EXPECT_DOUBLE_EQ(179.0 * util::DEG2RAD, transform.getState().getBearing());
-    EXPECT_DOUBLE_EQ(30.0 * util::DEG2RAD, transform.getState().getPitch());
+    EXPECT_DOUBLE_EQ(179.0 * util::DEG2RAD_D, transform.getState().getBearing());
+    EXPECT_DOUBLE_EQ(30.0 * util::DEG2RAD_D, transform.getState().getPitch());
     EXPECT_NEAR(1.308930, transform.getState().getX(), 1e-6);
     EXPECT_NEAR(56.813889, transform.getState().getY(), 1e-6);
 }
@@ -1004,7 +1004,7 @@ TEST(Transform, FreeCameraOptionsClampPitch) {
     FreeCameraOptions options;
     vec3 right, up, forward;
 
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, -85.0 * util::DEG2RAD).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, -85.0 * util::DEG2RAD_D).m;
     transform.setFreeCameraOptions(options);
     EXPECT_DOUBLE_EQ(util::PITCH_MAX, transform.getState().getPitch());
     std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
@@ -1022,14 +1022,14 @@ TEST(Transform, FreeCameraOptionsClampToBounds) {
 
     // Place camera to an arbitrary position looking away from the map
     options.position = vec3{{-100.0, -10000.0, 1000.0}};
-    options.orientation = Quaternion::fromEulerAngles(-45.0 * util::DEG2RAD, 0.0, 0.0).m;
+    options.orientation = Quaternion::fromEulerAngles(-45.0 * util::DEG2RAD_D, 0.0, 0.0).m;
     transform.setFreeCameraOptions(options);
 
     // Map center should be clamped to width/2 pixels away from map borders
     EXPECT_DOUBLE_EQ(206.0, transform.getState().getX());
     EXPECT_DOUBLE_EQ(206.0, transform.getState().getY());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getBearing());
-    EXPECT_DOUBLE_EQ(45.0 * util::DEG2RAD, transform.getState().getPitch());
+    EXPECT_DOUBLE_EQ(45.0 * util::DEG2RAD_D, transform.getState().getPitch());
 
     vec3 right, up, forward;
     std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
@@ -1070,7 +1070,7 @@ TEST(Transform, FreeCameraOptionsOrientationRoll) {
     EXPECT_NEAR(options.orientation.value()[2], orientationWithoutRoll.z, 1e-9);
     EXPECT_NEAR(options.orientation.value()[3], orientationWithoutRoll.w, 1e-9);
 
-    EXPECT_NEAR(45.0 * util::DEG2RAD, transform.getState().getPitch(), 1e-9);
+    EXPECT_NEAR(45.0 * util::DEG2RAD_D, transform.getState().getPitch(), 1e-9);
     EXPECT_NEAR(0.0, transform.getState().getBearing(), 1e-9);
     EXPECT_NEAR(0.0, transform.getState().getX(), 1e-9);
     EXPECT_NEAR(150.0, transform.getState().getY(), 1e-9);

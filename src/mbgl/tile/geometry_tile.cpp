@@ -333,7 +333,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
     matrix::multiply(posMatrix, projMatrix, posMatrix);
 
     layoutResult->featureIndex->query(result, queryGeometry, transformState, posMatrix,
-                                      util::tileSize * id.overscaleFactor(),
+                                      util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ), options, id.toUnwrapped(),
                                       layers, queryPadding * transformState.maxPitchScaleFactor(), featureState);
 }

@@ -51,7 +51,7 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
 
     try {
         return std::make_unique<style::Image>(
-            id, std::move(dstImage), ratio, sdf, std::move(stretchX), std::move(stretchY), content);
+            id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content);
     } catch (const util::StyleImageException& ex) {
         Log::Error(Event::Sprite, "Can't create image with invalid metadata: %s", ex.what());
         return nullptr;

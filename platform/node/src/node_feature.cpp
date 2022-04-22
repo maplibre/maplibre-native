@@ -92,11 +92,11 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(int64_t t) {
-        return operator()(double(t));
+        return operator()(static_cast<double>(t));
     }
 
     v8::Local<v8::Value> operator()(uint64_t t) {
-        return operator()(double(t));
+        return operator()(static_cast<double>(t));
     }
 
     v8::Local<v8::Value> operator()(double t) {

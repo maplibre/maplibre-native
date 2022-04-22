@@ -85,7 +85,7 @@ AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, do
     std::vector<int16_t> v(maxDimension);
     
     for (uint32_t i = 0; i < size; i++) {
-        double a = double(rasterInput.data[i]) / 255; // alpha value
+        double a = static_cast<double>(rasterInput.data[i]) / 255; // alpha value
         gridOuter[i] = a == 1.0 ? 0.0 : a == 0.0 ? tinysdf::INF : std::pow(std::max(0.0, 0.5 - a), 2.0);
         gridInner[i] = a == 1.0 ? tinysdf::INF : a == 0.0 ? 0.0 : std::pow(std::max(0.0, a - 0.5), 2.0);
     }
@@ -95,7 +95,7 @@ AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, do
 
     for (uint32_t i = 0; i < size; i++) {
         double distance = gridOuter[i] - gridInner[i];
-        sdf.data[i] = std::max(0l, std::min(255l, ::lround(255.0 - 255.0 * (distance / radius + cutoff))));
+        sdf.data[i] = static_cast<uint8_t>(std::max(0l, std::min(255l, ::lround(255.0 - 255.0 * (distance / radius + cutoff)))));
     }
 
     return sdf;

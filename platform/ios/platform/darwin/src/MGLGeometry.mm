@@ -57,7 +57,7 @@ double MGLZoomLevelForAltitude(CLLocationDistance altitude, CGFloat pitch, CLLoc
     CLLocationDistance metersTall = eyeAltitude * 2 * std::tan(MGLRadiansFromDegrees(MGLAngularFieldOfView) / 2.);
     CLLocationDistance metersPerPixel = metersTall / size.height;
     CGFloat mapPixelWidthAtZoom = std::cos(MGLRadiansFromDegrees(latitude)) * mbgl::util::M2PI * mbgl::util::EARTH_RADIUS_M / metersPerPixel;
-    return ::log2(mapPixelWidthAtZoom / mbgl::util::tileSize);
+    return ::log2(mapPixelWidthAtZoom / mbgl::util::tileSize_D);
 }
 
 MGLRadianDistance MGLDistanceBetweenRadianCoordinates(MGLRadianCoordinate2D from, MGLRadianCoordinate2D to) {

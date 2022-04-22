@@ -489,6 +489,11 @@ GLint components(const gfx::AttributeDataType type) {
 
 } // namespace
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4312) // reinterpret_cast different size
+#endif
+
 void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocation location) {
     if (binding) {
         context.vertexBuffer = reinterpret_cast<const gl::VertexBufferResource&>(*binding->vertexBufferResource).buffer;
@@ -504,6 +509,10 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
         MBGL_CHECK_ERROR(glDisableVertexAttribArray(location));
     }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 const constexpr PixelStorePack::Type PixelStorePack::Default;
 

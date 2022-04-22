@@ -9,7 +9,7 @@ bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordin
     for (auto i = ring.begin(), j = ring.end() - 1; i != ring.end(); j = i++) {
         auto& p1 = *i;
         auto& p2 = *j;
-        if (((p1.y > p.y) != (p2.y > p.y)) && (p.x < float(p2.x - p1.x) * float(p.y - p1.y) / float(p2.y - p1.y) + p1.x)) {
+        if (((p1.y > p.y) != (p2.y > p.y)) && (p.x < static_cast<float>(p2.x - p1.x) * static_cast<float>(p.y - p1.y) / static_cast<float>(p2.y - p1.y) + p1.x)) {
             c = !c;
         }
     }
@@ -20,7 +20,7 @@ bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordin
 float distToSegmentSquared(const GeometryCoordinate& p, const GeometryCoordinate& v, const GeometryCoordinate& w) {
     if (v == w) return util::distSqr<float>(p, v);
     const auto l2 = util::distSqr<float>(v, w);
-    const float t = float((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    const float t = static_cast<float>((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
     if (t < 0) return util::distSqr<float>(p, v);
     if (t > 1) return util::distSqr<float>(p, w);
     return util::distSqr<float>(p, convertPoint<float>(w - v) * t + convertPoint<float>(v));

@@ -26,7 +26,7 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       util::tileSize,
+                       util::tileSize_I,
                        tileset.zoomRange,
                        tileset.bounds,
                        [&](const OverscaledTileID& tileID) {

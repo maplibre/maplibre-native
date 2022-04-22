@@ -96,8 +96,8 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
     double zoom = camera.zoom.value_or(getZoom());
-    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD : getBearing();
-    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD : getPitch();
+    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD_D : getBearing();
+    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD_D : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
         if (animation.transitionFinishFn) {
@@ -178,8 +178,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
     double zoom = camera.zoom.value_or(getZoom());
-    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD : getBearing();
-    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD : getPitch();
+    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD_D : getBearing();
+    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD_D : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
         if (animation.transitionFinishFn) {
@@ -382,22 +382,22 @@ void Transform::setMaxZoom(const double maxZoom) {
 
 void Transform::setMinPitch(const double minPitch) {
     if (std::isnan(minPitch)) return;
-    if (minPitch * util::DEG2RAD < util::PITCH_MIN) {
+    if (minPitch * util::DEG2RAD_D < util::PITCH_MIN) {
         Log::Warning(Event::General,
                      "Trying to set minimum pitch below the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MIN * util::RAD2DEG);
+                     util::PITCH_MIN * util::RAD2DEG_D);
     }
-    state.setMinPitch(minPitch * util::DEG2RAD);
+    state.setMinPitch(minPitch * util::DEG2RAD_D);
 }
 
 void Transform::setMaxPitch(const double maxPitch) {
     if (std::isnan(maxPitch)) return;
-    if (maxPitch * util::DEG2RAD > util::PITCH_MAX) {
+    if (maxPitch * util::DEG2RAD_D > util::PITCH_MAX) {
         Log::Warning(Event::General,
                      "Trying to set maximum pitch above the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MAX * util::RAD2DEG);
+                     util::PITCH_MAX * util::RAD2DEG_D);
     }
-    state.setMaxPitch(maxPitch * util::DEG2RAD);
+    state.setMaxPitch(maxPitch * util::DEG2RAD_D);
 }
 
 #pragma mark - Bearing
@@ -418,7 +418,7 @@ void Transform::rotateBy(const ScreenCoordinate& first,
         center.y = first.y + std::sin(rotateBearing) * heightOffset;
     }
 
-    const double bearing = -(state.getBearing() + util::angle_between(first - center, second - center)) * util::RAD2DEG;
+    const double bearing = -(state.getBearing() + util::angle_between(first - center, second - center)) * util::RAD2DEG_D;
     easeTo(CameraOptions().withBearing(bearing), animation);
 }
 
@@ -516,7 +516,7 @@ void Transform::startTransition(const CameraOptions& camera,
     transitionDuration = duration;
 
     transitionFrameFn = [isAnimated, animation, frame, anchor, anchorLatLng, this](const TimePoint now) {
-        float t = isAnimated ? (std::chrono::duration<float>(now - transitionStart) / transitionDuration) : 1.0;
+        float t = isAnimated ? (std::chrono::duration<float>(now - transitionStart) / transitionDuration) : 1.0f;
         if (t >= 1.0) {
             frame(1.0);
         } else {
