@@ -135,4 +135,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.MAPLIBREGLNATIVE}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
