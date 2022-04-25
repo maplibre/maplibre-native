@@ -131,9 +131,8 @@ jobs:
         run: |
           npm pack --dry-run
 
-      # Uncomment to start publishing the package
-      # @TODO: Figure out the binary distribution method.
-      # - name: Publish package
-      #   if: github.ref == 'refs/heads/main'
-      #   run: |
-      #     npm publish
+      - name: Publish package
+        if: github.ref == 'refs/heads/main'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.MAPLIBREGLNATIVE}}
