@@ -1,5 +1,5 @@
 {
-  "name": "@maplibre/maplibre-gl-native",
+  "name": "@wifidb/maplibre-gl-native",
   "version": "5.0.0",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
@@ -15,7 +15,7 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/maplibre/maplibre-gl-native.git"
+    "url": "git://github.com/acalcutt/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
