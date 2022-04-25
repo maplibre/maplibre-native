@@ -1,6 +1,6 @@
 {
   "name": "@acalcutt/maplibre-gl-native",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -20,8 +20,8 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
+    "@mapbox/node-pre-gyp": "^1.0.9",
     "minimatch": "^3.0.4",
-    "node-pre-gyp": "^0.10.2",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
@@ -55,12 +55,19 @@
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
+    "install": "node-pre-gyp install --fallback-to-build=true",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js"
   },
-  "gypfile": true
+  "gypfile": true,
+  "binary": {
+    "module_name": "mbgl",
+    "module_path": "./lib/{node_abi}",
+    "host": "https://mapbox-node-binary.s3.amazonaws.com",
+    "remote_path": "./{name}/v{version}",
+    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
+  }
 }
