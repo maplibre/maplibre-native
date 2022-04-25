@@ -62,12 +62,5 @@
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js"
   },
-  "gypfile": true,
-  "binary": {
-    "module_name": "mbgl",
-    "module_path": "./lib/{node_abi}",
-    "host": "https://mapbox-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
-  }
+  "gypfile": true
 }
