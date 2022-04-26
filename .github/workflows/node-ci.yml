@@ -133,7 +133,7 @@ jobs:
 
       - name: Release to Github
         env:
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm run package
           npm run release
