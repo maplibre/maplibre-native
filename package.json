@@ -70,7 +70,7 @@
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
     "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
-    "remote_path": "./@acalcutt/maplibre-gl-native/v{version}",
+    "remote_path": "node_v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
