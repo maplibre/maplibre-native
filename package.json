@@ -15,7 +15,7 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/acalcutt/maplibre-gl-native.git"
+    "url": "https://github.com/acalcutt/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
