@@ -21,6 +21,7 @@
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
     "@mapbox/node-pre-gyp": "^1.0.9",
+    "node-pre-gyp-github": "1.4.4",
     "minimatch": "^3.0.4",
     "npm-run-all": "^4.0.2"
   },
@@ -61,13 +62,15 @@
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js"
+    "package": "node-pre-gyp package",
+    "release": "node-pre-gyp-github publish"
   },
   "gypfile": true,
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://mapbox-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
+    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
+    "remote_path": "./@maplibre/maplibre-gl-native/v{version}",
+    "package_name": "{node_abi}-{platform}-{arch}-{configuration}-{matrix.os}.tar.gz"
   }
 }
