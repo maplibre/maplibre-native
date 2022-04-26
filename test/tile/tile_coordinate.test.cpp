@@ -73,7 +73,7 @@ TEST(TileCoordinate, FromLatLng) {
             ASSERT_DOUBLE_EQ(fromLatLng.p.x, tilePoint.x * maxTilesPerAxis);
             ASSERT_NEAR(fromLatLng.p.y, tilePoint.y * maxTilesPerAxis, 1.0e-7);
 
-            const auto fromScreenCoordinate = TileCoordinate::fromScreenCoordinate(transform.getState(), zoom, screenCoordinate);
+            const auto fromScreenCoordinate = TileCoordinate::fromScreenCoordinate(transform.getState(), static_cast<uint8_t>(zoom), screenCoordinate);
             ASSERT_DOUBLE_EQ(fromScreenCoordinate.z, fromLatLng.z);
             ASSERT_NEAR(fromScreenCoordinate.p.x, fromLatLng.p.x, 0.99);
             ASSERT_NEAR(fromScreenCoordinate.p.y, fromLatLng.p.y, 0.99);
@@ -92,10 +92,10 @@ TEST(TileCoordinate, ToGeometryCoordinate) {
     };
 
     for (uint8_t zoom = 0; zoom <= 16; ++zoom) {
-        uint32_t maxTilesPerAxis = std::pow(2, zoom);
+        auto maxTilesPerAxis = static_cast<uint32_t>(std::pow(2, zoom));
         for (const auto& edge : edges) {
-            uint32_t tileX = edge.x == 0 ? 0 : edge.x == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2.0) - 1;
-            uint32_t tileY = edge.y == 0 ? 0 : edge.y == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2.0) - 1;
+            uint32_t tileX = edge.x == 0 ? 0 : edge.x == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2) - 1;
+            uint32_t tileY = edge.y == 0 ? 0 : edge.y == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2) - 1;
             UnwrappedTileID unwrapped(0, CanonicalTileID { zoom, tileX, tileY });
 
             auto tilePointX = ((edge.x * maxTilesPerAxis) - tileX) * util::EXTENT;

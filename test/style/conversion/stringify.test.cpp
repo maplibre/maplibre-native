@@ -67,7 +67,7 @@ TEST(Stringify, Vector) {
 }
 
 TEST(Stringify, Map) {
-    ASSERT_EQ(stringify(std::unordered_map<std::string, float> {{ "a", 1 }}), "{\"a\":1.0}");
+    ASSERT_EQ(stringify(std::unordered_map<std::string, float> {{ "a", 1.0f }}), "{\"a\":1.0}");
 }
 
 TEST(Stringify, Value) {

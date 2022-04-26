@@ -21,7 +21,7 @@ PremultipliedImage namedImage(const std::string& name) {
 }
 
 std::unique_ptr<style::Image> namedMarker(const std::string& name) {
-    return std::make_unique<style::Image>(name, namedImage(name), 1.0);
+    return std::make_unique<style::Image>(name, namedImage(name), 1.0f);
 }
 
 class AnnotationTest {
@@ -340,7 +340,7 @@ TEST(Annotations, ReaddImage) {
 
     test.frontend.render(test.map);
 
-    test.map.addAnnotationImage(std::make_unique<style::Image>("default_marker", namedImage("flipped_marker"), 1.0));
+    test.map.addAnnotationImage(std::make_unique<style::Image>("default_marker", namedImage("flipped_marker"), 1.0f));
     test.checkRendering("readd_image");
 }
 
