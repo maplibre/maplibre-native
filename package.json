@@ -15,7 +15,7 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/acalcutt/maplibre-gl-native.git"
+    "url": "git+https://github.com/acalcutt/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
@@ -69,7 +69,7 @@
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
+    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/node_v{version}/",
     "remote_path": "node_v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
