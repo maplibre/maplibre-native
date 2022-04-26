@@ -130,14 +130,15 @@ jobs:
           npm pack --dry-run
 
       - name: Release to Github
-        env:
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/main'
         run: |
           npm run package
           npm run release
+        env:
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Publish to NPM
-        if: github.ref == 'refs/heads/main'
+        if: runner.os == 'Linux' && github.ref == 'refs/heads/main'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
