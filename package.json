@@ -71,6 +71,6 @@
     "module_path": "./lib/{node_abi}",
     "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
     "remote_path": "./@maplibre/maplibre-gl-native/v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}-{matrix.os}.tar.gz"
+    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
