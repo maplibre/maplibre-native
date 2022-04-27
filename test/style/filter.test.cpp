@@ -51,7 +51,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
         [&] (int64_t t) { writer.Int64(t); },
         [&] (double f) {
             // make sure integer values are stringified without trailing ".0".
-            f == std::floor(f) ? writer.Int(f) : writer.Double(f);
+            f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
         },
         [&] (const std::string& s) { writer.String(s); },
         [&] (const std::vector<Value>& arr) {
