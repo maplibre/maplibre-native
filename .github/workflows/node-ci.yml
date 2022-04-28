@@ -145,7 +145,7 @@ jobs:
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Publish to NPM
-        if: runner.os == 'Linux' && github.ref == 'refs/heads/main'
+        if: runner.os == 'Linux' && matrix.node == '10' && github.ref == 'refs/heads/main'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
