@@ -1,6 +1,6 @@
 {
   "name": "@acalcutt/maplibre-gl-native",
-  "version": "5.0.12",
+  "version": "5.0.13",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -63,7 +63,7 @@
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js",
     "package": "node-pre-gyp package",
-    "release": "node-pre-gyp-github publish"
+    "release": "node-pre-gyp-github publish --release"
   },
   "gypfile": true,
   "binary": {
