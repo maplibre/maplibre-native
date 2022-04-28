@@ -27,7 +27,7 @@ jobs:
         os:
           - macos-11.0
           - ubuntu-20.04
-        node: [ 10, 12, 14, 16 ]
+        node: [ 10, 12, 14, 16 , 17 , 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     env:
@@ -145,7 +145,7 @@ jobs:
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Publish to NPM
-        if: runner.os == 'Linux' && matrix.node == '10' && github.ref == 'refs/heads/main'
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '10' && github.ref == 'refs/heads/main'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
