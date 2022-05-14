@@ -76,6 +76,9 @@ jobs:
         os:
           - [self-hosted, macOS, ARM64]
           - ubuntu-20.04
+        include:
+          - os: macos-12
+            arch: arm64
     runs-on: ${{ matrix.os }}
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -92,17 +95,30 @@ jobs:
           fetch-depth: 0
 
       - name: Install dependencies
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list ninja || brew install ninja
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-          brew list libuv || brew install libuv
+          brew list cmake || brew install -q cmake
+          brew list ccache || brew install -q ccache
+          brew list ninja || brew install -q ninja
+          brew list pkg-config || brew install -q pkg-config
+          brew list glfw3 || brew install -q glfw3
+          brew list libuv || brew install -q libuv
+
+      - name: Install dependencies
+        if: runner.os == 'macOS' && matrix.arch == 'arm64'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew info cmake |grep Poured || brew install -q cmake
+          brew info ccache |grep Poured || brew install -q ccache
+          brew info ninja |grep Poured || brew install -q ninja
+          brew info pkg-config |grep Poured || brew install -q pkg-config
+          brew info libuv |grep Poured || brew install -q libuv
+          ./scripts/brew-install-arm64.sh glfw
 
       - name: Install dependencies
         if: runner.os == 'Linux'
@@ -178,7 +194,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
@@ -186,6 +202,24 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
+
+      - name: Release
+        if: matrix.os != 'ubuntu-20.04' && matrix.os != 'macos-11.0' && matrix.arch != 'arm64'
+        env:
+          PUBLISH: true
+          BUILDTYPE: RelWithDebInfo
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+        run: |
+          ./platform/node/scripts/publish.sh
+
+      - name: Release
+        if: matrix.arch == 'arm64'
+        env:
+          PUBLISH: true
+          BUILDTYPE: RelWithDebInfo
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+        run: |
+          ./platform/node/scripts/publish.sh --target_arch=arm64
 
       # Uncomment to start publishing the package
       # @TODO: Figure out the binary distribution method.
