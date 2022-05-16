@@ -151,7 +151,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     const bool zoomChanged =
-        zoomHistory.update(static_cast<float>(updateParameters->transformState.getZoom()), updateParameters->timePoint);
+        zoomHistory.update(updateParameters->transformState.getZoom(), updateParameters->timePoint);
 
     const TransitionOptions transitionOptions =
         isMapModeContinuous ? updateParameters->transitionOptions : TransitionOptions();
@@ -383,7 +383,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     bool symbolBucketsChanged = false;
     bool symbolBucketsAdded = false;
     std::set<std::string> usedSymbolLayers;
-    const auto longitude = static_cast<float>(updateParameters->transformState.getLatLng().longitude());
+    auto longitude = updateParameters->transformState.getLatLng().longitude();
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
         RenderLayer& layer = *it;
         auto result = crossTileSymbolIndex.addLayer(layer, longitude);
@@ -407,7 +407,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
 
         renderTreeParameters->placementChanged = !placementController.placementIsRecent(
-            updateParameters->timePoint, static_cast<float>(updateParameters->transformState.getZoom()), placementUpdatePeriodOverride);
+            updateParameters->timePoint, updateParameters->transformState.getZoom(), placementUpdatePeriodOverride);
         symbolBucketsChanged |= renderTreeParameters->placementChanged;
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());

@@ -149,7 +149,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                          },
                          paintAttributeData,
                          properties,
-                         static_cast<float>(state.getZoom())),
+                         state.getZoom()),
                      ClippingMaskProgram::computeAllAttributeBindings(
                          *staticData.tileVertexBuffer, paintAttributeData, properties),
                      ClippingMaskProgram::TextureBindings{},

@@ -41,12 +41,12 @@ public:
         } else if (it == stops.begin()) {
             return stops.begin()->second->evaluate(params);
         } else {
-            double t = interpolationFactor({ std::prev(it)->first, it->first }, x);
+            float t = interpolationFactor({ std::prev(it)->first, it->first }, x);
 
-            if (t == 0.0) {
+            if (t == 0.0f) {
                 return std::prev(it)->second->evaluate(params);
             }
-            if (t == 1.0) {
+            if (t == 1.0f) {
                 return it->second->evaluate(params);
             }
 

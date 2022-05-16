@@ -1,5 +1,6 @@
 #include <mbgl/style/expression/distance.hpp>
 
+#include <mapbox/cheap_ruler.hpp>
 #include <mapbox/geojson.hpp>
 #include <mapbox/geometry.hpp>
 

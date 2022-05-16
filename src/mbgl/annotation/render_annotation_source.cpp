@@ -34,7 +34,7 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
         needsRelayout,
         parameters,
         *baseImpl,
-        util::tileSize_I,
+        util::tileSize,
         // Zoom level 16 is typically sufficient for annotations.
         // See https://github.com/mapbox/mapbox-gl-native/issues/10197
         {0, 16},

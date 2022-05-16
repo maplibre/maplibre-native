@@ -97,7 +97,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
             uniformValues,
             paintPropertyBinders,
             evaluated_,
-            static_cast<float>(parameters.state.getZoom())
+            parameters.state.getZoom()
         );
         const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
             *tileBucket.vertexBuffer,
@@ -199,7 +199,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                         tile.id,
                         parameters.state,
                         evaluated.get<FillExtrusionOpacity>(),
-                        static_cast<float>(-std::pow(2, tile.id.canonical.z) / util::tileSize_D / 8.0),
+                        -std::pow(2, tile.id.canonical.z) / util::tileSize / 8.0f,
                         parameters.pixelRatio,
                         parameters.evaluatedLight,
                         evaluated.get<FillExtrusionVerticalGradient>()
@@ -235,7 +235,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
             queryGeometry,
             evaluated.get<style::FillExtrusionTranslate>(),
             evaluated.get<style::FillExtrusionTranslateAnchor>(),
-            static_cast<float>(transformState.getBearing()),
+            transformState.getBearing(),
             pixelsToTileUnits);
 
     return util::polygonIntersectsMultiPolygon(translatedQueryGeometry.value_or(queryGeometry), feature.getGeometries());

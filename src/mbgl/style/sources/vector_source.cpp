@@ -69,13 +69,13 @@ void VectorSource::loadDescription(FileSource& fileSource) {
                 return;
             }
             if (maxZoom) {
-                tileset->zoomRange.max = static_cast<uint8_t>(*maxZoom);
+                tileset->zoomRange.max = *maxZoom;
             }
             if (minZoom) {
-                tileset->zoomRange.min = static_cast<uint8_t>(*minZoom);
+                tileset->zoomRange.min = *minZoom;
             }
             const TileServerOptions& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
-            util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), util::tileSize_I);
+            util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), util::tileSize);
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);

@@ -42,7 +42,7 @@ TEST(TileCoordinate, FromLatLng) {
 
     Transform transform(observer);
 
-    const double max = util::tileSize_D;
+    const double max = util::tileSize;
     transform.resize({ static_cast<uint32_t>(max), static_cast<uint32_t>(max) });
 
     // Center, top-left, bottom-left, bottom-right, top-right edges.

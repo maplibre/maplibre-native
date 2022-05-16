@@ -183,7 +183,7 @@ struct Converter<int64_t> {
         if (!converted) {
             return nullopt;
         }
-        return static_cast<int64_t>(*converted);
+        return *converted;
     }
 };
 
@@ -219,7 +219,7 @@ static optional<std::unique_ptr<Expression>> convertLiteral(type::Type type, con
             if (!result) {
                 return nullopt;
             }
-            return literal(static_cast<double>(*result));
+            return literal(double(*result));
         },
         [&](const type::BooleanType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<bool>(value, error);
@@ -261,7 +261,7 @@ static optional<std::unique_ptr<Expression>> convertLiteral(type::Type type, con
                             error.message = "value must be an array of numbers";
                             return nullopt;
                         }
-                        result.emplace_back(static_cast<double>(*number));
+                        result.emplace_back(double(*number));
                     }
                     return literal(result);
                 },

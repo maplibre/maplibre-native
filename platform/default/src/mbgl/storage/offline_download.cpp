@@ -75,7 +75,7 @@ uint64_t tileCount(const OfflineRegionDefinition& definition, style::SourceType 
     const Range<uint8_t> clampedZoomRange =
             definition.match([&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
 
-    uint64_t result{};
+    unsigned long result = 0;;
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
         result += definition.match(
                 [&](const OfflineTilePyramidRegionDefinition& reg){ return util::tileCount(reg.bounds, z); },
@@ -174,7 +174,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
         switch (type) {
         case SourceType::Vector: {
             const auto& vectorSource = *source->as<VectorSource>();
-            handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize_I);
+            handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize);
             break;
         }
 
@@ -284,7 +284,7 @@ void OfflineDownload::activateDownload() {
             switch (type) {
                 case SourceType::Vector: {
                     const auto& vectorSource = *source->as<VectorSource>();
-                    handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize_I);
+                    handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize);
                     break;
                 }
 

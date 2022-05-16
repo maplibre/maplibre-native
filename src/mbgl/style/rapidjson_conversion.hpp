@@ -65,7 +65,7 @@ public:
         if (!value->IsNumber()) {
             return {};
         }
-        return static_cast<float>(value->GetDouble());
+        return value->GetDouble();
     }
 
     static optional<double> toDouble(const JSValue* value) {

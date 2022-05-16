@@ -55,7 +55,7 @@ optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, Error
             error.message = "invalid minzoom";
             return nullopt;
         }
-        result.zoomRange.min = static_cast<uint8_t>(*minzoom);
+        result.zoomRange.min = *minzoom;
     }
 
     auto maxzoomValue = objectMember(value, "maxzoom");
@@ -65,7 +65,7 @@ optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, Error
             error.message = "invalid maxzoom";
             return nullopt;
         }
-        result.zoomRange.max = static_cast<uint8_t>(*maxzoom);
+        result.zoomRange.max = *maxzoom;
     }
 
     auto attributionValue = objectMember(value, "attribution");

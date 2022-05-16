@@ -57,7 +57,7 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
         if (!minDigitsResult) {
             return minDigitsResult.error();
         }
-        evaluatedMinFractionDigits = static_cast<uint8_t>(minDigitsResult->get<double>());
+        evaluatedMinFractionDigits = minDigitsResult->get<double>();
     }
 
     uint8_t evaluatedMaxFractionDigits = 3;
@@ -66,7 +66,7 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
         if (!maxDigitsResult) {
             return maxDigitsResult.error();
         }
-        evaluatedMaxFractionDigits = static_cast<uint8_t>(maxDigitsResult->get<double>());
+        evaluatedMaxFractionDigits = maxDigitsResult->get<double>();
     }
 
     std::string output;

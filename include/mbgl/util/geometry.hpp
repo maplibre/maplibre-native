@@ -41,7 +41,7 @@ using Geometry = mapbox::geometry::geometry<T>;
 
 template <class S, class T>
 Point<S> convertPoint(const Point<T>& p) {
-    return Point<S>(static_cast<S>(p.x), static_cast<S>(p.y));
+    return Point<S>(p.x, p.y);
 }
 
 struct ToFeatureType {

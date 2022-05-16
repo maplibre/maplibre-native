@@ -45,7 +45,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       util::tileSize_I,
+                       util::tileSize,
                        impl().getZoomRange(),
                        {},
                        [&](const OverscaledTileID& tileID) {
