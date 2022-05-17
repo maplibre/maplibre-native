@@ -2,26 +2,6 @@ name: macos-ci
 
 on:
   workflow_dispatch:
-  push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - "platform/android/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
-      - ".gitignore"
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "platform/android/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
-      - ".gitignore"
 
 jobs:
   build:
