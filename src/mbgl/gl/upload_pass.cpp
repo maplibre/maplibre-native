@@ -21,13 +21,13 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memVertexBuffers += size;
+    commandEncoder.context.renderingStats().memVertexBuffers += static_cast<int>(size);
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{ std::move(id), { commandEncoder.context } };
     commandEncoder.context.vertexBuffer = result;
     MBGL_CHECK_ERROR(
         glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    return std::make_unique<gl::VertexBufferResource>(std::move(result), size);
+    return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource,
@@ -42,14 +42,14 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memIndexBuffers += size;
+    commandEncoder.context.renderingStats().memIndexBuffers += static_cast<int>(size);
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{ std::move(id), { commandEncoder.context } };
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = result;
     MBGL_CHECK_ERROR(
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    return std::make_unique<gl::IndexBufferResource>(std::move(result), size);
+    return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource,

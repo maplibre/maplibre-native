@@ -58,7 +58,7 @@ public:
             // Interpolate between recursively-calculated prior value and final.
             float t = std::chrono::duration<float>(now - begin) / (end - begin);
             return util::interpolate(prior->get().evaluate(evaluator, now), finalValue,
-                                     util::DEFAULT_TRANSITION_EASE.solve(t, 0.001));
+                                     static_cast<float>(util::DEFAULT_TRANSITION_EASE.solve(t, 0.001)));
         }
     }
 

@@ -47,7 +47,7 @@ CollisionIndex::CollisionIndex(const TransformState& transformState_, MapMode ma
       screenBottomBoundary(transformState.getSize().height + viewportPadding),
       gridRightBoundary(transformState.getSize().width + 2 * viewportPadding),
       gridBottomBoundary(transformState.getSize().height + 2 * viewportPadding),
-      pitchFactor(std::cos(transformState.getPitch()) * transformState.getCameraToCenterDistance()) {}
+      pitchFactor(static_cast<float>(std::cos(transformState.getPitch()) * transformState.getCameraToCenterDistance())) {}
 
 float CollisionIndex::approximateTileDistance(const TileDistance& tileDistance,
                                               const float lastSegmentAngle,
@@ -122,13 +122,13 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     const float tileY2 = tileEdges[3];
 
     // Check left border
-    int minSectionLength = std::min(tileX1 - x1, x2 - tileX1);
+    float minSectionLength = std::min(tileX1 - x1, x2 - tileX1);
     if (minSectionLength <= 0) { // Check right border
         minSectionLength = std::min(tileX2 - x1, x2 - tileX2);
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::VerticalBorders;
-        result.minSectionLength = minSectionLength;
+        result.minSectionLength = static_cast<int>(minSectionLength);
     }
     // Check top border
     minSectionLength = std::min(tileY1 - y1, y2 - tileY1);
@@ -137,7 +137,7 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::HorizontalBorders;
-        result.minSectionLength = std::min(result.minSectionLength, minSectionLength);
+        result.minSectionLength = std::min(result.minSectionLength, static_cast<int>(minSectionLength));
     }
     return result;
 }
@@ -347,10 +347,10 @@ bool polygonIntersectsBox(const LineString<float>& polygon, const GridIndex<Inde
     for (const auto& point : polygon) {
         integerPolygon.push_back(convertPoint<int16_t>(point));
     }
-    int16_t minX1 = bbox.min.x;
-    int16_t maxY1 = bbox.max.y;
-    int16_t minY1 = bbox.min.y;
-    int16_t maxX1 = bbox.max.x;
+    auto minX1 = static_cast<int16_t>(bbox.min.x);
+    auto maxY1 = static_cast<int16_t>(bbox.max.y);
+    auto minY1 = static_cast<int16_t>(bbox.min.y);
+    auto maxX1 = static_cast<int16_t>(bbox.max.x);
 
     auto bboxPoints = GeometryCoordinates {
         { minX1, minY1 }, { maxX1, minY1 }, { maxX1, maxY1 }, { minX1, maxY1 }
@@ -367,7 +367,7 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
 
     LineString<float> gridQuery;
     for (const auto& point : queryGeometry) {
-        gridQuery.emplace_back(point.x + viewportPadding, point.y + viewportPadding);
+        gridQuery.emplace_back(static_cast<float>(point.x) + viewportPadding, static_cast<float>(point.y) + viewportPadding);
     }
     
     auto envelope = mapbox::geometry::envelope(gridQuery);
@@ -404,8 +404,8 @@ std::pair<float,float> CollisionIndex::projectAnchor(const mat4& posMatrix, cons
     vec4 p = {{ point.x, point.y, 0, 1 }};
     matrix::transformMat4(p, p, posMatrix);
     return std::make_pair(
-        0.5 + 0.5 * (transformState.getCameraToCenterDistance() / p[3]),
-        p[3]
+        0.5f + 0.5f * (transformState.getCameraToCenterDistance() / static_cast<float>(p[3])),
+        static_cast<float>(p[3])
     );
 }
 
@@ -415,13 +415,13 @@ std::pair<Point<float>,float> CollisionIndex::projectAndGetPerspectiveRatio(cons
     auto size = transformState.getSize();
     return std::make_pair(
         Point<float>(
-            (((p[0] / p[3] + 1) / 2) * size.width) + viewportPadding,
-            (((-p[1] / p[3] + 1) / 2) * size.height) + viewportPadding
+            static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width) + viewportPadding,
+            static_cast<float>(((-p[1] / p[3] + 1) / 2) * size.height) + viewportPadding
         ),
         // See perspective ratio comment in symbol_sdf.vertex
         // We're doing collision detection in viewport space so we need
         // to scale down boxes in the distance
-        0.5 + 0.5 * transformState.getCameraToCenterDistance() / p[3]
+        0.5f + 0.5f * transformState.getCameraToCenterDistance() / static_cast<float>(p[3])
     );
 }
 

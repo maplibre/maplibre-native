@@ -784,7 +784,7 @@ void NativeMapView::addAnnotationIcon(JNIEnv& env, const jni::String& symbol, ji
 
     jni::GetArrayRegion(env, *jpixels, 0, size, reinterpret_cast<jbyte*>(premultipliedImage.data.get()));
     map->addAnnotationImage(std::make_unique<mbgl::style::Image>(
-        symbolName, std::move(premultipliedImage), float(scale)));
+        symbolName, std::move(premultipliedImage), static_cast<float>(scale)));
 }
 
 void NativeMapView::removeAnnotationIcon(JNIEnv& env, const jni::String& symbol) {
@@ -1097,7 +1097,7 @@ void NativeMapView::addImage(JNIEnv& env, const jni::String& name, const jni::Ob
     map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
         jni::Make<std::string>(env, name),
         std::move(premultipliedImage),
-        float(scale),
+        static_cast<float>(scale),
         sdf)
     );
 }

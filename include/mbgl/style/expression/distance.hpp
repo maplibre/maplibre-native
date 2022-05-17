@@ -1,6 +1,17 @@
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#pragma warning(disable: 4267)
+#endif
+
 #include <mapbox/cheap_ruler.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/geojson.hpp>
 

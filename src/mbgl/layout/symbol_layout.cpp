@@ -84,13 +84,13 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                            const LayoutParameters& layoutParameters)
     : bucketLeaderID(layers.front()->baseImpl->id),
       sourceLayer(std::move(sourceLayer_)),
-      overscaling(parameters.tileID.overscaleFactor()),
+      overscaling(static_cast<float>(parameters.tileID.overscaleFactor())),
       zoom(parameters.tileID.overscaledZ),
       canonicalID(parameters.tileID.canonical),
       mode(parameters.mode),
       pixelRatio(parameters.pixelRatio),
-      tileSize(util::tileSize * overscaling),
-      tilePixelRatio(float(util::EXTENT) / tileSize),
+      tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
+      tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
       layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
@@ -540,7 +540,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const float symbolSpacing = tilePixelRatio * layout->get<SymbolSpacing>();
     const float textPadding = layout->get<TextPadding>() * tilePixelRatio;
     const float iconPadding = layout->get<IconPadding>() * tilePixelRatio;
-    const float textMaxAngle = layout->get<TextMaxAngle>() * util::DEG2RAD;
+    const float textMaxAngle = layout->get<TextMaxAngle>() * util::DEG2RAD_F;
     const float iconRotation = layout->evaluate<IconRotate>(zoom, feature, canonicalID);
     const float textRotation = layout->evaluate<TextRotate>(zoom, feature, canonicalID);
     std::array<float, 2> variableTextOffset;
@@ -689,8 +689,8 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
             }
 
             // 1 pixel worth of precision, in tile coordinates
-            auto poi = mapbox::polylabel(poly, double(util::EXTENT / util::tileSize));
-            Anchor anchor(poi.x, poi.y, 0, minScale);
+            auto poi = mapbox::polylabel(poly, util::EXTENT / util::tileSize_D);
+            Anchor anchor(static_cast<float>(poi.x), static_cast<float>(poi.y), 0.0f, static_cast<size_t>(minScale));
             addSymbolInstance(anchor, createSymbolInstanceSharedData(polygon[0]));
         }
     } else if (type == FeatureType::LineString) {
@@ -698,13 +698,13 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
             // Skip invalid LineStrings.
             if (line.empty()) continue;
 
-            Anchor anchor(line[0].x, line[0].y, 0, minScale);
+            Anchor anchor(static_cast<float>(line[0].x), static_cast<float>(line[0].y), 0.0f, static_cast<size_t>(minScale));
             addSymbolInstance(anchor, createSymbolInstanceSharedData(line));
         }
     } else if (type == FeatureType::Point) {
         for (const auto& points : feature.geometry) {
             for (const auto& point : points) {
-                Anchor anchor(point.x, point.y, 0, minScale);
+                Anchor anchor(static_cast<float>(point.x), static_cast<float>(point.y), 0.0f, static_cast<size_t>(minScale));
                 addSymbolInstance(anchor, createSymbolInstanceSharedData({point}));
             }
         }
@@ -799,7 +799,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                       std::vector<float>());
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
-                iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? M_PI_2 : 0;
+                iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? static_cast<float>(M_PI_2) : 0.0f;
                 iconSymbol.vertexStartIndex =
                     addSymbols(iconBuffer, sizeData, iconQuads, symbolInstance.anchor, iconSymbol, feature.sortKey);
             };
@@ -927,7 +927,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            placedIconIndex);
     placedIndex = bucket.text.placedSymbols.size() - 1;
     PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();
-    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? M_PI_2 : 0;
+    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? static_cast<float>(M_PI_2) : 0.0f;
 
     bool firstSymbol = true;
     for (const auto& symbolQuad : glyphQuads) {

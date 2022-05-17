@@ -106,7 +106,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
             auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
             const auto& evaluated = getEvaluated<HeatmapLayerProperties>(renderData->layerProperties);
 
-            const auto extrudeScale = tile.id.pixelsToTileUnits(1, parameters.state.getZoom());
+            const auto extrudeScale = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
             const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
@@ -119,7 +119,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                     uniforms::heatmap::extrude_scale::Value(extrudeScale)},
                 paintPropertyBinders,
                 evaluated,
-                parameters.state.getZoom());
+                static_cast<float>(parameters.state.getZoom()));
             const auto allAttributeBindings =
                 HeatmapProgram::computeAllAttributeBindings(*bucket.vertexBuffer, paintPropertyBinders, evaluated);
 
@@ -159,7 +159,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                     getEvaluated<HeatmapLayerProperties>(evaluatedProperties).get<HeatmapOpacity>())},
             paintAttributeData,
             properties,
-            parameters.state.getZoom());
+            static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings = HeatmapTextureProgram::computeAllAttributeBindings(
             *parameters.staticData.heatmapTextureVertexBuffer, paintAttributeData, properties);
 
@@ -199,10 +199,10 @@ void RenderHeatmapLayer::updateColorRamp() {
 
     for (uint32_t i = 0; i < length; i += 4) {
         const auto color = colorValue.evaluate(static_cast<double>(i) / length);
-        colorRamp.data[i + 0] = std::floor(color.r * 255);
-        colorRamp.data[i + 1] = std::floor(color.g * 255);
-        colorRamp.data[i + 2] = std::floor(color.b * 255);
-        colorRamp.data[i + 3] = std::floor(color.a * 255);
+        colorRamp.data[i + 0] = static_cast<uint8_t>(std::floor(color.r * 255.f));
+        colorRamp.data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
+        colorRamp.data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
+        colorRamp.data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
     }
 
     if (colorRampTexture) {

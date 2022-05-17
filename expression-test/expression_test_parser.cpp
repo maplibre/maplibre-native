@@ -470,7 +470,7 @@ Value toValue(const Compiled& compiled) {
 optional<Value> toValue(const expression::Value& exprValue) {
     return exprValue.match(
         [](const Color& c) -> optional<Value> {
-            std::vector<Value> color { double(c.r), double(c.g), double(c.b), double(c.a) };
+            std::vector<Value> color { static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a) };
             return {Value{std::move(color)}};
         },
         [](const expression::Formatted& formatted) -> optional<Value> { return {formatted.toObject()}; },

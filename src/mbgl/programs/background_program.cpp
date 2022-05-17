@@ -19,8 +19,8 @@ BackgroundPatternProgram::layoutUniformValues(mat4 matrix,
                                               const CrossfadeParameters& fading,
                                               const UnwrappedTileID& tileID,
                                               const TransformState& state) {
-    int32_t tileSizeAtNearestZoom = util::tileSize * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z);
-    int32_t pixelX = tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z));
+    int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
+    int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
     int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
 
     return {
@@ -36,8 +36,8 @@ BackgroundPatternProgram::layoutUniformValues(mat4 matrix,
         uniforms::scale_a::Value( fading.fromScale ),
         uniforms::scale_b::Value( fading.toScale ),
         uniforms::mix::Value( fading.t ),
-        uniforms::pixel_coord_upper::Value( std::array<float, 2> {{ float(pixelX >> 16), float(pixelY >> 16) }}),
-        uniforms::pixel_coord_lower::Value( std::array<float, 2> {{ float(pixelX & 0xFFFF), float(pixelY & 0xFFFF)}}),
+        uniforms::pixel_coord_upper::Value( std::array<float, 2> {{ static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16) }}),
+        uniforms::pixel_coord_lower::Value( std::array<float, 2> {{ static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)}}),
         uniforms::tile_units_to_pixels::Value( 1.0f / tileID.pixelsToTileUnits(1.0f, state.getIntegerZoom()) ),
     };
 }

@@ -145,7 +145,7 @@ void align(Shaping& shaping,
     if (maxLineHeight != lineHeight) {
         shiftY = -blockHeight * verticalAlign - Shaping::yOffset;
     } else {
-        shiftY = (-verticalAlign * lineCount + 0.5) * lineHeight;
+        shiftY = (-verticalAlign * static_cast<float>(lineCount + 0.5)) * lineHeight;
     }
 
     for (auto& line : shaping.positionedLines) {
@@ -164,7 +164,7 @@ void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, 
 
     PositionedGlyph& lastGlyph = positionedGlyphs.back();
     const float lastAdvance = lastGlyph.metrics.advance * lastGlyph.scale;
-    const float lineIndent = float(lastGlyph.x + lastAdvance) * justify;
+    const auto lineIndent = static_cast<float>(lastGlyph.x + lastAdvance) * justify;
     for (auto& positionedGlyph : positionedGlyphs) {
         positionedGlyph.x -= lineIndent;
         positionedGlyph.y += lineOffset;
@@ -186,13 +186,13 @@ float getGlyphAdvance(char16_t codePoint,
         if (it == glyphs->second.end() || !it->second) {
             return 0.0f;
         }
-        return (*it->second)->metrics.advance * section.scale + spacing;
+        return static_cast<float>((*it->second)->metrics.advance * section.scale) + spacing;
     } else {
         auto image = imagePositions.find(*section.imageID);
         if (image == imagePositions.end()) {
             return 0.0f;
         }
-        return image->second.displaySize()[0] * section.scale * util::ONE_EM / layoutTextSize + spacing;
+        return image->second.displaySize()[0] * static_cast<float>(section.scale) * util::ONE_EM / layoutTextSize + spacing;
     }
 }
 
@@ -210,12 +210,12 @@ float determineAverageLineWidth(const TaggedString& logicalInput,
         totalWidth += getGlyphAdvance(codePoint, section, glyphMap, imagePositions, layoutTextSize, spacing);
     }
     
-    int32_t targetLineCount = ::fmax(1, std::ceil(totalWidth / maxWidth));
+    auto targetLineCount = static_cast<int32_t>(::fmax(1, std::ceil(totalWidth / maxWidth)));
     return totalWidth / targetLineCount;
 }
 
 float calculateBadness(const float lineWidth, const float targetWidth, const float penalty, const bool isLastBreak) {
-    const float raggedness = std::pow(lineWidth - targetWidth, 2);
+    const float raggedness = static_cast<float>(std::pow(lineWidth - targetWidth, 2));
     if (isLastBreak) {
         // Favor finals lines shorter than average over longer than average
         if (lineWidth < targetWidth) {
@@ -225,9 +225,9 @@ float calculateBadness(const float lineWidth, const float targetWidth, const flo
         }
     }
     if (penalty < 0) {
-        return raggedness - std::pow(penalty, 2);
+        return raggedness - penalty * penalty;
     }
-    return raggedness + std::pow(penalty, 2);
+    return raggedness + penalty * penalty;
 }
 
 float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penalizableIdeographicBreak) {
@@ -364,7 +364,7 @@ void shapeLines(Shaping& shaping,
     float y = Shaping::yOffset;
 
     float maxLineLength = 0.0f;
-    double maxLineHeight = 0.0f;
+    float maxLineHeight = 0.0f;
 
     const float justify =
         textJustify == style::TextJustifyType::Right ? 1.0f : textJustify == style::TextJustifyType::Left ? 0.0f : 0.5f;
@@ -428,7 +428,7 @@ void shapeLines(Shaping& shaping,
                     }
                     metrics = (*glyph->second)->metrics;
                 }
-                advance = metrics.advance;
+                advance = static_cast<float>(metrics.advance);
                 // We don't know the baseline, but since we're laying out
                 // at 24 points, we can calculate how much it will move when
                 // we scale up or down.
@@ -440,11 +440,11 @@ void shapeLines(Shaping& shaping,
                 }
                 shaping.iconsInText |= true;
                 const auto& displaySize = image->second.displaySize();
-                metrics.width = displaySize[0];
-                metrics.height = displaySize[1];
+                metrics.width = static_cast<uint32_t>(displaySize[0]);
+                metrics.height = static_cast<uint32_t>(displaySize[1]);
                 metrics.left = ImagePosition::padding;
                 metrics.top = -Glyph::borderSize;
-                metrics.advance = vertical ? displaySize[1] : displaySize[0];
+                metrics.advance = vertical ? metrics.height : metrics.width;
                 rect = image->second.paddedRect;
 
                 // If needed, allow to set scale factor for an image using
@@ -454,9 +454,9 @@ void shapeLines(Shaping& shaping,
 
                 // Difference between one EM and an image size.
                 // Aligns bottom of an image to a baseline level.
-                float imageOffset = util::ONE_EM - displaySize[1] * sectionScale;
+                float imageOffset = util::ONE_EM - displaySize[1] * static_cast<float>(sectionScale);
                 baselineOffset = maxLineOffset + imageOffset;
-                advance = verticalAdvance = metrics.advance;
+                advance = verticalAdvance = static_cast<float>(metrics.advance);
 
                 // Difference between height of an image and one EM at max line scale.
                 // Pushes current line down if an image size is over 1 EM at max line scale.
@@ -470,27 +470,27 @@ void shapeLines(Shaping& shaping,
             if (!vertical) {
                 positionedGlyphs.emplace_back(codePoint,
                                               x,
-                                              y + baselineOffset,
+                                              y + static_cast<float>(baselineOffset),
                                               vertical,
                                               section.fontStackHash,
-                                              sectionScale,
+                                              static_cast<float>(sectionScale),
                                               rect,
                                               metrics,
                                               section.imageID,
                                               sectionIndex);
-                x += advance * sectionScale + spacing;
+                x += advance * static_cast<float>(sectionScale) + spacing;
             } else {
                 positionedGlyphs.emplace_back(codePoint,
                                               x,
-                                              y + baselineOffset,
+                                              y + static_cast<float>(baselineOffset),
                                               vertical,
                                               section.fontStackHash,
-                                              sectionScale,
+                                              static_cast<float>(sectionScale),
                                               rect,
                                               metrics,
                                               section.imageID,
                                               sectionIndex);
-                x += verticalAdvance * sectionScale + spacing;
+                x += verticalAdvance * static_cast<float>(sectionScale) + spacing;
                 shaping.verticalizable |= true;
             }
         }
@@ -499,13 +499,13 @@ void shapeLines(Shaping& shaping,
         if (!positionedGlyphs.empty()) {
             float lineLength = x - spacing; // Don't count trailing spacing
             maxLineLength = util::max(lineLength, maxLineLength);
-            justifyLine(positionedGlyphs, justify, lineOffset);
+            justifyLine(positionedGlyphs, justify, static_cast<float>(lineOffset));
         }
 
-        double currentLineHeight = lineHeight * lineMaxScale + lineOffset;
+        auto currentLineHeight = static_cast<float>(lineHeight * lineMaxScale + lineOffset);
         x = 0.0f;
         y += currentLineHeight;
-        positionedLine.lineOffset = std::max(lineOffset, maxLineOffset);
+        positionedLine.lineOffset = static_cast<float>(std::max(lineOffset, maxLineOffset));
         maxLineHeight = std::max(currentLineHeight, maxLineHeight);
     }
 

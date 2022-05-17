@@ -59,7 +59,7 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
-    bearing = parameters.transform.state.getBearing();
+    bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
     auto tiles = makeMutable<std::vector<RenderTile>>();
@@ -97,8 +97,8 @@ RenderTiles RenderTileSource::getRenderTiles() const {
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {
     if (!renderTilesSortedByY) {
         const auto comp = [bearing = this->bearing](const RenderTile& a, const RenderTile& b) {
-            Point<float> pa(a.id.canonical.x, a.id.canonical.y);
-            Point<float> pb(b.id.canonical.x, b.id.canonical.y);
+            Point<float> pa(static_cast<float>(a.id.canonical.x), static_cast<float>(a.id.canonical.y));
+            Point<float> pb(static_cast<float>(b.id.canonical.x), static_cast<float>(b.id.canonical.y));
 
             auto par = util::rotate(pa, bearing);
             auto pbr = util::rotate(pb, bearing);

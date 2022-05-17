@@ -1,8 +1,17 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/math/clamp.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4005)
+#endif
 
 #include <mapbox/geometry/wagyu/wagyu.hpp>
-#include <mbgl/math/clamp.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace mbgl {
 
@@ -184,11 +193,11 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
 
         auto x = (c.x + 180.0) * size / 360.0 - x0;
         p.x =
-            int16_t(util::clamp<int64_t>(x, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
+            int16_t(util::clamp<int64_t>(static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         auto y = (180 - (std::log(std::tan((c.y + 90) * M_PI / 360.0)) * 180 / M_PI)) * size / 360 - y0;
         p.y =
-            int16_t(util::clamp<int64_t>(y, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
+            int16_t(util::clamp<int64_t>(static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         return p;
     };

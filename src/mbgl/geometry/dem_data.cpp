@@ -85,7 +85,7 @@ void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy
 int32_t DEMData::get(const int32_t x, const int32_t y) const {
     const auto& unpack = getUnpackVector();
     const uint8_t* value = image.data.get() + idx(x, y) * 4;
-    return value[0] * unpack[0] + value[1] * unpack[1] + value[2] * unpack[2] - unpack[3];
+    return static_cast<int32_t>(value[0] * unpack[0] + value[1] * unpack[1] + value[2] * unpack[2] - unpack[3]);
 }
 
 const std::array<float, 4>& DEMData::getUnpackVector() const {

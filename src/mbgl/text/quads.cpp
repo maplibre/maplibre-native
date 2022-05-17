@@ -76,8 +76,8 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     const float iconWidth = shapedIcon.right() - shapedIcon.left();
     const float iconHeight = shapedIcon.bottom() - shapedIcon.top();
 
-    const ImageStretches stretchXFull{{0, imageWidth}};
-    const ImageStretches stretchYFull{{0, imageHeight}};
+    const ImageStretches stretchXFull{{0.0f, imageWidth}};
+    const ImageStretches stretchYFull{{0.0f, imageHeight}};
     const ImageStretches& stretchX = !image.stretchX.empty() ? image.stretchX : stretchXFull;
     const ImageStretches& stretchY = !image.stretchY.empty() ? image.stretchY : stretchYFull;
 
@@ -109,7 +109,7 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
 
     optional<std::array<float, 4>> matrix{nullopt};
     if (iconRotate) {
-        const float angle = iconRotate * util::DEG2RAD;
+        const float angle = iconRotate * util::DEG2RAD_F;
         const float angle_sin = std::sin(angle);
         const float angle_cos = std::cos(angle);
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
@@ -201,7 +201,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const style::SymbolPlacementType placement,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
-    const float textRotate = layout.get<TextRotate>() * util::DEG2RAD;
+    const float textRotate = layout.get<TextRotate>() * util::DEG2RAD_F;
     const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
 
     SymbolQuads quads;
@@ -216,7 +216,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
             float pixelRatio = 1.0f;
             float lineOffset = 0.0f;
             const bool rotateVerticalGlyph = (alongLine || allowVerticalPlacement) && positionedGlyph.vertical;
-            const float halfAdvance = positionedGlyph.metrics.advance * positionedGlyph.scale / 2.0;
+            const float halfAdvance = positionedGlyph.metrics.advance * positionedGlyph.scale / 2.0f;
             const Rect<uint16_t>& rect = positionedGlyph.rect;
             bool isSDF = true;
 

@@ -67,7 +67,7 @@ static float contrastFactor(float contrast) {
 }
 
 static std::array<float, 3> spinWeights(float spin) {
-    spin *= util::DEG2RAD;
+    spin *= util::DEG2RAD_F;
     float s = std::sin(spin);
     float c = std::cos(spin);
     std::array<float, 3> spin_weights = {{
@@ -116,7 +116,7 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
             },
             paintAttributeData,
             evaluated,
-            parameters.state.getZoom());
+            static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings =
             RasterProgram::computeAllAttributeBindings(vertexBuffer, paintAttributeData, evaluated);
 

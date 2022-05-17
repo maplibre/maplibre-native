@@ -96,15 +96,15 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
                                                               parameters.state)),
                 uniforms::scale_with_map::Value(scaleWithMap),
                 uniforms::extrude_scale::Value(
-                    pitchWithMap ? std::array<float, 2>{{tile.id.pixelsToTileUnits(1, parameters.state.getZoom()),
-                                                         tile.id.pixelsToTileUnits(1, parameters.state.getZoom())}}
+                    pitchWithMap ? std::array<float, 2>{{tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+                                                         tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
                                  : parameters.pixelsToGLUnits),
                 uniforms::device_pixel_ratio::Value(parameters.pixelRatio),
                 uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance()),
                 uniforms::pitch_with_map::Value(pitchWithMap)),
             paintPropertyBinders,
             evaluated,
-            parameters.state.getZoom());
+            static_cast<float>(parameters.state.getZoom()));
         const auto& allAttributeBindings =
             CircleProgram::computeAllAttributeBindings(*circleBucket.vertexBuffer, paintPropertyBinders, evaluated);
 
@@ -177,7 +177,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
             queryGeometry,
             evaluated.get<style::CircleTranslate>(),
             evaluated.get<style::CircleTranslateAnchor>(),
-            transformState.getBearing(),
+            static_cast<float>(transformState.getBearing()),
             pixelsToTileUnits).value_or(queryGeometry);
 
     // Evaluate functions
@@ -206,9 +206,9 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
             auto pitchAlignment = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature);
             if (pitchScale == CirclePitchScaleType::Viewport && pitchAlignment == AlignmentType::Map) {
-                adjustedSize *= center[3] / transformState.getCameraToCenterDistance();
+                adjustedSize *= static_cast<float>(center[3] / transformState.getCameraToCenterDistance());
             } else if (pitchScale == CirclePitchScaleType::Map && pitchAlignment == AlignmentType::Viewport) {
-                adjustedSize *= transformState.getCameraToCenterDistance() / center[3];
+                adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / center[3]);
             }
 
             if (util::polygonIntersectsBufferedPoint(transformedQueryGeometry, transformedPoint, adjustedSize)) return true;

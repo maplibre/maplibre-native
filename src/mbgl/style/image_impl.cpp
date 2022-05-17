@@ -50,9 +50,9 @@ Image::Impl::Impl(std::string id_,
         throw util::StyleImageException("dimensions may not be zero");
     } else if (pixelRatio <= 0) {
         throw util::StyleImageException("pixelRatio may not be <= 0");
-    } else if (!validateStretch(stretchX, image.size.width)) {
+    } else if (!validateStretch(stretchX, static_cast<float>(image.size.width))) {
         throw util::StyleImageException("stretchX is out of bounds or overlapping");
-    } else if (!validateStretch(stretchY, image.size.height)) {
+    } else if (!validateStretch(stretchY, static_cast<float>(image.size.height))) {
         throw util::StyleImageException("stretchY is out of bounds or overlapping");
     } else if (content && !validateContent(*content, image.size)) {
         throw util::StyleImageException("content area is invalid");

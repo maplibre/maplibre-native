@@ -20,12 +20,12 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
 
     auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
     auto y =
-        (util::LONGITUDE_MAX - (std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)) * util::RAD2DEG)) *
+        (util::LONGITUDE_MAX - (std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)) * util::RAD2DEG_D)) *
         size / util::DEGREES_MAX;
 
     Point<int64_t> p;
-    p.x = (util::clamp<int64_t>(x, std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
-    p.y = (util::clamp<int64_t>(y, std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.x = (util::clamp<int64_t>(static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.y = (util::clamp<int64_t>(static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
 
     return p;
 };
@@ -94,7 +94,7 @@ MultiPoint<int64_t> getTilePoints(const GeometryCoordinates& points,
                                   const WithinBBox& polyBBox) {
     const int64_t xShift = util::EXTENT * canonical.x;
     const int64_t yShift = util::EXTENT * canonical.y;
-    const auto worldSize = util::EXTENT * std::pow(2, canonical.z);
+    const auto worldSize = static_cast<int64_t>(util::EXTENT * std::pow(2, canonical.z));
     MultiPoint<int64_t> results;
     results.reserve(points.size());
     for (const auto& p : points) {
@@ -125,7 +125,7 @@ MultiLineString<int64_t> getTileLines(const GeometryCollection& lines,
         results.push_back(std::move(lineString));
     }
 
-    const auto worldSize = util::EXTENT * std::pow(2, canonical.z);
+    const auto worldSize = static_cast<int64_t>(util::EXTENT * std::pow(2, canonical.z));
     if (bbox[2] - bbox[0] <= worldSize / 2) {
         bbox = DefaultWithinBBox;
         for (auto& line : results) {

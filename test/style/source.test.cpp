@@ -774,7 +774,7 @@ public:
                            needsRelayout,
                            parameters,
                            *baseImpl,
-                           util::tileSize,
+                           util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
                            [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });

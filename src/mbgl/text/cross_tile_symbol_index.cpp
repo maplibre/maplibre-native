@@ -33,7 +33,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
                                  const OverscaledTileID& newCoord,
                                  std::set<uint32_t>& zoomCrossTileIDs) const {
     auto& symbolInstances = bucket.symbolInstances;
-    float tolerance = coord.canonical.z < newCoord.canonical.z ? 1 : std::pow(2, coord.canonical.z - newCoord.canonical.z);
+    float tolerance = coord.canonical.z < newCoord.canonical.z ? 1.0f : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
 
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
@@ -76,7 +76,7 @@ CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_) 
  * so that they match the new wrapped version of the map.
  */
 void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
-    const int wrapDelta = std::round((newLng - lng) / 360);
+    const auto wrapDelta = static_cast<int>(std::round((newLng - lng) / 360.0f));
     if (wrapDelta != 0) {
         std::map<uint8_t, std::map<OverscaledTileID,TileLayerIndex>> newIndexes;
         for (auto& zoomIndex : indexes) {
@@ -102,10 +102,10 @@ bool isInVewport(const mat4& posMatrix, const Point<float>& point) {
     matrix::transformMat4(p, p, posMatrix);
 
     // buffer covers area of the next zoom level (current zoom - 1 covered area).
-    constexpr float buffer = 1.0f;
-    constexpr float edge = 1.0f + buffer;
-    float x = p[0] / p[3];
-    float y = p[1] / p[3];
+    constexpr double buffer = 1.0;
+    constexpr double edge = 1.0 + buffer;
+    const double x = p[0] / p[3];
+    const double y = p[1] / p[3];
     return (x > -edge && y > -edge && x < edge && y < edge);
 }
 
