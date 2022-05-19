@@ -121,12 +121,12 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     [self sendEventForURLResponse:response withAction:@"cancel"];
 }
 
-- (void)debugLog:(NSString *)format, ... {
-    MGLLogDebug(format);
+- (void)debugLog:(NSString *)message {
+    MGLLogDebug(message);
 }
 
-- (void)errorLog:(NSString *)format, ... {
-    MGLLogError(format);
+- (void)errorLog:(NSString *)message {
+    MGLLogError(message);
 }
 
 #pragma mark - Event management

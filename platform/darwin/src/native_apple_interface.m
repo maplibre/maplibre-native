@@ -53,13 +53,21 @@ static MGLNativeNetworkManager *instance = nil;
 }
 
 - (void)debugLog:(NSString *)format, ... {
-    // TODO: Replace with existing mbgl logging handling.
-    [self.delegate debugLog:format];
+    va_list formatList;
+    va_start(formatList, format);
+    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
+    va_end(formatList);
+
+    [self.delegate debugLog:formattedMessage];
 }
 
 - (void)errorLog:(NSString *)format, ... {
-    // TODO: Replace with existing mbgl logging handling.
-    [self.delegate errorLog:format];
+    va_list formatList;
+    va_start(formatList, format);
+    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
+    va_end(formatList);
+
+    [self.delegate errorLog:formattedMessage];
 }
 
 @end

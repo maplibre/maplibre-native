@@ -20,9 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)stopDownloadEventForResponse:(NSURLResponse *)response;
 
-- (void)debugLog:(NSString *)format, ...;
+- (void)debugLog:(NSString *)message;
 
-- (void)errorLog:(NSString *)format, ...;
+- (void)errorLog:(NSString *)message;
 
 @end
 
