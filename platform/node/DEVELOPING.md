@@ -1,6 +1,6 @@
-# Developing the Mapbox GL Native Node.js module
+# Developing the Maplibre GL Native Node.js module
 
-This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Mapbox GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
+This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Maplibre GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
 
 ## Building
 
@@ -8,11 +8,68 @@ To develop these bindings, you’ll need to build them from source. Building req
 the [macOS](../macos/INSTALL.md#requirements) or [Linux](../linux/README.md#prerequisites) install documentation, depending
 on the target platform.
 
+First you'll need to install dependencies:
+
+
+#### MacOS
+
+```bash
+brew install \
+  cmake \
+  ccache \
+  ninja \
+  pkg-config \
+  glfw3 \
+  libuv
+```
+
+#### Linux (Ubuntu)
+
+```bash
+sudo apt-get install -y \
+  ccache \
+  cmake \
+  ninja-build \
+  pkg-config \
+  xvfb \
+  libcurl4-openssl-dev \
+  libglfw3-dev \
+  libuv1-dev \
+  g++-10 \
+  libc++-9-dev \
+  libc++abi-9-dev
+/usr/sbin/update-ccache-symlinks
+```
+
+### Compiling
+
 To compile the Node.js bindings and install module dependencies, from the repository root directory, first run:
 
+#### MacOS
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
 ```
-make distclean
+
+Then, as a temporary step until build system is changed, run:
+```bash
+sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
 ```
+
+#### Linux
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+```
+
+### Building
+
+Finally, build:
+```bash
+cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
+
 
 If you are rebuilding after time has passed.
 
@@ -33,7 +90,7 @@ npm test
 
 ## Merging your pull request
 
-To clean up your pull request and prepare it for merging, update your local `master` branch, then run `git rebase -i master` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `master` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
+To clean up your pull request and prepare it for merging, update your local `main` branch, then run `git rebase -i main` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `main` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
 
 ## Publishing
 
@@ -55,4 +112,4 @@ If everything looks good:
 
 ### Preleases
 
-Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is pretty much the same except that you'll be making your version number commit and `git tag node-v{VERSION}` (like `git tag node-v3.3.2-pre.1`) on a pull request branch before merging it rather than on `master`.
+Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is pretty much the same except that you'll be making your version number commit and `git tag node-v{VERSION}` (like `git tag node-v3.3.2-pre.1`) on a pull request branch before merging it rather than on `main`.

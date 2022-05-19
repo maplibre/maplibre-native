@@ -49,7 +49,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 [&](bool b) { writer.Bool(b); },
                 [&](double f) {
                     // make sure integer values are stringified without trailing ".0".
-                    f == std::floor(f) ? writer.Int(f) : writer.Double(f);
+                    f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
                 },
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
@@ -270,7 +270,7 @@ optional<Position> ValueConverter<Position>::fromExpressionValue(const Value& v)
 }
 
 Value ValueConverter<Rotation>::toExpressionValue(const mbgl::style::Rotation& value) {
-    return ValueConverter<float>::toExpressionValue(value.getAngle());
+    return ValueConverter<float>::toExpressionValue(static_cast<float>(value.getAngle()));
 }
 
 optional<Rotation> ValueConverter<Rotation>::fromExpressionValue(const Value& v) {

@@ -118,7 +118,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                 programInstance.computeAllUniformValues(std::forward<decltype(uniformValues)>(uniformValues),
                                                         paintPropertyBinders,
                                                         evaluated,
-                                                        parameters.state.getZoom());
+                                                        static_cast<float>(parameters.state.getZoom()));
             const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
                 *bucket.vertexBuffer,
                 paintPropertyBinders,
@@ -157,7 +157,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                                                      dashPatternTexture.getFrom(),
                                                      dashPatternTexture.getTo(),
                                                      crossfade,
-                                                     dashPatternTexture.getSize().width),
+                                                     static_cast<float>(dashPatternTexture.getSize().width)),
                  {},
                  {},
                  LineSDFProgram::TextureBindings{
@@ -263,7 +263,7 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
             queryGeometry,
             evaluated.get<style::LineTranslate>(),
             evaluated.get<style::LineTranslateAnchor>(),
-            transformState.getBearing(),
+            static_cast<float>(transformState.getBearing()),
             pixelsToTileUnits);
 
     // Evaluate function
@@ -297,10 +297,10 @@ void RenderLineLayer::updateColorRamp() {
 
     for (uint32_t i = 0; i < length; i += 4) {
         const auto color = colorValue.evaluate(static_cast<double>(i) / length);
-        colorRamp.data[i] = std::floor(color.r * 255);
-        colorRamp.data[i + 1] = std::floor(color.g * 255);
-        colorRamp.data[i + 2] = std::floor(color.b * 255);
-        colorRamp.data[i + 3] = std::floor(color.a * 255);
+        colorRamp.data[i] = static_cast<uint8_t>(std::floor(color.r * 255.f));
+        colorRamp.data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
+        colorRamp.data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
+        colorRamp.data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
     }
 
     if (colorRampTexture) {

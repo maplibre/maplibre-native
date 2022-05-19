@@ -727,7 +727,7 @@ void Context::reduceMemoryUsage() {
 
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     setStencilMode(gfx::StencilMode::disabled());
     setDepthMode(gfx::DepthMode::disabled());
     setColorMode(gfx::ColorMode::unblended());
@@ -756,7 +756,7 @@ void Context::visualizeStencilBuffer() {
 
 void Context::visualizeDepthBuffer(const float depthRangeSize) {
     (void)depthRangeSize;
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     setStencilMode(gfx::StencilMode::disabled());
     setDepthMode(gfx::DepthMode::disabled());
     setColorMode(gfx::ColorMode::unblended());

@@ -39,7 +39,7 @@ TEST(API, RecycleMapUpdateImages) {
         map->getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
         map->getStyle().addSource(std::move(source));
         map->getStyle().addLayer(std::move(layer));
-        map->getStyle().addImage(std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0));
+        map->getStyle().addImage(std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0f));
     };
 
     // default marker

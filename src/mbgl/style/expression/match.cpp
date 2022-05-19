@@ -108,7 +108,7 @@ template<> EvaluationResult Match<int64_t>::evaluate(const EvaluationContext& pa
     }
 
     const auto numeric = inputValue->get<double>();
-    int64_t rounded = std::floor(numeric);
+    const auto rounded = static_cast<int64_t>(std::floor(numeric));
     if (numeric == rounded) {
         auto it = branches.find(rounded);
         if (it != branches.end()) {

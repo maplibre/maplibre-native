@@ -1,6 +1,16 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 #include <mapbox/vector_tile.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <protozero/pbf_reader.hpp>
 
 #include <unordered_map>

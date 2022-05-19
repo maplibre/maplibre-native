@@ -66,8 +66,8 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
     }
 
     // Determine query radius
-    const float pixelsToTileUnits = util::EXTENT / tileSize / scale;
-    const int16_t additionalPadding = std::min<int16_t>(util::EXTENT, additionalQueryPadding * pixelsToTileUnits);
+    const auto pixelsToTileUnits = static_cast<float>(util::EXTENT / tileSize / scale);
+    const int16_t additionalPadding = std::min<int16_t>(util::EXTENT, static_cast<int16_t>(additionalQueryPadding * pixelsToTileUnits));
 
     // Query the grid index
     mapbox::geometry::box<int16_t> box = mapbox::geometry::envelope(queryGeometry);
@@ -194,7 +194,7 @@ optional<GeometryCoordinates> FeatureIndex::translateQueryGeometry(
         return {};
     }
 
-    GeometryCoordinate translateVec(translate[0] * pixelsToTileUnits, translate[1] * pixelsToTileUnits);
+    GeometryCoordinate translateVec(static_cast<int16_t>(translate[0] * pixelsToTileUnits), static_cast<int16_t>(translate[1] * pixelsToTileUnits));
     if (anchorType == style::TranslateAnchorType::Viewport) {
         translateVec = util::rotate(translateVec, -bearing);
     }

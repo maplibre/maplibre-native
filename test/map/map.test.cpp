@@ -121,7 +121,7 @@ TEST(Map, RendererState) {
     }
 
     // RendererState::hasImage
-    test.map.getStyle().addImage(std::make_unique<style::Image>("default_marker", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0));
+    test.map.getStyle().addImage(std::make_unique<style::Image>("default_marker", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f));
 
     // The frontend has not yet been notified about the newly-added image.
     EXPECT_FALSE(test.frontend.hasImage("default_marker"));

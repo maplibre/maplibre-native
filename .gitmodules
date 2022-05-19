@@ -18,7 +18,7 @@
 	url = https://github.com/okdshin/unique_resource.git
 [submodule "vendor/boost"]
 	path = vendor/boost
-	url = https://github.com/mapbox/mapbox-gl-native-boost.git
+	url = https://github.com/maplibre/maplibre-gl-native-boost.git
 [submodule "vendor/benchmark"]
 	path = vendor/benchmark
 	url = https://github.com/google/benchmark.git

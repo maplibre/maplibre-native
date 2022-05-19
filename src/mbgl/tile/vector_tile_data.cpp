@@ -39,7 +39,7 @@ FeatureIdentifier VectorTileFeature::getID() const {
 
 const GeometryCollection& VectorTileFeature::getGeometries() const {
     if (!lines) {
-        const float scale = float(util::EXTENT) / feature.getExtent();
+        const auto scale = static_cast<float>(util::EXTENT) / feature.getExtent();
         lines = feature.getGeometries<GeometryCollection>(scale);
         if (feature.getVersion() < 2 && feature.getType() == mapbox::vector_tile::GeomType::POLYGON) {
             lines = fixupPolygons(*lines);

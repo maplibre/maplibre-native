@@ -140,6 +140,16 @@ struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
             return { a };
         }
     }
+
+    PossiblyEvaluatedPropertyValue<T> operator()(const PossiblyEvaluatedPropertyValue<T>& a,
+                                                 const PossiblyEvaluatedPropertyValue<T>& b,
+                                                 const float t) const {
+        if (a.isConstant() && b.isConstant()) {
+            return { interpolate(*a.constant(), *b.constant(), t) };
+        } else {
+            return { a };
+        }
+    }
 };
 
 } // namespace util

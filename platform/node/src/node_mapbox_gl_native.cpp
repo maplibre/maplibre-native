@@ -7,6 +7,7 @@
 
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/gfx/backend.hpp>
+#include <mbgl/gfx/backend_scope.hpp>
 
 #include "node_map.hpp"
 #include "node_logging.hpp"
@@ -33,7 +34,7 @@ void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) 
     Nan::SetMethod(target, "setBackendType", SetBackendType);
 
     node_mbgl::NodeMap::Init(target);
-    node_mbgl::NodeRequest::Init();
+    node_mbgl::NodeRequest::Init(target);
     node_mbgl::NodeExpression::Init(target);
 
     // Exports Resource constants.

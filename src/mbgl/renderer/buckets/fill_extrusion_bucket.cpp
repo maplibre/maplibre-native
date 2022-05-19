@@ -6,7 +6,16 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/constants.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 #include <mapbox/earcut.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <cassert>
 

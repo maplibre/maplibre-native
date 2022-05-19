@@ -212,7 +212,7 @@ void drawText(const DrawFn& draw,
 
     if (bucket.iconsInText) {
         const ZoomEvaluatedSize partiallyEvaluatedTextSize =
-            bucket.textSizeBinder->evaluateForZoom(parameters.state.getZoom());
+            bucket.textSizeBinder->evaluateForZoom(static_cast<float>(parameters.state.getZoom()));
         const bool transformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
         const Size& iconTexSize = tile.getIconAtlasTexture().size;
         const gfx::TextureBinding iconTextureBinding{
@@ -363,7 +363,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
             *symbolSizeBinder,
             binders,
             paintProperties,
-            parameters.state.getZoom()
+            static_cast<float>(parameters.state.getZoom())
         );
 
         const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
@@ -462,8 +462,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
 
             static const style::Properties<>::PossiblyEvaluated properties{};
             static const CollisionBoxProgram::Binders paintAttributeData(properties, 0);
-            auto pixelRatio = tile.id.pixelsToTileUnits(1, parameters.state.getZoom());
-            const float scale = std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ);
+            const auto pixelRatio = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
+            const auto scale = static_cast<float>(std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ));
             std::array<float,2> extrudeScale =
                 {{
                     parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
@@ -498,7 +498,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                     paintAttributeData,
                     properties,
                     CollisionBoxProgram::TextureBindings{},
-                    parameters.state.getZoom(),
+                    static_cast<float>(parameters.state.getZoom()),
                     getID());
             }
             if (hasCollisionCircle) {
@@ -516,7 +516,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                                  ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
                                  : tile.matrix)),
                         uniforms::extrude_scale::Value(extrudeScale),
-                        uniforms::overscale_factor::Value(float(tile.getOverscaledTileID().overscaleFactor())),
+                        uniforms::overscale_factor::Value(static_cast<float>(tile.getOverscaledTileID().overscaleFactor())),
                         uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())
                     },
                     *collisionCircle->vertexBuffer,
@@ -526,7 +526,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                     paintAttributeData,
                     properties,
                     CollisionCircleProgram::TextureBindings{},
-                    parameters.state.getZoom(),
+                    static_cast<float>(parameters.state.getZoom()),
                     getID());
             }
         };

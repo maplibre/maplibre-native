@@ -92,11 +92,11 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(int64_t t) {
-        return operator()(double(t));
+        return operator()(static_cast<double>(t));
     }
 
     v8::Local<v8::Value> operator()(uint64_t t) {
-        return operator()(double(t));
+        return operator()(static_cast<double>(t));
     }
 
     v8::Local<v8::Value> operator()(double t) {
@@ -113,7 +113,7 @@ struct ToValue {
         Nan::EscapableHandleScope scope;
         v8::Local<v8::Array> result = Nan::New<v8::Array>();
         for (std::size_t i = 0; i < array.size(); i++) {
-            result->Set(i, toJS(array[i]));
+            Nan::Set(result, i, toJS(array[i]));
         }
         return scope.Escape(result);
     }

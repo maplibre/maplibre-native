@@ -24,7 +24,7 @@ class CustomGeometrySource final : public Source {
 public:
     struct TileOptions {
         double tolerance = 0.375;
-        uint16_t tileSize = util::tileSize;
+        uint16_t tileSize = util::tileSize_I;
         uint16_t buffer = 128;
         bool clip = false;
         bool wrap = false;

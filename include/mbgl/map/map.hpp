@@ -23,6 +23,7 @@
 namespace mbgl {
 
 class RendererFrontend;
+class TransformState;
 
 namespace style {
 class Image;
@@ -109,6 +110,9 @@ public:
     LatLng latLngForPixel(const ScreenCoordinate&) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
+
+    // Transform
+    TransformState getTransfromState() const;
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);

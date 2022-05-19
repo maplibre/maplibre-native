@@ -1,6 +1,6 @@
 export BUILDTYPE ?= Debug
 export IS_LOCAL_DEVELOPMENT ?= true
-export TARGET_BRANCH ?= master
+export TARGET_BRANCH ?= main
 
 CMAKE ?= cmake
 

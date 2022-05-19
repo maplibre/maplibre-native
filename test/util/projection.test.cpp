@@ -19,7 +19,7 @@ TEST(Projection, Boundaries) {
 
     projected = Projection::project(sw, minScale);
     EXPECT_DOUBLE_EQ(projected.x, 0.0);
-    EXPECT_DOUBLE_EQ(projected.y, util::tileSize);
+    EXPECT_DOUBLE_EQ(projected.y, util::tileSize_D);
 
     unprojected = Projection::unproject(projected, minScale);
     EXPECT_DOUBLE_EQ(unprojected.latitude(), -util::LATITUDE_MAX);
@@ -27,14 +27,14 @@ TEST(Projection, Boundaries) {
 
     projected = Projection::project(sw, maxScale);
     EXPECT_DOUBLE_EQ(projected.x, 0.0);
-    EXPECT_DOUBLE_EQ(projected.y, util::tileSize * maxScale);
+    EXPECT_DOUBLE_EQ(projected.y, util::tileSize_D * maxScale);
 
     unprojected = Projection::unproject(projected, maxScale);
     EXPECT_DOUBLE_EQ(unprojected.latitude(), -util::LATITUDE_MAX);
     EXPECT_DOUBLE_EQ(unprojected.longitude(), sw.longitude());
 
     projected = Projection::project(ne, minScale);
-    EXPECT_DOUBLE_EQ(projected.x, util::tileSize);
+    EXPECT_DOUBLE_EQ(projected.x, util::tileSize_D);
     ASSERT_NEAR(projected.y, 0.0, 1e-10);
 
     unprojected = Projection::unproject(projected, minScale);
@@ -42,7 +42,7 @@ TEST(Projection, Boundaries) {
     EXPECT_DOUBLE_EQ(unprojected.longitude(), ne.longitude());
 
     projected = Projection::project(ne, maxScale);
-    EXPECT_DOUBLE_EQ(projected.x, util::tileSize * maxScale);
+    EXPECT_DOUBLE_EQ(projected.x, util::tileSize_D * maxScale);
     ASSERT_NEAR(projected.y, 0.0, 1e-6);
 
     unprojected = Projection::unproject(projected, maxScale);

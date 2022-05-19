@@ -3,14 +3,15 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
+option(MBGL_QT_STATIC "Build Mapbox GL Qt bindings staticly" OFF)
 option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
 option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
-if (MBGL_WITH_QT)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
 project("Mapbox GL Native" LANGUAGES CXX C)
@@ -85,11 +86,11 @@ target_link_libraries(
 
 cmake_policy(SET CMP0063 NEW)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -97,8 +98,13 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-add_library(
-    mbgl-core STATIC
+if(MBGL_QT_STATIC)
+    add_library(mbgl-core OBJECT)
+else()
+    add_library(mbgl-core STATIC)
+endif()
+target_sources(
+    mbgl-core PRIVATE
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/aspiring_actor.hpp
@@ -128,6 +134,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/projection_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/clamp.hpp
@@ -369,6 +376,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_options.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.cpp

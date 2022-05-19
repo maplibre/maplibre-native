@@ -41,8 +41,8 @@ std::array<float, 2> RenderHillshadeLayer::getLatRange(const UnwrappedTileID& id
 
 std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-    float azimuthal = evaluated.get<HillshadeIlluminationDirection>() * util::DEG2RAD;
-    if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport) azimuthal = azimuthal - parameters.state.getBearing();
+    float azimuthal = evaluated.get<HillshadeIlluminationDirection>() * util::DEG2RAD_F;
+    if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport) azimuthal = azimuthal - static_cast<float>(parameters.state.getBearing());
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
 }
 
@@ -100,7 +100,7 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
             },
             paintAttributeData,
             evaluated,
-            parameters.state.getZoom());
+            static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings =
             HillshadeProgram::computeAllAttributeBindings(vertexBuffer, paintAttributeData, evaluated);
 
@@ -155,13 +155,13 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
                 HillshadePrepareProgram::LayoutUniformValues{
                     uniforms::matrix::Value(mat),
                     uniforms::dimension::Value({{stride, stride}}),
-                    uniforms::zoom::Value(float(tile.id.canonical.z)),
-                    uniforms::maxzoom::Value(float(maxzoom)),
+                    uniforms::zoom::Value(static_cast<float>(tile.id.canonical.z)),
+                    uniforms::maxzoom::Value(static_cast<float>(maxzoom)),
                     uniforms::unpack::Value(bucket.getDEMData().getUnpackVector()),
                 },
                 paintAttributeData,
                 properties,
-                parameters.state.getZoom());
+                static_cast<float>(parameters.state.getZoom()));
             const auto allAttributeBindings = HillshadePrepareProgram::computeAllAttributeBindings(
                 *parameters.staticData.rasterVertexBuffer, paintAttributeData, properties);
 

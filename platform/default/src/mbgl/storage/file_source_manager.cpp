@@ -28,7 +28,7 @@ public:
                                   [](const ResourceOptions& options) { return std::make_unique<LocalFileSource>(options); });
 
         registerFileSourceFactory(FileSourceType::Mbtiles,
-                                  [](const ResourceOptions& options) { return std::make_unique<MaptilerFileSource>(options); });
+                                  [](const ResourceOptions& options) { return std::make_unique<MBTilesFileSource>(options); });
 
         registerFileSourceFactory(FileSourceType::Network, [](const ResourceOptions& options) {
             std::unique_ptr<FileSource> networkSource = std::make_unique<OnlineFileSource>(options);

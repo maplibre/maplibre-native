@@ -46,8 +46,8 @@ TEST(TileCover, PitchIssue15442) {
     transform.resize({ 412, 691 });
 
     transform.jumpTo(CameraOptions().withCenter(LatLng { 59.116898740996106, 91.565660781803615, })
-        .withZoom(2.0551126748417214).withBearing(0.74963938256567264 * util::RAD2DEG)
-        .withPitch(1.0471975511965976 * util::RAD2DEG));
+        .withZoom(2.0551126748417214).withBearing(0.74963938256567264 * util::RAD2DEG_D)
+        .withPitch(1.0471975511965976 * util::RAD2DEG_D));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{
                   {2, 3, 1}, {2, 2, 1}, {2, 3, 0}, {2, 2, 0}, {2, 1, {2, 0, 0}}, {2, 1, {2, 1, 0}}}),
@@ -61,7 +61,7 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
     transform.jumpTo(CameraOptions().withCenter(LatLng { 0.1, -0.1 }).withPadding(EdgeInsets { 376, 0, 0, 0 })
                                     .withZoom(8.0).withBearing(45.0).withPitch(60.0));
     // Top padding of 376 leads to capped pitch. See Transform::getMaxPitchForEdgeInsets.
-    EXPECT_LE(transform.getPitch() + 0.001, util::DEG2RAD * 60);
+    EXPECT_LE(transform.getPitch() + 0.001, util::DEG2RAD_D * 60);
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),

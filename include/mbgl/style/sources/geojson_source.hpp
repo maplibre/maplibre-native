@@ -21,7 +21,7 @@ struct GeoJSONOptions {
     // GeoJSON-VT options
     uint8_t minzoom = 0;
     uint8_t maxzoom = 18;
-    uint16_t tileSize = util::tileSize;
+    uint16_t tileSize = util::tileSize_I;
     uint16_t buffer = 128;
     double tolerance = 0.375;
     bool lineMetrics = false;

@@ -67,6 +67,7 @@
 #import "MGLNetworkConfiguration_Private.h"
 #import "MGLReachability.h"
 #import "MGLSettings_Private.h"
+#import "MGLMapProjection.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -2757,6 +2758,15 @@ public:
     {
         attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MGLSemanticVersionString"]];
     }
+    
+    NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize] linkColor:nil];
+    for (MGLAttributionInfo *attributionInfo in attributionInfos)
+    {
+        UIAlertAction *action = [UIAlertAction actionWithTitle:[attributionInfo.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:nil];
+        [attributionController addAction:action];
+    }
 
     NSString *cancelTitle = NSLocalizedStringWithDefaultValue(@"CANCEL", nil, nil, @"Cancel", @"Title of button for dismissing attribution action sheet");
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelTitle
@@ -4349,6 +4359,10 @@ static void *windowScreenContext = &windowScreenContext;
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel
 {
     return mbgl::Projection::getMetersPerPixelAtLatitude(latitude, zoomLevel);
+}
+
+- (MGLMapProjection*)mapProjection {
+    return [[MGLMapProjection alloc] initWithMapView:self];
 }
 
 #pragma mark - Camera Change Reason -

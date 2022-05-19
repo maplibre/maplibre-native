@@ -34,7 +34,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
 
     if (alongLine) {
         float height = y2 - y1;
-        const double length = x2 - x1;
+        const float length = x2 - x1;
 
         if (height <= 0.0f) return;
 
@@ -46,7 +46,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
         if (rotate) {
             // Account for *-rotate in point collision boxes
             // Doesn't account for icon-text-fit
-            const float rotateRadians = rotate * M_PI / 180.0;
+            const float rotateRadians = rotate * util::DEG2RAD_F;
 
             const Point<float> tl = util::rotate(Point<float>(x1, y1), rotateRadians);
             const Point<float> tr = util::rotate(Point<float>(x2, y1), rotateRadians);
@@ -85,8 +85,8 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
     // symbol spacing will put labels very close together in a pitched map.
     // To reduce the cost of adding extra collision circles, we slowly increase
     // them for overscaled tiles.
-    const float overscalingPaddingFactor = 1 + .4 * util::log2(static_cast<double>(overscaling));
-    const int nPitchPaddingBoxes = std::floor(nBoxes * overscalingPaddingFactor / 2);
+    const double overscalingPaddingFactor = 1 + .4 * util::log2(static_cast<double>(overscaling));
+    const int nPitchPaddingBoxes = static_cast<int>(std::floor(nBoxes * overscalingPaddingFactor / 2));
 
     // offset the center of the first box by half a box so that the edge of the
     // box is at the edge of the label.
@@ -162,8 +162,8 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
         // Otherwise, the .8 multiplication gives us a little bit of conservative
         // padding in choosing which boxes to use (see CollisionIndex#placedCollisionCircles)
         const float paddedAnchorDistance = std::abs(boxDistanceToAnchor - firstBoxOffset) < step ?
-            0 :
-            (boxDistanceToAnchor - firstBoxOffset) * 0.8;
+            0.0f :
+            (boxDistanceToAnchor - firstBoxOffset) * 0.8f;
 
         boxes.emplace_back(boxAnchor, -boxSize / 2, -boxSize / 2, boxSize / 2, boxSize / 2, paddedAnchorDistance);
     }

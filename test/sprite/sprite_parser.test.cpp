@@ -162,7 +162,7 @@ TEST(Sprite, SpriteImageCreationInvalid) {
               }));
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    ASSERT_EQ(nullptr, createStyleImage("test", image_1x, 0, 0, 16, 16, 1, false, {{-1, 3}}));
+    ASSERT_EQ(nullptr, createStyleImage("test", image_1x, 0, 0, 16, 16, 1, false, {{-1.0f, 3.0f}}));
     EXPECT_EQ(1u,
               log.count({
                   EventSeverity::Error,
@@ -463,8 +463,8 @@ TEST(Sprite, SpriteParsingStretchAndContent) {
     })JSON");
     EXPECT_EQ(1u, images.size());
     EXPECT_EQ("image", images[0]->id);
-    EXPECT_EQ((style::ImageStretches{{2, 14}}), images[0]->stretchX);
-    EXPECT_EQ((style::ImageStretches{{0, 4}, {12, 16}}), images[0]->stretchY);
+    EXPECT_EQ((style::ImageStretches{{2.0f, 14.0f}}), images[0]->stretchX);
+    EXPECT_EQ((style::ImageStretches{{0.0f, 4.0f}, {12.0f, 16.0f}}), images[0]->stretchY);
     EXPECT_EQ((style::ImageContent{2, 2, 14, 14}), images[0]->content);
 }
 

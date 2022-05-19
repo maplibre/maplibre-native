@@ -75,7 +75,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
     const auto clusterRadiusValue = objectMember(value, "clusterRadius");
     if (clusterRadiusValue) {
         if (toNumber(*clusterRadiusValue)) {
-            options.clusterRadius = static_cast<double>(*toNumber(*clusterRadiusValue));
+            options.clusterRadius = static_cast<uint16_t>(*toNumber(*clusterRadiusValue));
         } else {
             error.message = "GeoJSON source clusterRadius value must be a number";
             return nullopt;

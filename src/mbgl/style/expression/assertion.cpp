@@ -64,7 +64,7 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
                 return ParseResult();
             }
             if (n) {
-                N = optional<std::size_t>(*n);
+                N = static_cast<size_t>(*n);
             }
             i++;
         }

@@ -459,6 +459,43 @@ void QMapboxGLSettings::setResourceTransform(const std::function<std::string(con
     m_resourceTransform = transform;
 }
 
+/*!
+    Reset all settings based on the given template.
+
+    MapLibre can support servers with different resource path structure.
+    Some of the most common servers like Maptiler and Mapbox are defined
+    in the library. This function will re-initialise all settings based
+    on the default values of specific service provider defaults.
+*/
+void QMapboxGLSettings::resetToTemplate(SettingsTemplate settings_template)
+{
+    if(m_tileServerOptionsInternal) delete m_tileServerOptionsInternal;
+
+    if(settings_template == MapLibreSettings){
+        m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapLibreConfiguration());
+    }else if(settings_template == MapTilerSettings){
+        m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapTilerConfiguration());
+    }else if(settings_template == MapboxSettings){
+        m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapboxConfiguration());
+    }else{
+        m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration());
+    }
+}
+
+/*!
+    All predefined styles.
+
+    Return all styles that are defined in default settings.
+*/
+QVector<QPair<QString, QString> > QMapboxGLSettings::defaultStyles() const {
+    QVector<QPair<QString, QString>> styles;
+    for (const auto &style : tileServerOptionsInternal()->defaultStyles()) {
+        styles.append(QPair<QString, QString>(
+                                 QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
+    }
+    return styles;
+}
+
 mbgl::TileServerOptions *QMapboxGLSettings::tileServerOptionsInternal() const {
     return m_tileServerOptionsInternal;
 }

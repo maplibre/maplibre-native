@@ -51,10 +51,10 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
     double m1 = e1.dx / e1.dy;
     double d0 = e0.dx > 0; // use y + 1 to compute x0
     double d1 = e1.dx < 0; // use y + 1 to compute x1
-    for (int32_t y = y0; y < y1; y++) {
+    for (double y = y0; y < y1; y++) {
         double x0 = m0 * ::fmax(0, ::fmin(e0.dy, y + d0 - e0.y0)) + e0.x0;
         double x1 = m1 * ::fmax(0, ::fmin(e1.dy, y + d1 - e1.y0)) + e1.x0;
-        scanLine(std::floor(x1), std::ceil(x0), y);
+        scanLine(static_cast<int32_t>(std::floor(x1)), static_cast<int32_t>(std::ceil(x0)), static_cast<int32_t>(y));
     }
 }
 
@@ -139,11 +139,11 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
 } // namespace
 
 int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) {
-    zoom += util::log2(util::tileSize / size);
+    zoom += util::log2(util::tileSize_D / size);
     if (type == style::SourceType::Raster || type == style::SourceType::Video) {
-        return ::round(zoom);
+        return static_cast<int32_t>(std::round(zoom));
     } else {
-        return std::floor(zoom);
+        return static_cast<int32_t>(std::floor(zoom));
     }
 }
 
@@ -316,7 +316,7 @@ uint64_t tileCount(const LatLngBounds& bounds, uint8_t zoom){
 
     auto dx = x1 > x2 ? (maxTile - x1) + x2 : x2 - x1;
     auto dy = y1 - y2;
-    return (dx + 1) * (dy + 1);
+    return static_cast<uint64_t>((dx + 1) * (dy + 1));
 }
 
 uint64_t tileCount(const Geometry<double>& geometry, uint8_t z) {
