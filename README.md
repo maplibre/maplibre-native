@@ -22,6 +22,13 @@ Beside merging in platform specific SDKs, the following changes were made compar
 | [Maps SDK for Android](platform/android/)      | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci)           |
 | [Maps SDK for Android](platform/android/)     | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-release) |
 
+
+## Sponsors
+
+We thank everyone who supported us financially in the past and special thanks to the people and organizations who support us with recurring dontations:  
+
+@jawg, @nekoyasan, @atierian, @photoprism, @kaplanlior, @francois2metz, @Schneider-Geo, @serghov, @ambientlight, @joschi77, @geoffhill, @jasongodev
+
 ## Installation
 
 ### Android
