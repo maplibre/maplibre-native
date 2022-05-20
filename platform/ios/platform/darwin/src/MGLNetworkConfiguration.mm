@@ -121,22 +121,12 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     [self sendEventForURLResponse:response withAction:@"cancel"];
 }
 
-- (void)debugLog:(NSString *)format, ... {
-    va_list formatList;
-    va_start(formatList, format);
-    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
-    va_end(formatList);
-
-    MGLLogDebug(formattedMessage);
+- (void)debugLog:(NSString *)message {
+    MGLLogDebug(message);
 }
 
-- (void)errorLog:(NSString *)format, ... {
-    va_list formatList;
-    va_start(formatList, format);
-    NSString *formattedMessage = [[NSString alloc] initWithFormat:format arguments:formatList];
-    va_end(formatList);
-
-    MGLLogError(formattedMessage);
+- (void)errorLog:(NSString *)message {
+    MGLLogError(message);
 }
 
 #pragma mark - Event management
