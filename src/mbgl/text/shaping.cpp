@@ -145,7 +145,7 @@ void align(Shaping& shaping,
     if (maxLineHeight != lineHeight) {
         shiftY = -blockHeight * verticalAlign - Shaping::yOffset;
     } else {
-        shiftY = (-verticalAlign * static_cast<float>(lineCount + 0.5)) * lineHeight;
+        shiftY = (-verticalAlign * static_cast<float>(lineCount) + 0.5f) * lineHeight;
     }
 
     for (auto& line : shaping.positionedLines) {
