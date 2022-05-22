@@ -1,24 +1,7 @@
 name: node-release
 
 on:
-  push:
-    tags:
-    - 'node_*'
-    
-    paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
-      - "platform/qt/**"
-      - ".gitignore"
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
-      - ".gitignore"
+  workflow_dispatch:
 
 jobs:
   build:
