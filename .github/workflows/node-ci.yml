@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-11.0
-          - ubuntu-20.04
+          - macos-10.15
+          - ubuntu-18.04
         node: [ 10, 12, 14, 16 , 17 , 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
