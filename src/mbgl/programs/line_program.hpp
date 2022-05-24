@@ -55,8 +55,10 @@ public:
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
         return LayoutVertex {
             {{
-                static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)),
-                static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))
+                p.x,
+                p.y,
+                static_cast<int16_t>(round ? 1 : 0),
+                static_cast<int16_t>(up ? 1 : -1)
             }},
             {{
                 // add 128 to store a byte in an unsigned byte
