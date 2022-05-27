@@ -281,7 +281,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     if (resource.url.find(":///") == std::string::npos) {
         Response response;
         response.noContent = true;
-        response.error     = std::make_unique<Response::Error>(
+        response.error = std::make_unique<Response::Error>(
             Response::Error::Reason::Other, "MBTilesFileSource only supports absolute path urls");
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
@@ -294,7 +294,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     if (result == -1 && errno == ENOENT) {
         Response response;
         response.noContent = true;
-        response.error     = std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "path not found: "+path);
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "path not found: "+path);
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
     }
