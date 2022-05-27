@@ -35,6 +35,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/storage/http_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/local_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/main_resource_loader.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/storage/mbtiles_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/offline.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/offline_database.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/offline_download.test.cpp
@@ -106,7 +107,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp    
+    ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
