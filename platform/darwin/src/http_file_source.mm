@@ -286,7 +286,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
                 using Error = Response::Error;
 
                 if (error) {
-                    [MGLNativeNetworkManager.sharedManager errorLog:@"Requesting: %@ failed with error: %@", res.URL.relativePath, error];
+                    [MGLNativeNetworkManager.sharedManager errorLog:@"Requesting: %@ failed with error: %@", req.URL, error.debugDescription];
                     
                     if (data) {
                         response.data =

@@ -17,6 +17,9 @@
 
 #include <mbgl/storage/sqlite3.hpp>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #if defined(__QT__) && (defined(_WIN32) || defined(__EMSCRIPTEN__))
 #include <QtZlib/zlib.h>
 #else
@@ -27,10 +30,15 @@ namespace {
 bool acceptsURL(const std::string& url) {
     return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
 }
+
+std::string url_to_path(const std::string &url) {
+    return mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(mbgl::util::MBTILES_PROTOCOL)));
+}
 } // namespace
 
 namespace mbgl {
 using namespace rapidjson;
+
 
 class MBTilesFileSource::Impl {
 public:
@@ -61,9 +69,7 @@ public:
         return std::string(buffer.GetString(), buffer.GetSize());
     }
 
-    std::string url_to_path(const std::string &url) {
-        return mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::MBTILES_PROTOCOL)));
-    }
+
 
     std::string db_path(const std::string &path) {
         return path.substr(0, path.find('?'));
@@ -263,24 +269,38 @@ MBTilesFileSource::MBTilesFileSource(const ResourceOptions& options) :
     thread(std::make_unique<util::Thread<Impl>>(
         util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MBTilesFileSource", options.clone())) {}
 
-
 std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
+
+    // assume if there is a tile request, that the mbtiles file has been validated
+    if (resource.kind == Resource::Tile) {
+        thread->actor().invoke(&Impl::request_tile, resource, req->actor());
+        return req;
+    }
 
     if (resource.url.find(":///") == std::string::npos) {
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                           "MBTilesFileSource only supports absolute path urls");
+        response.error = std::make_unique<Response::Error>(
+            Response::Error::Reason::Other, "MBTilesFileSource only supports absolute path urls");
         req->actor().invoke(&FileSourceRequest::setResponse, response);
-
-    } else {
-        if (resource.kind == Resource::Tile) {
-            thread->actor().invoke(&Impl::request_tile, resource, req->actor());
-        } else {
-            thread->actor().invoke(&Impl::request_tilejson, resource, req->actor());
-        }
+        return req;
     }
+
+    // file must exist
+    auto path = url_to_path(resource.url);
+    struct stat buffer;
+    int result = stat(path.c_str(), &buffer);
+    if (result == -1 && errno == ENOENT) {
+        Response response;
+        response.noContent = true;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "path not found: "+path);
+        req->actor().invoke(&FileSourceRequest::setResponse, response);
+        return req;
+    }
+
+    // return TileJSON
+    thread->actor().invoke(&Impl::request_tilejson, resource, req->actor());
     return req;
 }
 
