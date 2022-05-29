@@ -129,7 +129,7 @@ jobs:
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Publish to NPM
-        if: matrix.os == 'ubuntu-18.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
