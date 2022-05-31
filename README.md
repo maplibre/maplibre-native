@@ -264,7 +264,7 @@ For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` 
 }
 ```
 
-Note that this style is totally inadequate for any real use beyond testing your setup.
+Note that this style is totally inadequate for any real use beyond testing your setup. Don't forget to replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file.
 
 From your `maplibre-gl-native/` dir, run the following command.
 
