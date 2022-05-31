@@ -150,3 +150,136 @@ make xpackage
 
 This produces a `Mapbox.framework` in the `platform/ios/build/macos/pkg/` folder.
 Please refer to [Mapbox Maps SDK for macos](platform/ios/platform/macos/) for detailed instructions.
+
+#### Linux
+
+First, install system dependencies. The following packages were required to build maplibre-gl-native on Debian 11.
+
+```bash
+apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri
+```
+
+There are two required packages that are not available in the standard Debian package repository: `libjpeg-turbo8` and `libicu66`. You can install them by downloading and installing the `.deb` packages.
+
+```bash
+wget http://archive.ubuntu.com/ubuntu/pool/main/libj/libjpeg-turbo/libjpeg-turbo8_2.0.3-0ubuntu1_amd64.deb
+apt install ./libjpeg-turbo8_2.0.3-0ubuntu1_amd64.deb
+wget http://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu66_66.1-2ubuntu2_amd64.deb
+apt install ./libicu66_66.1-2ubuntu2_amd64.deb
+```
+
+On an Ubuntu based distribution, you may be able to install these using `apt`.
+
+```bash
+apt install libjpeg-turbo8 libicu66
+```
+
+To create the build, run the following commands from the `maplibre-gl-native/` root directory.
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
+
+If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it's working properly, you will need a data source and a style JSON file.
+
+For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` from [here](https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zurich_switzerland.mbtiles), and the following `style.json` file.
+
+```json
+{
+  "version": 8,
+  "name": "Test style",
+  "center": [
+    8.54806714892635,
+    47.37180823552663
+  ],
+  "sources": {
+    "test": {
+      "type": "vector",
+      "url": "mbtiles:///path/to/zurich_switzerland.mbtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "hsl(47, 26%, 88%)"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "test",
+      "source-layer": "water",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
+      "paint": {
+        "fill-color": "hsl(205, 56%, 73%)"
+      }
+    },
+    {
+      "id": "admin_country",
+      "type": "line",
+      "source": "test",
+      "source-layer": "boundary",
+      "filter": [
+        "all",
+        [
+          "<=",
+          "admin_level",
+          2
+        ],
+        [
+          "==",
+          "$type",
+          "LineString"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsla(0, 8%, 22%, 0.51)",
+        "line-width": {
+          "base": 1.3,
+          "stops": [
+            [
+              3,
+              0.5
+            ],
+            [
+              22,
+              15
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+Note that this style is totally inadequate for any real use beyond testing your setup.
+
+From your `maplibre-gl-native/` dir, run the following command.
+
+```bash
+./build/bin/mbgl-render --style /path/to/style.json --output out.png
+```
+
+> I get an error `Error: Failed to open X display.` when I run this command.
+
+If you're setting up `maplibre-gl-native` on a headless server without a display, you'll need to simulate an X server to do any rendering.
+
+```bash
+xvfb-run -a ./build/bin/mbgl-render --style /path/to/style.json --output out.png
+```
+
+If all has gone well, this should produce an `out.png` image in your current directory that looks something like so.
+
+![Sample out.png from mbgl-render command](/misc/sample-mbgl-render-out.png)
