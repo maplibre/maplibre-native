@@ -280,6 +280,6 @@ If you're setting up `maplibre-gl-native` on a headless server without a display
 xvfb-run -a ./build/bin/mbgl-render --style /path/to/style.json --output out.png
 ```
 
-If all has gone well, this should produce an `out.png` image in your current directory that looks something like so.
+If all has gone well, this should produce an `out.png` image in your current directory with an image of the world. It should look something like so.
 
-![Sample out.png from mbgl-render command](/misc/sample-mbgl-render-out.png)
+![Sample image of world from mbgl-render command](/misc/sample-mbgl-render-out.png)
