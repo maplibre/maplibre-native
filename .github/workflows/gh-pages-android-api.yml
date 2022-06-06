@@ -1,0 +1,31 @@
+name: gh-pages-android-api
+
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'     
+        required: true
+        default: '9.5.2'
+
+jobs:
+  gh-pages-android-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Download javadoc from Maven
+        run: |
+          wget https://repo1.maven.org/maven2/org/maplibre/gl/android-sdk/${{ github.event.inputs.version }}/android-sdk-${{ github.event.inputs.version }}-javadoc.jar -O javadoc.zip
+      
+      - name: Unzip
+        run: |
+          mkdir -p unzipped/android/api/
+          unzip javadoc.zip -d unzipped/android/api/
+      
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          branch: gh-pages
+          folder: unzipped
