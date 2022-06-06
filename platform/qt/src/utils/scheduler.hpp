@@ -9,13 +9,13 @@
 #include <mutex>
 #include <queue>
 
-class QMapboxGLScheduler : public QObject, public mbgl::Scheduler
+class QMapLibreScheduler : public QObject, public mbgl::Scheduler
 {
     Q_OBJECT
 
 public:
-    QMapboxGLScheduler();
-    virtual ~QMapboxGLScheduler();
+    QMapLibreScheduler();
+    virtual ~QMapLibreScheduler();
 
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()> scheduled) final;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "qmapboxgl.hpp"
-#include "qmapboxgl_map_observer.hpp"
-#include "qmapboxgl_map_renderer.hpp"
+#include "qmaplibregl.hpp"
+#include "utils/map_observer.hpp"
+#include "utils/map_renderer.hpp"
 
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/map/map.hpp>
@@ -16,13 +16,13 @@
 #include <atomic>
 #include <memory>
 
-class QMapboxGLPrivate : public QObject, public mbgl::RendererFrontend
+class QMapLibreGLPrivate : public QObject, public mbgl::RendererFrontend
 {
     Q_OBJECT
 
 public:
-    explicit QMapboxGLPrivate(QMapboxGL *, const QMapboxGLSettings &, const QSize &size, qreal pixelRatio);
-    virtual ~QMapboxGLPrivate();
+    explicit QMapLibreGLPrivate(QMapLibreGL *, const QMapLibreSettings &, const QSize &size, qreal pixelRatio);
+    virtual ~QMapLibreGLPrivate();
 
     // mbgl::RendererFrontend implementation.
     void reset() final {}
@@ -39,7 +39,7 @@ public:
     bool setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value);
 
     mbgl::EdgeInsets margins;
-    std::unique_ptr<mbgl::Map> mapObj;
+    std::unique_ptr<mbgl::Map> mapObj{};
     QVector<QPair<QString, QString>> defaultStyles;
 
 public slots:
@@ -49,17 +49,17 @@ signals:
     void needsRendering();
 
 private:
-    Q_DISABLE_COPY(QMapboxGLPrivate)
+    Q_DISABLE_COPY(QMapLibreGLPrivate)
 
     std::recursive_mutex m_mapRendererMutex;
-    std::shared_ptr<mbgl::RendererObserver> m_rendererObserver;
-    std::shared_ptr<mbgl::UpdateParameters> m_updateParameters;
+    std::shared_ptr<mbgl::RendererObserver> m_rendererObserver{};
+    std::shared_ptr<mbgl::UpdateParameters> m_updateParameters{};
 
-    std::unique_ptr<QMapboxGLMapObserver> m_mapObserver;
-    std::unique_ptr<QMapboxGLMapRenderer> m_mapRenderer;
-    std::unique_ptr<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>> m_resourceTransform;
+    std::unique_ptr<QMapLibreMapObserver> m_mapObserver{};
+    std::unique_ptr<QMapLibreMapRenderer> m_mapRenderer{};
+    std::unique_ptr<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>> m_resourceTransform{};
 
-    QMapboxGLSettings::GLContextMode m_mode;
+    QMapLibreSettings::GLContextMode m_mode;
     qreal m_pixelRatio;
 
     QString m_localFontFamily;

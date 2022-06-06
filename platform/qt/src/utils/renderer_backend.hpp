@@ -1,15 +1,15 @@
 #pragma once
 
-#include "qmapboxgl.hpp"
-
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 
-class QMapboxGLRendererBackend final : public mbgl::gl::RendererBackend,
+#include <QtGlobal>
+
+class QMapLibreRendererBackend final : public mbgl::gl::RendererBackend,
                                        public mbgl::gfx::Renderable {
 public:
-    QMapboxGLRendererBackend(mbgl::gfx::ContextMode);
-    ~QMapboxGLRendererBackend() override;
+    QMapLibreRendererBackend(mbgl::gfx::ContextMode);
+    ~QMapLibreRendererBackend() override;
 
     void updateFramebuffer(quint32 fbo, const mbgl::Size&);
     void restoreFramebufferBinding();
@@ -31,7 +31,7 @@ protected:
     void updateAssumedState() override;
 
 private:
-    quint32 m_fbo = 0;
+    quint32 m_fbo{};
 
-    Q_DISABLE_COPY(QMapboxGLRendererBackend)
+    Q_DISABLE_COPY(QMapLibreRendererBackend)
 };
