@@ -1,17 +1,13 @@
-# Mapbox Maps SDK for Qt
-
-[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native/tree/master) [![AppVeyor CI build status](https://ci.appveyor.com/api/projects/status/3q12kbcooc6df8uc?svg=true)](https://ci.appveyor.com/project/Mapbox/mapbox-gl-native)
+# MapLibre Maps SDK for Qt
 
 ## Developing
 
 This is the foundation for the [Mapbox GL plugin](https://doc.qt.io/qt-5/location-plugin-mapboxgl.html)
 available in the Qt SDK since Qt 5.9. Use the [Qt bugtracker](https://bugreports.qt.io) for bugs related
-to the plugin and this GitHub repository for bugs related to Mapbox GL Native and the Qt bindings.
+to the plugin and this GitHub repository for bugs related to MapLibre GL Native and the Qt bindings.
 
 You should build this repository if you want to develop/contribute using the low level Qt C++ bindings or
-want to contribute to the Mapbox GL Native project using the Qt port for debugging.
-
-See the Mapbox Qt landing page for more details: https://www.mapbox.com/qt/
+want to contribute to the MapLibre GL Native project using the Qt port for debugging.
 
 ### Build dependencies
 

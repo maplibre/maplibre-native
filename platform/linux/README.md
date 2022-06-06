@@ -1,6 +1,6 @@
 # Linux
 
-A simple map application and test suite for Linux based on [Mapbox GL Native](../../README.md) and [GLFW](https://github.com/glfw/glfw).
+A simple map application and test suite for Linux based on MapLibre GL Native and [GLFW](https://github.com/glfw/glfw).
 
 We are using Ubuntu for development. While the software should work on other distributions as well, we are not providing explicit build instructions here.
 
