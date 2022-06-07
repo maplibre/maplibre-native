@@ -16,8 +16,8 @@ template <>
 struct ShaderSource<FillOutlineProgram> {
     static constexpr const char* name = "fill_outline";
     static constexpr const uint8_t hash[8] = {0x51, 0x25, 0x43, 0x9d, 0x41, 0x73, 0xe1, 0xbb};
-    static constexpr const auto vertexOffset = 13930;
-    static constexpr const auto fragmentOffset = 14755;
+    static constexpr const auto vertexOffset = 15863;
+    static constexpr const auto fragmentOffset = 16688;
 };
 
 constexpr const char* ShaderSource<FillOutlineProgram>::name;
@@ -40,12 +40,9 @@ Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programPara
 // Uncompressed source of fill_outline.vertex.glsl:
 /*
 attribute vec2 a_pos;
-
 uniform mat4 u_matrix;
 uniform vec2 u_world;
-
 varying vec2 v_pos;
-
 
 #ifndef HAS_UNIFORM_u_outline_color
 uniform lowp float u_outline_color_t;
@@ -64,7 +61,6 @@ varying lowp float opacity;
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
     
 #ifndef HAS_UNIFORM_u_outline_color
@@ -80,17 +76,14 @@ void main() {
     lowp float opacity = u_opacity;
 #endif
 
-
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
-
 */
 
 // Uncompressed source of fill_outline.fragment.glsl:
 /*
 varying vec2 v_pos;
-
 
 #ifndef HAS_UNIFORM_u_outline_color
 varying highp vec4 outline_color;
@@ -105,7 +98,6 @@ varying lowp float opacity;
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
     
 #ifdef HAS_UNIFORM_u_outline_color
@@ -117,15 +109,12 @@ void main() {
     lowp float opacity = u_opacity;
 #endif
 
-
     float dist = length(v_pos - gl_FragCoord.xy);
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
     gl_FragColor = outline_color * (alpha * opacity);
-
 #ifdef OVERDRAW_INSPECTOR
     gl_FragColor = vec4(1.0);
 #endif
 }
-
 */
 // clang-format on

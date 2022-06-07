@@ -15,9 +15,9 @@ struct ShaderSource;
 template <>
 struct ShaderSource<FillOutlinePatternProgram> {
     static constexpr const char* name = "fill_outline_pattern";
-    static constexpr const uint8_t hash[8] = {0x56, 0x9c, 0x2f, 0x58, 0x6b, 0x31, 0xff, 0x84};
-    static constexpr const auto vertexOffset = 15345;
-    static constexpr const auto fragmentOffset = 17205;
+    static constexpr const uint8_t hash[8] = {0x47, 0x2d, 0xe3, 0xf9, 0x56, 0xa7, 0xa8, 0x99};
+    static constexpr const auto vertexOffset = 17278;
+    static constexpr const auto fragmentOffset = 19709;
 };
 
 constexpr const char* ShaderSource<FillOutlinePatternProgram>::name;
@@ -43,14 +43,11 @@ uniform mat4 u_matrix;
 uniform vec2 u_world;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
-uniform vec4 u_scale;
-
+uniform vec3 u_scale;
 attribute vec2 a_pos;
-
 varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec2 v_pos;
-
 
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
@@ -79,6 +76,21 @@ uniform lowp vec4 u_pattern_to;
 #endif
 
 
+#ifndef HAS_UNIFORM_u_pixel_ratio_from
+uniform lowp float u_pixel_ratio_from_t;
+attribute lowp vec2 a_pixel_ratio_from;
+#else
+uniform lowp float u_pixel_ratio_from;
+#endif
+
+
+#ifndef HAS_UNIFORM_u_pixel_ratio_to
+uniform lowp float u_pixel_ratio_to_t;
+attribute lowp vec2 a_pixel_ratio_to;
+#else
+uniform lowp float u_pixel_ratio_to;
+#endif
+
 void main() {
     
 #ifndef HAS_UNIFORM_u_opacity
@@ -101,41 +113,44 @@ void main() {
     mediump vec4 pattern_to = u_pattern_to;
 #endif
 
+    
+#ifndef HAS_UNIFORM_u_pixel_ratio_from
+    lowp float pixel_ratio_from = unpack_mix_vec2(a_pixel_ratio_from, u_pixel_ratio_from_t);
+#else
+    lowp float pixel_ratio_from = u_pixel_ratio_from;
+#endif
+
+    
+#ifndef HAS_UNIFORM_u_pixel_ratio_to
+    lowp float pixel_ratio_to = unpack_mix_vec2(a_pixel_ratio_to, u_pixel_ratio_to_t);
+#else
+    lowp float pixel_ratio_to = u_pixel_ratio_to;
+#endif
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
-
-    float pixelRatio = u_scale.x;
-    float tileRatio = u_scale.y;
-    float fromScale = u_scale.z;
-    float toScale = u_scale.w;
-
+    float tileRatio = u_scale.x;
+    float fromScale = u_scale.y;
+    float toScale = u_scale.z;
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
-
-    vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-
+    vec2 display_size_a = (pattern_br_a - pattern_tl_a) / pixel_ratio_from;
+    vec2 display_size_b = (pattern_br_b - pattern_tl_b) / pixel_ratio_to;
     v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, fromScale * display_size_a, tileRatio, a_pos);
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileRatio, a_pos);
-
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
-
 */
 
 // Uncompressed source of fill_outline_pattern.fragment.glsl:
 /*
-
 uniform vec2 u_texsize;
 uniform sampler2D u_image;
 uniform float u_fade;
-
 varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec2 v_pos;
-
 
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
@@ -157,7 +172,6 @@ varying lowp vec4 pattern_to;
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
     
 #ifdef HAS_UNIFORM_u_opacity
@@ -174,32 +188,22 @@ void main() {
     mediump vec4 pattern_to = u_pattern_to;
 #endif
 
-
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
-
     vec2 imagecoord = mod(v_pos_a, 1.0);
     vec2 pos = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, imagecoord);
     vec4 color1 = texture2D(u_image, pos);
-
     vec2 imagecoord_b = mod(v_pos_b, 1.0);
     vec2 pos2 = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, imagecoord_b);
     vec4 color2 = texture2D(u_image, pos2);
-
-    // find distance to outline for alpha interpolation
-
     float dist = length(v_pos - gl_FragCoord.xy);
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
-
-
     gl_FragColor = mix(color1, color2, u_fade) * alpha * opacity;
-
 #ifdef OVERDRAW_INSPECTOR
     gl_FragColor = vec4(1.0);
 #endif
 }
-
 */
 // clang-format on

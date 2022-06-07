@@ -15,9 +15,9 @@ struct ShaderSource;
 template <>
 struct ShaderSource<DebugProgram> {
     static constexpr const char* name = "debug";
-    static constexpr const uint8_t hash[8] = {0x07, 0x98, 0x41, 0xa8, 0x6b, 0x73, 0xaf, 0x34};
-    static constexpr const auto vertexOffset = 12494;
-    static constexpr const auto fragmentOffset = 12672;
+    static constexpr const uint8_t hash[8] = {0x8a, 0x14, 0x0d, 0x90, 0x6d, 0x8d, 0xdb, 0xc1};
+    static constexpr const auto vertexOffset = 14408;
+    static constexpr const auto fragmentOffset = 14605;
 };
 
 constexpr const char* ShaderSource<DebugProgram>::name;
@@ -41,30 +41,22 @@ Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programPara
 /*
 attribute vec2 a_pos;
 varying vec2 v_uv;
-
 uniform mat4 u_matrix;
 uniform float u_overlay_scale;
-
 void main() {
-    // This vertex shader expects a EXTENT x EXTENT quad,
-    // The UV co-ordinates for the overlay texture can be calculated using that knowledge
     v_uv = a_pos / 8192.0;
-    gl_Position = u_matrix * vec4(a_pos * u_overlay_scale, 0, 1);
+    gl_Position = u_matrix * vec4(a_pos * u_overlay_scale, get_elevation(a_pos), 1);
 }
-
 */
 
 // Uncompressed source of debug.fragment.glsl:
 /*
 uniform highp vec4 u_color;
 uniform sampler2D u_overlay;
-
 varying vec2 v_uv;
-
 void main() {
     vec4 overlay_color = texture2D(u_overlay, v_uv);
     gl_FragColor = mix(u_color, overlay_color, overlay_color.a);
 }
-
 */
 // clang-format on
