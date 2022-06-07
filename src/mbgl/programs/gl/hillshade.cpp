@@ -16,8 +16,8 @@ template <>
 struct ShaderSource<HillshadeProgram> {
     static constexpr const char* name = "hillshade";
     static constexpr const uint8_t hash[8] = {0x8a, 0x11, 0x29, 0x18, 0x52, 0x7f, 0x3b, 0xbb};
-    static constexpr const auto vertexOffset = 29333;
-    static constexpr const auto fragmentOffset = 29504;
+    static constexpr const auto vertexOffset = 31831;
+    static constexpr const auto fragmentOffset = 32002;
 };
 
 constexpr const char* ShaderSource<HillshadeProgram>::name;
@@ -86,7 +86,7 @@ void main() {
 
     // We scale the slope exponentially based on intensity, using a calculation similar to
     // the exponential interpolation function in the style spec:
-    // https://github.com/mapbox/mapbox-gl-js/blob/master/src/style-spec/expression/definitions/interpolate.js#L217-L228
+    // src/style-spec/expression/definitions/interpolate.js#L217-L228
     // so that higher intensity values create more opaque hillshading.
     float base = 1.875 - intensity * 1.75;
     float maxValue = 0.5 * PI;
