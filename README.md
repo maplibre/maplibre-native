@@ -103,6 +103,8 @@ git checkout tags/$TAG -b $TAG
 
 #### Android
 
+The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
+
 > Make sure you have set Android SDK path in platform/android/local.properties, variable sdk.dir
 
 ```bash
