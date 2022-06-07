@@ -153,4 +153,4 @@ Please refer to [Mapbox Maps SDK for macos](platform/ios/platform/macos/) for de
 
 #### Linux
 
-See [the Linux platform build README](platform/linux/README.md) for instructions.
+See [the Linux platform build section](platform/linux/) for instructions.
