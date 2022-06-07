@@ -17,11 +17,12 @@
     "type": "git",
     "url": "git://github.com/maplibre/maplibre-gl-native.git"
   },
+  "type": "module",
   "license": "BSD-2-Clause",
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
+    "@mapbox/node-pre-gyp": "^1.0.8",
     "minimatch": "^3.0.4",
-    "node-pre-gyp": "^0.10.2",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
@@ -49,14 +50,16 @@
     "shuffle-seed": "1.1.6",
     "st": "1.2.2",
     "tape": "^4.5.1",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.2",
     "xcode": "^1.0.0"
   },
   "engines": {
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
     "test": "tape platform/node/test/js/**/*.test.js",
+    "generate-shaders": "node --loader ts-node/esm --experimental-specifier-resolution=node ./scripts/generate-shaders.ts",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
