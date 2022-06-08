@@ -150,3 +150,7 @@ make xpackage
 
 This produces a `Mapbox.framework` in the `platform/ios/build/macos/pkg/` folder.
 Please refer to [Mapbox Maps SDK for macos](platform/ios/platform/macos/) for detailed instructions.
+
+#### Linux
+
+See [the Linux platform build section](platform/linux/) for instructions.
