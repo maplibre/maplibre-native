@@ -30,6 +30,9 @@ jobs:
           - ubuntu-20.04
           - ubuntu-18.04
     runs-on: ${{ matrix.os }}
+    concurrency: 
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 

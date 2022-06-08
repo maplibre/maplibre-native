@@ -28,6 +28,9 @@ on:
 jobs:
   build-core:
     runs-on: windows-latest
+    concurrency: 
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     strategy:
       matrix:
         include:

@@ -54,6 +54,9 @@ jobs:
             qt: 6.2.2
             qt_target: desktop
     runs-on: ${{ matrix.os }}
+    concurrency: 
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     env:
       BUILD_TYPE: Debug
       BUILD_MODE: ${{ matrix.static }}
