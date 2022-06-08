@@ -59,7 +59,7 @@ If you're setting up MapLibre GL Native on a headless server (i.e. one without a
 xvfb-run -a ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 ```
 
-This should produce an `out.png` map tile image with the default Maplibre styling from [the Maplibre demo](https://maplibre.org/).
+This should produce an `out.png` map tile image with the default MapLibre styling from [the MapLibre demo](https://maplibre.org/).
 
 ![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
