@@ -53,7 +53,7 @@ If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-rende
 
 > I get an error `Error: Failed to open X display.` when I run this command.
 
-If you're setting up Maplibre GL Native on a headless server (i.e. one without a display), you'll need to simulate an X server to do any rendering.
+If you're setting up MapLibre GL Native on a headless server (i.e. one without a display), you'll need to simulate an X server to do any rendering.
 
 ```bash
 xvfb-run -a ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
