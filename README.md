@@ -103,6 +103,8 @@ git checkout tags/$TAG -b $TAG
 
 #### Android
 
+The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
+
 > Make sure you have set Android SDK path in platform/android/local.properties, variable sdk.dir
 
 ```bash
@@ -150,3 +152,7 @@ make xpackage
 
 This produces a `Mapbox.framework` in the `platform/ios/build/macos/pkg/` folder.
 Please refer to [Mapbox Maps SDK for macos](platform/ios/platform/macos/) for detailed instructions.
+
+#### Linux
+
+See [the Linux platform build section](platform/linux/) for instructions.

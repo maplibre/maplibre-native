@@ -1,76 +1,162 @@
 # Linux
 
-A simple map application and test suite for Linux based on MapLibre GL Native and [GLFW](https://github.com/glfw/glfw).
+A simple executable and test suite for Linux based on [MapLibre GL Native](../../README.md).
 
-We are using Ubuntu for development. While the software should work on other distributions as well, we are not providing explicit build instructions here.
+This guide focuses on Debian and Ubuntu distributions.
 
-This process gives you a Linux desktop app built on a Linux host system.
+The build process should give you a set of `.a` files that you can use to include MapLibre GL Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
 
-### Prerequisites
+## Prerequisites
 
-Install GCC 4.9+ if you are running Ubuntu 14.04 or older. Alternatively, you can also use [Clang 3.5+](http://llvm.org/apt/).
+The following dependencies are required to build MapLibre GL Native on Debian 11.
 
-    sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-    sudo apt-get update
-    sudo apt-get install gcc-4.9 g++-4.9
-    export CXX=g++-4.9
+```bash
+apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri
+```
 
-Ensure you have git and other build essentials:
+There are two required packages that are not available in the standard Debian package repository: `libjpeg-turbo8` and `libicu66`. You can install them by downloading and installing the `.deb` packages.
 
-    sudo apt-get install curl git build-essential zlib1g-dev automake \
-                         libtool xutils-dev make cmake pkg-config python-pip \
-                         libcurl4-openssl-dev libpng-dev libsqlite3-dev \
-                         libllvm3.9
+```bash
+wget http://archive.ubuntu.com/ubuntu/pool/main/libj/libjpeg-turbo/libjpeg-turbo8_2.0.3-0ubuntu1_amd64.deb
+apt install ./libjpeg-turbo8_2.0.3-0ubuntu1_amd64.deb
+wget http://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu66_66.1-2ubuntu2_amd64.deb
+apt install ./libicu66_66.1-2ubuntu2_amd64.deb
+```
 
-Ensure you have cmake 3.x:
+On an Ubuntu based distribution, you may be able to install these using `apt`.
 
-    sudo apt-get install cmake cmake-data
-
-Install glfw3 dependencies:
-
-    sudo apt-get install libxi-dev libglu1-mesa-dev x11proto-randr-dev \
-                         x11proto-xext-dev libxrandr-dev \
-                         x11proto-xf86vidmode-dev libxxf86vm-dev \
-                         libxcursor-dev libxinerama-dev
-
-[Node.js](https://nodejs.org/) 4.2.1 or later is also required.
-
-[ccache](https://ccache.samba.org) is optional, but improves recompilation performance.
+```bash
+apt install libjpeg-turbo8 libicu66
+```
 
 ## Build
 
-Clone the git repository:
+First, clone the repository. This repository uses git submodules, which are also required to build the project.
 
-     git clone https://github.com/mapbox/mapbox-gl-native.git
-     cd mapbox-gl-native
+```bash
+git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-gl-native.git
+cd maplibre-gl-native
+```
 
-Note that this repository uses Git submodules. They'll be automatically checked out when you first run a `make` command,
-but are not updated automatically. We recommended that you run `git submodule update` after pulling down new commits to
-this repository.
+To create the build, run the following commands.
 
-Set the environment variable `MAPBOX_ACCESS_TOKEN` to your [Mapbox access token](ACCESS_TOKEN.md):
+```bash
+cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
 
-    export MAPBOX_ACCESS_TOKEN=MYTOKEN
+If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
 
-Optionally, you can specify a custom style to the test application:
+```bash
+./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
+```
 
-    export MAPBOX_STYLE_URL=MYSTYLEURL
+> I get an error `Error: Failed to open X display.` when I run this command.
 
-Then, you can then proceed to build the test application:
+If you're setting up MapLibre GL Native on a headless server (i.e. one without a display), you'll need to simulate an X server to do any rendering.
 
-    make glfw-app
+```bash
+xvfb-run -a ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
+```
 
-Set an access token as described below, and then run:
+This should produce an `out.png` map tile image with the default MapLibre styling from [the MapLibre demo](https://maplibre.org/).
 
-    make run-glfw-app
+![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
-### Test
+### Using your own style/tiles 
 
-- `make run-test-*` Builds and runs all tests. You can specify individual tests by replacing * with their name (e.g. `make run-test-Sprite.CustomSpriteImages`).
+You can also use the `mbgl-render` command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.
 
-The `zsh` will treat the * in this command as a glob, so you'll need to run
-`make "run-test-*"` instead.
+For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` from [here](https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zurich_switzerland.mbtiles), and the following `style.json` file.
 
-### Usage
+```json
+{
+  "version": 8,
+  "name": "Test style",
+  "center": [
+    8.54806714892635,
+    47.37180823552663
+  ],
+  "sources": {
+    "test": {
+      "type": "vector",
+      "url": "mbtiles:///path/to/zurich_switzerland.mbtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "hsl(47, 26%, 88%)"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "test",
+      "source-layer": "water",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
+      "paint": {
+        "fill-color": "hsl(205, 56%, 73%)"
+      }
+    },
+    {
+      "id": "admin_country",
+      "type": "line",
+      "source": "test",
+      "source-layer": "boundary",
+      "filter": [
+        "all",
+        [
+          "<=",
+          "admin_level",
+          2
+        ],
+        [
+          "==",
+          "$type",
+          "LineString"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsla(0, 8%, 22%, 0.51)",
+        "line-width": {
+          "base": 1.3,
+          "stops": [
+            [
+              3,
+              0.5
+            ],
+            [
+              22,
+              15
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}
+```
 
-Keyboard shortcuts for testing functionality are logged to the console when the test app is started.
+Note that this style is totally inadequate for any real use beyond testing your custom setup. Don't forget to replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file.
+
+From your `maplibre-gl-native/` dir, run the following command.
+
+```bash
+./build/bin/mbgl-render --style /path/to/style.json --output out.png
+```
+
+This should produce an `out.png` image in your current directory with a barebones image of the world.
+
+![Sample image of world from mbgl-render command](/misc/sample-barebones-mbgl-render-out.png)
+
