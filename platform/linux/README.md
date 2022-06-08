@@ -4,7 +4,7 @@ A simple executable and test suite for Linux based on [MapLibre GL Native](../..
 
 This guide focuses on Debian and Ubuntu distributions.
 
-The build process should give you a set of `.a` files that you can use to include Maplibre GL Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
+The build process should give you a set of `.a` files that you can use to include MapLibre GL Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
 
 ## Prerequisites
 
