@@ -1,6 +1,6 @@
 # Linux
 
-A simple executable and test suite for Linux based on [Maplibre GL Native](../../README.md).
+A simple executable and test suite for Linux based on [MapLibre GL Native](../../README.md).
 
 This guide focuses on Debian and Ubuntu distributions.
 
