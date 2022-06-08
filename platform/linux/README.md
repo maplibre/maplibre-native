@@ -8,7 +8,7 @@ The build process should give you a set of `.a` files that you can use to includ
 
 ## Prerequisites
 
-The following dependencies are required to build Maplibre GL Native on Debian 11.
+The following dependencies are required to build MapLibre GL Native on Debian 11.
 
 ```bash
 apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri
