@@ -58,6 +58,13 @@ We thank everyone who supported us financially in the past and special thanks to
 
 3. Sync gradle and rebuild your app
 
+*Note: MapLibre by default ships with the proprietary Google Play Location Services. If you want to avoid pulling proprietary dependencies into your project, you can exclude Google Play Location Services as follows:*
+```gradle
+    implementation ('org.maplibre.gl:android-sdk:9.4.0') {
+        exclude group: 'com.google.android.gms'
+    }
+```
+
 ### iOS
 
 1. To add a package dependency to your Xcode project, select File > Swift Packages > Add Package Dependency and enter its repository URL. You can also navigate to your target’s General pane, and in the “Frameworks, Libraries, and Embedded Content” section, click the + button, select Add Other, and choose Add Package Dependency.
