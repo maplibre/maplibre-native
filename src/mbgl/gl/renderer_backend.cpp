@@ -33,6 +33,9 @@ void RendererBackend::assumeFramebufferBinding(const gl::FramebufferID fbo) {
 
 void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
     getContext<gl::Context>().viewport.setCurrentValue({ x, y, size });
+    if (gl::value::Viewport::Get() != getContext<gl::Context>().viewport.getCurrentValue()) {
+        gl::value::Viewport::Set(getContext<gl::Context>().viewport.getCurrentValue());
+    }
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
@@ -54,6 +57,9 @@ void RendererBackend::setFramebufferBinding(const gl::FramebufferID fbo) {
 
 void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
     getContext<gl::Context>().viewport = { x, y, size };
+    if (gl::value::Viewport::Get() != getContext<gl::Context>().viewport.getCurrentValue()) {
+        gl::value::Viewport::Set(getContext<gl::Context>().viewport.getCurrentValue());
+    }
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 

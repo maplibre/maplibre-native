@@ -6,6 +6,8 @@
 #import <UIKit/UIImage.h>
 #import <QuartzCore/CALayer.h>
 
+#import <MetalANGLE/MGLContext.h>
+
 @class MGLMapView;
 
 class MGLMapViewImpl : public mbgl::MapObserver {
@@ -18,7 +20,7 @@ public:
     virtual mbgl::gfx::RendererBackend& getRendererBackend() = 0;
 
     // Returns a handle to the OpenGL context object if this view is rendered with OpenGL.
-    virtual EAGLContext* getEAGLContext() {
+    virtual MGLContext* getEAGLContext() {
         return nullptr;
     }
 

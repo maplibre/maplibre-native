@@ -1775,7 +1775,7 @@ public:
 
 #pragma mark - GL / display link wake/sleep
 
-- (EAGLContext *)context {
+- (MGLContext *)context {
     return _mbglView->getEAGLContext();
 }
 
