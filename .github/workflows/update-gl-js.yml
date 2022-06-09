@@ -1,0 +1,45 @@
+name: update-gl-js
+
+on: 
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit'     
+        required: true
+        default: '49bc4ca45'
+
+jobs:
+  update-gl-js:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        depth: 0
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 10
+
+    - name: Update submodule, test, build, commit, push
+      run: |
+        git config --global user.email "mail@example.com"
+        git config --global user.name "GitHub Action"
+        git checkout -b update-gl-js-to-${{ github.event.inputs.commit }}
+        npm ci --ignore-scripts
+        cd maplibre-gl-js
+        git checkout ${{ github.event.inputs.commit }}
+        yarn install
+        cd ..
+        node scripts/generate-shaders.js
+        cd platform/ios/
+        npm ci --ignore-scripts
+        node platform/darwin/scripts/generate-style-code.js
+        node platform/darwin/scripts/update-examples.js
+        git add -u
+        git commit -m "Update MapLibre GL JS to ${{ github.event.inputs.commit }}"
+        git push --set-upstream origin update-gl-js-to-${{ github.event.inputs.commit }}
+
+    - name: Create pull request
+      run: gh pr create --base main --fill
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
