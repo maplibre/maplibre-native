@@ -15,20 +15,3 @@ If you want to contribute code:
 1. Prefix your commit messages with the platform(s) your changes affect: `[ios]` or `[macos]`.
 
 Please note the special instructions for contributing new source code files, asset files, or user-facing strings to the [iOS SDK](platform/ios/DEVELOPING.md#contributing) or [macOS SDK](platform/macos/DEVELOPING.md#contributing).
-
-### Github issue labels
-
-Our labeling system is:
-
- * **minimalistic:** Labels’ usefulness are inversely proportional to how many we have.
- * **objective:** Labels should be objective enough that any two people would agree on a labeling decision.
- * **useful:** Labels should track state or capture semantic meaning that would otherwise be hard to search for.
-
-We’ve color-coded our labels by facet to make them easier to use:
-
- * type (blue)
- * platform (black)
- * actionable status (red)
- * non-actionable status (grey)
- * importance / urgency (green)
- * topic / project / misc (yellow)
