@@ -1,12 +1,12 @@
 module: Mapbox
 author: Mapbox
-author_url: https://www.mapbox.com/
-github_url: https://github.com/mapbox/mapbox-gl-native-ios
+author_url: https://maplibre.org/
+github_url: https://github.com/maplibre/maplibre-gl-native
 dash_url: https://docs.mapbox.com/ios/docsets/Mapbox.xml
-copyright: '© 2014–2019 [Mapbox](https://www.mapbox.com/). See [license](https://github.com/mapbox/mapbox-gl-native-ios/blob/master/LICENSE.md) for more details.'
+copyright: '[License](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md)'
 
 head: |
-  <link rel='shortcut icon' href='https://www.mapbox.com/img/favicon.ico' type='image/x-icon' />
+  <link rel='shortcut icon' href='https://maplibre.org/favicon.ico' type='image/x-icon' />
 
 objc: Yes
 skip_undocumented: Yes
