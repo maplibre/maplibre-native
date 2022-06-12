@@ -21,11 +21,12 @@ jobs:
       
       - name: Unzip
         run: |
-          mkdir -p unzipped/android/api/
-          unzip javadoc.zip -d unzipped/android/api/
+          mkdir unzipped/
+          unzip javadoc.zip -d unzipped/
       
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.0
         with:
           branch: gh-pages
           folder: unzipped
+          target-folder: android/api/
