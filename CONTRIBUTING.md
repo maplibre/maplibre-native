@@ -6,11 +6,11 @@ If you want to contribute code:
 
 1. Please familiarize yourself with the [install process](INSTALL.md).
 
-1. Ensure that existing [pull requests](https://github.com/mapbox/mapbox-gl-native-ios/pulls) and [issues](https://github.com/mapbox/mapbox-gl-native-ios/issues) don’t already cover your contribution or question.
+1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
 
 1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **master** section of the relevant changelog(s):
-  * [Mapbox Maps SDK for iOS](platform/ios/CHANGELOG.md)
-  * [Mapbox Maps SDK for macOS](platform/macos/CHANGELOG.md)
+  * [Maplibre Maps SDK for iOS](platform/ios/CHANGELOG.md)
+  * [Maplibre Maps SDK for macOS](platform/macos/CHANGELOG.md)
 
 1. Prefix your commit messages with the platform(s) your changes affect: `[ios]` or `[macos]`.
 
