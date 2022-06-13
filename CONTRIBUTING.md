@@ -4,7 +4,7 @@ If you have a usage question for a product built on MapLibre GL (such as our iOS
 
 If you want to contribute code:
 
-1. Please familiarize yourself with the [install process](INSTALL.md).
+1. Please familiarize yourself with the [install process](README.md#installation).
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
 
