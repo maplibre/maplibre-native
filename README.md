@@ -29,6 +29,12 @@ We thank everyone who supported us financially in the past and special thanks to
 
 [MIERUNE Inc.](https://www.mierune.co.jp/?lang=en) [@MIERUNE](https://github.com/MIERUNE), [@jawg](https://github.com/jawg), [@nekoyasan](https://github.com/nekoyasan), [@atierian](https://github.com/atierian), [@photoprism](https://github.com/photoprism), [@kaplanlior](https://github.com/kaplanlior), [@francois2metz](https://github.com/francois2metz), [@Schneider-Geo](https://github.com/Schneider-Geo), [@serghov](https://github.com/serghov), [@ambientlight](https://github.com/ambientlight), [@joschi77](https://github.com/joschi77), [@geoffhill](https://github.com/geoffhill), [@jasongode](https://github.com/jasongode)
 
+## Documentation
+
+The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
+
+The iOS API documentation is available at https://maplibre.org/maplibre-gl-native/ios/api/
+
 ## Installation
 
 ### Android
@@ -102,8 +108,6 @@ git checkout tags/$TAG -b $TAG
 ```
 
 #### Android
-
-The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
 
 > Make sure you have set Android SDK path in platform/android/local.properties, variable sdk.dir
 
