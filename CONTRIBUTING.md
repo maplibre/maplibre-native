@@ -14,4 +14,4 @@ If you want to contribute code:
 
 1. Prefix your commit messages with the platform(s) your changes affect: `[ios]` or `[macos]`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to the [iOS SDK](platform/ios/DEVELOPING.md#contributing) or [macOS SDK](platform/macos/DEVELOPING.md#contributing).
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to the [iOS SDK](platform/ios/DEVELOPING.md) or [macOS SDK](platform/macos/DEVELOPING.md).
