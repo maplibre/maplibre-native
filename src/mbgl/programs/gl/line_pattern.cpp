@@ -15,9 +15,9 @@ struct ShaderSource;
 template <>
 struct ShaderSource<LinePatternProgram> {
     static constexpr const char* name = "line_pattern";
-    static constexpr const uint8_t hash[8] = {0x38, 0x9c, 0x3d, 0xde, 0xb4, 0xe0, 0xd1, 0x61};
-    static constexpr const auto vertexOffset = 38066;
-    static constexpr const auto fragmentOffset = 41460;
+    static constexpr const uint8_t hash[8] = {0xa3, 0x92, 0x7f, 0xcc, 0xdc, 0xc5, 0xba, 0x85};
+    static constexpr const auto vertexOffset = 40651;
+    static constexpr const auto fragmentOffset = 45125;
 };
 
 constexpr const char* ShaderSource<LinePatternProgram>::name;
@@ -63,6 +63,7 @@ varying vec2 v_normal;
 varying vec2 v_width2;
 varying float v_linesofar;
 varying float v_gamma_scale;
+varying float v_width;
 
 
 #ifndef HAS_UNIFORM_u_blur
@@ -107,6 +108,14 @@ uniform mediump float u_width;
 #endif
 
 
+#ifndef HAS_UNIFORM_u_floorwidth
+uniform lowp float u_floorwidth_t;
+attribute lowp vec2 a_floorwidth;
+#else
+uniform lowp float u_floorwidth;
+#endif
+
+
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
 attribute lowp vec4 a_pattern_from;
@@ -122,6 +131,24 @@ attribute lowp vec4 a_pattern_to;
 varying lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
+#endif
+
+
+#ifndef HAS_UNIFORM_u_pixel_ratio_from
+uniform lowp float u_pixel_ratio_from_t;
+attribute lowp vec2 a_pixel_ratio_from;
+varying lowp float pixel_ratio_from;
+#else
+uniform lowp float u_pixel_ratio_from;
+#endif
+
+
+#ifndef HAS_UNIFORM_u_pixel_ratio_to
+uniform lowp float u_pixel_ratio_to_t;
+attribute lowp vec2 a_pixel_ratio_to;
+varying lowp float pixel_ratio_to;
+#else
+uniform lowp float u_pixel_ratio_to;
 #endif
 
 
@@ -162,6 +189,13 @@ void main() {
 #endif
 
     
+#ifndef HAS_UNIFORM_u_floorwidth
+    lowp float floorwidth = unpack_mix_vec2(a_floorwidth, u_floorwidth_t);
+#else
+    lowp float floorwidth = u_floorwidth;
+#endif
+
+    
 #ifndef HAS_UNIFORM_u_pattern_from
     pattern_from = a_pattern_from;
 #else
@@ -175,6 +209,20 @@ void main() {
     mediump vec4 pattern_to = u_pattern_to;
 #endif
 
+    
+#ifndef HAS_UNIFORM_u_pixel_ratio_from
+    pixel_ratio_from = unpack_mix_vec2(a_pixel_ratio_from, u_pixel_ratio_from_t);
+#else
+    lowp float pixel_ratio_from = u_pixel_ratio_from;
+#endif
+
+    
+#ifndef HAS_UNIFORM_u_pixel_ratio_to
+    pixel_ratio_to = unpack_mix_vec2(a_pixel_ratio_to, u_pixel_ratio_to_t);
+#else
+    lowp float pixel_ratio_to = u_pixel_ratio_to;
+#endif
+
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -183,7 +231,7 @@ void main() {
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;
     float a_linesofar = (floor(a_data.z / 4.0) + a_data.w * 64.0) * LINE_DISTANCE_SCALE;
-    // float tileRatio = u_scale.y;
+    // float tileRatio = u_scale.x;
     vec2 pos = floor(a_pos_normal * 0.5);
 
     // x is 1 if it's a round cap, 0 otherwise
@@ -224,6 +272,7 @@ void main() {
 
     v_linesofar = a_linesofar;
     v_width2 = vec2(outset, inset);
+    v_width = floorwidth;
 }
 
 */
@@ -233,7 +282,7 @@ void main() {
 uniform lowp float u_device_pixel_ratio;
 uniform vec2 u_texsize;
 uniform float u_fade;
-uniform mediump vec4 u_scale;
+uniform mediump vec3 u_scale;
 
 uniform sampler2D u_image;
 
@@ -241,6 +290,7 @@ varying vec2 v_normal;
 varying vec2 v_width2;
 varying float v_linesofar;
 varying float v_gamma_scale;
+varying float v_width;
 
 
 #ifndef HAS_UNIFORM_u_pattern_from
@@ -254,6 +304,20 @@ uniform lowp vec4 u_pattern_from;
 varying lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
+#endif
+
+
+#ifndef HAS_UNIFORM_u_pixel_ratio_from
+varying lowp float pixel_ratio_from;
+#else
+uniform lowp float u_pixel_ratio_from;
+#endif
+
+
+#ifndef HAS_UNIFORM_u_pixel_ratio_to
+varying lowp float pixel_ratio_to;
+#else
+uniform lowp float u_pixel_ratio_to;
 #endif
 
 
@@ -282,6 +346,16 @@ void main() {
     mediump vec4 pattern_to = u_pattern_to;
 #endif
 
+    
+#ifdef HAS_UNIFORM_u_pixel_ratio_from
+    lowp float pixel_ratio_from = u_pixel_ratio_from;
+#endif
+
+    
+#ifdef HAS_UNIFORM_u_pixel_ratio_to
+    lowp float pixel_ratio_to = u_pixel_ratio_to;
+#endif
+
 
     
 #ifdef HAS_UNIFORM_u_blur
@@ -299,16 +373,18 @@ void main() {
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
 
-    float pixelRatio = u_scale.x;
-    float tileZoomRatio = u_scale.y;
-    float fromScale = u_scale.z;
-    float toScale = u_scale.w;
+    float tileZoomRatio = u_scale.x;
+    float fromScale = u_scale.y;
+    float toScale = u_scale.z;
 
-    vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
+    vec2 display_size_a = (pattern_br_a - pattern_tl_a) / pixel_ratio_from;
+    vec2 display_size_b = (pattern_br_b - pattern_tl_b) / pixel_ratio_to;
 
     vec2 pattern_size_a = vec2(display_size_a.x * fromScale / tileZoomRatio, display_size_a.y);
     vec2 pattern_size_b = vec2(display_size_b.x * toScale / tileZoomRatio, display_size_b.y);
+
+    float aspect_a = display_size_a.y / v_width;
+    float aspect_b = display_size_b.y / v_width;
 
     // Calculate the distance of the pixel from the line in pixels.
     float dist = length(v_normal) * v_width2.s;
@@ -319,18 +395,15 @@ void main() {
     float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
-    float x_a = mod(v_linesofar / pattern_size_a.x, 1.0);
-    float x_b = mod(v_linesofar / pattern_size_b.x, 1.0);
+    float x_a = mod(v_linesofar / pattern_size_a.x * aspect_a, 1.0);
+    float x_b = mod(v_linesofar / pattern_size_b.x * aspect_b, 1.0);
 
-    // v_normal.y is 0 at the midpoint of the line, -1 at the lower edge, 1 at the upper edge
-    // we clamp the line width outset to be between 0 and half the pattern height plus padding (2.0)
-    // to ensure we don't sample outside the designated symbol on the sprite sheet.
-    // 0.5 is added to shift the component to be bounded between 0 and 1 for interpolation of
-    // the texture coordinate
-    float y_a = 0.5 + (v_normal.y * clamp(v_width2.s, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
-    float y_b = 0.5 + (v_normal.y * clamp(v_width2.s, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
-    vec2 pos_a = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, vec2(x_a, y_a));
-    vec2 pos_b = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, vec2(x_b, y_b));
+    float y = 0.5 * v_normal.y + 0.5;
+
+    vec2 texel_size = 1.0 / u_texsize;
+
+    vec2 pos_a = mix(pattern_tl_a * texel_size - texel_size, pattern_br_a * texel_size + texel_size, vec2(x_a, y));
+    vec2 pos_b = mix(pattern_tl_b * texel_size - texel_size, pattern_br_b * texel_size + texel_size, vec2(x_b, y));
 
     vec4 color = mix(texture2D(u_image, pos_a), texture2D(u_image, pos_b), u_fade);
 
