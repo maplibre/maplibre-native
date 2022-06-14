@@ -153,7 +153,7 @@ typedef NS_ENUM(NSUInteger, MGLSymbolPlacement) {
 };
 
 /**
- Determines whether overlapping symbols in the same layer are rendered in the 
+ Determines whether overlapping symbols in the same layer are rendered in the
  order that they appear in the data source or by their y-position relative to
  the viewport. To control the order and prioritization of symbols otherwise, use
  `MGLSymbolStyleLayer.symbolSortKey`.
