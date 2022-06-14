@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     concurrency: 
-      group: ${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
       cancel-in-progress: true
     defaults:
       run:

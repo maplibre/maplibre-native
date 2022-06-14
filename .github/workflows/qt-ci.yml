@@ -55,7 +55,7 @@ jobs:
             qt_target: desktop
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: ${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
       cancel-in-progress: true
     env:
       BUILD_TYPE: Debug
