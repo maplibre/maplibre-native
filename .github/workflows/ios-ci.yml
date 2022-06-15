@@ -6,20 +6,44 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/android/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/macos/**"
+      - "platform/node/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android*.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos*.yml"
+      - ".github/workflows/node*.yml"
+      - ".github/workflows/qt*.yml"
+
   pull_request:
     branches:
       - main
     paths-ignore:
-      - "platform/android/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/node/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android*.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos*.yml"
+      - ".github/workflows/node*.yml"
+      - ".github/workflows/qt*.yml"
 
 jobs:
   build:

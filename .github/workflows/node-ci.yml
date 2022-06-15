@@ -6,19 +6,42 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
-      - "platform/qt/**"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android*.yml"
+      - ".github/workflows/ios*.yml"
+      - ".github/workflows/macos*.yml"
+      - ".github/workflows/qt*.yml"
     branches:
       - main
   pull_request:
     branches:
       - main
     paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android*.yml"
+      - ".github/workflows/ios*.yml"
+      - ".github/workflows/macos*.yml"
+      - ".github/workflows/qt*.yml"
 
 jobs:
   build:

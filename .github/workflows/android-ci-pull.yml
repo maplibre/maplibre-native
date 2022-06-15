@@ -6,11 +6,23 @@ on:
     branches:
       - main
     paths-ignore:
-      - "platform/ios/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/node/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-docker*.yml"
+      - ".github/workflows/android-release.yml"
+      - ".github/workflows/ios*.yml"
+      - ".github/workflows/macos*.yml"
+      - ".github/workflows/node*.yml"
+      - ".github/workflows/qt*.yml"
 
 jobs:
   build:
