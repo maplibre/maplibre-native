@@ -6,19 +6,68 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
-      - "platform/qt/**"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos-ci.yml"
+      - ".github/workflows/macos-release.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
     branches:
       - main
+
   pull_request:
     branches:
       - main
     paths-ignore:
-      - "platform/android/**"
-      - "platform/ios/**"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos-ci.yml"
+      - ".github/workflows/macos-release.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -30,9 +79,6 @@ jobs:
           - ubuntu-20.04
           - ubuntu-18.04
     runs-on: ${{ matrix.os }}
-    concurrency: 
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
