@@ -16,13 +16,21 @@ on:
       - "platform/qt/**"
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
-      - ".github/workflows/android*.yml"
-      - ".github/workflows/gh-pages*.yml"
-      - ".github/workflows/ios*.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
       - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node*.yml"
-      - ".github/workflows/qt*.yml"
+      - ".github/workflows/node-ci.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
+
 
     branches:
       - main
@@ -40,12 +48,19 @@ on:
       - "platform/qt/**"
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
-      - ".github/workflows/android*.yml"
-      - ".github/workflows/gh-pages*.yml"
-      - ".github/workflows/ios*.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
       - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node*.yml"
-      - ".github/workflows/qt*.yml"
+      - ".github/workflows/node-ci.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
 
 concurrency:
