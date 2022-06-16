@@ -51,7 +51,7 @@ We thank everyone who supported us financially in the past and special thanks to
     ```gradle
         dependencies {
             ...
-            implementation 'org.maplibre.gl:android-sdk:9.4.0'
+            implementation 'org.maplibre.gl:android-sdk:<version>'
             ...
         }
     ```
@@ -60,7 +60,7 @@ We thank everyone who supported us financially in the past and special thanks to
 
 *Note: MapLibre by default ships with the proprietary Google Play Location Services. If you want to avoid pulling proprietary dependencies into your project, you can exclude Google Play Location Services as follows:*
 ```gradle
-    implementation ('org.maplibre.gl:android-sdk:9.4.0') {
+    implementation ('org.maplibre.gl:android-sdk:<version>') {
         exclude group: 'com.google.android.gms'
     }
 ```
