@@ -1,108 +1,44 @@
 # MapLibre Maps SDK for Qt
 
-## Developing
+This is a community maintained MapLibre SDK for usage in Qt apps.
+Both Qt5 (minimal 5.6) and Qt6 are supported.
+Note that only OpenGL rendering is supported at the moment.
 
-This is the foundation for the [Mapbox GL plugin](https://doc.qt.io/qt-5/location-plugin-mapboxgl.html)
-available in the Qt SDK since Qt 5.9. Use the [Qt bugtracker](https://bugreports.qt.io) for bugs related
-to the plugin and this GitHub repository for bugs related to MapLibre GL Native and the Qt bindings.
+## Supported platforms
 
-You should build this repository if you want to develop/contribute using the low level Qt C++ bindings or
-want to contribute to the MapLibre GL Native project using the Qt port for debugging.
+- macOS
+- iOS
+- Android
+- Linux
+- Windows
 
-### Build dependencies
+## Building
 
-#### Linux
+This project uses out of source build. CMake 3.10 or later is used to generate
+make files. Ninja is recommended.
 
-For Linux (tested on Ubuntu) desktop, together with these [build instructions](../linux/README.md), you also need:
+Before the project can be built Qt installation needs to be added to the `PATH`:
 
-```
-$ sudo apt-get install qt5-default
-```
-
-#### macOS
-
-For macOS desktop, you can install Qt 5 via [Homebrew](https://brew.sh):
-
-```
-$ brew install qt5
+```shell
+export PATH=<path_to_Qt>/Qt/<Qt_version>/<Qt_platform>/bin:$PATH
 ```
 
-Since Homebrew doesn't add Qt to the path, you'll have to do that manually before running any Make target:
+A minimal set of commands to build and install is
 
-```
-export PATH=/usr/local/opt/qt5/bin:$PATH
-```
-
-### Windows
-
-The Windows build will assume you have installed and on the default path:
-
-- Microsoft Visual Studio 2019
-- [CMake 3.10.1+](https://cmake.org/download/)
-- [Ninja](https://github.com/ninja-build/ninja/releases)
-- [Qt 5.4+](https://www.qt.io/download) with "msvc2019" (or later) support.
-
-At runtime, you will also need installed:
-
-- [OpenSSL 1.0.2+](https://slproweb.com/products/Win32OpenSSL.html)
-- DirectX
-
-#### QNX 7.0
-
-To build for QNX 7.0, you need to install the QNX Software Development Platform (SDP) on a Linux host.
-
-http://www.qnx.com/developers/docs/7.0.0/#com.qnx.doc.qnxsdp.nav/topic/bookset.html
-
-After installing the SDP, you need to source the QNX environment script:
-
-```
-source <SDP_DIRECTORY>/qnxsdp-env.sh
+```shell
+mkdir build && cd build
+cmake ../maplibre-gl-native/ \
+  -GNinja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=<installation_prefix> \
+  -DMBGL_WITH_QT=ON
+ninja
+ninja install
 ```
 
-You also need to Build Qt for QNX.
+`<installation_prefix>` above should be replaced with a wished installation path.
+Files installed there can later be used as the dependency for your app.
 
-http://wiki.qt.io/Building_Qt_for_QNX_Neutrino_OS
-
-After building Qt for QNX, you need to add Qt installation's bin directory to the path.
-
-```
-export PATH=<INSTALLFOLDER>/bin:$PATH
-```
-
-### Build instructions
-
-Public API headers can be found in the [platform/qt/include](include) directory.
-
-#### Linux and macOS
-
-#### QMapboxGL example application
-
-```
-$ make qt-lib      # Will build libqmapboxgl.so
-$ make qt-app      # Will build the test app and libqmapboxgl.so if not built yet
-$ make run-qt-app  # Will build and run the test app
-```
-
-#### Windows
-
-```
-$ mkdir build
-$ cd build
-$ cmake -G Ninja -DMBGL_WITH_QT=ON -DCMAKE_BUILD_TYPE=Release ..
-$ ninja
-```
-
-You may need to specify the path to Qt:
-
-```
-$ cmake -G Ninja -DMBGL_WITH_QT=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake ..
-```
-
-
-#### QNX 7.0
-
-Building the repository for QNX 7.0 is very similar to other platforms (e.g. Linux and macOS).
-
-```
-$ make qnx-qt-lib      # Will build libqmapboxgl.so
-```
+For platform-specific details look at build scripts provided
+in the [scripts](scripts) folder. Each script requires (at least) paths
+to source and installation locations.

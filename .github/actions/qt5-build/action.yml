@@ -1,0 +1,6 @@
+# action.yml
+name: 'Qt5 Linux Builder'
+description: 'Helper action to build in a specific Docker container'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

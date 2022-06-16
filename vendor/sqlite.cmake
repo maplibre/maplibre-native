@@ -27,3 +27,8 @@ target_include_directories(
     mbgl-vendor-sqlite SYSTEM
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/sqlite/include
 )
+
+export(TARGETS
+    mbgl-vendor-sqlite
+    APPEND FILE MapboxCoreTargets.cmake
+)

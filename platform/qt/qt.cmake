@@ -4,13 +4,13 @@ message(STATUS "Configuring GL-Native with Qt bindings")
 file(READ "${PROJECT_SOURCE_DIR}/platform/qt/VERSION" MBGL_QT_VERSION)
 string(REGEX REPLACE "\n" "" MBGL_QT_VERSION "${MBGL_QT_VERSION}") # get rid of the newline at the end
 set(MBGL_QT_VERSION_COMPATIBILITY 2.0.0)
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Version ${MBGL_QT_VERSION}")
 
 option(MBGL_QT_LIBRARY_ONLY "Build only libraries" OFF)
-option(MBGL_QT_INSIDE_QT_PLUGIN "Build qmapboxgl as OBJECT library, so it can be bundled into separate single plugin lib." OFF)
+option(MBGL_QT_STATIC "Build Mapbox GL Qt bindings staticly" OFF)
+option(MBGL_QT_INSIDE_PLUGIN "Build qmapboxgl as OBJECT library, so it can be bundled into separate single plugin lib." OFF)
 option(MBGL_WITH_QT_HEADLESS "Build Mapbox GL Qt with headless support" ON)
-option(MBGL_QT_WITH_INTERNAL_SQLITE "Build Mapbox GL Qt bindings with internal sqlite" $<NOT:$<BOOL:${MBGL_QT_STATIC}>>)
+option(MBGL_QT_WITH_INTERNAL_SQLITE "Build Mapbox GL Qt bindings with internal sqlite" OFF)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR}
@@ -63,10 +63,10 @@ endif()
 if(ANDROID)
     message(STATUS "Building for ABI: ${ANDROID_ABI}")
     set(CMAKE_STATIC_LIBRARY_SUFFIX "_${ANDROID_ABI}.a")
-elseif(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_STATIC_LIBRARY_SUFFIX "d.lib")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_STATIC_LIBRARY_SUFFIX "d.a")
+elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    set(CMAKE_DEBUG_POSTFIX "_debug")
+elseif(MSVC OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 target_sources(
@@ -150,7 +150,7 @@ set_property(TARGET mbgl-core PROPERTY AUTOMOC ON)
 target_link_libraries(
     mbgl-core
     PRIVATE
-        $<$<NOT:$<PLATFORM_ID:Windows,Emscripten>>:z>
+        $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
@@ -166,12 +166,10 @@ set(qmapboxgl_headers
     ${PROJECT_SOURCE_DIR}/platform/qt/include/qmapboxgl.hpp
 )
 
-if(MBGL_QT_STATIC)
-    if(MBGL_QT_INSIDE_QT_PLUGIN)
-        add_library(qmapboxgl OBJECT)
-    else()
-        add_library(qmapboxgl STATIC)
-    endif()
+if (MBGL_QT_INSIDE_PLUGIN)
+    add_library(qmapboxgl OBJECT)
+elseif(MBGL_QT_STATIC)
+    add_library(qmapboxgl STATIC)
 else()
     add_library(qmapboxgl SHARED)
 endif()
@@ -206,7 +204,7 @@ set_target_properties(
     SOVERSION ${MBGL_QT_VERSION_COMPATIBILITY}
     PUBLIC_HEADER "${qmapboxgl_headers}"
 )
-if (NOT MBGL_QT_STATIC)
+if (NOT MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
     set_target_properties(
         qmapboxgl PROPERTIES
         FRAMEWORK ON
@@ -231,6 +229,8 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfigVers
 install(EXPORT QMapboxGLTargets
 	DESTINATION ${CMAKECONFIG_INSTALL_DIR}
 	COMPONENT development)
+
+export(EXPORT QMapboxGLTargets)
 
 install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/QMapboxGLConfig.cmake"
@@ -305,7 +305,7 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
     target_compile_definitions(
         mbgl-qt
         PRIVATE
-        $<$<BOOL:${MBGL_QT_STATIC}>:QT_MAPBOXGL_STATIC>
+        $<$<OR:$<BOOL:${MBGL_QT_STATIC}>,$<BOOL:${MBGL_QT_INSIDE_PLUGIN}>>:QT_MAPBOXGL_STATIC>
     )
 
     target_link_libraries(
@@ -320,7 +320,7 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
 
     target_include_directories(
         mbgl-qt
-        PUBLIC ${PROJECT_SOURCE_DIR}/platform/qt/include
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/qt/include
     )
 
     add_executable(
@@ -330,7 +330,7 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
 
     target_include_directories(
         mbgl-test-runner
-        PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
+        PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
     )
 
     target_compile_definitions(
