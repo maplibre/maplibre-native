@@ -43,6 +43,11 @@ on:
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/update-gl-js.yml"
 
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build-core:
     strategy:
@@ -74,10 +79,6 @@ jobs:
             qt: 6.2.2
             qt_target: desktop
     runs-on: ${{ matrix.os }}
-    concurrency:
-      # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILD_TYPE: Debug
       BUILD_MODE: ${{ matrix.static }}

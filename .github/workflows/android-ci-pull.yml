@@ -26,13 +26,14 @@ on:
       - ".github/workflows/qt*.yml"
       - ".github/workflows/update-gl-js.yml"
 
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build:
     runs-on: ubuntu-20.04
-    concurrency:
-      # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     defaults:
       run:
         working-directory: platform/android
