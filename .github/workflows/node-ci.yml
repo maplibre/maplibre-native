@@ -18,9 +18,11 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios*.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/qt*.yml"
+      - ".github/workflows/update-gl-js.yml"
     branches:
       - main
   pull_request:
@@ -39,9 +41,11 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios*.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/qt*.yml"
+      - ".github/workflows/update-gl-js.yml"
 
 jobs:
   build:
@@ -53,8 +57,8 @@ jobs:
           - ubuntu-20.04
           - ubuntu-18.04
     runs-on: ${{ matrix.os }}
-    concurrency: 
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}

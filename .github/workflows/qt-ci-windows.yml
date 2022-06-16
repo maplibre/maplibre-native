@@ -17,9 +17,11 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios*.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
 
   pull_request:
     branches:
@@ -36,15 +38,17 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios*.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
 
 jobs:
   build-core:
     runs-on: windows-latest
-    concurrency: 
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     strategy:
       matrix:

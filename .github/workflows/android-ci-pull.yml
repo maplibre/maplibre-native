@@ -19,16 +19,18 @@ on:
       - ".github/workflows/android-ci.yml"
       - ".github/workflows/android-docker*.yml"
       - ".github/workflows/android-release.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios*.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/node*.yml"
       - ".github/workflows/qt*.yml"
+      - ".github/workflows/update-gl-js.yml"
 
 jobs:
   build:
     runs-on: ubuntu-20.04
-    concurrency: 
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     defaults:
       run:

@@ -18,11 +18,13 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios-pre-release.yml"
       - ".github/workflows/ios-release.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/node*.yml"
       - ".github/workflows/qt*.yml"
+      - ".github/workflows/update-gl-js.yml"
 
   pull_request:
     branches:
@@ -39,17 +41,19 @@ on:
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
       - ".github/workflows/android*.yml"
+      - ".github/workflows/gh-pages*.yml"
       - ".github/workflows/ios-pre-release.yml"
       - ".github/workflows/ios-release.yml"
       - ".github/workflows/macos*.yml"
       - ".github/workflows/node*.yml"
       - ".github/workflows/qt*.yml"
+      - ".github/workflows/update-gl-js.yml"
 
 jobs:
   build:
     runs-on: macos-10.15
-    concurrency: 
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     env:
       BUILDTYPE: Debug
