@@ -89,3 +89,4 @@ autosort = True
 # then don't lstrip() them off. This allows for lazy hash rulers where the first
 # hash char is not separated by space
 hashruler_min_length = 10
+
