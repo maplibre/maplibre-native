@@ -53,8 +53,9 @@ jobs:
   build:
     runs-on: macos-10.15
     concurrency:
+      # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1

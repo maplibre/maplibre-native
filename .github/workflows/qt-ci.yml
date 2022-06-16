@@ -75,8 +75,9 @@ jobs:
             qt_target: desktop
     runs-on: ${{ matrix.os }}
     concurrency:
+      # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILD_TYPE: Debug
       BUILD_MODE: ${{ matrix.static }}

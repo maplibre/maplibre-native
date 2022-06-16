@@ -48,8 +48,9 @@ jobs:
   build-core:
     runs-on: windows-latest
     concurrency:
+      # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     strategy:
       matrix:
         include:

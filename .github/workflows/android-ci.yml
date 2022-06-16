@@ -31,8 +31,9 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     concurrency:
+      # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     defaults:
       run:
         working-directory: platform/android

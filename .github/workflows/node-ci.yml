@@ -58,8 +58,9 @@ jobs:
           - ubuntu-18.04
     runs-on: ${{ matrix.os }}
     concurrency:
+      # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
