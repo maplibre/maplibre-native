@@ -91,7 +91,7 @@ You can also download pre-build from releases in this repository.
 git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
 ```
 
-### Build
+## Build
 
 MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancments or debugging.
 
@@ -102,9 +102,9 @@ You can list available tags by issuing the command `git tag`, then use the resul
 git tag
 
 # 2.  Set a convenience variable with the desired TAG
-# TAG=android-v9.2.1
 # TAG=android-v9.4.2
-TAG=ios-v5.11.0
+# TAG=android-v9.5.2
+TAG=ios-v5.12.0
 # TAG=ios-v5.12.0-pre.1
 
 # 3.  Check out a particular TAG
@@ -114,19 +114,32 @@ git checkout tags/$TAG -b $TAG
 # clean, if you need to troubleshoot build dependencies by using `make clean`
 ```
 
-#### Android
+### Android
 
-> Make sure you have set Android SDK path in platform/android/local.properties, variable sdk.dir
+The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
+
+---
+
+<details open><summary>macOS Build Environment:  Android Studio + NDK</summary>
+<ul>
+<li>Environment:  Android Studio + NDK<ul>
+<li><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">JAVA_HOME=/Applications/Android Studio.app/Contents/jre/Contents/Home</code></li>
+<li><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">ANDROID_SDK_ROOT=~/Library/Android/sdk</code></li>
+<li><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">~/Library/Android/sdk/tools/bin/sdkmanager --install ndk;major.minor.build</code></li>
+</ul>
+</details>
+
 
 ```bash
 cd platform/android
-BUILDTYPE=Release make apackage
+BUILDTYPE=Debug make apackage
+#BUILDTYPE=Release make apackage
 ```
 
-Binaries are produced in `platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar`
+Binaries are produced in `platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-<BUILDTYPE>.aar`
 Please refer to [Mapbox Maps SDK for Android](platform/android/) for detailed instructions.
 
-#### iOS
+### iOS
 
 You can run automated test on a Simulator or Device by changing to the Scheme `iosapp` and choosing `Product` > `Test` (or use `⌘-U`).  Use `⌘-9` to navigate to `Reports` to see results and browse through screenshots.  This method of testing should work well with CI tools such as GitHub Actions, Xcode Server Bots, & AWS Device Farm.
 
