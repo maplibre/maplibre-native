@@ -57,12 +57,19 @@ The iOS API documentation is available at https://maplibre.org/maplibre-gl-nativ
     ```gradle
         dependencies {
             ...
-            implementation 'org.maplibre.gl:android-sdk:9.4.0'
+            implementation 'org.maplibre.gl:android-sdk:<version>'
             ...
         }
     ```
 
 3. Sync gradle and rebuild your app
+
+*Note: MapLibre by default ships with the proprietary Google Play Location Services. If you want to avoid pulling proprietary dependencies into your project, you can exclude Google Play Location Services as follows:*
+```gradle
+    implementation ('org.maplibre.gl:android-sdk:<version>') {
+        exclude group: 'com.google.android.gms'
+    }
+```
 
 ### iOS
 
