@@ -153,15 +153,21 @@ typedef NS_ENUM(NSUInteger, MGLSymbolPlacement) {
 };
 
 /**
- Controls the order in which overlapping symbols in the same layer are rendered
+ Determines whether overlapping symbols in the same layer are rendered in the
+ order that they appear in the data source or by their y-position relative to
+ the viewport. To control the order and prioritization of symbols otherwise, use
+ `MGLSymbolStyleLayer.symbolSortKey`.
 
  Values of this type are used in the `MGLSymbolStyleLayer.symbolZOrder`
  property.
  */
 typedef NS_ENUM(NSUInteger, MGLSymbolZOrder) {
     /**
-     If `MGLSymbolStyleLayer.symbolSortKey` is set, sort based on that.
-     Otherwise sort symbols by their y-position relative to the viewport.
+     Sorts symbols by `MGLSymbolStyleLayer.symbolSortKey` if set. Otherwise,
+     sorts symbols by their y-position relative to the viewport if
+     `iconAllowOverlap` or `textAllowOverlap` is set to `YES` or
+     `MGLTextAllowOverlapIconIgnorePlacement` or `textIgnorePlacement` is
+     `false`.
      */
     MGLSymbolZOrderAuto,
     /**
@@ -1100,7 +1106,10 @@ MGL_EXPORT
 @property (nonatomic, null_resettable) NSExpression *symbolSpacing;
 
 /**
- Controls the order in which overlapping symbols in the same layer are rendered
+ Determines whether overlapping symbols in the same layer are rendered in the
+ order that they appear in the data source or by their y-position relative to
+ the viewport. To control the order and prioritization of symbols otherwise, use
+ `symbolSortKey`.
  
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
@@ -1109,8 +1118,10 @@ MGL_EXPORT
  
  * Constant `MGLSymbolZOrder` values
  * Any of the following constant string values:
-   * `auto`: If `symbol-sort-key` is set, sort based on that. Otherwise sort
- symbols by their y-position relative to the viewport.
+   * `auto`: Sorts symbols by `symbol-sort-key` if set. Otherwise, sorts symbols
+ by their y-position relative to the viewport if `icon-allow-overlap` or
+ `text-allow-overlap` is set to `true` or `icon-ignore-placement` or
+ `text-ignore-placement` is `false`.
    * `viewport-y`: Specify this z order if symbols’ appearance relies on lower
  features overlapping higher features. For example, symbols with a pin-like
  appearance would require this z order.
