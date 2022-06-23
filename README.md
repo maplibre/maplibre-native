@@ -116,8 +116,6 @@ git checkout tags/$TAG -b $TAG
 
 ### Android
 
-The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
-
 ---
 
 <details open><summary>macOS Build Environment:  Android Studio + NDK</summary>
