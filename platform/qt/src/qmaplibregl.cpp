@@ -50,6 +50,7 @@
 #include <mbgl/util/traits.hpp>
 
 #include <QColor>
+#include <QDebug>
 #include <QThreadStorage>
 #include <QVariant>
 #include <QVariantList>

@@ -1,5 +1,7 @@
 #include "geojson.hpp"
 
+#include <QDebug>
+
 namespace QMapLibreGeoJSON {
 
 mbgl::Point<double> asPoint(const QMapLibre::Coordinate &coordinate) {
