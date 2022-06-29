@@ -6,7 +6,7 @@ find_dependency(Qt@QT_VERSION_MAJOR@
 find_dependency(Qt@QT_VERSION_MAJOR@
                 COMPONENTS Network @REQUIRED_QT_VERSION@)
 
-if(NOT @MBGL_WITH_QT_LIB_ONLY@ OR @MBGL_QT_WITH_HEADLESS@)
+if(NOT @MBGL_QT_LIBRARY_ONLY@ OR @MBGL_QT_WITH_HEADLESS@)
 	find_dependency(Qt@QT_VERSION_MAJOR@
                         COMPONENTS OpenGL @REQUIRED_QT_VERSION@)
 endif()
