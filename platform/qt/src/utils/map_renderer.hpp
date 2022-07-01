@@ -18,15 +18,17 @@ class Renderer;
 class UpdateParameters;
 } // namespace mbgl
 
-class QMapLibreRendererBackend;
+namespace QMapLibreGL {
 
-class QMapLibreMapRenderer : public QObject
+class RendererBackend;
+
+class MapRenderer : public QObject
 {
     Q_OBJECT
 
 public:
-    QMapLibreMapRenderer(qreal pixelRatio, QMapLibreSettings::GLContextMode, const QString &localFontFamily);
-    virtual ~QMapLibreMapRenderer();
+    MapRenderer(qreal pixelRatio, Settings::GLContextMode, const QString &localFontFamily);
+    virtual ~MapRenderer();
 
     void render();
     void updateFramebuffer(quint32 fbo, const mbgl::Size &size);
@@ -41,13 +43,15 @@ signals:
 private:
     MBGL_STORE_THREAD(tid)
 
-    Q_DISABLE_COPY(QMapLibreMapRenderer)
+    Q_DISABLE_COPY(MapRenderer)
 
     std::mutex m_updateMutex;
     std::shared_ptr<mbgl::UpdateParameters> m_updateParameters;
 
-    QMapLibreRendererBackend m_backend;
+    RendererBackend m_backend;
     std::unique_ptr<mbgl::Renderer> m_renderer{};
 
     bool m_forceScheduler{};
 };
+
+} // namespace QMapLibreGL

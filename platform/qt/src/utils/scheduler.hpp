@@ -9,17 +9,19 @@
 #include <mutex>
 #include <queue>
 
-class QMapLibreScheduler : public QObject, public mbgl::Scheduler
+namespace QMapLibreGL {
+
+class Scheduler : public QObject, public mbgl::Scheduler
 {
     Q_OBJECT
 
 public:
-    QMapLibreScheduler();
-    virtual ~QMapLibreScheduler();
+    Scheduler();
+    virtual ~Scheduler();
 
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()> scheduled) final;
-    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     void processEvents();
 
@@ -33,3 +35,5 @@ private:
     std::queue<std::function<void()>> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 };
+
+} // namepace QMapLibreGL

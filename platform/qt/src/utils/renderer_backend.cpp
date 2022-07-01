@@ -6,9 +6,11 @@
 #include <QtGlobal>
 #include <QOpenGLContext>
 
-class QMapLibreRenderableResource final : public mbgl::gl::RenderableResource {
+namespace QMapLibreGL {
+
+class RenderableResource final : public mbgl::gl::RenderableResource {
 public:
-    QMapLibreRenderableResource(QMapLibreRendererBackend& backend_) : backend(backend_) {
+    RenderableResource(RendererBackend& backend_) : backend(backend_) {
     }
 
     void bind() override {
@@ -18,26 +20,26 @@ public:
     }
 
 private:
-    QMapLibreRendererBackend& backend;
+    RendererBackend& backend;
 };
 
-QMapLibreRendererBackend::QMapLibreRendererBackend(const mbgl::gfx::ContextMode contextMode_)
+RendererBackend::RendererBackend(const mbgl::gfx::ContextMode contextMode_)
     : mbgl::gl::RendererBackend(contextMode_),
-      mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<QMapLibreRenderableResource>(*this)) {
+      mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<RenderableResource>(*this)) {
 }
 
-QMapLibreRendererBackend::~QMapLibreRendererBackend() = default;
+RendererBackend::~RendererBackend() = default;
 
-void QMapLibreRendererBackend::updateAssumedState() {
+void RendererBackend::updateAssumedState() {
     assumeFramebufferBinding(ImplicitFramebufferBinding);
     assumeViewport(0, 0, size);
 }
 
-void QMapLibreRendererBackend::restoreFramebufferBinding() {
+void RendererBackend::restoreFramebufferBinding() {
     setFramebufferBinding(m_fbo);
 }
 
-void QMapLibreRendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size& newSize) {
+void RendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size& newSize) {
     m_fbo = fbo;
     size = newSize;
 }
@@ -46,7 +48,9 @@ void QMapLibreRendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size& 
     Initializes an OpenGL extension function such as Vertex Array Objects (VAOs),
     required by MapLibre GL Native engine.
 */
-mbgl::gl::ProcAddress QMapLibreRendererBackend::getExtensionFunctionPointer(const char* name) {
+mbgl::gl::ProcAddress RendererBackend::getExtensionFunctionPointer(const char* name) {
     QOpenGLContext* thisContext = QOpenGLContext::currentContext();
     return thisContext->getProcAddress(name);
 }
+
+} // namespace QMapLibreGL

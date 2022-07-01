@@ -2,13 +2,13 @@
 
 #include <QDebug>
 
-namespace QMapLibreGeoJSON {
+namespace QMapLibreGL::GeoJSON {
 
-mbgl::Point<double> asPoint(const QMapLibre::Coordinate &coordinate) {
+mbgl::Point<double> asPoint(const Coordinate &coordinate) {
     return mbgl::Point<double> { coordinate.second, coordinate.first };
 }
 
-mbgl::MultiPoint<double> asMultiPoint(const QMapLibre::Coordinates &multiPoint) {
+mbgl::MultiPoint<double> asMultiPoint(const Coordinates &multiPoint) {
     mbgl::MultiPoint<double> mbglMultiPoint;
     mbglMultiPoint.reserve(multiPoint.size());
     for (const auto &point: multiPoint) {
@@ -17,7 +17,7 @@ mbgl::MultiPoint<double> asMultiPoint(const QMapLibre::Coordinates &multiPoint) 
     return mbglMultiPoint;
 };
 
-mbgl::LineString<double> asLineString(const QMapLibre::Coordinates &lineString) {
+mbgl::LineString<double> asLineString(const Coordinates &lineString) {
     mbgl::LineString<double> mbglLineString;
     mbglLineString.reserve(lineString.size());
     for (const auto &coordinate : lineString) {
@@ -26,7 +26,7 @@ mbgl::LineString<double> asLineString(const QMapLibre::Coordinates &lineString) 
     return mbglLineString;
 };
 
-mbgl::MultiLineString<double> asMultiLineString(const QMapLibre::CoordinatesCollection &multiLineString) {
+mbgl::MultiLineString<double> asMultiLineString(const CoordinatesCollection &multiLineString) {
     mbgl::MultiLineString<double> mbglMultiLineString;
     mbglMultiLineString.reserve(multiLineString.size());
     for (const auto &lineString : multiLineString) {
@@ -35,7 +35,7 @@ mbgl::MultiLineString<double> asMultiLineString(const QMapLibre::CoordinatesColl
     return mbglMultiLineString;
 };
 
-mbgl::Polygon<double> asPolygon(const QMapLibre::CoordinatesCollection &polygon) {
+mbgl::Polygon<double> asPolygon(const CoordinatesCollection &polygon) {
     mbgl::Polygon<double> mbglPolygon;
     mbglPolygon.reserve(polygon.size());
     for (const auto &linearRing : polygon) {
@@ -49,7 +49,7 @@ mbgl::Polygon<double> asPolygon(const QMapLibre::CoordinatesCollection &polygon)
     return mbglPolygon;
 };
 
-mbgl::MultiPolygon<double> asMultiPolygon(const QMapLibre::CoordinatesCollections &multiPolygon) {
+mbgl::MultiPolygon<double> asMultiPolygon(const CoordinatesCollections &multiPolygon) {
     mbgl::MultiPolygon<double> mbglMultiPolygon;
     mbglMultiPolygon.reserve(multiPolygon.size());
     for (const auto &polygon : multiPolygon) {
@@ -126,7 +126,7 @@ mbgl::FeatureIdentifier asFeatureIdentifier(const QVariant &id) {
     }
 }
 
-mbgl::GeoJSONFeature asFeature(const QMapLibre::Feature &feature) {
+mbgl::GeoJSONFeature asFeature(const Feature &feature) {
     mbgl::PropertyMap properties;
     properties.reserve(feature.properties.size());
     for (auto it = feature.properties.constBegin(); it != feature.properties.constEnd(); ++it) {
@@ -135,22 +135,22 @@ mbgl::GeoJSONFeature asFeature(const QMapLibre::Feature &feature) {
 
     mbgl::FeatureIdentifier id = asFeatureIdentifier(feature.id);
 
-    if (feature.type == QMapLibre::Feature::PointType) {
-        const QMapLibre::Coordinates &points = feature.geometry.first().first();
+    if (feature.type == Feature::PointType) {
+        const Coordinates &points = feature.geometry.first().first();
         if (points.size() == 1) {
             return { asPoint(points.first()), std::move(properties), std::move(id) };
         } else {
             return { asMultiPoint(points), std::move(properties), std::move(id) };
         }
-    } else if (feature.type == QMapLibre::Feature::LineStringType) {
-        const QMapLibre::CoordinatesCollection &lineStrings = feature.geometry.first();
+    } else if (feature.type == Feature::LineStringType) {
+        const CoordinatesCollection &lineStrings = feature.geometry.first();
         if (lineStrings.size() == 1) {
             return { asLineString(lineStrings.first()), std::move(properties), std::move(id) };
         } else {
             return { asMultiLineString(lineStrings), std::move(properties), std::move(id) };
         }
     } else { // PolygonType
-        const QMapLibre::CoordinatesCollections &polygons = feature.geometry;
+        const CoordinatesCollections &polygons = feature.geometry;
         if (polygons.size() == 1) {
             return { asPolygon(polygons.first()), std::move(properties), std::move(id) };
         } else {
@@ -159,4 +159,4 @@ mbgl::GeoJSONFeature asFeature(const QMapLibre::Feature &feature) {
     }
 };
 
-} // namespace QMapLibreGeoJSON
+} // namespace QMapLibreGL::GeoJSON

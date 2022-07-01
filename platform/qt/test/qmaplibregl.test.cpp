@@ -66,7 +66,7 @@ TEST_F(QMapLibreGLTest, TEST_DISABLED_ON_CI(styleJson)) {
 }
 
 TEST_F(QMapLibreGLTest, TEST_DISABLED_ON_CI(styleUrl)) {
-    QString url(QMapLibre::defaultStyles()[0].first);
+    QString url(QMapLibreGL::defaultStyles()[0].first);
 
     map.setStyleUrl(url);
     ASSERT_EQ(map.styleUrl(), url);

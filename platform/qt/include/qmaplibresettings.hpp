@@ -16,10 +16,13 @@ namespace mbgl
     class TileServerOptions;
 }
 
-class Q_MAPLIBREGL_EXPORT QMapLibreSettings
+
+namespace QMapLibreGL {
+
+class Q_MAPLIBREGL_EXPORT Settings
 {
 public:
-    QMapLibreSettings();
+    Settings();
 
     enum GLContextMode {
         UniqueGLContext = 0,
@@ -103,5 +106,7 @@ private:
 
     mbgl::TileServerOptions *m_tileServerOptionsInternal{};
 };
+
+} // namespace QMapLibreGL
 
 #endif // QMAPLIBRESETTINGS_H

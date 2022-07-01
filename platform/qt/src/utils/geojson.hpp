@@ -10,16 +10,16 @@
 
 #include <string>
 
-namespace QMapLibreGeoJSON {
+namespace QMapLibreGL::GeoJSON {
 
-mbgl::Point<double> asPoint(const QMapLibre::Coordinate &coordinate);
-mbgl::MultiPoint<double> asMultiPoint(const QMapLibre::Coordinates &multiPoint);
-mbgl::LineString<double> asLineString(const QMapLibre::Coordinates &lineString);
-mbgl::MultiLineString<double> asMultiLineString(const QMapLibre::CoordinatesCollection &multiLineString);
-mbgl::Polygon<double> asPolygon(const QMapLibre::CoordinatesCollection &polygon);
-mbgl::MultiPolygon<double> asMultiPolygon(const QMapLibre::CoordinatesCollections &multiPolygon);
+mbgl::Point<double> asPoint(const Coordinate &coordinate);
+mbgl::MultiPoint<double> asMultiPoint(const Coordinates &multiPoint);
+mbgl::LineString<double> asLineString(const Coordinates &lineString);
+mbgl::MultiLineString<double> asMultiLineString(const CoordinatesCollection &multiLineString);
+mbgl::Polygon<double> asPolygon(const CoordinatesCollection &polygon);
+mbgl::MultiPolygon<double> asMultiPolygon(const CoordinatesCollections &multiPolygon);
 mbgl::Value asPropertyValue(const QVariant &value);
 mbgl::FeatureIdentifier asFeatureIdentifier(const QVariant &id);
-mbgl::GeoJSONFeature asFeature(const QMapLibre::Feature &feature);
+mbgl::GeoJSONFeature asFeature(const Feature &feature);
 
-} // namespace QMapLibreGeoJSON
+} // namespace QMapLibreGL::GeoJSON

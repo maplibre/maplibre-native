@@ -4,63 +4,63 @@
 #include "mbgl/util/traits.hpp"
 
 // mbgl::FeatureType
-static_assert(mbgl::underlying_type(QMapLibre::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point), "error");
-static_assert(mbgl::underlying_type(QMapLibre::Feature::LineStringType) == mbgl::underlying_type(mbgl::FeatureType::LineString), "error");
-static_assert(mbgl::underlying_type(QMapLibre::Feature::PolygonType) == mbgl::underlying_type(mbgl::FeatureType::Polygon), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::LineStringType) == mbgl::underlying_type(mbgl::FeatureType::LineString), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PolygonType) == mbgl::underlying_type(mbgl::FeatureType::Polygon), "error");
 
-namespace QMapLibre {
+namespace QMapLibreGL {
 
 /*!
-    \namespace QMapLibre
+    \namespace QMapLibreGL
     \inmodule MapLibre Maps SDK for Qt
 
-    Contains miscellaneous MapLibre types and utilities used throughout QMapLibreGL.
+    Contains miscellaneous MapLibre types and utilities used throughout QMapLibreGLGL.
 */
 
 /*!
-    \typedef QMapLibre::Coordinate
+    \typedef QMapLibreGL::Coordinate
 
     Alias for QPair<double, double>.
     Representation for geographical coordinates - latitude and longitude, respectively.
 */
 
 /*!
-    \typedef QMapLibre::CoordinateZoom
+    \typedef QMapLibreGL::CoordinateZoom
 
     Alias for QPair<Coordinate, double>.
-    Used as return value in QMapLibreGL::coordinateZoomForBounds.
+    Used as return value in QMapLibreGLGL::coordinateZoomForBounds.
 */
 
 /*!
-    \typedef QMapLibre::ProjectedMeters
+    \typedef QMapLibreGL::ProjectedMeters
 
     Alias for QPair<double, double>.
     Representation for projected meters - northing and easting, respectively.
 */
 
 /*!
-    \typedef QMapLibre::Coordinates
+    \typedef QMapLibreGL::Coordinates
 
-    Alias for QVector<QMapLibre::Coordinate>.
-    A list of QMapLibre::Coordinate objects.
+    Alias for QVector<QMapLibreGL::Coordinate>.
+    A list of QMapLibreGL::Coordinate objects.
 */
 
 /*!
-    \typedef QMapLibre::CoordinatesCollection
+    \typedef QMapLibreGL::CoordinatesCollection
 
-    Alias for QVector<QMapLibre::Coordinates>.
-    A list of QMapLibre::Coordinates objects.
+    Alias for QVector<QMapLibreGL::Coordinates>.
+    A list of QMapLibreGL::Coordinates objects.
 */
 
 /*!
-    \typedef QMapLibre::CoordinatesCollections
+    \typedef QMapLibreGL::CoordinatesCollections
 
-    Alias for QVector<QMapLibre::CoordinatesCollection>.
-    A list of QMapLibre::CoordinatesCollection objects.
+    Alias for QVector<QMapLibreGL::CoordinatesCollection>.
+    A list of QMapLibreGL::CoordinatesCollection objects.
 */
 
 /*!
-    \class QMapLibre::Feature
+    \class QMapLibreGL::Feature
 
     \inmodule MapLibre Maps SDK for Qt
 
@@ -70,9 +70,9 @@ namespace QMapLibre {
 */
 
 /*!
-    \enum QMapLibre::Feature::Type
+    \enum QMapLibreGL::Feature::Type
 
-    This enum is used as basis for geometry disambiguation in QMapLibre::Feature.
+    This enum is used as basis for geometry disambiguation in QMapLibreGL::Feature.
 
     \value PointType      A point geometry type. Means a single or a collection of points.
     \value LineStringType A line string geometry type. Means a single or a collection of line strings.
@@ -80,7 +80,7 @@ namespace QMapLibre {
 */
 
 /*!
-    \class QMapLibre::ShapeAnnotationGeometry
+    \class QMapLibreGL::ShapeAnnotationGeometry
 
     \inmodule MapLibre Maps SDK for Qt
 
@@ -88,7 +88,7 @@ namespace QMapLibre {
 */
 
 /*!
-    \enum QMapLibre::ShapeAnnotationGeometry::Type
+    \enum QMapLibreGL::ShapeAnnotationGeometry::Type
 
     This enum is used as basis for shape annotation geometry disambiguation.
 
@@ -99,7 +99,7 @@ namespace QMapLibre {
 */
 
 /*!
-    \class QMapLibre::SymbolAnnotation
+    \class QMapLibreGL::SymbolAnnotation
 
     \inmodule MapLibre Maps SDK for Qt
 
@@ -107,7 +107,7 @@ namespace QMapLibre {
 */
 
 /*!
-    \class QMapLibre::LineAnnotation
+    \class QMapLibreGL::LineAnnotation
 
     \inmodule MapLibre Maps SDK for Qt
 
@@ -117,7 +117,7 @@ namespace QMapLibre {
 */
 
 /*!
-    \class QMapLibre::FillAnnotation
+    \class QMapLibreGL::FillAnnotation
 
     \inmodule MapLibre Maps SDK for Qt
 
@@ -127,33 +127,33 @@ namespace QMapLibre {
 */
 
 /*!
-    \typedef QMapLibre::Annotation
+    \typedef QMapLibreGL::Annotation
 
     Alias for QVariant.
     Container that encapsulates either a symbol, a line, a fill or a style sourced annotation.
 */
 
 /*!
-    \typedef QMapLibre::AnnotationID
+    \typedef QMapLibreGL::AnnotationID
 
     Alias for quint32 representing an annotation identifier.
 */
 
 /*!
-    \typedef QMapLibre::AnnotationIDs
+    \typedef QMapLibreGL::AnnotationIDs
 
     Alias for QVector<quint32> representing a container of annotation identifiers.
 */
 
 /*!
-    \class QMapLibre::CameraOptions
+    \class QMapLibreGL::CameraOptions
     \inmodule MapLibre Maps SDK for Qt
 
-    QMapLibre::CameraOptions provides camera options to the renderer.
+    QMapLibreGL::CameraOptions provides camera options to the renderer.
 */
 
 /*!
-    \class QMapLibre::CustomLayerHostInterface
+    \class QMapLibreGL::CustomLayerHostInterface
 
     Represents a host interface to be implemented for rendering custom layers.
 
@@ -162,11 +162,11 @@ namespace QMapLibre {
 */
 
 /*!
-    \class QMapLibre::CustomLayerRenderParameters
+    \class QMapLibreGL::CustomLayerRenderParameters
     \inmodule MapLibre Maps SDK for Qt
 
-    QMapLibre::CustomLayerRenderParameters provides the data passed on each render
+    QMapLibreGL::CustomLayerRenderParameters provides the data passed on each render
     pass for a custom layer.
 */
 
-} // namespace QMapLibre
+} // namespace QMapLibreGL

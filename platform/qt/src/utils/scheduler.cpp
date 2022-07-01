@@ -4,16 +4,18 @@
 
 #include <cassert>
 
-QMapLibreScheduler::QMapLibreScheduler()
+namespace QMapLibreGL {
+
+Scheduler::Scheduler()
 {
 }
 
-QMapLibreScheduler::~QMapLibreScheduler()
+Scheduler::~Scheduler()
 {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void QMapLibreScheduler::schedule(std::function<void()> function) {
+void Scheduler::schedule(std::function<void()> function) {
     std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
@@ -22,7 +24,7 @@ void QMapLibreScheduler::schedule(std::function<void()> function) {
     emit needsProcessing();
 }
 
-void QMapLibreScheduler::processEvents()
+void Scheduler::processEvents()
 {
     std::queue<std::function<void()>> taskQueue;
     {
@@ -36,3 +38,5 @@ void QMapLibreScheduler::processEvents()
         taskQueue.pop();
     }
 }
+
+} // namespace QMapLibreGL

@@ -6,7 +6,7 @@
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
-namespace QMapLibre {
+namespace QMapLibreGL {
 
 enum NetworkMode {
     Online, // Default
@@ -20,6 +20,6 @@ Q_MAPLIBREGL_EXPORT double metersPerPixelAtLatitude(double latitude, double zoom
 Q_MAPLIBREGL_EXPORT ProjectedMeters projectedMetersForCoordinate(const Coordinate &);
 Q_MAPLIBREGL_EXPORT Coordinate coordinateForProjectedMeters(const ProjectedMeters &);
 
-} // namespace QMapLibre
+} // namespace QMapLibreGL
 
 #endif // QMAPLIBRETYPES_H

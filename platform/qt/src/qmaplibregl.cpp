@@ -66,10 +66,10 @@
 #endif
 
 // mbgl::NorthOrientation
-static_assert(mbgl::underlying_type(QMapLibreGL::NorthUpwards) == mbgl::underlying_type(mbgl::NorthOrientation::Upwards), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::NorthRightwards) == mbgl::underlying_type(mbgl::NorthOrientation::Rightwards), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::NorthDownwards) == mbgl::underlying_type(mbgl::NorthOrientation::Downwards), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::NorthLeftwards) == mbgl::underlying_type(mbgl::NorthOrientation::Leftwards), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Map::NorthUpwards) == mbgl::underlying_type(mbgl::NorthOrientation::Upwards), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Map::NorthRightwards) == mbgl::underlying_type(mbgl::NorthOrientation::Rightwards), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Map::NorthDownwards) == mbgl::underlying_type(mbgl::NorthOrientation::Downwards), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Map::NorthLeftwards) == mbgl::underlying_type(mbgl::NorthOrientation::Leftwards), "error");
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -110,7 +110,7 @@ std::unique_ptr<mbgl::style::Image> toStyleImage(const QString &id, const QImage
         1.0);
 }
 
-mbgl::MapOptions mapOptionsFromSettings(const QMapLibreSettings &settings, const QSize &size, qreal pixelRatio) {
+mbgl::MapOptions mapOptionsFromSettings(const QMapLibreGL::Settings &settings, const QSize &size, qreal pixelRatio) {
     return std::move(mbgl::MapOptions()
         .withSize(sanitizedSize(size))
         .withPixelRatio(pixelRatio)
@@ -119,7 +119,7 @@ mbgl::MapOptions mapOptionsFromSettings(const QMapLibreSettings &settings, const
         .withViewportMode(static_cast<mbgl::ViewportMode>(settings.viewportMode())));
 }
 
-mbgl::ResourceOptions resourceOptionsFromSettings(const QMapLibreSettings &settings) {
+mbgl::ResourceOptions resourceOptionsFromSettings(const QMapLibreGL::Settings &settings) {
     return std::move(mbgl::ResourceOptions()
         .withApiKey(settings.apiKey().toStdString())
         .withAssetPath(settings.assetPath().toStdString())
@@ -129,36 +129,36 @@ mbgl::ResourceOptions resourceOptionsFromSettings(const QMapLibreSettings &setti
 }
 
 
-mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & annotation) {
-    auto asGeometry = [](const QMapLibre::ShapeAnnotationGeometry &geometry) {
+mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibreGL::Annotation & annotation) {
+    auto asGeometry = [](const QMapLibreGL::ShapeAnnotationGeometry &geometry) {
         mbgl::ShapeAnnotationGeometry result;
         switch (geometry.type) {
-        case QMapLibre::ShapeAnnotationGeometry::LineStringType:
-            result = QMapLibreGeoJSON::asLineString(geometry.geometry.first().first());
+        case QMapLibreGL::ShapeAnnotationGeometry::LineStringType:
+            result = QMapLibreGL::GeoJSON::asLineString(geometry.geometry.first().first());
             break;
-        case QMapLibre::ShapeAnnotationGeometry::PolygonType:
-            result = QMapLibreGeoJSON::asPolygon(geometry.geometry.first());
+        case QMapLibreGL::ShapeAnnotationGeometry::PolygonType:
+            result = QMapLibreGL::GeoJSON::asPolygon(geometry.geometry.first());
             break;
-        case QMapLibre::ShapeAnnotationGeometry::MultiLineStringType:
-            result = QMapLibreGeoJSON::asMultiLineString(geometry.geometry.first());
+        case QMapLibreGL::ShapeAnnotationGeometry::MultiLineStringType:
+            result = QMapLibreGL::GeoJSON::asMultiLineString(geometry.geometry.first());
             break;
-        case QMapLibre::ShapeAnnotationGeometry::MultiPolygonType:
-            result = QMapLibreGeoJSON::asMultiPolygon(geometry.geometry);
+        case QMapLibreGL::ShapeAnnotationGeometry::MultiPolygonType:
+            result = QMapLibreGL::GeoJSON::asMultiPolygon(geometry.geometry);
             break;
         }
         return result;
     };
 
-    if (annotation.canConvert<QMapLibre::SymbolAnnotation>()) {
-        QMapLibre::SymbolAnnotation symbolAnnotation = annotation.value<QMapLibre::SymbolAnnotation>();
-        QMapLibre::Coordinate& pair = symbolAnnotation.geometry;
+    if (annotation.canConvert<QMapLibreGL::SymbolAnnotation>()) {
+        QMapLibreGL::SymbolAnnotation symbolAnnotation = annotation.value<QMapLibreGL::SymbolAnnotation>();
+        QMapLibreGL::Coordinate& pair = symbolAnnotation.geometry;
         return { mbgl::SymbolAnnotation(mbgl::Point<double> { pair.second, pair.first }, symbolAnnotation.icon.toStdString()) };
-    } else if (annotation.canConvert<QMapLibre::LineAnnotation>()) {
-        QMapLibre::LineAnnotation lineAnnotation = annotation.value<QMapLibre::LineAnnotation>();
+    } else if (annotation.canConvert<QMapLibreGL::LineAnnotation>()) {
+        QMapLibreGL::LineAnnotation lineAnnotation = annotation.value<QMapLibreGL::LineAnnotation>();
         auto color = mbgl::Color::parse(mbgl::style::conversion::convertColor(lineAnnotation.color));
         return { mbgl::LineAnnotation(asGeometry(lineAnnotation.geometry), lineAnnotation.opacity, lineAnnotation.width, { *color }) };
-    } else if (annotation.canConvert<QMapLibre::FillAnnotation>()) {
-        QMapLibre::FillAnnotation fillAnnotation = annotation.value<QMapLibre::FillAnnotation>();
+    } else if (annotation.canConvert<QMapLibreGL::FillAnnotation>()) {
+        QMapLibreGL::FillAnnotation fillAnnotation = annotation.value<QMapLibreGL::FillAnnotation>();
         auto color = mbgl::Color::parse(mbgl::style::conversion::convertColor(fillAnnotation.color));
         if (fillAnnotation.outlineColor.canConvert<QColor>()) {
             auto outlineColor = mbgl::Color::parse(mbgl::style::conversion::convertColor(fillAnnotation.outlineColor.value<QColor>()));
@@ -175,39 +175,41 @@ mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & anno
 } // namespace
 
 
+namespace QMapLibreGL {
+
 /*!
-    \class QMapLibreGL
-    \brief The QMapLibreGL class is a Qt wrapper for the MapLibre GL Native engine.
+    \class QMapLibreGL::Map
+    \brief The QMapLibreGL::Map class is a Qt wrapper for the MapLibre GL Native engine.
 
     \inmodule MapLibre Maps SDK for Qt
 
-    QMapLibreGL is a Qt friendly version the MapLibre GL Native engine using Qt types
-    and deep integration with Qt event loop. QMapLibreGL relies as much as possible
+    QMapLibreGL::Map is a Qt friendly version the MapLibre GL Native engine using Qt types
+    and deep integration with Qt event loop. QMapLibreGL::Map relies as much as possible
     on Qt, trying to minimize the external dependencies. For instance it will use
     QNetworkAccessManager for HTTP requests and QString for UTF-8 manipulation.
 
-    QMapLibreGL is not thread-safe and it is assumed that it will be accessed from
+    QMapLibreGL::Map is not thread-safe and it is assumed that it will be accessed from
     the same thread as the thread where the OpenGL context lives.
 */
 
 /*!
-    \enum QMapLibreGL::MapChange
+    \enum QMapLibreGL::Map::MapChange
 
     This enum represents the last changed occurred to the map state.
 
     \value MapChangeRegionWillChange                      A region of the map will change, like
     when resizing the map.
 
-    \value MapChangeRegionWillChangeAnimated              Not in use by QMapLibreGL.
+    \value MapChangeRegionWillChangeAnimated              Not in use by QMapLibreGL::Map.
 
     \value MapChangeRegionIsChanging                      A region of the map is changing.
 
     \value MapChangeRegionDidChange                       A region of the map finished changing.
 
-    \value MapChangeRegionDidChangeAnimated               Not in use by QMapLibreGL.
+    \value MapChangeRegionDidChangeAnimated               Not in use by QMapLibreGL::Map.
 
     \value MapChangeWillStartLoadingMap                   The map is getting loaded. This state
-    is set only once right after QMapLibreGL is created and a style is set.
+    is set only once right after QMapLibreGL::Map is created and a style is set.
 
     \value MapChangeDidFinishLoadingMap                   All the resources were loaded and parsed
     and the map is fully rendered. After this state the mapChanged() signal won't fire again unless
@@ -229,7 +231,7 @@ mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & anno
     \value MapChangeWillStartRenderingMap                 Set once when the map is about to get
     rendered for the first time.
 
-    \value MapChangeDidFinishRenderingMap                 Not in use by QMapLibreGL.
+    \value MapChangeDidFinishRenderingMap                 Not in use by QMapLibreGL::Map.
 
     \value MapChangeDidFinishRenderingMapFullyRendered    Map is fully loaded and rendered.
 
@@ -241,7 +243,7 @@ mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & anno
 */
 
 /*!
-    \enum QMapLibreGL::MapLoadingFailure
+    \enum QMapLibreGL::Map::MapLoadingFailure
 
     This enum represents map loading failure type.
 
@@ -254,7 +256,7 @@ mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & anno
 */
 
 /*!
-    \enum QMapLibreGL::NorthOrientation
+    \enum QMapLibreGL::Map::NorthOrientation
 
     This enum sets the orientation of the north bearing. It will directly affect bearing when
     resetting the north (i.e. setting bearing to 0).
@@ -272,35 +274,35 @@ mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibre::Annotation & anno
 */
 
 /*!
-    Constructs a QMapLibreGL object with \a settings and sets \a parent_ as the parent
+    Constructs a QMapLibreGL::Map object with \a settings and sets \a parent_ as the parent
     object. The \a settings cannot be changed after the object is constructed. The
     \a size represents the size of the viewport and the \a pixelRatio the initial pixel
     density of the screen.
 */
-QMapLibreGL::QMapLibreGL(QObject *parent_, const QMapLibreSettings &settings, const QSize& size, qreal pixelRatio)
+Map::Map(QObject *parent_, const Settings &settings, const QSize& size, qreal pixelRatio)
     : QObject(parent_)
 {
     assert(!size.isEmpty());
 
-    // Multiple QMapLibreGL running on the same thread
+    // Multiple QMapLibreGL::Map running on the same thread
     // will share the same mbgl::util::RunLoop
     if (!loop.hasLocalData()) {
         loop.setLocalData(std::make_shared<mbgl::util::RunLoop>());
     }
 
-    d_ptr = new QMapLibreGLPrivate(this, settings, size, pixelRatio);
+    d_ptr = new MapPrivate(this, settings, size, pixelRatio);
 }
 
 /*!
-    Destroys this QMapLibreGL.
+    Destroys this QMapLibreGL::Map.
 */
-QMapLibreGL::~QMapLibreGL()
+Map::~Map()
 {
     delete d_ptr;
 }
 
 /*!
-    \property QMapLibreGL::styleJson
+    \property QMapLibreGL::Map::styleJson
     \brief the map style JSON.
 
     Sets a new \a style from a JSON that must conform to the
@@ -308,20 +310,20 @@ QMapLibreGL::~QMapLibreGL()
     {Mapbox style specification}.
 
     \note In case of a invalid style it will trigger a mapChanged
-    signal with QMapLibreGL::MapChangeDidFailLoadingMap as argument.
+    signal with QMapLibreGL::Map::MapChangeDidFailLoadingMap as argument.
 */
-QString QMapLibreGL::styleJson() const
+QString Map::styleJson() const
 {
     return QString::fromStdString(d_ptr->mapObj->getStyle().getJSON());
 }
 
-void QMapLibreGL::setStyleJson(const QString &style)
+void Map::setStyleJson(const QString &style)
 {
     d_ptr->mapObj->getStyle().loadJSON(style.toStdString());
 }
 
 /*!
-    \property QMapLibreGL::styleUrl
+    \property QMapLibreGL::Map::styleUrl
     \brief the map style URL.
 
     Sets a URL for fetching a JSON that will be later fed to
@@ -333,55 +335,55 @@ void QMapLibreGL::setStyleJson(const QString &style)
     from anything that QNetworkAccessManager can handle.
 
     \note In case of a invalid style it will trigger a mapChanged
-    signal with QMapLibreGL::MapChangeDidFailLoadingMap as argument.
+    signal with QMapLibreGL::Map::MapChangeDidFailLoadingMap as argument.
 */
-QString QMapLibreGL::styleUrl() const
+QString Map::styleUrl() const
 {
     return QString::fromStdString(d_ptr->mapObj->getStyle().getURL());
 }
 
-void QMapLibreGL::setStyleUrl(const QString &url)
+void Map::setStyleUrl(const QString &url)
 {
     d_ptr->mapObj->getStyle().loadURL(url.toStdString());
 }
 
 /*!
-    \property QMapLibreGL::latitude
+    \property QMapLibreGL::Map::latitude
     \brief the map's current latitude in degrees.
 
-    Setting a latitude doesn't necessarily mean it will be accepted since QMapLibreGL
+    Setting a latitude doesn't necessarily mean it will be accepted since QMapLibreGL::Map
     might constrain it within the limits of the Web Mercator projection.
 */
-double QMapLibreGL::latitude() const
+double Map::latitude() const
 {
     return d_ptr->mapObj->getCameraOptions(d_ptr->margins).center->latitude();
 }
 
-void QMapLibreGL::setLatitude(double latitude_)
+void Map::setLatitude(double latitude_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng { latitude_, longitude() }).withPadding(d_ptr->margins));
 }
 
 /*!
-    \property QMapLibreGL::longitude
+    \property QMapLibreGL::Map::longitude
     \brief the map current longitude in degrees.
 
     Setting a longitude beyond the limits of the Web Mercator projection will make
     the map wrap. As an example, setting the longitude to 360 is effectively the same
     as setting it to 0.
 */
-double QMapLibreGL::longitude() const
+double Map::longitude() const
 {
     return d_ptr->mapObj->getCameraOptions(d_ptr->margins).center->longitude();
 }
 
-void QMapLibreGL::setLongitude(double longitude_)
+void Map::setLongitude(double longitude_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng { latitude(), longitude_ }).withPadding(d_ptr->margins));
 }
 
 /*!
-    \property QMapLibreGL::scale
+    \property QMapLibreGL::Map::scale
     \brief the map scale factor.
 
     This property is used to zoom the map. When \a center is defined, the map will
@@ -393,18 +395,18 @@ void QMapLibreGL::setLongitude(double longitude_)
 
     \sa zoom()
 */
-double QMapLibreGL::scale() const
+double Map::scale() const
 {
     return std::pow(2.0, zoom());
 }
 
-void QMapLibreGL::setScale(double scale_, const QPointF &center)
+void Map::setScale(double scale_, const QPointF &center)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions().withZoom(::log2(scale_)).withAnchor(mbgl::ScreenCoordinate { center.x(), center.y() }));
 }
 
 /*!
-    \property QMapLibreGL::zoom
+    \property QMapLibreGL::Map::zoom
     \brief the map zoom factor.
 
     This property is used to zoom the map. When \a center is defined, the map will
@@ -413,12 +415,12 @@ void QMapLibreGL::setScale(double scale_, const QPointF &center)
 
     \sa scale()
 */
-double QMapLibreGL::zoom() const
+double Map::zoom() const
 {
     return *d_ptr->mapObj->getCameraOptions().zoom;
 }
 
-void QMapLibreGL::setZoom(double zoom_)
+void Map::setZoom(double zoom_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions().withZoom(zoom_).withPadding(d_ptr->margins));
 }
@@ -428,7 +430,7 @@ void QMapLibreGL::setZoom(double zoom_)
 
     \sa maximumZoom()
 */
-double QMapLibreGL::minimumZoom() const
+double Map::minimumZoom() const
 {
     return *d_ptr->mapObj->getBounds().minZoom;
 }
@@ -438,26 +440,26 @@ double QMapLibreGL::minimumZoom() const
 
     \sa minimumZoom()
 */
-double QMapLibreGL::maximumZoom() const
+double Map::maximumZoom() const
 {
     return *d_ptr->mapObj->getBounds().maxZoom;
 }
 
 /*!
-    \property QMapLibreGL::coordinate
+    \property QMapLibreGL::Map::coordinate
     \brief the map center \a coordinate.
 
     Centers the map at a geographic coordinate respecting the margins, if set.
 
     \sa margins()
 */
-QMapLibre::Coordinate QMapLibreGL::coordinate() const
+Coordinate Map::coordinate() const
 {
     const mbgl::LatLng latLng = *d_ptr->mapObj->getCameraOptions(d_ptr->margins).center;
-    return QMapLibre::Coordinate(latLng.latitude(), latLng.longitude());
+    return Coordinate(latLng.latitude(), latLng.longitude());
 }
 
-void QMapLibreGL::setCoordinate(const QMapLibre::Coordinate &coordinate_)
+void Map::setCoordinate(const Coordinate &coordinate_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions()
                               .withCenter(mbgl::LatLng { coordinate_.first, coordinate_.second })
@@ -465,7 +467,7 @@ void QMapLibreGL::setCoordinate(const QMapLibre::Coordinate &coordinate_)
 }
 
 /*!
-    \fn QMapLibreGL::setCoordinateZoom(const QMapLibre::Coordinate &coordinate, double zoom)
+    \fn QMapLibreGL::Map::setCoordinateZoom(const Coordinate &coordinate, double zoom)
 
     Convenience method for setting the \a coordinate and \a zoom simultaneously.
 
@@ -475,7 +477,7 @@ void QMapLibreGL::setCoordinate(const QMapLibre::Coordinate &coordinate_)
     \sa zoom()
     \sa coordinate()
 */
-void QMapLibreGL::setCoordinateZoom(const QMapLibre::Coordinate &coordinate_, double zoom_)
+void Map::setCoordinateZoom(const Coordinate &coordinate_, double zoom_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions()
                               .withCenter(mbgl::LatLng { coordinate_.first, coordinate_.second })
@@ -486,11 +488,11 @@ void QMapLibreGL::setCoordinateZoom(const QMapLibre::Coordinate &coordinate_, do
 /*!
     Atomically jumps to the \a camera options.
 */
-void QMapLibreGL::jumpTo(const QMapLibre::CameraOptions& camera)
+void Map::jumpTo(const CameraOptions& camera)
 {
     mbgl::CameraOptions mbglCamera;
     if (camera.center.isValid()) {
-        const QMapLibre::Coordinate center = camera.center.value<QMapLibre::Coordinate>();
+        const Coordinate center = camera.center.value<Coordinate>();
         mbglCamera.center = mbgl::LatLng { center.first, center.second };
     }
     if (camera.anchor.isValid()) {
@@ -513,7 +515,7 @@ void QMapLibreGL::jumpTo(const QMapLibre::CameraOptions& camera)
 }
 
 /*!
-    \property QMapLibreGL::bearing
+    \property QMapLibreGL::Map::bearing
     \brief the map bearing in degrees.
 
     Set the angle in degrees. Negative values and values over 360 are
@@ -524,19 +526,19 @@ void QMapLibreGL::jumpTo(const QMapLibre::CameraOptions& camera)
 
     \sa margins()
 */
-double QMapLibreGL::bearing() const
+double Map::bearing() const
 {
     return *d_ptr->mapObj->getCameraOptions().bearing;
 }
 
-void QMapLibreGL::setBearing(double degrees)
+void Map::setBearing(double degrees)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions()
                               .withBearing(degrees)
                               .withPadding(d_ptr->margins));
 }
 
-void QMapLibreGL::setBearing(double degrees, const QPointF &center)
+void Map::setBearing(double degrees, const QPointF &center)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions()
                               .withBearing(degrees)
@@ -544,7 +546,7 @@ void QMapLibreGL::setBearing(double degrees, const QPointF &center)
 }
 
 /*!
-    \property QMapLibreGL::pitch
+    \property QMapLibreGL::Map::pitch
     \brief the map pitch in degrees.
 
     Pitch toward the horizon measured in degrees, with 0 resulting in a
@@ -552,17 +554,17 @@ void QMapLibreGL::setBearing(double degrees, const QPointF &center)
 
     \sa margins()
 */
-double QMapLibreGL::pitch() const
+double Map::pitch() const
 {
     return *d_ptr->mapObj->getCameraOptions().pitch;
 }
 
-void QMapLibreGL::setPitch(double pitch_)
+void Map::setPitch(double pitch_)
 {
     d_ptr->mapObj->jumpTo(mbgl::CameraOptions().withPitch(pitch_));
 }
 
-void QMapLibreGL::pitchBy(double pitch_)
+void Map::pitchBy(double pitch_)
 {
     d_ptr->mapObj->pitchBy(pitch_);
 }
@@ -570,15 +572,15 @@ void QMapLibreGL::pitchBy(double pitch_)
 /*!
     Returns the north orientation mode.
 */
-QMapLibreGL::NorthOrientation QMapLibreGL::northOrientation() const
+Map::NorthOrientation Map::northOrientation() const
 {
-    return static_cast<QMapLibreGL::NorthOrientation>(d_ptr->mapObj->getMapOptions().northOrientation());
+    return static_cast<Map::NorthOrientation>(d_ptr->mapObj->getMapOptions().northOrientation());
 }
 
 /*!
     Sets the north orientation mode to \a orientation.
 */
-void QMapLibreGL::setNorthOrientation(NorthOrientation orientation)
+void Map::setNorthOrientation(NorthOrientation orientation)
 {
     d_ptr->mapObj->setNorthOrientation(static_cast<mbgl::NorthOrientation>(orientation));
 }
@@ -588,7 +590,7 @@ void QMapLibreGL::setNorthOrientation(NorthOrientation orientation)
     affects how the map renders labels, as it will use different texture filters if a gesture
     is ongoing.
 */
-void QMapLibreGL::setGestureInProgress(bool progress)
+void Map::setGestureInProgress(bool progress)
 {
     d_ptr->mapObj->setGestureInProgress(progress);
 }
@@ -597,7 +599,7 @@ void QMapLibreGL::setGestureInProgress(bool progress)
     Sets the \a duration and \a delay of style transitions. Style paint property
     values transition to new values with animation when they are updated.
 */
-void QMapLibreGL::setTransitionOptions(qint64 duration, qint64 delay) {
+void Map::setTransitionOptions(qint64 duration, qint64 delay) {
     static auto convert = [](qint64 value) -> mbgl::optional<mbgl::Duration> {
         return std::chrono::duration_cast<mbgl::Duration>(mbgl::Milliseconds(value));
     };
@@ -612,9 +614,9 @@ void QMapLibreGL::setTransitionOptions(qint64 duration, qint64 delay) {
 
     \sa addAnnotationIcon()
 */
-QMapLibre::AnnotationID QMapLibreGL::addAnnotation(const QMapLibre::Annotation &annotation)
+AnnotationID Map::addAnnotation(const Annotation &annotation)
 {
-    return static_cast<QMapLibre::AnnotationID>(d_ptr->mapObj->addAnnotation(*asAnnotation(annotation)));
+    return static_cast<AnnotationID>(d_ptr->mapObj->addAnnotation(*asAnnotation(annotation)));
 }
 
 /*!
@@ -622,7 +624,7 @@ QMapLibre::AnnotationID QMapLibreGL::addAnnotation(const QMapLibre::Annotation &
 
     \sa addAnnotationIcon()
 */
-void QMapLibreGL::updateAnnotation(QMapLibre::AnnotationID id, const QMapLibre::Annotation &annotation)
+void Map::updateAnnotation(AnnotationID id, const Annotation &annotation)
 {
     d_ptr->mapObj->updateAnnotation(id, *asAnnotation(annotation));
 }
@@ -630,7 +632,7 @@ void QMapLibreGL::updateAnnotation(QMapLibre::AnnotationID id, const QMapLibre::
 /*!
     Removes an existing annotation referred by \a id.
 */
-void QMapLibreGL::removeAnnotation(QMapLibre::AnnotationID id)
+void Map::removeAnnotation(AnnotationID id)
 {
     d_ptr->mapObj->removeAnnotation(id);
 }
@@ -674,7 +676,7 @@ void QMapLibreGL::removeAnnotation(QMapLibre::AnnotationID id)
         \li QVariantList
     \endtable
 */
-bool QMapLibreGL::setLayoutProperty(const QString& layer, const QString& propertyName, const QVariant& value)
+bool Map::setLayoutProperty(const QString& layer, const QString& propertyName, const QVariant& value)
 {
     return d_ptr->setProperty(&mbgl::style::Layer::setProperty, layer, propertyName, value);
 }
@@ -734,7 +736,7 @@ bool QMapLibreGL::setLayoutProperty(const QString& layer, const QString& propert
     \endcode
 */
 
-bool QMapLibreGL::setPaintProperty(const QString& layer, const QString& propertyName, const QVariant& value)
+bool Map::setPaintProperty(const QString& layer, const QString& propertyName, const QVariant& value)
 {
     return d_ptr->setProperty(&mbgl::style::Layer::setProperty, layer, propertyName, value);
 }
@@ -743,7 +745,7 @@ bool QMapLibreGL::setPaintProperty(const QString& layer, const QString& property
     Returns true when the map is completely rendered, false otherwise. A partially
     rendered map ranges from nothing rendered at all to only labels missing.
 */
-bool QMapLibreGL::isFullyLoaded() const
+bool Map::isFullyLoaded() const
 {
     return d_ptr->mapObj->isFullyLoaded();
 }
@@ -753,18 +755,18 @@ bool QMapLibreGL::isFullyLoaded() const
 
     The pixel coordinate origin is located at the upper left corner of the map.
 */
-void QMapLibreGL::moveBy(const QPointF &offset)
+void Map::moveBy(const QPointF &offset)
 {
     d_ptr->mapObj->moveBy(mbgl::ScreenCoordinate { offset.x(), offset.y() });
 }
 
 /*!
-    \fn QMapLibreGL::scaleBy(double scale, const QPointF &center)
+    \fn QMapLibreGL::Map::scaleBy(double scale, const QPointF &center)
 
     Scale the map by \a scale in the direction of the \a center. This function
     can be used for implementing a pinch gesture.
 */
-void QMapLibreGL::scaleBy(double scale_, const QPointF &center) {
+void Map::scaleBy(double scale_, const QPointF &center) {
     d_ptr->mapObj->scaleBy(scale_, mbgl::ScreenCoordinate { center.x(), center.y() });
 }
 
@@ -774,7 +776,7 @@ void QMapLibreGL::scaleBy(double scale_, const QPointF &center) {
     being \a first the cursor coordinate at the last frame and \a second the cursor coordinate
     at the current frame.
 */
-void QMapLibreGL::rotateBy(const QPointF &first, const QPointF &second)
+void Map::rotateBy(const QPointF &first, const QPointF &second)
 {
     d_ptr->mapObj->rotateBy(
             mbgl::ScreenCoordinate { first.x(), first.y() },
@@ -785,7 +787,7 @@ void QMapLibreGL::rotateBy(const QPointF &first, const QPointF &second)
     Resize the map to \a size_ and scale to fit at the framebuffer. For
     high DPI screens, the size will be smaller than the framebuffer.
 */
-void QMapLibreGL::resize(const QSize& size_)
+void Map::resize(const QSize& size_)
 {
     auto size = sanitizedSize(size_);
 
@@ -804,7 +806,7 @@ void QMapLibreGL::resize(const QSize& size_)
 
     \sa addAnnotation()
 */
-void QMapLibreGL::addAnnotationIcon(const QString &name, const QImage &icon)
+void Map::addAnnotationIcon(const QString &name, const QImage &icon)
 {
     if (icon.isNull()) return;
 
@@ -812,31 +814,7 @@ void QMapLibreGL::addAnnotationIcon(const QString &name, const QImage &icon)
 }
 
 /*!
-    Returns the amount of meters per pixel from a given \a latitude_ and \a zoom_.
-*/
-double QMapLibreGL::metersPerPixelAtLatitude(double latitude_, double zoom_) const
-{
-    return QMapLibre::metersPerPixelAtLatitude(latitude_, zoom_);
-}
-
-/*!
-    Return the projected meters for a given \a coordinate_ object.
-*/
-QMapLibre::ProjectedMeters QMapLibreGL::projectedMetersForCoordinate(const QMapLibre::Coordinate &coordinate_) const
-{
-    return QMapLibre::projectedMetersForCoordinate(coordinate_);
-}
-
-/*!
-    Returns the coordinate for a given \a projectedMeters object.
-*/
-QMapLibre::Coordinate QMapLibreGL::coordinateForProjectedMeters(const QMapLibre::ProjectedMeters &projectedMeters) const
-{
-    return QMapLibre::coordinateForProjectedMeters(projectedMeters);
-}
-
-/*!
-    \fn QMapLibreGL::pixelForCoordinate(const QMapLibre::Coordinate &coordinate) const
+    \fn QMapLibreGL::Map::pixelForCoordinate(const Coordinate &coordinate) const
 
     Returns the offset in pixels for \a coordinate. The origin pixel coordinate is
     located at the top left corner of the map view.
@@ -846,7 +824,7 @@ QMapLibre::Coordinate QMapLibreGL::coordinateForProjectedMeters(const QMapLibre:
 
     /note The return value is affected by the current zoom level, bearing and pitch.
 */
-QPointF QMapLibreGL::pixelForCoordinate(const QMapLibre::Coordinate &coordinate_) const
+QPointF Map::pixelForCoordinate(const Coordinate &coordinate_) const
 {
     const mbgl::ScreenCoordinate pixel =
         d_ptr->mapObj->pixelForLatLng(mbgl::LatLng { coordinate_.first, coordinate_.second });
@@ -857,20 +835,20 @@ QPointF QMapLibreGL::pixelForCoordinate(const QMapLibre::Coordinate &coordinate_
 /*!
     Returns the geographic coordinate for the \a pixel coordinate.
 */
-QMapLibre::Coordinate QMapLibreGL::coordinateForPixel(const QPointF &pixel) const
+Coordinate Map::coordinateForPixel(const QPointF &pixel) const
 {
     const mbgl::LatLng latLng =
         d_ptr->mapObj->latLngForPixel(mbgl::ScreenCoordinate { pixel.x(), pixel.y() });
 
-    return QMapLibre::Coordinate(latLng.latitude(), latLng.longitude());
+    return Coordinate(latLng.latitude(), latLng.longitude());
 }
 
 /*!
     Returns the coordinate and zoom combination needed in order to make the coordinate
     bounding box \a sw and \a ne visible.
 */
-QMapLibre::CoordinateZoom QMapLibreGL::coordinateZoomForBounds(const QMapLibre::Coordinate &sw,
-                                                               const QMapLibre::Coordinate &ne) const {
+CoordinateZoom Map::coordinateZoomForBounds(const Coordinate &sw,
+                                                               const Coordinate &ne) const {
     auto bounds = mbgl::LatLngBounds::hull(mbgl::LatLng { sw.first, sw.second }, mbgl::LatLng { ne.first, ne.second });
     mbgl::CameraOptions camera = d_ptr->mapObj->cameraForLatLngBounds(bounds, d_ptr->margins);
 
@@ -881,8 +859,8 @@ QMapLibre::CoordinateZoom QMapLibreGL::coordinateZoomForBounds(const QMapLibre::
     Returns the coordinate and zoom combination needed in order to make the coordinate
     bounding box \a sw and \a ne visible taking into account \a newBearing and \a newPitch.
 */
-QMapLibre::CoordinateZoom QMapLibreGL::coordinateZoomForBounds(const QMapLibre::Coordinate &sw,
-                                                               const QMapLibre::Coordinate &ne,
+CoordinateZoom Map::coordinateZoomForBounds(const Coordinate &sw,
+                                                               const Coordinate &ne,
                                                                double newBearing,
                                                                double newPitch)
 
@@ -893,12 +871,12 @@ QMapLibre::CoordinateZoom QMapLibreGL::coordinateZoomForBounds(const QMapLibre::
 }
 
 /*!
-    \property QMapLibreGL::margins
+    \property QMapLibreGL::Map::margins
     \brief the map margins in pixels from the corners of the map.
 
     This property sets a new reference center for the map.
 */
-void QMapLibreGL::setMargins(const QMargins &margins_)
+void Map::setMargins(const QMargins &margins_)
 {
     d_ptr->margins = {
         static_cast<double>(margins_.top()),
@@ -908,7 +886,7 @@ void QMapLibreGL::setMargins(const QMargins &margins_)
     };
 }
 
-QMargins QMapLibreGL::margins() const
+QMargins Map::margins() const
 {
     return QMargins(
         d_ptr->margins.left(),
@@ -936,7 +914,7 @@ QMargins QMapLibreGL::margins() const
         map->addSource("routeSource", routeSource);
     \endcode
 */
-void QMapLibreGL::addSource(const QString &id, const QVariantMap &params)
+void Map::addSource(const QString &id, const QVariantMap &params)
 {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
@@ -954,7 +932,7 @@ void QMapLibreGL::addSource(const QString &id, const QVariantMap &params)
 /*!
     Returns true if the layer with given \a sourceID exists, false otherwise.
 */
-bool QMapLibreGL::sourceExists(const QString& sourceID)
+bool Map::sourceExists(const QString& sourceID)
 {
     return !!d_ptr->mapObj->getStyle().getSource(sourceID.toStdString());
 }
@@ -965,7 +943,7 @@ bool QMapLibreGL::sourceExists(const QString& sourceID)
     If the source does not exist, it will be added like in addSource(). Only
     image and GeoJSON sources can be updated.
 */
-void QMapLibreGL::updateSource(const QString &id, const QVariantMap &params)
+void Map::updateSource(const QString &id, const QVariantMap &params)
 {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
@@ -999,7 +977,7 @@ void QMapLibreGL::updateSource(const QString &id, const QVariantMap &params)
 
     This method has no effect if the source does not exist.
 */
-void QMapLibreGL::removeSource(const QString& id)
+void Map::removeSource(const QString& id)
 {
     auto sourceIDStdString = id.toStdString();
 
@@ -1016,14 +994,14 @@ void QMapLibreGL::removeSource(const QString& id)
     \warning This is used for delegating the rendering of a layer to the user of
     this API and is not officially supported. Use at your own risk.
 */
-void QMapLibreGL::addCustomLayer(const QString &id,
-                                 std::unique_ptr<QMapLibre::CustomLayerHostInterface> host,
+void Map::addCustomLayer(const QString &id,
+                                 std::unique_ptr<CustomLayerHostInterface> host,
                                  const QString &before)
 {
     class HostWrapper : public mbgl::style::CustomLayerHost {
         public:
-        std::unique_ptr<QMapLibre::CustomLayerHostInterface> ptr{};
-        HostWrapper(std::unique_ptr<QMapLibre::CustomLayerHostInterface> p)
+        std::unique_ptr<CustomLayerHostInterface> ptr{};
+        HostWrapper(std::unique_ptr<CustomLayerHostInterface> p)
          : ptr(std::move(p)) {
          }
 
@@ -1032,7 +1010,7 @@ void QMapLibreGL::addCustomLayer(const QString &id,
         }
 
         void render(const mbgl::style::CustomLayerRenderParameters& params) {
-            QMapLibre::CustomLayerRenderParameters renderParams;
+            CustomLayerRenderParameters renderParams;
             renderParams.width = params.width;
             renderParams.height = params.height;
             renderParams.latitude = params.latitude;
@@ -1077,7 +1055,7 @@ void QMapLibreGL::addCustomLayer(const QString &id,
 
     /note The source must exist prior to adding a layer.
 */
-void QMapLibreGL::addLayer(const QVariantMap &params, const QString& before)
+void Map::addLayer(const QVariantMap &params, const QString& before)
 {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
@@ -1096,7 +1074,7 @@ void QMapLibreGL::addLayer(const QVariantMap &params, const QString& before)
 /*!
     Returns true if the layer with given \a id exists, false otherwise.
 */
-bool QMapLibreGL::layerExists(const QString& id)
+bool Map::layerExists(const QString& id)
 {
     return !!d_ptr->mapObj->getStyle().getLayer(id.toStdString());
 }
@@ -1104,7 +1082,7 @@ bool QMapLibreGL::layerExists(const QString& id)
 /*!
     Removes the layer with given \a id.
 */
-void QMapLibreGL::removeLayer(const QString& id)
+void Map::removeLayer(const QString& id)
 {
     d_ptr->mapObj->getStyle().removeLayer(id.toStdString());
 }
@@ -1112,7 +1090,7 @@ void QMapLibreGL::removeLayer(const QString& id)
 /*!
     List of all existing layer ids from the current style.
 */
-QVector<QString> QMapLibreGL::layerIds() const
+QVector<QString> Map::layerIds() const
 {
     const auto &layers = d_ptr->mapObj->getStyle().getLayers();
 
@@ -1136,7 +1114,7 @@ QVector<QString> QMapLibreGL::layerIds() const
 
     \sa addLayer()
 */
-void QMapLibreGL::addImage(const QString &id, const QImage &image)
+void Map::addImage(const QString &id, const QImage &image)
 {
     if (image.isNull()) return;
 
@@ -1146,7 +1124,7 @@ void QMapLibreGL::addImage(const QString &id, const QImage &image)
 /*!
     Removes the image \a id.
 */
-void QMapLibreGL::removeImage(const QString &id)
+void Map::removeImage(const QString &id)
 {
     d_ptr->mapObj->getStyle().removeImage(id.toStdString());
 }
@@ -1171,7 +1149,7 @@ void QMapLibreGL::removeImage(const QString &id)
         map->setFilter(QLatin1String("marker"), filter);
     \endcode
 */
-void QMapLibreGL::setFilter(const QString& layer, const QVariant& filter)
+void Map::setFilter(const QString& layer, const QVariant& filter)
 {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
@@ -1232,7 +1210,7 @@ QVariant QVariantFromValue(const mbgl::Value &value) {
 
     Filter value types are described in the {https://www.mapbox.com/mapbox-gl-js/style-spec/#types}{Mapbox style specification}.
 */
-QVariant QMapLibreGL::getFilter(const QString &layer)  const {
+QVariant Map::getFilter(const QString &layer)  const {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
 
@@ -1252,7 +1230,7 @@ QVariant QMapLibreGL::getFilter(const QString &layer)  const {
 
     Must be called on the render thread.
 */
-void QMapLibreGL::createRenderer()
+void Map::createRenderer()
 {
     d_ptr->createRenderer();
 }
@@ -1263,7 +1241,7 @@ void QMapLibreGL::createRenderer()
 
     Must be called on the render thread.
 */
-void QMapLibreGL::destroyRenderer()
+void Map::destroyRenderer()
 {
     d_ptr->destroyRenderer();
 }
@@ -1272,9 +1250,9 @@ void QMapLibreGL::destroyRenderer()
     Start a static rendering of the current state of the map. This
     should only be called when the map is initialized in static mode.
 
-    \sa QMapLibreSettings::MapMode
+    \sa QMapLibreGL::Settings::MapMode
 */
-void QMapLibreGL::startStaticRender()
+void Map::startStaticRender()
 {
     d_ptr->mapObj->renderStill([this](std::exception_ptr err) {
         QString what;
@@ -1302,7 +1280,7 @@ void QMapLibreGL::startStaticRender()
 
     Must be called on the render thread.
 */
-void QMapLibreGL::render()
+void Map::render()
 {
     d_ptr->render();
 }
@@ -1314,7 +1292,7 @@ void QMapLibreGL::render()
 
     Must be called on the render thread.
 */
-void QMapLibreGL::setFramebufferObject(quint32 fbo, const QSize& size)
+void Map::setFramebufferObject(quint32 fbo, const QSize& size)
 {
     d_ptr->setFramebufferObject(fbo, size);
 }
@@ -1323,7 +1301,7 @@ void QMapLibreGL::setFramebufferObject(quint32 fbo, const QSize& size)
     Informs the map that the network connection has been established, causing
     all network requests that previously timed out to be retried immediately.
 */
-void QMapLibreGL::connectionEstablished()
+void Map::connectionEstablished()
 {
     mbgl::NetworkStatus::Reachable();
 }
@@ -1332,13 +1310,13 @@ void QMapLibreGL::connectionEstablished()
     Returns a list containing a pair of string objects, representing the style
     URL and name, respectively.
 */
-const QVector<QPair<QString, QString>> &QMapLibreGL::defaultStyles() const
+const QVector<QPair<QString, QString>> &Map::defaultStyles() const
 {
     return d_ptr->defaultStyles;
 }
 
 /*!
-    \fn void QMapLibreGL::needsRendering()
+    \fn void QMapLibreGL::Map::needsRendering()
 
     This signal is emitted when the visual contents of the map have changed
     and a redraw is needed in order to keep the map visually consistent
@@ -1348,7 +1326,7 @@ const QVector<QPair<QString, QString>> &QMapLibreGL::defaultStyles() const
 */
 
 /*!
-    \fn void QMapLibreGL::staticRenderFinished(const QString &error)
+    \fn void QMapLibreGL::Map::staticRenderFinished(const QString &error)
 
     This signal is emitted when a static map is fully drawn. Usually the next
     step is to extract the map from a framebuffer into a container like a
@@ -1358,7 +1336,7 @@ const QVector<QPair<QString, QString>> &QMapLibreGL::defaultStyles() const
 */
 
 /*!
-    \fn void QMapLibreGL::mapChanged(QMapLibreGL::MapChange change)
+    \fn void QMapLibreGL::Map::mapChanged(QMapLibreGL::Map::MapChange change)
 
     This signal is emitted when the state of the map has changed. This signal
     may be used for detecting errors when loading a style or detecting when
@@ -1366,14 +1344,14 @@ const QVector<QPair<QString, QString>> &QMapLibreGL::defaultStyles() const
 */
 
 /*!
-    \fn void QMapLibreGL::mapLoadingFailed(QMapLibreGL::MapLoadingFailure type, const QString &description)
+    \fn void QMapLibreGL::Map::mapLoadingFailed(QMapLibreGL::Map::MapLoadingFailure type, const QString &description)
 
     This signal is emitted when a map loading failure happens. Details of the
     failures are provided, including its \a type and textual \a description.
 */
 
 /*!
-    \fn void QMapLibreGL::copyrightsChanged(const QString &copyrightsHtml);
+    \fn void QMapLibreGL::Map::copyrightsChanged(const QString &copyrightsHtml);
 
     This signal is emitted when the copyrights of the current content of the map
     have changed. This can be caused by a style change or adding a new source.
@@ -1381,20 +1359,20 @@ const QVector<QPair<QString, QString>> &QMapLibreGL::defaultStyles() const
     \a copyrightsHtml is a string with a HTML snippet.
 */
 
-QMapLibreGLPrivate::QMapLibreGLPrivate(QMapLibreGL *q, const QMapLibreSettings &settings, const QSize &size, qreal pixelRatio_)
+MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qreal pixelRatio_)
     : QObject(q)
     , m_mode(settings.contextMode())
     , m_pixelRatio(pixelRatio_)
     , m_localFontFamily(settings.localFontFamily())
 {
     // Setup MapObserver
-    m_mapObserver = std::make_unique<QMapLibreMapObserver>(this);
+    m_mapObserver = std::make_unique<MapObserver>(this);
 
-    qRegisterMetaType<QMapLibreGL::MapChange>("QMapLibreGL::MapChange");
+    qRegisterMetaType<Map::MapChange>("Map::MapChange");
 
-    connect(m_mapObserver.get(), &QMapLibreMapObserver::mapChanged, q, &QMapLibreGL::mapChanged);
-    connect(m_mapObserver.get(), &QMapLibreMapObserver::mapLoadingFailed, q, &QMapLibreGL::mapLoadingFailed);
-    connect(m_mapObserver.get(), &QMapLibreMapObserver::copyrightsChanged, q, &QMapLibreGL::copyrightsChanged);
+    connect(m_mapObserver.get(), &MapObserver::mapChanged, q, &Map::mapChanged);
+    connect(m_mapObserver.get(), &MapObserver::mapLoadingFailed, q, &Map::mapLoadingFailed);
+    connect(m_mapObserver.get(), &MapObserver::copyrightsChanged, q, &Map::copyrightsChanged);
 
     auto resourceOptions = resourceOptionsFromSettings(settings);
     for (auto style : resourceOptions.tileServerOptions().defaultStyles()) {
@@ -1427,14 +1405,14 @@ QMapLibreGLPrivate::QMapLibreGLPrivate(QMapLibreGL *q, const QMapLibreSettings &
      }
 
     // Needs to be Queued to give time to discard redundant draw calls via the `renderQueued` flag.
-    connect(this, &QMapLibreGLPrivate::needsRendering, q, &QMapLibreGL::needsRendering, Qt::QueuedConnection);
+    connect(this, &MapPrivate::needsRendering, q, &Map::needsRendering, Qt::QueuedConnection);
 }
 
-QMapLibreGLPrivate::~QMapLibreGLPrivate()
+MapPrivate::~MapPrivate()
 {
 }
 
-void QMapLibreGLPrivate::update(std::shared_ptr<mbgl::UpdateParameters> parameters)
+void MapPrivate::update(std::shared_ptr<mbgl::UpdateParameters> parameters)
 {
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
 
@@ -1449,9 +1427,9 @@ void QMapLibreGLPrivate::update(std::shared_ptr<mbgl::UpdateParameters> paramete
     requestRendering();
 }
 
-void QMapLibreGLPrivate::setObserver(mbgl::RendererObserver &observer)
+void MapPrivate::setObserver(mbgl::RendererObserver &observer)
 {
-    m_rendererObserver = std::make_shared<QMapLibreRendererObserver>(
+    m_rendererObserver = std::make_shared<RendererObserver>(
             *mbgl::util::RunLoop::Get(), observer);
 
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
@@ -1461,7 +1439,7 @@ void QMapLibreGLPrivate::setObserver(mbgl::RendererObserver &observer)
     }
 }
 
-void QMapLibreGLPrivate::createRenderer()
+void MapPrivate::createRenderer()
 {
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
 
@@ -1469,13 +1447,13 @@ void QMapLibreGLPrivate::createRenderer()
         return;
     }
 
-    m_mapRenderer = std::make_unique<QMapLibreMapRenderer>(
+    m_mapRenderer = std::make_unique<MapRenderer>(
         m_pixelRatio,
         m_mode,
         m_localFontFamily
     );
 
-    connect(m_mapRenderer.get(), &QMapLibreMapRenderer::needsRendering, this, &QMapLibreGLPrivate::requestRendering);
+    connect(m_mapRenderer.get(), &MapRenderer::needsRendering, this, &MapPrivate::requestRendering);
 
     m_mapRenderer->setObserver(m_rendererObserver);
 
@@ -1485,14 +1463,14 @@ void QMapLibreGLPrivate::createRenderer()
     }
 }
 
-void QMapLibreGLPrivate::destroyRenderer()
+void MapPrivate::destroyRenderer()
 {
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
 
     m_mapRenderer.reset();
 }
 
-void QMapLibreGLPrivate::render()
+void MapPrivate::render()
 {
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
 
@@ -1504,7 +1482,7 @@ void QMapLibreGLPrivate::render()
     m_mapRenderer->render();
 }
 
-void QMapLibreGLPrivate::setFramebufferObject(quint32 fbo, const QSize& size)
+void MapPrivate::setFramebufferObject(quint32 fbo, const QSize& size)
 {
     std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
 
@@ -1515,14 +1493,14 @@ void QMapLibreGLPrivate::setFramebufferObject(quint32 fbo, const QSize& size)
     m_mapRenderer->updateFramebuffer(fbo, sanitizedSize(size));
 }
 
-void QMapLibreGLPrivate::requestRendering()
+void MapPrivate::requestRendering()
 {
     if (!m_renderQueued.test_and_set()) {
         emit needsRendering();
     }
 }
 
-bool QMapLibreGLPrivate::setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value) {
+bool MapPrivate::setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value) {
     using namespace mbgl::style;
 
     Layer* layerObject = mapObj->getStyle().getLayer(layer.toStdString());
@@ -1560,3 +1538,5 @@ bool QMapLibreGLPrivate::setProperty(const PropertySetter& setter, const QString
 
     return true;
 }
+
+} // namespace QMapLibreGL

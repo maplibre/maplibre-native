@@ -15,11 +15,13 @@
 #include <functional>
 #include <memory>
 
-class QMapLibreGLPrivate;
+namespace QMapLibreGL {
+
+class MapPrivate;
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
-class Q_MAPLIBREGL_EXPORT QMapLibreGL : public QObject
+class Q_MAPLIBREGL_EXPORT Map : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(double latitude READ latitude WRITE setLatitude)
@@ -30,7 +32,7 @@ class Q_MAPLIBREGL_EXPORT QMapLibreGL : public QObject
     Q_PROPERTY(QString styleJson READ styleJson WRITE setStyleJson)
     Q_PROPERTY(QString styleUrl READ styleUrl WRITE setStyleUrl)
     Q_PROPERTY(double scale READ scale WRITE setScale)
-    Q_PROPERTY(QMapLibre::Coordinate coordinate READ coordinate WRITE setCoordinate)
+    Q_PROPERTY(QMapLibreGL::Coordinate coordinate READ coordinate WRITE setCoordinate)
     Q_PROPERTY(QMargins margins READ margins WRITE setMargins)
 
 public:
@@ -68,11 +70,11 @@ public:
         NorthLeftwards,
     };
 
-    QMapLibreGL(QObject* parent = 0,
-                const QMapLibreSettings& = QMapLibreSettings(),
-                const QSize& size = QSize(),
-                qreal pixelRatio = 1);
-    virtual ~QMapLibreGL();
+    Map(QObject* parent = 0,
+        const Settings& = Settings(),
+        const QSize& size = QSize(),
+        qreal pixelRatio = 1);
+    virtual ~Map();
 
     QString styleJson() const;
     QString styleUrl() const;
@@ -106,11 +108,11 @@ public:
     NorthOrientation northOrientation() const;
     void setNorthOrientation(NorthOrientation);
 
-    QMapLibre::Coordinate coordinate() const;
-    void setCoordinate(const QMapLibre::Coordinate &);
-    void setCoordinateZoom(const QMapLibre::Coordinate &, double zoom);
+    Coordinate coordinate() const;
+    void setCoordinate(const Coordinate &);
+    void setCoordinateZoom(const Coordinate &, double zoom);
 
-    void jumpTo(const QMapLibre::CameraOptions&);
+    void jumpTo(const CameraOptions&);
 
     void setGestureInProgress(bool inProgress);
 
@@ -118,9 +120,9 @@ public:
 
     void addAnnotationIcon(const QString &name, const QImage &sprite);
 
-    QMapLibre::AnnotationID addAnnotation(const QMapLibre::Annotation &);
-    void updateAnnotation(QMapLibre::AnnotationID, const QMapLibre::Annotation &);
-    void removeAnnotation(QMapLibre::AnnotationID);
+    AnnotationID addAnnotation(const Annotation &);
+    void updateAnnotation(AnnotationID, const Annotation &);
+    void removeAnnotation(AnnotationID);
 
     bool setLayoutProperty(const QString &layer, const QString &property, const QVariant &value);
     bool setPaintProperty(const QString &layer, const QString &property, const QVariant &value);
@@ -133,17 +135,14 @@ public:
 
     void resize(const QSize &size);
 
-    double metersPerPixelAtLatitude(double latitude, double zoom) const;
-    QMapLibre::ProjectedMeters projectedMetersForCoordinate(const QMapLibre::Coordinate &) const;
-    QMapLibre::Coordinate coordinateForProjectedMeters(const QMapLibre::ProjectedMeters &) const;
-    QPointF pixelForCoordinate(const QMapLibre::Coordinate &) const;
-    QMapLibre::Coordinate coordinateForPixel(const QPointF &) const;
+    QPointF pixelForCoordinate(const Coordinate &) const;
+    Coordinate coordinateForPixel(const QPointF &) const;
 
-    QMapLibre::CoordinateZoom coordinateZoomForBounds(const QMapLibre::Coordinate &sw, const QMapLibre::Coordinate &ne) const;
-    QMapLibre::CoordinateZoom coordinateZoomForBounds(const QMapLibre::Coordinate &sw,
-                                                      const QMapLibre::Coordinate &ne,
-                                                      double bearing,
-                                                      double pitch);
+    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw, const Coordinate &ne) const;
+    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw,
+                                           const Coordinate &ne,
+                                           double bearing,
+                                           double pitch);
 
     void setMargins(const QMargins &margins);
     QMargins margins() const;
@@ -157,7 +156,7 @@ public:
     void removeImage(const QString &name);
 
     void addCustomLayer(const QString &id,
-        std::unique_ptr<QMapLibre::CustomLayerHostInterface> host,
+        std::unique_ptr<CustomLayerHostInterface> host,
         const QString &before = QString());
     void addLayer(const QVariantMap &params, const QString& before = QString());
     bool layerExists(const QString &id);
@@ -185,19 +184,21 @@ public slots:
 
 signals:
     void needsRendering();
-    void mapChanged(QMapLibreGL::MapChange);
-    void mapLoadingFailed(QMapLibreGL::MapLoadingFailure, const QString &reason);
+    void mapChanged(Map::MapChange);
+    void mapLoadingFailed(Map::MapLoadingFailure, const QString &reason);
     void copyrightsChanged(const QString &copyrightsHtml);
 
     void staticRenderFinished(const QString &error);
 
 private:
-    Q_DISABLE_COPY(QMapLibreGL)
+    Q_DISABLE_COPY(Map)
 
-    QMapLibreGLPrivate *d_ptr;
+    MapPrivate *d_ptr;
 };
 
-Q_DECLARE_METATYPE(QMapLibreGL::MapChange);
-Q_DECLARE_METATYPE(QMapLibreGL::MapLoadingFailure);
+} // namespace QMapLibreGL
+
+Q_DECLARE_METATYPE(QMapLibreGL::Map::MapChange);
+Q_DECLARE_METATYPE(QMapLibreGL::Map::MapLoadingFailure);
 
 #endif // QMAPLIBREGL_H

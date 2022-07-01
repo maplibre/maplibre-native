@@ -9,7 +9,7 @@
 
 #include "qmaplibreexport.hpp"
 
-namespace QMapLibre {
+namespace QMapLibreGL {
 
 typedef QPair<double, double> Coordinate;
 typedef QPair<Coordinate, double> CoordinateZoom;
@@ -115,17 +115,17 @@ public:
     virtual void deinitialize() = 0;
 };
 
-} // namespace QMapLibre
+} // namespace QMapLibreGL
 
-Q_DECLARE_METATYPE(QMapLibre::Coordinate);
-Q_DECLARE_METATYPE(QMapLibre::Coordinates);
-Q_DECLARE_METATYPE(QMapLibre::CoordinatesCollection);
-Q_DECLARE_METATYPE(QMapLibre::CoordinatesCollections);
-Q_DECLARE_METATYPE(QMapLibre::Feature);
+Q_DECLARE_METATYPE(QMapLibreGL::Coordinate);
+Q_DECLARE_METATYPE(QMapLibreGL::Coordinates);
+Q_DECLARE_METATYPE(QMapLibreGL::CoordinatesCollection);
+Q_DECLARE_METATYPE(QMapLibreGL::CoordinatesCollections);
+Q_DECLARE_METATYPE(QMapLibreGL::Feature);
 
-Q_DECLARE_METATYPE(QMapLibre::SymbolAnnotation);
-Q_DECLARE_METATYPE(QMapLibre::ShapeAnnotationGeometry);
-Q_DECLARE_METATYPE(QMapLibre::LineAnnotation);
-Q_DECLARE_METATYPE(QMapLibre::FillAnnotation);
+Q_DECLARE_METATYPE(QMapLibreGL::SymbolAnnotation);
+Q_DECLARE_METATYPE(QMapLibreGL::ShapeAnnotationGeometry);
+Q_DECLARE_METATYPE(QMapLibreGL::LineAnnotation);
+Q_DECLARE_METATYPE(QMapLibreGL::FillAnnotation);
 
 #endif // QMAPLIBRETYPES_H

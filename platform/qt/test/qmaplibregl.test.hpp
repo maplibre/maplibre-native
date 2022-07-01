@@ -19,8 +19,8 @@ private:
     QGLFramebufferObject fbo;
 
 protected:
-    QMapLibreSettings settings;
-    QMapLibreGL map;
+    Settings settings;
+    Map map;
 
     std::function<void(QMapLibreGL::MapChange)> changeCallback;
 

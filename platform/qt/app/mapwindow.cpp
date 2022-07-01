@@ -11,7 +11,7 @@
 
 int kAnimationDuration = 10000;
 
-MapWindow::MapWindow(const QMapLibreSettings &settings)
+MapWindow::MapWindow(const QMapLibreGL::Settings &settings)
     : m_settings(settings)
 {
     setWindowIcon(QIcon(":icon.png"));
@@ -20,7 +20,7 @@ MapWindow::MapWindow(const QMapLibreSettings &settings)
 MapWindow::~MapWindow()
 {
     // Make sure we have a valid context so we
-    // can delete the QMapLibreGL.
+    // can delete the QMapLibreGL::Map.
     makeCurrent();
 }
 
@@ -250,10 +250,10 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
         break;
     case Qt::Key_1: {
             if (m_symbolAnnotationId.isNull()) {
-                QMapLibre::Coordinate coordinate = m_map->coordinate();
-                QMapLibre::SymbolAnnotation symbol { coordinate, "default_marker" };
+                QMapLibreGL::Coordinate coordinate = m_map->coordinate();
+                QMapLibreGL::SymbolAnnotation symbol { coordinate, "default_marker" };
                 m_map->addAnnotationIcon("default_marker", QImage(":default_marker.svg"));
-                m_symbolAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibre::SymbolAnnotation>(symbol));
+                m_symbolAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibreGL::SymbolAnnotation>(symbol));
             } else {
                 m_map->removeAnnotation(m_symbolAnnotationId.toUInt());
                 m_symbolAnnotationId.clear();
@@ -262,24 +262,24 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
         break;
     case Qt::Key_2: {
             if (m_lineAnnotationId.isNull()) {
-                QMapLibre::Coordinates coordinates;
+                QMapLibreGL::Coordinates coordinates;
                 coordinates.push_back(m_map->coordinateForPixel({ 0, 0 }));
                 coordinates.push_back(m_map->coordinateForPixel({ qreal(size().width()), qreal(size().height()) }));
 
-                QMapLibre::CoordinatesCollection collection;
+                QMapLibreGL::CoordinatesCollection collection;
                 collection.push_back(coordinates);
 
-                QMapLibre::CoordinatesCollections lineGeometry;
+                QMapLibreGL::CoordinatesCollections lineGeometry;
                 lineGeometry.push_back(collection);
 
-                QMapLibre::ShapeAnnotationGeometry annotationGeometry(QMapLibre::ShapeAnnotationGeometry::LineStringType, lineGeometry);
+                QMapLibreGL::ShapeAnnotationGeometry annotationGeometry(QMapLibreGL::ShapeAnnotationGeometry::LineStringType, lineGeometry);
 
-                QMapLibre::LineAnnotation line;
+                QMapLibreGL::LineAnnotation line;
                 line.geometry = annotationGeometry;
                 line.opacity = 0.5f;
                 line.width = 1.0f;
                 line.color = Qt::red;
-                m_lineAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibre::LineAnnotation>(line));
+                m_lineAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibreGL::LineAnnotation>(line));
             } else {
                 m_map->removeAnnotation(m_lineAnnotationId.toUInt());
                 m_lineAnnotationId.clear();
@@ -288,26 +288,26 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
         break;
     case Qt::Key_3: {
             if (m_fillAnnotationId.isNull()) {
-                QMapLibre::Coordinates coordinates;
+                QMapLibreGL::Coordinates coordinates;
                 coordinates.push_back(m_map->coordinateForPixel({ qreal(size().width()), 0 }));
                 coordinates.push_back(m_map->coordinateForPixel({ qreal(size().width()), qreal(size().height()) }));
                 coordinates.push_back(m_map->coordinateForPixel({ 0, qreal(size().height()) }));
                 coordinates.push_back(m_map->coordinateForPixel({ 0, 0 }));
 
-                QMapLibre::CoordinatesCollection collection;
+                QMapLibreGL::CoordinatesCollection collection;
                 collection.push_back(coordinates);
 
-                QMapLibre::CoordinatesCollections fillGeometry;
+                QMapLibreGL::CoordinatesCollections fillGeometry;
                 fillGeometry.push_back(collection);
 
-                QMapLibre::ShapeAnnotationGeometry annotationGeometry(QMapLibre::ShapeAnnotationGeometry::PolygonType, fillGeometry);
+                QMapLibreGL::ShapeAnnotationGeometry annotationGeometry(QMapLibreGL::ShapeAnnotationGeometry::PolygonType, fillGeometry);
 
-                QMapLibre::FillAnnotation fill;
+                QMapLibreGL::FillAnnotation fill;
                 fill.geometry = annotationGeometry;
                 fill.opacity = 0.5f;
                 fill.color = Qt::green;
                 fill.outlineColor = QVariant::fromValue<QColor>(QColor(Qt::black));
-                m_fillAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibre::FillAnnotation>(fill));
+                m_fillAnnotationId = m_map->addAnnotation(QVariant::fromValue<QMapLibreGL::FillAnnotation>(fill));
             } else {
                 m_map->removeAnnotation(m_fillAnnotationId.toUInt());
                 m_fillAnnotationId.clear();
@@ -319,20 +319,20 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
                 m_map->removeLayer("circleLayer");
                 m_map->removeSource("circleSource");
             } else {
-                QMapLibre::Coordinates coordinates;
+                QMapLibreGL::Coordinates coordinates;
                 coordinates.push_back(m_map->coordinate());
 
-                QMapLibre::CoordinatesCollection collection;
+                QMapLibreGL::CoordinatesCollection collection;
                 collection.push_back(coordinates);
 
-                QMapLibre::CoordinatesCollections point;
+                QMapLibreGL::CoordinatesCollections point;
                 point.push_back(collection);
 
-                QMapLibre::Feature feature(QMapLibre::Feature::PointType, point, {}, {});
+                QMapLibreGL::Feature feature(QMapLibreGL::Feature::PointType, point, {}, {});
 
                 QVariantMap circleSource;
                 circleSource["type"] = "geojson";
-                circleSource["data"] = QVariant::fromValue<QMapLibre::Feature>(feature);
+                circleSource["data"] = QVariant::fromValue<QMapLibreGL::Feature>(feature);
                 m_map->addSource("circleSource", circleSource);
 
                 QVariantMap circle;
@@ -357,12 +357,12 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
                     auto coordinate = m_map->coordinate();
                     coordinate.first += dx;
                     coordinate.second += dy;
-                    return QMapLibre::Feature{QMapLibre::Feature::PointType,
+                    return QMapLibreGL::Feature{QMapLibreGL::Feature::PointType,
                         {{{coordinate}}}, {{"color", color}}, {}};
                 };
 
-                // multiple features by QVector<QMapLibre::Feature>
-                QVector<QMapLibre::Feature> inner{
+                // multiple features by QVector<QMapLibreGL::Feature>
+                QVector<QMapLibreGL::Feature> inner{
                     makePoint(0.001,  0, "red"),
                     makePoint(0,  0.001, "green"),
                     makePoint(0, -0.001, "blue")
@@ -376,8 +376,8 @@ void MapWindow::keyPressEvent(QKeyEvent *ev)
                     {"source", "innerCirclesSource"}
                 });
 
-                // multiple features by QList<QMapLibre::Feature>
-                QList<QMapLibre::Feature> outer{
+                // multiple features by QList<QMapLibreGL::Feature>
+                QList<QMapLibreGL::Feature> outer{
                     makePoint( 0.002,  0.002, "cyan"),
                     makePoint(-0.002,  0.002, "magenta"),
                     makePoint( 0.002, -0.002, "yellow"),
@@ -476,11 +476,11 @@ void MapWindow::wheelEvent(QWheelEvent *ev)
 
 void MapWindow::initializeGL()
 {
-    m_map.reset(new QMapLibreGL(nullptr, m_settings, size(), pixelRatio()));
+    m_map.reset(new QMapLibreGL::Map(nullptr, m_settings, size(), pixelRatio()));
     connect(m_map.get(), SIGNAL(needsRendering()), this, SLOT(update()));
 
     // Set default location to Helsinki.
-    m_map->setCoordinateZoom(QMapLibre::Coordinate(60.170448, 24.942046), 5);
+    m_map->setCoordinateZoom(QMapLibreGL::Coordinate(60.170448, 24.942046), 5);
 
     QString styleUrl = qgetenv("MGL_STYLE_URL");
     if (styleUrl.isEmpty()) {

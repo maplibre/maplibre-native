@@ -6,106 +6,108 @@
 
 #include <exception>
 
-QMapLibreMapObserver::QMapLibreMapObserver(QMapLibreGLPrivate *d)
+namespace QMapLibreGL {
+
+MapObserver::MapObserver(MapPrivate *d)
     : d_ptr(d)
 {
 }
 
-QMapLibreMapObserver::~QMapLibreMapObserver()
+MapObserver::~MapObserver()
 {
 }
 
-void QMapLibreMapObserver::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode)
+void MapObserver::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode)
 {
     if (mode == mbgl::MapObserver::CameraChangeMode::Immediate) {
-        emit mapChanged(QMapLibreGL::MapChangeRegionWillChange);
+        emit mapChanged(Map::MapChangeRegionWillChange);
     } else {
-        emit mapChanged(QMapLibreGL::MapChangeRegionWillChangeAnimated);
+        emit mapChanged(Map::MapChangeRegionWillChangeAnimated);
     }
 }
 
-void QMapLibreMapObserver::onCameraIsChanging()
+void MapObserver::onCameraIsChanging()
 {
-    emit mapChanged(QMapLibreGL::MapChangeRegionIsChanging);
+    emit mapChanged(Map::MapChangeRegionIsChanging);
 }
 
-void QMapLibreMapObserver::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode)
+void MapObserver::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode)
 {
     if (mode == mbgl::MapObserver::CameraChangeMode::Immediate) {
-        emit mapChanged(QMapLibreGL::MapChangeRegionDidChange);
+        emit mapChanged(Map::MapChangeRegionDidChange);
     } else {
-        emit mapChanged(QMapLibreGL::MapChangeRegionDidChangeAnimated);
+        emit mapChanged(Map::MapChangeRegionDidChangeAnimated);
     }
 }
 
-void QMapLibreMapObserver::onWillStartLoadingMap()
+void MapObserver::onWillStartLoadingMap()
 {
-    emit mapChanged(QMapLibreGL::MapChangeWillStartLoadingMap);
+    emit mapChanged(Map::MapChangeWillStartLoadingMap);
 }
 
-void QMapLibreMapObserver::onDidFinishLoadingMap()
+void MapObserver::onDidFinishLoadingMap()
 {
-    emit mapChanged(QMapLibreGL::MapChangeDidFinishLoadingMap);
+    emit mapChanged(Map::MapChangeDidFinishLoadingMap);
 }
 
-void QMapLibreMapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& what)
+void MapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& what)
 {
-    emit mapChanged(QMapLibreGL::MapChangeDidFailLoadingMap);
+    emit mapChanged(Map::MapChangeDidFailLoadingMap);
 
-    QMapLibreGL::MapLoadingFailure type;
+    Map::MapLoadingFailure type;
     QString description(what.c_str());
 
     switch (error) {
         case mbgl::MapLoadError::StyleParseError:
-            type = QMapLibreGL::MapLoadingFailure::StyleParseFailure;
+            type = Map::MapLoadingFailure::StyleParseFailure;
             break;
         case mbgl::MapLoadError::StyleLoadError:
-            type = QMapLibreGL::MapLoadingFailure::StyleLoadFailure;
+            type = Map::MapLoadingFailure::StyleLoadFailure;
             break;
         case mbgl::MapLoadError::NotFoundError:
-            type = QMapLibreGL::MapLoadingFailure::NotFoundFailure;
+            type = Map::MapLoadingFailure::NotFoundFailure;
             break;
         default:
-            type = QMapLibreGL::MapLoadingFailure::UnknownFailure;
+            type = Map::MapLoadingFailure::UnknownFailure;
     }
 
     emit mapLoadingFailed(type, description);
 }
 
-void QMapLibreMapObserver::onWillStartRenderingFrame()
+void MapObserver::onWillStartRenderingFrame()
 {
-    emit mapChanged(QMapLibreGL::MapChangeWillStartRenderingFrame);
+    emit mapChanged(Map::MapChangeWillStartRenderingFrame);
 }
 
-void QMapLibreMapObserver::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status)
+void MapObserver::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status)
 {
     if (status.mode == mbgl::MapObserver::RenderMode::Partial) {
-        emit mapChanged(QMapLibreGL::MapChangeDidFinishRenderingFrame);
+        emit mapChanged(Map::MapChangeDidFinishRenderingFrame);
     } else {
-        emit mapChanged(QMapLibreGL::MapChangeDidFinishRenderingFrameFullyRendered);
+        emit mapChanged(Map::MapChangeDidFinishRenderingFrameFullyRendered);
     }
 }
 
-void QMapLibreMapObserver::onWillStartRenderingMap()
+void MapObserver::onWillStartRenderingMap()
 {
-    emit mapChanged(QMapLibreGL::MapChangeWillStartRenderingMap);
+    emit mapChanged(Map::MapChangeWillStartRenderingMap);
 }
 
-void QMapLibreMapObserver::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode)
+void MapObserver::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode)
 {
     if (mode == mbgl::MapObserver::RenderMode::Partial) {
-        emit mapChanged(QMapLibreGL::MapChangeDidFinishRenderingMap);
+        emit mapChanged(Map::MapChangeDidFinishRenderingMap);
     } else {
-        emit mapChanged(QMapLibreGL::MapChangeDidFinishRenderingMapFullyRendered);
+        emit mapChanged(Map::MapChangeDidFinishRenderingMapFullyRendered);
     }
 }
 
-void QMapLibreMapObserver::onDidFinishLoadingStyle()
+void MapObserver::onDidFinishLoadingStyle()
 {
-    emit mapChanged(QMapLibreGL::MapChangeDidFinishLoadingStyle);
+    emit mapChanged(Map::MapChangeDidFinishLoadingStyle);
 }
 
-void QMapLibreMapObserver::onSourceChanged(mbgl::style::Source&)
+void MapObserver::onSourceChanged(mbgl::style::Source&)
 {
     std::string attribution;
     for (const auto& source : d_ptr->mapObj->getStyle().getSources()) {
@@ -114,5 +116,7 @@ void QMapLibreMapObserver::onSourceChanged(mbgl::style::Source&)
             attribution = *source->getAttribution();
     }
     emit copyrightsChanged(QString::fromStdString(attribution));
-    emit mapChanged(QMapLibreGL::MapChangeSourceDidChange);
+    emit mapChanged(Map::MapChangeSourceDidChange);
 }
+
+} // namespace QMapLibreGL

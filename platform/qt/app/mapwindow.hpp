@@ -19,7 +19,7 @@ class MapWindow : public QOpenGLWidget
     Q_OBJECT
 
 public:
-    MapWindow(const QMapLibreSettings &);
+    MapWindow(const QMapLibreGL::Settings &);
     ~MapWindow();
 
     void selfTest();
@@ -44,8 +44,8 @@ private:
 
     QPointF m_lastPos;
 
-    QMapLibreSettings m_settings;
-    std::unique_ptr<QMapLibreGL> m_map{};
+    QMapLibreGL::Settings m_settings;
+    std::unique_ptr<QMapLibreGL::Map> m_map{};
 
     QPropertyAnimation *m_bearingAnimation{};
     QPropertyAnimation *m_zoomAnimation{};

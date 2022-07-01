@@ -10,15 +10,17 @@
 #include <exception>
 #include <memory>
 
-class QMapLibreGLPrivate;
+namespace QMapLibreGL {
 
-class QMapLibreMapObserver : public QObject, public mbgl::MapObserver
+class MapPrivate;
+
+class MapObserver : public QObject, public mbgl::MapObserver
 {
     Q_OBJECT
 
 public:
-    explicit QMapLibreMapObserver(QMapLibreGLPrivate *);
-    virtual ~QMapLibreMapObserver();
+    explicit MapObserver(MapPrivate *);
+    virtual ~MapObserver();
 
     // mbgl::MapObserver implementation.
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) final;
@@ -35,12 +37,14 @@ public:
     void onSourceChanged(mbgl::style::Source&) final;
 
 signals:
-    void mapChanged(QMapLibreGL::MapChange);
-    void mapLoadingFailed(QMapLibreGL::MapLoadingFailure, const QString &reason);
+    void mapChanged(Map::MapChange);
+    void mapLoadingFailed(Map::MapLoadingFailure, const QString &reason);
     void copyrightsChanged(const QString &copyrightsHtml);
 
 private:
-    Q_DISABLE_COPY(QMapLibreMapObserver)
+    Q_DISABLE_COPY(MapObserver)
 
-    QMapLibreGLPrivate *d_ptr;
+    MapPrivate *d_ptr;
 };
+
+} // namespace QMapLibreGL

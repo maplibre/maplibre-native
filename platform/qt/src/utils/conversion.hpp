@@ -48,9 +48,9 @@ public:
         return value.canConvert(QVariant::Map)
             || value.type() == QVariant::ByteArray
 #endif
-            || QString(value.typeName()) == QStringLiteral("QMapLibre::Feature")
-            || value.userType() == qMetaTypeId<QVector<QMapLibre::Feature>>()
-            || value.userType() == qMetaTypeId<QList<QMapLibre::Feature>>();
+            || QString(value.typeName()) == QStringLiteral("QMapLibreGL::Feature")
+            || value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()
+            || value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>();
     }
 
     static optional<QVariant> objectMember(const QVariant& value, const char* key) {
@@ -170,12 +170,12 @@ public:
     }
 
     static optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
-        if (value.typeName() == QStringLiteral("QMapLibre::Feature")) {
-            return GeoJSON { QMapLibreGeoJSON::asFeature(value.value<QMapLibre::Feature>()) };
-        } else if (value.userType() == qMetaTypeId<QVector<QMapLibre::Feature>>()) {
-            return featureCollectionToGeoJSON(value.value<QVector<QMapLibre::Feature>>());
-        } else if (value.userType() == qMetaTypeId<QList<QMapLibre::Feature>>()) {
-            return featureCollectionToGeoJSON(value.value<QList<QMapLibre::Feature>>());
+        if (value.typeName() == QStringLiteral("QMapLibreGL::Feature")) {
+            return GeoJSON { QMapLibreGL::GeoJSON::asFeature(value.value<QMapLibreGL::Feature>()) };
+        } else if (value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()) {
+            return featureCollectionToGeoJSON(value.value<QVector<QMapLibreGL::Feature>>());
+        } else if (value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()) {
+            return featureCollectionToGeoJSON(value.value<QList<QMapLibreGL::Feature>>());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         } else if (value.typeId() != QMetaType::QByteArray) {
 #else
@@ -195,7 +195,7 @@ private:
         mapbox::feature::feature_collection<double> collection;
         collection.reserve(static_cast<std::size_t>(features.size()));
         for (const auto &feature : features) {
-            collection.push_back(QMapLibreGeoJSON::asFeature(feature));
+            collection.push_back(QMapLibreGL::GeoJSON::asFeature(feature));
         }
         return GeoJSON { std::move(collection) };
     }

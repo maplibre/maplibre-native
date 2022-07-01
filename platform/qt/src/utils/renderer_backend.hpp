@@ -5,11 +5,13 @@
 
 #include <QtGlobal>
 
-class QMapLibreRendererBackend final : public mbgl::gl::RendererBackend,
+namespace QMapLibreGL {
+
+class RendererBackend final : public mbgl::gl::RendererBackend,
                                        public mbgl::gfx::Renderable {
 public:
-    QMapLibreRendererBackend(mbgl::gfx::ContextMode);
-    ~QMapLibreRendererBackend() override;
+    RendererBackend(mbgl::gfx::ContextMode);
+    ~RendererBackend() override;
 
     void updateFramebuffer(quint32 fbo, const mbgl::Size&);
     void restoreFramebufferBinding();
@@ -33,5 +35,7 @@ protected:
 private:
     quint32 m_fbo{};
 
-    Q_DISABLE_COPY(QMapLibreRendererBackend)
+    Q_DISABLE_COPY(RendererBackend)
 };
+
+} // namespace QMapLibreGL

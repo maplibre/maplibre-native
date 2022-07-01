@@ -16,13 +16,15 @@
 #include <atomic>
 #include <memory>
 
-class QMapLibreGLPrivate : public QObject, public mbgl::RendererFrontend
+namespace QMapLibreGL {
+
+class MapPrivate : public QObject, public mbgl::RendererFrontend
 {
     Q_OBJECT
 
 public:
-    explicit QMapLibreGLPrivate(QMapLibreGL *, const QMapLibreSettings &, const QSize &size, qreal pixelRatio);
-    virtual ~QMapLibreGLPrivate();
+    explicit MapPrivate(Map *, const Settings &, const QSize &size, qreal pixelRatio);
+    virtual ~MapPrivate();
 
     // mbgl::RendererFrontend implementation.
     void reset() final {}
@@ -49,20 +51,22 @@ signals:
     void needsRendering();
 
 private:
-    Q_DISABLE_COPY(QMapLibreGLPrivate)
+    Q_DISABLE_COPY(MapPrivate)
 
     std::recursive_mutex m_mapRendererMutex;
     std::shared_ptr<mbgl::RendererObserver> m_rendererObserver{};
     std::shared_ptr<mbgl::UpdateParameters> m_updateParameters{};
 
-    std::unique_ptr<QMapLibreMapObserver> m_mapObserver{};
-    std::unique_ptr<QMapLibreMapRenderer> m_mapRenderer{};
+    std::unique_ptr<MapObserver> m_mapObserver{};
+    std::unique_ptr<MapRenderer> m_mapRenderer{};
     std::unique_ptr<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>> m_resourceTransform{};
 
-    QMapLibreSettings::GLContextMode m_mode;
+    Settings::GLContextMode m_mode;
     qreal m_pixelRatio;
 
     QString m_localFontFamily;
 
     std::atomic_flag m_renderQueued = ATOMIC_FLAG_INIT;
 };
+
+} // namespace QMapLibreGL

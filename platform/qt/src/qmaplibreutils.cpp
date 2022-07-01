@@ -8,13 +8,13 @@
 #include <QOpenGLContext>
 
 // mbgl::NetworkStatus::Status
-static_assert(mbgl::underlying_type(QMapLibre::Online) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Online), "error");
-static_assert(mbgl::underlying_type(QMapLibre::Offline) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Offline), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Online) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Online), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Offline) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Offline), "error");
 
-namespace QMapLibre {
+namespace QMapLibreGL {
 
 /*!
-    \enum QMapLibre::NetworkMode
+    \enum QMapLibreGL::NetworkMode
 
     This enum represents whether server requests can be performed via network.
 
@@ -23,9 +23,9 @@ namespace QMapLibre {
 */
 
 /*!
-    \fn QMapLibre::NetworkMode QMapLibre::networkMode()
+    \fn QMapLibreGL::NetworkMode QMapLibreGL::networkMode()
 
-    Returns the current QMapLibre::NetworkMode.
+    Returns the current QMapLibreGL::NetworkMode.
 */
 NetworkMode networkMode()
 {
@@ -33,7 +33,7 @@ NetworkMode networkMode()
 }
 
 /*!
-    \fn void QMapLibre::setNetworkMode(QMapLibre::NetworkMode mode)
+    \fn void QMapLibreGL::setNetworkMode(QMapLibreGL::NetworkMode mode)
 
     Forwards the network status \a mode to MapLibre GL Native engine.
 
@@ -59,7 +59,7 @@ double metersPerPixelAtLatitude(double latitude, double zoom)
 ProjectedMeters projectedMetersForCoordinate(const Coordinate &coordinate)
 {
     auto projectedMeters = mbgl::Projection::projectedMetersForLatLng(mbgl::LatLng { coordinate.first, coordinate.second });
-    return QMapLibre::ProjectedMeters(projectedMeters.northing(), projectedMeters.easting());
+    return ProjectedMeters(projectedMeters.northing(), projectedMeters.easting());
 }
 
 /*!
@@ -68,7 +68,7 @@ ProjectedMeters projectedMetersForCoordinate(const Coordinate &coordinate)
 Coordinate coordinateForProjectedMeters(const ProjectedMeters &projectedMeters)
 {
     auto latLng = mbgl::Projection::latLngForProjectedMeters(mbgl::ProjectedMeters { projectedMeters.first, projectedMeters.second });
-    return QMapLibre::Coordinate(latLng.latitude(), latLng.longitude());
+    return Coordinate(latLng.latitude(), latLng.longitude());
 }
 
-} // namespace QMapLibre
+} // namespace QMapLibreGL
