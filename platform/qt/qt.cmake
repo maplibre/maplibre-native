@@ -335,7 +335,6 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
         mbgl-test-runner
         PRIVATE
             Qt${QT_VERSION_MAJOR}::Gui
-            Qt${QT_VERSION_MAJOR}::OpenGL
             mbgl-compiler-options
             $<$<NOT:$<BOOL:MSVC>>:pthread>
     )
