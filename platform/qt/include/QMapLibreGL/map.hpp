@@ -1,8 +1,8 @@
-#ifndef QMAPLIBREGL_H
-#define QMAPLIBREGL_H
+#ifndef QMAPLIBREGL_MAP_H
+#define QMAPLIBREGL_MAP_H
 
-#include <QMapLibreSettings>
-#include <QMapLibreTypes>
+#include <QMapLibreGL/Settings>
+#include <QMapLibreGL/Types>
 
 #include <QImage>
 #include <QMargins>
@@ -201,4 +201,4 @@ private:
 Q_DECLARE_METATYPE(QMapLibreGL::Map::MapChange);
 Q_DECLARE_METATYPE(QMapLibreGL::Map::MapLoadingFailure);
 
-#endif // QMAPLIBREGL_H
+#endif // QMAPLIBREGL_MAP_H

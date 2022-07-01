@@ -1,6 +1,7 @@
-#include "qmaplibregl.hpp"
-#include "qmaplibregl_p.hpp"
-#include "qmaplibreutils.hpp"
+#include <QMapLibreGL/Map>
+#include <QMapLibreGL/Utils>
+
+#include "map_p.hpp"
 
 #include "utils/conversion.hpp"
 #include "utils/geojson.hpp"

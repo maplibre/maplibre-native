@@ -1,15 +1,15 @@
 #pragma once
 
+#include <QMapLibreGL/Types>
+
+#include "geojson.hpp"
+
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/optional.hpp>
 
-#include <QMapLibreTypes>
-
 #include <QColor>
 #include <QVariant>
-
-#include "geojson.hpp"
 
 namespace mbgl {
 namespace style {

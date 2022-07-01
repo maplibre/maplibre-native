@@ -1,6 +1,7 @@
 #pragma once
 
-#include "qmaplibresettings.hpp"
+#include <QMapLibreGL/Settings>
+
 #include "renderer_backend.hpp"
 
 #include <mbgl/renderer/renderer.hpp>

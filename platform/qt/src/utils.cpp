@@ -1,4 +1,4 @@
-#include "qmaplibreutils.hpp"
+#include <QMapLibreGL/Utils>
 
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/util/geometry.hpp>

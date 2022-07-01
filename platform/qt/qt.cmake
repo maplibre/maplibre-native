@@ -91,10 +91,10 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/sqlite3.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/mbgl/sqlite3.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        $<$<BOOL:${MBGL_QT_WITH_HEADLESS}>:${PROJECT_SOURCE_DIR}/platform/qt/src/headless_backend_qt.cpp>
+        $<$<BOOL:${MBGL_QT_WITH_HEADLESS}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
@@ -145,15 +145,15 @@ target_link_libraries(
 )
 
 set(qmaplibregl_headers
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/qmaplibreexport.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/qmaplibregl.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/qmaplibresettings.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreSettings
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/qmaplibretypes.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreTypes
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/qmaplibreutils.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreUtils
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/export.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/map.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Map
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/settings.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Settings
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/types.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Types
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/utils.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Utils
 )
 
 if (MBGL_QT_INSIDE_PLUGIN)
@@ -168,11 +168,11 @@ target_sources(
     qmaplibregl
     PRIVATE
     ${qmaplibregl_headers}
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/qmaplibresettings.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/qmaplibretypes.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/qmaplibreutils.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/qmaplibregl.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/qmaplibregl_p.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/src/map.cpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/src/map_p.hpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/src/settings.cpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/src/types.cpp
+    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils.cpp
     ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_observer.cpp
     ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_observer.hpp
     ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_renderer.cpp
@@ -197,11 +197,19 @@ set_target_properties(
     SOVERSION ${MBGL_QT_VERSION_COMPATIBILITY}
     PUBLIC_HEADER "${qmaplibregl_headers}"
 )
-if (NOT MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
+if (APPLE AND NOT MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
     set_target_properties(
         qmaplibregl PROPERTIES
         FRAMEWORK ON
         FRAMEWORK_VERSION A
+        MACOSX_FRAMEWORK_IDENTIFIER org.maplibre.QMapLibreGL
+        MACOSX_FRAMEWORK_BUNDLE_VERSION ${MBGL_QT_VERSION}
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${MBGL_QT_VERSION}
+    )
+    target_include_directories(
+        qmaplibregl
+        INTERFACE
+            $<INSTALL_INTERFACE:lib/QMapLibreGL.framework>
     )
 endif()
 
@@ -241,10 +249,8 @@ install(
 target_include_directories(
     qmaplibregl
     PRIVATE
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/platform/qt/include
-    INTERFACE
-    "$<INSTALL_INTERFACE:include>"
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/platform/qt/include
 )
 
 target_compile_definitions(
@@ -260,12 +266,25 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
     PRIVATE
-        "$<BUILD_INTERFACE:mbgl-compiler-options>"
-        "$<BUILD_INTERFACE:mbgl-core>"
-        "$<BUILD_INTERFACE:mbgl-vendor-parsedate>"
-        "$<BUILD_INTERFACE:mbgl-vendor-nunicode>"
-        "$<BUILD_INTERFACE:mbgl-vendor-csscolorparser>"
+        $<BUILD_INTERFACE:mbgl-compiler-options>
+        $<BUILD_INTERFACE:mbgl-core>
+        $<BUILD_INTERFACE:mbgl-vendor-parsedate>
+        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
+        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
 )
+# Do not use generator expressions for cleaner output
+if (MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
+    target_link_libraries(
+        qmaplibregl
+        PUBLIC
+            $<$<NOT:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
+            $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
+    )
+    target_compile_definitions(
+        qmaplibregl
+        PUBLIC QT_MAPLIBREGL_STATIC
+    )
+endif()
 
 install(TARGETS qmaplibregl
         EXPORT QMapLibreGLTargets
@@ -275,7 +294,7 @@ install(TARGETS qmaplibregl
         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/QMapLibreGL"
 )
 
 if(NOT MBGL_QT_LIBRARY_ONLY)
@@ -294,12 +313,6 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
     # Qt public API should keep compatibility with old compilers for legacy systems
     set_property(TARGET mbgl-qt PROPERTY CXX_STANDARD 98)
     set_property(TARGET mbgl-qt PROPERTY AUTOMOC ON)
-
-    target_compile_definitions(
-        mbgl-qt
-        PRIVATE
-        $<$<OR:$<BOOL:${MBGL_QT_STATIC}>,$<BOOL:${MBGL_QT_INSIDE_PLUGIN}>>:QT_MAPLIBREGL_STATIC>
-    )
 
     target_link_libraries(
         mbgl-qt

@@ -1,4 +1,4 @@
-#include "qmaplibretypes.hpp"
+#include <QMapLibreGL/Types>
 
 #include "mbgl/util/geometry.hpp"
 #include "mbgl/util/traits.hpp"

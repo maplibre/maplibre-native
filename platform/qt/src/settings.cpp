@@ -1,4 +1,4 @@
-#include "qmaplibresettings.hpp"
+#include <QMapLibreGL/Settings>
 
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/map/mode.hpp>

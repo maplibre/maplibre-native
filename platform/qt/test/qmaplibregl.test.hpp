@@ -1,4 +1,4 @@
-#include <QMapLibreGL>
+#include <QMapLibreGL/Map>
 
 #include <QGLWidget>
 #include <QGLFramebufferObject>

@@ -1,8 +1,8 @@
-#ifndef QMAPLIBREUTILS_H
-#define QMAPLIBREUTILS_H
+#ifndef QMAPLIBREGL_UTILS_H
+#define QMAPLIBREGL_UTILS_H
 
-#include "qmaplibreexport.hpp"
-#include "qmaplibretypes.hpp"
+#include "export.hpp"
+#include "types.hpp"
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
@@ -22,4 +22,4 @@ Q_MAPLIBREGL_EXPORT Coordinate coordinateForProjectedMeters(const ProjectedMeter
 
 } // namespace QMapLibreGL
 
-#endif // QMAPLIBRETYPES_H
+#endif // QMAPLIBREGL_UTILS_H

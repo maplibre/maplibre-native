@@ -1,8 +1,8 @@
 #ifndef MAPWINDOW_H
 #define MAPWINDOW_H
 
-#include <QMapLibreGL>
-#include <QMapLibreSettings>
+#include <QMapLibreGL/Map>
+#include <QMapLibreGL/Settings>
 
 #include <QtGlobal>
 #include <QOpenGLWidget>

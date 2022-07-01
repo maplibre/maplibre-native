@@ -1,6 +1,7 @@
 #pragma once
 
-#include "qmaplibregl.hpp"
+#include <QMapLibreGL/Map>
+
 #include "utils/map_observer.hpp"
 #include "utils/map_renderer.hpp"
 

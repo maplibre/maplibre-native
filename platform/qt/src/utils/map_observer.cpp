@@ -1,6 +1,6 @@
 #include "map_observer.hpp"
 
-#include "../qmaplibregl_p.hpp"
+#include "../map_p.hpp"
 
 #include <mbgl/util/exception.hpp>
 

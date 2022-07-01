@@ -1,5 +1,5 @@
-#ifndef QMAPLIBREEXPORT_H
-#define QMAPLIBREEXPORT_H
+#ifndef QMAPLIBRE_EXPORT_H
+#define QMAPLIBRE_EXPORT_H
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
@@ -13,4 +13,4 @@
 #  define Q_MAPLIBREGL_EXPORT
 #endif
 
-#endif // QMAPLIBREEXPORT_H
+#endif // QMAPLIBRE_EXPORT_H

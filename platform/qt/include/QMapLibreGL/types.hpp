@@ -1,5 +1,5 @@
-#ifndef QMAPLIBRETYPES_H
-#define QMAPLIBRETYPES_H
+#ifndef QMAPLIBREGL_TYPES_H
+#define QMAPLIBREGL_TYPES_H
 
 #include <QColor>
 #include <QPair>
@@ -7,7 +7,7 @@
 #include <QVariant>
 #include <QVector>
 
-#include "qmaplibreexport.hpp"
+#include "export.hpp"
 
 namespace QMapLibreGL {
 
@@ -128,4 +128,4 @@ Q_DECLARE_METATYPE(QMapLibreGL::ShapeAnnotationGeometry);
 Q_DECLARE_METATYPE(QMapLibreGL::LineAnnotation);
 Q_DECLARE_METATYPE(QMapLibreGL::FillAnnotation);
 
-#endif // QMAPLIBRETYPES_H
+#endif // QMAPLIBREGL_TYPES_H

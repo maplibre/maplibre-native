@@ -1,6 +1,6 @@
 #include "qmaplibregl.test.hpp"
 
-#include <QMapLibreGL>
+#include <QMapLibreGL/Map>
 
 #include <QFile>
 #include <QGuiApplication>

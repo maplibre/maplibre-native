@@ -1,10 +1,10 @@
 #pragma once
 
+#include <QMapLibreGL/Types>
+
 #include <mapbox/geojson.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/feature.hpp>
-
-#include <QMapLibreTypes>
 
 #include <QVariant>
 

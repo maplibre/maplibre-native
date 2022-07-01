@@ -1,12 +1,12 @@
-#ifndef QMAPLIBRESETTINGS_H
-#define QMAPLIBRESETTINGS_H
+#ifndef QMAPLIBREGL_SETTINGS_H
+#define QMAPLIBREGL_SETTINGS_H
 
 #include <QImage>
 #include <QString>
 
 #include <functional>
 
-#include "qmaplibreexport.hpp"
+#include "export.hpp"
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
@@ -109,4 +109,4 @@ private:
 
 } // namespace QMapLibreGL
 
-#endif // QMAPLIBRESETTINGS_H
+#endif // QMAPLIBREGL_SETTINGS_H
