@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
+ - Platform [e.g. Qt, Node.js, iOS]
  - Version [e.g. 22]
 
 
