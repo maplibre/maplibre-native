@@ -38,7 +38,11 @@ public:
     template <typename Fn, class... Args>
     auto ask(Fn fn, Args&&... args) const {
         // Result type is deduced from the function's return type
+#if __cplusplus >= 201703L
+        using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
+#else
         using ResultType = typename std::result_of<decltype(fn)(Object, Args...)>::type;
+#endif
 
         std::promise<ResultType> promise;
         auto future = promise.get_future();

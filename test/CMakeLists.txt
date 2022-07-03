@@ -229,4 +229,11 @@ target_link_libraries(
     $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>
 )
 
+if(MSVC)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MBGL_BUILDING_LIB
+    )
+endif()
+
 set_property(TARGET mbgl-test PROPERTY FOLDER Core)

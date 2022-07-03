@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
-option(MBGL_QT_STATIC "Build Mapbox GL Qt bindings staticly" OFF)
 option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
 option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
@@ -55,6 +54,7 @@ target_compile_options(
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
         $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
+        $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MBGL_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wshadow>
@@ -68,10 +68,10 @@ target_compile_options(
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-parameter>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-property-ivar>
         $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
-        # $<$<CXX_COMPILER_ID:MSVC>:/WX>    # all warnings as errors
+        $<$<CXX_COMPILER_ID:MSVC>:/WX>      # all warnings as errors
+        $<$<CXX_COMPILER_ID:MSVC>:/EHsc>    # exceptions
         $<$<CXX_COMPILER_ID:MSVC>:/wd4068>  # pragma
-        $<$<CXX_COMPILER_ID:MSVC>:/wd4244>  # types
-        $<$<CXX_COMPILER_ID:MSVC>:/wd4828>  # encoding
+        $<$<CXX_COMPILER_ID:MSVC>:/D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS>
         $<$<CXX_COMPILER_ID:MSVC>:/D_CRT_SECURE_NO_WARNINGS>
 )
 
@@ -93,12 +93,16 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
+if (CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
+    set(CMAKE_CROSS_CONFIGS "all")
+    set(CMAKE_DEFAULT_CONFIGS "all")
+endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-if(MBGL_QT_STATIC)
+if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-core OBJECT)
 else()
     add_library(mbgl-core STATIC)
@@ -1018,6 +1022,38 @@ target_link_libraries(
         Mapbox::Base::geometry.hpp
         Mapbox::Base::optional
         Mapbox::Base::variant
+)
+
+export(TARGETS
+    mbgl-core
+
+    mapbox-base
+    mapbox-base-cheap-ruler-cpp
+    mapbox-base-extras-expected-lite
+    mapbox-base-extras-kdbush.hpp
+    mapbox-base-extras-rapidjson
+    mapbox-base-geojson-vt-cpp
+    mapbox-base-geojson.hpp
+    mapbox-base-geometry.hpp
+    mapbox-base-jni.hpp
+    mapbox-base-optional
+    mapbox-base-pixelmatch-cpp
+    mapbox-base-shelf-pack-cpp
+    mapbox-base-supercluster.hpp
+    mapbox-base-variant
+    mbgl-compiler-options
+    mbgl-vendor-boost
+    mbgl-vendor-csscolorparser
+    mbgl-vendor-earcut.hpp
+    mbgl-vendor-eternal
+    mbgl-vendor-parsedate
+    mbgl-vendor-polylabel
+    mbgl-vendor-protozero
+    mbgl-vendor-unique_resource
+    mbgl-vendor-vector-tile
+    mbgl-vendor-wagyu
+
+    FILE MapboxCoreTargets.cmake
 )
 
 set_target_properties(

@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-csscolorparser)
     return()
 endif()
 
-if(MBGL_QT_STATIC)
+if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-vendor-csscolorparser OBJECT)
 else()
     add_library(mbgl-vendor-csscolorparser STATIC)
@@ -22,6 +22,10 @@ target_include_directories(
     mbgl-vendor-csscolorparser SYSTEM
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/csscolorparser
 )
+
+if(MSVC)
+    target_compile_options(mbgl-vendor-csscolorparser PRIVATE /wd4244)
+endif()
 
 set_target_properties(
     mbgl-vendor-csscolorparser

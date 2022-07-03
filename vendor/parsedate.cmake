@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-parsedate)
     return()
 endif()
 
-if(MBGL_QT_STATIC)
+if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-vendor-parsedate OBJECT)
 else()
     add_library(mbgl-vendor-parsedate STATIC)

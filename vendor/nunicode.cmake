@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-nunicode)
     return()
 endif()
 
-if(MBGL_QT_STATIC)
+if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-vendor-nunicode OBJECT)
 else()
     add_library(mbgl-vendor-nunicode STATIC)
@@ -24,11 +24,18 @@ target_compile_definitions(
     PRIVATE NU_BUILD_STATIC
 )
 
-if(NOT MSVC)
+if(MSVC)
+    target_compile_options(mbgl-vendor-nunicode PRIVATE /wd4146)
+else()
     target_compile_options(mbgl-vendor-nunicode PRIVATE -Wno-error)
 endif()
 
 target_include_directories(
     mbgl-vendor-nunicode SYSTEM
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/nunicode/include
+)
+
+export(TARGETS
+    mbgl-vendor-nunicode
+    APPEND FILE MapboxCoreTargets.cmake
 )

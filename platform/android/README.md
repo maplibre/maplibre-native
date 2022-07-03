@@ -53,10 +53,26 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
 
 #### macOS
 
-Execute the following command in this repository's root folder to generate the required build files and open the project with Android Studio:
+* Environment:  Android Studio + NDK
+  * `JAVA_HOME=/Applications/Android Studio.app/Contents/jre/Contents/Home`
+  * `ANDROID_SDK_ROOT=~/Library/Android/sdk`
+  * See NDK version discussion on issue: [maplibre/maplibre-gl-native/#xxx](https://github.com/maplibre/maplibre-gl-native/issues/xxx)  
 
 ```
+cd platform/android
+
+# generate the required build files and open the project with Android Studio
 make aproj
+
+# Build package
+BUILDTYPE=Debug make apackage
+#BUILDTYPE=Release make apackage
+
+# Build release Test App
+make android
+
+# Generate javadoc
+make android-javadoc
 ```
 
 #### linux

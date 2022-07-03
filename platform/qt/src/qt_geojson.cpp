@@ -1,7 +1,4 @@
 #include "qt_geojson.hpp"
-#include <mapbox/geojson.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/feature.hpp>
 
 #pragma clang diagnostic ignored "-Wenum-compare-switch"
 
