@@ -1,6 +1,6 @@
 #pragma once
 
-#include "qmapboxgl.hpp"
+#include <QMapLibreGL/Map>
 
 #include <mbgl/map/map_observer.hpp>
 #include <mbgl/style/style.hpp>
@@ -10,15 +10,17 @@
 #include <exception>
 #include <memory>
 
-class QMapboxGLPrivate;
+namespace QMapLibreGL {
 
-class QMapboxGLMapObserver : public QObject, public mbgl::MapObserver
+class MapPrivate;
+
+class MapObserver : public QObject, public mbgl::MapObserver
 {
     Q_OBJECT
 
 public:
-    explicit QMapboxGLMapObserver(QMapboxGLPrivate *);
-    virtual ~QMapboxGLMapObserver();
+    explicit MapObserver(MapPrivate *);
+    virtual ~MapObserver();
 
     // mbgl::MapObserver implementation.
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) final;
@@ -35,12 +37,14 @@ public:
     void onSourceChanged(mbgl::style::Source&) final;
 
 signals:
-    void mapChanged(QMapboxGL::MapChange);
-    void mapLoadingFailed(QMapboxGL::MapLoadingFailure, const QString &reason);
+    void mapChanged(Map::MapChange);
+    void mapLoadingFailed(Map::MapLoadingFailure, const QString &reason);
     void copyrightsChanged(const QString &copyrightsHtml);
 
 private:
-    Q_DISABLE_COPY(QMapboxGLMapObserver)
+    Q_DISABLE_COPY(MapObserver)
 
-    QMapboxGLPrivate *d_ptr;
+    MapPrivate *d_ptr;
 };
+
+} // namespace QMapLibreGL

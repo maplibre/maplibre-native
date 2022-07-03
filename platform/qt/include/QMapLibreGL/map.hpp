@@ -1,8 +1,10 @@
-#ifndef QMAPBOXGL_H
-#define QMAPBOXGL_H
+#ifndef QMAPLIBREGL_MAP_H
+#define QMAPLIBREGL_MAP_H
+
+#include <QMapLibreGL/Settings>
+#include <QMapLibreGL/Types>
 
 #include <QImage>
-#include <QMapbox>
 #include <QMargins>
 #include <QObject>
 #include <QPointF>
@@ -13,113 +15,13 @@
 #include <functional>
 #include <memory>
 
-class QMapboxGLPrivate;
+namespace QMapLibreGL {
+
+class MapPrivate;
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
-// TODO: this will be wrapped at some point
-namespace mbgl
-{
-    class TileServerOptions;
-}
-
-class Q_MAPBOXGL_EXPORT QMapboxGLSettings
-{
-public:
-    QMapboxGLSettings();
-
-    enum GLContextMode {
-        UniqueGLContext = 0,
-        SharedGLContext
-    };
-
-    enum MapMode {
-        Continuous = 0,
-        Static
-    };
-
-    enum ConstrainMode {
-        NoConstrain = 0,
-        ConstrainHeightOnly,
-        ConstrainWidthAndHeight
-    };
-
-    enum ViewportMode {
-        DefaultViewport = 0,
-        FlippedYViewport
-    };
-
-    enum SettingsTemplate {
-        DefaultSettings = 0,
-        MapLibreSettings,
-        MapTilerSettings,
-        MapboxSettings
-    };
-
-    GLContextMode contextMode() const;
-    void setContextMode(GLContextMode);
-
-    MapMode mapMode() const;
-    void setMapMode(MapMode);
-
-    ConstrainMode constrainMode() const;
-    void setConstrainMode(ConstrainMode);
-
-    ViewportMode viewportMode() const;
-    void setViewportMode(ViewportMode);
-
-    unsigned cacheDatabaseMaximumSize() const;
-    void setCacheDatabaseMaximumSize(unsigned);
-
-    QString cacheDatabasePath() const;
-    void setCacheDatabasePath(const QString &);
-
-    QString assetPath() const;
-    void setAssetPath(const QString &);
-
-    QString apiKey() const;
-    void setApiKey(const QString &);
-
-    QString apiBaseUrl() const;
-    void setApiBaseUrl(const QString &);
-
-    QString localFontFamily() const;
-    void setLocalFontFamily(const QString &);
-
-    std::function<std::string(const std::string &)> resourceTransform() const;
-    void setResourceTransform(const std::function<std::string(const std::string &)> &);
-
-    void resetToTemplate(SettingsTemplate);
-
-    QVector<QPair<QString, QString>> defaultStyles() const;
-
-    mbgl::TileServerOptions *tileServerOptionsInternal() const;
-
-private:
-    GLContextMode m_contextMode;
-    MapMode m_mapMode;
-    ConstrainMode m_constrainMode;
-    ViewportMode m_viewportMode;
-
-    unsigned m_cacheMaximumSize;
-    QString m_cacheDatabasePath;
-    QString m_assetPath;
-    QString m_apiKey;
-    QString m_localFontFamily;
-    std::function<std::string(const std::string &)> m_resourceTransform;
-
-    mbgl::TileServerOptions *m_tileServerOptionsInternal{};
-};
-
-struct Q_MAPBOXGL_EXPORT QMapboxGLCameraOptions {
-    QVariant center;  // Coordinate
-    QVariant anchor;  // QPointF
-    QVariant zoom;    // double
-    QVariant bearing; // double
-    QVariant pitch;   // double
-};
-
-class Q_MAPBOXGL_EXPORT QMapboxGL : public QObject
+class Q_MAPLIBREGL_EXPORT Map : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(double latitude READ latitude WRITE setLatitude)
@@ -130,7 +32,7 @@ class Q_MAPBOXGL_EXPORT QMapboxGL : public QObject
     Q_PROPERTY(QString styleJson READ styleJson WRITE setStyleJson)
     Q_PROPERTY(QString styleUrl READ styleUrl WRITE setStyleUrl)
     Q_PROPERTY(double scale READ scale WRITE setScale)
-    Q_PROPERTY(QMapbox::Coordinate coordinate READ coordinate WRITE setCoordinate)
+    Q_PROPERTY(QMapLibreGL::Coordinate coordinate READ coordinate WRITE setCoordinate)
     Q_PROPERTY(QMargins margins READ margins WRITE setMargins)
 
 public:
@@ -168,11 +70,11 @@ public:
         NorthLeftwards,
     };
 
-    QMapboxGL(QObject* parent = 0,
-              const QMapboxGLSettings& = QMapboxGLSettings(),
-              const QSize& size = QSize(),
-              qreal pixelRatio = 1);
-    virtual ~QMapboxGL();
+    Map(QObject* parent = 0,
+        const Settings& = Settings(),
+        const QSize& size = QSize(),
+        qreal pixelRatio = 1);
+    virtual ~Map();
 
     QString styleJson() const;
     QString styleUrl() const;
@@ -206,11 +108,11 @@ public:
     NorthOrientation northOrientation() const;
     void setNorthOrientation(NorthOrientation);
 
-    QMapbox::Coordinate coordinate() const;
-    void setCoordinate(const QMapbox::Coordinate &);
-    void setCoordinateZoom(const QMapbox::Coordinate &, double zoom);
+    Coordinate coordinate() const;
+    void setCoordinate(const Coordinate &);
+    void setCoordinateZoom(const Coordinate &, double zoom);
 
-    void jumpTo(const QMapboxGLCameraOptions&);
+    void jumpTo(const CameraOptions&);
 
     void setGestureInProgress(bool inProgress);
 
@@ -218,9 +120,9 @@ public:
 
     void addAnnotationIcon(const QString &name, const QImage &sprite);
 
-    QMapbox::AnnotationID addAnnotation(const QMapbox::Annotation &);
-    void updateAnnotation(QMapbox::AnnotationID, const QMapbox::Annotation &);
-    void removeAnnotation(QMapbox::AnnotationID);
+    AnnotationID addAnnotation(const Annotation &);
+    void updateAnnotation(AnnotationID, const Annotation &);
+    void removeAnnotation(AnnotationID);
 
     bool setLayoutProperty(const QString &layer, const QString &property, const QVariant &value);
     bool setPaintProperty(const QString &layer, const QString &property, const QVariant &value);
@@ -233,17 +135,14 @@ public:
 
     void resize(const QSize &size);
 
-    double metersPerPixelAtLatitude(double latitude, double zoom) const;
-    QMapbox::ProjectedMeters projectedMetersForCoordinate(const QMapbox::Coordinate &) const;
-    QMapbox::Coordinate coordinateForProjectedMeters(const QMapbox::ProjectedMeters &) const;
-    QPointF pixelForCoordinate(const QMapbox::Coordinate &) const;
-    QMapbox::Coordinate coordinateForPixel(const QPointF &) const;
+    QPointF pixelForCoordinate(const Coordinate &) const;
+    Coordinate coordinateForPixel(const QPointF &) const;
 
-    QMapbox::CoordinateZoom coordinateZoomForBounds(const QMapbox::Coordinate &sw, const QMapbox::Coordinate &ne) const;
-    QMapbox::CoordinateZoom coordinateZoomForBounds(const QMapbox::Coordinate &sw,
-                                                    const QMapbox::Coordinate &ne,
-                                                    double bearing,
-                                                    double pitch);
+    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw, const Coordinate &ne) const;
+    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw,
+                                           const Coordinate &ne,
+                                           double bearing,
+                                           double pitch);
 
     void setMargins(const QMargins &margins);
     QMargins margins() const;
@@ -257,7 +156,7 @@ public:
     void removeImage(const QString &name);
 
     void addCustomLayer(const QString &id,
-        std::unique_ptr<QMapbox::CustomLayerHostInterface> host,
+        std::unique_ptr<CustomLayerHostInterface> host,
         const QString &before = QString());
     void addLayer(const QVariantMap &params, const QString& before = QString());
     bool layerExists(const QString &id);
@@ -285,19 +184,21 @@ public slots:
 
 signals:
     void needsRendering();
-    void mapChanged(QMapboxGL::MapChange);
-    void mapLoadingFailed(QMapboxGL::MapLoadingFailure, const QString &reason);
+    void mapChanged(Map::MapChange);
+    void mapLoadingFailed(Map::MapLoadingFailure, const QString &reason);
     void copyrightsChanged(const QString &copyrightsHtml);
 
     void staticRenderFinished(const QString &error);
 
 private:
-    Q_DISABLE_COPY(QMapboxGL)
+    Q_DISABLE_COPY(Map)
 
-    QMapboxGLPrivate *d_ptr;
+    MapPrivate *d_ptr;
 };
 
-Q_DECLARE_METATYPE(QMapboxGL::MapChange);
-Q_DECLARE_METATYPE(QMapboxGL::MapLoadingFailure);
+} // namespace QMapLibreGL
 
-#endif // QMAPBOXGL_H
+Q_DECLARE_METATYPE(QMapLibreGL::Map::MapChange);
+Q_DECLARE_METATYPE(QMapLibreGL::Map::MapLoadingFailure);
+
+#endif // QMAPLIBREGL_MAP_H

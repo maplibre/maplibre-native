@@ -1,11 +1,12 @@
 #ifndef MAPWINDOW_H
 #define MAPWINDOW_H
 
-#include <QMapboxGL>
+#include <QMapLibreGL/Map>
+#include <QMapLibreGL/Settings>
 
+#include <QtGlobal>
 #include <QOpenGLWidget>
 #include <QPropertyAnimation>
-#include <QtGlobal>
 
 #include <memory>
 
@@ -18,7 +19,7 @@ class MapWindow : public QOpenGLWidget
     Q_OBJECT
 
 public:
-    MapWindow(const QMapboxGLSettings &);
+    MapWindow(const QMapLibreGL::Settings &);
     ~MapWindow();
 
     void selfTest();
@@ -43,20 +44,20 @@ private:
 
     QPointF m_lastPos;
 
-    QMapboxGLSettings m_settings;
-    std::unique_ptr<QMapboxGL> m_map{};
+    QMapLibreGL::Settings m_settings;
+    std::unique_ptr<QMapLibreGL::Map> m_map{};
 
-    QPropertyAnimation *m_bearingAnimation;
-    QPropertyAnimation *m_zoomAnimation;
+    QPropertyAnimation *m_bearingAnimation{};
+    QPropertyAnimation *m_zoomAnimation{};
 
-    unsigned m_animationTicks = 0;
-    unsigned m_frameDraws = 0;
+    unsigned m_animationTicks{};
+    unsigned m_frameDraws{};
 
     QVariant m_symbolAnnotationId;
     QVariant m_lineAnnotationId;
     QVariant m_fillAnnotationId;
 
-    bool m_sourceAdded = false;
+    bool m_sourceAdded{};
 };
 
 #endif

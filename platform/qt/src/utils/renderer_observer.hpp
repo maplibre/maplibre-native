@@ -8,16 +8,18 @@
 
 #include <memory>
 
+namespace QMapLibreGL {
+
 // Forwards RendererObserver signals to the given
 // Delegate RendererObserver on the given RunLoop
-class QMapboxGLRendererObserver : public mbgl::RendererObserver {
+class RendererObserver : public mbgl::RendererObserver {
 public:
-    QMapboxGLRendererObserver(mbgl::util::RunLoop& mapRunLoop, mbgl::RendererObserver& delegate_)
+    RendererObserver(mbgl::util::RunLoop& mapRunLoop, mbgl::RendererObserver& delegate_)
         : mailbox(std::make_shared<mbgl::Mailbox>(mapRunLoop))
         , delegate(delegate_, mailbox) {
     }
 
-    ~QMapboxGLRendererObserver() {
+    ~RendererObserver() {
         mailbox->close();
     }
 
@@ -46,6 +48,8 @@ public:
     }
 
 private:
-    std::shared_ptr<mbgl::Mailbox> mailbox;
+    std::shared_ptr<mbgl::Mailbox> mailbox{};
     mbgl::ActorRef<mbgl::RendererObserver> delegate;
 };
+
+} // namespace QMapLibreGL

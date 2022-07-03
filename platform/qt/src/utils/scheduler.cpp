@@ -1,19 +1,21 @@
-#include "qmapboxgl_scheduler.hpp"
+#include "scheduler.hpp"
 
 #include <mbgl/util/util.hpp>
 
 #include <cassert>
 
-QMapboxGLScheduler::QMapboxGLScheduler()
+namespace QMapLibreGL {
+
+Scheduler::Scheduler()
 {
 }
 
-QMapboxGLScheduler::~QMapboxGLScheduler()
+Scheduler::~Scheduler()
 {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void QMapboxGLScheduler::schedule(std::function<void()> function) {
+void Scheduler::schedule(std::function<void()> function) {
     std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
@@ -22,7 +24,7 @@ void QMapboxGLScheduler::schedule(std::function<void()> function) {
     emit needsProcessing();
 }
 
-void QMapboxGLScheduler::processEvents()
+void Scheduler::processEvents()
 {
     std::queue<std::function<void()>> taskQueue;
     {
@@ -36,3 +38,5 @@ void QMapboxGLScheduler::processEvents()
         taskQueue.pop();
     }
 }
+
+} // namespace QMapLibreGL

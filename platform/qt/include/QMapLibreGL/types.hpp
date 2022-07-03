@@ -1,5 +1,5 @@
-#ifndef QMAPBOX_H
-#define QMAPBOX_H
+#ifndef QMAPLIBREGL_TYPES_H
+#define QMAPLIBREGL_TYPES_H
 
 #include <QColor>
 #include <QPair>
@@ -7,19 +7,9 @@
 #include <QVariant>
 #include <QVector>
 
-// This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
+#include "export.hpp"
 
-#if !defined(QT_MAPBOXGL_STATIC)
-#  if defined(QT_BUILD_MAPBOXGL_LIB)
-#    define Q_MAPBOXGL_EXPORT Q_DECL_EXPORT
-#  else
-#    define Q_MAPBOXGL_EXPORT Q_DECL_IMPORT
-#  endif
-#else
-#  define Q_MAPBOXGL_EXPORT
-#endif
-
-namespace QMapbox {
+namespace QMapLibreGL {
 
 typedef QPair<double, double> Coordinate;
 typedef QPair<Coordinate, double> CoordinateZoom;
@@ -30,7 +20,7 @@ typedef QVector<Coordinates> CoordinatesCollection;
 
 typedef QVector<CoordinatesCollection> CoordinatesCollections;
 
-struct Q_MAPBOXGL_EXPORT Feature {
+struct Q_MAPLIBREGL_EXPORT Feature {
     enum Type {
         PointType = 1,
         LineStringType,
@@ -48,7 +38,7 @@ struct Q_MAPBOXGL_EXPORT Feature {
     QVariant id;
 };
 
-struct Q_MAPBOXGL_EXPORT ShapeAnnotationGeometry {
+struct Q_MAPLIBREGL_EXPORT ShapeAnnotationGeometry {
     enum Type {
         LineStringType = 1,
         PolygonType,
@@ -64,12 +54,12 @@ struct Q_MAPBOXGL_EXPORT ShapeAnnotationGeometry {
     CoordinatesCollections geometry;
 };
 
-struct Q_MAPBOXGL_EXPORT SymbolAnnotation {
+struct Q_MAPLIBREGL_EXPORT SymbolAnnotation {
     Coordinate geometry;
     QString icon;
 };
 
-struct Q_MAPBOXGL_EXPORT LineAnnotation {
+struct Q_MAPLIBREGL_EXPORT LineAnnotation {
     /*! Class constructor. */
     LineAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(), float opacity_ = 1.0f,
             float width_ = 1.0f, const QColor& color_ = Qt::black)
@@ -81,7 +71,7 @@ struct Q_MAPBOXGL_EXPORT LineAnnotation {
     QColor color;
 };
 
-struct Q_MAPBOXGL_EXPORT FillAnnotation {
+struct Q_MAPLIBREGL_EXPORT FillAnnotation {
     /*! Class constructor. */
     FillAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(), float opacity_ = 1.0f,
             const QColor& color_ = Qt::black, const QVariant& outlineColor_ = QVariant())
@@ -97,16 +87,16 @@ typedef QVariant Annotation;
 typedef quint32 AnnotationID;
 typedef QVector<AnnotationID> AnnotationIDs;
 
-enum NetworkMode {
-    Online, // Default
-    Offline,
+struct Q_MAPLIBREGL_EXPORT CameraOptions {
+    QVariant center;  // Coordinate
+    QVariant anchor;  // QPointF
+    QVariant zoom;    // double
+    QVariant bearing; // double
+    QVariant pitch;   // double
 };
 
-Q_MAPBOXGL_EXPORT NetworkMode networkMode();
-Q_MAPBOXGL_EXPORT void setNetworkMode(NetworkMode);
-
 // This struct is a 1:1 copy of mbgl::CustomLayerRenderParameters.
-struct Q_MAPBOXGL_EXPORT CustomLayerRenderParameters {
+struct Q_MAPLIBREGL_EXPORT CustomLayerRenderParameters {
     double width;
     double height;
     double latitude;
@@ -117,7 +107,7 @@ struct Q_MAPBOXGL_EXPORT CustomLayerRenderParameters {
     double fieldOfView;
 };
 
-class Q_MAPBOXGL_EXPORT CustomLayerHostInterface {
+class Q_MAPLIBREGL_EXPORT CustomLayerHostInterface {
 public:
     virtual ~CustomLayerHostInterface() = default;
     virtual void initialize() = 0;
@@ -125,21 +115,17 @@ public:
     virtual void deinitialize() = 0;
 };
 
-Q_MAPBOXGL_EXPORT double metersPerPixelAtLatitude(double latitude, double zoom);
-Q_MAPBOXGL_EXPORT ProjectedMeters projectedMetersForCoordinate(const Coordinate &);
-Q_MAPBOXGL_EXPORT Coordinate coordinateForProjectedMeters(const ProjectedMeters &);
+} // namespace QMapLibreGL
 
-} // namespace QMapbox
+Q_DECLARE_METATYPE(QMapLibreGL::Coordinate);
+Q_DECLARE_METATYPE(QMapLibreGL::Coordinates);
+Q_DECLARE_METATYPE(QMapLibreGL::CoordinatesCollection);
+Q_DECLARE_METATYPE(QMapLibreGL::CoordinatesCollections);
+Q_DECLARE_METATYPE(QMapLibreGL::Feature);
 
-Q_DECLARE_METATYPE(QMapbox::Coordinate);
-Q_DECLARE_METATYPE(QMapbox::Coordinates);
-Q_DECLARE_METATYPE(QMapbox::CoordinatesCollection);
-Q_DECLARE_METATYPE(QMapbox::CoordinatesCollections);
-Q_DECLARE_METATYPE(QMapbox::Feature);
+Q_DECLARE_METATYPE(QMapLibreGL::SymbolAnnotation);
+Q_DECLARE_METATYPE(QMapLibreGL::ShapeAnnotationGeometry);
+Q_DECLARE_METATYPE(QMapLibreGL::LineAnnotation);
+Q_DECLARE_METATYPE(QMapLibreGL::FillAnnotation);
 
-Q_DECLARE_METATYPE(QMapbox::SymbolAnnotation);
-Q_DECLARE_METATYPE(QMapbox::ShapeAnnotationGeometry);
-Q_DECLARE_METATYPE(QMapbox::LineAnnotation);
-Q_DECLARE_METATYPE(QMapbox::FillAnnotation);
-
-#endif // QMAPBOX_H
+#endif // QMAPLIBREGL_TYPES_H

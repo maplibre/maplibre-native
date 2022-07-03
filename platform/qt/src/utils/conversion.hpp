@@ -1,13 +1,15 @@
 #pragma once
 
+#include <QMapLibreGL/Types>
+
+#include "geojson.hpp"
+
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/optional.hpp>
 
-#include <QVariant>
 #include <QColor>
-#include <QMapbox>
-#include "qt_geojson.hpp"
+#include <QVariant>
 
 namespace mbgl {
 namespace style {
@@ -46,9 +48,9 @@ public:
         return value.canConvert(QVariant::Map)
             || value.type() == QVariant::ByteArray
 #endif
-            || QString(value.typeName()) == QStringLiteral("QMapbox::Feature")
-            || value.userType() == qMetaTypeId<QVector<QMapbox::Feature>>()
-            || value.userType() == qMetaTypeId<QList<QMapbox::Feature>>();
+            || QString(value.typeName()) == QStringLiteral("QMapLibreGL::Feature")
+            || value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()
+            || value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>();
     }
 
     static optional<QVariant> objectMember(const QVariant& value, const char* key) {
@@ -168,12 +170,12 @@ public:
     }
 
     static optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
-        if (value.typeName() == QStringLiteral("QMapbox::Feature")) {
-            return GeoJSON { asMapboxGLFeature(value.value<QMapbox::Feature>()) };
-        } else if (value.userType() == qMetaTypeId<QVector<QMapbox::Feature>>()) {
-            return featureCollectionToGeoJSON(value.value<QVector<QMapbox::Feature>>());
-        } else if (value.userType() == qMetaTypeId<QList<QMapbox::Feature>>()) {
-            return featureCollectionToGeoJSON(value.value<QList<QMapbox::Feature>>());
+        if (value.typeName() == QStringLiteral("QMapLibreGL::Feature")) {
+            return GeoJSON { QMapLibreGL::GeoJSON::asFeature(value.value<QMapLibreGL::Feature>()) };
+        } else if (value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()) {
+            return featureCollectionToGeoJSON(value.value<QVector<QMapLibreGL::Feature>>());
+        } else if (value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()) {
+            return featureCollectionToGeoJSON(value.value<QList<QMapLibreGL::Feature>>());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         } else if (value.typeId() != QMetaType::QByteArray) {
 #else
@@ -193,7 +195,7 @@ private:
         mapbox::feature::feature_collection<double> collection;
         collection.reserve(static_cast<std::size_t>(features.size()));
         for (const auto &feature : features) {
-            collection.push_back(asMapboxGLFeature(feature));
+            collection.push_back(QMapLibreGL::GeoJSON::asFeature(feature));
         }
         return GeoJSON { std::move(collection) };
     }

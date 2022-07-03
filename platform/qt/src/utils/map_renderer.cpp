@@ -1,10 +1,11 @@
-#include "qmapboxgl_map_renderer.hpp"
-#include "qmapboxgl_scheduler.hpp"
+#include "map_renderer.hpp"
+#include "scheduler.hpp"
 
 #include <mbgl/gfx/backend_scope.hpp>
 
 #include <QThreadStorage>
-#include <QtGlobal>
+
+namespace {
 
 static bool needsToForceScheduler() {
     static QThreadStorage<bool> force;
@@ -17,16 +18,21 @@ static bool needsToForceScheduler() {
 };
 
 static auto *getScheduler() {
-    static QThreadStorage<std::shared_ptr<QMapboxGLScheduler>> scheduler;
+    static QThreadStorage<std::shared_ptr<QMapLibreGL::Scheduler>> scheduler;
 
     if (!scheduler.hasLocalData()) {
-        scheduler.setLocalData(std::make_shared<QMapboxGLScheduler>());
+        scheduler.setLocalData(std::make_shared<QMapLibreGL::Scheduler>());
     }
 
     return scheduler.localData().get();
 };
 
-QMapboxGLMapRenderer::QMapboxGLMapRenderer(qreal pixelRatio, QMapboxGLSettings::GLContextMode mode, const QString &localFontFamily)
+} // namespace
+
+
+namespace QMapLibreGL {
+
+MapRenderer::MapRenderer(qreal pixelRatio, Settings::GLContextMode mode, const QString &localFontFamily)
     : m_backend(static_cast<mbgl::gfx::ContextMode>(mode)),
       m_renderer(std::make_unique<mbgl::Renderer>(m_backend, pixelRatio,
                  localFontFamily.isEmpty() ? mbgl::nullopt : mbgl::optional<std::string> { localFontFamily.toStdString() }))
@@ -43,29 +49,29 @@ QMapboxGLMapRenderer::QMapboxGLMapRenderer(qreal pixelRatio, QMapboxGLSettings::
             mbgl::Scheduler::SetCurrent(scheduler);
         }
 
-        connect(scheduler, &QMapboxGLScheduler::needsProcessing, this, &QMapboxGLMapRenderer::needsRendering);
+        connect(scheduler, &Scheduler::needsProcessing, this, &MapRenderer::needsRendering);
     }
 }
 
-QMapboxGLMapRenderer::~QMapboxGLMapRenderer()
+MapRenderer::~MapRenderer()
 {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void QMapboxGLMapRenderer::updateParameters(std::shared_ptr<mbgl::UpdateParameters> newParameters)
+void MapRenderer::updateParameters(std::shared_ptr<mbgl::UpdateParameters> newParameters)
 {
     std::lock_guard<std::mutex> lock(m_updateMutex);
     m_updateParameters = std::move(newParameters);
 }
 
-void QMapboxGLMapRenderer::updateFramebuffer(quint32 fbo, const mbgl::Size &size)
+void MapRenderer::updateFramebuffer(quint32 fbo, const mbgl::Size &size)
 {
     MBGL_VERIFY_THREAD(tid);
 
     m_backend.updateFramebuffer(fbo, size);
 }
 
-void QMapboxGLMapRenderer::render()
+void MapRenderer::render()
 {
     MBGL_VERIFY_THREAD(tid);
 
@@ -91,7 +97,9 @@ void QMapboxGLMapRenderer::render()
     }
 }
 
-void QMapboxGLMapRenderer::setObserver(std::shared_ptr<mbgl::RendererObserver> observer)
+void MapRenderer::setObserver(std::shared_ptr<mbgl::RendererObserver> observer)
 {
     m_renderer->setObserver(observer.get());
 }
+
+} // namespace QMapLibreGL

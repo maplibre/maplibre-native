@@ -1,13 +1,15 @@
 #pragma once
 
-#include "qmapboxgl.hpp"
-#include "qmapboxgl_renderer_backend.hpp"
+#include <QMapLibreGL/Settings>
+
+#include "renderer_backend.hpp"
 
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/util/util.hpp>
 
 #include <QtGlobal>
+#include <QObject>
 
 #include <memory>
 #include <mutex>
@@ -17,15 +19,17 @@ class Renderer;
 class UpdateParameters;
 } // namespace mbgl
 
-class QMapboxGLRendererBackend;
+namespace QMapLibreGL {
 
-class QMapboxGLMapRenderer : public QObject
+class RendererBackend;
+
+class MapRenderer : public QObject
 {
     Q_OBJECT
 
 public:
-    QMapboxGLMapRenderer(qreal pixelRatio, QMapboxGLSettings::GLContextMode, const QString &localFontFamily);
-    virtual ~QMapboxGLMapRenderer();
+    MapRenderer(qreal pixelRatio, Settings::GLContextMode, const QString &localFontFamily);
+    virtual ~MapRenderer();
 
     void render();
     void updateFramebuffer(quint32 fbo, const mbgl::Size &size);
@@ -40,13 +44,15 @@ signals:
 private:
     MBGL_STORE_THREAD(tid)
 
-    Q_DISABLE_COPY(QMapboxGLMapRenderer)
+    Q_DISABLE_COPY(MapRenderer)
 
     std::mutex m_updateMutex;
     std::shared_ptr<mbgl::UpdateParameters> m_updateParameters;
 
-    QMapboxGLRendererBackend m_backend;
-    std::unique_ptr<mbgl::Renderer> m_renderer;
+    RendererBackend m_backend;
+    std::unique_ptr<mbgl::Renderer> m_renderer{};
 
-    bool m_forceScheduler;
+    bool m_forceScheduler{};
 };
+
+} // namespace QMapLibreGL
