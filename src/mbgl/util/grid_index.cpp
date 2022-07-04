@@ -263,12 +263,12 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool (const 
 
 template <class T>
 std::size_t GridIndex<T>::convertToXCellCoord(const float x) const {
-    return util::max(size_t(0), util::min(xCellCount - 1, static_cast<size_t>(std::floor(x * xScale))));
+    return util::max(0.0, util::min(xCellCount - 1.0, std::floor(x * xScale)));
 }
 
 template <class T>
 std::size_t GridIndex<T>::convertToYCellCoord(const float y) const {
-    return util::max(size_t(0), util::min(yCellCount - 1, static_cast<size_t>(std::floor(y * yScale))));
+    return util::max(0.0, util::min(yCellCount - 1.0, std::floor(y * yScale)));
 }
 
 template <class T>
