@@ -15,9 +15,9 @@ struct ShaderSource;
 template <>
 struct ShaderSource<CollisionCircleProgram> {
     static constexpr const char* name = "collision_circle";
-    static constexpr const uint8_t hash[8] = {0x99, 0x2e, 0xad, 0x8c, 0xd3, 0x88, 0xae, 0x82};
+    static constexpr const uint8_t hash[8] = {0x8c, 0x22, 0x17, 0x46, 0x5b, 0xed, 0x28, 0x64};
     static constexpr const auto vertexOffset = 10902;
-    static constexpr const auto fragmentOffset = 11818;
+    static constexpr const auto fragmentOffset = 12272;
 };
 
 constexpr const char* ShaderSource<CollisionCircleProgram>::name;
@@ -40,79 +40,85 @@ Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programPara
 // Uncompressed source of collision_circle.vertex.glsl:
 /*
 attribute vec2 a_pos;
-attribute vec2 a_anchor_pos;
-attribute vec2 a_extrude;
-attribute vec2 a_placed;
+attribute float a_radius;
+attribute vec2 a_flags;
 
 uniform mat4 u_matrix;
-uniform vec2 u_extrude_scale;
+uniform mat4 u_inv_matrix;
+uniform vec2 u_viewport_size;
 uniform float u_camera_to_center_distance;
 
-varying float v_placed;
-varying float v_notUsed;
 varying float v_radius;
-
 varying vec2 v_extrude;
-varying vec2 v_extrude_scale;
+varying float v_perspective_ratio;
+varying float v_collision;
+
+vec3 toTilePosition(vec2 screenPos) {
+    // Shoot a ray towards the ground to reconstruct the depth-value
+    vec4 rayStart = u_inv_matrix * vec4(screenPos, -1.0, 1.0);
+    vec4 rayEnd   = u_inv_matrix * vec4(screenPos,  1.0, 1.0);
+
+    rayStart.xyz /= rayStart.w;
+    rayEnd.xyz   /= rayEnd.w;
+
+    highp float t = (0.0 - rayStart.z) / (rayEnd.z - rayStart.z);
+    return mix(rayStart.xyz, rayEnd.xyz, t);
+}
 
 void main() {
-    vec4 projectedPoint = u_matrix * vec4(a_anchor_pos, 0, 1);
-    highp float camera_to_anchor_distance = projectedPoint.w;
+    vec2 quadCenterPos = a_pos;
+    float radius = a_radius;
+    float collision = a_flags.x;
+    float vertexIdx = a_flags.y;
+
+    vec2 quadVertexOffset = vec2(
+        mix(-1.0, 1.0, float(vertexIdx >= 2.0)),
+        mix(-1.0, 1.0, float(vertexIdx >= 1.0 && vertexIdx <= 2.0)));
+
+    vec2 quadVertexExtent = quadVertexOffset * radius;
+
+    // Screen position of the quad might have been computed with different camera parameters.
+    // Transform the point to a proper position on the current viewport
+    vec3 tilePos = toTilePosition(quadCenterPos);
+    vec4 clipPos = u_matrix * vec4(tilePos, 1.0);
+
+    highp float camera_to_anchor_distance = clipPos.w;
     highp float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (u_camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field circles in pitched/overzoomed tiles
         4.0);
 
-    gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);
+    // Apply small padding for the anti-aliasing effect to fit the quad
+    // Note that v_radius and v_extrude are in screen coordinates already
+    float padding_factor = 1.2;
+    v_radius = radius;
+    v_extrude = quadVertexExtent * padding_factor;
+    v_perspective_ratio = collision_perspective_ratio;
+    v_collision = collision;
 
-    highp float padding_factor = 1.2; // Pad the vertices slightly to make room for anti-alias blur
-    gl_Position.xy += a_extrude * u_extrude_scale * padding_factor * gl_Position.w * collision_perspective_ratio;
-
-    v_placed = a_placed.x;
-    v_notUsed = a_placed.y;
-    v_radius = abs(a_extrude.y); // We don't pitch the circles, so both units of the extrusion vector are equal in magnitude to the radius
-
-    v_extrude = a_extrude * padding_factor;
-    v_extrude_scale = u_extrude_scale * u_camera_to_center_distance * collision_perspective_ratio;
+    gl_Position = vec4(clipPos.xyz / clipPos.w, 1.0) + vec4(quadVertexExtent * padding_factor / u_viewport_size * 2.0, 0.0, 0.0);
 }
 
 */
 
 // Uncompressed source of collision_circle.fragment.glsl:
 /*
-uniform float u_overscale_factor;
-
-varying float v_placed;
-varying float v_notUsed;
 varying float v_radius;
 varying vec2 v_extrude;
-varying vec2 v_extrude_scale;
+varying float v_perspective_ratio;
+varying float v_collision;
 
 void main() {
-    float alpha = 0.5;
+    float alpha = 0.5 * min(v_perspective_ratio, 1.0);
+    float stroke_radius = 0.9 * max(v_perspective_ratio, 1.0);
 
-    // Red = collision, hide label
-    vec4 color = vec4(1.0, 0.0, 0.0, 1.0) * alpha;
+    float distance_to_center = length(v_extrude);
+    float distance_to_edge = abs(distance_to_center - v_radius);
+    float opacity_t = smoothstep(-stroke_radius, 0.0, -distance_to_edge);
 
-    // Blue = no collision, label is showing
-    if (v_placed > 0.5) {
-        color = vec4(0.0, 0.0, 1.0, 0.5) * alpha;
-    }
+    vec4 color = mix(vec4(0.0, 0.0, 1.0, 0.5), vec4(1.0, 0.0, 0.0, 1.0), v_collision);
 
-    if (v_notUsed > 0.5) {
-        // This box not used, fade it out
-        color *= .2;
-    }
-
-    float extrude_scale_length = length(v_extrude_scale);
-    float extrude_length = length(v_extrude) * extrude_scale_length;
-    float stroke_width = 15.0 * extrude_scale_length / u_overscale_factor;
-    float radius = v_radius * extrude_scale_length;
-
-    float distance_to_edge = abs(extrude_length - radius);
-    float opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
-
-    gl_FragColor = opacity_t * color;
+    gl_FragColor = color * alpha * opacity_t;
 }
 
 */
