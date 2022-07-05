@@ -122,22 +122,22 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     const float tileY2 = tileEdges[3];
 
     // Check left border
-    int minSectionLength = std::min(tileX1 - x1, x2 - tileX1);
+    int minSectionLength = static_cast<int>(std::min(tileX1 - x1, x2 - tileX1));
     if (minSectionLength <= 0) { // Check right border
-        minSectionLength = std::min(tileX2 - x1, x2 - tileX2);
+        minSectionLength = static_cast<int>(std::min(tileX2 - x1, x2 - tileX2));
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::VerticalBorders;
-        result.minSectionLength = static_cast<int>(minSectionLength);
+        result.minSectionLength = minSectionLength;
     }
     // Check top border
-    minSectionLength = std::min(tileY1 - y1, y2 - tileY1);
+    minSectionLength = static_cast<int>(std::min(tileY1 - y1, y2 - tileY1));
     if (minSectionLength <= 0) { // Check bottom border
-        minSectionLength = std::min(tileY2 - y1, y2 - tileY2);
+        minSectionLength = static_cast<int>(std::min(tileY2 - y1, y2 - tileY2));
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::HorizontalBorders;
-        result.minSectionLength = std::min(result.minSectionLength, static_cast<int>(minSectionLength));
+        result.minSectionLength = static_cast<int>(std::min(result.minSectionLength, minSectionLength));
     }
     return result;
 }
