@@ -75,7 +75,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: source
           submodules: recursive
           fetch-depth: 0
 
