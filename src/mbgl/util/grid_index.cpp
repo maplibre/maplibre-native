@@ -268,7 +268,7 @@ std::size_t GridIndex<T>::convertToXCellCoord(const float x) const {
 
 template <class T>
 std::size_t GridIndex<T>::convertToYCellCoord(const float y) const {
-    return util::max(0.0, util::min(yCellCount - 1.0, std::floor(y * yScale)));
+    return static_cast<size_t>(util::max(0.0, util::min(yCellCount - 1.0, std::floor(y * yScale))));
 }
 
 template <class T>
