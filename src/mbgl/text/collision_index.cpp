@@ -137,7 +137,7 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::HorizontalBorders;
-        result.minSectionLength = static_cast<int>(std::min(result.minSectionLength, minSectionLength));
+        result.minSectionLength = std::min(result.minSectionLength, minSectionLength);
     }
     return result;
 }
