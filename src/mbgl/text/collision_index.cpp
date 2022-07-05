@@ -415,8 +415,8 @@ std::pair<Point<float>,float> CollisionIndex::projectAndGetPerspectiveRatio(cons
     auto size = transformState.getSize();
     return std::make_pair(
         Point<float>(
-            (((p[0] / p[3] + 1) / 2) * size.width) + viewportPadding,
-            (((-p[1] / p[3] + 1) / 2) * size.height) + viewportPadding
+            static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width + viewportPadding),
+            static_cast<float>(((-p[1] / p[3] + 1) / 2) * size.height + viewportPadding)
         ),
         // See perspective ratio comment in symbol_sdf.vertex
         // We're doing collision detection in viewport space so we need
