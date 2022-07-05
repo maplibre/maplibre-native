@@ -11,7 +11,7 @@ import java.net.URL;
 /**
  * A raster DEM source.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#sources-raster-dem">The style specification</a>
+ * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#sources-raster-dem">The style specification</a>
  */
 @UiThread
 public class RasterDemSource extends Source {
