@@ -43,3 +43,8 @@ target_include_directories(
 )
 
 set_property(TARGET mbgl-vendor-icu PROPERTY FOLDER Core)
+
+export(TARGETS
+    mbgl-vendor-icu
+    APPEND FILE MapboxCoreTargets.cmake
+)

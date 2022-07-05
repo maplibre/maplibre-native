@@ -4,10 +4,10 @@ include($QT_INSTALL_DOCS/global/compat.qdocconf)
 include($QT_INSTALL_DOCS/global/fileextensions.qdocconf)
 include($QT_INSTALL_DOCS/global/qt-html-templates-online.qdocconf)
 
-Cpp.ignoretokens = Q_MAPBOXGL_EXPORT
+Cpp.ignoretokens = Q_MAPLIBRE_EXPORT
 
-project     = QMapboxGL
-description = Mapbox Maps SDK for Qt
+project     = QMapLibreGL
+description = MapLibre GL Maps SDK for Qt
 language    = Cpp
 
 outputdir   = docs

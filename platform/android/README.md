@@ -1,11 +1,6 @@
-# [Mapbox Maps SDK for Android](https://www.mapbox.com/android-sdk/)
+# MapLibre Maps SDK for Android
 
-[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native-android/tree/master.svg?style=shield)](https://circleci.com/gh/mapbox/mapbox-gl-native-android/tree/master)
-
-
-[![](https://www.mapbox.com/android-docs/assets/overview-map-sdk-322-9abe118316efb5910b6101e222a2e57c.png)](https://docs.mapbox.com/android/maps/overview/)
-
-The Mapbox Maps SDK for Android is a library based on [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native/) for embedding interactive map views with scalable, customizable vector maps onto Android devices.
+The MapLibre Maps SDK for Android is a library based on MapLibre GL Native for embedding interactive map views with scalable, customizable vector maps onto Android devices.
 
 ## Getting Started
 
@@ -58,10 +53,26 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
 
 #### macOS
 
-Execute the following command in this repository's root folder to generate the required build files and open the project with Android Studio:
+* Environment:  Android Studio + NDK
+  * `JAVA_HOME=/Applications/Android Studio.app/Contents/jre/Contents/Home`
+  * `ANDROID_SDK_ROOT=~/Library/Android/sdk`
+  * See NDK version discussion on issue: [maplibre/maplibre-gl-native/#xxx](https://github.com/maplibre/maplibre-gl-native/issues/xxx)  
 
 ```
+cd platform/android
+
+# generate the required build files and open the project with Android Studio
 make aproj
+
+# Build package
+BUILDTYPE=Debug make apackage
+#BUILDTYPE=Release make apackage
+
+# Build release Test App
+make android
+
+# Generate javadoc
+make android-javadoc
 ```
 
 #### linux

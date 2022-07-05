@@ -6,11 +6,31 @@ on:
     tags-ignore:
       - '**'
     paths-ignore:
-      - "platform/ios/**"
-      - "platform/qt/**"
-      - ".github/**"
-      - "README.md"
       - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/node/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos-ci.yml"
+      - ".github/workflows/macos-release.yml"
+      - ".github/workflows/node-ci.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
 
 jobs:
   build:
@@ -50,7 +70,6 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
 
       - name: Prepare ccache
         run: ccache --clear
