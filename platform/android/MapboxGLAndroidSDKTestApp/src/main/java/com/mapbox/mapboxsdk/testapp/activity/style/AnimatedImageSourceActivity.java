@@ -26,7 +26,7 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
  * Test activity showing how to use a series of images to create an animation
  * with an ImageSource
  * <p>
- * GL-native equivalent of https://www.mapbox.com/mapbox-gl-js/example/animate-images/
+ * GL-native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/animate-images/
  * </p>
  */
 public class AnimatedImageSourceActivity extends AppCompatActivity implements OnMapReadyCallback {

@@ -1426,7 +1426,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         { 37.936, -71.516 },
         { 46.437, -71.516 } };
 
-    MGLImageSource *imageSource = [[MGLImageSource alloc] initWithIdentifier:@"style-image-source-id" coordinateQuad:coordinateQuad URL:[NSURL URLWithString:@"https://www.mapbox.com/mapbox-gl-js/assets/radar0.gif"]];
+    MGLImageSource *imageSource = [[MGLImageSource alloc] initWithIdentifier:@"style-image-source-id" coordinateQuad:coordinateQuad URL:[NSURL URLWithString:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar0.gif"]];
 
     [self.mapView.style addSource:imageSource];
     
@@ -1444,7 +1444,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)updateAnimatedImageSource:(NSTimer *)timer {
     static int radarSuffix = 0;
     MGLImageSource *imageSource = (MGLImageSource *)timer.userInfo;
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.mapbox.com/mapbox-gl-js/assets/radar%d.gif", radarSuffix++]];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar%d.gif", radarSuffix++]];
     [imageSource setValue:url forKey:@"URL"];
     if (radarSuffix > 3) {
         radarSuffix = 0;

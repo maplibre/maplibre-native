@@ -42,7 +42,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.heatmapWeight;
  */
 public class HeatmapLayerActivity extends AppCompatActivity {
 
-  private static final String EARTHQUAKE_SOURCE_URL = "https://www.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson";
+  private static final String EARTHQUAKE_SOURCE_URL = "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson";
   private static final String EARTHQUAKE_SOURCE_ID = "earthquakes";
   private static final String HEATMAP_LAYER_ID = "earthquakes-heat";
   private static final String HEATMAP_LAYER_SOURCE = "earthquakes";

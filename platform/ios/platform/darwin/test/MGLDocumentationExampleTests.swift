@@ -231,7 +231,7 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
           bottomLeft: CLLocationCoordinate2D(latitude: 37.936, longitude: -80.425),
           bottomRight: CLLocationCoordinate2D(latitude: 37.936, longitude: -71.516),
           topRight: CLLocationCoordinate2D(latitude: 46.437, longitude: -71.516))
-        let source = MGLImageSource(identifier: "radar", coordinateQuad: coordinates, url: URL(string: "https://www.mapbox.com/mapbox-gl-js/assets/radar.gif")!)
+        let source = MGLImageSource(identifier: "radar", coordinateQuad: coordinates, url: URL(string: "https://maplibre.org/maplibre-gl-js-docs/assets/radar.gif")!)
         mapView.style?.addSource(source)
         //#-end-example-code
 

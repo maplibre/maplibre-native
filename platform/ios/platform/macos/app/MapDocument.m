@@ -1032,7 +1032,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
         [self.mapView.style addLayer:ohioLayer];
     }
 
-    NSURL *imageURL = [NSURL URLWithString:@"https://www.mapbox.com/mapbox-gl-js/assets/radar.gif"];
+    NSURL *imageURL = [NSURL URLWithString:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar.gif"];
     MGLCoordinateQuad quad = { {46.437, -80.425},
       {37.936, -80.425},
       {37.936, -71.516},
