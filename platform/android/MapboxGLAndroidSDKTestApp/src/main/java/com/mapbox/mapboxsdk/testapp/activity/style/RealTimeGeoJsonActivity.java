@@ -24,7 +24,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 /**
  * Test activity showcasing using realtime GeoJSON to move a symbol on your map
  * <p>
- * GL-native equivalent of https://www.mapbox.com/mapbox-gl-js/example/live-geojson/
+ * GL-native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/live-geojson/
  * </p>
  */
 public class RealTimeGeoJsonActivity extends AppCompatActivity implements OnMapReadyCallback {
