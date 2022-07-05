@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Represents a string broken into sections annotated with separate formatting options.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#types-formatted">Style specification</a>
+ * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#types-formatted">Style specification</a>
  */
 @Keep
 public class Formatted {

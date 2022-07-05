@@ -159,19 +159,19 @@ typedef NS_ENUM(NSUInteger, MGLResourceKind) {
     MGLResourceKindUnknown,
     /** Style sheet JSON file */
     MGLResourceKindStyle,
-    /** TileJSON file as specified in https://www.mapbox.com/mapbox-gl-js/style-spec/#root-sources */
+    /** TileJSON file as specified in https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sources */
     MGLResourceKindSource,
     /** A vector or raster tile as described in the style sheet at
-        https://www.mapbox.com/mapbox-gl-js/style-spec/#sources */
+        https://maplibre.org/maplibre-gl-js-docs/style-spec/#sources */
     MGLResourceKindTile,
     /** Signed distance field glyphs for text rendering. These are the URLs specified in the style
-        in https://www.mapbox.com/mapbox-gl-js/style-spec/#root-glyphs */
+        in https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-glyphs */
     MGLResourceKindGlyphs,
     /** Image part of a sprite sheet. It is constructed of the prefix in
-        https://www.mapbox.com/mapbox-gl-js/style-spec/#root-sprite and a PNG file extension. */
+        https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sprite and a PNG file extension. */
     MGLResourceKindSpriteImage,
     /** JSON part of a sprite sheet. It is constructed of the prefix in
-        https://www.mapbox.com/mapbox-gl-js/style-spec/#root-sprite and a JSON file extension. */
+        https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sprite and a JSON file extension. */
     MGLResourceKindSpriteJSON,
     /** Image data for a georeferenced image source. **/
     MGLResourceKindImage,
