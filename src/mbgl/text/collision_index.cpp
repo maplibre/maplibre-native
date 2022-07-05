@@ -122,22 +122,22 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     const float tileY2 = tileEdges[3];
 
     // Check left border
-    float minSectionLength = std::min(tileX1 - x1, x2 - tileX1);
+    int minSectionLength = static_cast<int>(std::min(tileX1 - x1, x2 - tileX1));
     if (minSectionLength <= 0) { // Check right border
-        minSectionLength = std::min(tileX2 - x1, x2 - tileX2);
+        minSectionLength = static_cast<int>(std::min(tileX2 - x1, x2 - tileX2));
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::VerticalBorders;
-        result.minSectionLength = static_cast<int>(minSectionLength);
+        result.minSectionLength = minSectionLength;
     }
     // Check top border
-    minSectionLength = std::min(tileY1 - y1, y2 - tileY1);
+    minSectionLength = static_cast<int>(std::min(tileY1 - y1, y2 - tileY1));
     if (minSectionLength <= 0) { // Check bottom border
-        minSectionLength = std::min(tileY2 - y1, y2 - tileY2);
+        minSectionLength = static_cast<int>(std::min(tileY2 - y1, y2 - tileY2));
     }
     if (minSectionLength > 0) {
         result.flags |= IntersectStatus::HorizontalBorders;
-        result.minSectionLength = std::min(result.minSectionLength, static_cast<int>(minSectionLength));
+        result.minSectionLength = std::min(result.minSectionLength, minSectionLength);
     }
     return result;
 }
@@ -415,8 +415,8 @@ std::pair<Point<float>,float> CollisionIndex::projectAndGetPerspectiveRatio(cons
     auto size = transformState.getSize();
     return std::make_pair(
         Point<float>(
-            static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width) + viewportPadding,
-            static_cast<float>(((-p[1] / p[3] + 1) / 2) * size.height) + viewportPadding
+            static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width + viewportPadding),
+            static_cast<float>(((-p[1] / p[3] + 1) / 2) * size.height + viewportPadding)
         ),
         // See perspective ratio comment in symbol_sdf.vertex
         // We're doing collision detection in viewport space so we need
