@@ -1,4 +1,4 @@
-#include <QApplication>
+#include <QGuiApplication>
 
 #include <mbgl/test.hpp>
 #include <cstring>
@@ -15,7 +15,7 @@
 #define str(s) #s
 
 int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
 #ifdef WORK_DIRECTORY
 #ifdef _MSC_VER

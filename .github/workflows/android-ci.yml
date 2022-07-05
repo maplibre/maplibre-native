@@ -70,7 +70,6 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
 
       - name: Prepare ccache
         run: ccache --clear

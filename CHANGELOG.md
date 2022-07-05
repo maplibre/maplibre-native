@@ -1,8 +1,16 @@
 # Changelog
 
-## master
+## main
 
-- [core] `MaptilerFileSource` renamed to `MBTilesFileSource`.
+### ✨ New features
+
+- *...Add new stuff here...*
+
+### 🐞 Bug fixes
+
+- *...Add new stuff here...*
+
+- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` (#198)[https://github.com/maplibre/maplibre-gl-native/pull/198].
 
 ## maps-v1.6.0
 

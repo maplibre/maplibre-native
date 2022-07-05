@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt@QT_VERSION_MAJOR@
+                COMPONENTS Gui @REQUIRED_QT_VERSION@)
+find_dependency(Qt@QT_VERSION_MAJOR@
+                COMPONENTS Network @REQUIRED_QT_VERSION@)
+
+if(@MBGL_QT_STATIC@ AND NOT @MBGL_QT_INSIDE_PLUGIN@ AND NOT @MBGL_QT_WITH_INTERNAL_SQLITE@)
+  find_dependency(Qt@QT_VERSION_MAJOR@
+                  COMPONENTS Sql @REQUIRED_QT_VERSION@)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/QMapLibreGLTargets.cmake")
+@PACKAGE_INCLUDE_QCHTARGETS@
