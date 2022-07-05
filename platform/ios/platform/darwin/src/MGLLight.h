@@ -102,7 +102,7 @@ MGL_EXPORT
  attributes.
 
  This property corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-js/style-spec/#light-anchor"><code>anchor</code></a>
+ href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#light-anchor"><code>anchor</code></a>
  light property in the Mapbox Style Specification.
  */
 @property (nonatomic) NSExpression *anchor;
@@ -132,7 +132,7 @@ MGL_EXPORT
  feature attributes.
 
  This property corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-js/style-spec/#light-position"><code>position</code></a>
+ href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#light-position"><code>position</code></a>
  light property in the Mapbox Style Specification.
 
  #### Related examples
@@ -169,7 +169,7 @@ MGL_EXPORT
  feature attributes.
 
  This property corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-js/style-spec/#light-color"><code>color</code></a>
+ href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#light-color"><code>color</code></a>
  light property in the Mapbox Style Specification.
  */
 @property (nonatomic) NSExpression *color;
@@ -192,7 +192,7 @@ MGL_EXPORT
  feature attributes.
 
  This property corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-js/style-spec/#light-color"><code>color</code></a>
+ href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#light-color"><code>color</code></a>
  light property in the Mapbox Style Specification.
  */
 @property (nonatomic) NSExpression *color;
@@ -224,7 +224,7 @@ MGL_EXPORT
  feature attributes.
 
  This property corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-js/style-spec/#light-intensity"><code>intensity</code></a>
+ href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#light-intensity"><code>intensity</code></a>
  light property in the Mapbox Style Specification.
  */
 @property (nonatomic) NSExpression *intensity;
