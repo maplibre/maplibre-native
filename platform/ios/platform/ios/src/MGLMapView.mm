@@ -990,54 +990,12 @@ public:
     }
 }
 
-- (void)updateViewsWithCurrentUpdateParameters {
-    // Update UIKit elements, prior to rendering
-    [self updateUserLocationAnnotationView];
-    [self updateAnnotationViews];
-    [self updateCalloutView];
-}
-
-- (BOOL)renderSync
+- (void)renderSync
 {
-    BOOL hasPendingBlocks = (self.pendingCompletionBlocks.count > 0);
-
-    if (!self.needsDisplayRefresh && !hasPendingBlocks) {
-        return NO;
-    }
-
-    BOOL needsRender = self.needsDisplayRefresh;
-
-    self.needsDisplayRefresh = NO;
-
-    if (!self.dormant && needsRender)
+    if (!self.dormant && _rendererFrontend && !CGRectIsEmpty(self.frame))
     {
-        // It's important to call this *before* `_rendererFrontend->render()`, as
-        // that function saves the current `updateParameters` before rendering. If this
-        // occurs after then the views will be a frame behind.
-        //
-        // The update parameters will have been updated earlier, for example by
-        // calls to easeTo, flyTo, called from gesture handlers.
-        
-        [self updateViewsWithCurrentUpdateParameters];
-      
-        if (_rendererFrontend) {
-            
-            _rendererFrontend->render();
-
-        }
-        
+        _rendererFrontend->render();
     }
-
-    if (hasPendingBlocks) {
-        // Call any pending completion blocks. This is primarily to ensure
-        // that annotations are in the expected position after core rendering
-        // and map update.
-        //
-        // TODO: Consider using this same mechanism for delegate callbacks.
-        [self processPendingBlocks];
-    }
-
-    return YES;
 }
 
 // This gets called when the view dimension changes, e.g. because the device is being rotated.
@@ -1281,11 +1239,22 @@ public:
         return;
     }
     
-    if (self.needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
+    if (_needsDisplayRefresh || (self.pendingCompletionBlocks.count > 0))
     {
-        // UIView update logic has moved into `renderSync` above, which now gets
-        // triggered by a call to setNeedsDisplay.
-        // See MGLMapViewOpenGLImpl::display() for more details
+        _needsDisplayRefresh = NO;
+
+        // Update UIKit elements, prior to rendering
+        [self updateUserLocationAnnotationView];
+        [self updateAnnotationViews];
+        [self updateCalloutView];
+
+        // Call any pending completion blocks. This is primarily to ensure
+        // that annotations are in the expected position after core rendering
+        // and map update.
+        //
+        // TODO: Consider using this same mechanism for delegate callbacks.
+        [self processPendingBlocks];
+        
         _mbglView->display();
     }
 
@@ -1316,7 +1285,7 @@ public:
 {
     MGLAssertIsMainThread();
 
-    self.needsDisplayRefresh = YES;
+    _needsDisplayRefresh = YES;
 }
 
 - (void)willTerminate
@@ -1382,7 +1351,7 @@ public:
         _displayLink = [self.window.screen displayLinkWithTarget:self selector:@selector(updateFromDisplayLink:)];
         [self updateDisplayLinkPreferredFramesPerSecond];
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-        self.needsDisplayRefresh = YES;
+        _needsDisplayRefresh = YES;
         [self updateFromDisplayLink:_displayLink];
     }
     else if ( ! isVisible && _displayLink)
