@@ -131,6 +131,7 @@ void MGLMapViewOpenGLImpl::createView() {
     resource.glView.drawableDepthFormat = MGLDrawableDepthFormat16;
     resource.glView.opaque = mapView.opaque;
     resource.glView.layer.opaque = mapView.opaque;
+    resource.glView.layer.sublayers.firstObject.zPosition = -10;
     resource.glView.enableSetNeedsDisplay = NO;
 
     [mapView insertSubview:resource.glView atIndex:0];
