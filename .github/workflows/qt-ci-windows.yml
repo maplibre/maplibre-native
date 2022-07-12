@@ -30,6 +30,8 @@ on:
       - ".github/workflows/node-ci.yml"
       - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
+    branches:
+      - main
 
   pull_request:
     branches:
