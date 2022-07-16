@@ -1,5 +1,6 @@
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <algorithm>
@@ -30,7 +31,7 @@ FileSourceManager::FileSourceManager() : impl(std::make_unique<Impl>()) {}
 
 FileSourceManager::~FileSourceManager() = default;
 
-PassRefPtr<FileSource> FileSourceManager::getFileSource(FileSourceType type, const ResourceOptions& options) noexcept {
+PassRefPtr<FileSource> FileSourceManager::getFileSource(FileSourceType type, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) noexcept {
     std::lock_guard<std::recursive_mutex> lock(impl->mutex);
 
     // Remove released file sources.
@@ -38,10 +39,10 @@ PassRefPtr<FileSource> FileSourceManager::getFileSource(FileSourceType type, con
         it = it->fileSource.expired() ? impl->fileSources.erase(it) : ++it;
     }
 
-    const auto context = reinterpret_cast<uint64_t>(options.platformContext());
-    std::string baseURL = options.tileServerOptions().baseURL();
+    const auto context = reinterpret_cast<uint64_t>(resourceOptions.platformContext());
+    std::string baseURL = resourceOptions.tileServerOptions().baseURL();
     std::string id =
-        baseURL + '|' + options.apiKey() + '|' + options.cachePath() + '|' + util::toString(context);
+        baseURL + '|' + resourceOptions.apiKey() + '|' + resourceOptions.cachePath() + '|' + util::toString(context);
 
     std::shared_ptr<FileSource> fileSource;
     auto fileSourceIt = std::find_if(impl->fileSources.begin(), impl->fileSources.end(), [type, &id](const auto& info) {
@@ -55,7 +56,7 @@ PassRefPtr<FileSource> FileSourceManager::getFileSource(FileSourceType type, con
         auto it = impl->fileSourceFactories.find(type);
         if (it != impl->fileSourceFactories.end()) {
             assert(it->second);
-            fileSource = it->second(options);
+            fileSource = it->second(resourceOptions, clientOptions);
             impl->fileSources.emplace_back(type, std::move(id), fileSource);
         }
     }

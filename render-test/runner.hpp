@@ -57,7 +57,7 @@ private:
     void registerProxyFileSource();
 
     struct Impl {
-        Impl(const TestMetadata&, const mbgl::ResourceOptions&);
+        Impl(const TestMetadata&, const mbgl::ResourceOptions&, const mbgl::ClientOptions&);
         ~Impl();
 
         std::unique_ptr<TestRunnerMapObserver> observer;

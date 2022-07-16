@@ -4,7 +4,8 @@
 
 ### ✨ New features
 
-- *...Add new stuff here...*
+- [core] Add `ClientOptions` to configure client information.
+- [qt] Build user agent based on `ClientOptions`, if available.
 
 ### 🐞 Bug fixes
 

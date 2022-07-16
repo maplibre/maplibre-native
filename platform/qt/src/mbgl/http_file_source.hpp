@@ -3,6 +3,7 @@
 #include <mbgl/storage/http_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <QMap>
 #include <QNetworkAccessManager>
@@ -22,7 +23,7 @@ class HTTPFileSource::Impl : public QObject
     Q_OBJECT
 
 public:
-    Impl(const ResourceOptions& options);
+    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     virtual ~Impl() = default;
 
     void request(HTTPRequest *);
@@ -31,6 +32,9 @@ public:
     void setResourceOptions(ResourceOptions options);
     ResourceOptions getResourceOptions();
 
+    void setClientOptions(ClientOptions options);
+    ClientOptions getClientOptions();
+
 public slots:
     void onReplyFinished();
 
@@ -38,6 +42,7 @@ private:
     QMap<QUrl, QPair<QPointer<QNetworkReply>, QVector<HTTPRequest *>>> m_pending;
     QNetworkAccessManager *m_manager;
     ResourceOptions m_resourceOptions;
+    ClientOptions m_clientOptions;
 };
 
 } // namespace mbgl

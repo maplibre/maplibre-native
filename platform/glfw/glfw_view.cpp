@@ -121,11 +121,12 @@ void glfwError(int error, const char *description) {
     mbgl::Log::Error(mbgl::Event::OpenGL, "GLFW error (%i): %s", error, description);
 }
 
-GLFWView::GLFWView(bool fullscreen_, bool benchmark_, const mbgl::ResourceOptions &options)
+GLFWView::GLFWView(bool fullscreen_, bool benchmark_, const mbgl::ResourceOptions &resourceOptions, const mbgl::ClientOptions &clientOptions)
     : fullscreen(fullscreen_),
       benchmark(benchmark_),
       snapshotterObserver(std::make_unique<SnapshotObserver>()),
-      mapResourceOptions(options.clone()) {
+      mapResourceOptions(resourceOptions.clone()),
+      mapClientOptions(clientOptions.clone()) {
     glfwSetErrorCallback(glfwError);
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -726,7 +727,7 @@ void GLFWView::popAnnotation() {
 void GLFWView::makeSnapshot(bool withOverlay) {
     if (!snapshotter || snapshotter->getStyleURL() != map->getStyle().getURL()) {
         snapshotter = std::make_unique<mbgl::MapSnapshotter>(
-            map->getMapOptions().size(), map->getMapOptions().pixelRatio(), mapResourceOptions, *snapshotterObserver);
+            map->getMapOptions().size(), map->getMapOptions().pixelRatio(), mapResourceOptions, mapClientOptions, *snapshotterObserver);
         snapshotter->setStyleURL(map->getStyle().getURL());
     }
 

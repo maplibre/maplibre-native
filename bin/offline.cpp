@@ -5,6 +5,7 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 
 #include <args.hxx>
@@ -172,12 +173,13 @@ int main(int argc, char *argv[]) {
             FileSourceType::Database,
             ResourceOptions().withApiKey(apiKey)
               .withTileServerOptions(mapTilerConfiguration)
-              .withCachePath(output))));
+              .withCachePath(output),
+            ClientOptions())));
 
     std::unique_ptr<OfflineRegion> region;
 
     if (inputDb && mergePath) {
-        DatabaseFileSource inputSource(ResourceOptions().withCachePath(*inputDb));
+        DatabaseFileSource inputSource(ResourceOptions().withCachePath(*inputDb), ClientOptions());
 
         int retCode = 0;
         std::cout << "Start Merge" << std::endl;

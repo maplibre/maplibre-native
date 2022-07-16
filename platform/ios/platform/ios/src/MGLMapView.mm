@@ -15,6 +15,7 @@
 #include <mbgl/gl/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/constants.hpp>
@@ -499,14 +500,15 @@ public:
     resourceOptions.withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
                    .withTileServerOptions(*tileServerOptions);
-    
+    mbgl::ClientOptions clientOptions;
+
     auto apiKey = [[MGLSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
 
     // start paused if launch into the background
     if (background) {

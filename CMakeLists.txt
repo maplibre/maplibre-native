@@ -255,6 +255,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/char_array_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/chrono.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/client_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/color.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/compression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/constants.hpp
@@ -774,6 +775,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/chrono.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/client_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/color.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/convert.cpp

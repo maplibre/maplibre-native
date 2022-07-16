@@ -42,7 +42,8 @@ using namespace rapidjson;
 
 class MBTilesFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): resourceOptions (options.clone()) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {}
 
     std::vector<double> &split(const std::string &s, char delim, std::vector<double> &elems) {
         std::stringstream ss(s);
@@ -235,6 +236,17 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        clientOptions = options;
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return clientOptions.clone();
+    }
+
+
 private:
     std::map<std::string, mapbox::sqlite::Database> db_cache;
 
@@ -261,13 +273,15 @@ private:
     }
 
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 
-MBTilesFileSource::MBTilesFileSource(const ResourceOptions& options) :
+MBTilesFileSource::MBTilesFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) :
     thread(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MBTilesFileSource", options.clone())) {}
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MBTilesFileSource", resourceOptions.clone(), clientOptions.clone())) {}
 
 std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -316,6 +330,14 @@ void MBTilesFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions MBTilesFileSource::getResourceOptions() {
     return thread->actor().ask(&Impl::getResourceOptions).get();
+}
+
+void MBTilesFileSource::setClientOptions(ClientOptions options) {
+    thread->actor().invoke(&Impl::setClientOptions, options.clone());
+}
+
+ClientOptions MBTilesFileSource::getClientOptions() {
+    return thread->actor().ask(&Impl::getClientOptions).get();
 }
 
 }
