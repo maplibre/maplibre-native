@@ -1,6 +1,5 @@
 message(STATUS "Configuring GL-Native with Qt bindings")
 
-# VLC-Qt version number
 file(READ "${PROJECT_SOURCE_DIR}/platform/qt/VERSION" MBGL_QT_VERSION)
 string(REGEX REPLACE "\n" "" MBGL_QT_VERSION "${MBGL_QT_VERSION}") # get rid of the newline at the end
 set(MBGL_QT_VERSION_COMPATIBILITY 2.0.0)
@@ -145,6 +144,7 @@ target_link_libraries(
 )
 
 set(qmaplibregl_headers
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/QMapLibreGL
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/export.hpp
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/map.hpp
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Map
