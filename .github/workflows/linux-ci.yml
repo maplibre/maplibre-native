@@ -74,3 +74,8 @@ jobs:
       - name: Run render tests
         run: |
           xvfb-run -s "-ac -screen 0 1280x1024x24" ./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: render-query-test-results
+          path: metrics/linux-clang8-release-style.html
