@@ -16,6 +16,7 @@ static void TileCountBounds(benchmark::State& state) {
         auto count = util::tileCount(sanFrancisco, 10);
         length += count;
     }
+    (void)length;
 }
 
 static void TileCoverPitchedViewport(benchmark::State& state) {
@@ -29,6 +30,7 @@ static void TileCoverPitchedViewport(benchmark::State& state) {
         auto tiles = util::tileCover(transform.getState(), 8);
         length += tiles.size();
     }
+    (void)length;
 }
 
 static void TileCoverBounds(benchmark::State& state) {
@@ -37,6 +39,7 @@ static void TileCoverBounds(benchmark::State& state) {
         auto tiles = util::tileCover(sanFrancisco, 8);
         length += tiles.size();
     }
+    (void)length;
 }
 
 static const auto geomPolygon = Polygon<double>{
@@ -74,6 +77,7 @@ static void TileCoverPolygon(benchmark::State& state) {
         auto tiles = util::tileCover(geomPolygon, 8);
         length += tiles.size();
     }
+    (void)length;
 }
 
 static void TileCountPolygon(benchmark::State& state) {
@@ -83,6 +87,7 @@ static void TileCountPolygon(benchmark::State& state) {
         auto tiles = util::tileCount(geomPolygon, 16);
         length += tiles;
     }
+    (void)length;
 }
 
 BENCHMARK(TileCountBounds);

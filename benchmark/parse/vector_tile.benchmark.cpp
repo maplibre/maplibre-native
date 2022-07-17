@@ -22,6 +22,7 @@ static void Parse_VectorTile(benchmark::State& state) {
                 }
             }
         }
+        (void)length;
     }
 }
 

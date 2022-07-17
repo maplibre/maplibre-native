@@ -1,5 +1,5 @@
 
-# master
+# main
 * Add support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image). ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877))
 
 # 5.0.0
