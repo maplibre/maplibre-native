@@ -66,17 +66,8 @@ jobs:
             ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}
             ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}
 
-      - name: Clear ccache statistics
-        if: runner.os == 'macOS'
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats -v
-
       - name: Build
         run: |
-          pwd
-          ls
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
