@@ -38,3 +38,5 @@
 node_modules
 # Node binaries.
 /lib
+
+/bazel-*
