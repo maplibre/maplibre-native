@@ -1,20 +1,52 @@
-This document aims to outline at a high level the various parts that make up mapbox-gl-native and how they work together.
+This document aims to outline at a high level the various parts that make up MapLibre GL Native and how they work together.
 
 # Repository structure
 
-mapbox-gl-native uses a monolithic that houses both core C++ code and code that wraps the C++ core with SDKs for Android, iOS, macOS, Node.js, and Qt. A "monorepo" allows us to:
+MapLibre GL Native uses a monolithic repository that houses both core C++ code and code that wraps the C++ core with SDKs for Android, iOS, macOS, Node.js, and Qt. A "monorepo" allows us to:
 
  * Make changes to the core API and SDKs simultaneously, ensuring no platform falls behind.
  * Ensure that core changes do not inadvertently break SDK tests.
  * Centralize discussions about features and defects that affect multiple platforms.
 
+## Core cross-platform C++ code
+
 In the repository, core C++ code is contained in the `include` and `src` directories. The former includes headers that are considered to make up the "public" core C++ API, while the latter includes `.cpp` implementation files and headers that are private to the implementation. Within both directories, files are nested under an `mbgl` directory, which has various subdirectories based on areas of functionality. Both public and private headers therefore can (and should) always be included with the form `#include <mbgl/___/___.hpp>`.
 
-Code and build scripts belonging to platform SDKs are contained in the `platform` directory, which has subdirectories for each platform. The `platform/darwin` and `platform/default` directories contain code shared by multiple platform SDKs.
+## Platform specific code
+
+Code and build scripts belonging to platform SDKs are contained in the `platform` directory, which has subdirectories for each platform. 
+
+- `platform/darwin` and `platform/default` directories contain code shared by multiple platform SDKs.
+- `platform/ios` and `platform/macos` - the SDKs for Apple's operating systems, forked from https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216 (mapbox hosted both iOS and MacOS SDKs in the same project).
+- `platform/android` - Android SDK, forked from https://github.com/mapbox/mapbox-gl-native-android/commit/4c12fb2c.
+- `platform/glfw` - [GLFW](https://www.glfw.org) is library to support OpenGL development on the desktop. The code in this directory builds an executable application `mbgl-glfw` for demo/dev/local testing purposes.
+
+## Maplibre-gl-js
+
+`maplibre-gl-js` is added to this repostiory as a top-level submodule to provide
+
+- Test cases and test data, e.g. all rendering test manifests json files under `render-test` load test cases from `maplibre-gl-js/test/*`.
+- Shader written in GLSL ES.
+- Style specification
+
+## Other directories
+
+- `benchmark` contains the performance tests built using https://github.com/google/benchmark/. The code under this directory builds the `mbgl-benchmark-test` executable to execute the benchmark tests.
+  - The entry point of this executable is `platform/default/src/mbgl/benchmark/main.cpp -> benchmark/src/mbgl/benchmark/benchmark.cpp`.
+  - iOS SDK runs benchmark test through a separate app named `BenchmarkApp`.
+  - Android SDK does not have benchmark test.
+- `bin` contains the code for tools like `mbgl-cache`, `mbgl-offline`, and `mbgl-render`.
+- `expression-test` contains tests for the expression feature in the map style (see more details about expression [here](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/).
+- `metrics` contains test manifest files and ground truth for graphic comparison based render test.
+- `misc` contains protobuf for style, vector tile, and glyphs. It also icons and pictures used in documents.
+- `render-test` contains image diff based render tests. These tests verify if the rendering results match with expectations by capturing the rendering results and compare with the groundtruth images in the `metrics` directory.
+  - A typical render test run can be triggered by `mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json`. It will by default generate a html file `linux-clang8-release-style.html` with test results visualized and summarized.
+- `test` contains unit test for the C++ native code. The tests can be run through `mbgl-test-runner` executable after building the project.
+- `vendor`: 3rd party dependencies.
 
 # Build system
 
-The mapbox-gl-native build system uses a variety of tools.
+The MapLibre GL Native build system uses a variety of tools.
 
 ## Make
 
@@ -26,17 +58,17 @@ Git submodules are used to pull in several dependencies: mason (see below) and s
 
 ## npm
 
-npm is a package manager for Node.js. mapbox-gl-native uses it to pull in several development dependencies that happen to be packaged as node modules -- mainly for testing needs.
+npm is a package manager for Node.js. MapLibre GL Native uses it to pull in several development dependencies that happen to be packaged as node modules -- mainly for testing needs.
 
 ## Mason
 
-[Mason](https://github.com/mapbox/mason) is Mapbox's own cross platform C/C++ package manager. mapbox-gl-native uses mason packages as a source of precompiled binaries for third-party dependencies such as Boost, RapidJSON, and SQLite, and Mapbox's own C++ modules such as [earcut.hpp](https://github.com/mapbox/earcut.hpp) and [geojson-vt-cpp](https://github.com/mapbox/geojson-vt-cpp). It is also used to obtain a toolchain for Android platform cross-compiliation.
+[Mason](https://github.com/mapbox/mason) is Mapbox's own cross platform C/C++ package manager. MapLibre GL Native uses mason packages as a source of precompiled binaries for third-party dependencies such as Boost, RapidJSON, and SQLite, and Mapbox's own C++ modules such as [earcut.hpp](https://github.com/mapbox/earcut.hpp) and [geojson-vt-cpp](https://github.com/mapbox/geojson-vt-cpp). It is also used to obtain a toolchain for Android platform cross-compiliation.
 
 We track mason dependencies for a given platform in the file `platform/<platform>/scripts/configure.sh`. The `configure` script at the root handles sourcing this file during the build, running the appropriate mason commands, and writing configuration settings for the subsequent build to a `config.gypi` in the build output directory.
 
 ## gyp
 
-[gyp](https://gyp.gsrc.io/) is a build system originally created for Chromium and since adopted by Node.js. In mapbox-gl-native it's used to build the core C++ static library, the Node.js platform module, and the shared JNI module for Android.
+[gyp](https://gyp.gsrc.io/) is a build system originally created for Chromium and since adopted by Node.js. In MapLibre GL Native it's used to build the core C++ static library, the Node.js platform module, and the shared JNI module for Android.
 
 ## Platform-specific subsystems
 
@@ -53,9 +85,9 @@ See the relevant platform-specific `README.md` / `INSTALL.md` for details.
 ## Map
 ## Style
 
-The "Style" component of mapbox-gl-native contains an implementation of the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
+The "Style" component of MapLibre GL Native contains an implementation of the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
 
-In addition to supporting styles loaded from a URL, mapbox-gl-native includes a runtime styling API, which allows users to dynamically modify the current style: add and remove layers, modify layer properties, and so on. As appropriate for a C++ API, the runtime styling API API is _strongly typed_: there are subclasses for each layer type, with correctly-typed accessors for each style property. This results in a large API surface area. Fortunately, this is automated, by generating the API – and the regular portion of the implementation – from the style specification.
+In addition to supporting styles loaded from a URL, MapLibre GL Native includes a runtime styling API, which allows users to dynamically modify the current style: add and remove layers, modify layer properties, and so on. As appropriate for a C++ API, the runtime styling API API is _strongly typed_: there are subclasses for each layer type, with correctly-typed accessors for each style property. This results in a large API surface area. Fortunately, this is automated, by generating the API – and the regular portion of the implementation – from the style specification.
 
 The layers API makes a distinction between public API and internal implementation using [the `Impl` idiom](https://github.com/mapbox/mapbox-gl-native/issues/3254) seen elsewhere in the codebase. Here, it takes the form of parallel class hierarchies:
 
@@ -108,7 +140,7 @@ One final benefit of this approach of diffing immutable objects: we get "smart" 
 
 # Threading
 
-At runtime, mapbox-gl-native uses the following threads:
+At runtime, MapLibre GL Native uses the following threads:
 
 * The "main thread" (or other thread on which a `Map` object is created) handles direct `Map` API requests, owns the active `Style` and its associated objects, and renders the map. Since this thread is usually dispatching events triggered by user input, it's important that these duties not require significant computation or perform blocking I/O that would cause UI jank or hangs.
 * Many of the tasks that require significant computation are associated with layout and styling of map features: parsing vector tiles, computing text layout, and generating data buffers to be consumed by OpenGL. This work happens on "worker threads" that are spawned by the main thread, four per `Style` object. The `Style` and its associated objects handle dispatching tasks to the workers, typically on a tile-by-tile basis.
