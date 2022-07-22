@@ -1,4 +1,4 @@
-name: linux-ci
+name: linux-render-test
 
 on:
   workflow_dispatch:
@@ -27,12 +27,11 @@ on:
       - "platform/qt/**"
 
 concurrency:
-  # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  linux-ci:
+  linux-render-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,13 +45,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri libjpeg-turbo8 libicu66
-
-
-      - name: Prepare ccache
-        if: runner.os == 'macOS'
-        run: |
-          ccache --clear
-          ccache --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
         uses: actions/cache@v2
