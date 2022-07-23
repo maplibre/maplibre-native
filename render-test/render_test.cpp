@@ -127,7 +127,6 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     uint32_t seed;
     std::string manifestPath;
     std::string testFilter;
-    uint32_t failedXDisplayCount = 0;
 
     Log::useLogThread(false);
     TestRunner::UpdateResults updateResults;
@@ -214,13 +213,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
             // pipeline and collect the new baselines. The rebaseline bot will ultimately
             // report the error and block the patch from being merged.
             if (metadata.renderErrored || metadata.renderFailed) {
-                if (strncmp("Rendering raised an exception: Failed to open X display.", metadata.errorMessage.c_str(), 56) == 0) {
-                    printf(ANSI_COLOR_BLUE "* failed to open X display %s" ANSI_COLOR_RESET, id.c_str());
-                    failedXDisplayCount++;
-                }
-                else {
-                    returnCode = 1;
-                }
+                returnCode = 1;
             }
 
             if (passed) {
@@ -270,9 +263,6 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     }
     if (stats.erroredTests) {
         printf(ANSI_COLOR_RED "%u errored (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.erroredTests, 100.0 * stats.erroredTests / count);
-    }
-    if (failedXDisplayCount) {
-        printf(ANSI_COLOR_BLUE "%i errored because they failed to open X display and were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n", failedXDisplayCount, 100.0 * failedXDisplayCount / count);
     }
 
     printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).c_str());
