@@ -209,7 +209,9 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         metadata.actual = mbgl::encodePNG(actualImage);
 
         if (actualImage.size.isEmpty()) {
-            metadata.errorMessage = "Invalid size for actual image";
+            if (metadata.errorMessage.length() == 0) {
+                metadata.errorMessage = "Invalid size for actual image";
+            }
             metadata.renderErrored++;
             return;
         }
@@ -899,7 +901,7 @@ mbgl::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata,
     try {
         if (metadata.outputsImage) result = ctx.getFrontend().render(ctx.getMap());
     } catch (const std::exception& e) {
-        ctx.getMetadata().errorMessage = std::string("Renering raised an exception: ") + e.what();
+        ctx.getMetadata().errorMessage = std::string("Rendering raised an exception: ") + e.what();
     }
     return result;
 }
