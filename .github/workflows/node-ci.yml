@@ -168,14 +168,14 @@ jobs:
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: render-query-test-results
-          path: metrics/linux-clang8-release-style.html
+          path: metrics/macos-xcode11-release-style.html
 
       - name: Test
         if: runner.os == 'Linux'
