@@ -42,7 +42,6 @@ cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILE
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-Something similar should work on macOS...
 
 ### Running the render tests
 
