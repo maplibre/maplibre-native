@@ -41,6 +41,8 @@ public:
     using PropertySetter = mbgl::optional<mbgl::style::conversion::Error> (mbgl::style::Layer::*)(const std::string&, const mbgl::style::conversion::Convertible&);
     bool setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value);
 
+    std::vector<mbgl::Feature> queryRenderedFeatures(const mbgl::ScreenCoordinate& point, const mbgl::RenderedQueryOptions& options = {}) const;
+
     mbgl::EdgeInsets margins;
     std::unique_ptr<mbgl::Map> mapObj{};
     QVector<QPair<QString, QString>> defaultStyles;
