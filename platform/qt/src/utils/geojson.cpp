@@ -159,4 +159,196 @@ mbgl::GeoJSONFeature asFeature(const Feature &feature) {
     }
 };
 
+Coordinate toCoordinate (const mbgl::Point<double> &point){
+    return {point.y, point.x};
+}
+
+Coordinates toCoordinates (const mbgl::LineString<double> &lineString){
+    Coordinates coordinates;
+    for(auto const & point: lineString){
+        coordinates.push_back(toCoordinate(point));
+    }
+    return coordinates;
+}
+
+Coordinates toCoordinates (const mbgl::MultiPoint<double> &points){
+    Coordinates coordinates;
+    for(auto const & point: points){
+        coordinates.push_back(toCoordinate(point));
+    }
+    return coordinates;
+}
+
+CoordinatesCollection toCoordinatesCollection (const mbgl::Polygon<double> &polygon){
+    CoordinatesCollection coordinatesCollection;
+    for (auto const & linearRing: polygon){
+        Coordinates coordinates;
+        for(auto const &point: linearRing){
+            coordinates.push_back(toCoordinate(point));
+        }
+        coordinatesCollection.push_back(coordinates);
+    }
+    return coordinatesCollection;
+}
+
+CoordinatesCollection toCoordinatesCollection (const mbgl::MultiLineString<double> &lineStrings){
+    CoordinatesCollection coordinatesCollection;
+    for (auto const & lineString: lineStrings){
+        Coordinates coordinates;
+        for(auto const &point: lineString){
+            coordinates.push_back(toCoordinate(point));
+        }
+        coordinatesCollection.push_back(coordinates);
+    }
+    return coordinatesCollection;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::Point<double> &point){
+    CoordinatesCollections coordinatesCollections;
+    CoordinatesCollection coordinatesCollection;
+    Coordinates coordinates;
+    coordinates.push_back(toCoordinate(point));
+    coordinatesCollection.push_back(coordinates);
+    coordinatesCollections.push_back(coordinatesCollection);
+    return coordinatesCollections;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::LineString<double> &lineString){
+    CoordinatesCollections coordinatesCollections;
+    CoordinatesCollection coordinatesCollection;
+    coordinatesCollection.push_back(toCoordinates(lineString));
+    coordinatesCollections.push_back(coordinatesCollection);
+    return coordinatesCollections;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::Polygon<double> &polygon){
+    CoordinatesCollections coordinatesCollections;
+    coordinatesCollections.push_back(toCoordinatesCollection(polygon));
+    return coordinatesCollections;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPoint<double> &points){
+    CoordinatesCollections coordinatesCollections;
+    CoordinatesCollection coordinatesCollection;
+    coordinatesCollection.push_back(toCoordinates(points));
+    coordinatesCollections.push_back(coordinatesCollection);
+    return coordinatesCollections;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::MultiLineString<double> &lineStrings){
+    CoordinatesCollections coordinatesCollections;
+    coordinatesCollections.push_back(toCoordinatesCollection(lineStrings));
+    return coordinatesCollections;
+}
+
+CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPolygon<double> &polygons){
+    CoordinatesCollections coordinatesCollections;
+    for(auto const & polygon: polygons){
+        coordinatesCollections.push_back(toCoordinatesCollection(polygon));
+    }
+    return coordinatesCollections;
+}
+
+QVariant toQVariant(const mbgl::Value &value){
+    
+    auto valueList = [](const mapbox::util::recursive_wrapper<std::vector<mbgl::Value>> &list) {
+        QVariantList varList;
+        varList.reserve(list.get().size());
+        for (const auto& listValue : list.get()) {
+            varList.emplace_back(toQVariant(listValue));
+        }
+        return varList;
+    };
+
+    auto valueMap = [](const mapbox::util::recursive_wrapper<std::unordered_map<std::string, mbgl::Value>> &map) {
+        QVariantMap varMap;
+        for (auto it = map.get().begin(); it != map.get().end(); ++it) {
+            varMap.insert(QString::fromStdString(it->first), toQVariant(it->second));
+        }
+        return varMap;
+    };
+
+    switch (value.which()){
+    // Null
+    case 0:
+        return {};
+    // Bool
+    case 1:
+        return{value.get<bool>()};
+    // uint64_t
+    case 2:
+        return{value.get<uint64_t>()}; 
+    // int64_t 
+    case 3:
+        return{value.get<int64_t>()};
+    // double 
+    case 4:
+        return{value.get<double>()};
+    // std::string
+    case 5:
+        return QString::fromStdString(value.get<std::string>());
+    //mapbox::util::recursive_wrapper<std::vector<value>>
+    case 6:
+        return valueList(value.get<mapbox::util::recursive_wrapper<std::vector<mbgl::Value>>>());
+    //mapbox::util::recursive_wrapper<std::unordered_map<std::string, value>>
+    case 7:
+        return valueMap(value.get<mapbox::util::recursive_wrapper<std::unordered_map<std::string, mbgl::Value>>>());
+    default:
+        qWarning();
+        return {};
+    }
+}
+
+QVariant toQVariant(const mbgl::FeatureIdentifier &id){
+    switch (id.which()){
+        // Null
+        case 0:
+            return {};
+        // uint64_t
+        case 1:
+            return{id.get<uint64_t>()}; 
+        // int64_t
+        case 2:
+            return{id.get<int64_t>()};
+        // double
+        case 3:
+            return{id.get<double>()};
+        // std::string
+        case 4:
+            return QString::fromStdString(id.get<std::string>());
+        default:
+            qWarning();
+            return {};
+    }
+}
+
+Feature toFeature(const mbgl::GeoJSONFeature &feature){
+    QVariantMap properties;
+    for( auto it= feature.properties.begin(); it!=feature.properties.end(); it++) {
+        properties.insert(QString::fromStdString(it->first), toQVariant(it->second));
+    }
+
+    auto id = toQVariant(feature.id);
+
+    // auto geometry = toCoordinatesCollections(feature.geometry);
+    switch (feature.geometry.which()){
+        case 0:
+            return {Feature::PointType, CoordinatesCollections(), properties, id};
+        case 1:
+            return {Feature::PointType, toCoordinatesCollections(feature.geometry.get<mbgl::Point<double>>()), std::move(properties), std::move(id)};
+        case 2:
+            return {Feature::LineStringType, toCoordinatesCollections(feature.geometry.get<mbgl::LineString<double>>()), std::move(properties), std::move(id)};
+        case 3:
+            return {Feature::PolygonType, toCoordinatesCollections(feature.geometry.get<mbgl::Polygon<double>>()), std::move(properties), std::move(id)};
+        case 4:
+            return {Feature::PointType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiPoint<double>>()), std::move(properties), std::move(id)};
+        case 5:
+            return {Feature::LineStringType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiLineString<double>>()), std::move(properties), std::move(id)};
+        case 6:
+            return {Feature::PolygonType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiPolygon<double>>()), std::move(properties), std::move(id)};
+        default:
+            return {};
+    }
+}
+
 } // namespace QMapLibreGL::GeoJSON
