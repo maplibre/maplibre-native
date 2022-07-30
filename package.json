@@ -1,6 +1,6 @@
 {
-  "name": "@maplibre/maplibre-gl-native",
-  "version": "5.0.0",
+  "name": "@acalcutt/maplibre-gl-native",
+  "version": "5.0.21",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -15,13 +15,14 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/maplibre/maplibre-gl-native.git"
+    "url": "git+https://github.com/acalcutt/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
+    "@mapbox/node-pre-gyp": "^1.0.9",
+    "@acalcutt/node-pre-gyp-github": "1.4.5",
     "minimatch": "^3.0.4",
-    "node-pre-gyp": "^0.10.2",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
@@ -55,19 +56,21 @@
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
+    "install": "node-pre-gyp install --fallback-to-build=true",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
+    "test-query": "node -r esm platform/node/test/query.test.js",
+    "package": "node-pre-gyp package",
+    "release": "node-pre-gyp-github publish --release"
   },
   "gypfile": true,
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://mapbox-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}",
+    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
+    "remote_path": "node_v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
