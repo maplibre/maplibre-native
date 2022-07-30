@@ -1,6 +1,6 @@
 {
   "name": "@acalcutt/maplibre-gl-native",
-  "version": "5.0.22",
+  "version": "5.0.23",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -70,7 +70,7 @@
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
     "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
-    "remote_path": "node_v{version}",
+    "remote_path": "node-v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
