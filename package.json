@@ -1,6 +1,6 @@
 {
-  "name": "@acalcutt/maplibre-gl-native",
-  "version": "5.0.21",
+  "name": "@maplibre/maplibre-gl-native",
+  "version": "5.0.0",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -15,7 +15,7 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/acalcutt/maplibre-gl-native.git"
+    "url": "git+https://github.com/maplibre/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
@@ -69,7 +69,7 @@
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
+    "host": "https://github.com/maplibre/maplibre-gl-native/releases/download/",
     "remote_path": "node_v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
