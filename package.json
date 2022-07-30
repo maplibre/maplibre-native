@@ -21,7 +21,7 @@
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
     "@mapbox/node-pre-gyp": "^1.0.9",
-    "@acalcutt/node-pre-gyp-github": "1.4.5",
+    "@acalcutt/node-pre-gyp-github": "1.4.6",
     "minimatch": "^3.0.4",
     "npm-run-all": "^4.0.2"
   },
