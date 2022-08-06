@@ -10,9 +10,13 @@
 
 #include <memory>
 
+QT_BEGIN_NAMESPACE
+
 class QKeyEvent;
 class QMouseEvent;
 class QWheelEvent;
+
+QT_END_NAMESPACE
 
 class MapWindow : public QOpenGLWidget
 {
