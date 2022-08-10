@@ -42,14 +42,9 @@ mkdir -p ${BINOUT}
 step "Recording library version…"
 VERSION="${OUTPUT}"/version.txt
 echo -n "https://github.com/maplibre/maplibre-gl-native/commit/" > ${VERSION}
-HASH=`git log | head -1 | awk '{ print $2 }' | cut -c 1-10` && true
-echo -n "maplibre-gl-native-ios "
-echo ${HASH}
-echo ${HASH} >> ${VERSION}
 
 PROJ_VERSION=$(git rev-list --count HEAD)
 SEM_VERSION=$( git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//' )
-SHORT_VERSION=${SEM_VERSION%-*}
 
 step "Building targets (build ${PROJ_VERSION}, version ${SEM_VERSION})"
 
@@ -66,7 +61,6 @@ step "Building ${FORMAT} archive for iOS Simulator using ${SCHEME} scheme -> ${B
 xcodebuild \
     archive \
     CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
-    CURRENT_COMMIT_HASH=${HASH} \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
     -workspace ./platform/ios/ios.xcworkspace \
@@ -80,7 +74,6 @@ step "Building ${FORMAT} archive for iOS devices using ${SCHEME} scheme  -> ${BI
 xcodebuild \
     archive \
     CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
-    CURRENT_COMMIT_HASH=${HASH} \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
     -workspace ./platform/ios/ios.xcworkspace \

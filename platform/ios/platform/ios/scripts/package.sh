@@ -60,14 +60,9 @@ fi
 step "Recording library version…"
 VERSION="${OUTPUT}"/version.txt
 echo -n "https://github.com/maplibre/maplibre-gl-native/commit/" > ${VERSION}
-HASH=`git log | head -1 | awk '{ print $2 }' | cut -c 1-10` && true
-echo -n "maplibre-gl-native-ios "
-echo ${HASH}
-echo ${HASH} >> ${VERSION}
 
 PROJ_VERSION=$(git rev-list --count HEAD)
 SEM_VERSION=$( git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//' )
-SHORT_VERSION=${SEM_VERSION%-*}
 
 step "Building targets (build ${PROJ_VERSION}, version ${SEM_VERSION})"
 
@@ -86,7 +81,6 @@ fi
 step "Building ${FORMAT} framework for iOS Simulator using ${SCHEME} scheme"
 xcodebuild \
     CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
-    CURRENT_COMMIT_HASH=${HASH} \
     ONLY_ACTIVE_ARCH=NO \
     ${CI_XCCONFIG} \
     -derivedDataPath ${DERIVED_DATA} \
@@ -100,7 +94,6 @@ if [[ ${BUILD_FOR_DEVICE} == true ]]; then
     step "Building ${FORMAT} framework for iOS devices using ${SCHEME} scheme"
     xcodebuild \
         CURRENT_SEMANTIC_VERSION=${SEM_VERSION} \
-        CURRENT_COMMIT_HASH=${HASH} \
         ONLY_ACTIVE_ARCH=NO \
         ${CI_XCCONFIG} \
         -derivedDataPath ${DERIVED_DATA} \
