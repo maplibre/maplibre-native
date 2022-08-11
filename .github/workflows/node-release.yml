@@ -126,14 +126,14 @@ jobs:
           npm run package
           npm run release
         env:
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
 
       - name: Publish to NPM
         if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken ${NPM_ORG_TOKEN}
           npm publish --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_ORG_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
 
