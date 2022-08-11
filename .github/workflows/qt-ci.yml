@@ -110,7 +110,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: source
           submodules: recursive
@@ -146,7 +146,7 @@ jobs:
           ccache --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1
         with:
@@ -204,7 +204,7 @@ jobs:
         uses: ./source/.github/actions/qt5-build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt }}
           path: install
