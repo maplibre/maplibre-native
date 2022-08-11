@@ -73,32 +73,32 @@ jobs:
       matrix:
         include:
           - name: Linux
-            os: ubuntu-latest
+            os: ubuntu-20.04
             static: OFF
             qt: 5.15.2
             qt_target: desktop
           - name: macOS
-            os: macos-latest
+            os: macos-11
             static: OFF
             qt: 5.15.2
             qt_target: desktop
           - name: macOS_static
-            os: macos-latest
+            os: macos-11
             static: ON
             qt: 5.15.2
             qt_target: desktop
           - name: iOS_static
-            os: macos-latest
+            os: macos-11
             static: ON
             qt: 5.15.2
             qt_target: ios
           - name: macOS
-            os: macos-latest
+            os: macos-11
             static: ON
             qt: 6.2.2
             qt_target: desktop
           - name: macOS_static
-            os: macos-latest
+            os: macos-11
             static: OFF
             qt: 6.2.2
             qt_target: desktop
