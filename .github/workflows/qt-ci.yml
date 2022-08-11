@@ -78,27 +78,27 @@ jobs:
             qt: 5.15.2
             qt_target: desktop
           - name: macOS
-            os: macos-11
+            os: macos-10.15
             static: OFF
             qt: 5.15.2
             qt_target: desktop
           - name: macOS_static
-            os: macos-11
+            os: macos-10.15
             static: ON
             qt: 5.15.2
             qt_target: desktop
           - name: iOS_static
-            os: macos-11
+            os: macos-10.15
             static: ON
             qt: 5.15.2
             qt_target: ios
           - name: macOS
-            os: macos-11
+            os: macos-10.15
             static: ON
             qt: 6.2.2
             qt_target: desktop
           - name: macOS_static
-            os: macos-11
+            os: macos-10.15
             static: OFF
             qt: 6.2.2
             qt_target: desktop
