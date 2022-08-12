@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- Bump maplibre-native-base from 2.0.0 to 2.1.0
 
 ### 🐞 Bug fixes
 
