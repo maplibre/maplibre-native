@@ -7,13 +7,18 @@
 - *...Add new stuff here...*
 - [core] Add `ClientOptions` to configure client information [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
 - [qt] Build user agent based on `ClientOptions`, if available [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
-- Bump maplibre-native-base from 2.0.0 to 2.1.0 [#397](https://github.com/maplibre/maplibre-gl-native/pull/397)
+
+### ✨ Technical Improvements
+
+- *...Add new stuff here...*
+- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.0 [#397](https://github.com/maplibre/maplibre-gl-native/pull/397)
+- Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-gl-native/pull/398)
 
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
 
-- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` (#198)[https://github.com/maplibre/maplibre-gl-native/pull/198].
+- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-gl-native/pull/198).
 
 ## maps-v1.6.0
 
