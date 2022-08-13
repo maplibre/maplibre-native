@@ -101,10 +101,10 @@ void TestRunner::registerProxyFileSource() {
 
         auto resourceLoaderFactory =
             fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::ResourceLoader);
-        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& options) {
+        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             assert(defaultFactory);
-            std::shared_ptr<FileSource> fileSource = defaultFactory(options);
-            return std::make_unique<ProxyFileSource>(std::move(fileSource), options);
+            std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
+            return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
         };
 
         fileSourceManager->registerFileSourceFactory(mbgl::FileSourceType::ResourceLoader, std::move(factory));
@@ -677,10 +677,10 @@ uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float 
 
 } // namespace
 
-TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions)
+TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions)),
+      fileSource(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
           *observer.get(),
           mbgl::MapOptions()
@@ -688,7 +688,8 @@ TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions
               .withSize(metadata.size)
               .withPixelRatio(metadata.pixelRatio)
               .withCrossSourceCollisions(metadata.crossSourceCollisions),
-          resourceOptions) {}
+          resourceOptions,
+          clientOptions) {}
 
 TestRunner::Impl::~Impl() {}
 
@@ -738,7 +739,8 @@ void TestRunner::run(TestMetadata& metadata) {
     if (maps.find(key) == maps.end()) {
         maps[key] = std::make_unique<TestRunner::Impl>(
             metadata,
-            mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()));
+            mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()),
+            mbgl::ClientOptions());
     }
 
     ctx.runnerImpl = maps[key].get();

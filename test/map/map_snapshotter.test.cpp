@@ -4,6 +4,7 @@
 #include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/test/util.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
 
@@ -113,7 +114,7 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(cancel)) {
 TEST(MapSnapshotter, TEST_REQUIRES_SERVER(runtimeStyling)) {
     util::RunLoop runLoop;
     SnapshotterObserver observer;
-    MapSnapshotter snapshotter(Size{256, 128}, 1.0f, ResourceOptions(), observer);
+    MapSnapshotter snapshotter(Size{256, 128}, 1.0f, ResourceOptions(), ClientOptions(), observer);
     snapshotter.setStyleURL("http://127.0.0.1:3000/online/style.json");
 
     observer.didFinishLoadingStyleCallback = [&snapshotter, &runLoop] {

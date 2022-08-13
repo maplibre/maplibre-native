@@ -85,7 +85,8 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
     // Create the core map
     map = std::make_unique<mbgl::Map>(
         *rendererFrontend, *this, options,
-        mbgl::android::FileSource::getSharedResourceOptions(_env, jFileSource));
+        mbgl::android::FileSource::getSharedResourceOptions(_env, jFileSource),
+        mbgl::android::FileSource::getSharedClientOptions(_env, jFileSource));
 }
 
 /**

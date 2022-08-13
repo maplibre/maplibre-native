@@ -24,7 +24,7 @@ TEST(API, RecycleMapUpdateImages) {
 
     HeadlessFrontend frontend { 1 };
     auto map = std::make_unique<MapAdapter>(frontend, MapObserver::nullObserver(),
-                                         std::make_shared<StubFileSource>(ResourceOptions::Default()),
+                                         std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions()),
                                          MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
 
     EXPECT_TRUE(map);

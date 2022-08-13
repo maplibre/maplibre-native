@@ -2,16 +2,19 @@
 
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 
 class OnlineFileSource : public FileSource {
 public:
-    OnlineFileSource(const ResourceOptions& options);
+    OnlineFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~OnlineFileSource() override;
     void setResourceOptions(ResourceOptions) override;
-    ResourceOptions getResourceOptions() override;    
+    ResourceOptions getResourceOptions() override;
+    void setClientOptions(ClientOptions) override;
+    ClientOptions getClientOptions() override;
 
 private:
     // FileSource overrides

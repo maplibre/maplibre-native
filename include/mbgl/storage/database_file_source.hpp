@@ -4,16 +4,16 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/expected.hpp>
 #include <mbgl/util/optional.hpp>
-#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
+class ClientOptions;
 class ResourceOptions;
 
 // TODO: Split DatabaseFileSource into Ambient cache and Database interfaces.
 class DatabaseFileSource : public FileSource {
 public:
-    explicit DatabaseFileSource(const ResourceOptions& options);
+    explicit DatabaseFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~DatabaseFileSource() override;
 
     // FileSource overrides
@@ -235,6 +235,9 @@ public:
 
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;
+
+    void setClientOptions(ClientOptions) override;
+    ClientOptions getClientOptions() override;
 
 private:
     class Impl;

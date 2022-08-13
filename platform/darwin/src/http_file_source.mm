@@ -3,6 +3,7 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
 
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/http_header.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/async_request.hpp>
@@ -83,7 +84,8 @@ private:
 
 class HTTPFileSource::Impl {
 public:
-    Impl(const ResourceOptions& options): resourceOptions(options.clone()) {
+    Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
         @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MGLNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
@@ -95,6 +97,9 @@ public:
     void setResourceOptions(ResourceOptions options);
     ResourceOptions getResourceOptions();
 
+    void setClientOptions(ClientOptions options);
+    ClientOptions getClientOptions();
+
     NSURLSession* session = nil;
     NSString* userAgent = nil;
 
@@ -102,6 +107,7 @@ private:
     NSString* getUserAgent() const;
     NSBundle* getSDKBundle() const;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
@@ -110,6 +116,14 @@ void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
     return resourceOptions.clone();
+}
+
+void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
+    clientOptions = options;
+}
+
+ClientOptions HTTPFileSource::Impl::getClientOptions() {
+    return clientOptions.clone();
 }
 
 NSString *HTTPFileSource::Impl::getUserAgent() const {
@@ -193,8 +207,8 @@ NSBundle *HTTPFileSource::Impl::getSDKBundle() const {
     return bundle;
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(options)) {
+HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -403,5 +417,12 @@ ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
 
+void HTTPFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions HTTPFileSource::getClientOptions() {
+    return impl->getClientOptions();
+}
 
 }

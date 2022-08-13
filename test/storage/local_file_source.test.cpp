@@ -35,7 +35,7 @@ std::string toAbsoluteURL(const std::string& fileName) {
 using namespace mbgl;
 
 TEST(LocalFileSource, AcceptsURL) {
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
     EXPECT_TRUE(fs.canRequest(Resource::style("file://empty")));
     EXPECT_TRUE(fs.canRequest(Resource::style("file:///test")));
     EXPECT_FALSE(fs.canRequest(Resource::style("flie://foo")));
@@ -47,7 +47,7 @@ TEST(LocalFileSource, AcceptsURL) {
 TEST(LocalFileSource, EmptyFile) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("empty") }, [&](Response res) {
         req.reset();
@@ -63,7 +63,7 @@ TEST(LocalFileSource, EmptyFile) {
 TEST(LocalFileSource, NonEmptyFile) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("nonempty") }, [&](Response res) {
         req.reset();
@@ -79,7 +79,7 @@ TEST(LocalFileSource, NonEmptyFile) {
 TEST(LocalFileSource, NonExistentFile) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("does_not_exist") }, [&](Response res) {
         req.reset();
@@ -96,7 +96,7 @@ TEST(LocalFileSource, NonExistentFile) {
 TEST(LocalFileSource, InvalidURL) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "test://wrong-scheme" }, [&](Response res) {
         req.reset();
@@ -113,7 +113,7 @@ TEST(LocalFileSource, InvalidURL) {
 TEST(LocalFileSource, ReadDirectory) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("directory") }, [&](Response res) {
         req.reset();
@@ -130,7 +130,7 @@ TEST(LocalFileSource, ReadDirectory) {
 TEST(LocalFileSource, URLEncoding) {
     util::RunLoop loop;
 
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("%6eonempty") }, [&](Response res) {
         req.reset();
@@ -147,7 +147,7 @@ TEST(LocalFileSource, URLLimit) {
     util::RunLoop loop;
 
     size_t length = PATH_MAX - toAbsoluteURL("").size();
-    LocalFileSource fs(ResourceOptions::Default());
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
     char* filename = new char[length];
     memset(filename, 'x', length);
 
