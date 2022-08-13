@@ -5,7 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
-- Bump maplibre-native-base from 2.0.0 to 2.1.0
+- Bump maplibre-native-base from 2.0.0 to 2.1.0 [#397](https://github.com/maplibre/maplibre-gl-native/pull/397)
 
 ### 🐞 Bug fixes
 
