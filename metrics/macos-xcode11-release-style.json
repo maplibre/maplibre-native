@@ -6,7 +6,8 @@
     ],
     "ignore_paths": [
         "ignores/platform-all.json",
-        "ignores/platform-macos.json"
+        "ignores/platform-macos.json",
+        "ignores/platform-linux.json"
     ],
     "metric_path": "macos-xcode11-release",
     "probes": [
