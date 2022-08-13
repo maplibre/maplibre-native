@@ -74,10 +74,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-11.0
           - macos-10.15
+          - macos-11.0
           - ubuntu-20.04
-          - ubuntu-18.04
     runs-on: ${{ matrix.os }}
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -88,7 +87,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -133,7 +132,7 @@ jobs:
         run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1
         with:
