@@ -16,6 +16,8 @@
 - Bump [eternal](https://github.com/mapbox/eternal.git) from 1.0.0 to 1.0.1
 - Bump [protozero](https://github.com/mapbox/protozero.git) from 1.7.0 to 1.7.1
 - Bump [vector-tile](https://github.com/mapbox/vector-tile.git) from 1.0.3 to 1.0.4
+- Bump [polylabel](https://github.com/mapbox/polylabel) from 1.0.3 to 1.1.0
+- Bump [googletest](https://github.com/google/googletest.git) from 1.10.0 to 1.12.1
 
 ### 🐞 Bug fixes
 
