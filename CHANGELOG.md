@@ -18,6 +18,7 @@
 - Bump [vector-tile](https://github.com/mapbox/vector-tile.git) from 1.0.3 to 1.0.4
 - Bump [polylabel](https://github.com/mapbox/polylabel) from 1.0.3 to 1.1.0
 - Bump [googletest](https://github.com/google/googletest.git) from 1.10.0 to 1.12.1
+- Bump [zip-archive](https://github.com/ZipArchive/ZipArchive.git) from 2.2.3 to 2.5.2
 
 ### 🐞 Bug fixes
 
