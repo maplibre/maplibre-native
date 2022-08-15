@@ -1,4 +1,4 @@
-# name: ios-ci
+# name: ios-ci-static-analysis
 
 # on:
 #   workflow_dispatch:
@@ -65,7 +65,7 @@
 
 # jobs:
 #   build:
-#     runs-on: macos-10.15
+#     runs-on: ubuntu-latest
 #     concurrency:
 #       # cancel jobs on PRs only
 #       group: ${{ github.workflow }}-${{ github.ref }}
@@ -85,12 +85,15 @@
 #           submodules: recursive
 #           fetch-depth: 0
 
-#       - name: Install macos dependencies
+
+#       - name: Install ubuntu dependencies
+#         shell: bash
 #         run: |
-#           brew list cmake || brew install cmake
-#           brew list ccache || brew install ccache
-#           brew list pkg-config || brew install pkg-config
-#           brew list glfw3 || brew install glfw3
+#           sudo apt-get update -qq
+#           sudo apt-get install -y \
+#             ccache \
+#             pkg-config \
+#             libglfw3-dev 
 
 #       - name: Cache node modules
 #         uses: actions/cache@v3
@@ -133,24 +136,6 @@
 #           ./platform/ios/scripts/install-packaging-dependencies.sh
 #         env:
 #           CILAUNCH: true
-
-#       - name: Check debug symbols
-#         run: make darwin-check-public-symbols
-
-#       - name: Lint plist files
-#         run: make ios-lint-plist
-
-#       - name: Running ios unit tests
-#         run: make ios-test
-
-#       - name: Running ios UI tests
-#         run: make ios-uitest
-
-#       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-#         run: make ios-sanitize
-
-#       - name: Build and run SDK unit tests with address sanitizer
-#         run: make ios-sanitize-address
 
 #       - name: Build and run SDK unit tests with the static analyzer
 #         run: make ios-static-analyzer
