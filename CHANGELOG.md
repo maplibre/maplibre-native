@@ -19,7 +19,7 @@
 - Bump [polylabel](https://github.com/mapbox/polylabel) from 1.0.3 to 1.1.0
 - Bump [googletest](https://github.com/google/googletest.git) from 1.10.0 to 1.12.1
 - Bump [zip-archive](https://github.com/ZipArchive/ZipArchive.git) from 2.2.3 to 2.5.2
-- Bump [cpp-httplib](https://github.com/yhirose/cpp-httplib) from [this commit](https://github.com/yhirose/cpp-httplib/commit/b557ac9328f3571edbb8efa25905b950f6654e9d) (~0.5.1) to 0.11.0
+- Bump [cpp-httplib](https://github.com/yhirose/cpp-httplib) from [this commit](https://github.com/yhirose/cpp-httplib/commit/b557ac9328f3571edbb8efa25905b950f6654e9d) (~0.5.1) to 0.11.1
 
 ### 🐞 Bug fixes
 
