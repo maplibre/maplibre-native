@@ -11,7 +11,7 @@
 ### ✨ Technical Improvements
 
 - *...Add new stuff here...*
-- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 [#397](https://github.com/maplibre/maplibre-gl-native/pull/397)
+- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-gl-native/pull/397), [#406](https://github.com/maplibre/maplibre-gl-native/pull/406))
 - Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-gl-native/pull/398)
 - Bump [eternal](https://github.com/mapbox/eternal.git) from 1.0.0 to 1.0.1
 - Bump [protozero](https://github.com/mapbox/protozero.git) from 1.7.0 to 1.7.1
