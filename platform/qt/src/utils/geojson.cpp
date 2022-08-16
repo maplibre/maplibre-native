@@ -203,7 +203,7 @@ CoordinatesCollection toCoordinatesCollection (const mbgl::MultiLineString<doubl
     return coordinatesCollection;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::Point<double> &point){
+CoordinatesCollections asCoordinatesCollections(const mbgl::Point<double> &point){
     CoordinatesCollections coordinatesCollections;
     CoordinatesCollection coordinatesCollection;
     Coordinates coordinates;
@@ -213,7 +213,7 @@ CoordinatesCollections toCoordinatesCollections (const mbgl::Point<double> &poin
     return coordinatesCollections;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::LineString<double> &lineString){
+CoordinatesCollections asCoordinatesCollections(const mbgl::LineString<double> &lineString){
     CoordinatesCollections coordinatesCollections;
     CoordinatesCollection coordinatesCollection;
     coordinatesCollection.push_back(toCoordinates(lineString));
@@ -221,13 +221,13 @@ CoordinatesCollections toCoordinatesCollections (const mbgl::LineString<double> 
     return coordinatesCollections;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::Polygon<double> &polygon){
+CoordinatesCollections asCoordinatesCollections(const mbgl::Polygon<double> &polygon){
     CoordinatesCollections coordinatesCollections;
     coordinatesCollections.push_back(toCoordinatesCollection(polygon));
     return coordinatesCollections;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPoint<double> &points){
+CoordinatesCollections asCoordinatesCollections(const mbgl::MultiPoint<double> &points){
     CoordinatesCollections coordinatesCollections;
     CoordinatesCollection coordinatesCollection;
     coordinatesCollection.push_back(toCoordinates(points));
@@ -235,13 +235,13 @@ CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPoint<double> 
     return coordinatesCollections;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::MultiLineString<double> &lineStrings){
+CoordinatesCollections asCoordinatesCollections(const mbgl::MultiLineString<double> &lineStrings){
     CoordinatesCollections coordinatesCollections;
     coordinatesCollections.push_back(toCoordinatesCollection(lineStrings));
     return coordinatesCollections;
 }
 
-CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPolygon<double> &polygons){
+CoordinatesCollections asCoordinatesCollections(const mbgl::MultiPolygon<double> &polygons){
     CoordinatesCollections coordinatesCollections;
     for(auto const & polygon: polygons){
         coordinatesCollections.push_back(toCoordinatesCollection(polygon));
@@ -249,13 +249,12 @@ CoordinatesCollections toCoordinatesCollections (const mbgl::MultiPolygon<double
     return coordinatesCollections;
 }
 
-QVariant toQVariant(const mbgl::Value &value){
-    
+QVariant asQVariant(const mbgl::Value &value){
     auto valueList = [](const mapbox::util::recursive_wrapper<std::vector<mbgl::Value>> &list) {
         QVariantList varList;
         varList.reserve(list.get().size());
         for (const auto& listValue : list.get()) {
-            varList.emplace_back(toQVariant(listValue));
+            varList.emplace_back(asQVariant(listValue));
         }
         return varList;
     };
@@ -263,7 +262,7 @@ QVariant toQVariant(const mbgl::Value &value){
     auto valueMap = [](const mapbox::util::recursive_wrapper<std::unordered_map<std::string, mbgl::Value>> &map) {
         QVariantMap varMap;
         for (auto it = map.get().begin(); it != map.get().end(); ++it) {
-            varMap.insert(QString::fromStdString(it->first), toQVariant(it->second));
+            varMap.insert(QString::fromStdString(it->first), asQVariant(it->second));
         }
         return varMap;
     };
@@ -299,7 +298,7 @@ QVariant toQVariant(const mbgl::Value &value){
     }
 }
 
-QVariant toQVariant(const mbgl::FeatureIdentifier &id){
+QVariant asQVariant(const mbgl::FeatureIdentifier &id){
     switch (id.which()){
         // Null
         case 0:
@@ -322,30 +321,30 @@ QVariant toQVariant(const mbgl::FeatureIdentifier &id){
     }
 }
 
-Feature toFeature(const mbgl::GeoJSONFeature &feature){
+Feature asFeature(const mbgl::GeoJSONFeature &feature){
     QVariantMap properties;
     for( auto it= feature.properties.begin(); it!=feature.properties.end(); it++) {
-        properties.insert(QString::fromStdString(it->first), toQVariant(it->second));
+        properties.insert(QString::fromStdString(it->first), asQVariant(it->second));
     }
 
-    auto id = toQVariant(feature.id);
+    auto id = asQVariant(feature.id);
 
-    // auto geometry = toCoordinatesCollections(feature.geometry);
+    // auto geometry = asCoordinatesCollections(feature.geometry);
     switch (feature.geometry.which()){
         case 0:
             return {Feature::PointType, CoordinatesCollections(), properties, id};
         case 1:
-            return {Feature::PointType, toCoordinatesCollections(feature.geometry.get<mbgl::Point<double>>()), std::move(properties), std::move(id)};
+            return {Feature::PointType, asCoordinatesCollections(feature.geometry.get<mbgl::Point<double>>()), std::move(properties), std::move(id)};
         case 2:
-            return {Feature::LineStringType, toCoordinatesCollections(feature.geometry.get<mbgl::LineString<double>>()), std::move(properties), std::move(id)};
+            return {Feature::LineStringType, asCoordinatesCollections(feature.geometry.get<mbgl::LineString<double>>()), std::move(properties), std::move(id)};
         case 3:
-            return {Feature::PolygonType, toCoordinatesCollections(feature.geometry.get<mbgl::Polygon<double>>()), std::move(properties), std::move(id)};
+            return {Feature::PolygonType, asCoordinatesCollections(feature.geometry.get<mbgl::Polygon<double>>()), std::move(properties), std::move(id)};
         case 4:
-            return {Feature::PointType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiPoint<double>>()), std::move(properties), std::move(id)};
+            return {Feature::PointType, asCoordinatesCollections(feature.geometry.get<mbgl::MultiPoint<double>>()), std::move(properties), std::move(id)};
         case 5:
-            return {Feature::LineStringType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiLineString<double>>()), std::move(properties), std::move(id)};
+            return {Feature::LineStringType, asCoordinatesCollections(feature.geometry.get<mbgl::MultiLineString<double>>()), std::move(properties), std::move(id)};
         case 6:
-            return {Feature::PolygonType, toCoordinatesCollections(feature.geometry.get<mbgl::MultiPolygon<double>>()), std::move(properties), std::move(id)};
+            return {Feature::PolygonType, asCoordinatesCollections(feature.geometry.get<mbgl::MultiPolygon<double>>()), std::move(properties), std::move(id)};
         default:
             return {};
     }

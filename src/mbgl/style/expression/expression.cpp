@@ -39,7 +39,7 @@ public:
     }
 
 private:
-    FeatureType getTypeImpl() const { return apply_visitor(ToFeatureType(), feature.geometry); }
+    FeatureType getTypeImpl() const { return apply_visitor(asFeatureType(), feature.geometry); }
 };
 
 EvaluationResult Expression::evaluate(optional<float> zoom,

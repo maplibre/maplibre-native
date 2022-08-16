@@ -44,7 +44,8 @@ Point<S> convertPoint(const Point<T>& p) {
     return Point<S>(static_cast<S>(p.x), static_cast<S>(p.y));
 }
 
-struct ToFeatureType {
+struct asFeatureType
+{
     FeatureType operator()(const EmptyGeometry&) const { return FeatureType::Unknown; }
     template <class T>
     FeatureType operator()(const Point<T> &) const { return FeatureType::Point; }

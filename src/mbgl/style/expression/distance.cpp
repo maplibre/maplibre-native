@@ -744,7 +744,7 @@ optional<GeoJSON> parseValue(const style::conversion::Convertible& value, style:
 }
 
 optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
-    const auto type = apply_visitor(ToFeatureType(), feature.geometry);
+    const auto type = apply_visitor(asFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
     }

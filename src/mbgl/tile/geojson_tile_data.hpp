@@ -14,7 +14,7 @@ public:
     }
 
     FeatureType getType() const override  {
-        return apply_visitor(ToFeatureType(), feature.geometry);
+        return apply_visitor(asFeatureType(), feature.geometry);
     }
 
     const PropertyMap& getProperties() const override {

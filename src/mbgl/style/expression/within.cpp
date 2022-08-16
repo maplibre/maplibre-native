@@ -186,7 +186,7 @@ mbgl::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Converti
 
 mbgl::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
                                                       mbgl::style::expression::ParsingContext& ctx) {
-    const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
+    const auto type = apply_visitor(asFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;
     }

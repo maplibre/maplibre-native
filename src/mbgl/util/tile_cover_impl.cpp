@@ -277,8 +277,8 @@ struct BuildBoundsMap {
 
 TileCover::Impl::Impl(int32_t z, const Geometry<double>& geom, bool project)
  : zoom(z) {
-    ToFeatureType toFeatureType;
-    isClosed = apply_visitor(toFeatureType, geom) == FeatureType::Polygon;
+    asFeatureType asFeatureType;
+    isClosed = apply_visitor(asFeatureType, geom) == FeatureType::Polygon;
 
     BuildBoundsMap toBoundsMap(z, project);
     boundsMap = apply_visitor(toBoundsMap, geom);
