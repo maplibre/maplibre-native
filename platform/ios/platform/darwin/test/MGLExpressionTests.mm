@@ -56,6 +56,81 @@ using namespace std::string_literals;
     return predicate;
 }
 
+#pragma mark - Objective-C Example Code for MGL Expressions
+
+- (void)testSteppingExpression {
+    //#-example-code
+    // Objective-C sample of how to create a stepping expression with multiple stops.
+    NSNumber *initialValue = @4.0f;
+    NSDictionary *stops = @{@11.0f: initialValue,
+                            @14.0f: @6.0f,
+                            @20.0f: @18.0f };
+    
+    NSExpression *steppingExpression = [
+        NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+        fromExpression:[NSExpression expressionForConstantValue:initialValue]
+        stops:[NSExpression expressionForConstantValue:stops]
+    ];
+    //#-end-example-code
+
+    XCTAssertNotNil(steppingExpression);
+}
+
+- (void)testSteppingExpression_ColorOverZoom {
+    //#-example-code
+    // Objective-C sample of how to create a stepping expression with color.
+    NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MGLColor redColor]];
+    NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
+    NSExpression *functionExpression;
+    
+    if (@available(iOS 15, *)) {
+        // How to create expressions with iOS 15
+        functionExpression = [NSExpression
+                              mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+                              fromExpression:constantExpression
+                              stops:stops];
+    } else {
+        // How to create expressions up to iOS 14
+        functionExpression = [NSExpression
+                              expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)",
+                              constantExpression,
+                              stops];
+    }
+    //#-end-example-code
+    
+    XCTAssertNotNil(functionExpression);
+    NSLog(@"%s %@", __FUNCTION__, functionExpression);
+}
+
+- (void)testInterpolatingExpression {
+    //#-example-code
+    // Objective-C sample of how to create an interpolating expression with multiple stops.
+
+    NSDictionary *opacityStops = @{@5.0f: @0.0f,
+                                   @14.0: @0.7f,
+                                   @20.0f: @1.0f };
+    NSExpression *stops = [NSExpression expressionForConstantValue:opacityStops];
+    NSExpression *functionExpression;
+    
+    if (@available(iOS 15, *)) {
+        // How to create expressions with iOS 15
+        functionExpression = [NSExpression
+                              mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
+                              withCurveType:MGLExpressionInterpolationModeLinear
+                              parameters:nil
+                              stops:stops];
+    } else {
+        // How to create expressions up to iOS 14
+        functionExpression = [NSExpression
+                              expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
+                              stops];
+    }
+    //#-end-example-code
+    
+    XCTAssertNotNil(functionExpression);
+    NSLog(@"%s %@", __FUNCTION__, functionExpression);
+}
+
 #pragma mark - Valuation tests
 
 - (void)testStringValuation {

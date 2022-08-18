@@ -46,6 +46,8 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
     
     func testMigratingToExpressions$Stops() {
         //#-example-code
+        // Swift sample on how to populate a stepping expression with multiple stops.
+        // Create a color ramp.
         #if os(macOS)
             let stops: [NSNumber: NSColor] = [
                 0: .yellow,
@@ -63,10 +65,27 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
                 10: .white,
             ]
         #endif
-        //#-end-example-code
+
+        // Based on the zoom and `stops`, change the color.
+        var functionExpression = NSExpression(forMGLStepping: .zoomLevelVariable,
+                                              from: NSExpression(forConstantValue: stops[0]),
+                                              stops: NSExpression(forConstantValue: stops))
+
+        // Based on zoom and `stopsLineWidth`, set the Line width.
+        let initialValue = 4.0
+        let stopsLineWidth = [
+            11.0: initialValue,
+            14.0: 6.0,
+            20.0: 18.0]
         
-        let _ = NSExpression(format: "mgl_step:from:stops:(mag, %@, %@)",
-                             stops[0]!, stops)
+        functionExpression = NSExpression(
+            forMGLStepping: .zoomLevelVariable,
+            from: NSExpression(forConstantValue: initialValue),
+            stops: NSExpression(forConstantValue: stopsLineWidth)
+        )
+        //#-end-example-code
+        print(functionExpression)
+        print(stopsLineWidth)
     }
     
     func testMigratingToExpressions$Linear() {
@@ -76,6 +95,7 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
         let symbolLayer = MGLSymbolStyleLayer(identifier: "place-city-sm", source: symbolSource)
         
         let source = MGLShapeSource(identifier: "earthquakes", url: url, options: nil)
+        let mag = 1.0  // Update based on earthquake GeoJSON data
         mapView.style?.addSource(source)
         
         #if os(macOS)
@@ -97,16 +117,26 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
         #endif
         
         let layer = MGLCircleStyleLayer(identifier: "circles", source: source)
-        #if os(macOS)
-            layer.circleColor = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)",
-                                             stops)
-        #else
-            layer.circleColor = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)",
-                                             stops)
-        #endif
+        
+        let circleExpression : NSExpression
+        if #available(iOS 15, *) {
+            circleExpression = NSExpression(
+                forMGLInterpolating: NSExpression(forConstantValue: mag),
+                curveType: .linear,
+                parameters: nil,
+                stops: NSExpression(forConstantValue: stops))
+        } else {
+            // This works up to iOS 14.5
+            circleExpression = NSExpression(
+                format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)",
+                stops)
+        }
+        
+        layer.circleColor = circleExpression
         layer.circleRadius = NSExpression(forConstantValue: 10)
         mapView.style?.insertLayer(layer, below: symbolLayer)
         //#-end-example-code
+        print(circleExpression)
     }
     
     func testMigratingToExpressions$LinearConvenience() {
@@ -150,8 +180,10 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
             18: 18,
         ]
         
-        layer.circleRadius = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.5, %@)",
-                                          stops)
+        layer.circleRadius = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                          curveType: .exponential,
+                                          parameters: NSExpression(forConstantValue: 1.5),
+                                          stops: NSExpression(forConstantValue: stops))
         //#-end-example-code
     }
     
@@ -183,8 +215,9 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
                 10: .white,
             ]
             
-            layer.circleColor = NSExpression(format: "mgl_step:from:stops:(mag, %@, %@)",
-                                             NSColor.green, stops)
+            layer.circleColor = NSExpression(forMGLStepping: .zoomLevelVariable,
+                                             from: NSExpression(forConstantValue: NSColor.green),
+                                             stops: NSExpression(forConstantValue: stops))
         #else
             let stops: [NSNumber: UIColor] = [
                 0: .yellow,
@@ -194,8 +227,9 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
                 10: .white,
             ]
             
-            layer.circleColor = NSExpression(format: "mgl_step:from:stops:(mag, %@, %@)",
-                                             UIColor.green, stops)
+            layer.circleColor = NSExpression(forMGLStepping: .zoomLevelVariable,
+                                             from: NSExpression(forConstantValue: UIColor.green),
+                                             stops: NSExpression(forConstantValue: stops))
         #endif
         //#-end-example-code
     }
@@ -205,15 +239,33 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
         let layer = MGLCircleStyleLayer(identifier: "circles", source: source)
         
         //#-example-code
+        // Category type
+        let type = NSExpression(forConstantValue: "type")
+
+        // Categories
+        let earthquake = NSExpression(forConstantValue: "earthquake")
+        let explosion = NSExpression(forConstantValue: "explosion")
+        let quarryBlast = NSExpression(forConstantValue: "quarry blast")
+
         #if os(macOS)
-            let defaultColor = NSColor.blue
-            layer.circleColor = NSExpression(
-            format: "MGL_MATCH(type, 'earthquake', %@, 'explosion', %@, 'quarry blast', %@, %@)",
-                NSColor.orange, NSColor.red, NSColor.yellow, defaultColor)
+        let defaultColor = NSExpression(forConstantValue: NSColor.blue)
+        let orange = NSExpression(forConstantValue: NSColor.orange)
+        let red = NSExpression(forConstantValue: NSColor.red)
+        let yellow = NSExpression(forConstantValue: NSColor.yellow)
+        
+        layer.circleColor = NSExpression(forMGLMatchingKey: type,
+                                         in: [earthquake:orange, explosion:red, quarryBlast:yellow],
+                                         default: defaultColor)
         #else
-            let defaultColor = UIColor.blue
-            layer.circleColor = NSExpression(format: "MGL_MATCH(type, 'earthquake', %@, 'explosion', %@, 'quarry blast', %@, %@)",
-                UIColor.orange, UIColor.red, UIColor.yellow, defaultColor)
+        let defaultColor = NSExpression(forConstantValue: UIColor.blue)
+        let orange = NSExpression(forConstantValue: UIColor.orange)
+        let red = NSExpression(forConstantValue: UIColor.red)
+        let yellow = NSExpression(forConstantValue: UIColor.yellow)
+
+
+        layer.circleColor = NSExpression(forMGLMatchingKey: type,
+                                         in: [earthquake:orange, explosion:red, quarryBlast:yellow],
+                                         default: defaultColor)
         #endif
         //#-end-example-code
     }
