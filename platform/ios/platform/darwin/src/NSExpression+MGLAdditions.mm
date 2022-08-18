@@ -597,13 +597,15 @@ const MGLExpressionInterpolationMode MGLExpressionInterpolationModeCubicBezier =
 }
 
 + (instancetype)mgl_expressionForSteppingExpression:(nonnull NSExpression *)steppingExpression fromExpression:(nonnull NSExpression *)minimumExpression stops:(nonnull NSExpression *)stops {
-    return [NSExpression expressionForFunction:@"mgl_step:from:stops:"
-                                     arguments:@[steppingExpression, minimumExpression, stops]];
+    return [NSExpression expressionForFunction:steppingExpression
+                                   selectorName:@"mgl_step:from:stops:"
+                                      arguments:@[steppingExpression, minimumExpression, stops]];
 }
 
 + (instancetype)mgl_expressionForInterpolatingExpression:(nonnull NSExpression *)inputExpression withCurveType:(nonnull MGLExpressionInterpolationMode)curveType parameters:(nullable NSExpression *)parameters stops:(nonnull NSExpression *)stops {
     NSExpression *sanitizeParams = parameters ? parameters : [NSExpression expressionForConstantValue:nil];
-    return [NSExpression expressionForFunction:@"mgl_interpolate:withCurveType:parameters:stops:"
+    return [NSExpression expressionForFunction:inputExpression
+                                  selectorName:@"mgl_interpolate:withCurveType:parameters:stops:"
                                      arguments:@[inputExpression, [NSExpression expressionForConstantValue:curveType], sanitizeParams, stops]];
 }
 
@@ -819,12 +821,14 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
         } else if ([op isEqualToString:@"interpolate"]) {
             NSArray *interpolationOptions = argumentObjects.firstObject;
             NSString *curveType = interpolationOptions.firstObject;
-            NSExpression *curveTypeExpression = [NSExpression expressionWithMGLJSONObject:curveType];
+            MGLExpressionInterpolationMode interpolationMode = MGLExpressionInterpolationModeLinear;
             id curveParameters;
             if ([curveType isEqual:@"exponential"]) {
                 curveParameters = interpolationOptions[1];
+                interpolationMode = MGLExpressionInterpolationModeExponential;
             } else if ([curveType isEqualToString:@"cubic-bezier"]) {
                 curveParameters = @[@"literal", [interpolationOptions subarrayWithRange:NSMakeRange(1, 4)]];
+                interpolationMode = MGLExpressionInterpolationModeCubicBezier;
             }
             else {
                 curveParameters = [NSNull null];
@@ -840,8 +844,10 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
                 stops[key] = [NSExpression expressionWithMGLJSONObject:valueExpression];
             }
             NSExpression *stopExpression = [NSExpression expressionForConstantValue:stops];
-            return [NSExpression expressionForFunction:@"mgl_interpolate:withCurveType:parameters:stops:"
-                                             arguments:@[inputExpression, curveTypeExpression, curveParameterExpression, stopExpression]];
+            return [NSExpression mgl_expressionForInterpolatingExpression:inputExpression
+                                                            withCurveType:interpolationMode
+                                                               parameters:curveParameterExpression
+                                                                    stops:stopExpression];
         } else if ([op isEqualToString:@"step"]) {
             NSExpression *inputExpression = [NSExpression expressionWithMGLJSONObject:argumentObjects[0]];
             NSArray *stopExpressions = [argumentObjects subarrayWithRange:NSMakeRange(1, argumentObjects.count - 1)];
@@ -864,8 +870,9 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
             NSAssert(minimum, @"minimum should be non-nil");
             if (minimum) {
                 NSExpression *stopExpression = [NSExpression expressionForConstantValue:stops];
-                return [NSExpression expressionForFunction:@"mgl_step:from:stops:"
-                                                 arguments:@[inputExpression, minimum, stopExpression]];
+                return [NSExpression mgl_expressionForSteppingExpression:inputExpression
+                                                          fromExpression:minimum
+                                                                   stops:stopExpression];
             }
             
         } else if ([op isEqualToString:@"zoom"]) {
