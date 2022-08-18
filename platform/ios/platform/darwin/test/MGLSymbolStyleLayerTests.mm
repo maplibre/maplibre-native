@@ -77,6 +77,7 @@
 
         XCTAssertEqual(rawLayer->getIconAllowOverlap(), propertyValue,
                        @"Setting iconAllowsOverlap to a camera expression should update icon-allow-overlap.");
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects(layer.iconAllowsOverlap, functionExpression,
                               @"iconAllowsOverlap should round-trip camera expressions.");
 

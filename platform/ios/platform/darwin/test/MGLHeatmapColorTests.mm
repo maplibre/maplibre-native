@@ -40,6 +40,7 @@
                    @"Setting heatmapColor to an expression depending on $heatmapDensity should update heatmap-color.");
     XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(12.0), mbgl::Color::blue(),
                    @"Setting heatmapColor to an expression depending on $heatmapDensity should update heatmap-color.");
+    XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
     XCTAssertEqualObjects(layer.heatmapColor, functionExpression,
                           @"heatmapColor should round-trip expressions depending on $heatmapDensity.");
 

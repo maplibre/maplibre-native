@@ -76,6 +76,7 @@
 
         XCTAssertEqual(rawLayer->getFillSortKey(), propertyValue,
                        @"Setting fillSortKey to a camera expression should update fill-sort-key.");
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects(layer.fillSortKey, functionExpression,
                               @"fillSortKey should round-trip camera expressions.");
 

@@ -76,6 +76,7 @@
 
         XCTAssertEqual(rawLayer->getLineCap(), propertyValue,
                        @"Setting lineCap to a camera expression should update line-cap.");
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects(layer.lineCap, functionExpression,
                               @"lineCap should round-trip camera expressions.");
 

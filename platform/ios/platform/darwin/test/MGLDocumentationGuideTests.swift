@@ -319,4 +319,16 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
         mapView.style?.addLayer(magnitudeLayer)
         //#-end-example-code
     }
+    
+    // MARK: Swift Example Code for Expected Failures
+    
+    func testExpectPassSwift() {
+        XCTAssertNotNil(1)
+    }
+
+    /// https://developer.apple.com/documentation/xctest/expected_failures
+    func testExpectFailureSwift() {
+        XCTExpectFailure("Swift example - Anticipate known test failures to prevent failing tests from affecting your workflows.")
+        XCTAssertNotNil(nil)
+    }
 }

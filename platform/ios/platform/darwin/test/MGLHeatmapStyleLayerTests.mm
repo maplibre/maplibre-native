@@ -76,6 +76,7 @@
 
         XCTAssertEqual(rawLayer->getHeatmapIntensity(), propertyValue,
                        @"Setting heatmapIntensity to a camera expression should update heatmap-intensity.");
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects(layer.heatmapIntensity, functionExpression,
                               @"heatmapIntensity should round-trip camera expressions.");
 

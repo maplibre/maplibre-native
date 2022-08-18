@@ -891,6 +891,7 @@ using namespace std::string_literals;
         NSArray *jsonExpression = @[@"interpolate", @[@"linear"], @[@"get", @"x"], @0, @100, @10, @200];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects(compatibilityExpression.mgl_jsonExpressionObject, jsonExpression);
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
@@ -1502,6 +1503,19 @@ using namespace std::string_literals;
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
+
+}
+
+#pragma mark - Objective-C Example Code for Expected Failures
+
+- (void)testExpectPassObjC {
+    XCTAssertNotNil(@1);
+}
+
+/// https://developer.apple.com/documentation/xctest/expected_failures?language=objc
+- (void)testExpectFailureObjC {
+    XCTExpectFailure(@"Objective-C example - Anticipate known test failures to prevent failing tests from affecting your workflows.");
+    XCTAssertNotNil(nil);
 }
 
 

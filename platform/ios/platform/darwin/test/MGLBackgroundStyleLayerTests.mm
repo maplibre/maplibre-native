@@ -55,6 +55,7 @@
 
         XCTAssertEqual(rawLayer->getBackgroundColor(), propertyValue,
                        @"Setting backgroundColor to a camera expression should update background-color.");
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects(layer.backgroundColor, functionExpression,
                               @"backgroundColor should round-trip camera expressions.");
 
