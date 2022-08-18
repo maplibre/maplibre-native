@@ -977,6 +977,8 @@
 		74CB5EC8219B285000102936 /* MGLOpenGLStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLOpenGLStyleLayer_Private.h; sourceTree = "<group>"; };
 		74CB5EC9219B285000102936 /* MGLRasterStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLRasterStyleLayer_Private.h; sourceTree = "<group>"; };
 		74CB5ED0219B286400102936 /* MGLSymbolStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLSymbolStyleLayer_Private.h; sourceTree = "<group>"; };
+		7914ABB328A5B799007D986B /* CI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CI.xctestplan; sourceTree = "<group>"; };
+		7914ABB428A5B92F007D986B /* CI-Expressions.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "CI-Expressions.xctestplan"; sourceTree = "<group>"; };
 		8989B17A201A48EA0081CF59 /* MGLHeatmapStyleLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLHeatmapStyleLayer.h; sourceTree = "<group>"; };
 		8989B17B201A48EA0081CF59 /* MGLHeatmapStyleLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MGLHeatmapStyleLayer.mm; sourceTree = "<group>"; };
 		920A3E5C1E6F995200C16EFC /* MGLSourceQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MGLSourceQueryTests.m; path = ../../darwin/test/MGLSourceQueryTests.m; sourceTree = "<group>"; };
@@ -1660,6 +1662,8 @@
 		409F43FB1E9E77D10048729D /* Swift Integration */ = {
 			isa = PBXGroup;
 			children = (
+				7914ABB428A5B92F007D986B /* CI-Expressions.xctestplan */,
+				7914ABB328A5B799007D986B /* CI.xctestplan */,
 				409F43FC1E9E781C0048729D /* MGLMapViewDelegateIntegrationTests.swift */,
 				409D0A0C1ED614CE00C95D0C /* MGLAnnotationViewIntegrationTests.swift */,
 			);
