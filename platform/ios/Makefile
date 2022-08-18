@@ -147,13 +147,19 @@ $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettin
 ios: $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' build $(XCPRETTY)
 
-# make iproj
+#  make iproj
 .PHONY: iproj
 iproj: $(IOS_PROJ_PATH)
 	@#   Check if Xcode should run in headless mode
 	@#     If CI=1, then just perform `make iproj`
 	@#       else, use `xed` to open the XCworkspace
 	@if [ $(CI) == 1 ]; then echo "make iproj CI=1.  Running in headless mode, skip opening .xcworkspace in Xcode.  To open Xcode use 'xed $(IOS_WORK_PATH)'"; else echo "make iproj. Opening MapLibre in Xcode using:  'xed $(IOS_WORK_PATH)'.  To skip opening Xcode, use 'make iproj CI=1'"; xed $(IOS_WORK_PATH);  fi;
+	@echo "## Xcode dependencies"
+	@xcodebuild -version
+	@uname -a
+	@sw_vers
+	@arch
+	@brew list --versions cmake ccache pkg-config glfw
 
 .PHONY: ios-lint-plist
 ios-lint-plist:
@@ -169,7 +175,7 @@ ios-lint: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
 
-# make ios-uitest
+#  make ios-uitest
 .PHONY: ios-uitest
 ios-uitest: $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'iosapp' test $(XCPRETTY)
@@ -211,7 +217,7 @@ iframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
 
-# make xcframework
+#  make xcframework
 .PHONY: xcframework
 xcframework: $(IOS_PROJ_PATH)
 	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
@@ -221,16 +227,20 @@ xcframework: $(IOS_PROJ_PATH)
 ideploy:
 	caffeinate -i ./platform/ios/scripts/deploy-packages.sh
 
+#  make idocument
+#   open documentation/ 
 .PHONY: idocument
 idocument:
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
+#  make darwin-style-code
 .PHONY: darwin-style-code
 darwin-style-code:
 	node platform/darwin/scripts/generate-style-code.js
 	node platform/darwin/scripts/update-examples.js
 style-code: darwin-style-code
 
+# make darwin-update-examples
 .PHONY: darwin-update-examples
 darwin-update-examples:
 	node platform/darwin/scripts/update-examples.js
