@@ -11,7 +11,11 @@ See the "Requirements" section in [INSTALL.md](INSTALL.md).
 Create and open an Xcode workspace that includes both the SDK source and some Objective-C test applications by running:
 
 ```bash
+# make and open the Xcode workspace
 make iproj
+
+# make Xcode workspace, but run in headless mode
+make iproj CI=1
 ```
 
 ### Xcode schemes
@@ -171,12 +175,15 @@ You can provide an optional and custom [`xcconfig`](https://help.apple.com/xcode
 
 ## Testing
 
+You can review test results in  `$(IOS_OUTPUT_PATH)/Logs/Test`.
+
 `make ios-test` builds and runs unit tests of cross-platform code and of the SDK. Other types of tests available include:
 
 * `make ios-integration-test` runs UI tests from the "Integration Test Harness" scheme.
 * `make ios-sanitize` runs unit tests from the "CI" scheme with the Thread Sanitizer and Undefined Behavior Sanitizer enabled.
 * `make ios-sanitize-address` runs unit tests from the "CI" scheme with the Address Sanitizer enabled.
 * `make ios-static-analyzer` runs unit tests from the "CI" scheme with the Static Analyzer enabled.
+* `make ios-uitest` runs user interface testing from the "iosapp" scheme.
 
 These commands are run by default on a single Simulator. To enable legacy iOS versions and more device types, add `MORE_SIMULATORS=YES`. Use `IOS_LATEST=YES`, `IOS_11=YES`, etc. to test on specific iOS versions.
 
@@ -187,8 +194,29 @@ To skip a specific test or class of tests, add `SKIP_TESTING=test/MGLNameOfTestC
 To run the cross-platform tests in Xcode instead of on the command line:
 
 1. Run `make iproj` to set up the workspace.
-1. Change the scheme to “test (platform project)” and press Command-R to run core unit tests.
-1. Change the scheme to “CI” and press Command-U to run SDK integration tests.
+1. Change the scheme to “test (platform project)” and press Command-R (⌘-R) to run core unit tests.
+1. Change the scheme to “CI” and press Command-U (⌘-U) to run SDK integration tests.
+
+### Testing from the command line
+
+```bash
+# Change Directory
+cd platform/ios/platform/ios
+
+# Test Scheme CI
+xcodebuild test -scheme CI \
+  -destination 'platform=iOS Simulator,OS=14.5,name=iPhone SE (2nd generation)'
+
+# Test Scheme with Test Plan over OS versions
+xcodebuild test -scheme CI -testPlan CI-Expressions \
+  -destination 'platform=iOS Simulator,OS=14.5,name=iPhone SE (2nd generation)'
+
+xcodebuild test -scheme CI -testPlan CI-Expressions \
+  -destination 'platform=iOS Simulator,OS=15.4,name=iPhone SE (3rd generation)'
+
+xcodebuild test -scheme CI -testPlan CI-Expressions \
+  -destination 'platform=iOS Simulator,OS=15.5,name=iPhone SE (3rd generation)'
+```
 
 ## Access tokens
 
