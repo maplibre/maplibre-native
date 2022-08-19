@@ -130,3 +130,41 @@ Which will log the following samples.
 #### Xcode Sample Logging Output
 
 > MapLibre: online_file_source.cpp activateRequest req->resource.url = https://demotiles.maplibre.org/style.json
+
+---
+
+### Autocomplete with `make`
+
+MapLibre makes use of several command line tools for local and cloud builds.  
+To see what targets exist you have to review the `Makefile`, which can be tedious.
+
+There is a better way with the Zsh.  While in a folder with a `Makefile`, you can type `make` followed by hitting `<tab>` twice.
+
+
+```zsh
+cd platform/android
+make android # <tab><tab>
+# Example, Android make targets starting with `ap`
+# apackage  aproj
+
+# ----
+
+cd platform/ios
+make ios # <tab><tab>
+# Example, iOS make targets starting with `ios`
+# ios ios-lint ios-sanitize ios-test
+
+make macos # <tab><tab>
+# Example, macOS make targets starting with `macos`
+# macos       macos-lint  macos-test
+```
+
+To add this feature add the following to your zsh.
+
+```zsh
+# open ~/.zprofile
+
+# Autocomplete for `make` when in a directory 
+zstyle ':completion:*:*:make:*' tag-order 'targets'
+autoload -Uz compinit && compinit
+```

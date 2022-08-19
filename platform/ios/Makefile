@@ -287,6 +287,7 @@ macos: $(MACOS_PROJ_PATH)
 xproj: $(MACOS_PROJ_PATH)
 	xed $(MACOS_WORK_PATH)
 
+#  make macos-test
 .PHONY: macos-test
 macos-test: $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
