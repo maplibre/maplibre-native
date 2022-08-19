@@ -290,7 +290,9 @@ using namespace std::string_literals;
     }
     {
         NSDictionary *context = @{@"loremIpsum": MGLConstantExpression(@"Lorem ipsum dolor sit amet")};
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"MGL_LET('loremIpsum', 'Lorem ipsum dolor sit amet', uppercase($loremIpsum))", context];
         NSExpression *compatibilityExpression = [NSExpression expressionWithFormat:@"FUNCTION(uppercase($loremIpsum), 'mgl_expressionWithContext:', %@)", context];
         NSArray *jsonExpression = @[@"let", @"loremIpsum", @"Lorem ipsum dolor sit amet", @[@"upcase", @[@"var", @"loremIpsum"]]];
@@ -624,7 +626,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([expression expressionValueWithObject:nil context:nil], @-2);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionForFunction:@"mgl_round:" arguments:@[MGLConstantExpression(@1.5)]];
         NSArray *jsonExpression = @[@"round", @1.5];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -665,7 +669,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionForFunction:@"mgl_log2:" arguments:@[MGLConstantExpression(@1024)]];
         NSArray *jsonExpression = @[@"log2", @1024];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -749,7 +755,9 @@ using namespace std::string_literals;
     {
         MGLPointAnnotation *point = [[MGLPointAnnotation alloc] init];
         point.coordinate = CLLocationCoordinate2DMake(1, -1);
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionForFunction:@"mgl_distanceFrom:" arguments:@[MGLConstantExpression(point)]];
         NSArray *jsonExpression = @[@"distance", @{@"type": @"Point", @"coordinates": @[@-1, @1]}];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -762,7 +770,9 @@ using namespace std::string_literals;
     NSArray *arguments = @[MGLConstantExpression(@"MacDonald")];
     {
         NSExpression *expression = [NSExpression expressionWithFormat:@"FUNCTION('Old', 'stringByAppendingString:', 'MacDonald')"];
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *aftermarketExpression = [NSExpression expressionWithFormat:@"mgl_join({'Old', 'MacDonald'})"];
         NSArray *jsonExpression = @[@"concat", @"Old", @"MacDonald"];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -866,7 +876,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"MGL_FUNCTION('to-color', x, y, z)"];
         NSArray *jsonExpression = @[@"to-color", @[@"get", @"x"], @[@"get", @"y"], @[@"get", @"z"]];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -898,7 +910,6 @@ using namespace std::string_literals;
         NSArray *jsonExpression = @[@"interpolate", @[@"linear"], @[@"get", @"x"], @0, @100, @10, @200];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects(compatibilityExpression.mgl_jsonExpressionObject, jsonExpression);
-        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
@@ -945,7 +956,9 @@ using namespace std::string_literals;
 
 - (void)testMatchExpressionObject {
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"MGL_MATCH(2 - 1,  %@, %@, %@, %@, 'default')", MGLConstantExpression(@1),
                                     MGLConstantExpression(@"one"),
                                     MGLConstantExpression(@0),
@@ -984,7 +997,9 @@ using namespace std::string_literals;
 
 - (void)testCoalesceExpressionObject {
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_coalesce(%@)",
                                     @[[NSExpression expressionForKeyPath:@"x"],
                                       [NSExpression expressionForKeyPath:@"y"],
@@ -1022,7 +1037,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"MGL_IF(%@, %@, %@)",
                                     [NSExpression expressionWithFormat:@"%@", [NSPredicate predicateWithFormat:@"1 = 2"]],
                                     MGLConstantExpression(@YES),
@@ -1113,7 +1130,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionForFunction:@"mgl_does:have:"
                                                              arguments:@[[NSExpression expressionForEvaluatedObject],
                                                                          [NSExpression expressionForConstantValue:@"x"]]];
@@ -1174,7 +1193,9 @@ using namespace std::string_literals;
         MGLAttributedExpression *attribute4 = [MGLAttributedExpression attributedExpression:[NSExpression expressionForConstantValue:@"\r"]
                                                                                   fontNames:@[]
                                                                                   fontScale:nil];
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@, %@, %@, %@)",
                                     MGLConstantExpression(attribute1),
                                     MGLConstantExpression(attribute4),
@@ -1304,7 +1325,9 @@ using namespace std::string_literals;
 
 - (void)testGenericExpressionObject {
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [NSExpression expressionWithFormat:@"MGL_FUNCTION('random', 1, 2, 3, 4, 5)"];
         NSArray *jsonExpression = @[@"random", @1, @2, @3, @4, @5];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
@@ -1373,7 +1396,9 @@ using namespace std::string_literals;
         MGLAttributedExpression *attributedExpression = [MGLAttributedExpression attributedExpression:keyExpression attributes:@{}];
         NSExpression *original = [NSExpression expressionForConstantValue:attributedExpression];
 
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *coalesceExpression = [NSExpression expressionWithFormat:@"mgl_coalesce({%K, %K})", @"name_en", @"name"];
         MGLAttributedExpression *expectedAttributedExpression = [MGLAttributedExpression attributedExpression:coalesceExpression attributes:@{}];
         NSExpression *expected = [NSExpression expressionForConstantValue:expectedAttributedExpression];
@@ -1501,7 +1526,9 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMGLJSONObject:jsonExpression], expression);
     }
     {
+        #if TARGET_OS_IPHONE
         XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+        #endif
         NSExpression *expression = [[NSExpression expressionForConstantValue:@"Old"] mgl_expressionByAppendingExpression:[NSExpression expressionForConstantValue:@"MacDonald"]];
 
         NSArray *jsonExpression = @[@"concat", @"Old", @"MacDonald"];
