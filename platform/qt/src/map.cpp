@@ -129,6 +129,12 @@ mbgl::ResourceOptions resourceOptionsFromSettings(const QMapLibreGL::Settings &s
         .withMaximumCacheSize(settings.cacheDatabaseMaximumSize()));
 }
 
+mbgl::ClientOptions clientOptionsFromSettings(const QMapLibreGL::Settings &settings) {
+    return std::move(mbgl::ClientOptions()
+        .withName(settings.clientName().toStdString())
+        .withVersion(settings.clientVersion().toStdString()));
+}
+
 
 mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibreGL::Annotation & annotation) {
     auto asGeometry = [](const QMapLibreGL::ShapeAnnotationGeometry &geometry) {
@@ -1132,7 +1138,7 @@ void Map::removeImage(const QString &id)
 
 /*!
     Adds a \a filter to a style \a layer using the format described in the \l
-    {https://www.mapbox.com/mapbox-gl-js/style-spec/#other-filter}{Mapbox style specification}.
+    {https://maplibre.org/maplibre-gl-js-docs/style-spec/#other-filter}{Mapbox style specification}.
 
     Given a layer \c marker from an arbitrary GeoJSON source containing features of type \b
     "Point" and \b "LineString", this example shows how to make sure the layer will only tag
@@ -1209,7 +1215,7 @@ QVariant QVariantFromValue(const mbgl::Value &value) {
     Returns the current \a expression-based filter value applied to a style
     \layer, if any.
 
-    Filter value types are described in the {https://www.mapbox.com/mapbox-gl-js/style-spec/#types}{Mapbox style specification}.
+    Filter value types are described in the {https://maplibre.org/maplibre-gl-js-docs/style-spec/#types}{Mapbox style specification}.
 */
 QVariant Map::getFilter(const QString &layer)  const {
     using namespace mbgl::style;
@@ -1380,11 +1386,14 @@ MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qrea
         defaultStyles.append(QPair<QString, QString>(
             QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
     }
+    
+    auto clientOptions = clientOptionsFromSettings(settings);
 
     // Setup the Map object.
     mapObj = std::make_unique<mbgl::Map>(*this, *m_mapObserver,
                                          mapOptionsFromSettings(settings, size, m_pixelRatio),
-                                         resourceOptions);
+                                         resourceOptions,
+                                         clientOptionsFromSettings(settings));
 
      if (settings.resourceTransform()) {
          m_resourceTransform = std::make_unique<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>>(
@@ -1401,7 +1410,7 @@ MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qrea
              actorRef.invoke(&mbgl::ResourceTransform::TransformCallback::operator(), kind, url, std::move(onFinished));
          }};
          std::shared_ptr<mbgl::FileSource> fs =
-             mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions);
+             mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
          fs->setResourceTransform(std::move(transform));
      }
 

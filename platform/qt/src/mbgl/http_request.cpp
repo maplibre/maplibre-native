@@ -39,7 +39,18 @@ QNetworkRequest HTTPRequest::networkRequest() const
     QNetworkRequest req = QNetworkRequest(requestUrl());
     req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
-    static const QByteArray agent = QString("MapLibreGL/%1 (Qt %2)").arg(version::revision).arg(QT_VERSION_STR).toLatin1();
+    static const QByteArray agent = !m_context->getClientOptions().name().empty()
+        ? QString("%1/%2 (%3) MapLibreGL/%4 (Qt %5)")
+            .arg(QString::fromStdString(m_context->getClientOptions().name()))
+            .arg(QString::fromStdString(m_context->getClientOptions().version()))
+            .arg(QSysInfo::prettyProductName())
+            .arg(version::revision)
+            .arg(QT_VERSION_STR)
+            .toLatin1()
+        : QString("MapLibreGL/%1 (Qt %2)")
+            .arg(version::revision)
+            .arg(QT_VERSION_STR)
+            .toLatin1();
     req.setRawHeader("User-Agent", agent);
 
     if (m_resource.priorEtag) {

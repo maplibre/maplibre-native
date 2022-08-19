@@ -3,6 +3,7 @@
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 
@@ -91,6 +92,11 @@ public:
     virtual void setResourceOptions(ResourceOptions) = 0;
     // gets the resource options
     virtual ResourceOptions getResourceOptions() = 0;
+
+    // sets the client options
+    virtual void setClientOptions(ClientOptions) = 0;
+    // gets the client options
+    virtual ClientOptions getClientOptions() = 0;
 
 protected:
     FileSource() = default;

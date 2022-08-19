@@ -10,6 +10,9 @@ int main(int argc, char **argv)
     settings.setCacheDatabasePath("/tmp/mbgl-cache.db");
     settings.setCacheDatabaseMaximumSize(20 * 1024 * 1024);
 
+    settings.setClientName("TestApp");
+    settings.setClientVersion("1.0");
+
     MapWindow window(settings);
 
     window.resize(800, 600);

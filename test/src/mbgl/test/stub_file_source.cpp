@@ -1,6 +1,7 @@
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/util/async_request.hpp>
-#include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 namespace mbgl {
 
@@ -20,10 +21,10 @@ public:
 };
 
 StubFileSource::StubFileSource(ResponseType type_):
-    StubFileSource::StubFileSource(ResourceOptions().withTileServerOptions(TileServerOptions::MapTilerConfiguration()), type_) {}
+    StubFileSource::StubFileSource(ResourceOptions().withTileServerOptions(TileServerOptions::MapTilerConfiguration()), ClientOptions(), type_) {}
 
-StubFileSource::StubFileSource(const ResourceOptions& options, ResponseType type_)
-        : type(type_), resourceOptions(options.clone()) {
+StubFileSource::StubFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_, ResponseType type_)
+        : type(type_), resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
     if (type == ResponseType::Synchronous) {
         return;
     }
@@ -120,6 +121,14 @@ void StubFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions StubFileSource::getResourceOptions() {
     return resourceOptions.clone();
+}
+
+void StubFileSource::setClientOptions(ClientOptions options) {
+    clientOptions = options;
+}
+
+ClientOptions StubFileSource::getClientOptions() {
+    return clientOptions.clone();
 }
 
 } // namespace mbgl

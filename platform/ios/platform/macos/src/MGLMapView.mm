@@ -34,6 +34,7 @@
 #import <mbgl/storage/network_status.hpp>
 #import <mbgl/storage/resource_options.hpp>
 #import <mbgl/math/wrap.hpp>
+#import <mbgl/util/client_options.hpp>
 #import <mbgl/util/constants.hpp>
 #import <mbgl/util/chrono.hpp>
 #import <mbgl/util/exception.hpp>
@@ -298,13 +299,14 @@ public:
     resourceOptions.withTileServerOptions(*tileServerOptions)
                    .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String);
-    
+    mbgl::ClientOptions clientOptions;
+
     auto apiKey = [[MGLSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
     }                     
 
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
 
     // Notify map object when network reachability status changes.
     _reachability = [MGLReachability reachabilityForInternetConnection];

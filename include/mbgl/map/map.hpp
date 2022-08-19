@@ -13,6 +13,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/map/projection_mode.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <cstdint>
 #include <string>
@@ -35,7 +36,8 @@ public:
     explicit Map(RendererFrontend&,
                  MapObserver&,
                  const MapOptions&,
-                 const ResourceOptions&);
+                 const ResourceOptions&,
+                 const ClientOptions& = ClientOptions());
     ~Map();
 
     // Register a callback that will get called (on the render thread) when all resources have

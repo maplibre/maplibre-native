@@ -36,7 +36,7 @@ std::string toAbsoluteURL(const std::string &fileName) {
 using namespace mbgl;
 
 TEST(MBTilesFileSource, AcceptsURL) {
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
     EXPECT_TRUE(mbtiles.canRequest(Resource::style("mbtiles:///test")));
     EXPECT_FALSE(mbtiles.canRequest(Resource::style("mbtile://test")));
     EXPECT_FALSE(mbtiles.canRequest(Resource::style("mbtiles:")));
@@ -47,7 +47,7 @@ TEST(MBTilesFileSource, AcceptsURL) {
 TEST(MBTilesFileSource, AbsolutePath) {
     util::RunLoop loop;
 
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         {Resource::Unknown, "mbtiles://not_absolute"}, [&](Response res) {
@@ -66,7 +66,7 @@ TEST(MBTilesFileSource, AbsolutePath) {
 TEST(MBTilesFileSource, NonExistentFile) {
     util::RunLoop loop;
 
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         {Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
@@ -85,7 +85,7 @@ TEST(MBTilesFileSource, NonExistentFile) {
 TEST(MBTilesFileSource, TileJSON) {
     util::RunLoop loop;
 
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         {Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
@@ -105,7 +105,7 @@ TEST(MBTilesFileSource, TileJSON) {
 TEST(MBTilesFileSource, Tile) {
     util::RunLoop loop;
 
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
@@ -124,7 +124,7 @@ TEST(MBTilesFileSource, Tile) {
 TEST(MBTilesFileSource, NonExistentTile) {
     util::RunLoop loop;
 
-    MBTilesFileSource mbtiles(ResourceOptions::Default());
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),

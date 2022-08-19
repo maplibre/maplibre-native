@@ -259,7 +259,7 @@ public class Expression {
    * @param green green color expression
    * @param blue  blue color expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-rgb">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-rgb">Style specification</a>
    */
   public static Expression rgb(@NonNull Expression red, @NonNull Expression green, @NonNull Expression blue) {
     return new Expression("rgb", red, green, blue);
@@ -289,7 +289,7 @@ public class Expression {
    * @param green green color value
    * @param blue  blue color value
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-rgb">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-rgb">Style specification</a>
    */
   public static Expression rgb(@NonNull Number red, @NonNull Number green, @NonNull Number blue) {
     return rgb(literal(red), literal(green), literal(blue));
@@ -325,7 +325,7 @@ public class Expression {
    * @param blue  blue color value
    * @param alpha alpha color value
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-rgba">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-rgba">Style specification</a>
    */
   public static Expression rgba(@NonNull Expression red, @NonNull Expression green,
                                 @NonNull Expression blue, @NonNull Expression alpha) {
@@ -357,7 +357,7 @@ public class Expression {
    * @param blue  blue color value
    * @param alpha alpha color value
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-rgba">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-rgba">Style specification</a>
    */
   public static Expression rgba(@NonNull Number red, @NonNull Number green, @NonNull Number blue, @NonNull Number
     alpha) {
@@ -369,7 +369,7 @@ public class Expression {
    *
    * @param expression an expression to convert to a color
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-to-rgba">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-to-rgba">Style specification</a>
    */
   public static Expression toRgba(@NonNull Expression expression) {
     return new Expression("to-rgba", expression);
@@ -393,7 +393,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression("==", compareOne, compareTwo);
@@ -418,7 +418,7 @@ public class Expression {
    * @param compareTwo the second expression
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                               @NonNull Expression collator) {
@@ -442,7 +442,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second boolean
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, boolean compareTwo) {
     return eq(compareOne, literal(compareTwo));
@@ -465,7 +465,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return eq(compareOne, literal(compareTwo));
@@ -490,7 +490,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, @NonNull String compareTwo,
                               @NonNull Expression collator) {
@@ -514,7 +514,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-==">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-==">Style specification</a>
    */
   public static Expression eq(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return eq(compareOne, literal(compareTwo));
@@ -538,7 +538,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression("!=", compareOne, compareTwo);
@@ -563,7 +563,7 @@ public class Expression {
    * @param compareTwo the second expression
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                                @NonNull Expression collator) {
@@ -587,7 +587,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second boolean
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(Expression compareOne, boolean compareTwo) {
     return new Expression("!=", compareOne, literal(compareTwo));
@@ -610,7 +610,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return new Expression("!=", compareOne, literal(compareTwo));
@@ -635,7 +635,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(@NonNull Expression compareOne, @NonNull String compareTwo,
                                @NonNull Expression collator) {
@@ -659,7 +659,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!=">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!=">Style specification</a>
    */
   public static Expression neq(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return new Expression("!=", compareOne, literal(compareTwo));
@@ -683,7 +683,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E">Style specification</a>
    */
   public static Expression gt(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression(">", compareOne, compareTwo);
@@ -708,7 +708,7 @@ public class Expression {
    * @param compareTwo the second expression
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E">Style specification</a>
    */
   public static Expression gt(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                               @NonNull Expression collator) {
@@ -732,7 +732,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E">Style specification</a>
    */
   public static Expression gt(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return new Expression(">", compareOne, literal(compareTwo));
@@ -755,7 +755,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E">Style specification</a>
    */
   public static Expression gt(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return new Expression(">", compareOne, literal(compareTwo));
@@ -780,7 +780,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E">Style specification</a>
    */
   public static Expression gt(@NonNull Expression compareOne, @NonNull String compareTwo,
                               @NonNull Expression collator) {
@@ -805,7 +805,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C">Style specification</a>
    */
   public static Expression lt(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression("<", compareOne, compareTwo);
@@ -830,7 +830,7 @@ public class Expression {
    * @param compareTwo the second number
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C">Style specification</a>
    */
   public static Expression lt(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                               @NonNull Expression collator) {
@@ -854,7 +854,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C">Style specification</a>
    */
   public static Expression lt(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return new Expression("<", compareOne, literal(compareTwo));
@@ -877,7 +877,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C">Style specification</a>
    */
   public static Expression lt(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return new Expression("<", compareOne, literal(compareTwo));
@@ -902,7 +902,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C">Style specification</a>
    */
   public static Expression lt(@NonNull Expression compareOne, @NonNull String compareTwo,
                               @NonNull Expression collator) {
@@ -927,7 +927,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E%3D">Style specification</a>
    */
   public static Expression gte(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression(">=", compareOne, compareTwo);
@@ -952,7 +952,7 @@ public class Expression {
    * @param compareTwo the second expression
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E%3D">Style specification</a>
    */
   public static Expression gte(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                                @NonNull Expression collator) {
@@ -976,7 +976,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E%3D">Style specification</a>
    */
   public static Expression gte(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return new Expression(">=", compareOne, literal(compareTwo));
@@ -999,7 +999,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E%3D">Style specification</a>
    */
   public static Expression gte(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return new Expression(">=", compareOne, literal(compareTwo));
@@ -1024,7 +1024,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3E%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3E%3D">Style specification</a>
    */
   public static Expression gte(@NonNull Expression compareOne, @NonNull String compareTwo,
                                @NonNull Expression collator) {
@@ -1049,7 +1049,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C%3D">Style specification</a>
    */
   public static Expression lte(@NonNull Expression compareOne, @NonNull Expression compareTwo) {
     return new Expression("<=", compareOne, compareTwo);
@@ -1074,7 +1074,7 @@ public class Expression {
    * @param compareTwo the second expression
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C%3D">Style specification</a>
    */
   public static Expression lte(@NonNull Expression compareOne, @NonNull Expression compareTwo,
                                @NonNull Expression collator) {
@@ -1098,7 +1098,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C%3D">Style specification</a>
    */
   public static Expression lte(@NonNull Expression compareOne, @NonNull Number compareTwo) {
     return new Expression("<=", compareOne, literal(compareTwo));
@@ -1121,7 +1121,7 @@ public class Expression {
    * @param compareOne the first expression
    * @param compareTwo the second string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C%3D">Style specification</a>
    */
   public static Expression lte(@NonNull Expression compareOne, @NonNull String compareTwo) {
     return new Expression("<=", compareOne, literal(compareTwo));
@@ -1146,7 +1146,7 @@ public class Expression {
    * @param compareTwo the second String
    * @param collator   the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%3C%3D">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%3C%3D">Style specification</a>
    */
   public static Expression lte(@NonNull Expression compareOne, @NonNull String compareTwo,
                                @NonNull Expression collator) {
@@ -1174,7 +1174,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-all">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-all">Style specification</a>
    */
   public static Expression all(@NonNull Expression... input) {
     return new Expression("all", input);
@@ -1201,7 +1201,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-any">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-any">Style specification</a>
    */
   public static Expression any(@NonNull Expression... input) {
     return new Expression("any", input);
@@ -1223,7 +1223,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!">Style specification</a>
    */
   public static Expression not(@NonNull Expression input) {
     return new Expression("!", input);
@@ -1245,7 +1245,7 @@ public class Expression {
    *
    * @param input boolean input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-!">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-!">Style specification</a>
    */
   public static Expression not(boolean input) {
     return not(literal(input));
@@ -1277,7 +1277,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-case">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-case">Style specification</a>
    */
   public static Expression switchCase(@NonNull @Size(min = 1) Expression... input) {
     return new Expression("case", input);
@@ -1309,7 +1309,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-match">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-match">Style specification</a>
    */
   public static Expression match(@NonNull @Size(min = 2) Expression... input) {
     return new Expression("match", input);
@@ -1340,7 +1340,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-match">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-match">Style specification</a>
    */
   public static Expression match(@NonNull Expression input, @NonNull Expression defaultOutput, @NonNull Stop... stops) {
     return match(join(join(new Expression[] {input}, Stop.toExpressionArray(stops)), new Expression[] {defaultOutput}));
@@ -1367,7 +1367,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-coalesce">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-coalesce">Style specification</a>
    */
   public static Expression coalesce(@NonNull Expression... input) {
     return new Expression("coalesce", input);
@@ -1391,7 +1391,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-properties">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-properties">Style specification</a>
    */
   public static Expression properties() {
     return new Expression("properties");
@@ -1412,7 +1412,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-geometry-types">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-geometry-types">Style specification</a>
    */
   public static Expression geometryType() {
     return new Expression("geometry-type");
@@ -1433,7 +1433,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-id">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-id">Style specification</a>
    */
   public static Expression id() {
     return new Expression("id");
@@ -1454,7 +1454,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-accumulated">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-accumulated">Style specification</a>
    */
   public static Expression accumulated() {
     return new Expression("accumulated");
@@ -1484,7 +1484,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-heatmap-density">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-heatmap-density">Style specification</a>
    */
   public static Expression heatmapDensity() {
     return new Expression("heatmap-density");
@@ -1510,7 +1510,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-line-progress">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-line-progress">Style specification</a>
    */
   public static Expression lineProgress() {
     return new Expression("line-progress");
@@ -1522,7 +1522,7 @@ public class Expression {
    * @param number     the index expression
    * @param expression the array expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-at">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-at">Style specification</a>
    */
   public static Expression at(@NonNull Expression number, @NonNull Expression expression) {
     return new Expression("at", number, expression);
@@ -1534,7 +1534,7 @@ public class Expression {
    * @param number     the index expression
    * @param expression the array expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-at">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-at">Style specification</a>
    */
   public static Expression at(@NonNull Number number, @NonNull Expression expression) {
     return at(literal(number), expression);
@@ -1546,7 +1546,7 @@ public class Expression {
    * @param needle   the item expression
    * @param haystack the array or string expression
    * @return true if exists.
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-in">Style specification</a>
    */
   public static Expression in(@NonNull Expression needle, @NonNull Expression haystack) {
     return new Expression("in", needle, haystack);
@@ -1558,7 +1558,7 @@ public class Expression {
    * @param needle   the item expression
    * @param haystack the array or string expression
    * @return true if exists.
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-in">Style specification</a>
    */
   public static Expression in(@NonNull Number needle, @NonNull Expression haystack) {
     return new Expression("in", literal(needle), haystack);
@@ -1570,7 +1570,7 @@ public class Expression {
    * @param needle   the item expression
    * @param haystack the array or string expression
    * @return true if exists.
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-in">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-in">Style specification</a>
    */
   public static Expression in(@NonNull String needle, @NonNull Expression haystack) {
     return new Expression("in", literal(needle), haystack);
@@ -1587,7 +1587,7 @@ public class Expression {
    *                Currently supports `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`
    *                geometry types
    * @return the distance in the unit "meters".
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-distance">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-distance">Style specification</a>
    */
   public static Expression distance(@NonNull GeoJson geoJson) {
     Map<String, Expression> map = new HashMap<>();
@@ -1622,7 +1622,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-get">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-get">Style specification</a>
    */
   public static Expression get(@NonNull Expression input) {
     return new Expression("get", input);
@@ -1646,7 +1646,7 @@ public class Expression {
    *
    * @param input string input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-get">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-get">Style specification</a>
    */
   public static Expression get(@NonNull String input) {
     return get(literal(input));
@@ -1670,7 +1670,7 @@ public class Expression {
    * @param key    a property value key
    * @param object an expression object
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-get">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-get">Style specification</a>
    */
   public static Expression get(@NonNull Expression key, @NonNull Expression object) {
     return new Expression("get", key, object);
@@ -1694,7 +1694,7 @@ public class Expression {
    * @param key    a property value key
    * @param object an expression object
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-get">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-get">Style specification</a>
    */
   public static Expression get(@NonNull String key, @NonNull Expression object) {
     return get(literal(key), object);
@@ -1716,7 +1716,7 @@ public class Expression {
    *
    * @param key the expression property value key
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-has">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-has">Style specification</a>
    */
   public static Expression has(@NonNull Expression key) {
     return new Expression("has", key);
@@ -1738,7 +1738,7 @@ public class Expression {
    *
    * @param key the property value key
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-has">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-has">Style specification</a>
    */
   public static Expression has(@NonNull String key) {
     return has(literal(key));
@@ -1761,7 +1761,7 @@ public class Expression {
    * @param key    the expression property value key
    * @param object an expression object
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-has">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-has">Style specification</a>
    */
   public static Expression has(@NonNull Expression key, @NonNull Expression object) {
     return new Expression("has", key, object);
@@ -1784,7 +1784,7 @@ public class Expression {
    * @param key    the property value key
    * @param object an expression object
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-has">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-has">Style specification</a>
    */
   public static Expression has(@NonNull String key, @NonNull Expression object) {
     return has(literal(key), object);
@@ -1795,7 +1795,7 @@ public class Expression {
    *
    * @param expression an expression object or expression string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-lenght">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-lenght">Style specification</a>
    */
   public static Expression length(@NonNull Expression expression) {
     return new Expression("length", expression);
@@ -1806,7 +1806,7 @@ public class Expression {
    *
    * @param input a string
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-lenght">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-lenght">Style specification</a>
    */
   public static Expression length(@NonNull String input) {
     return length(literal(input));
@@ -1827,7 +1827,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-ln2">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-ln2">Style specification</a>
    */
   public static Expression ln2() {
     return new Expression("ln2");
@@ -1848,7 +1848,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-pi">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-pi">Style specification</a>
    */
   public static Expression pi() {
     return new Expression("pi");
@@ -1869,7 +1869,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-e">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-e">Style specification</a>
    */
   public static Expression e() {
     return new Expression("e");
@@ -1891,7 +1891,7 @@ public class Expression {
    *
    * @param numbers the numbers to calculate the sum for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-+">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-+">Style specification</a>
    */
   public static Expression sum(@Size(min = 2) Expression... numbers) {
     return new Expression("+", numbers);
@@ -1913,7 +1913,7 @@ public class Expression {
    *
    * @param numbers the numbers to calculate the sum for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-+">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-+">Style specification</a>
    */
   @SuppressLint("Range")
   public static Expression sum(@Size(min = 2) Number... numbers) {
@@ -1940,7 +1940,7 @@ public class Expression {
    *
    * @param numbers the numbers to calculate the product for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-*">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-*">Style specification</a>
    */
   public static Expression product(@Size(min = 2) Expression... numbers) {
     return new Expression("*", numbers);
@@ -1962,7 +1962,7 @@ public class Expression {
    *
    * @param numbers the numbers to calculate the product for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-*">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-*">Style specification</a>
    */
   @SuppressLint("Range")
   public static Expression product(@Size(min = 2) Number... numbers) {
@@ -1989,7 +1989,7 @@ public class Expression {
    *
    * @param number the number subtract from 0
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions--">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions--">Style specification</a>
    */
   public static Expression subtract(@NonNull Expression number) {
     return new Expression("-", number);
@@ -2011,7 +2011,7 @@ public class Expression {
    *
    * @param number the number subtract from 0
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions--">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions--">Style specification</a>
    */
   public static Expression subtract(@NonNull Number number) {
     return subtract(literal(number));
@@ -2034,7 +2034,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions--">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions--">Style specification</a>
    */
   public static Expression subtract(@NonNull Expression first, @NonNull Expression second) {
     return new Expression("-", first, second);
@@ -2057,7 +2057,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions--">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions--">Style specification</a>
    */
   public static Expression subtract(@NonNull Number first, @NonNull Number second) {
     return subtract(literal(first), literal(second));
@@ -2080,7 +2080,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-/">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-/">Style specification</a>
    */
   public static Expression division(@NonNull Expression first, @NonNull Expression second) {
     return new Expression("/", first, second);
@@ -2103,7 +2103,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-/">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-/">Style specification</a>
    */
   public static Expression division(@NonNull Number first, @NonNull Number second) {
     return division(literal(first), literal(second));
@@ -2126,7 +2126,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%25">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%25">Style specification</a>
    */
   public static Expression mod(@NonNull Expression first, @NonNull Expression second) {
     return new Expression("%", first, second);
@@ -2149,7 +2149,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%25">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%25">Style specification</a>
    */
   public static Expression mod(@NonNull Number first, @NonNull Number second) {
     return mod(literal(first), literal(second));
@@ -2172,7 +2172,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%5E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%5E">Style specification</a>
    */
   public static Expression pow(@NonNull Expression first, @NonNull Expression second) {
     return new Expression("^", first, second);
@@ -2195,7 +2195,7 @@ public class Expression {
    * @param first  the first number
    * @param second the second number
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-%5E">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-%5E">Style specification</a>
    */
   public static Expression pow(@NonNull Number first, @NonNull Number second) {
     return pow(literal(first), literal(second));
@@ -2217,7 +2217,7 @@ public class Expression {
    *
    * @param number the number to take the square root from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-sqrt">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-sqrt">Style specification</a>
    */
   public static Expression sqrt(@NonNull Expression number) {
     return new Expression("sqrt", number);
@@ -2239,7 +2239,7 @@ public class Expression {
    *
    * @param number the number to take the square root from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-sqrt">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-sqrt">Style specification</a>
    */
   public static Expression sqrt(@NonNull Number number) {
     return sqrt(literal(number));
@@ -2261,7 +2261,7 @@ public class Expression {
    *
    * @param number the number to take base-ten logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-log10">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-log10">Style specification</a>
    */
   public static Expression log10(@NonNull Expression number) {
     return new Expression("log10", number);
@@ -2283,7 +2283,7 @@ public class Expression {
    *
    * @param number the number to take base-ten logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-log10">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-log10">Style specification</a>
    */
   public static Expression log10(@NonNull Number number) {
     return log10(literal(number));
@@ -2305,7 +2305,7 @@ public class Expression {
    *
    * @param number the number to take natural logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-ln">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-ln">Style specification</a>
    */
   public static Expression ln(Expression number) {
     return new Expression("ln", number);
@@ -2327,7 +2327,7 @@ public class Expression {
    *
    * @param number the number to take natural logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-ln">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-ln">Style specification</a>
    */
   public static Expression ln(@NonNull Number number) {
     return ln(literal(number));
@@ -2349,7 +2349,7 @@ public class Expression {
    *
    * @param number the number to take base-two logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-log2">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-log2">Style specification</a>
    */
   public static Expression log2(@NonNull Expression number) {
     return new Expression("log2", number);
@@ -2371,7 +2371,7 @@ public class Expression {
    *
    * @param number the number to take base-two logarithm from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-log2">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-log2">Style specification</a>
    */
   public static Expression log2(@NonNull Number number) {
     return log2(literal(number));
@@ -2393,7 +2393,7 @@ public class Expression {
    *
    * @param number the number to calculate the sine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-sin">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-sin">Style specification</a>
    */
   public static Expression sin(@NonNull Expression number) {
     return new Expression("sin", number);
@@ -2415,7 +2415,7 @@ public class Expression {
    *
    * @param number the number to calculate the sine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-sin">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-sin">Style specification</a>
    */
   public static Expression sin(@NonNull Number number) {
     return sin(literal(number));
@@ -2437,7 +2437,7 @@ public class Expression {
    *
    * @param number the number to calculate the cosine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-cos">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-cos">Style specification</a>
    */
   public static Expression cos(@NonNull Expression number) {
     return new Expression("cos", number);
@@ -2459,7 +2459,7 @@ public class Expression {
    *
    * @param number the number to calculate the cosine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-cos">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-cos">Style specification</a>
    */
   public static Expression cos(@NonNull Number number) {
     return new Expression("cos", literal(number));
@@ -2481,7 +2481,7 @@ public class Expression {
    *
    * @param number the number to calculate the tangent for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-tan">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-tan">Style specification</a>
    */
   public static Expression tan(@NonNull Expression number) {
     return new Expression("tan", number);
@@ -2503,7 +2503,7 @@ public class Expression {
    *
    * @param number the number to calculate the tangent for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-tan">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-tan">Style specification</a>
    */
   public static Expression tan(@NonNull Number number) {
     return new Expression("tan", literal(number));
@@ -2525,7 +2525,7 @@ public class Expression {
    *
    * @param number the number to calculate the arcsine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-asin">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-asin">Style specification</a>
    */
   public static Expression asin(@NonNull Expression number) {
     return new Expression("asin", number);
@@ -2547,7 +2547,7 @@ public class Expression {
    *
    * @param number the number to calculate the arcsine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-asin">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-asin">Style specification</a>
    */
   public static Expression asin(@NonNull Number number) {
     return asin(literal(number));
@@ -2569,7 +2569,7 @@ public class Expression {
    *
    * @param number the number to calculate the arccosine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-acos">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-acos">Style specification</a>
    */
   public static Expression acos(@NonNull Expression number) {
     return new Expression("acos", number);
@@ -2591,7 +2591,7 @@ public class Expression {
    *
    * @param number the number to calculate the arccosine for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-acos">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-acos">Style specification</a>
    */
   public static Expression acos(@NonNull Number number) {
     return acos(literal(number));
@@ -2613,7 +2613,7 @@ public class Expression {
    *
    * @param number the number to calculate the arctangent for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-atan">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-atan">Style specification</a>
    */
   public static Expression atan(@NonNull Expression number) {
     return new Expression("atan", number);
@@ -2635,7 +2635,7 @@ public class Expression {
    *
    * @param number the number to calculate the arctangent for
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-atan">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-atan">Style specification</a>
    */
   public static Expression atan(@NonNull Number number) {
     return atan(literal(number));
@@ -2657,7 +2657,7 @@ public class Expression {
    *
    * @param numbers varargs of numbers to get the minimum from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-min">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-min">Style specification</a>
    */
   public static Expression min(@Size(min = 1) Expression... numbers) {
     return new Expression("min", numbers);
@@ -2679,7 +2679,7 @@ public class Expression {
    *
    * @param numbers varargs of numbers to get the minimum from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-min">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-min">Style specification</a>
    */
   @SuppressLint("Range")
   public static Expression min(@Size(min = 1) Number... numbers) {
@@ -2706,7 +2706,7 @@ public class Expression {
    *
    * @param numbers varargs of numbers to get the maximum from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-max">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-max">Style specification</a>
    */
   public static Expression max(@Size(min = 1) Expression... numbers) {
     return new Expression("max", numbers);
@@ -2728,7 +2728,7 @@ public class Expression {
    *
    * @param numbers varargs of numbers to get the maximum from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-max">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-max">Style specification</a>
    */
   @SuppressLint("Range")
   public static Expression max(@Size(min = 1) Number... numbers) {
@@ -2757,7 +2757,7 @@ public class Expression {
    *
    * @param expression number expression to round
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-round">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-round">Style specification</a>
    */
   public static Expression round(Expression expression) {
     return new Expression("round", expression);
@@ -2781,7 +2781,7 @@ public class Expression {
    *
    * @param number number to round
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-round">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-round">Style specification</a>
    */
   public static Expression round(@NonNull Number number) {
     return round(literal(number));
@@ -2803,7 +2803,7 @@ public class Expression {
    *
    * @param expression number expression to get absolute value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression abs(Expression expression) {
     return new Expression("abs", expression);
@@ -2825,7 +2825,7 @@ public class Expression {
    *
    * @param number number to get absolute value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression abs(@NonNull Number number) {
     return abs(literal(number));
@@ -2847,7 +2847,7 @@ public class Expression {
    *
    * @param expression number expression to get value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression ceil(Expression expression) {
     return new Expression("ceil", expression);
@@ -2869,7 +2869,7 @@ public class Expression {
    *
    * @param number number to get value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression ceil(@NonNull Number number) {
     return ceil(literal(number));
@@ -2891,7 +2891,7 @@ public class Expression {
    *
    * @param expression number expression to get value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression floor(Expression expression) {
     return new Expression("floor", expression);
@@ -2913,7 +2913,7 @@ public class Expression {
    *
    * @param number number to get value from
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-abs">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-abs">Style specification</a>
    */
   public static Expression floor(@NonNull Number number) {
     return floor(literal(number));
@@ -2940,7 +2940,7 @@ public class Expression {
    *
    * @param collator the collator expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-resolved-locale">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-resolved-locale">Style specification</a>
    */
   public static Expression resolvedLocale(Expression collator) {
     return new Expression("resolved-locale", collator);
@@ -2970,7 +2970,7 @@ public class Expression {
    *
    * @param expression the expression to evaluate
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-is-supported-script">Style
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-is-supported-script">Style
    * specification</a>
    */
   public static Expression isSupportedScript(Expression expression) {
@@ -3001,7 +3001,7 @@ public class Expression {
    *
    * @param string the string to evaluate
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-is-supported-script">Style
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-is-supported-script">Style
    * specification</a>
    */
   public static Expression isSupportedScript(@NonNull String string) {
@@ -3028,7 +3028,7 @@ public class Expression {
    *
    * @param string the string to upcase
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-upcase">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-upcase">Style specification</a>
    */
   public static Expression upcase(@NonNull Expression string) {
     return new Expression("upcase", string);
@@ -3054,7 +3054,7 @@ public class Expression {
    *
    * @param string string to upcase
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-upcase">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-upcase">Style specification</a>
    */
   public static Expression upcase(@NonNull String string) {
     return upcase(literal(string));
@@ -3080,7 +3080,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-downcase">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-downcase">Style specification</a>
    */
   public static Expression downcase(@NonNull Expression input) {
     return new Expression("downcase", input);
@@ -3106,7 +3106,7 @@ public class Expression {
    *
    * @param input string to downcase
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-downcase">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-downcase">Style specification</a>
    */
   public static Expression downcase(@NonNull String input) {
     return downcase(literal(input));
@@ -3128,7 +3128,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-concat">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-concat">Style specification</a>
    */
   public static Expression concat(@NonNull Expression... input) {
     return new Expression("concat", input);
@@ -3150,7 +3150,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-concat">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-concat">Style specification</a>
    */
   public static Expression concat(@NonNull String... input) {
     Expression[] stringExpression = new Expression[input.length];
@@ -3167,7 +3167,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-array">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-array">Style specification</a>
    */
   public static Expression array(@NonNull Expression input) {
     return new Expression("array", input);
@@ -3178,7 +3178,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-typeof">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-typeof">Style specification</a>
    */
   public static Expression typeOf(@NonNull Expression input) {
     return new Expression("typeof", input);
@@ -3192,7 +3192,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-string">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-string">Style specification</a>
    */
   public static Expression string(@NonNull Expression... input) {
     return new Expression("string", input);
@@ -3206,7 +3206,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-number">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-number">Style specification</a>
    */
   public static Expression number(@NonNull Expression... input) {
     return new Expression("number", input);
@@ -3254,7 +3254,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-boolean">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-boolean">Style specification</a>
    */
   public static Expression bool(@NonNull Expression... input) {
     return new Expression("boolean", input);
@@ -3272,7 +3272,7 @@ public class Expression {
    * @param diacriticSensitive diacritic sensitive flag
    * @param locale             locale
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-collator">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-collator">Style specification</a>
    */
   public static Expression collator(boolean caseSensitive, boolean diacriticSensitive, Locale locale) {
     Map<String, Expression> map = new HashMap<>();
@@ -3307,7 +3307,7 @@ public class Expression {
    * @param caseSensitive      case sensitive flag
    * @param diacriticSensitive diacritic sensitive flag
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-collator">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-collator">Style specification</a>
    */
   public static Expression collator(boolean caseSensitive, boolean diacriticSensitive) {
     Map<String, Expression> map = new HashMap<>();
@@ -3328,7 +3328,7 @@ public class Expression {
    * @param diacriticSensitive diacritic sensitive flag
    * @param locale             locale
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-collator">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-collator">Style specification</a>
    */
   public static Expression collator(Expression caseSensitive, Expression diacriticSensitive, Expression locale) {
     Map<String, Expression> map = new HashMap<>();
@@ -3349,7 +3349,7 @@ public class Expression {
    * @param caseSensitive      case sensitive flag
    * @param diacriticSensitive diacritic sensitive flag
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-collator">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-collator">Style specification</a>
    */
   public static Expression collator(Expression caseSensitive, Expression diacriticSensitive) {
     Map<String, Expression> map = new HashMap<>();
@@ -3390,7 +3390,7 @@ public class Expression {
    *
    * @param formatEntries format entries
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-format">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-format">Style specification</a>
    */
   public static Expression format(@NonNull FormatEntry... formatEntries) {
     // for each entry we are going to build an input and parameters
@@ -3527,7 +3527,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-object">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-object">Style specification</a>
    */
   public static Expression object(@NonNull Expression input) {
     return new Expression("object", input);
@@ -3556,7 +3556,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-to-string">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-string">Style specification</a>
    */
   public static Expression toString(@NonNull Expression input) {
     return new Expression("to-string", input);
@@ -3583,7 +3583,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-to-number">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-number">Style specification</a>
    */
   public static Expression toNumber(@NonNull Expression input) {
     return new Expression("to-number", input);
@@ -3606,7 +3606,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-to-boolean">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-boolean">Style specification</a>
    */
   public static Expression toBool(@NonNull Expression input) {
     return new Expression("to-boolean", input);
@@ -3630,7 +3630,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-to-color">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-color">Style specification</a>
    */
   public static Expression toColor(@NonNull Expression input) {
     return new Expression("to-color", input);
@@ -3642,7 +3642,7 @@ public class Expression {
    *
    * @param input expression input
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-let">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-let">Style specification</a>
    */
   public static Expression let(@Size(min = 1) Expression... input) {
     return new Expression("let", input);
@@ -3653,7 +3653,7 @@ public class Expression {
    *
    * @param expression the variable naming expression that was bound with using let
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-var">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-var">Style specification</a>
    */
   public static Expression var(@NonNull Expression expression) {
     return new Expression("var", expression);
@@ -3664,7 +3664,7 @@ public class Expression {
    *
    * @param variableName the variable naming that was bound with using let
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-var">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-var">Style specification</a>
    */
   public static Expression var(@NonNull String variableName) {
     return var(literal(variableName));
@@ -3696,7 +3696,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-zoom">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-zoom">Style specification</a>
    */
   public static Expression zoom() {
     return new Expression("zoom");
@@ -3758,7 +3758,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Number input, @NonNull Expression defaultOutput, Expression... stops) {
     return step(literal(input), defaultOutput, stops);
@@ -3790,7 +3790,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Expression input, @NonNull Expression defaultOutput,
                                 @NonNull Expression... stops) {
@@ -3823,7 +3823,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Number input, @NonNull Expression defaultOutput, Stop... stops) {
     return step(literal(input), defaultOutput, Stop.toExpressionArray(stops));
@@ -3855,7 +3855,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Expression input, @NonNull Expression defaultOutput, Stop... stops) {
     return step(input, defaultOutput, Stop.toExpressionArray(stops));
@@ -3887,7 +3887,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Number input, @NonNull Number defaultOutput, Expression... stops) {
     return step(literal(input), defaultOutput, stops);
@@ -3919,7 +3919,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Expression input, @NonNull Number defaultOutput, Expression... stops) {
     return step(input, literal(defaultOutput), stops);
@@ -3951,7 +3951,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Number input, @NonNull Number defaultOutput, Stop... stops) {
     return step(literal(input), defaultOutput, Stop.toExpressionArray(stops));
@@ -3983,7 +3983,7 @@ public class Expression {
    * @param defaultOutput the default output expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step">Style specification</a>
    */
   public static Expression step(@NonNull Expression input, @NonNull Number defaultOutput, Stop... stops) {
     return step(input, defaultOutput, Stop.toExpressionArray(stops));
@@ -4017,7 +4017,7 @@ public class Expression {
    * @param number        the input expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Expression interpolate(@NonNull Interpolator interpolation,
                                        @NonNull Expression number, @NonNull Expression... stops) {
@@ -4052,7 +4052,7 @@ public class Expression {
    * @param number        the input expression
    * @param stops         pair of input and output values
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Expression interpolate(@NonNull Interpolator interpolation,
                                        @NonNull Expression number, Stop... stops) {
@@ -4081,7 +4081,7 @@ public class Expression {
    * </pre>
    *
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Interpolator linear() {
     return new Interpolator("linear");
@@ -4113,7 +4113,7 @@ public class Expression {
    *
    * @param base value controlling the route at which the output increases
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Interpolator exponential(@NonNull Number base) {
     return exponential(literal(base));
@@ -4145,7 +4145,7 @@ public class Expression {
    *
    * @param expression base number expression
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Interpolator exponential(@NonNull Expression expression) {
     return new Interpolator("exponential", expression);
@@ -4177,7 +4177,7 @@ public class Expression {
    * @param x2 x value of the second point of a cubic bezier, ranges from 0 to 1
    * @param y2 y value fo the second point of a cubic bezier, ranges from 0 to 1
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Interpolator cubicBezier(@NonNull Expression x1, @NonNull Expression y1,
                                          @NonNull Expression x2, @NonNull Expression y2) {
@@ -4210,7 +4210,7 @@ public class Expression {
    * @param x2 x value of the second point of a cubic bezier, ranges from 0 to 1
    * @param y2 y value fo the second point of a cubic bezier, ranges from 0 to 1
    * @return expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-interpolate">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate">Style specification</a>
    */
   public static Interpolator cubicBezier(@NonNull Number x1, @NonNull Number y1,
                                          @NonNull Number x2, @NonNull Number y2) {
@@ -4296,7 +4296,7 @@ public class Expression {
    *
    * @param rawExpression the raw expression
    * @return the resulting expression
-   * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/">Style specification</a>
    */
   public static Expression raw(@NonNull String rawExpression) {
     return Converter.convert(rawExpression);
@@ -4851,7 +4851,7 @@ public class Expression {
      *
      * @param rawExpression the raw expression to convert
      * @return the resulting expression
-     * @see <a href="https://www.mapbox.com/mapbox-gl-js/style-spec/">Style specification</a>
+     * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/">Style specification</a>
      */
     public static Expression convert(@NonNull String rawExpression) {
       return convert(gson.fromJson(rawExpression, JsonArray.class));

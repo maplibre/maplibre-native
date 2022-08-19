@@ -1,6 +1,5 @@
 message(STATUS "Configuring GL-Native with Qt bindings")
 
-# VLC-Qt version number
 file(READ "${PROJECT_SOURCE_DIR}/platform/qt/VERSION" MBGL_QT_VERSION)
 string(REGEX REPLACE "\n" "" MBGL_QT_VERSION "${MBGL_QT_VERSION}") # get rid of the newline at the end
 set(MBGL_QT_VERSION_COMPATIBILITY 2.0.0)
@@ -145,6 +144,7 @@ target_link_libraries(
 )
 
 set(qmaplibregl_headers
+    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/QMapLibreGL
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/export.hpp
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/map.hpp
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Map
@@ -280,11 +280,18 @@ if (MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
             $<$<NOT:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
             $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
     )
+endif()
+
+if (MBGL_QT_STATIC OR MBGL_QT_INSIDE_PLUGIN)
+    # Don't add import/export into public header because we don't build shared library.
+    # In case on MBGL_QT_INSIDE_PLUGIN it's always OBJECT library and bundled into one
+    # single Qt plugin lib.
     target_compile_definitions(
         qmaplibregl
         PUBLIC QT_MAPLIBREGL_STATIC
     )
 endif()
+
 
 install(TARGETS qmaplibregl
         EXPORT QMapLibreGLTargets
