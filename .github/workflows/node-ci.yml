@@ -75,7 +75,6 @@ jobs:
       matrix:
         os:
           - macos-10.15
-          - macos-11.0
           - ubuntu-20.04
         node: [ 10, 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
