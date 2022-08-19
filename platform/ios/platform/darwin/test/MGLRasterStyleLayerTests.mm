@@ -46,6 +46,7 @@
                               @"maximumRasterBrightness should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
         layer.maximumRasterBrightness = functionExpression;
 

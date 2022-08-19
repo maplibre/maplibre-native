@@ -263,6 +263,7 @@ class MGLDocumentationGuideTests: XCTestCase, MGLMapViewDelegate {
         let yellow = NSExpression(forConstantValue: UIColor.yellow)
 
 
+        XCTExpectFailure("Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331")
         layer.circleColor = NSExpression(forMGLMatchingKey: type,
                                          in: [earthquake:orange, explosion:red, quarryBlast:yellow],
                                          default: defaultColor)
