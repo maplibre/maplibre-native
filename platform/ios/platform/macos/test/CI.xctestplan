@@ -21,7 +21,8 @@
   "testTargets" : [
     {
       "skippedTests" : [
-        "MGLMapSnapshotterTests\/testLocalGlyphRendering"
+        "MGLMapSnapshotterTests\/testLocalGlyphRendering",
+        "MGLOfflineStorageTests\/testAddPackForBounds"
       ],
       "target" : {
         "containerPath" : "container:macos.xcodeproj",
