@@ -4,7 +4,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11")
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
 # https://stackoverflow.com/a/22689917/5531400
-set(CMAKE_OSX_ARCHITECTURES "$(ARCHS_STANDARD)")
+set(CMAKE_OSX_ARCHITECTURES "${ARCHS_STANDARD}")
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES")
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
