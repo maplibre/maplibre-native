@@ -31,7 +31,7 @@ HTTPRequest::~HTTPRequest()
 
 QUrl HTTPRequest::requestUrl() const
 {
-    return QUrl::fromPercentEncoding(QByteArray(m_resource.url.data(), static_cast<int>(m_resource.url.size())));
+    return QUrl{QString::fromStdString(m_resource.url)};
 }
 
 QNetworkRequest HTTPRequest::networkRequest() const
