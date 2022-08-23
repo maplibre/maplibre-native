@@ -74,10 +74,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-11.0
           - macos-10.15
+          - macos-11.0
           - ubuntu-20.04
-          - ubuntu-18.04
     runs-on: ${{ matrix.os }}
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -88,7 +87,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -133,7 +132,7 @@ jobs:
         run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1
         with:
@@ -163,6 +162,17 @@ jobs:
       - name: Build
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: Run render tests on macOS
+        if: runner.os == 'macOS'
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+
+      - name: Upload render test artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: render-query-test-results
+          path: metrics/macos-xcode11-release-style.html
 
       - name: Test
         if: runner.os == 'Linux'

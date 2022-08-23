@@ -7,6 +7,7 @@
 #import <mbgl/map/map_snapshotter.hpp>
 #import <mbgl/map/camera.hpp>
 #import <mbgl/storage/resource_options.hpp>
+#import <mbgl/util/client_options.hpp>
 #import <mbgl/util/string.hpp>
 
 #import "MGLOfflineStorage_Private.h"
@@ -718,6 +719,8 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
         .withTileServerOptions(*tileServerOptions)
         .withCachePath(MGLOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
         .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
+    mbgl::ClientOptions clientOptions;
+
     auto apiKey = [[MGLSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
@@ -727,7 +730,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     auto localFontFamilyName = config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;
     _delegateHost = std::make_unique<MGLMapSnapshotterDelegateHost>(self);
     _mbglMapSnapshotter = std::make_unique<mbgl::MapSnapshotter>(
-                                                                 size, pixelRatio, resourceOptions, *_delegateHost, localFontFamilyName);
+                                                                 size, pixelRatio, resourceOptions, clientOptions, *_delegateHost, localFontFamilyName);
     
     _mbglMapSnapshotter->setStyleURL(std::string(options.styleURL.absoluteString.UTF8String));
     

@@ -3824,7 +3824,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
 				LLVM_LTO = YES;
 				OTHER_LDFLAGS = (
@@ -4493,7 +4492,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -4533,7 +4531,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/vendor/mapbox-accounts-ios",
 				);
 				LLVM_LTO = YES;
 				OTHER_LDFLAGS = (

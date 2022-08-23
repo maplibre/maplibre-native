@@ -6,6 +6,7 @@
 #include <mbgl/storage/offline_download.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
@@ -154,13 +155,14 @@ private:
 
 class DatabaseFileSource::Impl {
 public:
-    Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& options) :
+    Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_) :
         thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              options.cachePath())),
-        resourceOptions(options.clone()) {}
+              resourceOptions_.cachePath())),
+              resourceOptions(resourceOptions_.clone()),
+              clientOptions(clientOptions_.clone()) {}
 
     ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
 
@@ -177,16 +179,29 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        clientOptions = options;
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return clientOptions.clone();
+    }
+
 private:
     const std::unique_ptr<util::Thread<DatabaseFileSourceThread>> thread;
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
-DatabaseFileSource::DatabaseFileSource(const ResourceOptions& options)
+DatabaseFileSource::DatabaseFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<Impl>(
-            FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-            options)) {}
+            FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
+            resourceOptions,
+            clientOptions)) {}
 
 DatabaseFileSource::~DatabaseFileSource() = default;
 
@@ -320,6 +335,14 @@ void DatabaseFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions DatabaseFileSource::getResourceOptions() {
     return impl->getResourceOptions();
+}
+
+void DatabaseFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions DatabaseFileSource::getClientOptions() {
+    return impl->getClientOptions();
 }
 
 } // namespace mbgl

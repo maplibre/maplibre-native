@@ -5,12 +5,27 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add `ClientOptions` to configure client information [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
+- [qt] Build user agent based on `ClientOptions`, if available [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
+
+### ✨ Technical Improvements
+
+- *...Add new stuff here...*
+- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-gl-native/pull/397), [#406](https://github.com/maplibre/maplibre-gl-native/pull/406))
+- Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-gl-native/pull/398)
+- Bump [eternal](https://github.com/mapbox/eternal.git) from 1.0.0 to 1.0.1
+- Bump [protozero](https://github.com/mapbox/protozero.git) from 1.7.0 to 1.7.1
+- Bump [vector-tile](https://github.com/mapbox/vector-tile.git) from 1.0.3 to 1.0.4
+- Bump [polylabel](https://github.com/mapbox/polylabel) from 1.0.3 to 1.1.0
+- Bump [googletest](https://github.com/google/googletest.git) from 1.10.0 to 1.12.1
+- Bump [zip-archive](https://github.com/ZipArchive/ZipArchive.git) from 2.2.3 to 2.5.2
+- Bump [cpp-httplib](https://github.com/yhirose/cpp-httplib) from [this commit](https://github.com/yhirose/cpp-httplib/commit/b557ac9328f3571edbb8efa25905b950f6654e9d) (~0.5.1) to 0.11.1
 
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
 
-- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` (#198)[https://github.com/maplibre/maplibre-gl-native/pull/198].
+- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-gl-native/pull/198).
 
 ## maps-v1.6.0
 

@@ -349,6 +349,38 @@ void Settings::setLocalFontFamily(const QString &family)
 }
 
 /*!
+    Returns the client name. Returns an empty string if no client name is set.
+*/
+QString Settings::clientName() const
+{
+    return m_clientName;
+}
+
+/*!
+    Sets the client name.
+*/
+void Settings::setClientName(const QString &name)
+{
+    m_clientName = name;
+}
+
+/*!
+    Returns the client version. Returns an empty string if no client version is set.
+*/
+QString Settings::clientVersion() const
+{
+    return m_clientVersion;
+}
+
+/*!
+    Sets the client version.
+*/
+void Settings::setClientVersion(const QString &version)
+{
+    m_clientVersion = version;
+}
+
+/*!
     Returns resource transformation callback used to transform requested URLs.
 */
 std::function<std::string(const std::string &)> Settings::resourceTransform() const {

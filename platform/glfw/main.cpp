@@ -102,13 +102,14 @@ int main(int argc, char *argv[]) {
     auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(cacheDB).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration);
+    mbgl::ClientOptions clientOptions;
     auto orderedStyles = mapTilerConfiguration.defaultStyles();
 
-    GLFWView backend(fullscreen, benchmark, resourceOptions);
+    GLFWView backend(fullscreen, benchmark, resourceOptions, clientOptions);
     view = &backend;
 
     std::shared_ptr<mbgl::FileSource> onlineFileSource =
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions);
+        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
     if (!settings.online) {
         if (onlineFileSource) {
             onlineFileSource->setProperty("online-status", false);
@@ -122,7 +123,7 @@ int main(int argc, char *argv[]) {
     GLFWRendererFrontend rendererFrontend { std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view };
 
     mbgl::Map map(rendererFrontend, *view,
-                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()), resourceOptions);
+                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()), resourceOptions, clientOptions);
 
     backend.setMap(&map);
 
@@ -166,7 +167,7 @@ int main(int argc, char *argv[]) {
 
     // Resource loader controls top-level request processing and can resume / pause all managed sources simultaneously.
     std::shared_ptr<mbgl::FileSource> resourceLoader =
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions);
+        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
     view->setPauseResumeCallback([resourceLoader]() {
         static bool isPaused = false;
 
@@ -181,7 +182,7 @@ int main(int argc, char *argv[]) {
 
     // Database file source.
     auto databaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions)));
+        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
     view->setResetCacheCallback([databaseFileSource]() {
         databaseFileSource->resetDatabase([](const std::exception_ptr& ex) {
             if (ex) {

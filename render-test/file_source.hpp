@@ -4,11 +4,12 @@
 
 namespace mbgl {
 
+class ClientOptions;
 class ResourceOptions;
 
 class ProxyFileSource : public FileSource {
 public:
-    ProxyFileSource(std::shared_ptr<FileSource>, const ResourceOptions&);
+    ProxyFileSource(std::shared_ptr<FileSource>, const ResourceOptions&, const ClientOptions&);
     ~ProxyFileSource();
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
@@ -45,9 +46,14 @@ public:
 
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;
+
+    void setClientOptions(ClientOptions) override;
+    ClientOptions getClientOptions() override;
+
 private:
     std::shared_ptr<FileSource> defaultResourceLoader;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 } // namespace mbgl
