@@ -1,0 +1,32 @@
+{
+    "buildType": {
+        "default": "debug",
+        "choices": {
+            "debug": {
+                "short": "Debug",
+                "long": "Building with debugging information",
+                "buildType": "Debug"
+            },
+            "release": {
+                "short": "Release",
+                "long": "Building with release configuration, binaries without symbols",
+                "buildType": "Release"
+            }
+        }
+    },
+    "platform": {
+        "default": "core",
+        "choices": {
+            "core":{
+                "short": "CoreOnly",
+                "long": "Mapbox GL Core Build Only",
+                "settings": {
+                    "MBGL_WITH_CORE_ONLY": "On"
+                }
+            },
+            "all":{
+                "short": "All"
+            }
+        }
+    }
+}
