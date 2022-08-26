@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     std::string exeDir = argv_str.substr(0, argv_str.find_last_of("/"));
 
     cxxopts::Options options(
-        "maplibre-map-renderer",
+        "map-renderer",
         "Renders MapLibre maps to raster images. Either center/zoom or bounds should be provided.");
 
     options.add_options()                                                                                         //
