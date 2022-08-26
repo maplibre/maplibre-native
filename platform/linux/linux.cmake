@@ -120,10 +120,12 @@ target_link_libraries(
         mbgl-vendor-sqlite
 )
 
+if (NOT MBGL_WITH_MAP_RENDERER)
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
 
 add_executable(
     mbgl-test-runner

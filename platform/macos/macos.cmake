@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -97,10 +96,12 @@ target_link_libraries(
         z
 )
 
+if (NOT MBGL_WITH_MAP_RENDERER)
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
 
 add_executable(
     mbgl-test-runner

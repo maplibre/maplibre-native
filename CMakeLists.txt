@@ -8,6 +8,7 @@ option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
 option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
+option(MBGL_WITH_MAP_RENDERER "Build Map Renderer utility" OFF)
 
 if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
@@ -1097,6 +1098,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
 else()
     message(FATAL_ERROR "Unsupported target platform: " ${CMAKE_SYSTEM_NAME})
+endif()
+
+if(MBGL_WITH_MAP_RENDERER)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/map-renderer)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
