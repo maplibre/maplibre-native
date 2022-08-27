@@ -125,7 +125,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
-endif()
 
 add_executable(
     mbgl-test-runner
@@ -177,3 +176,4 @@ endif()
 add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)
+endif()
