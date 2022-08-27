@@ -642,7 +642,7 @@ void NodeMap::cancel() {
     map = std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)
-                                      .withMapMode(mbgl::MapMode::Static)
+                                      .withMapMode(mode)
                                       .withCrossSourceCollisions(crossSourceCollisions),
                                       mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
                                       mbgl::ClientOptions());
