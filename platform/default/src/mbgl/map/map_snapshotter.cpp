@@ -151,6 +151,7 @@ public:
     Impl(Size size,
          float pixelRatio,
          const ResourceOptions& resourceOptions,
+         const ClientOptions& clientOptions,
          MapSnapshotterObserver& observer_,
          optional<std::string> localFontFamily)
         : observer(observer_),
@@ -158,7 +159,8 @@ public:
           map(frontend,
               *this,
               MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-              resourceOptions) {}
+              resourceOptions,
+              clientOptions) {}
 
     void setRegion(const LatLngBounds& region) {
         mbgl::EdgeInsets insets{0, 0, 0, 0};
@@ -252,13 +254,14 @@ private:
 MapSnapshotter::MapSnapshotter(Size size,
                                float pixelRatio,
                                const ResourceOptions& resourceOptions,
+                               const ClientOptions& clientOptions,
                                MapSnapshotterObserver& observer,
                                optional<std::string> localFontFamily)
     : impl(std::make_unique<MapSnapshotter::Impl>(
-          size, pixelRatio, resourceOptions, observer, std::move(localFontFamily))) {}
+          size, pixelRatio, resourceOptions, clientOptions, observer, std::move(localFontFamily))) {}
 
-MapSnapshotter::MapSnapshotter(Size size, float pixelRatio, const ResourceOptions& resourceOptions)
-    : MapSnapshotter(size, pixelRatio, resourceOptions, MapSnapshotterObserver::nullObserver()) {}
+MapSnapshotter::MapSnapshotter(Size size, float pixelRatio, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : MapSnapshotter(size, pixelRatio, resourceOptions, clientOptions, MapSnapshotterObserver::nullObserver()) {}
 
 MapSnapshotter::~MapSnapshotter() = default;
 

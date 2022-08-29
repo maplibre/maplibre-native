@@ -52,13 +52,13 @@ jobs:
       MBGL_ANDROID_STL: c++_static
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
@@ -77,7 +77,7 @@ jobs:
         run: ccache --clear
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1
         with:
@@ -95,7 +95,7 @@ jobs:
           ccache --show-stats
 
       - name: restore-gradle-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: gradle-v1
         with:
@@ -117,7 +117,7 @@ jobs:
         run: make test-code-android
 
       - name: Store debug artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: debug-artifacts
           path: |

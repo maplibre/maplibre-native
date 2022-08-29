@@ -2,6 +2,7 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/async_request.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <atomic>
@@ -15,11 +16,12 @@ std::atomic_size_t transferredSize{0};
 std::atomic_bool active{false};
 std::atomic_bool offline{true};
 
-ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_, const ResourceOptions& options)
-    : defaultResourceLoader(std::move(defaultResourceLoader_)) {
+ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+    : defaultResourceLoader(std::move(defaultResourceLoader_)),
+      resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
     assert(defaultResourceLoader);
     if (offline) {
-        std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database, options);
+        std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions_, clientOptions_);
         dbfs->setProperty(READ_ONLY_MODE_KEY, true);
     }
 } 
@@ -81,6 +83,14 @@ void ProxyFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions ProxyFileSource::getResourceOptions() {
     return resourceOptions.clone();
+}
+
+void ProxyFileSource::setClientOptions(ClientOptions options) {
+   clientOptions = options;
+}
+
+ClientOptions ProxyFileSource::getClientOptions() {
+    return clientOptions.clone();
 }
 
 
