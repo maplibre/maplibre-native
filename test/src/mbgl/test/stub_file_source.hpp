@@ -4,6 +4,7 @@
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/timer.hpp>
 
 #include <map>
@@ -18,7 +19,7 @@ public:
         Synchronous
     };
 
-    StubFileSource(const ResourceOptions&, ResponseType = ResponseType::Asynchronous);
+    StubFileSource(const ResourceOptions&, const ClientOptions&, ResponseType = ResponseType::Asynchronous);
     StubFileSource(ResponseType = ResponseType::Asynchronous);
     ~StubFileSource() override;
 
@@ -47,6 +48,9 @@ public:
     void setResourceOptions(ResourceOptions options) override;
     ResourceOptions getResourceOptions() override;
 
+    void setClientOptions(ClientOptions options) override;
+    ClientOptions getClientOptions() override;
+
 private:
     friend class StubOnlineFileSource;
 
@@ -59,6 +63,7 @@ private:
     std::map<std::string, mapbox::base::Value> properties;
 
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 } // namespace mbgl

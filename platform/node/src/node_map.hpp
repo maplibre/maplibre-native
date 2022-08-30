@@ -4,6 +4,7 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/async_request.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/image.hpp>
 
 #include <exception>
@@ -103,8 +104,11 @@ struct NodeFileSource : public mbgl::FileSource {
     bool canRequest(const mbgl::Resource&) const override;
     void setResourceOptions(mbgl::ResourceOptions) override;
     mbgl::ResourceOptions getResourceOptions() override;
+    void setClientOptions(mbgl::ClientOptions) override;
+    mbgl::ClientOptions getClientOptions() override;
     NodeMap* nodeMap;
     mbgl::ResourceOptions _resourceOptions;
+    mbgl::ClientOptions _clientOptions;
 };
 
 } // namespace node_mbgl

@@ -129,6 +129,12 @@ mbgl::ResourceOptions resourceOptionsFromSettings(const QMapLibreGL::Settings &s
         .withMaximumCacheSize(settings.cacheDatabaseMaximumSize()));
 }
 
+mbgl::ClientOptions clientOptionsFromSettings(const QMapLibreGL::Settings &settings) {
+    return std::move(mbgl::ClientOptions()
+        .withName(settings.clientName().toStdString())
+        .withVersion(settings.clientVersion().toStdString()));
+}
+
 
 mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibreGL::Annotation & annotation) {
     auto asGeometry = [](const QMapLibreGL::ShapeAnnotationGeometry &geometry) {
@@ -1380,11 +1386,14 @@ MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qrea
         defaultStyles.append(QPair<QString, QString>(
             QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
     }
+    
+    auto clientOptions = clientOptionsFromSettings(settings);
 
     // Setup the Map object.
     mapObj = std::make_unique<mbgl::Map>(*this, *m_mapObserver,
                                          mapOptionsFromSettings(settings, size, m_pixelRatio),
-                                         resourceOptions);
+                                         resourceOptions,
+                                         clientOptionsFromSettings(settings));
 
      if (settings.resourceTransform()) {
          m_resourceTransform = std::make_unique<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>>(
@@ -1401,7 +1410,7 @@ MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qrea
              actorRef.invoke(&mbgl::ResourceTransform::TransformCallback::operator(), kind, url, std::move(onFinished));
          }};
          std::shared_ptr<mbgl::FileSource> fs =
-             mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions);
+             mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
          fs->setResourceTransform(std::move(transform));
      }
 

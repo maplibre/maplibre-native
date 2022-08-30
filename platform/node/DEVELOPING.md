@@ -51,12 +51,6 @@ To compile the Node.js bindings and install module dependencies, from the reposi
 cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
 ```
 
-Then, as a temporary step until build system is changed, run:
-```bash
-sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
-sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
-```
-
 #### Linux
 
 ```bash

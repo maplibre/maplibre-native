@@ -30,6 +30,8 @@ on:
       - ".github/workflows/node-ci.yml"
       - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
+    branches:
+      - main
 
   pull_request:
     branches:
@@ -94,7 +96,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: source
           fetch-depth: 0
@@ -142,7 +144,7 @@ jobs:
           ninja install
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt }}
           path: install

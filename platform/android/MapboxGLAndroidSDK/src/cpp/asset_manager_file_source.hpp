@@ -2,6 +2,7 @@
 
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include "asset_manager.hpp"
 
@@ -15,7 +16,7 @@ template <typename T> class Thread;
 
 class AssetManagerFileSource : public FileSource {
 public:
-    AssetManagerFileSource(jni::JNIEnv&, const jni::Object<android::AssetManager>&, const ResourceOptions);
+    AssetManagerFileSource(jni::JNIEnv&, const jni::Object<android::AssetManager>&, const ResourceOptions, const ClientOptions);
     ~AssetManagerFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
@@ -23,6 +24,9 @@ public:
 
     void setResourceOptions(ResourceOptions options) override;
     ResourceOptions getResourceOptions() override;
+
+    void setClientOptions(ClientOptions options) override;
+    ClientOptions getClientOptions() override;
 
 private:
     class Impl;

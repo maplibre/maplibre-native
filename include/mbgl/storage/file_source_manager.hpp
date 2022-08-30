@@ -5,6 +5,7 @@
 
 namespace mbgl {
 
+class ClientOptions;
 class ResourceOptions;
 
 /**
@@ -18,7 +19,7 @@ class ResourceOptions;
  */
 class FileSourceManager {
 public:
-    using FileSourceFactory = std::function<std::unique_ptr<FileSource>(const ResourceOptions&)>;
+    using FileSourceFactory = std::function<std::unique_ptr<FileSource>(const ResourceOptions&, const ClientOptions&)>;
 
     /**
      * @brief A singleton getter.
@@ -30,7 +31,7 @@ public:
     // Returns shared instance of a file source for (type, options) tuple.
     // Creates new instance via registered factory if needed. If new instance cannot be
     // created, nullptr would be returned.
-    PassRefPtr<FileSource> getFileSource(FileSourceType, const ResourceOptions&) noexcept;
+    PassRefPtr<FileSource> getFileSource(FileSourceType, const ResourceOptions&, const ClientOptions& = ClientOptions()) noexcept;
 
     // Registers file source factory for a provided FileSourceType type. If factory for the
     // same type was already registered, will unregister previously registered factory.

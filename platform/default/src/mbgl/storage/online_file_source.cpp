@@ -3,10 +3,11 @@
 #include <mbgl/storage/http_file_source.hpp>
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/online_file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 
 #include <mbgl/actor/mailbox.hpp>
@@ -74,7 +75,8 @@ struct OnlineFileRequest {
 
 class OnlineFileSourceThread {
 public:
-    OnlineFileSourceThread(const ResourceOptions& options): resourceOptions(options.clone()), httpFileSource(options) {
+    OnlineFileSourceThread(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()), httpFileSource(resourceOptions_, clientOptions_) {
         NetworkStatus::Subscribe(&reachability);
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
@@ -170,6 +172,14 @@ public:
 
     const ResourceOptions& getResourceOptions() const {
         return resourceOptions;
+    }
+
+    void setClientOptions(ClientOptions options) {
+        clientOptions = options;
+    }
+
+    const ClientOptions& getClientOptions() const {
+        return clientOptions;
     }
 
     void setOnlineStatus(bool status) {
@@ -280,6 +290,7 @@ private:
     ResourceTransform resourceTransform;
 
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 
     /**
      * The lifetime of a request is:
@@ -307,10 +318,11 @@ private:
 
 class OnlineFileSource::Impl {
 public:
-    Impl(const ResourceOptions& options) :
-        cachedResourceOptions(options.clone()),
+    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) :
+        cachedResourceOptions(resourceOptions.clone()),
+        cachedClientOptions(clientOptions.clone()),
         thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
-              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", options.clone())) {}
+              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", resourceOptions.clone(), clientOptions.clone())) {}
 
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -339,6 +351,19 @@ public:
     ResourceOptions getResourceOptions() {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);
         return cachedResourceOptions.clone();
+    }
+
+    void setClientOptions(ClientOptions options) {
+        thread->actor().invoke(&OnlineFileSourceThread::setClientOptions, options.clone());
+        {
+            std::lock_guard<std::mutex> lock(clientOptionsMutex);
+            cachedClientOptions = options;
+        }
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return cachedClientOptions.clone();
     }
 
     void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
@@ -398,7 +423,9 @@ public:
 
 private:
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions cachedResourceOptions;
+    ClientOptions cachedClientOptions;
 
     mutable std::mutex maximumConcurrentRequestsMutex;
     uint32_t cachedMaximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
@@ -586,7 +613,8 @@ void OnlineFileRequest::onCancel(std::function<void()> callback_) {
     cancelCallback = std::move(callback_);
 }
 
-OnlineFileSource::OnlineFileSource(const ResourceOptions& options) : impl(std::make_unique<Impl>(options)) {}
+OnlineFileSource::OnlineFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {}
 
 OnlineFileSource::~OnlineFileSource() = default;
 
@@ -683,6 +711,14 @@ void OnlineFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions OnlineFileSource::getResourceOptions() {
     return impl->getResourceOptions();
+}
+
+void OnlineFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions OnlineFileSource::getClientOptions() {
+    return impl->getClientOptions();
 }
 
 } // namespace mbgl

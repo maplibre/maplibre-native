@@ -15,7 +15,7 @@
 #import "MGLSettings.h"
 
 #import "MBXFrameTimeGraphView.h"
-#import "../src/MGLMapView_Experimental.h"
+#import "MGLMapView_Experimental.h"
 #import <objc/runtime.h>
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {

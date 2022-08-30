@@ -2,9 +2,10 @@
 
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/online_file_source.hpp>
+#include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/util/async_request.hpp>
-#include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <algorithm>
 #include <list>
@@ -42,8 +43,9 @@ public:
         }
     };
 
-    FakeFileSource(const ResourceOptions& options): resourceOptions(options.clone()) {}
-    FakeFileSource(): FakeFileSource(ResourceOptions::Default()) {}
+    FakeFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {}
+    FakeFileSource() : FakeFileSource(ResourceOptions::Default(), ClientOptions()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
         return std::make_unique<FakeFileRequest>(resource, callback, requests);
@@ -76,14 +78,23 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) override {
+        clientOptions = options;
+    }
+    ClientOptions getClientOptions() override {
+        return clientOptions.clone();
+    }
+
 private:
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 class FakeOnlineFileSource : public FakeFileSource {
 public:
-    FakeOnlineFileSource(): FakeOnlineFileSource(ResourceOptions::Default()) {}
-    FakeOnlineFileSource(const ResourceOptions& options): FakeFileSource(options) {}
+    FakeOnlineFileSource() : FakeOnlineFileSource(ResourceOptions::Default(), ClientOptions()) {}
+    FakeOnlineFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : FakeFileSource(resourceOptions_, clientOptions_) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
         return FakeFileSource::request(resource, callback);
@@ -97,7 +108,7 @@ public:
         return onlineFs->getProperty(property);
     }
 
-    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default());
+    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 };
 
 } // namespace mbgl

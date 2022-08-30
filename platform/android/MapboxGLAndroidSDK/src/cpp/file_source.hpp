@@ -72,12 +72,15 @@ public:
 
     static mbgl::ResourceOptions getSharedResourceOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
 
+    static mbgl::ClientOptions getSharedClientOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
+
     static void registerNative(jni::JNIEnv&);
 
 private:
     const std::string DATABASE_FILE = "/mbgl-offline.db";
     optional<int> activationCounter;
     mbgl::ResourceOptions resourceOptions;
+    mbgl::ClientOptions clientOptions;
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;
     std::function<void()> pathChangeCallback;
     std::shared_ptr<mbgl::DatabaseFileSource> databaseSource;
