@@ -28,7 +28,7 @@ class ManualZoomActivity : AppCompatActivity() {
         mapView!!.getMapAsync { mapboxMap: MapboxMap ->
             this@ManualZoomActivity.mapboxMap = mapboxMap
             mapboxMap.setStyle(
-                    Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
+                Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
             )
             val uiSettings = this@ManualZoomActivity.mapboxMap!!.uiSettings
             uiSettings.setAllGesturesEnabled(false)
@@ -61,10 +61,10 @@ class ManualZoomActivity : AppCompatActivity() {
             R.id.action_zoom_to_point -> {
                 val view = window.decorView
                 mapboxMap!!.animateCamera(
-                        CameraUpdateFactory.zoomBy(
-                                1.0,
-                                Point(view.measuredWidth / 4, view.measuredHeight / 4)
-                        )
+                    CameraUpdateFactory.zoomBy(
+                        1.0,
+                        Point(view.measuredWidth / 4, view.measuredHeight / 4)
+                    )
                 )
                 true
             }

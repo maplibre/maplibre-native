@@ -24,27 +24,27 @@ import timber.log.Timber
  */
 class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
     private val callback: CancelableCallback =
-            object : CancelableCallback {
-                override fun onCancel() {
-                    Timber.i("Duration onCancel Callback called.")
-                    Toast.makeText(
-                                    this@CameraAnimationTypeActivity.applicationContext,
-                                    "Ease onCancel Callback called.",
-                                    Toast.LENGTH_LONG
-                            )
-                            .show()
-                }
-
-                override fun onFinish() {
-                    Timber.i("Duration onFinish Callback called.")
-                    Toast.makeText(
-                                    this@CameraAnimationTypeActivity.applicationContext,
-                                    "Ease onFinish Callback called.",
-                                    Toast.LENGTH_LONG
-                            )
-                            .show()
-                }
+        object : CancelableCallback {
+            override fun onCancel() {
+                Timber.i("Duration onCancel Callback called.")
+                Toast.makeText(
+                    this@CameraAnimationTypeActivity.applicationContext,
+                    "Ease onCancel Callback called.",
+                    Toast.LENGTH_LONG
+                )
+                    .show()
             }
+
+            override fun onFinish() {
+                Timber.i("Duration onFinish Callback called.")
+                Toast.makeText(
+                    this@CameraAnimationTypeActivity.applicationContext,
+                    "Ease onFinish Callback called.",
+                    Toast.LENGTH_LONG
+                )
+                    .show()
+            }
+        }
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapView: MapView
     private var cameraState = false
@@ -73,12 +73,12 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         val moveButton = findViewById<View>(R.id.cameraMoveButton)
         moveButton?.setOnClickListener { view: View? ->
             val cameraPosition =
-                    CameraPosition.Builder()
-                            .target(nextLatLng)
-                            .zoom(14.0)
-                            .tilt(30.0)
-                            .tilt(0.0)
-                            .build()
+                CameraPosition.Builder()
+                    .target(nextLatLng)
+                    .zoom(14.0)
+                    .tilt(30.0)
+                    .tilt(0.0)
+                    .build()
             mapboxMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         }
 
@@ -86,16 +86,16 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         val easeButton = findViewById<View>(R.id.cameraEaseButton)
         easeButton?.setOnClickListener { view: View? ->
             val cameraPosition =
-                    CameraPosition.Builder()
-                            .target(nextLatLng)
-                            .zoom(15.0)
-                            .bearing(180.0)
-                            .tilt(30.0)
-                            .build()
+                CameraPosition.Builder()
+                    .target(nextLatLng)
+                    .zoom(15.0)
+                    .bearing(180.0)
+                    .tilt(30.0)
+                    .build()
             mapboxMap!!.easeCamera(
-                    CameraUpdateFactory.newCameraPosition(cameraPosition),
-                    7500,
-                    callback
+                CameraUpdateFactory.newCameraPosition(cameraPosition),
+                7500,
+                callback
             )
         }
 
@@ -103,11 +103,11 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         val animateButton = findViewById<View>(R.id.cameraAnimateButton)
         animateButton?.setOnClickListener { view: View? ->
             val cameraPosition =
-                    CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
+                CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
             mapboxMap!!.animateCamera(
-                    CameraUpdateFactory.newCameraPosition(cameraPosition),
-                    7500,
-                    callback
+                CameraUpdateFactory.newCameraPosition(cameraPosition),
+                7500,
+                callback
             )
         }
     }
