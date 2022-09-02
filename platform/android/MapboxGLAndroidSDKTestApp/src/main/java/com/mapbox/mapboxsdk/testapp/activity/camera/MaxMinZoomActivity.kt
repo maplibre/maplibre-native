@@ -29,7 +29,7 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
         mapView.addOnDidFinishLoadingStyleListener(
-                OnDidFinishLoadingStyleListener { Timber.d("Style Loaded") }
+            OnDidFinishLoadingStyleListener { Timber.d("Style Loaded") }
         )
     }
 

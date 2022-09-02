@@ -38,12 +38,12 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
         seekBarX = findViewById(R.id.seekbar_move_x)
         val textViewX = findViewById<TextView>(R.id.textview_x)
         seekBarX.setOnSeekBarChangeListener(
-                PixelBarChangeListener(textViewX, R.string.scrollby_x_value)
+            PixelBarChangeListener(textViewX, R.string.scrollby_x_value)
         )
         seekBarY = findViewById(R.id.seekbar_move_y)
         val textViewY = findViewById<TextView>(R.id.textview_y)
         seekBarY.setOnSeekBarChangeListener(
-                PixelBarChangeListener(textViewY, R.string.scrollby_y_value)
+            PixelBarChangeListener(textViewY, R.string.scrollby_y_value)
         )
         mapView = findViewById(R.id.mapView)
         mapView.setTag(true)
@@ -61,8 +61,8 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
         fab.setColorFilter(ContextCompat.getColor(this@ScrollByActivity, R.color.primary))
         fab.setOnClickListener { view: View? ->
             mapboxMap!!.scrollBy(
-                    (seekBarX!!.progress * MULTIPLIER_PER_PIXEL).toFloat(),
-                    (seekBarY!!.progress * MULTIPLIER_PER_PIXEL).toFloat()
+                (seekBarX!!.progress * MULTIPLIER_PER_PIXEL).toFloat(),
+                (seekBarY!!.progress * MULTIPLIER_PER_PIXEL).toFloat()
             )
         }
     }
@@ -114,8 +114,9 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private class PixelBarChangeListener
     internal constructor(
-            private val valueView: TextView,
-            @field:StringRes @param:StringRes private val prefixTextResource: Int
+        private val valueView: TextView,
+        @field:StringRes @param:StringRes
+        private val prefixTextResource: Int
     ) : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
             val value = progress * MULTIPLIER_PER_PIXEL

@@ -19,8 +19,8 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.utils.GeoParseUtil.loadStringFromAssets
 import com.mapbox.mapboxsdk.utils.BitmapUtils
-import java.net.URISyntaxException
 import kotlinx.android.synthetic.main.activity_latlngbounds.*
+import java.net.URISyntaxException
 
 /** Test activity showcasing using the LatLngBounds camera API. */
 class LatLngBoundsActivity : AppCompatActivity() {
@@ -49,7 +49,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
             mapboxMap = map
 
             val featureCollection: FeatureCollection =
-                    fromJson(loadStringFromAssets(this, "points-sf.geojson"))
+                fromJson(loadStringFromAssets(this, "points-sf.geojson"))
             bounds = createBounds(featureCollection)
 
             map.getCameraForLatLngBounds(bounds, createPadding(peekHeight))?.let {
@@ -66,25 +66,25 @@ class LatLngBoundsActivity : AppCompatActivity() {
 
     private fun loadStyle(featureCollection: FeatureCollection) {
         mapboxMap.setStyle(
-                Style.Builder()
-                        .fromUri(Style.getPredefinedStyle("Streets"))
-                        .withLayer(
-                                SymbolLayer("symbol", "symbol")
-                                        .withProperties(
-                                                iconAllowOverlap(true),
-                                                iconIgnorePlacement(true),
-                                                iconImage("icon"),
-                                                iconAnchor(ICON_ANCHOR_CENTER)
-                                        )
+            Style.Builder()
+                .fromUri(Style.getPredefinedStyle("Streets"))
+                .withLayer(
+                    SymbolLayer("symbol", "symbol")
+                        .withProperties(
+                            iconAllowOverlap(true),
+                            iconIgnorePlacement(true),
+                            iconImage("icon"),
+                            iconAnchor(ICON_ANCHOR_CENTER)
                         )
-                        .withSource(GeoJsonSource("symbol", featureCollection))
-                        .withImage(
-                                "icon",
-                                BitmapUtils.getDrawableFromRes(
-                                        this@LatLngBoundsActivity,
-                                        R.drawable.ic_android
-                                )!!
-                        )
+                )
+                .withSource(GeoJsonSource("symbol", featureCollection))
+                .withImage(
+                    "icon",
+                    BitmapUtils.getDrawableFromRes(
+                        this@LatLngBoundsActivity,
+                        R.drawable.ic_android
+                    )!!
+                )
         ) {
             initBottomSheet()
             fab.setOnClickListener {
@@ -96,19 +96,19 @@ class LatLngBoundsActivity : AppCompatActivity() {
     private fun initBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(
-                object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                        val offset = convertSlideOffset(slideOffset)
-                        val bottomPadding = (peekHeight * offset).toInt()
+            object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    val offset = convertSlideOffset(slideOffset)
+                    val bottomPadding = (peekHeight * offset).toInt()
 
-                        mapboxMap.getCameraForLatLngBounds(bounds, createPadding(bottomPadding))
-                                ?.let { mapboxMap.cameraPosition = it }
-                    }
-
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        // no-op
-                    }
+                    mapboxMap.getCameraForLatLngBounds(bounds, createPadding(bottomPadding))
+                        ?.let { mapboxMap.cameraPosition = it }
                 }
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    // no-op
+                }
+            }
         )
     }
 
