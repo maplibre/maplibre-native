@@ -77,7 +77,7 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-            android:name=".activity.annotation.AnimatedSymbolLayerActivity"
+            android:name=".activity.style.AnimatedSymbolLayerActivity"
             android:description="@string/description_animated_symbollayer"
             android:exported="true"
             android:label="@string/activity_animated_symbollayer">
