@@ -16,8 +16,9 @@ namespace mbgl {
 
 class AssetManagerFileSource::Impl {
 public:
-    Impl(ActorRef<Impl>, AAssetManager* assetManager_, const ResourceOptions options) :
-        resourceOptions(options.clone()),
+    Impl(ActorRef<Impl>, AAssetManager* assetManager_, const ResourceOptions resourceOptions_, const ClientOptions clientOptions_) :
+        resourceOptions(resourceOptions_.clone()),
+        clientOptions(clientOptions_.clone()),
         assetManager(assetManager_) {}
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
@@ -46,20 +47,31 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        clientOptions = options;
+    }
+
+    ClientOptions getClientOptions() {
+        return clientOptions.clone();
+    }
+
 private:
     AAssetManager* assetManager;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
                                                const jni::Object<android::AssetManager>& assetManager_,
-                                               const ResourceOptions options)
+                                               const ResourceOptions resourceOptions,
+                                               const ClientOptions clientOptions)
     : assetManager(jni::NewGlobal(env, assetManager_)),
       impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetManagerFileSource",
           AAssetManager_fromJava(&env, jni::Unwrap(assetManager.get())),
-          options.clone())) {}
+          resourceOptions.clone(),
+          clientOptions.clone())) {}
 
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 
@@ -82,4 +94,13 @@ void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
 ResourceOptions AssetManagerFileSource::getResourceOptions() {
     return impl->actor().ask(&Impl::getResourceOptions).get();
 }
+
+void AssetManagerFileSource::setClientOptions(ClientOptions options) {
+    impl->actor().invoke(&Impl::setClientOptions, options.clone());
+}
+
+ClientOptions AssetManagerFileSource::getClientOptions() {
+    return impl->actor().ask(&Impl::getClientOptions).get();
+}
+
 } // namespace mbgl

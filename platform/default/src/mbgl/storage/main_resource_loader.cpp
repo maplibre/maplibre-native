@@ -6,6 +6,7 @@
 #include <mbgl/storage/main_resource_loader.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread.hpp>
 
@@ -133,7 +134,8 @@ private:
 
 class MainResourceLoader::Impl {
 public:
-    Impl(const ResourceOptions& options,
+    Impl(const ResourceOptions& resourceOptions_,
+         const ClientOptions& clientOptions_,
          std::shared_ptr<FileSource> assetFileSource_,
          std::shared_ptr<FileSource> databaseFileSource_,
          std::shared_ptr<FileSource> localFileSource_,
@@ -153,7 +155,8 @@ public:
               localFileSource,
               onlineFileSource,
               mbtilesFileSource)),
-          resourceOptions (options.clone()) {}
+          resourceOptions (resourceOptions_.clone()),
+          clientOptions (clientOptions_.clone()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -194,6 +197,21 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        clientOptions = options;
+        assetFileSource->setClientOptions(options.clone());
+        databaseFileSource->setClientOptions(options.clone());
+        localFileSource->setClientOptions(options.clone());
+        onlineFileSource->setClientOptions(options.clone());
+        mbtilesFileSource->setClientOptions(options.clone());
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return clientOptions.clone();
+    }
+
 private:
     const std::shared_ptr<FileSource> assetFileSource;
     const std::shared_ptr<FileSource> databaseFileSource;
@@ -204,15 +222,18 @@ private:
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
     mutable std::mutex resourceOptionsMutex;
     ResourceOptions resourceOptions;
+    mutable std::mutex clientOptionsMutex;
+    ClientOptions clientOptions;
 };
 
-MainResourceLoader::MainResourceLoader(const ResourceOptions& options):
-    impl(std::make_unique<Impl>(options.clone(),
-                              FileSourceManager::get()->getFileSource(FileSourceType::Asset, options),
-                              FileSourceManager::get()->getFileSource(FileSourceType::Database, options),
-                              FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, options),
-                              FileSourceManager::get()->getFileSource(FileSourceType::Network, options),
-                              FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, options))) {}
+MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions):
+    impl(std::make_unique<Impl>(resourceOptions.clone(),
+                                clientOptions.clone(),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Asset, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 
@@ -242,6 +263,14 @@ void MainResourceLoader::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions MainResourceLoader::getResourceOptions() {
     return impl->getResourceOptions();
+}
+
+void MainResourceLoader::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions MainResourceLoader::getClientOptions() {
+    return impl->getClientOptions();
 }
 
 } // namespace mbgl

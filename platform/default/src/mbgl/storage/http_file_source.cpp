@@ -2,6 +2,7 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <mbgl/util/util.hpp>
@@ -37,7 +38,7 @@ namespace mbgl {
 
 class HTTPFileSource::Impl {
 public:
-    Impl(const ResourceOptions& options);
+    Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_);
     ~Impl();
 
     static int handleSocket(CURL *handle, curl_socket_t s, int action, void *userp, void *socketp);
@@ -66,9 +67,14 @@ public:
     void setResourceOptions(ResourceOptions options);
     ResourceOptions getResourceOptions();
 
+    void setClientOptions(ClientOptions options);
+    ClientOptions getClientOptions();
+
 private:
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 class HTTPRequest : public AsyncRequest {
@@ -99,7 +105,8 @@ private:
     char error[CURL_ERROR_SIZE] = { 0 };
 };
 
-HTTPFileSource::Impl::Impl(const ResourceOptions& options): resourceOptions (options.clone()) {
+HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+    : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         throw std::runtime_error("Could not init cURL");
     }
@@ -240,6 +247,16 @@ void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
     std::lock_guard<std::mutex> lock(resourceOptionsMutex);
     return resourceOptions.clone();
+}
+
+void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
+    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    clientOptions = options;
+}
+
+ClientOptions HTTPFileSource::Impl::getClientOptions() {
+    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    return clientOptions.clone();
 }
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
@@ -424,8 +441,8 @@ void HTTPRequest::handleResult(CURLcode code) {
     callback_(response_);
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(options)) {
+HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -440,6 +457,14 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
+}
+
+void HTTPFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions HTTPFileSource::getClientOptions() {
+    return impl->getClientOptions();
 }
 
 } // namespace mbgl

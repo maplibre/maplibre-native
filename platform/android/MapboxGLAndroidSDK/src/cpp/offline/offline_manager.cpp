@@ -27,7 +27,9 @@ void handleException(std::exception_ptr exception,
 OfflineManager::OfflineManager(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource)
     : fileSource(std::static_pointer_cast<mbgl::DatabaseFileSource>(
           std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(
-              mbgl::FileSourceType::Database, FileSource::getSharedResourceOptions(env, jFileSource))))) {
+              mbgl::FileSourceType::Database,
+              FileSource::getSharedResourceOptions(env, jFileSource),
+              FileSource::getSharedClientOptions(env, jFileSource))))) {
     if (!fileSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Offline functionality is disabled.");
     }

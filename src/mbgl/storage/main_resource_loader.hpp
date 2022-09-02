@@ -1,16 +1,16 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
 
+class ClientOptions;
 class ResourceTransform;
 class ResourceOptions;
 
 class MainResourceLoader final : public FileSource {
 public:
-    explicit MainResourceLoader(const ResourceOptions& options);
+    explicit MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~MainResourceLoader() override;
 
     bool supportsCacheOnlyRequests() const override;
@@ -21,6 +21,9 @@ public:
 
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;
+
+    void setClientOptions(ClientOptions) override;
+    ClientOptions getClientOptions() override;
 
 private:
     class Impl;

@@ -194,7 +194,7 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     info.This()->SetInternalField(1, options);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions) {
+        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             return std::make_unique<node_mbgl::NodeFileSource>(
                 reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
         });
@@ -642,9 +642,10 @@ void NodeMap::cancel() {
     map = std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)
-                                      .withMapMode(mbgl::MapMode::Static)
+                                      .withMapMode(mode)
                                       .withCrossSourceCollisions(crossSourceCollisions),
-                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)));
+                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                      mbgl::ClientOptions());
 
     // FIXME: Reload the style after recreating the map. We need to find
     // a better way of canceling an ongoing rendering on the core level
@@ -1420,9 +1421,10 @@ NodeMap::NodeMap(v8::Local<v8::Object> options)
     , map(std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)
-                                      .withMapMode(mbgl::MapMode::Static)
+                                      .withMapMode(mode)
                                       .withCrossSourceCollisions(crossSourceCollisions),
-                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this))))
+                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                      mbgl::ClientOptions()))
     , async(new uv_async_t) {
     async->data = this;
     uv_async_init(uv_default_loop(), async, [](uv_async_t* h) {
@@ -1475,6 +1477,14 @@ void NodeFileSource::setResourceOptions(mbgl::ResourceOptions options) {
 
 mbgl::ResourceOptions NodeFileSource::getResourceOptions() {
     return this->_resourceOptions.clone();
+}
+
+void NodeFileSource::setClientOptions(mbgl::ClientOptions options) {
+    this->_clientOptions = std::move(options);
+}
+
+mbgl::ClientOptions NodeFileSource::getClientOptions() {
+    return this->_clientOptions.clone();
 }
 
 } // namespace node_mbgl
