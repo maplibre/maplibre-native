@@ -169,7 +169,12 @@ Please refer to [Mapbox Maps SDK for iOS](platform/ios/platform/ios/) for detail
 
 ```bash
 cd platform/ios
+# open macOS project in Xcode
+make xproj
+
+# build or test from the command line
 make xpackage
+make macos-test
 ```
 
 This produces a `Mapbox.framework` in the `platform/ios/build/macos/pkg/` folder.

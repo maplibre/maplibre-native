@@ -6,5 +6,8 @@
    </FileRef>
    <FileRef
       location = "group:../../build/ios/Mapbox GL Native.xcodeproj">
-   </FileRef>   
+   </FileRef>
+   <FileRef
+      location = "group:test/CI.xctestplan">
+   </FileRef>
 </Workspace>

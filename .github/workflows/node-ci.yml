@@ -102,7 +102,7 @@ jobs:
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
+          brew list glfw || brew install glfw
           brew list libuv || brew install libuv
 
       - name: Install dependencies
