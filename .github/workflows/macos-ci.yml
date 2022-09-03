@@ -69,7 +69,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: macos-12
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
