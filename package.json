@@ -49,7 +49,7 @@
     "shuffle-seed": "1.1.6",
     "st": "1.2.2",
     "tape": "^4.5.1",
-    "xcode": "^1.0.0"
+    "xcode": "^3.0.1"
   },
   "engines": {
     "node": ">=6"
