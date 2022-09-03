@@ -46,10 +46,12 @@
                               @"hillshadeAccentColor should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"%@", [MGLColor redColor]];
-#if TARGET_OS_IPHONE
-        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
-#endif
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
+
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:stops];
+
         layer.hillshadeAccentColor = functionExpression;
 
         {
@@ -61,7 +63,7 @@
 
         XCTAssertEqual(rawLayer->getHillshadeAccentColor(), propertyValue,
                        @"Setting hillshadeAccentColor to a camera expression should update hillshade-accent-color.");
-        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+
         XCTAssertEqualObjects(layer.hillshadeAccentColor, functionExpression,
                               @"hillshadeAccentColor should round-trip camera expressions.");
 
