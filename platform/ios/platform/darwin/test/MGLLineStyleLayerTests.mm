@@ -294,7 +294,7 @@
 
         XCTAssertEqual(rawLayer->getLineSortKey(), propertyValue,
                        @"Setting lineSortKey to a camera-data expression should update line-sort-key.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineSortKey, pedanticFunctionExpression,
                               @"lineSortKey should round-trip camera-data expressions.");
 
@@ -365,7 +365,7 @@
 
         XCTAssertEqual(rawLayer->getLineBlur(), propertyValue,
                        @"Setting lineBlur to a camera-data expression should update line-blur.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineBlur, pedanticFunctionExpression,
                               @"lineBlur should round-trip camera-data expressions.");
 
@@ -445,7 +445,7 @@
 
         XCTAssertEqual(rawLayer->getLineColor(), propertyValue,
                        @"Setting lineColor to a camera-data expression should update line-color.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineColor, pedanticFunctionExpression,
                               @"lineColor should round-trip camera-data expressions.");
 
@@ -573,7 +573,7 @@
 
         XCTAssertEqual(rawLayer->getLineGapWidth(), propertyValue,
                        @"Setting lineGapWidth to a camera-data expression should update line-gap-width.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineGapWidth, pedanticFunctionExpression,
                               @"lineGapWidth should round-trip camera-data expressions.");
 
@@ -653,7 +653,7 @@
 
         XCTAssertEqual(rawLayer->getLineOffset(), propertyValue,
                        @"Setting lineOffset to a camera-data expression should update line-offset.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineOffset, pedanticFunctionExpression,
                               @"lineOffset should round-trip camera-data expressions.");
 
@@ -733,7 +733,7 @@
 
         XCTAssertEqual(rawLayer->getLineOpacity(), propertyValue,
                        @"Setting lineOpacity to a camera-data expression should update line-opacity.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineOpacity, pedanticFunctionExpression,
                               @"lineOpacity should round-trip camera-data expressions.");
 
@@ -964,7 +964,7 @@
 
         XCTAssertEqual(rawLayer->getLineWidth(), propertyValue,
                        @"Setting lineWidth to a camera-data expression should update line-width.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.lineWidth, pedanticFunctionExpression,
                               @"lineWidth should round-trip camera-data expressions.");
 

@@ -110,7 +110,7 @@
 
         XCTAssertEqual(rawLayer->getCircleSortKey(), propertyValue,
                        @"Setting circleSortKey to a camera-data expression should update circle-sort-key.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleSortKey, pedanticFunctionExpression,
                               @"circleSortKey should round-trip camera-data expressions.");
 
@@ -181,7 +181,7 @@
 
         XCTAssertEqual(rawLayer->getCircleBlur(), propertyValue,
                        @"Setting circleBlur to a camera-data expression should update circle-blur.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleBlur, pedanticFunctionExpression,
                               @"circleBlur should round-trip camera-data expressions.");
 
@@ -261,7 +261,7 @@
 
         XCTAssertEqual(rawLayer->getCircleColor(), propertyValue,
                        @"Setting circleColor to a camera-data expression should update circle-color.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleColor, pedanticFunctionExpression,
                               @"circleColor should round-trip camera-data expressions.");
 
@@ -341,7 +341,7 @@
 
         XCTAssertEqual(rawLayer->getCircleOpacity(), propertyValue,
                        @"Setting circleOpacity to a camera-data expression should update circle-opacity.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleOpacity, pedanticFunctionExpression,
                               @"circleOpacity should round-trip camera-data expressions.");
 
@@ -469,7 +469,7 @@
 
         XCTAssertEqual(rawLayer->getCircleRadius(), propertyValue,
                        @"Setting circleRadius to a camera-data expression should update circle-radius.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleRadius, pedanticFunctionExpression,
                               @"circleRadius should round-trip camera-data expressions.");
 
@@ -597,7 +597,7 @@
 
         XCTAssertEqual(rawLayer->getCircleStrokeColor(), propertyValue,
                        @"Setting circleStrokeColor to a camera-data expression should update circle-stroke-color.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleStrokeColor, pedanticFunctionExpression,
                               @"circleStrokeColor should round-trip camera-data expressions.");
 
@@ -677,7 +677,7 @@
 
         XCTAssertEqual(rawLayer->getCircleStrokeOpacity(), propertyValue,
                        @"Setting circleStrokeOpacity to a camera-data expression should update circle-stroke-opacity.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleStrokeOpacity, pedanticFunctionExpression,
                               @"circleStrokeOpacity should round-trip camera-data expressions.");
 
@@ -757,7 +757,7 @@
 
         XCTAssertEqual(rawLayer->getCircleStrokeWidth(), propertyValue,
                        @"Setting circleStrokeWidth to a camera-data expression should update circle-stroke-width.");
-        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        pedanticFunctionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: pedanticFunctionExpression}]];
         XCTAssertEqualObjects(layer.circleStrokeWidth, pedanticFunctionExpression,
                               @"circleStrokeWidth should round-trip camera-data expressions.");
 
