@@ -97,7 +97,9 @@
                               @"minimumRasterBrightness should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.minimumRasterBrightness = functionExpression;
 
         {
@@ -143,7 +145,9 @@
                               @"rasterContrast should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterContrast = functionExpression;
 
         {
@@ -198,7 +202,9 @@
                               @"rasterFadeDuration should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterFadeDuration = functionExpression;
 
         {
@@ -244,7 +250,9 @@
                               @"rasterHueRotation should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterHueRotation = functionExpression;
 
         {
@@ -290,7 +298,9 @@
                               @"rasterOpacity should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterOpacity = functionExpression;
 
         {
@@ -345,7 +355,9 @@
                               @"rasterResamplingMode should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"'nearest'"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterResamplingMode = functionExpression;
 
         {
@@ -391,7 +403,9 @@
                               @"rasterSaturation should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.rasterSaturation = functionExpression;
 
         {

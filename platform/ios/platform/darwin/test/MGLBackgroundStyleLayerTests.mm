@@ -104,7 +104,9 @@
                               @"backgroundOpacity should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.backgroundOpacity = functionExpression;
 
         {
@@ -159,7 +161,9 @@
                               @"backgroundPattern should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"MGL_FUNCTION('image', 'Background Pattern')"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.backgroundPattern = functionExpression;
 
         {

@@ -124,7 +124,9 @@
                               @"heatmapOpacity should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.heatmapOpacity = functionExpression;
 
         {
@@ -179,7 +181,9 @@
                               @"heatmapRadius should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.heatmapRadius = functionExpression;
 
         {
@@ -257,7 +261,9 @@
                               @"heatmapWeight should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
-        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.heatmapWeight = functionExpression;
 
         {
