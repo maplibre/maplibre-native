@@ -65,11 +65,9 @@
 
         constantExpression = [NSExpression expressionWithFormat:@"1"];
         
-        NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
-        
         NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
             fromExpression:constantExpression
-            stops:stops];
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         
         layer.fillExtrusionBase = functionExpression;
 

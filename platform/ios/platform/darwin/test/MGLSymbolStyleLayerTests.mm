@@ -65,11 +65,9 @@
                               @"iconAllowsOverlap should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"true"];
-        NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
-        
         NSExpression *functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
             fromExpression:constantExpression
-            stops:stops];
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         layer.iconAllowsOverlap = functionExpression;
 
         {

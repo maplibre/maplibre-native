@@ -81,22 +81,10 @@ using namespace std::string_literals;
     // Objective-C sample of how to create a stepping expression with color.
     NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MGLColor redColor]];
     NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
-    NSExpression *functionExpression;
-    
-    if (@available(iOS 15, *)) {
-        // How to create expressions with iOS 15
-        functionExpression = [NSExpression
+    NSExpression *functionExpression = [NSExpression
                               mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
                               fromExpression:constantExpression
                               stops:stops];
-    } else {
-        // How to create expressions up to iOS 14
-        functionExpression = [NSExpression
-                              expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)",
-                              constantExpression,
-                              stops];
-    }
-    //#-end-example-code
     
     XCTAssertNotNil(functionExpression);
     NSLog(@"%s %@", __FUNCTION__, functionExpression);
@@ -110,22 +98,11 @@ using namespace std::string_literals;
                                    @14.0: @0.7f,
                                    @20.0f: @1.0f };
     NSExpression *stops = [NSExpression expressionForConstantValue:opacityStops];
-    NSExpression *functionExpression;
-    
-    if (@available(iOS 15, *)) {
-        // How to create expressions with iOS 15
-        functionExpression = [NSExpression
+    NSExpression *functionExpression = [NSExpression
                               mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
                               withCurveType:MGLExpressionInterpolationModeLinear
                               parameters:nil
-                              stops:stops];
-    } else {
-        // How to create expressions up to iOS 14
-        functionExpression = [NSExpression
-                              expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
-                              stops];
-    }
-    //#-end-example-code
+                              stops:stops];;
     
     XCTAssertNotNil(functionExpression);
     NSLog(@"%s %@", __FUNCTION__, functionExpression);
