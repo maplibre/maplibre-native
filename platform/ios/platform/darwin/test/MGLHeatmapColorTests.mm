@@ -57,7 +57,9 @@
     XCTAssertEqualObjects(layer.heatmapColor.description, defaultExpression.description,
                           @"heatmapColor should return the default value after being unset.");
 
-    functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+    functionExpression = [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
     XCTAssertThrowsSpecificNamed(layer.heatmapColor = functionExpression, NSException, NSInvalidArgumentException, @"MGLHeatmapLayer should raise an exception if a camera expression is applied to heatmapColor.");
     functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
     XCTAssertThrowsSpecificNamed(layer.heatmapColor = functionExpression, NSException, NSInvalidArgumentException, @"MGLHeatmapLayer should raise an exception if a data expression is applied to heatmapColor.");
