@@ -93,7 +93,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineCap = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineCap = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
@@ -175,7 +177,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineMiterLimit = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineMiterLimit = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
@@ -219,7 +223,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineRoundLimit = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineRoundLimit = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
@@ -488,7 +494,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineDashPattern = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineDashPattern = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
@@ -819,7 +827,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineTranslation = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineTranslation = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
@@ -863,7 +873,9 @@
 
         functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
         XCTAssertThrowsSpecificNamed(layer.lineTranslationAnchor = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
+            fromExpression:constantExpression
+            stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
         XCTAssertThrowsSpecificNamed(layer.lineTranslationAnchor = functionExpression, NSException, NSInvalidArgumentException, @"MGLLineLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
