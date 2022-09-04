@@ -96,7 +96,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.heatmapIntensity = functionExpression, NSException, NSInvalidArgumentException, @"MGLHeatmapLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
         // Transition property test
         layer.heatmapIntensityTransition = transitionTest;
@@ -153,7 +153,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.heatmapOpacity = functionExpression, NSException, NSInvalidArgumentException, @"MGLHeatmapLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
         // Transition property test
         layer.heatmapOpacityTransition = transitionTest;
@@ -214,7 +214,7 @@
         XCTAssertEqualObjects(layer.heatmapRadius, pedanticFunctionExpression,
                               @"heatmapRadius should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.heatmapRadius = functionExpression;
 
         {
@@ -294,7 +294,7 @@
         XCTAssertEqualObjects(layer.heatmapWeight, pedanticFunctionExpression,
                               @"heatmapWeight should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.heatmapWeight = functionExpression;
 
         {

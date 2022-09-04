@@ -187,7 +187,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconIgnoresPlacement = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -302,7 +302,7 @@
         XCTAssertEqualObjects(layer.iconOffset, pedanticFunctionExpression,
                               @"iconOffset should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconOffset = functionExpression;
 
         {
@@ -369,7 +369,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconOptional = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -417,7 +417,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconPadding = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -465,7 +465,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconPitchAlignment = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -517,7 +517,7 @@
         XCTAssertEqualObjects(layer.iconRotation, pedanticFunctionExpression,
                               @"iconRotation should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconRotation = functionExpression;
 
         {
@@ -584,7 +584,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconRotationAlignment = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -636,7 +636,7 @@
         XCTAssertEqualObjects(layer.iconScale, pedanticFunctionExpression,
                               @"iconScale should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconScale = functionExpression;
 
         {
@@ -703,7 +703,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconTextFit = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -757,7 +757,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconTextFitPadding = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -805,7 +805,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.keepsIconUpright = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -853,7 +853,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.keepsTextUpright = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -901,7 +901,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.maximumTextAngle = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -953,7 +953,7 @@
         XCTAssertEqualObjects(layer.maximumTextWidth, pedanticFunctionExpression,
                               @"maximumTextWidth should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.maximumTextWidth = functionExpression;
 
         {
@@ -1020,7 +1020,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.symbolAvoidsEdges = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1068,7 +1068,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.symbolPlacement = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1120,7 +1120,7 @@
         XCTAssertEqualObjects(layer.symbolSortKey, pedanticFunctionExpression,
                               @"symbolSortKey should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.symbolSortKey = functionExpression;
 
         {
@@ -1187,7 +1187,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.symbolSpacing = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1235,7 +1235,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.symbolZOrder = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1344,7 +1344,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textAllowsOverlap = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1476,7 +1476,7 @@
         XCTAssertEqualObjects(layer.textFontSize, pedanticFunctionExpression,
                               @"textFontSize should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textFontSize = functionExpression;
 
         {
@@ -1543,7 +1543,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textIgnoresPlacement = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1635,7 +1635,7 @@
         XCTAssertEqualObjects(layer.textLetterSpacing, pedanticFunctionExpression,
                               @"textLetterSpacing should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textLetterSpacing = functionExpression;
 
         {
@@ -1702,7 +1702,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textLineHeight = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1760,7 +1760,7 @@
         XCTAssertEqualObjects(layer.textOffset, pedanticFunctionExpression,
                               @"textOffset should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textOffset = functionExpression;
 
         {
@@ -1827,7 +1827,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textOptional = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1875,7 +1875,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textPadding = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1923,7 +1923,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textPitchAlignment = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -1975,7 +1975,7 @@
         XCTAssertEqualObjects(layer.textRadialOffset, pedanticFunctionExpression,
                               @"textRadialOffset should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textRadialOffset = functionExpression;
 
         {
@@ -2046,7 +2046,7 @@
         XCTAssertEqualObjects(layer.textRotation, pedanticFunctionExpression,
                               @"textRotation should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textRotation = functionExpression;
 
         {
@@ -2113,7 +2113,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textRotationAlignment = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -2201,7 +2201,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textVariableAnchor = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -2249,7 +2249,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textWritingModes = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -2301,7 +2301,7 @@
         XCTAssertEqualObjects(layer.iconColor, pedanticFunctionExpression,
                               @"iconColor should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconColor = functionExpression;
 
         {
@@ -2381,7 +2381,7 @@
         XCTAssertEqualObjects(layer.iconHaloBlur, pedanticFunctionExpression,
                               @"iconHaloBlur should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconHaloBlur = functionExpression;
 
         {
@@ -2461,7 +2461,7 @@
         XCTAssertEqualObjects(layer.iconHaloColor, pedanticFunctionExpression,
                               @"iconHaloColor should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconHaloColor = functionExpression;
 
         {
@@ -2541,7 +2541,7 @@
         XCTAssertEqualObjects(layer.iconHaloWidth, pedanticFunctionExpression,
                               @"iconHaloWidth should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconHaloWidth = functionExpression;
 
         {
@@ -2621,7 +2621,7 @@
         XCTAssertEqualObjects(layer.iconOpacity, pedanticFunctionExpression,
                               @"iconOpacity should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.iconOpacity = functionExpression;
 
         {
@@ -2703,7 +2703,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconTranslation = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -2751,7 +2751,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.iconTranslationAnchor = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -2803,7 +2803,7 @@
         XCTAssertEqualObjects(layer.textColor, pedanticFunctionExpression,
                               @"textColor should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textColor = functionExpression;
 
         {
@@ -2883,7 +2883,7 @@
         XCTAssertEqualObjects(layer.textHaloBlur, pedanticFunctionExpression,
                               @"textHaloBlur should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textHaloBlur = functionExpression;
 
         {
@@ -2963,7 +2963,7 @@
         XCTAssertEqualObjects(layer.textHaloColor, pedanticFunctionExpression,
                               @"textHaloColor should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textHaloColor = functionExpression;
 
         {
@@ -3043,7 +3043,7 @@
         XCTAssertEqualObjects(layer.textHaloWidth, pedanticFunctionExpression,
                               @"textHaloWidth should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textHaloWidth = functionExpression;
 
         {
@@ -3123,7 +3123,7 @@
         XCTAssertEqualObjects(layer.textOpacity, pedanticFunctionExpression,
                               @"textOpacity should round-trip data expressions.");
 
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         layer.textOpacity = functionExpression;
 
         {
@@ -3205,7 +3205,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textTranslation = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 
@@ -3253,7 +3253,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.textTranslationAnchor = functionExpression, NSException, NSInvalidArgumentException, @"MGLSymbolLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
     }
 }

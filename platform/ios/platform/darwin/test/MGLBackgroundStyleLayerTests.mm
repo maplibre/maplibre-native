@@ -76,7 +76,7 @@
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
         
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.backgroundColor = functionExpression, NSException, NSInvalidArgumentException, @"MGLBackgroundLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
         // Transition property test
         layer.backgroundColorTransition = transitionTest;
@@ -133,7 +133,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.backgroundOpacity = functionExpression, NSException, NSInvalidArgumentException, @"MGLBackgroundLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
         // Transition property test
         layer.backgroundOpacityTransition = transitionTest;
@@ -190,7 +190,7 @@
         functionExpression = [NSExpression mgl_expressionForSteppingExpression:[NSExpression expressionForVariable:@"bogus"]
             fromExpression:constantExpression
             stops:[NSExpression expressionForConstantValue:@{@18: constantExpression}]];
-        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        functionExpression = [NSExpression mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression withCurveType:MGLExpressionInterpolationModeLinear parameters:nil stops:[NSExpression expressionForConstantValue:@{@10: functionExpression}]];
         XCTAssertThrowsSpecificNamed(layer.backgroundPattern = functionExpression, NSException, NSInvalidArgumentException, @"MGLBackgroundLayer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
         // Transition property test
         layer.backgroundPatternTransition = transitionTest;
