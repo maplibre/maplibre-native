@@ -128,16 +128,16 @@ From there you can use the script in platform/ios/platform/ios/scripts/package-b
 
 `cd platform/ios/platform/ios/scripts`
 
-Dynamic xcframework compiled for release (this is default if no parameters are provided):
+Static xcframework compiled for release (this is default if no parameters are provided):
 `./bazel-package.sh --static --release`
 
-Dynamic xcframework compiled for release:
+Static xcframework compiled for debug:
 `./bazel-package.sh --static --debug`
 
 Dynamic xcframework compiled for release:
 `./bazel-package.sh --dynamic --release`
 
-Dynamic xcframework compiled for release:
+Dynamic xcframework compiled for debug:
 `./bazel-package.sh --dynamic --debug`
 
 All compiled frameworks will end up in the `bazel-bin/platform/ios/` path from the root of the repo.
