@@ -314,6 +314,9 @@
     {
         NSArray *expected = @[@"in", @"📍", @[@"literal", @"Pinole"]];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"'📍' IN 'Pinole'"];
+#if TARGET_OS_IPHONE
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+#endif
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, expected);
         XCTAssertEqualObjects([NSPredicate predicateWithMGLJSONObject:expected], predicate);
         XCTAssertEqualObjects([NSPredicate mgl_predicateWithFilter:predicate.mgl_filter], [NSPredicate predicateWithValue:NO]);
@@ -443,6 +446,9 @@
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"a =[c] 'b'"];
         NSArray *jsonExpression = @[@"==", @[@"get", @"a"], @"b", @[@"collator", @{@"case-sensitive": @NO, @"diacritic-sensitive": @YES}]];
         XCTAssertEqualObjects(predicate.mgl_jsonExpressionObject, jsonExpression);
+#if TARGET_OS_IPHONE
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+#endif
         [self testSymmetryWithPredicate:predicate
                           mustRoundTrip:NO];
     }

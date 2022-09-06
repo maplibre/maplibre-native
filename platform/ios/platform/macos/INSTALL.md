@@ -11,9 +11,17 @@ Before building, follow these steps to install prerequisites:
 1. Install [Xcode](https://developer.apple.com/xcode/)
 1. Launch Xcode and install any updates
 1. Install [Homebrew](http://brew.sh)
-1. Install [Node.js](https://nodejs.org/), [CMake](https://cmake.org/), and [ccache](https://ccache.samba.org):
-   ```
-   brew install node cmake ccache
+1. Install [Node.js](https://nodejs.org/), [CMake](https://cmake.org/), [ccache](https://ccache.samba.org), and [pkg-config](https://formulae.brew.sh/formula/pkg-config-wrapper#default), [glfw](https://formulae.brew.sh/formula/glfw):
+
+   ```bash
+   brew list node || brew install node
+   brew list cmake || brew install cmake
+   brew list ccache || brew install ccache
+   brew list pkg-config || brew install pkg-config
+   brew list glfw || brew install glfw
+
+   # To install the CMake documentation
+   brew list cmake-docs || brew install cmake-docs
    ```
 1. Install [xcpretty](https://github.com/supermarin/xcpretty) (optional, used for prettifying command line builds):
    ```
@@ -29,9 +37,9 @@ Before building, follow these steps to install prerequisites:
 To build the SDK from source:
 
 1. Clone the git repository:
-   ```
-   git clone https://github.com/mapbox/mapbox-gl-native-ios.git
-   cd mapbox-gl-native
+   ```bash
+   git clone https://github.com/maplibre/maplibre-gl-native.git
+   cd maplibre-gl-native
    ```
    Note that this repository uses Git submodules. They'll be automatically checked out when you first run a `make` command,
    but are not updated automatically. We recommended that you run `git submodule update` after pulling down new commits to

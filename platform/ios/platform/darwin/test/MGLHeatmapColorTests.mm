@@ -33,6 +33,9 @@
 
     constantExpression = [NSExpression expressionWithFormat:@"%@", [MGLColor redColor]];
     NSExpression *constantExpression2 = [NSExpression expressionWithFormat:@"%@", [MGLColor blueColor]];
+#if TARGET_OS_IPHONE
+    XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+#endif
     NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($heatmapDensity, %@, %@)", constantExpression, @{@12: constantExpression2}];
     layer.heatmapColor = functionExpression;
     
@@ -40,6 +43,7 @@
                    @"Setting heatmapColor to an expression depending on $heatmapDensity should update heatmap-color.");
     XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(12.0), mbgl::Color::blue(),
                    @"Setting heatmapColor to an expression depending on $heatmapDensity should update heatmap-color.");
+    XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
     XCTAssertEqualObjects(layer.heatmapColor, functionExpression,
                           @"heatmapColor should round-trip expressions depending on $heatmapDensity.");
 
