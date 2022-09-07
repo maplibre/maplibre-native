@@ -1,0 +1,85 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+
+# Objc files for the iOS source
+objc_library(
+    name = "darwin-objc",
+    srcs = [
+        "src/native_apple_interface.m",
+    ],
+    hdrs = [
+        "include/mbgl/interface/native_apple_interface.h",
+        "include/mbgl/storage/reachability.h",
+        "include/mbgl/util/image+MGLAdditions.hpp",
+    ],
+    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
+        "-fmodules",
+    ],
+    includes = [
+        "include",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        "//platform/default:mbgl-default",
+    ],
+)
+
+# Objcpp files for the iOS source
+objc_library(
+    name = "darwin-objcpp",
+    srcs = [
+        "src/CFHandle.hpp",
+        "src/collator.mm",
+        "src/headless_backend_eagl.mm",
+        "src/http_file_source.mm",
+        "src/image.mm",
+        "src/local_glyph_rasterizer.mm",
+        "src/logging_nslog.mm",
+        "src/nsthread.mm",
+        "src/number_format.mm",
+        "src/string_nsstring.mm",
+    ],
+    hdrs = [
+        "include/mbgl/interface/native_apple_interface.h",
+        "include/mbgl/storage/reachability.h",
+        "include/mbgl/util/image+MGLAdditions.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-vla-extension",
+        "-Wno-gnu-conditional-omitted-operand",
+    ],
+    includes = [
+        "include",
+    ],
+    sdk_frameworks = [
+        "CoreText",
+        "ImageIO",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        "//platform/default:mbgl-default",
+    ],
+)
+
+# Loop files for iOS.
+objc_library(
+    name = "darwin-loop",
+    srcs = [
+        "src/async_task.cpp",
+        "src/gl_functions.cpp",
+        "src/run_loop.cpp",
+        "src/timer.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    sdk_frameworks = [
+        "OpenGLES",
+        "SystemConfiguration",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+    ],
+)

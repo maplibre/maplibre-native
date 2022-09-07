@@ -1,0 +1,196 @@
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+# vendor/mapbox-base-files.json
+cc_library(
+    name = "mapbox-base",
+    hdrs = glob(
+        [
+            "mapbox-base/deps/cheap-ruler-cpp/include/mapbox/*.hpp",
+            "mapbox-base/deps/geojson-vt-cpp/include/**/*.hpp",
+            "mapbox-base/deps/geojson.hpp/include/**/*.hpp",
+            "mapbox-base/deps/geometry.hpp/include/**/*.hpp",
+            "mapbox-base/deps/jni.hpp/include/jni/*.hpp",
+            "mapbox-base/deps/pixelmatch-cpp/include/mapbox/*.hpp",
+            "mapbox-base/deps/shelf-pack-cpp/include/**/*.hpp",
+            "mapbox-base/deps/supercluster.hpp/include/*.hpp",
+            "mapbox-base/deps/variant/include/mapbox/*.hpp",
+            "mapbox-base/extras/expected-lite/include/**/*.hpp",
+            "mapbox-base/extras/filesystem/include/ghc/*.hpp",
+            "mapbox-base/extras/kdbush.hpp/include/*.hpp",
+            "mapbox-base/extras/rapidjson/include/**/*.h",
+            "mapbox-base/include/mapbox/**/*.hpp",
+        ],
+        allow_empty = False,
+        exclude = ["mapbox-base/deps/jni.hpp/include/jni/string_conversion.hpp"],
+    ),
+    copts = CPP_FLAGS,
+    defines = ["RAPIDJSON_HAS_STDSTRING=1"],
+    includes = [
+        "mapbox-base/deps/cheap-ruler-cpp/include",
+        "mapbox-base/deps/geojson.hpp/include",
+        "mapbox-base/deps/geojson-vt-cpp/include",
+        "mapbox-base/deps/geometry.hpp/include",
+        "mapbox-base/deps/jni.hpp/include",
+        "mapbox-base/deps/pixelmatch-cpp/include",
+        "mapbox-base/deps/shelf-pack-cpp/include",
+        "mapbox-base/deps/supercluster.hpp/include",
+        "mapbox-base/deps/variant/include",
+        "mapbox-base/extras/expected-lite/include",
+        "mapbox-base/extras/filesystem/include",
+        "mapbox-base/extras/kdbush.hpp/include",
+        "mapbox-base/extras/rapidjson/include",
+        "mapbox-base/include",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["optional"],
+)
+
+# vendor/parsedate
+cc_library(
+    name = "parsedate",
+    srcs = ["parsedate/parsedate.cpp"],
+    hdrs = glob(
+        [
+            "parsedate/**/*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["parsedate"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/optional
+cc_library(
+    name = "optional",
+    hdrs = glob(
+        [
+            "mapbox-base/deps/optional/*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["mapbox-base/deps/optional"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/csscolorparser
+cc_library(
+    name = "csscolorparser",
+    srcs = glob(
+        [
+            "csscolorparser/**/*.hpp",
+            "csscolorparser/**/*.cpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["csscolorparser"],
+    visibility = ["//visibility:public"],
+    deps = ["optional"],
+)
+
+# vendor/wagyu-files.json
+cc_library(
+    name = "wagyu",
+    hdrs = glob(
+        ["wagyu/include/mapbox/geometry/wagyu/*.hpp"],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["wagyu/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/boost-files.json
+cc_library(
+    name = "boost",
+    hdrs = glob(
+        [
+            "boost/include/boost/**/*.hpp",
+            "boost/include/boost/**/*.h",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["boost/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/protozero-files.json
+cc_library(
+    name = "protozero",
+    hdrs = glob(
+        ["protozero/include/protozero/*.hpp"],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["protozero/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/earcut.hpp-files.json
+cc_library(
+    name = "earcut.hpp",
+    hdrs = ["earcut.hpp/include/mapbox/earcut.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["earcut.hpp/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/eternal-files.json
+cc_library(
+    name = "eternal",
+    hdrs = ["eternal/include/mapbox/eternal.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["eternal/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/polylabel-files.json
+cc_library(
+    name = "polylabel",
+    hdrs = ["polylabel/include/mapbox/polylabel.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["polylabel/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/unique_resource-files.json
+cc_library(
+    name = "unique_resource",
+    hdrs = ["unique_resource/unique_resource.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["unique_resource"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/vector-tile-files.json
+cc_library(
+    name = "vector-tile",
+    hdrs = glob(
+        ["vector-tile/include/mapbox/**/*.hpp"],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["vector-tile/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/icu-files.json
+cc_library(
+    name = "icu",
+    srcs = glob(
+        [
+            "icu/src/*.cpp",
+            "icu/src/*.h",
+        ],
+        allow_empty = False,
+    ),
+    hdrs = glob(["icu/include/unicode/*.h"]),
+    copts = CPP_FLAGS + [
+        "-Wno-c11-extensions",
+    ],
+    includes = ["icu/include"],
+    visibility = ["//visibility:public"],
+)
