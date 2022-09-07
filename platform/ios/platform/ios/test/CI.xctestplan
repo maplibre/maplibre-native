@@ -32,8 +32,7 @@
     {
       "skippedTests" : [
         "MGLMapSnapshotterTests\/testLocalGlyphRendering",
-        "MGLMapViewContentInsetTests",
-        "MGLOfflineStorageTests\/testAddPackForBounds"
+        "MGLMapViewContentInsetTests"
       ],
       "target" : {
         "containerPath" : "container:ios.xcodeproj",
