@@ -144,11 +144,12 @@ private:
     MGLOfflineStorage *sharedOfflineStorage = [MGLOfflineStorage sharedOfflineStorage];
     __weak MGLOfflinePack *weakSelf = self;
     [sharedOfflineStorage getPacksWithCompletionHandler:^(NSArray<MGLOfflinePack *> *packs, __unused NSError * _Nullable error) {
+        MGLOfflinePack *strongSelf = weakSelf;
         for (MGLOfflinePack *pack in packs) {
             if (pack.mbglOfflineRegion->getID() == regionID) {
-                weakSelf.mbglOfflineRegion = pack.mbglOfflineRegion;
-                break;
+                strongSelf.mbglOfflineRegion = pack.mbglOfflineRegion;
             }
+            [pack invalidate];
         }
         completion(error);
     }];
