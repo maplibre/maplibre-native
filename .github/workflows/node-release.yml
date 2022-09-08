@@ -22,8 +22,6 @@ on:
 jobs:
   bump_version:
     runs-on: ubuntu-20.04
-    env:
-      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
     defaults:
       run:
@@ -36,33 +34,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install dependencies
-        if: runner.os == 'Linux'
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ccache \
-            cmake \
-            ninja-build \
-            pkg-config \
-            xvfb \
-            libcurl4-openssl-dev \
-            libglfw3-dev \
-            libuv1-dev \
-            g++-10 \
-            libc++-9-dev \
-            libc++abi-9-dev
-          /usr/sbin/update-ccache-symlinks
-          
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
 
       - name: Bump Version
         run: |
