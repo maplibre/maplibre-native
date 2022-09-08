@@ -79,6 +79,8 @@ jobs:
         working-directory: platform/ios
         shell: bash
 
+    steps:
+
       - uses: actions/checkout@v3
         with:
           submodules: recursive
