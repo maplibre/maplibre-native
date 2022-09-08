@@ -1,287 +1,288 @@
-package com.mapbox.mapboxsdk.testapp.activity.style;
+package com.mapbox.mapboxsdk.testapp.activity.style
 
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.View;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.CircleLayer;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.all;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.gt;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.gte;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.has;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.toNumber;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleRadius;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
-
+import android.graphics.Color
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFinishLoadingStyleListener
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
+import timber.log.Timber
+import java.net.URI
+import java.net.URISyntaxException
 
 /**
  * Test activity showcasing adding a Circle Layer to the Map
- * <p>
+ *
+ *
  * Uses bus stop data from Singapore as a source and allows to filter into 1 specific route with a line layer.
- * </p>
+ *
  */
-public class CircleLayerActivity extends AppCompatActivity implements View.OnClickListener {
-
-  public static final String SOURCE_ID = "bus_stop";
-  public static final String SOURCE_ID_CLUSTER = "bus_stop_cluster";
-  public static final String URL_BUS_ROUTES = "https://raw.githubusercontent.com/cheeaun/busrouter-sg/master/data/2/bus-stops.geojson";
-  public static final String LAYER_ID = "stops_layer";
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-
-  private FloatingActionButton styleFab;
-  private FloatingActionButton routeFab;
-
-  private CircleLayer layer;
-  private GeoJsonSource source;
-
-  private int currentStyleIndex = 0;
-  private boolean isLoadingStyle = true;
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_circle_layer);
-
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(map -> {
-      mapboxMap = map;
-      mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"));
-      mapView.addOnDidFinishLoadingStyleListener(() -> {
-        Style style = mapboxMap.getStyle();
-        addBusStopSource(style);
-        addBusStopCircleLayer(style);
-        initFloatingActionButtons();
-        isLoadingStyle = false;
-      });
-    });
-  }
-
-  private void addBusStopSource(Style style) {
-    try {
-      source = new GeoJsonSource(SOURCE_ID, new URI(URL_BUS_ROUTES));
-    } catch (URISyntaxException exception) {
-      Timber.e(exception, "That's not an url... ");
-    }
-    style.addSource(source);
-  }
-
-  private void addBusStopCircleLayer(Style style) {
-    layer = new CircleLayer(LAYER_ID, SOURCE_ID);
-    layer.setProperties(
-      circleColor(Color.parseColor("#FF9800")),
-      circleRadius(2.0f)
-    );
-    style.addLayerBelow(layer, "water_intermittent");
-  }
-
-  private void initFloatingActionButtons() {
-    routeFab = findViewById(R.id.fab_route);
-    routeFab.setColorFilter(ContextCompat.getColor(CircleLayerActivity.this, R.color.primary));
-    routeFab.setOnClickListener(CircleLayerActivity.this);
-
-    styleFab = findViewById(R.id.fab_style);
-    styleFab.setOnClickListener(CircleLayerActivity.this);
-  }
-
-  @Override
-  public void onClick(View view) {
-    if (isLoadingStyle) {
-      return;
-    }
-
-    if (view.getId() == R.id.fab_route) {
-      showBusCluster();
-    } else if (view.getId() == R.id.fab_style) {
-      changeMapStyle();
-    }
-  }
-
-  private void showBusCluster() {
-    removeFabs();
-    removeOldSource();
-    addClusteredSource();
-  }
-
-  private void removeOldSource() {
-    mapboxMap.getStyle().removeSource(SOURCE_ID);
-    mapboxMap.getStyle().removeLayer(LAYER_ID);
-  }
-
-  private void addClusteredSource() {
-    try {
-      mapboxMap.getStyle().addSource(
-        new GeoJsonSource(SOURCE_ID_CLUSTER,
-          new URI(URL_BUS_ROUTES),
-          new GeoJsonOptions()
-            .withCluster(true)
-            .withClusterMaxZoom(14)
-            .withClusterRadius(50)
+class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
+    private lateinit var mapView: MapView
+    private var mapboxMap: MapboxMap? = null
+    private lateinit var styleFab: FloatingActionButton
+    private lateinit var routeFab: FloatingActionButton
+    private var layer: CircleLayer? = null
+    private var source: GeoJsonSource? = null
+    private var currentStyleIndex = 0
+    private var isLoadingStyle = true
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_circle_layer)
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(
+            OnMapReadyCallback { map: MapboxMap? ->
+                mapboxMap = map
+                mapboxMap!!.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                mapView.addOnDidFinishLoadingStyleListener(
+                    OnDidFinishLoadingStyleListener {
+                        val style = mapboxMap!!.style
+                        addBusStopSource(style)
+                        addBusStopCircleLayer(style)
+                        initFloatingActionButtons()
+                        isLoadingStyle = false
+                    }
+                )
+            }
         )
-      );
-    } catch (URISyntaxException malformedUrlException) {
-      Timber.e(malformedUrlException, "That's not an url... ");
     }
 
-    // Add unclustered layer
-    int[][] layers = new int[][] {
-      new int[] {150, ResourcesCompat.getColor(getResources(), R.color.redAccent, getTheme())},
-      new int[] {20, ResourcesCompat.getColor(getResources(), R.color.greenAccent, getTheme())},
-      new int[] {0, ResourcesCompat.getColor(getResources(), R.color.blueAccent, getTheme())}
-    };
+    private fun addBusStopSource(style: Style?) {
+        try {
+            source = GeoJsonSource(SOURCE_ID, URI(URL_BUS_ROUTES))
+        } catch (exception: URISyntaxException) {
+            Timber.e(exception, "That's not an url... ")
+        }
+        style!!.addSource(source!!)
+    }
 
-    SymbolLayer unclustered = new SymbolLayer("unclustered-points", SOURCE_ID_CLUSTER);
-    unclustered.setProperties(
-      iconImage("bus-15")
-    );
-
-    mapboxMap.getStyle().addLayer(unclustered);
-
-    for (int i = 0; i < layers.length; i++) {
-      // Add some nice circles
-      CircleLayer circles = new CircleLayer("cluster-" + i, SOURCE_ID_CLUSTER);
-      circles.setProperties(
-        circleColor(layers[i][1]),
-        circleRadius(18f)
-      );
-
-      Expression pointCount = toNumber(get("point_count"));
-      circles.setFilter(
-        i == 0
-          ? all(has("point_count"),
-          gte(pointCount, literal(layers[i][0]))
-        ) : all(has("point_count"),
-          gt(pointCount, literal(layers[i][0])),
-          lt(pointCount, literal(layers[i - 1][0]))
+    private fun addBusStopCircleLayer(style: Style?) {
+        layer = CircleLayer(LAYER_ID, SOURCE_ID)
+        layer!!.setProperties(
+            PropertyFactory.circleColor(Color.parseColor("#FF9800")),
+            PropertyFactory.circleRadius(2.0f)
         )
-      );
-      mapboxMap.getStyle().addLayer(circles);
+        style!!.addLayerBelow(layer!!, "water_intermittent")
     }
 
-    // Add the count labels
-    SymbolLayer count = new SymbolLayer("count", SOURCE_ID_CLUSTER);
-    count.setProperties(
-      textField(Expression.toString(get("point_count"))),
-      textSize(12f),
-      textColor(Color.WHITE),
-      textIgnorePlacement(true),
-      textAllowOverlap(true)
-    );
-    mapboxMap.getStyle().addLayer(count);
-  }
-
-  private void removeFabs() {
-    routeFab.setVisibility(View.GONE);
-    styleFab.setVisibility(View.GONE);
-  }
-
-  private void changeMapStyle() {
-    isLoadingStyle = true;
-    removeBusStop();
-    loadNewStyle();
-  }
-
-  private void removeBusStop() {
-    mapboxMap.getStyle().removeLayer(layer);
-    mapboxMap.getStyle().removeSource(source);
-  }
-
-  private void loadNewStyle() {
-    mapboxMap.setStyle(new Style.Builder().fromUri(getNextStyle()));
-  }
-
-  private void addBusStop() {
-    mapboxMap.getStyle().addLayer(layer);
-    mapboxMap.getStyle().addSource(source);
-  }
-
-  private String getNextStyle() {
-    currentStyleIndex++;
-    if (currentStyleIndex == Data.STYLES.length) {
-      currentStyleIndex = 0;
+    private fun initFloatingActionButtons() {
+        routeFab = findViewById(R.id.fab_route)
+        routeFab.setColorFilter(ContextCompat.getColor(this@CircleLayerActivity, R.color.primary))
+        routeFab.setOnClickListener(this@CircleLayerActivity)
+        styleFab = findViewById(R.id.fab_style)
+        styleFab.setOnClickListener(this@CircleLayerActivity)
     }
-    return Data.STYLES[currentStyleIndex];
-  }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onClick(view: View) {
+        if (isLoadingStyle) {
+            return
+        }
+        if (view.id == R.id.fab_route) {
+            showBusCluster()
+        } else if (view.id == R.id.fab_style) {
+            changeMapStyle()
+        }
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    private fun showBusCluster() {
+        removeFabs()
+        removeOldSource()
+        addClusteredSource()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    private fun removeOldSource() {
+        mapboxMap!!.style!!.removeSource(SOURCE_ID)
+        mapboxMap!!.style!!.removeLayer(LAYER_ID)
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    private fun addClusteredSource() {
+        try {
+            mapboxMap!!.style!!.addSource(
+                GeoJsonSource(
+                    SOURCE_ID_CLUSTER,
+                    URI(URL_BUS_ROUTES),
+                    GeoJsonOptions()
+                        .withCluster(true)
+                        .withClusterMaxZoom(14)
+                        .withClusterRadius(50)
+                )
+            )
+        } catch (malformedUrlException: URISyntaxException) {
+            Timber.e(malformedUrlException, "That's not an url... ")
+        }
 
-  @Override
-  public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+        // Add unclustered layer
+        val layers = arrayOf(
+            intArrayOf(
+                150,
+                ResourcesCompat.getColor(
+                    resources,
+                    R.color.redAccent,
+                    theme
+                )
+            ),
+            intArrayOf(20, ResourcesCompat.getColor(resources, R.color.greenAccent, theme)),
+            intArrayOf(
+                0,
+                ResourcesCompat.getColor(
+                    resources,
+                    R.color.blueAccent,
+                    theme
+                )
+            )
+        )
+        val unclustered = SymbolLayer("unclustered-points", SOURCE_ID_CLUSTER)
+        unclustered.setProperties(
+            PropertyFactory.iconImage("bus-15")
+        )
+        mapboxMap!!.style!!.addLayer(unclustered)
+        for (i in layers.indices) {
+            // Add some nice circles
+            val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
+            circles.setProperties(
+                PropertyFactory.circleColor(layers[i][1]),
+                PropertyFactory.circleRadius(18f)
+            )
+            val pointCount = Expression.toNumber(Expression.get("point_count"))
+            circles.setFilter(
+                if (i == 0) Expression.all(
+                    Expression.has("point_count"),
+                    Expression.gte(
+                        pointCount,
+                        Expression.literal(
+                            layers[i][0]
+                        )
+                    )
+                ) else Expression.all(
+                    Expression.has("point_count"),
+                    Expression.gt(
+                        pointCount,
+                        Expression.literal(
+                            layers[i][0]
+                        )
+                    ),
+                    Expression.lt(
+                        pointCount,
+                        Expression.literal(
+                            layers[i - 1][0]
+                        )
+                    )
+                )
+            )
+            mapboxMap!!.style!!.addLayer(circles)
+        }
 
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+        // Add the count labels
+        val count = SymbolLayer("count", SOURCE_ID_CLUSTER)
+        count.setProperties(
+            PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+            PropertyFactory.textSize(12f),
+            PropertyFactory.textColor(Color.WHITE),
+            PropertyFactory.textIgnorePlacement(true),
+            PropertyFactory.textAllowOverlap(true)
+        )
+        mapboxMap!!.style!!.addLayer(count)
+    }
 
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
+    private fun removeFabs() {
+        routeFab!!.visibility = View.GONE
+        styleFab!!.visibility = View.GONE
+    }
 
-  private static class Data {
-    private static final String[] STYLES = new String[] {
-      Style.getPredefinedStyle("Streets"),
-      Style.getPredefinedStyle("Outdoor"),
-      Style.getPredefinedStyle("Bright"),
-      Style.getPredefinedStyle("Pastel"),
-      Style.getPredefinedStyle("Satellite Hybrid"),
-      Style.getPredefinedStyle("Satellite Hybrid")
-    };
-  }
+    private fun changeMapStyle() {
+        isLoadingStyle = true
+        removeBusStop()
+        loadNewStyle()
+    }
+
+    private fun removeBusStop() {
+        mapboxMap!!.style!!.removeLayer(layer!!)
+        mapboxMap!!.style!!.removeSource(source!!)
+    }
+
+    private fun loadNewStyle() {
+        mapboxMap!!.setStyle(Style.Builder().fromUri(nextStyle))
+    }
+
+    private fun addBusStop() {
+        mapboxMap!!.style!!.addLayer(layer!!)
+        mapboxMap!!.style!!.addSource(source!!)
+    }
+
+    private val nextStyle: String
+        private get() {
+            currentStyleIndex++
+            if (currentStyleIndex == Data.STYLES.size) {
+                currentStyleIndex = 0
+            }
+            return Data.STYLES[currentStyleIndex]
+        }
+
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
+
+    public override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
+
+    public override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
+
+    private object Data {
+        val STYLES = arrayOf(
+            Style.getPredefinedStyle("Streets"),
+            Style.getPredefinedStyle("Outdoor"),
+            Style.getPredefinedStyle("Bright"),
+            Style.getPredefinedStyle("Pastel"),
+            Style.getPredefinedStyle("Satellite Hybrid"),
+            Style.getPredefinedStyle("Satellite Hybrid")
+        )
+    }
+
+    companion object {
+        const val SOURCE_ID = "bus_stop"
+        const val SOURCE_ID_CLUSTER = "bus_stop_cluster"
+        const val URL_BUS_ROUTES =
+            "https://raw.githubusercontent.com/cheeaun/busrouter-sg/master/data/2/bus-stops.geojson"
+        const val LAYER_ID = "stops_layer"
+    }
 }
