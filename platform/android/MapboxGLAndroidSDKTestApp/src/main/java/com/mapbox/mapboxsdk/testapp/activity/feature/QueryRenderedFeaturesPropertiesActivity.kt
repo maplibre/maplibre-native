@@ -87,8 +87,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
                     if (feature.geometry() != null) feature.geometry()!!::class.java.simpleName else "<null>"
                 )
                 if (feature.properties() != null) {
-                    for ((key, value) in feature.properties()!!
-                        .entrySet()) {
+                    for ((key, value) in feature.properties()!!.entrySet()) {
                         Timber.i("Prop %s - %s", key, value)
                     }
                 }
