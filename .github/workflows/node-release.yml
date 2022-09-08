@@ -2,6 +2,15 @@ name: node-release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Choose a release type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   build:
@@ -113,6 +122,13 @@ jobs:
       - name: Test
         if: runner.os == 'macOS'
         run: npm test
+
+      - name: Bump Version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version ${{ github.event.inputs.version }} -m "Update version (${{ github.event.inputs.version }})"
+          git push
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
