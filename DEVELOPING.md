@@ -169,5 +169,5 @@ zstyle ':completion:*:*:make:*' tag-order 'targets'
 autoload -Uz compinit && compinit
 ```
 
-### Kotlin and Java compat
+### Kotlin and Java compatibility
 We are moving to Kotlin, which is backward compatible with Java, but if you need a Java version of the Android SDK there is a `before-kotlin-port` tag available.
