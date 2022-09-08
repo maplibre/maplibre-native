@@ -1,444 +1,414 @@
-package com.mapbox.mapboxsdk.testapp.activity.style;
+package com.mapbox.mapboxsdk.testapp.activity.style
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.TypeEvaluator;
-import android.animation.ValueAnimator;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.gson.JsonObject;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.turf.TurfMeasurement;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconRotate;
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.TypeEvaluator
+import android.animation.ValueAnimator
+import android.animation.ValueAnimator.AnimatorUpdateListener
+import android.graphics.drawable.BitmapDrawable
+import android.os.Bundle
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.JsonObject
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.style.AnimatedSymbolLayerActivity.Car
+import com.mapbox.turf.TurfMeasurement
+import java.util.*
 
 /**
  * Test activity showcasing animating a SymbolLayer.
  */
-public class AnimatedSymbolLayerActivity extends AppCompatActivity {
-
-  private static final String PASSENGER = "passenger";
-  private static final String PASSENGER_LAYER = "passenger-layer";
-  private static final String PASSENGER_SOURCE = "passenger-source";
-  private static final String TAXI = "taxi";
-  private static final String TAXI_LAYER = "taxi-layer";
-  private static final String TAXI_SOURCE = "taxi-source";
-  private static final String RANDOM_CAR_LAYER = "random-car-layer";
-  private static final String RANDOM_CAR_SOURCE = "random-car-source";
-  private static final String RANDOM_CAR_IMAGE_ID = "random-car";
-  private static final String PROPERTY_BEARING = "bearing";
-  private static final String WATERWAY_LAYER_ID = "water_intermittent";
-  private static final int DURATION_RANDOM_MAX = 1500;
-  private static final int DURATION_BASE = 3000;
-
-  private final Random random = new Random();
-
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-  private Style style;
-
-  private List<Car> randomCars = new ArrayList<>();
-  private GeoJsonSource randomCarSource;
-  private Car taxi;
-  private GeoJsonSource taxiSource;
-  private LatLng passenger;
-
-  private List<Animator> animators = new ArrayList<>();
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_animated_marker);
-
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(map -> {
-      this.mapboxMap = map;
-      map.setStyle(Style.getPredefinedStyle("Streets"), style -> {
-        this.style = style;
-        setupCars();
-        animateRandomRoutes();
-        animateTaxi();
-      });
-    });
-  }
-
-  private void setupCars() {
-    addRandomCars();
-    addPassenger();
-    addMainCar();
-  }
-
-  private void animateRandomRoutes() {
-    final Car longestDrive = getLongestDrive();
-    final Random random = new Random();
-    for (final Car car : randomCars) {
-      final boolean isLongestDrive = longestDrive.equals(car);
-      ValueAnimator valueAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), car.current, car.next);
-      valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-        private LatLng latLng;
-
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-          latLng = (LatLng) animation.getAnimatedValue();
-          car.current = latLng;
-          if (isLongestDrive) {
-            updateRandomCarSource();
-          }
-        }
-      });
-
-      if (isLongestDrive) {
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            super.onAnimationEnd(animation);
-            updateRandomDestinations();
-            animateRandomRoutes();
-          }
-        });
-      }
-
-      valueAnimator.addListener(new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationStart(Animator animation) {
-          super.onAnimationStart(animation);
-          car.feature.properties().addProperty("bearing", Car.getBearing(car.current, car.next));
-        }
-      });
-
-      int offset = random.nextInt(2) == 0 ? 0 : random.nextInt(1000) + 250;
-      valueAnimator.setStartDelay(offset);
-      valueAnimator.setDuration(car.duration - offset);
-      valueAnimator.setInterpolator(new LinearInterpolator());
-      valueAnimator.start();
-
-      animators.add(valueAnimator);
-    }
-  }
-
-  private void animateTaxi() {
-    ValueAnimator valueAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), taxi.current, taxi.next);
-    valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-      private LatLng latLng;
-
-      @Override
-      public void onAnimationUpdate(ValueAnimator animation) {
-        latLng = (LatLng) animation.getAnimatedValue();
-        taxi.current = latLng;
-        updateTaxiSource();
-      }
-    });
-
-    valueAnimator.addListener(new AnimatorListenerAdapter() {
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        super.onAnimationEnd(animation);
-        updatePassenger();
-        animateTaxi();
-      }
-    });
-
-    valueAnimator.addListener(new AnimatorListenerAdapter() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-        super.onAnimationStart(animation);
-        taxi.feature.properties().addProperty("bearing", Car.getBearing(taxi.current, taxi.next));
-      }
-    });
-
-    valueAnimator.setDuration((long) (7 * taxi.current.distanceTo(taxi.next)));
-    valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-    valueAnimator.start();
-
-    animators.add(valueAnimator);
-  }
-
-  private void updatePassenger() {
-    passenger = getLatLngInBounds();
-    updatePassengerSource();
-    taxi.setNext(passenger);
-  }
-
-  private void updatePassengerSource() {
-    GeoJsonSource source = style.getSourceAs(PASSENGER_SOURCE);
-    FeatureCollection featureCollection = FeatureCollection.fromFeatures(new Feature[] {
-      Feature.fromGeometry(
-        Point.fromLngLat(
-          passenger.getLongitude(),
-          passenger.getLatitude()
+class AnimatedSymbolLayerActivity : AppCompatActivity() {
+    private val random = Random()
+    private lateinit var mapView: MapView
+    private var mapboxMap: MapboxMap? = null
+    private var style: Style? = null
+    private val randomCars: MutableList<Car> = ArrayList()
+    private var randomCarSource: GeoJsonSource? = null
+    private var taxi: Car? = null
+    private var taxiSource: GeoJsonSource? = null
+    private var passenger: LatLng? = null
+    private val animators: MutableList<Animator> = ArrayList()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_animated_marker)
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(
+            OnMapReadyCallback { map: MapboxMap ->
+                mapboxMap = map
+                map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                    this.style = style
+                    setupCars()
+                    animateRandomRoutes()
+                    animateTaxi()
+                }
+            }
         )
-      )
-    });
-    source.setGeoJson(featureCollection);
-  }
-
-  private void updateTaxiSource() {
-    taxi.updateFeature();
-    taxiSource.setGeoJson(taxi.feature);
-  }
-
-  private void updateRandomDestinations() {
-    for (Car randomCar : randomCars) {
-      randomCar.setNext(getLatLngInBounds());
-    }
-  }
-
-  private Car getLongestDrive() {
-    Car longestDrive = null;
-    for (Car randomCar : randomCars) {
-      if (longestDrive == null) {
-        longestDrive = randomCar;
-      } else if (longestDrive.duration < randomCar.duration) {
-        longestDrive = randomCar;
-      }
-    }
-    return longestDrive;
-  }
-
-  private void updateRandomCarSource() {
-    for (Car randomCarsRoute : randomCars) {
-      randomCarsRoute.updateFeature();
-    }
-    randomCarSource.setGeoJson(featuresFromRoutes());
-  }
-
-  private FeatureCollection featuresFromRoutes() {
-    List<Feature> features = new ArrayList<>();
-    for (Car randomCarsRoute : randomCars) {
-      features.add(randomCarsRoute.feature);
-    }
-    return FeatureCollection.fromFeatures(features);
-  }
-
-  private long getDuration() {
-    return random.nextInt(DURATION_RANDOM_MAX) + DURATION_BASE;
-  }
-
-  private void addRandomCars() {
-    LatLng latLng;
-    LatLng next;
-    for (int i = 0; i < 10; i++) {
-      latLng = getLatLngInBounds();
-      next = getLatLngInBounds();
-
-      JsonObject properties = new JsonObject();
-      properties.addProperty(PROPERTY_BEARING, Car.getBearing(latLng, next));
-
-      Feature feature = Feature.fromGeometry(
-        Point.fromLngLat(
-          latLng.getLongitude(),
-          latLng.getLatitude()
-        ), properties);
-
-      randomCars.add(
-        new Car(feature, next, getDuration())
-      );
     }
 
-    randomCarSource = new GeoJsonSource(RANDOM_CAR_SOURCE, featuresFromRoutes());
-    style.addSource(randomCarSource);
-    style.addImage(RANDOM_CAR_IMAGE_ID,
-      ((BitmapDrawable) getResources().getDrawable(R.drawable.ic_car_top)).getBitmap());
+    private fun setupCars() {
+        addRandomCars()
+        addPassenger()
+        addMainCar()
+    }
 
-    SymbolLayer symbolLayer = new SymbolLayer(RANDOM_CAR_LAYER, RANDOM_CAR_SOURCE);
-    symbolLayer.withProperties(
-      iconImage(RANDOM_CAR_IMAGE_ID),
-      iconAllowOverlap(true),
-      iconRotate(get(PROPERTY_BEARING)),
-      iconIgnorePlacement(true)
-    );
+    private fun animateRandomRoutes() {
+        val longestDrive = longestDrive
+        val random = Random()
+        for (car in randomCars) {
+            val isLongestDrive = longestDrive == car
+            val valueAnimator = ValueAnimator.ofObject(LatLngEvaluator(), car.current, car.next)
+            valueAnimator.addUpdateListener(object : AnimatorUpdateListener {
+                private var latLng: LatLng? = null
+                override fun onAnimationUpdate(animation: ValueAnimator) {
+                    latLng = animation.animatedValue as LatLng
+                    car.current = latLng
+                    if (isLongestDrive) {
+                        updateRandomCarSource()
+                    }
+                }
+            })
+            if (isLongestDrive) {
+                valueAnimator.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        super.onAnimationEnd(animation)
+                        updateRandomDestinations()
+                        animateRandomRoutes()
+                    }
+                })
+            }
+            valueAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    super.onAnimationStart(animation)
+                    car.feature.properties()!!
+                        .addProperty("bearing", Car.getBearing(car.current, car.next))
+                }
+            })
+            val offset = if (random.nextInt(2) == 0) 0 else random.nextInt(1000) + 250
+            valueAnimator.startDelay = offset.toLong()
+            valueAnimator.duration = car.duration - offset
+            valueAnimator.interpolator = LinearInterpolator()
+            valueAnimator.start()
+            animators.add(valueAnimator)
+        }
+    }
 
-    style.addLayerBelow(symbolLayer, WATERWAY_LAYER_ID);
-  }
+    private fun animateTaxi() {
+        val valueAnimator = ValueAnimator.ofObject(LatLngEvaluator(), taxi!!.current, taxi!!.next)
+        valueAnimator.addUpdateListener(object : AnimatorUpdateListener {
+            private var latLng: LatLng? = null
+            override fun onAnimationUpdate(animation: ValueAnimator) {
+                latLng = animation.animatedValue as LatLng
+                taxi!!.current = latLng
+                updateTaxiSource()
+            }
+        })
+        valueAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                updatePassenger()
+                animateTaxi()
+            }
+        })
+        valueAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator) {
+                super.onAnimationStart(animation)
+                taxi!!.feature.properties()!!
+                    .addProperty("bearing", Car.getBearing(taxi!!.current, taxi!!.next))
+            }
+        })
+        valueAnimator.duration = (7 * taxi!!.current!!.distanceTo(taxi!!.next!!)).toLong()
+        valueAnimator.interpolator = AccelerateDecelerateInterpolator()
+        valueAnimator.start()
+        animators.add(valueAnimator)
+    }
 
-  private void addPassenger() {
-    passenger = getLatLngInBounds();
-    FeatureCollection featureCollection = FeatureCollection.fromFeatures(new Feature[] {
-      Feature.fromGeometry(
-        Point.fromLngLat(
-          passenger.getLongitude(),
-          passenger.getLatitude()
+    private fun updatePassenger() {
+        passenger = latLngInBounds
+        updatePassengerSource()
+        taxi!!.setNext(passenger)
+    }
+
+    private fun updatePassengerSource() {
+        val source = style!!.getSourceAs<GeoJsonSource>(PASSENGER_SOURCE)
+        val featureCollection = FeatureCollection.fromFeatures(
+            arrayOf(
+                Feature.fromGeometry(
+                    Point.fromLngLat(
+                        passenger!!.longitude,
+                        passenger!!.latitude
+                    )
+                )
+            )
         )
-      )
-    });
-
-    style.addImage(PASSENGER,
-      ((BitmapDrawable) getResources().getDrawable(R.drawable.icon_burned)).getBitmap());
-
-    GeoJsonSource geoJsonSource = new GeoJsonSource(PASSENGER_SOURCE, featureCollection);
-    style.addSource(geoJsonSource);
-
-    SymbolLayer symbolLayer = new SymbolLayer(PASSENGER_LAYER, PASSENGER_SOURCE);
-    symbolLayer.withProperties(
-      iconImage(PASSENGER),
-      iconIgnorePlacement(true),
-      iconAllowOverlap(true)
-    );
-    style.addLayerBelow(symbolLayer, RANDOM_CAR_LAYER);
-  }
-
-  private void addMainCar() {
-    LatLng latLng = getLatLngInBounds();
-    JsonObject properties = new JsonObject();
-    properties.addProperty(PROPERTY_BEARING, Car.getBearing(latLng, passenger));
-    Feature feature = Feature.fromGeometry(
-      Point.fromLngLat(
-        latLng.getLongitude(),
-        latLng.getLatitude()), properties);
-    FeatureCollection featureCollection = FeatureCollection.fromFeatures(new Feature[] {feature});
-
-    taxi = new Car(feature, passenger, getDuration());
-    style.addImage(TAXI,
-      ((BitmapDrawable) getResources().getDrawable(R.drawable.ic_taxi_top)).getBitmap());
-    taxiSource = new GeoJsonSource(TAXI_SOURCE, featureCollection);
-    style.addSource(taxiSource);
-
-    SymbolLayer symbolLayer = new SymbolLayer(TAXI_LAYER, TAXI_SOURCE);
-    symbolLayer.withProperties(
-      iconImage(TAXI),
-      iconRotate(get(PROPERTY_BEARING)),
-      iconAllowOverlap(true),
-      iconIgnorePlacement(true)
-
-    );
-    style.addLayer(symbolLayer);
-  }
-
-  private LatLng getLatLngInBounds() {
-    LatLngBounds bounds = mapboxMap.getProjection().getVisibleRegion().latLngBounds;
-    Random generator = new Random();
-    double randomLat = bounds.getLatSouth() + generator.nextDouble()
-      * (bounds.getLatNorth() - bounds.getLatSouth());
-    double randomLon = bounds.getLonWest() + generator.nextDouble()
-      * (bounds.getLonEast() - bounds.getLonWest());
-    return new LatLng(randomLat, randomLon);
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-
-    for (Animator animator : animators) {
-      if (animator != null) {
-        animator.removeAllListeners();
-        animator.cancel();
-      }
+        source!!.setGeoJson(featureCollection)
     }
 
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  /**
-   * Evaluator for LatLng pairs
-   */
-  private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
-
-    private LatLng latLng = new LatLng();
-
-    @Override
-    public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
-      latLng.setLatitude(startValue.getLatitude()
-        + ((endValue.getLatitude() - startValue.getLatitude()) * fraction));
-      latLng.setLongitude(startValue.getLongitude()
-        + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
-      return latLng;
-    }
-  }
-
-
-  private static class Car {
-    private Feature feature;
-    private LatLng next;
-    private LatLng current;
-    private long duration;
-
-    Car(Feature feature, LatLng next, long duration) {
-      this.feature = feature;
-      Point point = ((Point) feature.geometry());
-      this.current = new LatLng(point.latitude(), point.longitude());
-      this.duration = duration;
-      this.next = next;
+    private fun updateTaxiSource() {
+        taxi!!.updateFeature()
+        taxiSource!!.setGeoJson(taxi!!.feature)
     }
 
-    void setNext(LatLng next) {
-      this.next = next;
+    private fun updateRandomDestinations() {
+        for (randomCar in randomCars) {
+            randomCar.setNext(latLngInBounds)
+        }
     }
 
-    void updateFeature() {
-      feature = Feature.fromGeometry(Point.fromLngLat(
-        current.getLongitude(),
-        current.getLatitude())
-      );
-      feature.properties().addProperty("bearing", getBearing(current, next));
+    private val longestDrive: Car?
+        private get() {
+            var longestDrive: Car? = null
+            for (randomCar in randomCars) {
+                if (longestDrive == null) {
+                    longestDrive = randomCar
+                } else if (longestDrive.duration < randomCar.duration) {
+                    longestDrive = randomCar
+                }
+            }
+            return longestDrive
+        }
+
+    private fun updateRandomCarSource() {
+        for (randomCarsRoute in randomCars) {
+            randomCarsRoute.updateFeature()
+        }
+        randomCarSource!!.setGeoJson(featuresFromRoutes())
     }
 
-    private static float getBearing(LatLng from, LatLng to) {
-      return (float) TurfMeasurement.bearing(
-        Point.fromLngLat(from.getLongitude(), from.getLatitude()),
-        Point.fromLngLat(to.getLongitude(), to.getLatitude())
-      );
+    private fun featuresFromRoutes(): FeatureCollection {
+        val features: MutableList<Feature> = ArrayList()
+        for (randomCarsRoute in randomCars) {
+            features.add(randomCarsRoute.feature)
+        }
+        return FeatureCollection.fromFeatures(features)
     }
-  }
+
+    private val duration: Long
+        private get() = (random.nextInt(DURATION_RANDOM_MAX) + DURATION_BASE).toLong()
+
+    private fun addRandomCars() {
+        var latLng: LatLng
+        var next: LatLng
+        for (i in 0..9) {
+            latLng = latLngInBounds
+            next = latLngInBounds
+            val properties = JsonObject()
+            properties.addProperty(PROPERTY_BEARING, Car.getBearing(latLng, next))
+            val feature = Feature.fromGeometry(
+                Point.fromLngLat(
+                    latLng.longitude,
+                    latLng.latitude
+                ),
+                properties
+            )
+            randomCars.add(
+                Car(feature, next, duration)
+            )
+        }
+        randomCarSource = GeoJsonSource(RANDOM_CAR_SOURCE, featuresFromRoutes())
+        style!!.addSource(randomCarSource!!)
+        style!!.addImage(
+            RANDOM_CAR_IMAGE_ID,
+            (resources.getDrawable(R.drawable.ic_car_top) as BitmapDrawable).bitmap
+        )
+        val symbolLayer = SymbolLayer(RANDOM_CAR_LAYER, RANDOM_CAR_SOURCE)
+        symbolLayer.withProperties(
+            PropertyFactory.iconImage(RANDOM_CAR_IMAGE_ID),
+            PropertyFactory.iconAllowOverlap(true),
+            PropertyFactory.iconRotate(Expression.get(PROPERTY_BEARING)),
+            PropertyFactory.iconIgnorePlacement(true)
+        )
+        style!!.addLayerBelow(symbolLayer, WATERWAY_LAYER_ID)
+    }
+
+    private fun addPassenger() {
+        passenger = latLngInBounds
+        val featureCollection = FeatureCollection.fromFeatures(
+            arrayOf(
+                Feature.fromGeometry(
+                    Point.fromLngLat(
+                        passenger!!.longitude,
+                        passenger!!.latitude
+                    )
+                )
+            )
+        )
+        style!!.addImage(
+            PASSENGER,
+            (resources.getDrawable(R.drawable.icon_burned) as BitmapDrawable).bitmap
+        )
+        val geoJsonSource = GeoJsonSource(PASSENGER_SOURCE, featureCollection)
+        style!!.addSource(geoJsonSource)
+        val symbolLayer = SymbolLayer(PASSENGER_LAYER, PASSENGER_SOURCE)
+        symbolLayer.withProperties(
+            PropertyFactory.iconImage(PASSENGER),
+            PropertyFactory.iconIgnorePlacement(true),
+            PropertyFactory.iconAllowOverlap(true)
+        )
+        style!!.addLayerBelow(symbolLayer, RANDOM_CAR_LAYER)
+    }
+
+    private fun addMainCar() {
+        val latLng = latLngInBounds
+        val properties = JsonObject()
+        properties.addProperty(PROPERTY_BEARING, Car.getBearing(latLng, passenger))
+        val feature = Feature.fromGeometry(
+            Point.fromLngLat(
+                latLng.longitude,
+                latLng.latitude
+            ),
+            properties
+        )
+        val featureCollection = FeatureCollection.fromFeatures(arrayOf(feature))
+        taxi = Car(feature, passenger, duration)
+        style!!.addImage(
+            TAXI,
+            (resources.getDrawable(R.drawable.ic_taxi_top) as BitmapDrawable).bitmap
+        )
+        taxiSource = GeoJsonSource(TAXI_SOURCE, featureCollection)
+        style!!.addSource(taxiSource!!)
+        val symbolLayer = SymbolLayer(TAXI_LAYER, TAXI_SOURCE)
+        symbolLayer.withProperties(
+            PropertyFactory.iconImage(TAXI),
+            PropertyFactory.iconRotate(Expression.get(PROPERTY_BEARING)),
+            PropertyFactory.iconAllowOverlap(true),
+            PropertyFactory.iconIgnorePlacement(true)
+        )
+        style!!.addLayer(symbolLayer)
+    }
+
+    private val latLngInBounds: LatLng
+        private get() {
+            val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
+            val generator = Random()
+            val randomLat = bounds.latSouth + generator.nextDouble() * bounds.latNorth - bounds.latSouth
+            val randomLon = bounds.lonWest + generator.nextDouble() * bounds.lonEast - bounds.lonWest
+            return LatLng(randomLat, randomLon)
+        }
+
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        for (animator in animators) {
+            if (animator != null) {
+                animator.removeAllListeners()
+                animator.cancel()
+            }
+        }
+        mapView!!.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
+
+    /**
+     * Evaluator for LatLng pairs
+     */
+    private class LatLngEvaluator : TypeEvaluator<LatLng> {
+        private val latLng = LatLng()
+        override fun evaluate(fraction: Float, startValue: LatLng, endValue: LatLng): LatLng {
+            latLng.latitude = (
+                startValue.latitude +
+                    (endValue.latitude - startValue.latitude) * fraction
+                )
+            latLng.longitude = (
+                startValue.longitude +
+                    (endValue.longitude - startValue.longitude) * fraction
+                )
+            return latLng
+        }
+    }
+
+    private class Car internal constructor(var feature: Feature, next: LatLng?, duration: Long) {
+        var next: LatLng?
+        var current: LatLng?
+        val duration: Long
+
+        @JvmName("setNext1")
+        fun setNext(next: LatLng?) {
+            this.next = next
+        }
+
+        fun updateFeature() {
+            feature = Feature.fromGeometry(
+                Point.fromLngLat(
+                    current!!.longitude,
+                    current!!.latitude
+                )
+            )
+            feature.properties()!!.addProperty("bearing", getBearing(current, next))
+        }
+
+        companion object {
+            fun getBearing(from: LatLng?, to: LatLng?): Float {
+                return TurfMeasurement.bearing(
+                    Point.fromLngLat(from!!.longitude, from.latitude),
+                    Point.fromLngLat(to!!.longitude, to.latitude)
+                ).toFloat()
+            }
+        }
+
+        init {
+            val point = feature.geometry() as Point?
+            current = LatLng(point!!.latitude(), point.longitude())
+            this.duration = duration
+            this.next = next
+        }
+    }
+
+    companion object {
+        private const val PASSENGER = "passenger"
+        private const val PASSENGER_LAYER = "passenger-layer"
+        private const val PASSENGER_SOURCE = "passenger-source"
+        private const val TAXI = "taxi"
+        private const val TAXI_LAYER = "taxi-layer"
+        private const val TAXI_SOURCE = "taxi-source"
+        private const val RANDOM_CAR_LAYER = "random-car-layer"
+        private const val RANDOM_CAR_SOURCE = "random-car-source"
+        private const val RANDOM_CAR_IMAGE_ID = "random-car"
+        private const val PROPERTY_BEARING = "bearing"
+        private const val WATERWAY_LAYER_ID = "water_intermittent"
+        private const val DURATION_RANDOM_MAX = 1500
+        private const val DURATION_BASE = 3000
+    }
 }
