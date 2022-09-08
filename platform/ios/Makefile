@@ -79,9 +79,9 @@ IOS_XCODEBUILD_SIM = xcodebuild \
 	-jobs $(JOBS)
 
 ifneq ($(MORE_SIMULATORS),)
-	IOS_LATEST = false
-	IOS_11 = false
-	IOS_10 = false
+	IOS_LATEST = true
+	IOS_11 = true
+	IOS_10 = true
 	IOS_9 = true
 endif
 
