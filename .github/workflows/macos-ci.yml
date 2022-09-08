@@ -69,6 +69,7 @@ concurrency:
 
 jobs:
   build:
+    name: MacOS CI Tests
     runs-on: [self-hosted, macOS, ARM64]
     env:
       BUILDTYPE: Debug
