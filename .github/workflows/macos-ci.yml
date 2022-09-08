@@ -69,7 +69,8 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-12
+    name: MacOS CI Tests
+    runs-on: [self-hosted, macOS, ARM64]
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -105,8 +106,12 @@ jobs:
             ${{ runner.macos }}-build-
             ${{ runner.macos }}-
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
       - name: npm install
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Prepare ccache
         run: ccache --clear

@@ -143,11 +143,7 @@
     NSNumber *boolean = [shape attributeForKey:@"bool"];
     XCTAssertNotNil(boolean);
     XCTAssertTrue([boolean isKindOfClass:[NSNumber class]]);
-#if (TARGET_OS_IPHONE && __LP64__)  ||  TARGET_OS_WATCH
     XCTAssertEqual(strcmp(boolean.objCType, @encode(char)), 0, @"Boolean property should be converted to bool NSNumber");
-#else
-    XCTAssertEqual(strcmp(boolean.objCType, @encode(BOOL)), 0, @"Boolean property should be converted to bool NSNumber");
-#endif
     XCTAssertTrue(boolean.boolValue);
     XCTAssertEqual(boolean, shape.attributes[@"bool"]);
 

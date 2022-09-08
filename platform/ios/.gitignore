@@ -38,9 +38,6 @@ test/fixtures/storage/assets.zip
 buck-out
 .buckd
 
-# Generated file from npm/yarn
-package-lock.json
-
 # Visual Studio Code
 .vscode
 mapbox-gl-native.code-workspace
