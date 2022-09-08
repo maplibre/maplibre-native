@@ -1,136 +1,130 @@
-package com.mapbox.mapboxsdk.testapp.activity.feature;
+package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import android.os.Bundle;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.JsonObject;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.CircleLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.neq;
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.JsonObject
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
 
 /**
  * Test activity showcasing using the query source features API to query feature counts
  */
-public class QuerySourceFeaturesActivity extends AppCompatActivity {
+class QuerySourceFeaturesActivity : AppCompatActivity() {
+    var mapView: MapView? = null
+    private var mapboxMap: MapboxMap? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_query_source_features)
 
-  public MapView mapView;
-  private MapboxMap mapboxMap;
+        // Initialize map as normal
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView!!.onCreate(savedInstanceState)
+        mapView!!.getMapAsync { map: MapboxMap? ->
+            mapboxMap = map
+            mapboxMap!!.getStyle { style: Style -> initStyle(style) }
+            mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets"))
+        }
+    }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_query_source_features);
+    private fun initStyle(style: Style) {
+        val properties = JsonObject()
+        properties.addProperty("key1", "value1")
+        val source = GeoJsonSource(
+            "test-source",
+            FeatureCollection.fromFeatures(
+                arrayOf(
+                    Feature.fromGeometry(Point.fromLngLat(17.1, 51.0), properties),
+                    Feature.fromGeometry(Point.fromLngLat(17.2, 51.0), properties),
+                    Feature.fromGeometry(Point.fromLngLat(17.3, 51.0), properties),
+                    Feature.fromGeometry(Point.fromLngLat(17.4, 51.0), properties)
+                )
+            )
+        )
+        style.addSource(source)
+        val visible = Expression.eq(Expression.get("key1"), Expression.literal("value1"))
+        val invisible = Expression.neq(Expression.get("key1"), Expression.literal("value1"))
+        val layer = CircleLayer("test-layer", source.id)
+            .withFilter(visible)
+        style.addLayer(layer)
 
-    // Initialize map as normal
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(map -> {
-      this.mapboxMap = map;
-      mapboxMap.getStyle(this::initStyle);
-      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
-    });
-  }
+        // Add a click listener
+        mapboxMap!!.addOnMapClickListener { point: LatLng? ->
+            // Query
+            val features = source.querySourceFeatures(
+                Expression.eq(
+                    Expression.get("key1"),
+                    Expression.literal("value1")
+                )
+            )
+            Toast.makeText(
+                this@QuerySourceFeaturesActivity,
+                String.format(
+                    "Found %s features",
+                    features.size
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
+            false
+        }
+        val fab = findViewById<View>(R.id.fab) as FloatingActionButton
+        fab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
+        fab.setOnClickListener { view: View? ->
+            val visibility = layer.filter
+            if (visibility != null && visibility == visible) {
+                layer.setFilter(invisible)
+                fab.setImageResource(R.drawable.ic_layers_clear)
+            } else {
+                layer.setFilter(visible)
+                fab.setImageResource(R.drawable.ic_layers)
+            }
+        }
+    }
 
-  private void initStyle(Style style) {
-    JsonObject properties = new JsonObject();
-    properties.addProperty("key1", "value1");
-    final GeoJsonSource source = new GeoJsonSource("test-source",
-      FeatureCollection.fromFeatures(new Feature[] {
-        Feature.fromGeometry(Point.fromLngLat(17.1, 51), properties),
-        Feature.fromGeometry(Point.fromLngLat(17.2, 51), properties),
-        Feature.fromGeometry(Point.fromLngLat(17.3, 51), properties),
-        Feature.fromGeometry(Point.fromLngLat(17.4, 51), properties),
-      }));
-    style.addSource(source);
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-    Expression visible = eq(get("key1"), literal("value1"));
-    Expression invisible = neq(get("key1"), literal("value1"));
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-    CircleLayer layer = new CircleLayer("test-layer", source.getId())
-      .withFilter(visible);
-    style.addLayer(layer);
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-    // Add a click listener
-    mapboxMap.addOnMapClickListener(point -> {
-      // Query
-      List<Feature> features = source.querySourceFeatures(eq(get("key1"), literal("value1")));
-      Toast.makeText(QuerySourceFeaturesActivity.this, String.format("Found %s features",
-        features.size()), Toast.LENGTH_SHORT).show();
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-      return false;
-    });
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-    fab.setColorFilter(ContextCompat.getColor(this, R.color.primary));
-    fab.setOnClickListener(view -> {
-      Expression visibility = layer.getFilter();
-      if (visibility != null && visibility.equals(visible)) {
-        layer.setFilter(invisible);
-        fab.setImageResource(R.drawable.ic_layers_clear);
-      } else {
-        layer.setFilter(visible);
-        fab.setImageResource(R.drawable.ic_layers);
-      }
-    });
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }

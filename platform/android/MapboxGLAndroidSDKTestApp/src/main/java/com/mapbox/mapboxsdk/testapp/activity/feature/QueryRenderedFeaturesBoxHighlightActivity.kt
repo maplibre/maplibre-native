@@ -1,131 +1,114 @@
-package com.mapbox.mapboxsdk.testapp.activity.feature;
+package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import android.graphics.Color;
-import android.graphics.RectF;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.FillLayer;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-
-import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.toNumber;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
+import android.graphics.Color
+import android.graphics.RectF
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.FillLayer
+import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
+import timber.log.Timber
 
 /**
  * Demo's query rendered features
  */
-public class QueryRenderedFeaturesBoxHighlightActivity extends AppCompatActivity {
+class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
+    var mapView: MapView? = null
+    var mapboxMap: MapboxMap? = null
+        private set
 
-  public MapView mapView;
-  private MapboxMap mapboxMap;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_query_features_box)
+        val selectionBox = findViewById<View>(R.id.selection_box)
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_query_features_box);
+        // Initialize map as normal
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView!!.onCreate(savedInstanceState)
+        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+            this@QueryRenderedFeaturesBoxHighlightActivity.mapboxMap = mapboxMap
 
-    final View selectionBox = findViewById(R.id.selection_box);
+            // Add layer / source
+            val source = GeoJsonSource("highlighted-shapes-source")
+            val layer: Layer = FillLayer("highlighted-shapes-layer", "highlighted-shapes-source")
+                .withProperties(PropertyFactory.fillColor(Color.RED))
+            selectionBox.setOnClickListener { view: View? ->
+                // Query
+                val top = selectionBox.top - mapView!!.top
+                val left = selectionBox.left - mapView!!.left
+                val box = RectF(
+                    left.toFloat(),
+                    top.toFloat(),
+                    (left + selectionBox.width).toFloat(),
+                    (top + selectionBox.height).toFloat()
+                )
+                Timber.i("Querying box %s for buildings", box)
+                val filter = Expression.lt(
+                    Expression.toNumber(Expression.get("height")),
+                    Expression.literal(10)
+                )
+                val features = mapboxMap.queryRenderedFeatures(box, filter, "building")
 
-    // Initialize map as normal
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(mapboxMap -> {
-      QueryRenderedFeaturesBoxHighlightActivity.this.mapboxMap = mapboxMap;
+                // Show count
+                Toast.makeText(
+                    this@QueryRenderedFeaturesBoxHighlightActivity,
+                    String.format("%s features in box", features.size),
+                    Toast.LENGTH_SHORT
+                ).show()
 
-      // Add layer / source
-      final GeoJsonSource source = new GeoJsonSource("highlighted-shapes-source");
-      final Layer layer = new FillLayer("highlighted-shapes-layer", "highlighted-shapes-source")
-        .withProperties(fillColor(Color.RED));
+                // Update source data
+                source.setGeoJson(FeatureCollection.fromFeatures(features))
+            }
+            mapboxMap.setStyle(
+                Style.Builder()
+                    .fromUri(Style.getPredefinedStyle("Streets"))
+                    .withSource(source)
+                    .withLayer(layer)
+            )
+        }
+    }
 
-      selectionBox.setOnClickListener(view -> {
-        // Query
-        int top = selectionBox.getTop() - mapView.getTop();
-        int left = selectionBox.getLeft() - mapView.getLeft();
-        RectF box = new RectF(left, top, left + selectionBox.getWidth(), top + selectionBox.getHeight());
-        Timber.i("Querying box %s for buildings", box);
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-        Expression filter = lt(toNumber(get("height")), literal(10));
-        List<Feature> features = mapboxMap.queryRenderedFeatures(box, filter, "building");
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-        // Show count
-        Toast.makeText(
-          QueryRenderedFeaturesBoxHighlightActivity.this,
-          String.format("%s features in box", features.size()),
-          Toast.LENGTH_SHORT).show();
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-        // Update source data
-        source.setGeoJson(FeatureCollection.fromFeatures(features));
-      });
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-      mapboxMap.setStyle(new Style.Builder()
-        .fromUri(Style.getPredefinedStyle("Streets"))
-        .withSource(source)
-        .withLayer(layer)
-      );
-    });
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  public MapboxMap getMapboxMap() {
-    return mapboxMap;
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }

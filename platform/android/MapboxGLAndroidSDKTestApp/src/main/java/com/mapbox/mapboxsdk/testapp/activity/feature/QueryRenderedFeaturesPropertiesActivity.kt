@@ -1,244 +1,229 @@
-package com.mapbox.mapboxsdk.testapp.activity.feature;
+package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import android.graphics.Color;
-import android.graphics.PointF;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.gson.JsonElement;
-import com.mapbox.geojson.Feature;
-import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-import java.util.Map;
-
-import timber.log.Timber;
+import android.graphics.*
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import android.os.Bundle
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import timber.log.Timber
+import android.widget.Toast
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.style.layers.FillLayer
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarkerOptions
+import com.mapbox.mapboxsdk.maps.Style.OnStyleLoaded
+import com.mapbox.mapboxsdk.maps.MapboxMap.InfoWindowAdapter
+import android.widget.TextView
+import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarker
+import android.widget.LinearLayout
+import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions
+import android.os.Parcel
+import android.os.Parcelable
+import android.view.View
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.geojson.Feature
+import com.mapbox.mapboxsdk.annotations.Marker
+import com.mapbox.mapboxsdk.maps.Style
 
 /**
  * Test activity showcasing using the query rendered features API to query feature properties on Map click.
  */
-public class QueryRenderedFeaturesPropertiesActivity extends AppCompatActivity {
+class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
+    var mapView: MapView? = null
+    var mapboxMap: MapboxMap? = null
+        private set
+    private var marker: Marker? = null
+    private val mapClickListener = OnMapClickListener { point ->
+        val density = resources.displayMetrics.density
+        val pixel = mapboxMap!!.projection.toScreenLocation(point)
+        Timber.i(
+            "Requesting features for %sx%s (%sx%s adjusted for density)",
+            pixel.x, pixel.y, pixel.x / density, pixel.y / density
+        )
+        val features = mapboxMap!!.queryRenderedFeatures(pixel)
 
-  public MapView mapView;
-  private MapboxMap mapboxMap;
-  private Marker marker;
+        // Debug output
+        debugOutput(features)
 
-  private MapboxMap.OnMapClickListener mapClickListener = new MapboxMap.OnMapClickListener() {
-    @Override
-    public boolean onMapClick(@NonNull LatLng point) {
-      final float density = getResources().getDisplayMetrics().density;
-      final PointF pixel = mapboxMap.getProjection().toScreenLocation(point);
-      Timber.i(
-        "Requesting features for %sx%s (%sx%s adjusted for density)",
-        pixel.x, pixel.y, pixel.x / density, pixel.y / density
-      );
-      List<Feature> features = mapboxMap.queryRenderedFeatures(pixel);
-
-      // Debug output
-      debugOutput(features);
-
-      // Remove any previous markers
-      if (marker != null) {
-        mapboxMap.removeMarker(marker);
-      }
-
-      // Add a marker on the clicked point
-      marker = mapboxMap.addMarker(new CustomMarkerOptions().position(point).features(features));
-      mapboxMap.selectMarker(marker);
-      return true;
-    }
-  };
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_query_features_point);
-
-    // Initialize map as normal
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
-        QueryRenderedFeaturesPropertiesActivity.this.mapboxMap = mapboxMap;
-
-        // Add custom window adapter
-        addCustomInfoWindowAdapter(mapboxMap);
-
-        // Add a click listener
-        mapboxMap.addOnMapClickListener(mapClickListener);
-      });
-    });
-  }
-
-  private void debugOutput(List<Feature> features) {
-    Timber.i("Got %s features", features.size());
-    for (Feature feature : features) {
-      if (feature != null) {
-        Timber.i("Got feature %s with %s properties and Geometry %s",
-          feature.id(),
-          feature.properties() != null ? feature.properties().entrySet().size() : "<null>",
-          feature.geometry() != null ? feature.geometry().getClass().getSimpleName() : "<null>"
-        );
-        if (feature.properties() != null) {
-          for (Map.Entry<String, JsonElement> entry : feature.properties().entrySet()) {
-            Timber.i("Prop %s - %s", entry.getKey(), entry.getValue());
-          }
-        }
-      } else {
-        Timber.i("Got NULL feature");
-      }
-    }
-  }
-
-  private void addCustomInfoWindowAdapter(MapboxMap mapboxMap) {
-    mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
-
-      private TextView row(String text) {
-        TextView view = new TextView(QueryRenderedFeaturesPropertiesActivity.this);
-        view.setText(text);
-        return view;
-      }
-
-      @Override
-      public View getInfoWindow(@NonNull Marker marker) {
-        CustomMarker customMarker = (CustomMarker) marker;
-        LinearLayout view = new LinearLayout(QueryRenderedFeaturesPropertiesActivity.this);
-        view.setOrientation(LinearLayout.VERTICAL);
-        view.setBackgroundColor(Color.WHITE);
-
-        if (customMarker.features.size() > 0) {
-          view.addView(row(String.format("Found %s features", customMarker.features.size())));
-          Feature feature = customMarker.features.get(0);
-          for (Map.Entry<String, JsonElement> prop : feature.properties().entrySet()) {
-            view.addView(row(String.format("%s: %s", prop.getKey(), prop.getValue())));
-          }
-        } else {
-          view.addView(row("No features here"));
+        // Remove any previous markers
+        if (marker != null) {
+            mapboxMap!!.removeMarker(marker!!)
         }
 
-        return view;
-      }
-    });
-  }
-
-  public MapboxMap getMapboxMap() {
-    return mapboxMap;
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    if (mapboxMap != null) {
-      mapboxMap.removeOnMapClickListener(mapClickListener);
-    }
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  private static class CustomMarker extends Marker {
-
-    private final List<Feature> features;
-
-    CustomMarker(BaseMarkerOptions baseMarkerOptions, List<Feature> features) {
-      super(baseMarkerOptions);
-      this.features = features;
-    }
-  }
-
-  private static class CustomMarkerOptions extends BaseMarkerOptions<CustomMarker, CustomMarkerOptions> {
-
-
-    private List<Feature> features;
-
-    public CustomMarkerOptions features(List<Feature> features) {
-      this.features = features;
-      return this;
+        // Add a marker on the clicked point
+        marker = mapboxMap!!.addMarker(CustomMarkerOptions().position(point)!!.features(features))
+        mapboxMap!!.selectMarker(marker!!)
+        true
     }
 
-    CustomMarkerOptions() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_query_features_point)
+
+        // Initialize map as normal
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView!!.onCreate(savedInstanceState)
+        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+            mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                this@QueryRenderedFeaturesPropertiesActivity.mapboxMap = mapboxMap
+
+                // Add custom window adapter
+                addCustomInfoWindowAdapter(mapboxMap)
+
+                // Add a click listener
+                mapboxMap.addOnMapClickListener(mapClickListener)
+            }
+        }
     }
 
-    private CustomMarkerOptions(Parcel in) {
-      // Should implement this
+    private fun debugOutput(features: List<Feature>) {
+        Timber.i("Got %s features", features.size)
+        for (feature in features) {
+            if (feature != null) {
+                Timber.i(
+                    "Got feature %s with %s properties and Geometry %s",
+                    feature.id(),
+                    if (feature.properties() != null) feature.properties()!!
+                        .entrySet().size else "<null>",
+                    if (feature.geometry() != null) feature.geometry()!!::class.java.simpleName else "<null>"
+                )
+                if (feature.properties() != null) {
+                    for ((key, value) in feature.properties()!!
+                        .entrySet()) {
+                        Timber.i("Prop %s - %s", key, value)
+                    }
+                }
+            } else {
+                Timber.i("Got NULL feature")
+            }
+        }
     }
 
-    @Override
-    public CustomMarkerOptions getThis() {
-      return this;
+    private fun addCustomInfoWindowAdapter(mapboxMap: MapboxMap) {
+        mapboxMap.infoWindowAdapter = object : InfoWindowAdapter {
+            private fun row(text: String): TextView {
+                val view = TextView(this@QueryRenderedFeaturesPropertiesActivity)
+                view.text = text
+                return view
+            }
+
+            override fun getInfoWindow(marker: Marker): View? {
+                val customMarker = marker as CustomMarker
+                val view = LinearLayout(this@QueryRenderedFeaturesPropertiesActivity)
+                view.orientation = LinearLayout.VERTICAL
+                view.setBackgroundColor(Color.WHITE)
+                if (customMarker.features!!.size > 0) {
+                    view.addView(
+                        row(
+                            String.format(
+                                "Found %s features",
+                                customMarker.features.size
+                            )
+                        )
+                    )
+                    val feature = customMarker.features[0]
+                    for ((key, value) in feature.properties()!!
+                        .entrySet()) {
+                        view.addView(row(String.format("%s: %s", key, value)))
+                    }
+                } else {
+                    view.addView(row("No features here"))
+                }
+                return view
+            }
+        }
     }
 
-    @Override
-    public CustomMarker getMarker() {
-      return new CustomMarker(this, features);
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
     }
 
-    public static final Parcelable.Creator<CustomMarkerOptions> CREATOR =
-      new Parcelable.Creator<CustomMarkerOptions>() {
-        public CustomMarkerOptions createFromParcel(Parcel in) {
-          return new CustomMarkerOptions(in);
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mapboxMap != null) {
+            mapboxMap!!.removeOnMapClickListener(mapClickListener)
+        }
+        mapView!!.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
+
+    private class CustomMarker internal constructor(
+        baseMarkerOptions: BaseMarkerOptions<*, *>?,
+        val features: List<Feature>?
+    ) : Marker(baseMarkerOptions)
+
+    private class CustomMarkerOptions : BaseMarkerOptions<CustomMarker?, CustomMarkerOptions?> {
+        private var features: List<Feature>? = null
+        fun features(features: List<Feature>?): CustomMarkerOptions {
+            this.features = features
+            return this
         }
 
-        public CustomMarkerOptions[] newArray(int size) {
-          return new CustomMarkerOptions[size];
+        internal constructor() {}
+        private constructor(`in`: Parcel) {
+            // Should implement this
         }
-      };
 
-    @Override
-    public int describeContents() {
-      return 0;
-    }
+        override fun getThis(): CustomMarkerOptions {
+            return this
+        }
 
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-      // Should implement this
+        override fun getMarker(): CustomMarker {
+            return CustomMarker(this, features)
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            // Should implement this
+        }
+
+        companion object {
+            @JvmField
+            val CREATOR: Parcelable.Creator<CustomMarkerOptions?> =
+                object : Parcelable.Creator<CustomMarkerOptions?> {
+                    override fun createFromParcel(`in`: Parcel): CustomMarkerOptions? {
+                        return CustomMarkerOptions(`in`)
+                    }
+
+                    override fun newArray(size: Int): Array<CustomMarkerOptions?> {
+                        return arrayOfNulls(size)
+                    }
+                }
+        }
     }
-  }
 }

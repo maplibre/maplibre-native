@@ -1,146 +1,129 @@
-package com.mapbox.mapboxsdk.testapp.activity.feature;
+package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.RectF;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.geojson.Feature;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.BackgroundLayer;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils;
-
-import java.io.IOException;
-import java.util.List;
-
-import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.rgb;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.backgroundColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import android.graphics.BitmapFactory
+import android.graphics.RectF
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils
+import timber.log.Timber
+import java.io.IOException
 
 /**
  * Test activity showcasing using the query rendered features API to count Symbols in a rectangle.
  */
-public class QueryRenderedFeaturesBoxSymbolCountActivity extends AppCompatActivity {
+class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
+    var mapView: MapView? = null
+    var mapboxMap: MapboxMap? = null
+        private set
+    private lateinit var toast: Toast
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_query_features_box)
+        val selectionBox = findViewById<View>(R.id.selection_box)
 
-  public MapView mapView;
-  private MapboxMap mapboxMap;
+        // Initialize map as normal
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView!!.onCreate(savedInstanceState)
+        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+            this@QueryRenderedFeaturesBoxSymbolCountActivity.mapboxMap = mapboxMap
+            try {
+                val testPoints = ResourceUtils.readRawResource(
+                    mapView!!.context, R.raw.test_points_utrecht
+                )
+                val markerImage =
+                    BitmapFactory.decodeResource(resources, R.drawable.mapbox_marker_icon_default)
+                mapboxMap.setStyle(
+                    Style.Builder()
+                        .withLayer(
+                            BackgroundLayer("bg")
+                                .withProperties(
+                                    PropertyFactory.backgroundColor(Expression.rgb(120, 161, 226))
+                                )
+                        )
+                        .withLayer(
+                            SymbolLayer("symbols-layer", "symbols-source")
+                                .withProperties(
+                                    PropertyFactory.iconImage("test-icon")
+                                )
+                        )
+                        .withSource(
+                            GeoJsonSource("symbols-source", testPoints)
+                        )
+                        .withImage("test-icon", markerImage)
+                )
+            } catch (exception: IOException) {
+                exception.printStackTrace()
+            }
+            selectionBox.setOnClickListener { view: View? ->
+                // Query
+                val top = selectionBox.top - mapView!!.top
+                val left = selectionBox.left - mapView!!.left
+                val box = RectF(
+                    left.toFloat(),
+                    top.toFloat(),
+                    (left + selectionBox.width).toFloat(),
+                    (top + selectionBox.height).toFloat()
+                )
+                Timber.i("Querying box %s", box)
+                val features = mapboxMap.queryRenderedFeatures(box, "symbols-layer")
 
-  private Toast toast;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_query_features_box);
-
-    final View selectionBox = findViewById(R.id.selection_box);
-
-    // Initialize map as normal
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(mapboxMap -> {
-      QueryRenderedFeaturesBoxSymbolCountActivity.this.mapboxMap = mapboxMap;
-
-      try {
-        String testPoints = ResourceUtils.readRawResource(mapView.getContext(), R.raw.test_points_utrecht);
-        Bitmap markerImage = BitmapFactory.decodeResource(getResources(), R.drawable.mapbox_marker_icon_default);
-
-        mapboxMap.setStyle(new Style.Builder()
-          .withLayer(
-            new BackgroundLayer("bg")
-              .withProperties(
-                backgroundColor(rgb(120, 161, 226))
-              )
-          )
-          .withLayer(
-            new SymbolLayer("symbols-layer", "symbols-source")
-              .withProperties(
-                iconImage("test-icon")
-              )
-          )
-          .withSource(
-            new GeoJsonSource("symbols-source", testPoints)
-          )
-          .withImage("test-icon", markerImage)
-        );
-      } catch (IOException exception) {
-        exception.printStackTrace();
-      }
-
-      selectionBox.setOnClickListener(view -> {
-        // Query
-        int top = selectionBox.getTop() - mapView.getTop();
-        int left = selectionBox.getLeft() - mapView.getLeft();
-        RectF box = new RectF(left, top, left + selectionBox.getWidth(), top + selectionBox.getHeight());
-        Timber.i("Querying box %s", box);
-        List<Feature> features = mapboxMap.queryRenderedFeatures(box, "symbols-layer");
-
-        // Show count
-        if (toast != null) {
-          toast.cancel();
+                // Show count
+                if (toast != null) {
+                    toast!!.cancel()
+                }
+                toast = Toast.makeText(
+                    this@QueryRenderedFeaturesBoxSymbolCountActivity,
+                    String.format("%s features in box", features.size),
+                    Toast.LENGTH_SHORT
+                )
+                toast.show()
+            }
         }
-        toast = Toast.makeText(
-          QueryRenderedFeaturesBoxSymbolCountActivity.this,
-          String.format("%s features in box", features.size()),
-          Toast.LENGTH_SHORT);
-        toast.show();
-      });
-    });
-  }
+    }
 
-  public MapboxMap getMapboxMap() {
-    return mapboxMap;
-  }
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }
