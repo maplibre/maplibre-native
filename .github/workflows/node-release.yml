@@ -159,16 +159,8 @@ jobs:
         run: |
           npm pack --dry-run
 
-      - name: Publish PreRelease to Github
-        if: github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
-        run: |
-          npm run package
-          npm run prerelease
-        env:
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-
       - name: Publish Release to Github
-        if: github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: github.ref == 'refs/heads/main'
         run: |
           npm run package
           npm run release
@@ -182,7 +174,3 @@ jobs:
           npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-
-
-
