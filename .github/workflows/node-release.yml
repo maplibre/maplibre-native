@@ -11,9 +11,16 @@ on:
           - patch
           - minor
           - major
+      release:
+        description: Choose a release type
+        required: true
+        type: choice
+        options:
+          - prerelease
+          - release
 
 jobs:
-  version:
+  bump_version:
     runs-on: ubuntu-20.04
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -87,6 +94,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+        run: git pull
 
       - name: Install dependencies
         if: runner.os == 'macOS'
