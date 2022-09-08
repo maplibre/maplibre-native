@@ -94,6 +94,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Get Latest Version
         run: git pull
 
       - name: Install dependencies
