@@ -1,304 +1,270 @@
-package com.mapbox.mapboxsdk.testapp.activity.maplayout;
+package com.mapbox.mapboxsdk.testapp.activity.maplayout
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-import java.util.Locale;
-
-import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
+import android.content.Context
+import android.os.Bundle
+import android.view.*
+import android.widget.*
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnCameraMoveListener
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnFpsChangedListener
+import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.maplayout.DebugModeActivity.LayerListAdapter
+import timber.log.Timber
+import java.util.*
 
 /**
  * Test activity showcasing the different debug modes and allows to cycle between the default map styles.
  */
-public class DebugModeActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnFpsChangedListener {
-
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-  private MapboxMap.OnCameraMoveListener cameraMoveListener;
-  private ActionBarDrawerToggle actionBarDrawerToggle;
-  private int currentStyleIndex;
-  private boolean isReportFps = true;
-
-  private static final String[] STYLES = new String[] {
-    Style.getPredefinedStyle("Streets"),
-    Style.getPredefinedStyle("Outdoor"),
-    Style.getPredefinedStyle("Bright"),
-    Style.getPredefinedStyle("Pastel"),
-    Style.getPredefinedStyle("Satellite Hybrid"),
-    Style.getPredefinedStyle("Satellite Hybrid")  };
-  private TextView fpsView;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_debug_mode);
-    setupToolbar();
-    setupMapView(savedInstanceState);
-    setupDebugChangeView();
-    setupStyleChangeView();
-  }
-
-  private void setupToolbar() {
-    ActionBar actionBar = getSupportActionBar();
-    if (actionBar != null) {
-      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setHomeButtonEnabled(true);
-      DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-      actionBarDrawerToggle = new ActionBarDrawerToggle(this,
-        drawerLayout,
-        R.string.navigation_drawer_open,
-        R.string.navigation_drawer_close
-      );
-      actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
-      actionBarDrawerToggle.syncState();
+open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsChangedListener {
+    private var mapView: MapView? = null
+    private var mapboxMap: MapboxMap? = null
+    private var cameraMoveListener: OnCameraMoveListener? = null
+    private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
+    private var currentStyleIndex = 0
+    private var isReportFps = true
+    private var fpsView: TextView? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_debug_mode)
+        setupToolbar()
+        setupMapView(savedInstanceState)
+        setupDebugChangeView()
+        setupStyleChangeView()
     }
-  }
 
-  private void setupMapView(Bundle savedInstanceState) {
-    MapboxMapOptions mapboxMapOptions = setupMapboxMapOptions();
-    mapView = new MapView(this, mapboxMapOptions);
-    ((ViewGroup) findViewById(R.id.coordinator_layout)).addView(mapView, 0);
-    mapView.addOnDidFinishLoadingStyleListener(() -> {
-      if (mapboxMap != null) {
-        setupNavigationView(mapboxMap.getStyle().getLayers());
-      }
-    });
-
-    mapView.setTag(true);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-    mapView.addOnDidFinishLoadingStyleListener(() -> Timber.d("Style loaded"));
-  }
-
-  protected MapboxMapOptions setupMapboxMapOptions() {
-    return MapboxMapOptions.createFromAttributes(this, null);
-  }
-
-  @Override
-  public void onMapReady(@NonNull MapboxMap map) {
-    mapboxMap = map;
-    mapboxMap.setStyle(
-      new Style.Builder().fromUri(STYLES[currentStyleIndex]), style -> setupNavigationView(style.getLayers())
-    );
-    setupZoomView();
-    setFpsView();
-  }
-
-  private void setFpsView() {
-    fpsView = findViewById(R.id.fpsView);
-    mapboxMap.setOnFpsChangedListener(this);
-  }
-
-  @Override
-  public void onFpsChanged(double fps) {
-    fpsView.setText(String.format(Locale.US, "FPS: %4.2f", fps));
-  }
-
-  private void setupNavigationView(List<Layer> layerList) {
-    Timber.v("New style loaded with JSON: %s", mapboxMap.getStyle().getJson());
-    final LayerListAdapter adapter = new LayerListAdapter(this, layerList);
-    ListView listView = findViewById(R.id.listView);
-    listView.setAdapter(adapter);
-    listView.setOnItemClickListener((parent, view, position, id) -> {
-      Layer clickedLayer = adapter.getItem(position);
-      toggleLayerVisibility(clickedLayer);
-      closeNavigationView();
-    });
-  }
-
-  private void toggleLayerVisibility(Layer layer) {
-    boolean isVisible = layer.getVisibility().getValue().equals(Property.VISIBLE);
-    layer.setProperties(
-      visibility(
-        isVisible ? Property.NONE : Property.VISIBLE
-      )
-    );
-  }
-
-  private void closeNavigationView() {
-    DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-    drawerLayout.closeDrawers();
-  }
-
-  private void setupZoomView() {
-    final TextView textView = findViewById(R.id.textZoom);
-    mapboxMap.addOnCameraMoveListener(cameraMoveListener = new MapboxMap.OnCameraMoveListener() {
-      @Override
-      public void onCameraMove() {
-        textView.setText(String.format(DebugModeActivity.this.getString(
-          R.string.debug_zoom), mapboxMap.getCameraPosition().zoom));
-      }
-    });
-  }
-
-  private void setupDebugChangeView() {
-    FloatingActionButton fabDebug = findViewById(R.id.fabDebug);
-    fabDebug.setOnClickListener(view -> {
-      if (mapboxMap != null) {
-        mapboxMap.setDebugActive(!mapboxMap.isDebugActive());
-        Timber.d("Debug FAB: isDebug Active? %s", mapboxMap.isDebugActive());
-      }
-    });
-  }
-
-  private void setupStyleChangeView() {
-    FloatingActionButton fabStyles = findViewById(R.id.fabStyles);
-    fabStyles.setOnClickListener(view -> {
-      if (mapboxMap != null) {
-        currentStyleIndex++;
-        if (currentStyleIndex == STYLES.length) {
-          currentStyleIndex = 0;
+    private fun setupToolbar() {
+        val actionBar = supportActionBar
+        if (actionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            supportActionBar!!.setHomeButtonEnabled(true)
+            val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+            actionBarDrawerToggle = ActionBarDrawerToggle(
+                this,
+                drawerLayout,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+            )
+            actionBarDrawerToggle!!.isDrawerIndicatorEnabled = true
+            actionBarDrawerToggle!!.syncState()
         }
-        mapboxMap.setStyle(new Style.Builder().fromUri(STYLES[currentStyleIndex]));
-      }
-    });
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    int itemId = item.getItemId();
-    if (itemId == R.id.menu_action_toggle_report_fps) {
-      isReportFps = !isReportFps;
-      fpsView.setVisibility(isReportFps ? View.VISIBLE : View.GONE);
-      mapboxMap.setOnFpsChangedListener(isReportFps ? this : null);
-    } else if (itemId == R.id.menu_action_limit_to_30_fps) {
-      mapView.setMaximumFps(30);
-    } else if (itemId == R.id.menu_action_limit_to_60_fps) {
-      mapView.setMaximumFps(60);
     }
 
-    return actionBarDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_debug, menu);
-    return true;
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    if (mapboxMap != null) {
-      mapboxMap.removeOnCameraMoveListener(cameraMoveListener);
-    }
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  private static class LayerListAdapter extends BaseAdapter {
-
-    private LayoutInflater layoutInflater;
-    private List<Layer> layers;
-
-    LayerListAdapter(Context context, List<Layer> layers) {
-      this.layoutInflater = LayoutInflater.from(context);
-      this.layers = layers;
+    private fun setupMapView(savedInstanceState: Bundle?) {
+        val mapboxMapOptions = setupMapboxMapOptions()
+        mapView = MapView(this, mapboxMapOptions)
+        (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView, 0)
+        mapView!!.addOnDidFinishLoadingStyleListener {
+            if (mapboxMap != null) {
+                setupNavigationView(mapboxMap!!.style!!.layers)
+            }
+        }
+        mapView!!.tag = true
+        mapView!!.onCreate(savedInstanceState)
+        mapView!!.getMapAsync(this)
+        mapView!!.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
-    @Override
-    public int getCount() {
-      return layers.size();
+    protected open fun setupMapboxMapOptions(): MapboxMapOptions {
+        return MapboxMapOptions.createFromAttributes(this, null)
     }
 
-    @Override
-    public Layer getItem(int position) {
-      return layers.get(position);
+    override fun onMapReady(map: MapboxMap) {
+        mapboxMap = map
+        mapboxMap!!.setStyle(
+            Style.Builder().fromUri(STYLES[currentStyleIndex])
+        ) { style: Style -> setupNavigationView(style.layers) }
+        setupZoomView()
+        setFpsView()
     }
 
-    @Override
-    public long getItemId(int position) {
-      return position;
+    private fun setFpsView() {
+        fpsView = findViewById(R.id.fpsView)
+        mapboxMap!!.setOnFpsChangedListener(this)
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      Layer layer = layers.get(position);
-      View view = convertView;
-      if (view == null) {
-        view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false);
-        ViewHolder holder = new ViewHolder(
-          view.findViewById(android.R.id.text1),
-          view.findViewById(android.R.id.text2)
-        );
-        view.setTag(holder);
-      }
-      ViewHolder holder = (ViewHolder) view.getTag();
-      holder.text.setText(layer.getClass().getSimpleName());
-      holder.subText.setText(layer.getId());
-      return view;
+    override fun onFpsChanged(fps: Double) {
+        fpsView!!.text = String.format(Locale.US, "FPS: %4.2f", fps)
     }
 
-    private static class ViewHolder {
-      final TextView text;
-      final TextView subText;
-
-      ViewHolder(TextView text, TextView subText) {
-        this.text = text;
-        this.subText = subText;
-      }
+    private fun setupNavigationView(layerList: List<Layer>) {
+        Timber.v("New style loaded with JSON: %s", mapboxMap!!.style!!.json)
+        val adapter = LayerListAdapter(this, layerList)
+        val listView = findViewById<ListView>(R.id.listView)
+        listView.adapter = adapter
+        listView.onItemClickListener =
+            AdapterView.OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+                val clickedLayer = adapter.getItem(position)
+                toggleLayerVisibility(clickedLayer)
+                closeNavigationView()
+            }
     }
-  }
+
+    private fun toggleLayerVisibility(layer: Layer) {
+        val isVisible = layer.visibility.getValue() == Property.VISIBLE
+        layer.setProperties(
+            PropertyFactory.visibility(
+                if (isVisible) Property.NONE else Property.VISIBLE
+            )
+        )
+    }
+
+    private fun closeNavigationView() {
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        drawerLayout.closeDrawers()
+    }
+
+    private fun setupZoomView() {
+        val textView = findViewById<TextView>(R.id.textZoom)
+        mapboxMap!!.addOnCameraMoveListener(
+            OnCameraMoveListener {
+                textView.text = String.format(
+                    this@DebugModeActivity.getString(
+                        R.string.debug_zoom
+                    ),
+                    mapboxMap!!.cameraPosition.zoom
+                )
+            }.also { cameraMoveListener = it }
+        )
+    }
+
+    private fun setupDebugChangeView() {
+        val fabDebug = findViewById<FloatingActionButton>(R.id.fabDebug)
+        fabDebug.setOnClickListener { view: View? ->
+            if (mapboxMap != null) {
+                mapboxMap!!.isDebugActive = !mapboxMap!!.isDebugActive
+                Timber.d("Debug FAB: isDebug Active? %s", mapboxMap!!.isDebugActive)
+            }
+        }
+    }
+
+    private fun setupStyleChangeView() {
+        val fabStyles = findViewById<FloatingActionButton>(R.id.fabStyles)
+        fabStyles.setOnClickListener { view: View? ->
+            if (mapboxMap != null) {
+                currentStyleIndex++
+                if (currentStyleIndex == STYLES.size) {
+                    currentStyleIndex = 0
+                }
+                mapboxMap!!.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]))
+            }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val itemId = item.itemId
+        if (itemId == R.id.menu_action_toggle_report_fps) {
+            isReportFps = !isReportFps
+            fpsView!!.visibility = if (isReportFps) View.VISIBLE else View.GONE
+            mapboxMap!!.setOnFpsChangedListener(if (isReportFps) this else null)
+        } else if (itemId == R.id.menu_action_limit_to_30_fps) {
+            mapView!!.setMaximumFps(30)
+        } else if (itemId == R.id.menu_action_limit_to_60_fps) {
+            mapView!!.setMaximumFps(60)
+        }
+        return actionBarDrawerToggle!!.onOptionsItemSelected(item) || super.onOptionsItemSelected(
+            item
+        )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_debug, menu)
+        return true
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mapboxMap != null) {
+            mapboxMap!!.removeOnCameraMoveListener(cameraMoveListener!!)
+        }
+        mapView!!.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
+
+    private class LayerListAdapter internal constructor(context: Context?, layers: List<Layer>) :
+        BaseAdapter() {
+        private val layoutInflater: LayoutInflater
+        private val layers: List<Layer>
+        override fun getCount(): Int {
+            return layers.size
+        }
+
+        override fun getItem(position: Int): Layer {
+            return layers[position]
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+            val layer = layers[position]
+            var view = convertView
+            if (view == null) {
+                view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false)
+                val holder = ViewHolder(
+                    view.findViewById(android.R.id.text1),
+                    view.findViewById(android.R.id.text2)
+                )
+                view.tag = holder
+            }
+            val holder = view.tag as ViewHolder
+            holder.text.text = layer.javaClass.simpleName
+            holder.subText.text = layer.id
+            return view
+        }
+
+        private class ViewHolder internal constructor(val text: TextView, val subText: TextView)
+
+        init {
+            layoutInflater = LayoutInflater.from(context)
+            this.layers = layers
+        }
+    }
+
+    companion object {
+        private val STYLES = arrayOf(
+            Style.getPredefinedStyle("Streets"),
+            Style.getPredefinedStyle("Outdoor"),
+            Style.getPredefinedStyle("Bright"),
+            Style.getPredefinedStyle("Pastel"),
+            Style.getPredefinedStyle("Satellite Hybrid"),
+            Style.getPredefinedStyle("Satellite Hybrid")
+        )
+    }
 }

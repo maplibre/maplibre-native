@@ -1,96 +1,83 @@
-package com.mapbox.mapboxsdk.testapp.activity.maplayout;
+package com.mapbox.mapboxsdk.testapp.activity.maplayout
 
-import android.os.Bundle;
-import android.view.MenuItem;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.testapp.utils.NavUtils;
-import com.mapbox.mapboxsdk.util.DefaultStyle;
+import android.os.Bundle
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.utils.NavUtils
 
 /**
  * Test activity showcasing a simple MapView without any MapboxMap interaction.
  */
-public class SimpleMapActivity extends AppCompatActivity {
+class SimpleMapActivity : AppCompatActivity() {
+    private lateinit var mapView: MapView
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_map_simple)
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(
+            OnMapReadyCallback { mapboxMap: MapboxMap ->
+                val styles = Style.getPredefinedStyles()
+                if (styles != null && styles.size > 0) {
+                    val styleUrl = styles[0].url
+                    mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
+                }
+            }
+        )
+    }
 
-  private MapView mapView;
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_map_simple);
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(mapboxMap -> {
-      DefaultStyle[] styles = Style.getPredefinedStyles();
-      if (styles != null && styles.length > 0) {
-        String styleUrl = styles[0].getUrl();
-        mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
-      }
-    });
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                // activity uses singleInstance for testing purposes
+                // code below provides a default navigation when using the app
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case android.R.id.home:
+    override fun onBackPressed() {
         // activity uses singleInstance for testing purposes
         // code below provides a default navigation when using the app
-        onBackPressed();
-        return true;
+        NavUtils.navigateHome(this)
     }
-    return super.onOptionsItemSelected(item);
-  }
-
-  @Override
-  public void onBackPressed() {
-    // activity uses singleInstance for testing purposes
-    // code below provides a default navigation when using the app
-    NavUtils.navigateHome(this);
-  }
 }

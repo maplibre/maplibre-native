@@ -1,90 +1,137 @@
-package com.mapbox.mapboxsdk.testapp.activity.maplayout;
+package com.mapbox.mapboxsdk.testapp.activity.maplayout
 
-import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import timber.log.Timber;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView.OnCameraDidChangeListener
+import com.mapbox.mapboxsdk.maps.MapView.OnCameraIsChangingListener
+import com.mapbox.mapboxsdk.maps.MapView.OnCameraWillChangeListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidBecomeIdleListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFailLoadingMapListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFinishLoadingMapListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFinishLoadingStyleListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFinishRenderingFrameListener
+import com.mapbox.mapboxsdk.maps.MapView.OnDidFinishRenderingMapListener
+import com.mapbox.mapboxsdk.maps.MapView.OnSourceChangedListener
+import com.mapbox.mapboxsdk.maps.MapView.OnWillStartLoadingMapListener
+import com.mapbox.mapboxsdk.maps.MapView.OnWillStartRenderingFrameListener
+import com.mapbox.mapboxsdk.maps.MapView.OnWillStartRenderingMapListener
+import com.mapbox.mapboxsdk.testapp.R
+import timber.log.Timber
 
 /**
  * Test activity showcasing how to listen to map change events.
  */
-public class MapChangeActivity extends AppCompatActivity {
+class MapChangeActivity : AppCompatActivity() {
+    private lateinit var mapView: MapView
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_map_simple)
+        mapView = findViewById(R.id.mapView)
+        mapView.addOnCameraIsChangingListener(OnCameraIsChangingListener { Timber.v("OnCameraIsChanging") })
+        mapView.addOnCameraDidChangeListener(
+            OnCameraDidChangeListener { animated: Boolean ->
+                Timber.v(
+                    "OnCamaraDidChange: animated: %s",
+                    animated
+                )
+            }
+        )
+        mapView.addOnCameraWillChangeListener(
+            OnCameraWillChangeListener { animated: Boolean ->
+                Timber.v(
+                    "OnCameraWilChange: animated: %s",
+                    animated
+                )
+            }
+        )
+        mapView.addOnDidFailLoadingMapListener(
+            OnDidFailLoadingMapListener { errorMessage: String? ->
+                Timber.v(
+                    "OnDidFailLoadingMap: %s",
+                    errorMessage
+                )
+            }
+        )
+        mapView.addOnDidFinishLoadingMapListener(OnDidFinishLoadingMapListener { Timber.v("OnDidFinishLoadingMap") })
+        mapView.addOnDidFinishLoadingStyleListener(OnDidFinishLoadingStyleListener { Timber.v("OnDidFinishLoadingStyle") })
+        mapView.addOnDidFinishRenderingFrameListener(
+            OnDidFinishRenderingFrameListener { fully: Boolean ->
+                Timber.v(
+                    "OnDidFinishRenderingFrame: fully: %s",
+                    fully
+                )
+            }
+        )
+        mapView.addOnDidFinishRenderingMapListener(
+            OnDidFinishRenderingMapListener { fully: Boolean ->
+                Timber.v(
+                    "OnDidFinishRenderingMap: fully: %s",
+                    fully
+                )
+            }
+        )
+        mapView.addOnDidBecomeIdleListener(OnDidBecomeIdleListener { Timber.v("OnDidBecomeIdle") })
+        mapView.addOnSourceChangedListener(
+            OnSourceChangedListener { sourceId: String? ->
+                Timber.v(
+                    "OnSourceChangedListener: source with id: %s",
+                    sourceId
+                )
+            }
+        )
+        mapView.addOnWillStartLoadingMapListener(OnWillStartLoadingMapListener { Timber.v("OnWillStartLoadingMap") })
+        mapView.addOnWillStartRenderingFrameListener(OnWillStartRenderingFrameListener { Timber.v("OnWillStartRenderingFrame") })
+        mapView.addOnWillStartRenderingMapListener(OnWillStartRenderingMapListener { Timber.v("OnWillStartRenderingMap") })
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(
+            OnMapReadyCallback { mapboxMap: MapboxMap ->
+                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+                mapboxMap.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(55.754020, 37.620948),
+                        12.0
+                    ),
+                    9000
+                )
+            }
+        )
+    }
 
-  private MapView mapView;
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_map_simple);
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-    mapView = findViewById(R.id.mapView);
-    mapView.addOnCameraIsChangingListener(() -> Timber.v("OnCameraIsChanging"));
-    mapView.addOnCameraDidChangeListener(animated -> Timber.v("OnCamaraDidChange: animated: %s", animated));
-    mapView.addOnCameraWillChangeListener(animated -> Timber.v("OnCameraWilChange: animated: %s", animated));
-    mapView.addOnDidFailLoadingMapListener(errorMessage -> Timber.v("OnDidFailLoadingMap: %s", errorMessage));
-    mapView.addOnDidFinishLoadingMapListener(() -> Timber.v("OnDidFinishLoadingMap"));
-    mapView.addOnDidFinishLoadingStyleListener(() -> Timber.v("OnDidFinishLoadingStyle"));
-    mapView.addOnDidFinishRenderingFrameListener(fully -> Timber.v("OnDidFinishRenderingFrame: fully: %s", fully));
-    mapView.addOnDidFinishRenderingMapListener(fully -> Timber.v("OnDidFinishRenderingMap: fully: %s", fully));
-    mapView.addOnDidBecomeIdleListener(() -> Timber.v("OnDidBecomeIdle"));
-    mapView.addOnSourceChangedListener(sourceId -> Timber.v("OnSourceChangedListener: source with id: %s", sourceId));
-    mapView.addOnWillStartLoadingMapListener(() -> Timber.v("OnWillStartLoadingMap"));
-    mapView.addOnWillStartRenderingFrameListener(() -> Timber.v("OnWillStartRenderingFrame"));
-    mapView.addOnWillStartRenderingMapListener(() -> Timber.v("OnWillStartRenderingMap"));
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(mapboxMap -> {
-      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
-      mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-        new LatLng(55.754020, 37.620948), 12), 9000);
-    });
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 }

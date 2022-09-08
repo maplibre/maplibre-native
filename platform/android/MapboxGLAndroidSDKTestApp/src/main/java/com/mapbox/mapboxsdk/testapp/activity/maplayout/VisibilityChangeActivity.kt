@@ -1,145 +1,127 @@
-package com.mapbox.mapboxsdk.testapp.activity.maplayout;
+package com.mapbox.mapboxsdk.testapp.activity.maplayout
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
+import android.os.Bundle
+import android.os.Handler
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.maplayout.VisibilityChangeActivity.VisibilityRunner
 
 /**
  * Test activity showcasing visibility changes to the mapview.
  */
-public class VisibilityChangeActivity extends AppCompatActivity {
-
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-  private Handler handler = new Handler();
-  private Runnable runnable;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_map_visibility);
-
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(map -> {
-      mapboxMap = map;
-      mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
-      mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-        new LatLng(55.754020, 37.620948), 12), 9000);
-    });
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-    handler.post(runnable = new VisibilityRunner(mapView, findViewById(R.id.viewParent), handler));
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
-
-  private static class VisibilityRunner implements Runnable {
-
-    private MapView mapView;
-    private View viewParent;
-    private Handler handler;
-    private int currentStep;
-
-    VisibilityRunner(MapView mapView, View viewParent, Handler handler) {
-      this.mapView = mapView;
-      this.viewParent = viewParent;
-      this.handler = handler;
+class VisibilityChangeActivity : AppCompatActivity() {
+    private lateinit var mapView: MapView
+    private var mapboxMap: MapboxMap? = null
+    private val handler = Handler()
+    private var runnable: Runnable? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_map_visibility)
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(
+            OnMapReadyCallback { map: MapboxMap? ->
+                mapboxMap = map
+                mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets"))
+                mapboxMap!!.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(55.754020, 37.620948),
+                        12.0
+                    ),
+                    9000
+                )
+            }
+        )
     }
 
-    @Override
-    public void run() {
-      if (isViewHiearchyReady()) {
-        if (isEvenStep()) {
-          viewParent.setVisibility(View.VISIBLE);
-          mapView.setVisibility(View.VISIBLE);
-        } else if (isFirstOrThirdStep()) {
-          mapView.setVisibility(getVisibilityForStep());
-        } else if (isFifthOrSeventhStep()) {
-          viewParent.setVisibility(getVisibilityForStep());
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+        handler.post(
+            VisibilityRunner(
+                mapView,
+                findViewById(R.id.viewParent),
+                handler
+            ).also { runnable = it }
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
+
+    private class VisibilityRunner internal constructor(
+        private val mapView: MapView?,
+        private val viewParent: View?,
+        private val handler: Handler
+    ) : Runnable {
+        private var currentStep = 0
+        override fun run() {
+            if (isViewHiearchyReady) {
+                if (isEvenStep) {
+                    viewParent!!.visibility = View.VISIBLE
+                    mapView!!.visibility = View.VISIBLE
+                } else if (isFirstOrThirdStep) {
+                    mapView!!.visibility = visibilityForStep
+                } else if (isFifthOrSeventhStep) {
+                    viewParent!!.visibility = visibilityForStep
+                }
+                updateStep()
+            }
+            handler.postDelayed(this, 1500)
         }
-        updateStep();
-      }
-      handler.postDelayed(this, 1500);
+
+        private fun updateStep() {
+            if (currentStep == 7) {
+                currentStep = 0
+            } else {
+                currentStep++
+            }
+        }
+
+        private val visibilityForStep: Int
+            private get() = if (currentStep == 1 || currentStep == 5) View.GONE else View.INVISIBLE
+        private val isFifthOrSeventhStep: Boolean
+            private get() = currentStep == 5 || currentStep == 7
+        private val isFirstOrThirdStep: Boolean
+            private get() = currentStep == 1 || currentStep == 3
+        private val isEvenStep: Boolean
+            private get() = currentStep == 0 || currentStep % 2 == 0
+        private val isViewHiearchyReady: Boolean
+            private get() = mapView != null && viewParent != null
     }
 
-    private void updateStep() {
-      if (currentStep == 7) {
-        currentStep = 0;
-      } else {
-        currentStep++;
-      }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
     }
 
-    private int getVisibilityForStep() {
-      return (currentStep == 1 || currentStep == 5) ? View.GONE : View.INVISIBLE;
+    override fun onStop() {
+        super.onStop()
+        if (runnable != null) {
+            handler.removeCallbacks(runnable)
+            runnable = null
+        }
+        mapView!!.onStop()
     }
 
-    private boolean isFifthOrSeventhStep() {
-      return currentStep == 5 || currentStep == 7;
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
     }
 
-    private boolean isFirstOrThirdStep() {
-      return currentStep == 1 || currentStep == 3;
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
     }
 
-    private boolean isEvenStep() {
-      return currentStep == 0 || currentStep % 2 == 0;
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
     }
-
-    private boolean isViewHiearchyReady() {
-      return mapView != null && viewParent != null;
-    }
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    if (runnable != null) {
-      handler.removeCallbacks(runnable);
-      runnable = null;
-    }
-    mapView.onStop();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
 }

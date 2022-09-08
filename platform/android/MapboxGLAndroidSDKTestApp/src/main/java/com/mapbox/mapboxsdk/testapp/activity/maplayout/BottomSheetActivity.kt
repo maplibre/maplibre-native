@@ -1,284 +1,275 @@
-package com.mapbox.mapboxsdk.testapp.activity.maplayout;
+package com.mapbox.mapboxsdk.testapp.activity.maplayout
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.utils.MapFragmentUtils;
+import android.content.Context
+import android.os.Bundle
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.maplayout.BottomSheetActivity.BottomSheetFragment
+import com.mapbox.mapboxsdk.testapp.activity.maplayout.BottomSheetActivity.MainMapFragment
+import com.mapbox.mapboxsdk.utils.MapFragmentUtils
 
 /**
  * Test activity showcasing using a bottomView with a MapView and stacking map fragments below.
  */
-public class BottomSheetActivity extends AppCompatActivity {
-
-  private static final String TAG_MAIN_FRAGMENT = "com.mapbox.mapboxsdk.fragment.tag.main";
-  private static final String TAG_BOTTOM_FRAGMENT = "com.mapbox.mapboxsdk.fragment.tag.bottom";
-  private static final String AMOUNT_OF_MAIN_MAP_FRAGMENTS = "Amount of main map fragments: %s";
-  private boolean bottomSheetFragmentAdded;
-
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_bottom_sheet);
-
-    ActionBar actionBar = getSupportActionBar();
-    if (actionBar != null) {
-      actionBar.setDisplayHomeAsUpEnabled(true);
+class BottomSheetActivity : AppCompatActivity() {
+    private var bottomSheetFragmentAdded = false
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_bottom_sheet)
+        val actionBar = supportActionBar
+        actionBar?.setDisplayHomeAsUpEnabled(true)
+        findViewById<View>(R.id.fabFragment).setOnClickListener { v: View? -> addMapFragment() }
+        findViewById<View>(R.id.fabBottomSheet).setOnClickListener { v: View? -> toggleBottomSheetMapFragment() }
+        val bottomSheetBehavior: BottomSheetBehavior<*> =
+            BottomSheetBehavior.from(findViewById<View>(R.id.bottom_sheet))
+        bottomSheetBehavior.peekHeight = (64 * resources.displayMetrics.density).toInt()
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        toggleBottomSheetMapFragment()
     }
 
-    findViewById(R.id.fabFragment).setOnClickListener(v -> addMapFragment());
-
-    findViewById(R.id.fabBottomSheet).setOnClickListener(v -> toggleBottomSheetMapFragment());
-
-    BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
-    bottomSheetBehavior.setPeekHeight((int) (64 * getResources().getDisplayMetrics().density));
-    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-    toggleBottomSheetMapFragment();
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == android.R.id.home) {
-      onBackPressed();
-    }
-    return super.onOptionsItemSelected(item);
-  }
-
-  @Override
-  public void onBackPressed() {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-
-    if (fragmentManager.getBackStackEntryCount() > 0) {
-      fragmentManager.popBackStack();
-    } else {
-      super.onBackPressed();
-    }
-  }
-
-  private void addMapFragment() {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    int fragmentCount = fragmentManager.getBackStackEntryCount();
-
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    MainMapFragment mainMapFragment = MainMapFragment.newInstance(this, fragmentCount);
-    if (fragmentCount == 0) {
-      fragmentTransaction.add(R.id.fragment_container, mainMapFragment, TAG_MAIN_FRAGMENT);
-    } else {
-      fragmentTransaction.replace(R.id.fragment_container, mainMapFragment, TAG_MAIN_FRAGMENT);
-    }
-    fragmentTransaction.addToBackStack(String.valueOf(mainMapFragment.hashCode()));
-    fragmentTransaction.commit();
-    Toast.makeText(getApplicationContext(),
-      String.format(AMOUNT_OF_MAIN_MAP_FRAGMENTS, (fragmentCount + 1)),
-      Toast.LENGTH_SHORT
-    ).show();
-  }
-
-  private void toggleBottomSheetMapFragment() {
-    if (!bottomSheetFragmentAdded) {
-      addBottomSheetMapFragment();
-    } else {
-      removeBottomSheetFragment();
-    }
-    bottomSheetFragmentAdded = !bottomSheetFragmentAdded;
-  }
-
-  private void addBottomSheetMapFragment() {
-    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-    fragmentTransaction.add(R.id.fragment_container_bottom, BottomSheetFragment.newInstance(this), TAG_BOTTOM_FRAGMENT);
-    fragmentTransaction.commit();
-  }
-
-  private void removeBottomSheetFragment() {
-    Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_BOTTOM_FRAGMENT);
-    if (fragment != null) {
-      getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-    }
-  }
-
-  public static class MainMapFragment extends Fragment implements OnMapReadyCallback {
-
-    private static final String[] STYLES = new String[] {
-      Style.getPredefinedStyle("Streets"),
-      Style.getPredefinedStyle("Satellite Hybrid"),
-      Style.getPredefinedStyle("Bright"),
-      Style.getPredefinedStyle("Pastel"),
-      Style.getPredefinedStyle("Satellite Hybrid"),
-      Style.getPredefinedStyle("Outdoor")
-    };
-
-    private MapView map;
-
-    public static MainMapFragment newInstance(Context context, int mapCounter) {
-      MainMapFragment mapFragment = new MainMapFragment();
-      Bundle bundle = new Bundle();
-      bundle.putInt("mapcounter", mapCounter);
-      mapFragment.setArguments(bundle);
-      MapboxMapOptions mapboxMapOptions = MapboxMapOptions.createFromAttributes(context);
-      mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(mapboxMapOptions));
-      return mapFragment;
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-      super.onCreateView(inflater, container, savedInstanceState);
-      Context context = inflater.getContext();
-      return map = new MapView(context, MapFragmentUtils.resolveArgs(context, getArguments()));
+    override fun onBackPressed() {
+        val fragmentManager = supportFragmentManager
+        if (fragmentManager.backStackEntryCount > 0) {
+            fragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
+        }
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-      super.onViewCreated(view, savedInstanceState);
-      map.onCreate(savedInstanceState);
-      map.getMapAsync(this);
+    private fun addMapFragment() {
+        val fragmentManager = supportFragmentManager
+        val fragmentCount = fragmentManager.backStackEntryCount
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        val mainMapFragment = MainMapFragment.newInstance(this, fragmentCount)
+        if (fragmentCount == 0) {
+            fragmentTransaction.add(R.id.fragment_container, mainMapFragment, TAG_MAIN_FRAGMENT)
+        } else {
+            fragmentTransaction.replace(R.id.fragment_container, mainMapFragment, TAG_MAIN_FRAGMENT)
+        }
+        fragmentTransaction.addToBackStack(mainMapFragment.hashCode().toString())
+        fragmentTransaction.commit()
+        Toast.makeText(
+            applicationContext,
+            String.format(AMOUNT_OF_MAIN_MAP_FRAGMENTS, fragmentCount + 1),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
-    @Override
-    public void onMapReady(@NonNull MapboxMap mapboxMap) {
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.760545, -122.436055), 15));
-      mapboxMap.setStyle(
-        new Style.Builder().fromUri(
-          STYLES[Math.min(Math.max(getArguments().getInt("mapcounter"), 0), STYLES.length - 1)]
+    private fun toggleBottomSheetMapFragment() {
+        if (!bottomSheetFragmentAdded) {
+            addBottomSheetMapFragment()
+        } else {
+            removeBottomSheetFragment()
+        }
+        bottomSheetFragmentAdded = !bottomSheetFragmentAdded
+    }
+
+    private fun addBottomSheetMapFragment() {
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.add(
+            R.id.fragment_container_bottom,
+            BottomSheetFragment.newInstance(this),
+            TAG_BOTTOM_FRAGMENT
         )
-      );
+        fragmentTransaction.commit()
     }
 
-    @Override
-    public void onStart() {
-      super.onStart();
-      map.onStart();
+    private fun removeBottomSheetFragment() {
+        val fragment = supportFragmentManager.findFragmentByTag(TAG_BOTTOM_FRAGMENT)
+        if (fragment != null) {
+            supportFragmentManager.beginTransaction().remove(fragment).commit()
+        }
     }
 
-    @Override
-    public void onResume() {
-      super.onResume();
-      map.onResume();
+    class MainMapFragment : Fragment(), OnMapReadyCallback {
+        private var map: MapView? = null
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            super.onCreateView(inflater, container, savedInstanceState)
+            val context = inflater.context
+            return MapView(context, MapFragmentUtils.resolveArgs(context, arguments)).also {
+                map = it
+            }
+        }
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            map!!.onCreate(savedInstanceState)
+            map!!.getMapAsync(this)
+        }
+
+        override fun onMapReady(mapboxMap: MapboxMap) {
+            mapboxMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(37.760545, -122.436055),
+                    15.0
+                )
+            )
+            mapboxMap.setStyle(
+                Style.Builder().fromUri(
+                    STYLES[
+                        Math.min(
+                            Math.max(arguments!!.getInt("mapcounter"), 0),
+                            STYLES.size - 1
+                        )
+                    ]
+                )
+            )
+        }
+
+        override fun onStart() {
+            super.onStart()
+            map!!.onStart()
+        }
+
+        override fun onResume() {
+            super.onResume()
+            map!!.onResume()
+        }
+
+        override fun onPause() {
+            super.onPause()
+            map!!.onPause()
+        }
+
+        override fun onStop() {
+            super.onStop()
+            map!!.onStop()
+        }
+
+        override fun onSaveInstanceState(outState: Bundle) {
+            super.onSaveInstanceState(outState)
+            map!!.onSaveInstanceState(outState)
+        }
+
+        override fun onLowMemory() {
+            super.onLowMemory()
+            map!!.onLowMemory()
+        }
+
+        override fun onDestroyView() {
+            super.onDestroyView()
+            map!!.onDestroy()
+        }
+
+        companion object {
+            private val STYLES = arrayOf(
+                Style.getPredefinedStyle("Streets"),
+                Style.getPredefinedStyle("Satellite Hybrid"),
+                Style.getPredefinedStyle("Bright"),
+                Style.getPredefinedStyle("Pastel"),
+                Style.getPredefinedStyle("Satellite Hybrid"),
+                Style.getPredefinedStyle("Outdoor")
+            )
+
+            fun newInstance(context: Context?, mapCounter: Int): MainMapFragment {
+                val mapFragment = MainMapFragment()
+                val bundle = Bundle()
+                bundle.putInt("mapcounter", mapCounter)
+                mapFragment.arguments = bundle
+                val mapboxMapOptions = MapboxMapOptions.createFromAttributes(context!!)
+                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(mapboxMapOptions)
+                return mapFragment
+            }
+        }
     }
 
-    @Override
-    public void onPause() {
-      super.onPause();
-      map.onPause();
+    class BottomSheetFragment : Fragment(), OnMapReadyCallback {
+        private var map: MapView? = null
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            super.onCreateView(inflater, container, savedInstanceState)
+            val context = inflater.context
+            return MapView(context, MapFragmentUtils.resolveArgs(context, arguments)).also {
+                map = it
+            }
+        }
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            map!!.onCreate(savedInstanceState)
+            map!!.getMapAsync(this)
+        }
+
+        override fun onMapReady(mapboxMap: MapboxMap) {
+            mapboxMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(37.760545, -122.436055),
+                    15.0
+                )
+            )
+            mapboxMap.setStyle(Style.getPredefinedStyle("Bright"))
+        }
+
+        override fun onStart() {
+            super.onStart()
+            map!!.onStart()
+        }
+
+        override fun onResume() {
+            super.onResume()
+            map!!.onResume()
+        }
+
+        override fun onPause() {
+            super.onPause()
+            map!!.onPause()
+        }
+
+        override fun onStop() {
+            super.onStop()
+            map!!.onStop()
+        }
+
+        override fun onSaveInstanceState(outState: Bundle) {
+            super.onSaveInstanceState(outState)
+            map!!.onSaveInstanceState(outState)
+        }
+
+        override fun onLowMemory() {
+            super.onLowMemory()
+            map!!.onLowMemory()
+        }
+
+        override fun onDestroyView() {
+            super.onDestroyView()
+            map!!.onDestroy()
+        }
+
+        companion object {
+            fun newInstance(context: Context?): BottomSheetFragment {
+                val mapFragment = BottomSheetFragment()
+                val mapboxMapOptions = MapboxMapOptions.createFromAttributes(context!!)
+                mapboxMapOptions.renderSurfaceOnTop(true)
+                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(mapboxMapOptions)
+                return mapFragment
+            }
+        }
     }
 
-    @Override
-    public void onStop() {
-      super.onStop();
-      map.onStop();
+    companion object {
+        private const val TAG_MAIN_FRAGMENT = "com.mapbox.mapboxsdk.fragment.tag.main"
+        private const val TAG_BOTTOM_FRAGMENT = "com.mapbox.mapboxsdk.fragment.tag.bottom"
+        private const val AMOUNT_OF_MAIN_MAP_FRAGMENTS = "Amount of main map fragments: %s"
     }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-      super.onSaveInstanceState(outState);
-      map.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onLowMemory() {
-      super.onLowMemory();
-      map.onLowMemory();
-    }
-
-    @Override
-    public void onDestroyView() {
-      super.onDestroyView();
-      map.onDestroy();
-    }
-  }
-
-  public static class BottomSheetFragment extends Fragment implements OnMapReadyCallback {
-
-    private MapView map;
-
-    public static BottomSheetFragment newInstance(Context context) {
-      BottomSheetFragment mapFragment = new BottomSheetFragment();
-      MapboxMapOptions mapboxMapOptions = MapboxMapOptions.createFromAttributes(context);
-      mapboxMapOptions.renderSurfaceOnTop(true);
-      mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(mapboxMapOptions));
-      return mapFragment;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-      super.onCreateView(inflater, container, savedInstanceState);
-      Context context = inflater.getContext();
-      return map = new MapView(context, MapFragmentUtils.resolveArgs(context, getArguments()));
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-      super.onViewCreated(view, savedInstanceState);
-      map.onCreate(savedInstanceState);
-      map.getMapAsync(this);
-    }
-
-    @Override
-    public void onMapReady(@NonNull MapboxMap mapboxMap) {
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.760545, -122.436055), 15));
-      mapboxMap.setStyle(Style.getPredefinedStyle("Bright"));
-    }
-
-    @Override
-    public void onStart() {
-      super.onStart();
-      map.onStart();
-    }
-
-    @Override
-    public void onResume() {
-      super.onResume();
-      map.onResume();
-    }
-
-    @Override
-    public void onPause() {
-      super.onPause();
-      map.onPause();
-    }
-
-    @Override
-    public void onStop() {
-      super.onStop();
-      map.onStop();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-      super.onSaveInstanceState(outState);
-      map.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onLowMemory() {
-      super.onLowMemory();
-      map.onLowMemory();
-    }
-
-    @Override
-    public void onDestroyView() {
-      super.onDestroyView();
-      map.onDestroy();
-    }
-  }
 }
