@@ -39,7 +39,8 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
             this@QueryRenderedFeaturesBoxSymbolCountActivity.mapboxMap = mapboxMap
             try {
                 val testPoints = ResourceUtils.readRawResource(
-                    mapView!!.context, R.raw.test_points_utrecht
+                    mapView!!.context,
+                    R.raw.test_points_utrecht
                 )
                 val markerImage =
                     BitmapFactory.decodeResource(resources, R.drawable.mapbox_marker_icon_default)

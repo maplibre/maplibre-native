@@ -1,36 +1,25 @@
 package com.mapbox.mapboxsdk.testapp.activity.feature
 
 import android.graphics.*
-import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
 import android.os.Bundle
-import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import timber.log.Timber
-import android.widget.Toast
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.style.layers.FillLayer
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer
-import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarkerOptions
-import com.mapbox.mapboxsdk.maps.Style.OnStyleLoaded
-import com.mapbox.mapboxsdk.maps.MapboxMap.InfoWindowAdapter
-import android.widget.TextView
-import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarker
-import android.widget.LinearLayout
-import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions
 import android.os.Parcel
 import android.os.Parcelable
 import android.view.View
-import com.mapbox.mapboxsdk.style.layers.CircleLayer
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Feature
+import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions
 import com.mapbox.mapboxsdk.annotations.Marker
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.MapboxMap.InfoWindowAdapter
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarker
+import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarkerOptions
+import timber.log.Timber
 
 /**
  * Test activity showcasing using the query rendered features API to query feature properties on Map click.
@@ -45,7 +34,10 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         val pixel = mapboxMap!!.projection.toScreenLocation(point)
         Timber.i(
             "Requesting features for %sx%s (%sx%s adjusted for density)",
-            pixel.x, pixel.y, pixel.x / density, pixel.y / density
+            pixel.x,
+            pixel.y,
+            pixel.x / density,
+            pixel.y / density
         )
         val features = mapboxMap!!.queryRenderedFeatures(pixel)
 

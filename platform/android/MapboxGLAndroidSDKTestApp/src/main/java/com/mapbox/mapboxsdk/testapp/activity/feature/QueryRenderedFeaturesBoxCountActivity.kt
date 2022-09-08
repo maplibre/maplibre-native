@@ -1,20 +1,19 @@
 package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import android.os.Bundle
-import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import android.graphics.RectF
-import timber.log.Timber
-import android.widget.Toast
 import android.graphics.PointF
+import android.graphics.RectF
+import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Feature
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.utils.NavUtils
+import timber.log.Timber
 
 /**
  * Test activity showcasing using the query rendered features API to count features in a rectangle.
