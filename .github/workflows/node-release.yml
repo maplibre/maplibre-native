@@ -40,9 +40,6 @@ jobs:
           npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
           git push
 
-      - name: Get Version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.1.0
   build:
     strategy:
       matrix:
@@ -167,14 +164,6 @@ jobs:
         run: |
           npm run package
 
-      - name: Publish to NPM
-        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
-        run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish PreRelease to Github
         if: github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
@@ -188,6 +177,14 @@ jobs:
           npm run release
         env:
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+
+      - name: Publish to NPM
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 
 
