@@ -63,6 +63,7 @@
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js",
     "package": "node-pre-gyp package",
+    "prerelease": "node-pre-gyp-github publish",
     "release": "node-pre-gyp-github publish --release"
   },
   "gypfile": true,
