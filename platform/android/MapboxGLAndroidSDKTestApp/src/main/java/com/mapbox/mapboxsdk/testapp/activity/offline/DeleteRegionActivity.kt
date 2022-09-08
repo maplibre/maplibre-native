@@ -1,177 +1,164 @@
-package com.mapbox.mapboxsdk.testapp.activity.offline;
+package com.mapbox.mapboxsdk.testapp.activity.offline
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.offline.OfflineManager;
-import com.mapbox.mapboxsdk.offline.OfflineRegion;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.testapp.utils.OfflineUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import android.content.Context
+import android.content.DialogInterface
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.offline.OfflineManager
+import com.mapbox.mapboxsdk.offline.OfflineManager.ListOfflineRegionsCallback
+import com.mapbox.mapboxsdk.offline.OfflineRegion
+import com.mapbox.mapboxsdk.offline.OfflineRegion.OfflineRegionDeleteCallback
+import com.mapbox.mapboxsdk.offline.OfflineRegion.OfflineRegionInvalidateCallback
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.offline.DeleteRegionActivity.OfflineRegionAdapter
+import com.mapbox.mapboxsdk.testapp.utils.OfflineUtils
+import java.util.*
 
 /**
  * Test activity showing integration of deleting an OfflineRegion.
  */
-public class DeleteRegionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener,
-  AdapterView.OnItemLongClickListener {
+class DeleteRegionActivity :
+    AppCompatActivity(),
+    AdapterView.OnItemClickListener,
+    AdapterView.OnItemLongClickListener {
+    private var adapter: OfflineRegionAdapter? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_offline_region_delete)
+        val listView = findViewById<ListView>(R.id.listView)
+        listView.adapter = OfflineRegionAdapter(this).also { adapter = it }
+        listView.emptyView = findViewById(android.R.id.empty)
+        listView.onItemClickListener = this
+        listView.onItemLongClickListener = this
+    }
 
-  private OfflineRegionAdapter adapter;
+    override fun onItemClick(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+        val region = adapter!!.getItem(position)
+        val metadata = OfflineUtils.convertRegionName(region.metadata)
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Delete region")
+        val input = TextView(this)
+        input.text = metadata
+        builder.setView(input)
+        builder.setPositiveButton("OK") { dialog: DialogInterface?, which: Int -> delete(region) }
+        builder.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int -> dialog.cancel() }
+        builder.show()
+    }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_offline_region_delete);
+    override fun onItemLongClick(
+        parent: AdapterView<*>?,
+        view: View,
+        position: Int,
+        id: Long
+    ): Boolean {
+        val region = adapter!!.getItem(position)
+        region.invalidate(object : OfflineRegionInvalidateCallback {
+            override fun onInvalidate() {
+                Toast.makeText(
+                    this@DeleteRegionActivity,
+                    "Invalidate region success",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
-    ListView listView = findViewById(R.id.listView);
-    listView.setAdapter(adapter = new OfflineRegionAdapter(this));
-    listView.setEmptyView(findViewById(android.R.id.empty));
-    listView.setOnItemClickListener(this);
-    listView.setOnItemLongClickListener(this);
-  }
+            override fun onError(error: String) {
+                Toast.makeText(this@DeleteRegionActivity, "Error:$error", Toast.LENGTH_LONG).show()
+            }
+        })
+        return true
+    }
 
-  @Override
-  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    final OfflineRegion region = adapter.getItem(position);
-    String metadata = OfflineUtils.convertRegionName(region.getMetadata());
+    private fun delete(region: OfflineRegion) {
+        region.delete(object : OfflineRegionDeleteCallback {
+            override fun onDelete() {
+                Toast.makeText(
+                    this@DeleteRegionActivity,
+                    "Region deleted",
+                    Toast.LENGTH_SHORT
+                ).show()
+                loadOfflineRegions()
+            }
 
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle("Delete region");
+            override fun onError(error: String) {
+                Toast.makeText(
+                    this@DeleteRegionActivity,
+                    "Region deletion failed with $error",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
+    }
 
-    final TextView input = new TextView(this);
-    input.setText(metadata);
-    builder.setView(input);
+    override fun onStart() {
+        super.onStart()
+        loadOfflineRegions()
+    }
 
-    builder.setPositiveButton("OK", (dialog, which) -> delete(region));
-    builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+    private fun loadOfflineRegions() {
+        OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
+            override fun onList(offlineRegions: Array<OfflineRegion>) {
+                if (offlineRegions != null && offlineRegions.size > 0) {
+                    adapter!!.setOfflineRegions(Arrays.asList(*offlineRegions))
+                }
+            }
 
-    builder.show();
-  }
+            override fun onError(error: String) {
+                Toast.makeText(
+                    this@DeleteRegionActivity,
+                    "Error loading regions $error",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
+    }
 
-  @Override
-  public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-    final OfflineRegion region = adapter.getItem(position);
-    region.invalidate(new OfflineRegion.OfflineRegionInvalidateCallback() {
-      @Override
-      public void onInvalidate() {
-        Toast.makeText(DeleteRegionActivity.this, "Invalidate region success", Toast.LENGTH_SHORT).show();
-      }
-
-      @Override
-      public void onError(String error) {
-        Toast.makeText(DeleteRegionActivity.this, "Error:" + error, Toast.LENGTH_LONG).show();
-      }
-    });
-    return true;
-  }
-
-  private void delete(OfflineRegion region) {
-    region.delete(new OfflineRegion.OfflineRegionDeleteCallback() {
-      @Override
-      public void onDelete() {
-        Toast.makeText(
-          DeleteRegionActivity.this,
-          "Region deleted",
-          Toast.LENGTH_SHORT
-        ).show();
-        loadOfflineRegions();
-      }
-
-      @Override
-      public void onError(String error) {
-        Toast.makeText(
-          DeleteRegionActivity.this,
-          "Region deletion failed with " + error,
-          Toast.LENGTH_LONG
-        ).show();
-      }
-    });
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    loadOfflineRegions();
-  }
-
-  private void loadOfflineRegions() {
-    OfflineManager.getInstance(this).listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
-      @Override
-      public void onList(OfflineRegion[] offlineRegions) {
-        if (offlineRegions != null && offlineRegions.length > 0) {
-          adapter.setOfflineRegions(Arrays.asList(offlineRegions));
+    private class OfflineRegionAdapter internal constructor(private val context: Context) :
+        BaseAdapter() {
+        private var offlineRegions: List<OfflineRegion>
+        fun setOfflineRegions(offlineRegions: List<OfflineRegion>) {
+            this.offlineRegions = offlineRegions
+            notifyDataSetChanged()
         }
-      }
 
-      @Override
-      public void onError(String error) {
-        Toast.makeText(DeleteRegionActivity.this, "Error loading regions " + error, Toast.LENGTH_LONG).show();
-      }
-    });
-  }
+        override fun getCount(): Int {
+            return offlineRegions.size
+        }
 
-  private static class OfflineRegionAdapter extends BaseAdapter {
+        override fun getItem(position: Int): OfflineRegion {
+            return offlineRegions[position]
+        }
 
-    private Context context;
-    private List<OfflineRegion> offlineRegions;
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
 
-    OfflineRegionAdapter(Context ctx) {
-      context = ctx;
-      offlineRegions = new ArrayList<>();
+        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+            var convertView = convertView
+            val holder: ViewHolder
+            if (convertView == null) {
+                holder = ViewHolder()
+                convertView = LayoutInflater.from(context)
+                    .inflate(android.R.layout.simple_list_item_1, parent, false)
+                holder.text = convertView.findViewById<View>(android.R.id.text1) as TextView
+                convertView.tag = holder
+            } else {
+                holder = convertView.tag as ViewHolder
+            }
+            holder.text!!.text = OfflineUtils.convertRegionName(getItem(position).metadata)
+            return convertView
+        }
+
+        internal class ViewHolder {
+            var text: TextView? = null
+        }
+
+        init {
+            offlineRegions = ArrayList()
+        }
     }
-
-    void setOfflineRegions(List<OfflineRegion> offlineRegions) {
-      this.offlineRegions = offlineRegions;
-      notifyDataSetChanged();
-    }
-
-    @Override
-    public int getCount() {
-      return offlineRegions.size();
-    }
-
-    @Override
-    public OfflineRegion getItem(int position) {
-      return offlineRegions.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-      return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      ViewHolder holder;
-
-      if (convertView == null) {
-        holder = new ViewHolder();
-        convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
-        holder.text = (TextView) convertView.findViewById(android.R.id.text1);
-        convertView.setTag(holder);
-      } else {
-        holder = (ViewHolder) convertView.getTag();
-      }
-
-      holder.text.setText(OfflineUtils.convertRegionName(getItem(position).getMetadata()));
-      return convertView;
-    }
-
-    static class ViewHolder {
-      TextView text;
-    }
-  }
 }

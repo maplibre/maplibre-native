@@ -1,188 +1,182 @@
-package com.mapbox.mapboxsdk.testapp.activity.offline;
+package com.mapbox.mapboxsdk.testapp.activity.offline
 
-import android.content.Context;
-import android.os.Bundle;
-import android.text.InputType;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.offline.OfflineManager;
-import com.mapbox.mapboxsdk.offline.OfflineRegion;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.testapp.utils.OfflineUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import android.content.Context
+import android.content.DialogInterface
+import android.os.Bundle
+import android.text.InputType
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.offline.OfflineManager
+import com.mapbox.mapboxsdk.offline.OfflineManager.ListOfflineRegionsCallback
+import com.mapbox.mapboxsdk.offline.OfflineRegion
+import com.mapbox.mapboxsdk.offline.OfflineRegion.OfflineRegionUpdateMetadataCallback
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.activity.offline.UpdateMetadataActivity.OfflineRegionMetadataAdapter
+import com.mapbox.mapboxsdk.testapp.utils.OfflineUtils
+import java.util.*
 
 /**
  * Test activity showing integration of updating metadata of an OfflineRegion.
  */
-public class UpdateMetadataActivity extends AppCompatActivity implements AdapterView.OnItemClickListener,
-  AdapterView.OnItemLongClickListener {
-
-  private OfflineRegionMetadataAdapter adapter;
-
-  private MapView mapView;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_metadata_update);
-
-    ListView listView = findViewById(R.id.listView);
-    listView.setAdapter(adapter = new OfflineRegionMetadataAdapter(this));
-    listView.setEmptyView(findViewById(android.R.id.empty));
-    listView.setOnItemClickListener(this);
-    listView.setOnItemLongClickListener(this);
-  }
-
-  @Override
-  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    final OfflineRegion region = adapter.getItem(position);
-    String metadata = OfflineUtils.convertRegionName(region.getMetadata());
-
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle("Rename metadata");
-
-    final EditText input = new EditText(this);
-    input.setText(metadata);
-    input.setInputType(InputType.TYPE_CLASS_TEXT);
-    if (metadata != null) {
-      input.setSelection(metadata.length());
+class UpdateMetadataActivity :
+    AppCompatActivity(),
+    AdapterView.OnItemClickListener,
+    AdapterView.OnItemLongClickListener {
+    private var adapter: OfflineRegionMetadataAdapter? = null
+    private var mapView: MapView? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_metadata_update)
+        val listView = findViewById<ListView>(R.id.listView)
+        listView.adapter = OfflineRegionMetadataAdapter(this).also { adapter = it }
+        listView.emptyView = findViewById(android.R.id.empty)
+        listView.onItemClickListener = this
+        listView.onItemLongClickListener = this
     }
-    builder.setView(input);
 
-    builder.setPositiveButton("OK", (dialog, which) ->
-      updateMetadata(region, OfflineUtils.convertRegionName(input.getText().toString()))
-    );
-    builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-    builder.show();
-  }
-
-  @Override
-  public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-    ViewGroup container = findViewById(R.id.container);
-    container.removeAllViews();
-    container.addView(mapView = new MapView(view.getContext()));
-    mapView.onCreate(null);
-    mapView.getMapAsync(map -> map.setOfflineRegionDefinition(adapter.getItem(position).getDefinition()));
-    mapView.onStart();
-    mapView.onResume();
-    return true;
-  }
-
-  private void updateMetadata(OfflineRegion region, byte[] metadata) {
-    region.updateMetadata(metadata, new OfflineRegion.OfflineRegionUpdateMetadataCallback() {
-      @Override
-      public void onUpdate(byte[] metadata) {
-        adapter.notifyDataSetChanged();
-      }
-
-      @Override
-      public void onError(String error) {
-        Toast.makeText(
-          UpdateMetadataActivity.this,
-          "Region metadata update failed with " + error,
-          Toast.LENGTH_LONG
-        ).show();
-      }
-    });
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    loadOfflineRegions();
-  }
-
-  private void loadOfflineRegions() {
-    OfflineManager.getInstance(this).listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
-      @Override
-      public void onList(OfflineRegion[] offlineRegions) {
-        if (offlineRegions != null && offlineRegions.length > 0) {
-          adapter.setOfflineRegions(Arrays.asList(offlineRegions));
+    override fun onItemClick(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+        val region = adapter!!.getItem(position)
+        val metadata = OfflineUtils.convertRegionName(region.metadata)
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Rename metadata")
+        val input = EditText(this)
+        input.setText(metadata)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        if (metadata != null) {
+            input.setSelection(metadata.length)
         }
-      }
-
-      @Override
-      public void onError(String error) {
-        Toast.makeText(UpdateMetadataActivity.this, "Error loading regions " + error, Toast.LENGTH_LONG).show();
-      }
-    });
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    if (mapView != null) {
-      mapView.onPause();
-      mapView.onStop();
-      mapView.onDestroy();
-    }
-  }
-
-  private static class OfflineRegionMetadataAdapter extends BaseAdapter {
-
-    private Context context;
-    private List<OfflineRegion> offlineRegions;
-
-    OfflineRegionMetadataAdapter(Context ctx) {
-      context = ctx;
-      offlineRegions = new ArrayList<>();
+        builder.setView(input)
+        builder.setPositiveButton(
+            "OK"
+        ) { dialog: DialogInterface?, which: Int ->
+            updateMetadata(
+                region,
+                OfflineUtils.convertRegionName(input.text.toString())
+            )
+        }
+        builder.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int -> dialog.cancel() }
+        builder.show()
     }
 
-    void setOfflineRegions(List<OfflineRegion> offlineRegions) {
-      this.offlineRegions = offlineRegions;
-      notifyDataSetChanged();
+    override fun onItemLongClick(
+        parent: AdapterView<*>?,
+        view: View,
+        position: Int,
+        id: Long
+    ): Boolean {
+        val container = findViewById<ViewGroup>(R.id.container)
+        container.removeAllViews()
+        container.addView(MapView(view.context).also { mapView = it })
+        mapView!!.onCreate(null)
+        mapView!!.getMapAsync { map: MapboxMap ->
+            map.setOfflineRegionDefinition(
+                adapter!!.getItem(position).definition
+            )
+        }
+        mapView!!.onStart()
+        mapView!!.onResume()
+        return true
     }
 
-    @Override
-    public int getCount() {
-      return offlineRegions.size();
+    private fun updateMetadata(region: OfflineRegion, metadata: ByteArray) {
+        region.updateMetadata(
+            metadata,
+            object : OfflineRegionUpdateMetadataCallback {
+                override fun onUpdate(metadata: ByteArray) {
+                    adapter!!.notifyDataSetChanged()
+                }
+
+                override fun onError(error: String) {
+                    Toast.makeText(
+                        this@UpdateMetadataActivity,
+                        "Region metadata update failed with $error",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        )
     }
 
-    @Override
-    public OfflineRegion getItem(int position) {
-      return offlineRegions.get(position);
+    override fun onStart() {
+        super.onStart()
+        loadOfflineRegions()
     }
 
-    @Override
-    public long getItemId(int position) {
-      return position;
+    private fun loadOfflineRegions() {
+        OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
+            override fun onList(offlineRegions: Array<OfflineRegion>) {
+                if (offlineRegions != null && offlineRegions.size > 0) {
+                    adapter!!.setOfflineRegions(Arrays.asList(*offlineRegions))
+                }
+            }
+
+            override fun onError(error: String) {
+                Toast.makeText(
+                    this@UpdateMetadataActivity,
+                    "Error loading regions $error",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      ViewHolder holder;
-
-      if (convertView == null) {
-        holder = new ViewHolder();
-        convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
-        holder.text = (TextView) convertView.findViewById(android.R.id.text1);
-        convertView.setTag(holder);
-      } else {
-        holder = (ViewHolder) convertView.getTag();
-      }
-
-      holder.text.setText(OfflineUtils.convertRegionName(getItem(position).getMetadata()));
-      return convertView;
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mapView != null) {
+            mapView!!.onPause()
+            mapView!!.onStop()
+            mapView!!.onDestroy()
+        }
     }
 
-    static class ViewHolder {
-      TextView text;
+    private class OfflineRegionMetadataAdapter internal constructor(private val context: Context) :
+        BaseAdapter() {
+        private var offlineRegions: List<OfflineRegion>
+        fun setOfflineRegions(offlineRegions: List<OfflineRegion>) {
+            this.offlineRegions = offlineRegions
+            notifyDataSetChanged()
+        }
+
+        override fun getCount(): Int {
+            return offlineRegions.size
+        }
+
+        override fun getItem(position: Int): OfflineRegion {
+            return offlineRegions[position]
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+            var convertView = convertView
+            val holder: ViewHolder
+            if (convertView == null) {
+                holder = ViewHolder()
+                convertView = LayoutInflater.from(context)
+                    .inflate(android.R.layout.simple_list_item_1, parent, false)
+                holder.text = convertView.findViewById<View>(android.R.id.text1) as TextView
+                convertView.tag = holder
+            } else {
+                holder = convertView.tag as ViewHolder
+            }
+            holder.text!!.text = OfflineUtils.convertRegionName(getItem(position).metadata)
+            return convertView
+        }
+
+        internal class ViewHolder {
+            var text: TextView? = null
+        }
+
+        init {
+            offlineRegions = ArrayList()
+        }
     }
-  }
 }
