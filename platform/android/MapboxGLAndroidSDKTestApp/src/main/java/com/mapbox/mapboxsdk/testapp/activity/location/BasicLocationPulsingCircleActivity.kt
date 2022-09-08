@@ -119,7 +119,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 
     private fun loadNewStyle() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri(Utils.getNextStyle()))
+        mapboxMap!!.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
     private fun checkPermissions() {

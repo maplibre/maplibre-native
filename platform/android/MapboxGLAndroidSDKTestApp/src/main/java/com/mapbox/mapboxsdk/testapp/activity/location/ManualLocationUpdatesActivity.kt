@@ -1,171 +1,159 @@
-package com.mapbox.mapboxsdk.testapp.activity.location;
+package com.mapbox.mapboxsdk.testapp.activity.location
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.widget.Toast;
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.LocationComponent
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.engine.LocationEngine
+import com.mapbox.mapboxsdk.location.engine.LocationEngineProvider
+import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest
+import com.mapbox.mapboxsdk.location.modes.RenderMode
+import com.mapbox.mapboxsdk.location.permissions.PermissionsListener
+import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.testapp.R
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationComponent;
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
-import com.mapbox.mapboxsdk.location.engine.LocationEngine;
-import com.mapbox.mapboxsdk.location.engine.LocationEngineProvider;
-import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest;
-import com.mapbox.mapboxsdk.location.modes.RenderMode;
-import com.mapbox.mapboxsdk.location.permissions.PermissionsListener;
-import com.mapbox.mapboxsdk.location.permissions.PermissionsManager;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-
-public class ManualLocationUpdatesActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-  private MapView mapView;
-  private LocationComponent locationComponent;
-  private LocationEngine locationEngine;
-  private PermissionsManager permissionsManager;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_location_manual_update);
-
-    locationEngine = LocationEngineProvider.getBestLocationEngine(this, false);
-
-    FloatingActionButton fabManualUpdate = findViewById(R.id.fabManualLocationChange);
-    fabManualUpdate.setOnClickListener(v -> {
-      if (locationComponent != null && locationComponent.getLocationEngine() == null) {
-        locationComponent.forceLocationUpdate(
-          Utils.getRandomLocation(LatLngBounds.from(60, 25, 40, -5)));
-      }
-    });
-    fabManualUpdate.setEnabled(false);
-
-    FloatingActionButton fabToggle = findViewById(R.id.fabToggleManualLocation);
-    fabToggle.setOnClickListener(v -> {
-      if (locationComponent != null) {
-        locationComponent.setLocationEngine(locationComponent.getLocationEngine() == null ? locationEngine : null);
-
-        if (locationComponent.getLocationEngine() == null) {
-          fabToggle.setImageResource(R.drawable.ic_layers_clear);
-          fabManualUpdate.setEnabled(true);
-          fabManualUpdate.setAlpha(1f);
-          Toast.makeText(
-            ManualLocationUpdatesActivity.this.getApplicationContext(),
-            "LocationEngine disabled, use manual updates",
-            Toast.LENGTH_SHORT).show();
+class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var mapView: MapView
+    private var locationComponent: LocationComponent? = null
+    private var locationEngine: LocationEngine? = null
+    private var permissionsManager: PermissionsManager? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_location_manual_update)
+        locationEngine = LocationEngineProvider.getBestLocationEngine(this, false)
+        val fabManualUpdate = findViewById<FloatingActionButton>(R.id.fabManualLocationChange)
+        fabManualUpdate.setOnClickListener { v: View? ->
+            if (locationComponent != null && locationComponent!!.locationEngine == null) {
+                locationComponent!!.forceLocationUpdate(
+                    Utils.getRandomLocation(LatLngBounds.from(60.0, 25.0, 40.0, -5.0))
+                )
+            }
+        }
+        fabManualUpdate.isEnabled = false
+        val fabToggle = findViewById<FloatingActionButton>(R.id.fabToggleManualLocation)
+        fabToggle.setOnClickListener { v: View? ->
+            if (locationComponent != null) {
+                locationComponent!!.locationEngine =
+                    if (locationComponent!!.locationEngine == null) locationEngine else null
+                if (locationComponent!!.locationEngine == null) {
+                    fabToggle.setImageResource(R.drawable.ic_layers_clear)
+                    fabManualUpdate.isEnabled = true
+                    fabManualUpdate.alpha = 1f
+                    Toast.makeText(
+                        this@ManualLocationUpdatesActivity.applicationContext,
+                        "LocationEngine disabled, use manual updates",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    fabToggle.setImageResource(R.drawable.ic_layers)
+                    fabManualUpdate.isEnabled = false
+                    fabManualUpdate.alpha = 0.5f
+                    Toast.makeText(
+                        this@ManualLocationUpdatesActivity.applicationContext,
+                        "LocationEngine enabled",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            mapView.getMapAsync(this)
         } else {
-          fabToggle.setImageResource(R.drawable.ic_layers);
-          fabManualUpdate.setEnabled(false);
-          fabManualUpdate.setAlpha(0.5f);
-          Toast.makeText(
-            ManualLocationUpdatesActivity.this.getApplicationContext(),
-            "LocationEngine enabled",
-            Toast.LENGTH_SHORT).show();
-        }
-      }
-    });
+            permissionsManager = PermissionsManager(object : PermissionsListener {
+                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                    Toast.makeText(
+                        this@ManualLocationUpdatesActivity.applicationContext,
+                        "You need to accept location permissions.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-
-    if (PermissionsManager.areLocationPermissionsGranted(this)) {
-      mapView.getMapAsync(this);
-    } else {
-      permissionsManager = new PermissionsManager(new PermissionsListener() {
-        @Override
-        public void onExplanationNeeded(List<String> permissionsToExplain) {
-          Toast.makeText(ManualLocationUpdatesActivity.this.getApplicationContext(),
-            "You need to accept location permissions.",
-            Toast.LENGTH_SHORT
-          ).show();
+                override fun onPermissionResult(granted: Boolean) {
+                    if (granted) {
+                        mapView.getMapAsync(this@ManualLocationUpdatesActivity)
+                    } else {
+                        finish()
+                    }
+                }
+            })
+            permissionsManager!!.requestLocationPermissions(this)
         }
-
-        @Override
-        public void onPermissionResult(boolean granted) {
-          if (granted) {
-            mapView.getMapAsync(ManualLocationUpdatesActivity.this);
-          } else {
-            finish();
-          }
-        }
-      });
-      permissionsManager.requestLocationPermissions(this);
     }
-  }
 
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
-  }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
-  @SuppressLint("MissingPermission")
-  @Override
-  public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    mapboxMap.setStyle(new Style.Builder().fromUri(Style.getPredefinedStyle("Streets")), style -> {
-      locationComponent = mapboxMap.getLocationComponent();
+    @SuppressLint("MissingPermission")
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        mapboxMap.setStyle(
+            Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+        ) { style: Style? ->
+            locationComponent = mapboxMap.locationComponent
+            locationComponent!!.activateLocationComponent(
+                LocationComponentActivationOptions
+                    .builder(this, style!!)
+                    .locationEngine(locationEngine)
+                    .locationEngineRequest(
+                        LocationEngineRequest.Builder(500)
+                            .setFastestInterval(500)
+                            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+                    )
+                    .build()
+            )
+            locationComponent!!.isLocationComponentEnabled = true
+            locationComponent!!.renderMode = RenderMode.COMPASS
+        }
+    }
 
-      locationComponent.activateLocationComponent(
-        LocationComponentActivationOptions
-          .builder(this, style)
-          .locationEngine(locationEngine)
-          .locationEngineRequest(new LocationEngineRequest.Builder(500)
-            .setFastestInterval(500)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build())
-          .build());
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-      locationComponent.setLocationComponentEnabled(true);
-      locationComponent.setRenderMode(RenderMode.COMPASS);
-    });
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }

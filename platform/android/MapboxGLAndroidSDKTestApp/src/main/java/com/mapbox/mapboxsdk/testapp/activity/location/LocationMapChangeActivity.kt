@@ -1,143 +1,135 @@
-package com.mapbox.mapboxsdk.testapp.activity.location;
+package com.mapbox.mapboxsdk.testapp.activity.location
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.widget.Toast;
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.modes.RenderMode
+import com.mapbox.mapboxsdk.location.permissions.PermissionsListener
+import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.testapp.R
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.mapboxsdk.location.LocationComponent;
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
-import com.mapbox.mapboxsdk.location.modes.RenderMode;
-import com.mapbox.mapboxsdk.location.permissions.PermissionsListener;
-import com.mapbox.mapboxsdk.location.permissions.PermissionsManager;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import java.util.List;
-
-public class LocationMapChangeActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-  private PermissionsManager permissionsManager;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_location_layer_map_change);
-
-    mapView = findViewById(R.id.mapView);
-    FloatingActionButton stylesFab = findViewById(R.id.fabStyles);
-
-    stylesFab.setOnClickListener(v -> {
-      if (mapboxMap != null) {
-        mapboxMap.setStyle(new Style.Builder().fromUri(Utils.getNextStyle()));
-      }
-    });
-
-    mapView.onCreate(savedInstanceState);
-
-    if (PermissionsManager.areLocationPermissionsGranted(this)) {
-      mapView.getMapAsync(this);
-    } else {
-      permissionsManager = new PermissionsManager(new PermissionsListener() {
-        @Override
-        public void onExplanationNeeded(List<String> permissionsToExplain) {
-          Toast.makeText(LocationMapChangeActivity.this, "You need to accept location permissions.",
-            Toast.LENGTH_SHORT).show();
+class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var mapView: MapView
+    private var mapboxMap: MapboxMap? = null
+    private var permissionsManager: PermissionsManager? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_location_layer_map_change)
+        mapView = findViewById(R.id.mapView)
+        val stylesFab = findViewById<FloatingActionButton>(R.id.fabStyles)
+        stylesFab.setOnClickListener { v: View? ->
+            if (mapboxMap != null) {
+                mapboxMap!!.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
+            }
         }
+        mapView.onCreate(savedInstanceState)
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            mapView.getMapAsync(this)
+        } else {
+            permissionsManager = PermissionsManager(object : PermissionsListener {
+                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                    Toast.makeText(
+                        this@LocationMapChangeActivity,
+                        "You need to accept location permissions.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
-        @Override
-        public void onPermissionResult(boolean granted) {
-          if (granted) {
-            mapView.getMapAsync(LocationMapChangeActivity.this);
-          } else {
-            finish();
-          }
+                override fun onPermissionResult(granted: Boolean) {
+                    if (granted) {
+                        mapView.getMapAsync(this@LocationMapChangeActivity)
+                    } else {
+                        finish()
+                    }
+                }
+            })
+            permissionsManager!!.requestLocationPermissions(this)
         }
-      });
-      permissionsManager.requestLocationPermissions(this);
     }
-  }
 
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
-  }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
-  @Override
-  public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
-    mapboxMap.setStyle(new Style.Builder().fromUri(Utils.getNextStyle()),
-      style -> activateLocationComponent(style));
-  }
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        this.mapboxMap = mapboxMap
+        mapboxMap.setStyle(
+            Style.Builder().fromUri(Utils.nextStyle())
+        ) { style: Style -> activateLocationComponent(style) }
+    }
 
-  @SuppressLint("MissingPermission")
-  private void activateLocationComponent(@NonNull Style style) {
-    LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    @SuppressLint("MissingPermission")
+    private fun activateLocationComponent(style: Style) {
+        val locationComponent = mapboxMap!!.locationComponent
+        locationComponent.activateLocationComponent(
+            LocationComponentActivationOptions
+                .builder(this, style)
+                .useDefaultLocationEngine(true)
+                .build()
+        )
+        locationComponent.isLocationComponentEnabled = true
+        locationComponent.renderMode = RenderMode.COMPASS
+        locationComponent.addOnLocationClickListener {
+            Toast.makeText(
+                this,
+                "Location clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        locationComponent.addOnLocationLongClickListener {
+            Toast.makeText(
+                this,
+                "Location long clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
-    locationComponent.activateLocationComponent(
-      LocationComponentActivationOptions
-        .builder(this, style)
-        .useDefaultLocationEngine(true)
-        .build());
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-    locationComponent.setLocationComponentEnabled(true);
-    locationComponent.setRenderMode(RenderMode.COMPASS);
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-    locationComponent.addOnLocationClickListener(
-      () -> Toast.makeText(this, "Location clicked", Toast.LENGTH_SHORT).show());
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-    locationComponent.addOnLocationLongClickListener(
-      () -> Toast.makeText(this, "Location long clicked", Toast.LENGTH_SHORT).show());
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }
