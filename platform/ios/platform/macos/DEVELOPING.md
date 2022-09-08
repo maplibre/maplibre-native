@@ -10,6 +10,7 @@ See the "Requirements" section in [INSTALL.md](INSTALL.md).
 
 Build and package the SDK by using one of the following commands:
 
+* `make xproj` opens the macOS project in Xcode
 * `make xpackage` builds a dynamic framework in the Debug configuration, including debug symbols.
 * `make xdocument` generates API documentation using jazzy.
 

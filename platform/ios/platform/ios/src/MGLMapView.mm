@@ -1425,7 +1425,7 @@ public:
         // `0` is an alias for maximum frame rate.
         newFrameRate = newFrameRate ?: maximumFrameRate;
 
-        _displayLink.frameInterval = maximumFrameRate / MIN(newFrameRate, maximumFrameRate);
+        _displayLink.preferredFramesPerSecond = maximumFrameRate / MIN(newFrameRate, maximumFrameRate);
     }
 }
 

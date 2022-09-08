@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: [self-hosted, macOS, ARM64]
     env:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -26,7 +26,7 @@ jobs:
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
+          brew list glfw || brew install glfw
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm ci --ignore-scripts          
 
       - name: Prepare ccache
         run: ccache --clear       

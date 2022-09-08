@@ -94,9 +94,14 @@ typedef NS_ENUM(NSUInteger, MGLCircleTranslationAnchor) {
  let layer = MGLCircleStyleLayer(identifier: "circles", source: population)
  layer.sourceLayerIdentifier = "population"
  layer.circleColor = NSExpression(forConstantValue: UIColor.green)
- layer.circleRadius = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.75, %@)",
-                                   [12: 2,
-                                    22: 180])
+ 
+ let stops = NSExpression(forConstantValue: [12: 2,
+                                             22: 180])
+ layer.circleRadius = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                   curveType: .exponential,
+                                   parameters: NSExpression(forConstantValue: 1.75),
+                                   stops: stops)
+ 
  layer.circleOpacity = NSExpression(forConstantValue: 0.7)
  layer.predicate = NSPredicate(format: "%K == %@", "marital-status", "married")
  mapView.style?.addLayer(layer)

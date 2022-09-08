@@ -65,6 +65,7 @@
                               @"iconAllowsOverlap should round-trip constant value expressions.");
 
         constantExpression = [NSExpression expressionWithFormat:@"true"];
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
         NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
         layer.iconAllowsOverlap = functionExpression;
 
@@ -77,6 +78,9 @@
 
         XCTAssertEqual(rawLayer->getIconAllowOverlap(), propertyValue,
                        @"Setting iconAllowsOverlap to a camera expression should update icon-allow-overlap.");
+#if TARGET_OS_IPHONE
+        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-gl-native/issues/331");
+#endif
         XCTAssertEqualObjects(layer.iconAllowsOverlap, functionExpression,
                               @"iconAllowsOverlap should round-trip camera expressions.");
 

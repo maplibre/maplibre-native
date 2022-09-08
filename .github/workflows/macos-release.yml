@@ -5,7 +5,7 @@ on:
  
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: macos-12
     env:
       BUILDTYPE: Release
       SYMBOLS: NO
@@ -28,7 +28,7 @@ jobs:
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
+          brew list glfw || brew install glfw
 
       - name: Cache node modules
         uses: actions/cache@v3
