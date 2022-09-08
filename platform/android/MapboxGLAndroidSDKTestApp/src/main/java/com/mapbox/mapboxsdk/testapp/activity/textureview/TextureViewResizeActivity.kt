@@ -1,104 +1,89 @@
-package com.mapbox.mapboxsdk.testapp.activity.textureview;
+package com.mapbox.mapboxsdk.testapp.activity.textureview
 
-import android.os.Bundle;
-import android.view.View;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.testapp.R
 
 /**
- * Test resizing a {@link android.view.TextureView} backed map on the fly.
+ * Test resizing a [android.view.TextureView] backed map on the fly.
  */
-public class TextureViewResizeActivity extends AppCompatActivity {
-
-  private MapView mapView;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_textureview_resize);
-    setupToolbar();
-    setupMapView(savedInstanceState);
-    setupFab();
-  }
-
-  private void setupToolbar() {
-    ActionBar actionBar = getSupportActionBar();
-    if (actionBar != null) {
-      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setHomeButtonEnabled(true);
+class TextureViewResizeActivity : AppCompatActivity() {
+    private lateinit var mapView: MapView
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_textureview_resize)
+        setupToolbar()
+        setupMapView(savedInstanceState)
+        setupFab()
     }
-  }
 
-  private void setupMapView(Bundle savedInstanceState) {
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this::setupMap);
-  }
+    private fun setupToolbar() {
+        val actionBar = supportActionBar
+        if (actionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            supportActionBar!!.setHomeButtonEnabled(true)
+        }
+    }
 
-  private void setupMap(MapboxMap mapboxMap) {
-    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
-  }
+    private fun setupMapView(savedInstanceState: Bundle?) {
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(OnMapReadyCallback { mapboxMap: MapboxMap -> setupMap(mapboxMap) })
+    }
 
-  private void setupFab() {
-    FloatingActionButton fabDebug = findViewById(R.id.fabResize);
-    fabDebug.setOnClickListener(view -> {
-      if (mapView != null) {
-        View parent = findViewById(R.id.coordinator_layout);
-        int width = parent.getWidth() == mapView.getWidth() ? parent.getWidth() / 2 : parent.getWidth();
-        int height = parent.getHeight() == mapView.getHeight() ? parent.getHeight() / 2 : parent.getHeight();
-        mapView.setLayoutParams(new CoordinatorLayout.LayoutParams(width, height));
-      }
-    });
-  }
+    private fun setupMap(mapboxMap: MapboxMap) {
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    private fun setupFab() {
+        val fabDebug = findViewById<FloatingActionButton>(R.id.fabResize)
+        fabDebug.setOnClickListener { view: View? ->
+            if (mapView != null) {
+                val parent = findViewById<View>(R.id.coordinator_layout)
+                val width = if (parent.width == mapView!!.width) parent.width / 2 else parent.width
+                val height =
+                    if (parent.height == mapView!!.height) parent.height / 2 else parent.height
+                mapView!!.layoutParams = CoordinatorLayout.LayoutParams(width, height)
+            }
+        }
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView!!.onDestroy()
+    }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }
