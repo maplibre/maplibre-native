@@ -1,100 +1,88 @@
-package com.mapbox.mapboxsdk.testapp.activity.storage;
+package com.mapbox.mapboxsdk.testapp.activity.storage
 
-import android.app.Activity;
-import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.storage.FileSource;
-import com.mapbox.mapboxsdk.storage.Resource;
-import com.mapbox.mapboxsdk.testapp.R;
-
-import timber.log.Timber;
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.storage.FileSource
+import com.mapbox.mapboxsdk.storage.FileSource.ResourceTransformCallback
+import com.mapbox.mapboxsdk.storage.Resource
+import com.mapbox.mapboxsdk.testapp.R
+import timber.log.Timber
 
 /**
  * Test activity showcasing the url transform
  */
-public class UrlTransformActivity extends AppCompatActivity {
+class UrlTransformActivity : AppCompatActivity() {
+    private var mapView: MapView? = null
 
-  private MapView mapView;
-
-  /**
-   * Be sure to use an isolated class so the activity is not leaked when
-   * the activity goes out of scope (static class in this case).
-   * <p>
-   * Alternatively, unregister the callback in {@link Activity#onDestroy()}
-   */
-  private static final class Transform implements FileSource.ResourceTransformCallback {
-    @Override
-    public String onURL(@Resource.Kind int kind, String url) {
-      Timber.i("[%s] Could be rewriting %s", Thread.currentThread().getName(), url);
-      return url;
+    /**
+     * Be sure to use an isolated class so the activity is not leaked when
+     * the activity goes out of scope (static class in this case).
+     *
+     *
+     * Alternatively, unregister the callback in [Activity.onDestroy]
+     */
+    private class Transform : ResourceTransformCallback {
+        override fun onURL(@Resource.Kind kind: Int, url: String): String {
+            Timber.i("[%s] Could be rewriting %s", Thread.currentThread().name, url)
+            return url
+        }
     }
-  }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_data_driven_style);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_data_driven_style)
 
-    // Initialize map as normal
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
+        // Initialize map as normal
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView!!.onCreate(savedInstanceState)
 
-    // Get a handle to the file source and set the resource transform
-    FileSource.getInstance(UrlTransformActivity.this).setResourceTransform(new Transform());
+        // Get a handle to the file source and set the resource transform
+        FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(Transform())
+        mapView!!.getMapAsync { map: MapboxMap ->
+            Timber.i("Map loaded")
+            map.setStyle(Style.getPredefinedStyle("Streets"))
+        }
+    }
 
-    mapView.getMapAsync(map -> {
-      Timber.i("Map loaded");
-      map.setStyle(Style.getPredefinedStyle("Streets"));
-    });
-  }
+    override fun onStart() {
+        super.onStart()
+        mapView!!.onStart()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView!!.onResume()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView!!.onPause()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView!!.onStop()
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView!!.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    override fun onDestroy() {
+        super.onDestroy()
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
+        // Example of how to reset the transform callback
+        FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(null)
+        mapView!!.onDestroy()
+    }
 
-    // Example of how to reset the transform callback
-    FileSource.getInstance(UrlTransformActivity.this).setResourceTransform(null);
-
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView!!.onLowMemory()
+    }
 }
