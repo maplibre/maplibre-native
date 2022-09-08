@@ -13,6 +13,56 @@ on:
           - major
 
 jobs:
+  version:
+    runs-on: ubuntu-20.04
+    env:
+      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ccache \
+            cmake \
+            ninja-build \
+            pkg-config \
+            xvfb \
+            libcurl4-openssl-dev \
+            libglfw3-dev \
+            libuv1-dev \
+            g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev
+          /usr/sbin/update-ccache-symlinks
+          
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Bump Version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version ${{ github.event.inputs.version }} -m "Update version (${{ github.event.inputs.version }})"
+          git push
   build:
     strategy:
       matrix:
@@ -22,6 +72,7 @@ jobs:
         node: [ 10, 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
+    needs: version
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -122,13 +173,6 @@ jobs:
       - name: Test
         if: runner.os == 'macOS'
         run: npm test
-
-      - name: Bump Version
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          npm version ${{ github.event.inputs.version }} -m "Update version (${{ github.event.inputs.version }})"
-          git push
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
