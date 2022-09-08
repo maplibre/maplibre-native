@@ -1,6 +1,8 @@
+
+
 package com.mapbox.mapboxsdk.testapp.activity.feature
 
-import android.graphics.*
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -17,8 +19,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap.InfoWindowAdapter
 import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarker
-import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesPropertiesActivity.CustomMarkerOptions
 import timber.log.Timber
 
 /**
@@ -121,8 +121,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
                         )
                     )
                     val feature = customMarker.features[0]
-                    for ((key, value) in feature.properties()!!
-                        .entrySet()) {
+                    for ((key, value) in feature.properties()!!.entrySet()) {
                         view.addView(row(String.format("%s: %s", key, value)))
                     }
                 } else {
