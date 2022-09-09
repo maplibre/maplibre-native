@@ -2,17 +2,54 @@ name: node-release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Choose a release type
+        required: true
+        type: choice
+        options:
+          - prerelease 
+          - patch
+          - minor
+          - major
 
 jobs:
+  bump_version:
+    runs-on: ubuntu-20.04
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Bump Version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
+          git push
+
   build:
     strategy:
       matrix:
         os:
-          - macos-10.15
           - ubuntu-20.04
+          - macos-12
         node: [ 10, 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
+    needs: bump_version
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -27,6 +64,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Get Latest Version
+        run: git pull
 
       - name: Install dependencies
         if: runner.os == 'macOS'
@@ -114,13 +154,12 @@ jobs:
         if: runner.os == 'macOS'
         run: npm test
 
-      # On PRs make sure that the npm package can be packaged.
       - name: Pack
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
 
-      - name: Release to Github
+      - name: Publish Release to Github
         if: github.ref == 'refs/heads/main'
         run: |
           npm run package
@@ -135,5 +174,4 @@ jobs:
           npm publish --access public
         env:
           NPM_ORG_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
-
 
