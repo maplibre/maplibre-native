@@ -77,7 +77,7 @@ jobs:
           brew list ccache || brew install -q ccache
           brew list ninja || brew install -q ninja
           brew list pkg-config || brew install -q pkg-config
-          brew list glfw3 || brew install -q glfw3
+          brew list glfw || brew install glfw
           brew list libuv || brew install -q libuv
 
       - name: Install dependencies
