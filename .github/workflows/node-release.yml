@@ -1,0 +1,229 @@
+name: node-ci
+
+on:
+  workflow_dispatch:
+  push:
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos-ci.yml"
+      - ".github/workflows/macos-release.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - ".gitignore"
+      - "README.md"
+      # ignore other platforms
+      - "platform/android/**"
+      - "platform/darwin/**"
+      - "platform/glfw/**"
+      - "platform/ios/**"
+      - "platform/macos/**"
+      - "platform/qt/**"
+      # ignore CI for other platforms
+      - ".github/FUNDING.yml"
+      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-ci-pull.yml"
+      - ".github/workflows/android-docker-base.yml"
+      - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/gh-pages-android-api.yml"
+      - ".github/workflows/gh-pages-ios-api.yml"
+      - ".github/workflows/ios-ci.yml"
+      - ".github/workflows/ios-pre-release.yml"
+      - ".github/workflows/ios-release.yml"
+      - ".github/workflows/macos-ci.yml"
+      - ".github/workflows/macos-release.yml"
+      - ".github/workflows/qt-ci-windows.yml"
+      - ".github/workflows/qt-ci.yml"
+      - ".github/workflows/update-gl-js.yml"
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-12
+          - ubuntu-20.04
+        include:
+          - os: macos-12
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew list cmake || brew install -q cmake
+          brew list ccache || brew install -q ccache
+          brew list ninja || brew install -q ninja
+          brew list pkg-config || brew install -q pkg-config
+          brew list glfw3 || brew install -q glfw3
+          brew list libuv || brew install -q libuv
+
+      - name: Install dependencies
+        if: runner.os == 'macOS' && matrix.arch == 'arm64'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew info cmake |grep Poured || brew install -q cmake
+          brew info ccache |grep Poured || brew install -q ccache
+          brew info ninja |grep Poured || brew install -q ninja
+          brew info pkg-config |grep Poured || brew install -q pkg-config
+          brew info libuv |grep Poured || brew install -q libuv
+          ./scripts/brew-install-arm64.sh glfw
+
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ccache \
+            cmake \
+            ninja-build \
+            pkg-config \
+            xvfb \
+            libcurl4-openssl-dev \
+            libglfw3-dev \
+            libuv1-dev \
+            g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev
+          /usr/sbin/update-ccache-symlinks
+
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Prepare ccache
+        run: ccache --clear --set-config cache_dir=~/.ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v3
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache
+          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats --set-config cache_dir=~/.ccache
+          ccache --max-size=2G --set-config cache_dir=~/.ccache
+          ccache --show-stats --set-config cache_dir=~/.ccache
+
+      - name: CMake
+        if: runner.os == 'macOS'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
+
+      - name: CMake
+        if: runner.os == 'Linux'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: Build
+        run: |
+          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: Run render tests on macOS
+        if: runner.os == 'macOS'
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+
+      - name: Upload render test artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: render-query-test-results
+          path: metrics/macos-xcode11-release-style.html
+
+      - name: Test
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
+
+      - name: Test
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        run: npm test
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        if: github.ref != 'refs/heads/main'
+        run: |
+          npm pack --dry-run
+
+      - name: Release
+        if: matrix.os != 'ubuntu-20.04' && matrix.os != 'macos-11.0' && matrix.arch != 'arm64'
+        env:
+          PUBLISH: true
+          BUILDTYPE: RelWithDebInfo
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+        run: |
+          ./platform/node/scripts/publish.sh
+
+      - name: Release
+        if: matrix.arch == 'arm64'
+        env:
+          PUBLISH: true
+          BUILDTYPE: RelWithDebInfo
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+        run: |
+          ./platform/node/scripts/publish.sh --target_arch=arm64
+
+      # Uncomment to start publishing the package
+      # @TODO: Figure out the binary distribution method.
+      # - name: Publish package
+      #   if: github.ref == 'refs/heads/main'
+      #   run: |
+      #     npm publish
