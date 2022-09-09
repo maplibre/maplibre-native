@@ -1,5 +1,34 @@
 package com.mapbox.mapboxsdk.testapp.activity.style;
 
+import static com.mapbox.mapboxsdk.style.expressions.Expression.concat;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.downcase;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.match;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.number;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.pi;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.product;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.rgba;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.step;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.string;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.upcase;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
+import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
+import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_TOP;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAnchor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,41 +58,11 @@ import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 
 import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.concat;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.downcase;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.match;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.number;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.pi;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.product;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.rgba;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.step;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.string;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.upcase;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
-import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
-import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_TOP;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOpacity;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
 
 /**
  * Test activity showcasing using a symbol generator that generates Bitmaps from Android SDK Views.
