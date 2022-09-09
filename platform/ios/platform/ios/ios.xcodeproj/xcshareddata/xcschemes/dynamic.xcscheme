@@ -67,6 +67,12 @@
                <Test
                   Identifier = "MGLMapSnapshotterTests/testLocalGlyphRendering">
                </Test>
+               <Test
+                  Identifier = "MGLMapViewContentInsetTests">
+               </Test>
+               <Test
+                  Identifier = "MGLOfflineStorageTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

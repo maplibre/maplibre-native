@@ -1,0 +1,56 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+# From: platform/ios/core-files.json
+# Mostly platform/default
+cc_library(
+    name = "mbgl-default",
+    srcs = [
+        "src/mbgl/gfx/headless_backend.cpp",
+        "src/mbgl/gfx/headless_frontend.cpp",
+        "src/mbgl/gl/headless_backend.cpp",
+        "src/mbgl/map/map_snapshotter.cpp",
+        "src/mbgl/platform/time.cpp",
+        "src/mbgl/storage/asset_file_source.cpp",
+        "src/mbgl/storage/database_file_source.cpp",
+        "src/mbgl/storage/file_source_manager.cpp",
+        "src/mbgl/storage/file_source_request.cpp",
+        "src/mbgl/storage/local_file_request.cpp",
+        "src/mbgl/storage/local_file_source.cpp",
+        "src/mbgl/storage/main_resource_loader.cpp",
+        "src/mbgl/storage/mbtiles_file_source.cpp",
+        "src/mbgl/storage/offline.cpp",
+        "src/mbgl/storage/offline_database.cpp",
+        "src/mbgl/storage/offline_download.cpp",
+        "src/mbgl/storage/online_file_source.cpp",
+        "src/mbgl/storage/sqlite3.cpp",
+        "src/mbgl/text/bidi.cpp",
+        "src/mbgl/util/compression.cpp",
+        "src/mbgl/util/monotonic_timer.cpp",
+        "src/mbgl/util/png_writer.cpp",
+        "src/mbgl/util/thread_local.cpp",
+        "src/mbgl/util/utf.cpp",
+    ],
+    hdrs = [
+        "include/mbgl/gfx/headless_backend.hpp",
+        "include/mbgl/gfx/headless_frontend.hpp",
+        "include/mbgl/gl/headless_backend.hpp",
+        "include/mbgl/map/map_snapshotter.hpp",
+        "include/mbgl/storage/file_source_request.hpp",
+        "include/mbgl/storage/local_file_request.hpp",
+        "include/mbgl/storage/merge_sideloaded.hpp",
+        "include/mbgl/storage/offline_database.hpp",
+        "include/mbgl/storage/offline_download.hpp",
+        "include/mbgl/storage/offline_schema.hpp",
+        "include/mbgl/storage/sqlite3.hpp",
+        "include/mbgl/text/unaccent.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        "include",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        "//platform/darwin:darwin-loop",
+    ],
+)

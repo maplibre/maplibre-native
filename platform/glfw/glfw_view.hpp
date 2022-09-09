@@ -25,7 +25,7 @@ class RendererBackend;
 
 class GLFWView : public mbgl::MapObserver {
 public:
-    GLFWView(bool fullscreen, bool benchmark, const mbgl::ResourceOptions &options);
+    GLFWView(bool fullscreen, bool benchmark, const mbgl::ResourceOptions &resourceOptions, const mbgl::ClientOptions &clientOptions);
     ~GLFWView() override;
 
     float getPixelRatio() const;
@@ -152,6 +152,7 @@ private:
     std::unique_ptr<mbgl::MapSnapshotter> snapshotter;
     std::unique_ptr<SnapshotObserver> snapshotterObserver;
     mbgl::ResourceOptions mapResourceOptions;
+    mbgl::ClientOptions mapClientOptions;
 
 #if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     bool puckFollowsCameraCenter = false;

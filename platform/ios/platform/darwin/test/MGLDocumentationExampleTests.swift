@@ -250,9 +250,14 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         #else
             layer.circleColor = NSExpression(forConstantValue: UIColor.green)
         #endif
-        layer.circleRadius = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.75, %@)",
-                                          [12: 2,
-                                           22: 180])
+
+        let stops = NSExpression(forConstantValue: [12: 2,
+                                                    22: 180])
+        layer.circleRadius = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                          curveType: .exponential,
+                                          parameters: NSExpression(forConstantValue: 1.75),
+                                          stops: stops)
+
         layer.circleOpacity = NSExpression(forConstantValue: 0.7)
         layer.predicate = NSPredicate(format: "%K == %@", "marital-status", "married")
         mapView.style?.addLayer(layer)
@@ -268,9 +273,14 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         //#-example-code
         let layer = MGLLineStyleLayer(identifier: "trails-path", source: trails)
         layer.sourceLayerIdentifier = "trails"
-        layer.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.5, %@)",
-                                       [14: 2,
-                                        18: 20])
+        
+        let stops = NSExpression(forConstantValue: [14: 2,
+                                                    18: 20])
+        layer.lineWidth = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                       curveType: .exponential,
+                                       parameters: NSExpression(forConstantValue: 1.5),
+                                       stops: stops)
+
         #if os(macOS)
             layer.lineColor = NSExpression(forConstantValue: NSColor.brown)
         #else
@@ -325,12 +335,19 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         
         //#-example-code
         let layer = MGLHeatmapStyleLayer(identifier: "earthquake-heat", source: earthquakes)
-        layer.heatmapWeight = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(magnitude, 'linear', nil, %@)",
-                                           [0: 0,
-                                            6: 1])
-        layer.heatmapIntensity = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
-                                              [0: 1,
-                                               9: 3])
+
+        layer.heatmapWeight = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                            curveType: .linear,
+                                            parameters: nil,
+                                            stops: NSExpression(forConstantValue: [0: 0,
+                                                                                   6: 1]))
+
+        layer.heatmapIntensity = NSExpression(forMGLInterpolating: .zoomLevelVariable,
+                                              curveType: .linear,
+                                              parameters: nil,
+                                              stops: NSExpression(forConstantValue: [0: 1,
+                                                                                     9: 3]))
+        
         mapView.style?.addLayer(layer)
         //#-end-example-code
         

@@ -1,0 +1,46 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+# This is defined by both
+# platform/default/filesource-files.json
+# and
+# src/core-files.json
+# because they have dependencies on each other
+cc_library(
+    name = "mbgl-core",
+    srcs = glob(
+        [
+            "src/**/*.cpp",
+            "src/**/*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    hdrs = glob(
+        [
+            "include/**/*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        "include",
+        "src",
+    ],
+    local_defines = [
+        r"MBGL_VERSION_REV=\"standalone\"",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor:boost",
+        "//vendor:csscolorparser",
+        "//vendor:earcut.hpp",
+        "//vendor:eternal",
+        "//vendor:icu",
+        "//vendor:mapbox-base",
+        "//vendor:parsedate",
+        "//vendor:polylabel",
+        "//vendor:protozero",
+        "//vendor:unique_resource",
+        "//vendor:vector-tile",
+        "//vendor:wagyu",
+    ],
+)

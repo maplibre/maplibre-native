@@ -82,6 +82,12 @@ public:
     QString localFontFamily() const;
     void setLocalFontFamily(const QString &);
 
+    QString clientName() const;
+    void setClientName(const QString &);
+
+    QString clientVersion() const;
+    void setClientVersion(const QString &);
+
     std::function<std::string(const std::string &)> resourceTransform() const;
     void setResourceTransform(const std::function<std::string(const std::string &)> &);
 
@@ -102,6 +108,8 @@ private:
     QString m_assetPath;
     QString m_apiKey;
     QString m_localFontFamily;
+    QString m_clientName;
+    QString m_clientVersion;
     std::function<std::string(const std::string &)> m_resourceTransform;
 
     mbgl::TileServerOptions *m_tileServerOptionsInternal{};

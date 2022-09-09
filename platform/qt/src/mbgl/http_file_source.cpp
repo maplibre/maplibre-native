@@ -11,9 +11,10 @@
 
 namespace mbgl {
 
-HTTPFileSource::Impl::Impl(const ResourceOptions& options)
+HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : m_manager(new QNetworkAccessManager(this)),
-      m_resourceOptions(options.clone())
+      m_resourceOptions(resourceOptions.clone()),
+      m_clientOptions(clientOptions.clone())
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 }
@@ -110,8 +111,18 @@ ResourceOptions HTTPFileSource::Impl::getResourceOptions()
     return m_resourceOptions.clone();
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(options)) {
+void HTTPFileSource::Impl::setClientOptions(ClientOptions options)
+{
+    m_clientOptions = options;
+}
+
+ClientOptions HTTPFileSource::Impl::getClientOptions()
+{
+    return m_clientOptions.clone();
+}
+
+HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -128,5 +139,14 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
 ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
 }
+
+void HTTPFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions HTTPFileSource::getClientOptions() {
+    return impl->getClientOptions();
+}
+
 
 } // namespace mbgl

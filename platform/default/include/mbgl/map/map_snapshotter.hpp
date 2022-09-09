@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/optional.hpp>
 #include <mbgl/util/geo.hpp>
@@ -12,6 +13,7 @@
 namespace mbgl {
 
 struct CameraOptions;
+class ClientOptions;
 class LatLngBounds;
 class ResourceOptions;
 
@@ -34,10 +36,11 @@ public:
     MapSnapshotter(Size size,
                    float pixelRatio,
                    const ResourceOptions&,
+                   const ClientOptions&,
                    MapSnapshotterObserver&,
                    optional<std::string> localFontFamily = nullopt);
 
-    MapSnapshotter(Size size, float pixelRatio, const ResourceOptions&);
+    MapSnapshotter(Size size, float pixelRatio, const ResourceOptions&, const ClientOptions& = ClientOptions());
 
     ~MapSnapshotter();
 

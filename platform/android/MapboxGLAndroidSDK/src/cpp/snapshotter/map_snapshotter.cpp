@@ -46,6 +46,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
         size,
         pixelRatio,
         mbgl::android::FileSource::getSharedResourceOptions(_env, _jFileSource),
+        mbgl::android::FileSource::getSharedClientOptions(_env, _jFileSource),
         *this,
         _localIdeographFontFamily ? jni::Make<std::string>(_env, _localIdeographFontFamily) : optional<std::string>{});
 

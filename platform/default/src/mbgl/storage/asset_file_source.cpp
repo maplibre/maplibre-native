@@ -5,6 +5,7 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
@@ -20,9 +21,10 @@ namespace mbgl {
 
 class AssetFileSource::Impl {
 public:
-    Impl(const ActorRef<Impl>&, const ResourceOptions& options):
-        root (options.assetPath()),
-        resourceOptions (options.clone()) {}
+    Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_):
+        root (resourceOptions_.assetPath()),
+        resourceOptions (resourceOptions_.clone()),
+        clientOptions (clientOptions_.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -49,15 +51,27 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        clientOptions = options;
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return clientOptions.clone();
+    }
+
 private:
     std::string root;
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
-AssetFileSource::AssetFileSource(const ResourceOptions& options)
+AssetFileSource::AssetFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
         : impl(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", options.clone())) {}
+        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", resourceOptions.clone(), clientOptions.clone())) {}
 
 
 AssetFileSource::~AssetFileSource() = default;
@@ -88,6 +102,14 @@ void AssetFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions AssetFileSource::getResourceOptions() {
     return impl->actor().ask(&Impl::getResourceOptions).get();
+}
+
+void AssetFileSource::setClientOptions(ClientOptions options) {
+    impl->actor().invoke(&Impl::setClientOptions, options.clone());
+}
+
+ClientOptions AssetFileSource::getClientOptions() {
+    return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
 

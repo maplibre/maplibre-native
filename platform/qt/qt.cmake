@@ -280,11 +280,18 @@ if (MBGL_QT_STATIC AND NOT MBGL_QT_INSIDE_PLUGIN)
             $<$<NOT:$<BOOL:${MBGL_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
             $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
     )
+endif()
+
+if (MBGL_QT_STATIC OR MBGL_QT_INSIDE_PLUGIN)
+    # Don't add import/export into public header because we don't build shared library.
+    # In case on MBGL_QT_INSIDE_PLUGIN it's always OBJECT library and bundled into one
+    # single Qt plugin lib.
     target_compile_definitions(
         qmaplibregl
         PUBLIC QT_MAPLIBREGL_STATIC
     )
 endif()
+
 
 install(TARGETS qmaplibregl
         EXPORT QMapLibreGLTargets

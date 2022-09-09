@@ -15,7 +15,7 @@
 #import "MGLSettings.h"
 
 #import "MBXFrameTimeGraphView.h"
-#import "../src/MGLMapView_Experimental.h"
+#import "MGLMapView_Experimental.h"
 #import <objc/runtime.h>
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
@@ -2340,7 +2340,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                    preferredStyle:UIAlertControllerStyleAlert];
 
     UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:@"Turn On in Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:^(BOOL success) {
+            if (success) {
+                 NSLog(@"Opened url");
+            }
+        }];
     }];
 
     UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"Keep Precise Location Off" style:UIAlertActionStyleDefault

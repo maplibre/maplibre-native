@@ -1,0 +1,67 @@
+{
+  "configurations" : [
+    {
+      "id" : "5BA24211-C310-4541-954F-761180BB7D62",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "MGLAnnotationViewIntegrationTests",
+        "MGLAnnotationViewTests",
+        "MGLAttributionInfoTests",
+        "MGLClockDirectionFormatterTests",
+        "MGLCodingTests",
+        "MGLCompassButtonTests",
+        "MGLCompassDirectionFormatterTests",
+        "MGLComputedShapeSourceTests",
+        "MGLCoordinateFormatterTests",
+        "MGLDistanceFormatterTests",
+        "MGLFeatureTests",
+        "MGLGeometryTests",
+        "MGLImageSourceTests",
+        "MGLImageTests",
+        "MGLLightTest",
+        "MGLMapAccessibilityElementTests",
+        "MGLMapCameraTests",
+        "MGLMapProjectionTests",
+        "MGLMapSnapshotterTests",
+        "MGLMapViewContentInsetTests",
+        "MGLMapViewDelegateIntegrationTests",
+        "MGLMapViewDirectionTests",
+        "MGLMapViewGestureRecognizerTests",
+        "MGLMapViewLayoutTests",
+        "MGLMapViewPitchTests",
+        "MGLMapViewScaleBarTests",
+        "MGLMapViewTests",
+        "MGLMapViewZoomTests",
+        "MGLNSDateAdditionsTests",
+        "MGLNSOrthographyAdditionsTests",
+        "MGLNSStringAdditionsTests",
+        "MGLNetworkConfigurationTests",
+        "MGLOfflinePackTests",
+        "MGLOfflineRegionTests",
+        "MGLOfflineStorageTests",
+        "MGLRendererConfigurationTests",
+        "MGLResourceTests",
+        "MGLSourceQueryTests",
+        "MGLStyleTests",
+        "MGLTileSetTests",
+        "MGLVersionTests"
+      ],
+      "target" : {
+        "containerPath" : "container:ios.xcodeproj",
+        "identifier" : "DA2E88501CC036F400F24E7B",
+        "name" : "test"
+      }
+    }
+  ],
+  "version" : 1
+}

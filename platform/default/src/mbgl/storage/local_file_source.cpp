@@ -4,6 +4,7 @@
 #include <mbgl/storage/local_file_source.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread.hpp>
@@ -20,7 +21,8 @@ namespace mbgl {
 
 class LocalFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& options): resourceOptions (options.clone()) {}
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
@@ -46,14 +48,27 @@ public:
         return resourceOptions.clone();
     }
 
+    void setClientOptions(ClientOptions options) {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        clientOptions = options;
+    }
+
+    ClientOptions getClientOptions() {
+        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        return clientOptions.clone();
+    }
+
+
 private:
     mutable std::mutex resourceOptionsMutex;
+    mutable std::mutex clientOptionsMutex;
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
-LocalFileSource::LocalFileSource(const ResourceOptions& options):
+LocalFileSource::LocalFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions):
     impl(std::make_unique<util::Thread<Impl>>(
-          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "LocalFileSource", options.clone())) {}
+          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "LocalFileSource", resourceOptions.clone(), clientOptions.clone())) {}
 
 LocalFileSource::~LocalFileSource() = default;
 
@@ -83,6 +98,14 @@ void LocalFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions LocalFileSource::getResourceOptions() {
     return impl->actor().ask(&Impl::getResourceOptions).get();
+}
+
+void LocalFileSource::setClientOptions(ClientOptions options) {
+    impl->actor().invoke(&Impl::setClientOptions, options.clone());
+}
+
+ClientOptions LocalFileSource::getClientOptions() {
+    return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
 

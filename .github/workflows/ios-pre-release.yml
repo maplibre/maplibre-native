@@ -5,7 +5,7 @@ on:
   
 jobs:
   build:
-    #runs-on: macos-10.15
+    #runs-on: macos-12
     runs-on: [self-hosted, petr]
     env:
       BUILDTYPE: Release
@@ -17,7 +17,7 @@ jobs:
         shell: bash 
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -28,12 +28,12 @@ jobs:
           brew list cmake 1> /dev/null || brew install cmake
           brew list ccache 1> /dev/null || brew install ccache
           brew list pkg-config 1> /dev/null || brew install pkg-config
-          brew list glfw3 1> /dev/null || brew install glfw3
+          brew list glfw 1> /dev/null || brew install glfw
           brew list node 1> /dev/null || brew install node
           gem list -i xcpretty || sudo gem install xcpretty
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
@@ -51,7 +51,7 @@ jobs:
         run: ccache --clear       
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1     
         with:

@@ -46,6 +46,11 @@
                BlueprintName = "iosapp UITests"
                ReferencedContainer = "container:ios.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "iosapp_UITests/testDebugBoundaryTiles()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">

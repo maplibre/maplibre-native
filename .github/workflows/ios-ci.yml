@@ -65,7 +65,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -78,9 +78,8 @@ jobs:
       run:
         working-directory: platform/ios
         shell: bash
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -90,10 +89,10 @@ jobs:
           brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
+          brew list glfw || brew install glfw
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
@@ -104,14 +103,18 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
       - name: npm install
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Prepare ccache
         run: ccache --clear
 
       - name: Cache ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: ccache-v1
         with:

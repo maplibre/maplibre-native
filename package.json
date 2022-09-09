@@ -43,14 +43,14 @@
     "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^4.0.2",
-    "pngjs": "^3.4.0",
+    "pngjs": "^6.0.0",
     "pretty-bytes": "^5.1.0",
     "request": "^2.88.0",
     "semver": "^5.5.0",
     "shuffle-seed": "1.1.6",
     "st": "1.2.2",
     "tape": "^4.5.1",
-    "xcode": "^1.0.0"
+    "xcode": "^3.0.1"
   },
   "engines": {
     "node": ">=6"

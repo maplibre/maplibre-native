@@ -8,6 +8,7 @@
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource_transform.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
@@ -25,12 +26,12 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::
     mapbox::sqlite::setTempPath(path);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions& opts) {
+        mbgl::FileSourceType::Asset, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
             if (android::Mapbox::hasInstance(*env)) {
                 auto assetManager = android::Mapbox::getAssetManager(*env);
-                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager, opts.clone());
+                assetFileSource = std::make_unique<AssetManagerFileSource>(*env, assetManager, resourceOptions.clone(), clientOptions.clone());
             }
             return assetFileSource;
         });
@@ -44,10 +45,10 @@ FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::
     // Create a core file sources
     // TODO: Split Android FileSource API to smaller interfaces
     resourceLoader =
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions);
+        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
     databaseSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions)));
-    onlineSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions);
+        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
+    onlineSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
 }
 
 FileSource::~FileSource() {
@@ -194,6 +195,17 @@ mbgl::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
     // Core could be compiled without support for any sources.
     if (fileSource) {
         return fileSource->resourceOptions.clone();
+    }
+
+    return {};
+}
+
+mbgl::ClientOptions FileSource::getSharedClientOptions(jni::JNIEnv& env,
+                                                       const jni::Object<FileSource>& jFileSource) {
+    FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
+    // Core could be compiled without support for any sources.
+    if (fileSource) {
+        return fileSource->clientOptions.clone();
     }
 
     return {};

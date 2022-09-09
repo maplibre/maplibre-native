@@ -2,6 +2,7 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <mbgl/util/async_request.hpp>
@@ -17,15 +18,20 @@ namespace mbgl {
 
 class HTTPFileSource::Impl {
 public:
-    Impl(const ResourceOptions options): resourceOptions(options.clone()){};
+    Impl(const ResourceOptions resourceOptions_, const ClientOptions clientOptions_)
+        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {};
 
     android::UniqueEnv env { android::AttachEnv() };
 
     void setResourceOptions(ResourceOptions options) {resourceOptions = options;};
     ResourceOptions getResourceOptions() {return resourceOptions.clone(); };
 
+    void setClientOptions(ClientOptions options) {clientOptions = options;};
+    ClientOptions getClientOptions() {return clientOptions.clone();};
+
 private:
     ResourceOptions resourceOptions;
+    ClientOptions clientOptions;
 };
 
 class HTTPRequest : public AsyncRequest {
@@ -191,8 +197,8 @@ void HTTPRequest::onFailure(jni::JNIEnv& env, int type, const jni::String& messa
     async.send();
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions& options)
-    : impl(std::make_unique<Impl>(options.clone())) {
+HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions.clone(), clientOptions.clone())) {
 }
 
 HTTPFileSource::~HTTPFileSource() = default;
@@ -207,6 +213,14 @@ void HTTPFileSource::setResourceOptions(ResourceOptions options) {
 
 ResourceOptions HTTPFileSource::getResourceOptions() {
     return impl->getResourceOptions();
+}
+
+void HTTPFileSource::setClientOptions(ClientOptions options) {
+    impl->setClientOptions(options.clone());
+}
+
+ClientOptions HTTPFileSource::getClientOptions() {
+    return impl->getClientOptions();
 }
 
 } // namespace mbgl
