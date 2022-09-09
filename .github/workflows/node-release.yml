@@ -163,6 +163,14 @@ jobs:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
 
+      - name: Test
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
+
+      - name: Test
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        run: npm test
+
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
         if: github.ref != 'refs/heads/main'
