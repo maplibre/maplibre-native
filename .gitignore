@@ -24,7 +24,7 @@
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
 /new_offline.db
 *.gpg
-
+/.vscode
 /platform/android/node_modules
 /platform/android/signing-key.text
 /platform/android/.java-version
