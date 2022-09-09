@@ -43,7 +43,7 @@
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^4.0.2",
     "pngjs": "^6.0.0",
-    "pretty-bytes": "^5.1.0",
+    "pretty-bytes": "^6.0.0",
     "request": "^2.88.0",
     "semver": "^7.3.7",
     "shuffle-seed": "1.1.6",
