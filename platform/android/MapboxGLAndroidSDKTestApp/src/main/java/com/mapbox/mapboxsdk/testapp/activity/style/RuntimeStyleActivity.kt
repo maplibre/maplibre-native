@@ -395,27 +395,30 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun animateParksSource(parks: FeatureCollection, counter: Int) {
         val handler = Handler(mainLooper)
-        handler.postDelayed({
-            if (mapboxMap == null) {
-                return@postDelayed
-            }
-            Timber.d("Updating parks source")
-            // change the source
-            val park = if (counter < parks.features()!!.size - 1) counter else 0
-            val source = mapboxMap!!.style!!.getSourceAs<GeoJsonSource>("dynamic-park-source")
-            if (source == null) {
-                Timber.e("Source not found")
-                Toast.makeText(this@RuntimeStyleActivity, "Source not found", Toast.LENGTH_SHORT)
-                    .show()
-                return@postDelayed
-            }
-            val features: MutableList<Feature> = ArrayList()
-            features.add(parks.features()!![park])
-            source.setGeoJson(FeatureCollection.fromFeatures(features))
+        handler.postDelayed(
+            {
+                if (mapboxMap == null) {
+                    return@postDelayed
+                }
+                Timber.d("Updating parks source")
+                // change the source
+                val park = if (counter < parks.features()!!.size - 1) counter else 0
+                val source = mapboxMap!!.style!!.getSourceAs<GeoJsonSource>("dynamic-park-source")
+                if (source == null) {
+                    Timber.e("Source not found")
+                    Toast.makeText(this@RuntimeStyleActivity, "Source not found", Toast.LENGTH_SHORT)
+                        .show()
+                    return@postDelayed
+                }
+                val features: MutableList<Feature> = ArrayList()
+                features.add(parks.features()!![park])
+                source.setGeoJson(FeatureCollection.fromFeatures(features))
 
-            // Re-post
-            animateParksSource(parks, park + 1)
-        }, if (counter == 0) 100 else 1000.toLong())
+                // Re-post
+                animateParksSource(parks, park + 1)
+            },
+            if (counter == 0) 100 else 1000.toLong()
+        )
     }
 
     private fun addTerrainLayer() {
@@ -540,28 +543,31 @@ class RuntimeStyleActivity : AppCompatActivity() {
             )
         )
         val handler = Handler(mainLooper)
-        handler.postDelayed({
-            if (mapboxMap == null) {
-                return@postDelayed
-            }
-            Timber.d("Styling filtered fill layer")
-            val states = mapboxMap!!.style!!.getLayer("states") as FillLayer?
-            if (states != null) {
-                states.setFilter(Expression.eq(Expression.get("name"), Expression.literal("Texas")))
-                states.fillOpacityTransition = TransitionOptions(2500, 0)
-                states.fillColorTransition = TransitionOptions(2500, 0)
-                states.setProperties(
-                    PropertyFactory.fillColor(Color.RED),
-                    PropertyFactory.fillOpacity(0.25f)
-                )
-            } else {
-                Toast.makeText(
-                    this@RuntimeStyleActivity,
-                    "No states layer in this style",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }, 2000)
+        handler.postDelayed(
+            {
+                if (mapboxMap == null) {
+                    return@postDelayed
+                }
+                Timber.d("Styling filtered fill layer")
+                val states = mapboxMap!!.style!!.getLayer("states") as FillLayer?
+                if (states != null) {
+                    states.setFilter(Expression.eq(Expression.get("name"), Expression.literal("Texas")))
+                    states.fillOpacityTransition = TransitionOptions(2500, 0)
+                    states.fillColorTransition = TransitionOptions(2500, 0)
+                    states.setProperties(
+                        PropertyFactory.fillColor(Color.RED),
+                        PropertyFactory.fillOpacity(0.25f)
+                    )
+                } else {
+                    Toast.makeText(
+                        this@RuntimeStyleActivity,
+                        "No states layer in this style",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            2000
+        )
     }
 
     private fun styleTextSizeFilterLayer() {
@@ -573,99 +579,108 @@ class RuntimeStyleActivity : AppCompatActivity() {
             )
         )
         val handler = Handler(mainLooper)
-        handler.postDelayed({
-            if (mapboxMap == null) {
-                return@postDelayed
-            }
-            Timber.d("Styling text size fill layer")
-            val states = mapboxMap!!.style!!.getLayer("state-label-lg") as SymbolLayer?
-            if (states != null) {
-                states.setProperties(
-                    PropertyFactory.textSize(
-                        Expression.switchCase(
-                            Expression.`in`(Expression.get("name"), Expression.literal("Texas")),
-                            Expression.literal(25.0f),
-                            Expression.`in`(
-                                Expression.get("name"),
-                                Expression.literal(arrayOf<Any>("California", "Illinois"))
-                            ),
-                            Expression.literal(25.0f),
-                            Expression.literal(6.0f) // default value
+        handler.postDelayed(
+            {
+                if (mapboxMap == null) {
+                    return@postDelayed
+                }
+                Timber.d("Styling text size fill layer")
+                val states = mapboxMap!!.style!!.getLayer("state-label-lg") as SymbolLayer?
+                if (states != null) {
+                    states.setProperties(
+                        PropertyFactory.textSize(
+                            Expression.switchCase(
+                                Expression.`in`(Expression.get("name"), Expression.literal("Texas")),
+                                Expression.literal(25.0f),
+                                Expression.`in`(
+                                    Expression.get("name"),
+                                    Expression.literal(arrayOf<Any>("California", "Illinois"))
+                                ),
+                                Expression.literal(25.0f),
+                                Expression.literal(6.0f) // default value
+                            )
                         )
                     )
-                )
-            } else {
-                Toast.makeText(
-                    this@RuntimeStyleActivity,
-                    "No states layer in this style",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }, 2000)
+                } else {
+                    Toast.makeText(
+                        this@RuntimeStyleActivity,
+                        "No states layer in this style",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            2000
+        )
     }
 
     private fun styleLineFilterLayer() {
         mapboxMap!!.setStyle(Style.Builder().fromUri("asset://line_filter_style.json"))
         mapboxMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
         val handler = Handler(mainLooper)
-        handler.postDelayed({
-            if (mapboxMap == null) {
-                return@postDelayed
-            }
-            Timber.d("Styling filtered line layer")
-            val counties = mapboxMap!!.style!!.getLayer("counties") as LineLayer?
-            if (counties != null) {
-                counties.setFilter(Expression.eq(Expression.get("NAME10"), "Washington"))
-                counties.setProperties(
-                    PropertyFactory.lineColor(Color.RED),
-                    PropertyFactory.lineOpacity(0.75f),
-                    PropertyFactory.lineWidth(5f)
-                )
-            } else {
-                Toast.makeText(
-                    this@RuntimeStyleActivity,
-                    "No counties layer in this style",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }, 2000)
+        handler.postDelayed(
+            {
+                if (mapboxMap == null) {
+                    return@postDelayed
+                }
+                Timber.d("Styling filtered line layer")
+                val counties = mapboxMap!!.style!!.getLayer("counties") as LineLayer?
+                if (counties != null) {
+                    counties.setFilter(Expression.eq(Expression.get("NAME10"), "Washington"))
+                    counties.setProperties(
+                        PropertyFactory.lineColor(Color.RED),
+                        PropertyFactory.lineOpacity(0.75f),
+                        PropertyFactory.lineWidth(5f)
+                    )
+                } else {
+                    Toast.makeText(
+                        this@RuntimeStyleActivity,
+                        "No counties layer in this style",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            2000
+        )
     }
 
     private fun styleNumericFillLayer() {
         mapboxMap!!.setStyle(Style.Builder().fromUri("asset://numeric_filter_style.json"))
         mapboxMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
         val handler = Handler(mainLooper)
-        handler.postDelayed({
-            if (mapboxMap == null) {
-                return@postDelayed
-            }
-            Timber.d("Styling numeric fill layer")
-            val regions = mapboxMap!!.style!!.getLayer("regions") as FillLayer?
-            if (regions != null) {
-                regions.setFilter(
-                    Expression.all(
-                        Expression.gte(
-                            Expression.toNumber(Expression.get("HRRNUM")),
-                            Expression.literal(200)
-                        ),
-                        Expression.lt(
-                            Expression.toNumber(Expression.get("HRRNUM")),
-                            Expression.literal(300)
+        handler.postDelayed(
+            {
+                if (mapboxMap == null) {
+                    return@postDelayed
+                }
+                Timber.d("Styling numeric fill layer")
+                val regions = mapboxMap!!.style!!.getLayer("regions") as FillLayer?
+                if (regions != null) {
+                    regions.setFilter(
+                        Expression.all(
+                            Expression.gte(
+                                Expression.toNumber(Expression.get("HRRNUM")),
+                                Expression.literal(200)
+                            ),
+                            Expression.lt(
+                                Expression.toNumber(Expression.get("HRRNUM")),
+                                Expression.literal(300)
+                            )
                         )
                     )
-                )
-                regions.setProperties(
-                    PropertyFactory.fillColor(Color.BLUE),
-                    PropertyFactory.fillOpacity(0.5f)
-                )
-            } else {
-                Toast.makeText(
-                    this@RuntimeStyleActivity,
-                    "No regions layer in this style",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }, 2000)
+                    regions.setProperties(
+                        PropertyFactory.fillColor(Color.BLUE),
+                        PropertyFactory.fillOpacity(0.5f)
+                    )
+                } else {
+                    Toast.makeText(
+                        this@RuntimeStyleActivity,
+                        "No regions layer in this style",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            2000
+        )
     }
 
     private fun bringWaterToFront() {

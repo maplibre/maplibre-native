@@ -8,17 +8,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.style.StyleFileActivity.CreateStyleFileTask
-import com.mapbox.mapboxsdk.testapp.activity.style.StyleFileActivity.LoadStyleFileTask
 import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import java.io.IOException
-import java.lang.Exception
 import java.lang.ref.WeakReference
 
 /**
