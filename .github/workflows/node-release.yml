@@ -1,75 +1,44 @@
-name: node-ci
+name: node-release
 
 on:
   workflow_dispatch:
-  push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - ".gitignore"
-      - "README.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/macos/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
-    branches:
-      - main
-
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - ".gitignore"
-      - "README.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/macos/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
-
-concurrency:
-  # cancel jobs on PRs only
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    inputs:
+      version:
+        description: Choose a release type
+        required: true
+        type: choice
+        options:
+          - prerelease 
+          - patch
+          - minor
+          - major
 
 jobs:
+  bump_version:
+    runs-on: ubuntu-20.04
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Bump Version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
+          git push
   build:
     strategy:
       matrix:
@@ -93,6 +62,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Get Latest Version
+        run: git pull
 
       - name: Install dependencies
         if: runner.os == 'macOS' && matrix.arch != 'arm64'
@@ -203,8 +175,8 @@ jobs:
         run: |
           npm pack --dry-run
 
-      - name: Release
-        if: matrix.os != 'ubuntu-20.04' && matrix.os != 'macos-11.0' && matrix.arch != 'arm64'
+      - name: Publish X64 Release to Github
+        if: github.ref == 'refs/heads/main' && matrix.arch != 'arm64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -212,8 +184,8 @@ jobs:
         run: |
           ./platform/node/scripts/publish.sh
 
-      - name: Release
-        if: matrix.arch == 'arm64'
+      - name: Publish ARM Release to Github
+        if: github.ref == 'refs/heads/main' && matrix.arch == 'arm64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -221,9 +193,18 @@ jobs:
         run: |
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
-      # Uncomment to start publishing the package
-      # @TODO: Figure out the binary distribution method.
-      # - name: Publish package
-      #   if: github.ref == 'refs/heads/main'
-      #   run: |
-      #     npm publish
+      - name: Publish to NPM (release)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to NPM (prerelease)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag next --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
