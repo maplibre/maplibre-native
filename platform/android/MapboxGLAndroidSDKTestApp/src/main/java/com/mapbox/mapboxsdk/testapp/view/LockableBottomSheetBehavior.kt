@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: AttributeSet?) :
     BottomSheetBehavior<V>(context, attrs) {
@@ -35,7 +35,10 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
     }
 
     override fun onStartNestedScroll(
-        coordinatorLayout: CoordinatorLayout, child: V, directTargetChild: View, target: View,
+        coordinatorLayout: CoordinatorLayout,
+        child: V,
+        directTargetChild: View,
+        target: View,
         nestedScrollAxes: Int
     ): Boolean {
         var handled = false
@@ -52,7 +55,11 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
     }
 
     override fun onNestedPreScroll(
-        coordinatorLayout: CoordinatorLayout, child: V, target: View, dx: Int, dy: Int,
+        coordinatorLayout: CoordinatorLayout,
+        child: V,
+        target: View,
+        dx: Int,
+        dy: Int,
         consumed: IntArray
     ) {
         if (!locked) {
@@ -67,7 +74,10 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
     }
 
     override fun onNestedPreFling(
-        coordinatorLayout: CoordinatorLayout, child: V, target: View, velocityX: Float,
+        coordinatorLayout: CoordinatorLayout,
+        child: V,
+        target: View,
+        velocityX: Float,
         velocityY: Float
     ): Boolean {
         var handled = false

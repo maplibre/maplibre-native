@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".MapboxApplication"
+        android:name=".MapLibreApplication"
         android:allowBackup="true"
         android:exported="true"
         android:fullBackupContent="true"
