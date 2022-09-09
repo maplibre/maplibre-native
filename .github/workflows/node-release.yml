@@ -169,7 +169,7 @@ jobs:
           npm pack --dry-run
 
       - name: Publish X64 Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch != 'arm64'
+        if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -187,7 +187,7 @@ jobs:
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
       - name: Publish to NPM (release)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && matrix.arch == 'x86_64' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -195,7 +195,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && matrix.arch == 'x86_64' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
