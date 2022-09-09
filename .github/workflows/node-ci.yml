@@ -202,28 +202,3 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
-
-      - name: Release
-        if: matrix.os != 'ubuntu-20.04' && matrix.os != 'macos-11.0' && matrix.arch != 'arm64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-        run: |
-          ./platform/node/scripts/publish.sh
-
-      - name: Release
-        if: matrix.arch == 'arm64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-        run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
-
-      # Uncomment to start publishing the package
-      # @TODO: Figure out the binary distribution method.
-      # - name: Publish package
-      #   if: github.ref == 'refs/heads/main'
-      #   run: |
-      #     npm publish
