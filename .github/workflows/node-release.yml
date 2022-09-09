@@ -44,9 +44,9 @@ jobs:
     strategy:
       matrix:
         os:
+          - [self-hosted, macOS, ARM64]
           - ubuntu-20.04
-          - macos-12
-        node: [ 10, 14, 16, 18 ]
+        node: [ 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     needs: bump_version
