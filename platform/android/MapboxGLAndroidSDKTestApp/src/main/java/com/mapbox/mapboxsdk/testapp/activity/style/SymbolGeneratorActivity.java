@@ -228,14 +228,10 @@ public class SymbolGeneratorActivity extends AppCompatActivity implements OnMapR
     protected FeatureCollection doInBackground(Void... params) {
       Context context = activity.get();
       if (context != null) {
-        try {
-          // read local geojson from raw folder
-          String tinyCountriesJson = ResourceUtils.readRawResource(context, R.raw.tiny_countries);
-          return FeatureCollection.fromJson(tinyCountriesJson);
+        // read local geojson from raw folder
+        String tinyCountriesJson = ResourceUtils.readRawResource(context, R.raw.tiny_countries);
+        return FeatureCollection.fromJson(tinyCountriesJson);
 
-        } catch (IOException exception) {
-          Timber.e(exception);
-        }
       }
       return null;
     }
