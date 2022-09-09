@@ -49,6 +49,7 @@ jobs:
           - os: macos-12
             arch: arm64
     runs-on: ${{ matrix.os }}
+    needs: bump_version
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
@@ -161,14 +162,6 @@ jobs:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
 
-      - name: Test
-        if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum npm test
-
-      - name: Test
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
-        run: npm test
-
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
         if: github.ref != 'refs/heads/main'
@@ -194,7 +187,7 @@ jobs:
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
       - name: Publish to NPM (release)
-        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -202,7 +195,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
