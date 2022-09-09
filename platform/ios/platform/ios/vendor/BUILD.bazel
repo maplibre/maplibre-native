@@ -18,5 +18,5 @@ objc_library(
     ),
     copts = WARNING_FLAGS,
     includes = ["SMCalloutView"],
-    visibility = ["//visibility:public"],
+    visibility = ["//platform/ios:__pkg__"],
 )
