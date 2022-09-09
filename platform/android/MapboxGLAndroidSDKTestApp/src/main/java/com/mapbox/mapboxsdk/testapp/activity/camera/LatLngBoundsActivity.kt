@@ -22,9 +22,7 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils
 import kotlinx.android.synthetic.main.activity_latlngbounds.*
 import java.net.URISyntaxException
 
-/**
- * Test activity showcasing using the LatLngBounds camera API.
- */
+/** Test activity showcasing using the LatLngBounds camera API. */
 class LatLngBoundsActivity : AppCompatActivity() {
 
     private lateinit var mapboxMap: MapboxMap
@@ -50,7 +48,8 @@ class LatLngBoundsActivity : AppCompatActivity() {
         mapView.getMapAsync { map ->
             mapboxMap = map
 
-            val featureCollection: FeatureCollection = fromJson(loadStringFromAssets(this, "points-sf.geojson"))
+            val featureCollection: FeatureCollection =
+                fromJson(loadStringFromAssets(this, "points-sf.geojson"))
             bounds = createBounds(featureCollection)
 
             map.getCameraForLatLngBounds(bounds, createPadding(peekHeight))?.let {
@@ -79,29 +78,38 @@ class LatLngBoundsActivity : AppCompatActivity() {
                         )
                 )
                 .withSource(GeoJsonSource("symbol", featureCollection))
-                .withImage("icon", BitmapUtils.getDrawableFromRes(this@LatLngBoundsActivity, R.drawable.ic_android)!!)
+                .withImage(
+                    "icon",
+                    BitmapUtils.getDrawableFromRes(
+                        this@LatLngBoundsActivity,
+                        R.drawable.ic_android
+                    )!!
+                )
         ) {
             initBottomSheet()
-            fab.setOnClickListener { bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED }
+            fab.setOnClickListener {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 
     private fun initBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                val offset = convertSlideOffset(slideOffset)
-                val bottomPadding = (peekHeight * offset).toInt()
+        bottomSheetBehavior.setBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    val offset = convertSlideOffset(slideOffset)
+                    val bottomPadding = (peekHeight * offset).toInt()
 
-                mapboxMap.getCameraForLatLngBounds(bounds, createPadding(bottomPadding))?.let {
-                    mapboxMap.cameraPosition = it
+                    mapboxMap.getCameraForLatLngBounds(bounds, createPadding(bottomPadding))
+                        ?.let { mapboxMap.cameraPosition = it }
+                }
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    // no-op
                 }
             }
-
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                // no-op
-            }
-        })
+        )
     }
 
     // slideOffset ranges from NaN to -1.0, range from 1.0 to 0 instead
