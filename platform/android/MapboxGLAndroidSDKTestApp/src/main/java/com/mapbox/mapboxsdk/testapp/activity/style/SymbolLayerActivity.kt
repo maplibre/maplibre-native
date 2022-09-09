@@ -163,11 +163,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         val screenLoc = mapboxMap!!.projection.toScreenLocation(point)
         val markerFeatures = mapboxMap!!.queryRenderedFeatures(screenLoc, MARKER_LAYER)
         if (!markerFeatures.isEmpty()) {
-            for (
-                feature in Objects.requireNonNull(
-                    markerCollection!!.features()
-                )!!
-            ) {
+            for (feature in Objects.requireNonNull(markerCollection!!.features())!!) {
                 if (feature.getStringProperty(ID_FEATURE_PROPERTY)
                     == markerFeatures[0].getStringProperty(ID_FEATURE_PROPERTY)
                 ) {
