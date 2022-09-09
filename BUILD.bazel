@@ -44,3 +44,5 @@ cc_library(
         "//vendor:wagyu",
     ],
 )
+
+exports_files(["LICENSE.md"], visibility = ["//visibility:public"])
