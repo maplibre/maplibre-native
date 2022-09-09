@@ -96,6 +96,7 @@ apple_static_xcframework(
     minimum_os_versions = {"ios": "9.0"},
     public_hdrs = _PUBLIC_HEADERS,
     umbrella_header = "platform/ios/src/Mapbox.h",
+    visibility = ["//visibility:public"],
     deps = ["sdk"],
 )
 
@@ -113,6 +114,7 @@ apple_xcframework(
     minimum_os_versions = {"ios": "9.0"},
     public_hdrs = _PUBLIC_HEADERS,
     umbrella_header = "platform/ios/src/Mapbox.h",
+    visibility = ["//visibility:public"],
     deps = ["sdk"],
 )
 
@@ -249,7 +251,6 @@ objc_library(
         "OpenGLES",
         "QuartzCore",
     ],
-    visibility = ["//visibility:public"],
     deps = [
         "objc-headers",
         "//:mbgl-core",
@@ -301,7 +302,6 @@ objc_library(
     includes = [
         "platform/darwin/include",
     ],
-    visibility = ["//visibility:public"],
     deps = [
         "objc-headers",
         "//:mbgl-core",
