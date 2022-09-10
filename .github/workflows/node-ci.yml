@@ -71,15 +71,18 @@ concurrency:
 
 jobs:
   build:
+    runs-on: ${{ matrix.runs-on }}
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - macos-12
-          - ubuntu-20.04
         include:
-          - os: macos-12
+          - runs-on: ubuntu-20.04
+            arch: x86_64
+          - runs-on: macos-12
+            arch: x86_64
+          - runs-on: [self-hosted, macOS, ARM64]
             arch: arm64
-    runs-on: ${{ matrix.os }}
+    continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
@@ -94,7 +97,15 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install dependencies
+      - name: Get OS Info
+        run: uname -m
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies macOS
         if: runner.os == 'macOS' && matrix.arch != 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -104,10 +115,10 @@ jobs:
           brew list ccache || brew install -q ccache
           brew list ninja || brew install -q ninja
           brew list pkg-config || brew install -q pkg-config
-          brew list glfw3 || brew install -q glfw3
+          brew list glfw || brew install glfw
           brew list libuv || brew install -q libuv
 
-      - name: Install dependencies
+      - name: Install dependencies macOS arm64
         if: runner.os == 'macOS' && matrix.arch == 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -120,7 +131,7 @@ jobs:
           brew info libuv |grep Poured || brew install -q libuv
           ./scripts/brew-install-arm64.sh glfw
 
-      - name: Install dependencies
+      - name: Install dependencies Linux
         if: runner.os == 'Linux'
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -165,7 +176,14 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'macOS'
+        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
+          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
+
+      - name: CMake
+        if: runner.os == 'MacOS' && matrix.arch != 'arm64'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
 
