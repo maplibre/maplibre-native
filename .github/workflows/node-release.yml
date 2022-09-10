@@ -31,7 +31,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Bump Version
         run: |
@@ -73,6 +73,11 @@ jobs:
       - name: Get OS Info
         run: uname -m
 
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Install dependencies macOS
         if: runner.os == 'macOS' && matrix.arch != 'arm64'
         env:
@@ -96,7 +101,6 @@ jobs:
           brew info ccache |grep Poured || brew install -q ccache
           brew info ninja |grep Poured || brew install -q ninja
           brew info pkg-config |grep Poured || brew install -q pkg-config
-          brew list glfw |grep Poured || brew install glfw
           brew info libuv |grep Poured || brew install -q libuv
           ./scripts/brew-install-arm64.sh glfw
 
