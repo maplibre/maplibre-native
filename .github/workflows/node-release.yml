@@ -40,15 +40,17 @@ jobs:
           npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
           git push
   build:
+    runs-on: ${{ matrix.runs-on }}
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - macos-12
-          - ubuntu-20.04
         include:
-          - os: macos-12
+          - runs-on: ubuntu-20.04
+            arch: x86_64
+          - runs-on: macos-12
+            arch: x86_64
+          - runs-on: macos-12
             arch: arm64
-    runs-on: ${{ matrix.os }}
     needs: bump_version
     continue-on-error: true
     env:
@@ -68,7 +70,10 @@ jobs:
       - name: Get Latest Version
         run: git pull
 
-      - name: Install dependencies
+      - name: Get OS Info
+        run: uname -m
+
+      - name: Install dependencies macOS
         if: runner.os == 'macOS' && matrix.arch != 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -81,7 +86,7 @@ jobs:
           brew list glfw || brew install glfw
           brew list libuv || brew install -q libuv
 
-      - name: Install dependencies
+      - name: Install dependencies macOS arm64
         if: runner.os == 'macOS' && matrix.arch == 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -91,10 +96,11 @@ jobs:
           brew info ccache |grep Poured || brew install -q ccache
           brew info ninja |grep Poured || brew install -q ninja
           brew info pkg-config |grep Poured || brew install -q pkg-config
+          brew list glfw |grep Poured || brew install glfw
           brew info libuv |grep Poured || brew install -q libuv
           ./scripts/brew-install-arm64.sh glfw
 
-      - name: Install dependencies
+      - name: Install dependencies Linux
         if: runner.os == 'Linux'
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -139,7 +145,14 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'macOS'
+        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
+          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
+
+      - name: CMake
+        if: runner.os == 'MacOS' && matrix.arch != 'arm64'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
 
@@ -152,30 +165,30 @@ jobs:
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
-      - name: Run render tests on macOS
-        if: runner.os == 'macOS'
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+      #- name: Run render tests on macOS
+      #  if: runner.os == 'macOS'
+      #  run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
-      - name: Upload render test artifacts
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: render-query-test-results
-          path: metrics/macos-xcode11-release-style.html
+      #- name: Upload render test artifacts
+      #  uses: actions/upload-artifact@v3
+      #  if: always()
+      #  with:
+      #    name: render-query-test-results
+      #    path: metrics/macos-xcode11-release-style.html
 
-      - name: Test
-        if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum npm test
+      #- name: Test
+      #  if: runner.os == 'Linux'
+      #  run: xvfb-run --auto-servernum npm test
 
-      - name: Test
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
-        run: npm test
+      #- name: Test
+      #  if: runner.os == 'macOS' && matrix.arch != 'arm64'
+      #  run: npm test
 
       # On PRs make sure that the npm package can be packaged.
-      - name: Pack
-        if: github.ref != 'refs/heads/main'
-        run: |
-          npm pack --dry-run
+      #- name: Pack
+      #  if: github.ref != 'refs/heads/main'
+      #  run: |
+      #    npm pack --dry-run
 
       - name: Publish X64 Release to Github
         if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
