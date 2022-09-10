@@ -72,7 +72,7 @@ IOS_WORK_PATH = platform/ios/ios.xcworkspace
 IOS_USER_DATA_PATH = $(IOS_WORK_PATH)/xcuserdata/$(USER).xcuserdatad
 
 IOS_XCODEBUILD_SIM = xcodebuild \
-	ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES \
+	ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
 	-derivedDataPath $(IOS_OUTPUT_PATH) \
 	-configuration $(BUILDTYPE) -sdk iphonesimulator \
 	-workspace $(IOS_WORK_PATH) \

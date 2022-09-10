@@ -27,7 +27,7 @@
     "csscolorparser": "~1.0.2",
     "d3-queue": "3.0.7",
     "diff": "4.0.1",
-    "ejs": "^2.7.4",
+    "ejs": "^3.1.7",
     "esm": "~3.2.25",
     "express": "^4.11.1",
     "json-stringify-pretty-compact": "^2.0.0",
@@ -43,7 +43,7 @@
     "shuffle-seed": "1.1.6",
     "st": "1.2.2",
     "tape": "^4.5.1",
-    "xcode": "^1.0.0"
+    "xcode": "^3.0.1"
   },
   "engines": {
     "node": ">=6"

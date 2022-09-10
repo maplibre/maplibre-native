@@ -65,7 +65,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -78,7 +78,6 @@ jobs:
       run:
         working-directory: platform/ios
         shell: bash
-
     steps:
       - uses: actions/checkout@v3
         with:
@@ -104,8 +103,12 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
       - name: npm install
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Prepare ccache
         run: ccache --clear

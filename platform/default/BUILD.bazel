@@ -48,7 +48,10 @@ cc_library(
     includes = [
         "include",
     ],
-    visibility = ["//visibility:public"],
+    visibility = [
+        "//platform/darwin:__pkg__",
+        "//platform/ios:__pkg__",
+    ],
     deps = [
         "//:mbgl-core",
         "//platform/darwin:darwin-loop",
