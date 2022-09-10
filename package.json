@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@mapbox/flow-remove-types": "^2.0.0",
-    "@mapbox/mvt-fixtures": "3.5.1",
+    "@mapbox/mvt-fixtures": "3.10.0",
     "@octokit/plugin-retry": "^3.0.9",
     "@octokit/rest": "^19.0.4",
     "aws-sdk": "^2.285.1",
