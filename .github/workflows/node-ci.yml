@@ -70,7 +70,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  test:
     strategy:
       matrix:
         os:
