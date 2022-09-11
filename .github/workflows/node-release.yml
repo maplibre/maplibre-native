@@ -27,6 +27,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          token: ${{ secrets.CR_PAT }}
 
       - name: Setup node
         uses: actions/setup-node@v3
