@@ -172,7 +172,7 @@ jobs:
       - name: CMake
         if: runner.os == 'MacOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 
       - name: CMake
         if: runner.os == 'Linux'
