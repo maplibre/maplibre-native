@@ -13,7 +13,7 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "ejs": "^3.1.7",
-    "esm": "~3.1.0",
+    "esm": "~3.2.25",
     "lodash": "^4.17.21",
     "pixelmatch": "^4.0.2",
     "semver": "^5.5.0"
