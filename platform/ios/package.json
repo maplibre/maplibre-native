@@ -39,7 +39,7 @@
     "pngjs": "^3.4.0",
     "pretty-bytes": "^5.1.0",
     "request": "^2.88.0",
-    "semver": "^5.5.0",
+    "semver": "^7.3.7",
     "shuffle-seed": "1.1.6",
     "st": "1.2.2",
     "tape": "^4.5.1",
