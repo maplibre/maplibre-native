@@ -3,8 +3,10 @@ name: qt-ci
 on:
   workflow_dispatch:
   push:
-    tags-ignore:
-      - '**'
+    branches:
+      - main
+    tags:
+      - 'qt-**'
     paths-ignore:
       - ".gitignore"
       - "README.md"
@@ -28,10 +30,9 @@ on:
       - ".github/workflows/macos-ci.yml"
       - ".github/workflows/macos-release.yml"
       - ".github/workflows/node-ci.yml"
+      - ".github/workflows/node-release.yml"
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/update-gl-js.yml"
-    branches:
-      - main
   
   pull_request:
     branches:
@@ -59,6 +60,7 @@ on:
       - ".github/workflows/macos-ci.yml"
       - ".github/workflows/macos-release.yml"
       - ".github/workflows/node-ci.yml"
+      - ".github/workflows/node-release.yml"
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/update-gl-js.yml"
 
@@ -73,40 +75,35 @@ jobs:
       matrix:
         include:
           - name: Linux
-            os: ubuntu-latest
-            static: OFF
-            qt: 5.15.2
+            os: ubuntu-22.04
+            build_type: RelWithDebInfo
+            qt_version: 5.15.2
+            qt_target: desktop
+          - name: Linux
+            os: ubuntu-22.04
+            build_type: RelWithDebInfo
+            qt_version: 6.3.1
             qt_target: desktop
           - name: macOS
-            os: macos-latest
-            static: OFF
-            qt: 5.15.2
+            os: macos-12
+            build_type: RelWithDebInfo
+            qt_version: 5.15.2
             qt_target: desktop
-          - name: macOS_static
-            os: macos-latest
-            static: ON
-            qt: 5.15.2
-            qt_target: desktop
-          - name: iOS_static
-            os: macos-latest
-            static: ON
-            qt: 5.15.2
-            qt_target: ios
+            deployment_target: 10.13
+            deployment_arch: "x86_64"
           - name: macOS
-            os: macos-latest
-            static: ON
-            qt: 6.2.2
+            os: macos-12
+            build_type: RelWithDebInfo
+            qt_version: 6.3.1
             qt_target: desktop
-          - name: macOS_static
-            os: macos-latest
-            static: OFF
-            qt: 6.2.2
-            qt_target: desktop
+            deployment_target: 10.14
+            deployment_arch: "x86_64;arm64"
     runs-on: ${{ matrix.os }}
     env:
-      BUILD_TYPE: RelWithDebInfo
-      BUILD_MODE: ${{ matrix.static }}
-      QT_VERSION: ${{ matrix.qt }}
+      BUILD_TYPE: ${{ matrix.build_type }}
+      DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+      DEPLOYMENT_ARCH: ${{ matrix.deployment_arch }}
+      QT_VERSION: ${{ matrix.qt_version }}
 
     steps:
       - name: Checkout
@@ -116,16 +113,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install macOS dependencies
-        if: runner.os == 'macOS'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list ninja || brew install ninja
-
       - name: Setup Xcode
         if: runner.os == 'macOS'
         uses: maxim-lobanov/setup-xcode@v1
@@ -133,36 +120,20 @@ jobs:
           xcode-version: latest-stable
 
       - name: Download Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
+          aqtversion: ==2.1.*
           version: ${{ env.QT_VERSION }}
           dir: ${{ github.workspace }}
           target: ${{ matrix.qt_target }}
 
-      - name: Prepare ccache
-        if: runner.os == 'macOS'
-        run: |
-          ccache --clear
-          ccache --set-config cache_dir=~/.ccache
+      - name: Setup ninja
+        uses: seanmiddleditch/gha-setup-ninja@v3
 
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
         with:
-          path: ~/.ccache
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ matrix.name }}-${{ matrix.qt }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        if: runner.os == 'macOS'
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats -v
+          key: ${{ matrix.name }}
 
       - name: Build maplibre-gl-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
@@ -170,46 +141,27 @@ jobs:
           mkdir build && cd build
           cmake ../source/ \
             -G Ninja \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_INSTALL_PREFIX="../install" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
+            -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
             -DMBGL_WITH_QT=ON \
-            -DMBGL_QT_STATIC=${BUILD_MODE} \
-            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-            -DCMAKE_INSTALL_PREFIX=../install \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DMBGL_QT_LIBRARY_ONLY=ON
           ninja
           ninja install
 
-      - name: Build maplibre-gl-native (iOS)
-        if: runner.os == 'macOS' && matrix.qt_target == 'ios'
-        run: |
-          mkdir build && cd build
-          cmake ../source/ \
-            -G"Ninja Multi-Config" \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_CONFIGURATION_TYPES="Release;Debug" \
-            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
-            -DMBGL_WITH_QT=ON \
-            -DMBGL_QT_STATIC=${BUILD_MODE} \
-            -DMBGL_QT_LIBRARY_ONLY=ON \
-            -DMBGL_QT_WITH_IOS_CCACHE=ON \
-            -DCMAKE_INSTALL_PREFIX=../install \
-            -DCMAKE_FIND_ROOT_PATH="$Qt5_Dir" \
-            -DCMAKE_PREFIX_PATH="$Qt5_Dir"
-          cmake --build . --config Release
-          cmake --install . --config Release
-
-      - name: Build maplibre-gl-native (Linux)
-        if: runner.os == 'Linux'
+      - name: Build maplibre-gl-native (Linux, Qt5)
+        if: runner.os == 'Linux' && matrix.qt_version == '5.15.2'
         uses: ./source/.github/actions/qt5-build
+
+      - name: Build maplibre-gl-native (Linux, Qt6)
+        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2'
+        uses: ./source/.github/actions/qt6-build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt }}
+          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
           path: install
-
-      - name: Show ccache statistics
-        if: runner.os == 'macOS'
-        run: |
-          ccache --show-stats -v
