@@ -71,17 +71,14 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ${{ matrix.runs-on }}
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - runs-on: ubuntu-20.04
-            arch: x86_64
-          - runs-on: macos-12
-            arch: x86_64
+        os:
+          - macos-12
+          - ubuntu-20.04
         node: [ 10, 14, 16, 18 ]
-    name: OS ${{ matrix.runs-on }} Node ${{ matrix.node }}
+    name: OS ${{ matrix.os }} Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
