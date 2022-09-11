@@ -106,7 +106,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies macOS
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -117,19 +117,6 @@ jobs:
           brew list pkg-config || brew install -q pkg-config
           brew list glfw || brew install glfw
           brew list libuv || brew install -q libuv
-
-      - name: Install dependencies macOS arm64
-        if: runner.os == 'macOS' && matrix.arch == 'arm64'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew info cmake |grep Poured || brew install -q cmake
-          brew info ccache |grep Poured || brew install -q ccache
-          brew info ninja |grep Poured || brew install -q ninja
-          brew info pkg-config |grep Poured || brew install -q pkg-config
-          brew info libuv |grep Poured || brew install -q libuv
-          ./scripts/brew-install-arm64.sh glfw
 
       - name: Install dependencies Linux
         if: runner.os == 'Linux'
