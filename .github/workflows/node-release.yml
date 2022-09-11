@@ -1,76 +1,46 @@
-name: node-ci
+name: node-release
 
 on:
   workflow_dispatch:
-  push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - ".gitignore"
-      - "README.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/macos/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
-    branches:
-      - main
-
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - ".gitignore"
-      - "README.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/macos/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
-
-concurrency:
-  # cancel jobs on PRs only
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    inputs:
+      version:
+        description: Choose a release type
+        required: true
+        type: choice
+        options:
+          - prerelease 
+          - patch
+          - minor
+          - major
 
 jobs:
-  test:
+  bump_version:
+    runs-on: ubuntu-20.04
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Bump Version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
+          git push
+
+  build:
     strategy:
       matrix:
         os:
@@ -79,6 +49,7 @@ jobs:
         node: [ 10, 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
+    needs: bump_version
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -94,6 +65,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Get Latest Version
+        run: git pull
+
       - name: Install dependencies
         if: runner.os == 'macOS'
         env:
@@ -104,7 +78,7 @@ jobs:
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
+          brew list glfw3 || brew install glfw3
           brew list libuv || brew install libuv
 
       - name: Install dependencies
@@ -139,7 +113,7 @@ jobs:
         run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         env:
           cache-name: ccache-v1
         with:
@@ -160,6 +134,8 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
+          sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
 
       - name: CMake
         if: runner.os == 'Linux'
@@ -170,17 +146,6 @@ jobs:
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
-      - name: Run render tests on macOS
-        if: runner.os == 'macOS'
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
-
-      - name: Upload render test artifacts
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: render-query-test-results
-          path: metrics/macos-xcode11-release-style.html
-
       - name: Test
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum npm test
@@ -189,8 +154,32 @@ jobs:
         if: runner.os == 'macOS'
         run: npm test
 
-      # On PRs make sure that the npm package can be packaged.
       - name: Pack
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
+
+      - name: Publish Release to Github
+        if: github.ref == 'refs/heads/main'
+        run: |
+          npm run package
+          npm run release
+        env:
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+
+      - name: Publish to NPM (release)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
+
+      - name: Publish to NPM (prerelease)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag next --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
+
