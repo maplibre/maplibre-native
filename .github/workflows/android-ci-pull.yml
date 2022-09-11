@@ -16,6 +16,7 @@ on:
       - "platform/qt/**"
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
+      - ".github/actions/**"
       - ".github/workflows/android-ci.yml"
       - ".github/workflows/android-docker-base.yml"
       - ".github/workflows/android-docker-ndk-r21b.yml"
