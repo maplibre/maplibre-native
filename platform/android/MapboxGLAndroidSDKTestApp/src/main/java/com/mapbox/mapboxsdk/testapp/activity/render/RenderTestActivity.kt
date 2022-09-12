@@ -19,6 +19,8 @@ import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.LoadRende
 import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.OnRenderTestCompletionListener
 import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.SaveResultToDiskTask
 import okio.Okio
+import okio.buffer
+import okio.source
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -343,7 +345,7 @@ class RenderTestActivity : AppCompatActivity() {
             val ignores: MutableList<String> = ArrayList()
             try {
                 assets.open(String.format("%s/ignores.json", TEST_BASE_PATH)).use { input ->
-                    val source = Okio.buffer(Okio.source(input))
+                    val source = input.source().buffer()
                     val styleJson = source.readByteString().string(Charset.forName("utf-8"))
                     val `object` = Gson().fromJson(styleJson, JsonObject::class.java)
                     for ((key) in `object`.entrySet()) {
@@ -368,7 +370,7 @@ class RenderTestActivity : AppCompatActivity() {
                         test
                     )
                 ).use { input ->
-                    val source = Okio.buffer(Okio.source(input))
+                    val source = input.source().buffer()
                     styleJson = source.readByteString().string(Charset.forName("utf-8"))
                 }
             } catch (exception: IOException) {
