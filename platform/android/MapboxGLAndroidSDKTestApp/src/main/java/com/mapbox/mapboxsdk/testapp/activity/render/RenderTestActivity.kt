@@ -14,11 +14,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshot
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter
-import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.LoadRenderDefinitionTask
-import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.LoadRenderIgnoreTask
-import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.OnRenderTestCompletionListener
-import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity.SaveResultToDiskTask
-import okio.Okio
 import okio.buffer
 import okio.source
 import timber.log.Timber
