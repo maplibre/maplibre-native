@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.CR_PAT }}
+          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -166,7 +166,7 @@ jobs:
           npm run package
           npm run release
         env:
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Publish to NPM (release)
         if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
