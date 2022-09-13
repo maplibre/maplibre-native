@@ -22,6 +22,7 @@ on:
       - ".github/workflows/android-ci-pull.yml"
       - ".github/workflows/android-docker-base.yml"
       - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/android-release.yml"
       - ".github/workflows/gh-pages-android-api.yml"
       - ".github/workflows/gh-pages-ios-api.yml"
       - ".github/workflows/ios-ci.yml"
