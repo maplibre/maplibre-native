@@ -1,15 +1,13 @@
 #!/bin/bash -l
 
-source scl_source enable devtoolset-8 rh-git218
-
 set -e
 set -x
 
 export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
-export PATH="$Qt5_Dir/bin:$PATH"
+export PATH="$Qt6_DIR/bin:$PATH"
 
 mkdir build && cd build
-cmake ../source/ \
+qt-cmake ../source/ \
   -G Ninja \
   -DCMAKE_BUILD_TYPE="Release" \
   -DCMAKE_C_COMPILER_LAUNCHER="ccache" \

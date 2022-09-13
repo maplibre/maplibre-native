@@ -7,7 +7,7 @@ on:
       - '**'
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"
@@ -17,10 +17,12 @@ on:
       - "platform/qt/**"
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
+      - ".github/actions/**"
       - ".github/workflows/android-ci.yml"
       - ".github/workflows/android-ci-pull.yml"
       - ".github/workflows/android-docker-base.yml"
       - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/android-release.yml"
       - ".github/workflows/gh-pages-android-api.yml"
       - ".github/workflows/gh-pages-ios-api.yml"
       - ".github/workflows/ios-ci.yml"
@@ -39,7 +41,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"
@@ -78,7 +80,7 @@ jobs:
         include:
           - runs-on: ubuntu-20.04
             arch: x86_64
-          - runs-on: [self-hosted, macOS, ARM64]
+          - runs-on: macos-12
             arch: x86_64
           - runs-on: [self-hosted, macOS, ARM64]
             arch: arm64

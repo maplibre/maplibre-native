@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "5.0.0",
+  "version": "5.0.1-pre.0",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -44,7 +44,7 @@
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^6.0.0",
-    "pretty-bytes": "^5.1.0",
+    "pretty-bytes": "^6.0.0",
     "request": "^2.88.0",
     "semver": "^7.3.7",
     "shuffle-seed": "1.1.6",
@@ -61,7 +61,9 @@
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
+    "test-query": "node -r esm platform/node/test/query.test.js",
+    "package": "node-pre-gyp package",
+    "release": "node-pre-gyp-github publish --release"
   },
   "gypfile": true,
   "binary": {

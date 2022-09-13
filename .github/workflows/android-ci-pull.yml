@@ -7,7 +7,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/darwin/**"
       - "platform/glfw/**"
@@ -16,6 +16,7 @@ on:
       - "platform/qt/**"
       # ignore CI for other platforms
       - ".github/FUNDING.yml"
+      - ".github/actions/**"
       - ".github/workflows/android-ci.yml"
       - ".github/workflows/android-docker-base.yml"
       - ".github/workflows/android-docker-ndk-r21b.yml"
@@ -56,6 +57,11 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
 
       - name: Cache node modules
         uses: actions/cache@v3

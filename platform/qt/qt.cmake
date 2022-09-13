@@ -10,6 +10,7 @@ option(MBGL_QT_STATIC "Build MapLibre GL Qt bindings staticly" OFF)
 option(MBGL_QT_INSIDE_PLUGIN "Build QMapLibreGL as OBJECT library, so it can be bundled into separate single plugin lib." OFF)
 option(MBGL_QT_WITH_HEADLESS "Build MapLibre GL Qt with headless support" ON)
 option(MBGL_QT_WITH_INTERNAL_SQLITE "Build MapLibre GL Qt bindings with internal sqlite" OFF)
+option(MBGL_QT_DEPLOYMENT "Autogenerate files necessary for deployment" OFF)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR}
@@ -49,11 +50,14 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions("-D_USE_MATH_DEFINES")
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    option(MBGL_QT_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
-    if(MBGL_QT_WITH_IOS_CCACHE)
-        include(${PROJECT_SOURCE_DIR}/platform/ios/ccache.cmake)
-    endif()
+if (MSVC)
+    foreach(config DEBUG RELWITHDEBINFO)
+        foreach(lang C CXX)
+            set(flags_var "CMAKE_${lang}_FLAGS_${config}")
+            string(REPLACE "/Zi" "/Z7" ${flags_var} "${${flags_var}}")
+            set(${flags_var} "${${flags_var}}" PARENT_SCOPE)
+        endforeach()
+    endforeach()
 endif()
 
 if(ANDROID)
@@ -244,6 +248,11 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT development
 )
+
+if(MBGL_QT_DEPLOYMENT)
+    install(FILES ${PROJECT_SOURCE_DIR}/LICENSE.md
+            DESTINATION .)
+endif()
 
 # FIXME: Because of rapidjson conversion
 target_include_directories(
