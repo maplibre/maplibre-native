@@ -164,17 +164,17 @@ jobs:
           ccache --max-size=2G --set-config cache_dir=~/.ccache
           ccache --show-stats --set-config cache_dir=~/.ccache
 
-      #- name: CMake
-      #  if: runner.os == 'MacOS' && matrix.arch == 'arm64'
-      #  run: |
-      #    cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
-      #    sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
-      #    sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
+      - name: CMake
+        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
+          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
 
       - name: CMake
-        if: runner.os == 'MacOS'
+        if: runner.os == 'MacOS' && matrix.arch == 'x86_64'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=x86_64
 
       - name: CMake
         if: runner.os == 'Linux'
