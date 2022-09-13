@@ -71,7 +71,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build-core:
+  build:
     strategy:
       matrix:
         include:
@@ -83,7 +83,7 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.3.1
+            qt_version: 6.3.2
             qt_target: desktop
           - name: macOS
             os: macos-12
@@ -95,7 +95,7 @@ jobs:
           - name: macOS
             os: macos-12
             build_type: RelWithDebInfo
-            qt_version: 6.3.1
+            qt_version: 6.3.2
             qt_target: desktop
             deployment_target: 10.14
             deployment_arch: "x86_64;arm64"
@@ -113,7 +113,7 @@ jobs:
             build_type: "RelWithDebInfo;Debug"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.3.1
+            qt_version: 6.3.2
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ''
@@ -131,7 +131,7 @@ jobs:
             build_type: RelWithDebInfo
             compiler_type: mingw1120_64
             compiler_version: 11.2.0
-            qt_version: 6.3.1
+            qt_version: 6.3.2
             qt_target: desktop
             qt_arch: win64_mingw
             qt_tools: tools_mingw90
@@ -210,6 +210,7 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
             -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
             -DMBGL_WITH_QT=ON \
+            -DMBGL_QT_DEPLOYMENT=ON \
             -DMBGL_QT_LIBRARY_ONLY=ON
           ninja
           ninja install
@@ -236,6 +237,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_INSTALL_PREFIX="../install" \
             -DMBGL_WITH_QT=ON \
+            -DMBGL_QT_DEPLOYMENT=ON \
             -DMBGL_QT_LIBRARY_ONLY=ON
           ninja.exe
           ninja.exe install
@@ -245,3 +247,38 @@ jobs:
         with:
           name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
           path: install
+
+  release:
+    name: Release QMapLibreGL
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        name: [Linux, macOS, win64_msvc2019, win64_mingw]
+        qt_version: [5.15.2, 6.3.2]
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+        path: install
+
+    - name: Make tarball
+      env:
+        TAG_NAME: ${{ github.ref_name }}
+        TAG_PLATFORM: ${{ matrix.name }}
+        QT_VERSION: ${{ matrix.qt_version }}
+      run: |
+        cd install
+        tar cjvf ../QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2 *
+
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: QMapLibreGL_*.tar.bz2
+        allowUpdates: true
+        draft: true
