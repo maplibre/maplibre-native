@@ -28,8 +28,8 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-        distribution: "zulu"
-        java-version: "11"
+          distribution: 'zulu'
+          java-version: '11'
 
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh        
