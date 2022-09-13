@@ -168,8 +168,6 @@ jobs:
         if: runner.os == 'MacOS' && matrix.arch == 'arm64'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
-          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
-          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
 
       - name: CMake
         if: runner.os == 'MacOS' && matrix.arch == 'x86_64'
