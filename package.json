@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "5.0.0",
+  "version": "5.0.1-pre.0",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -15,59 +15,62 @@
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/maplibre/maplibre-gl-native.git"
+    "url": "git+https://github.com/maplibre/maplibre-gl-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
     "@mapbox/node-pre-gyp": "^1.0.10",
-    "minimatch": "^3.0.4",
+    "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "minimatch": "^5.1.0",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
-    "@mapbox/flow-remove-types": "^1.3.0-await.upstream.2",
-    "@mapbox/mvt-fixtures": "3.5.1",
-    "@octokit/plugin-retry": "^2.2.0",
+    "@mapbox/flow-remove-types": "^2.0.0",
+    "@mapbox/mvt-fixtures": "3.10.0",
+    "@octokit/plugin-retry": "^3.0.9",
     "@octokit/rest": "^19.0.4",
-    "aws-sdk": "^2.285.1",
+    "aws-sdk": "^2.1213.0",
     "csscolorparser": "~1.0.2",
     "d3-queue": "3.0.7",
-    "diff": "4.0.1",
+    "diff": "5.1.0",
     "ejs": "^3.1.8",
     "esm": "~3.2.25",
     "express": "^4.18.1",
-    "json-stringify-pretty-compact": "^2.0.0",
+    "json-stringify-pretty-compact": "^4.0.0",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.16.4",
     "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^6.0.0",
-    "pretty-bytes": "^5.1.0",
+    "pretty-bytes": "^6.0.0",
     "request": "^2.88.0",
     "semver": "^7.3.7",
     "shuffle-seed": "1.1.6",
     "st": "3.0.0",
-    "tape": "^4.5.1",
+    "tape": "^5.6.0",
     "xcode": "^3.0.1"
   },
   "engines": {
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
+    "install": "node-pre-gyp install --fallback-to-build=true",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
+    "test-query": "node -r esm platform/node/test/query.test.js",
+    "package": "node-pre-gyp package",
+    "release": "node-pre-gyp-github publish --release"
   },
   "gypfile": true,
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://mapbox-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}",
+    "host": "https://github.com/maplibre/maplibre-gl-native/releases/download/",
+    "remote_path": "node-v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }

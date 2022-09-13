@@ -72,8 +72,7 @@ dependencies {
 
     implementation dependenciesList.okhttp3
 
-    debugImplementation dependenciesList.leakCanaryDebug
-    releaseImplementation dependenciesList.leakCanaryRelease
+    implementation dependenciesList.leakCanary
 
     androidTestImplementation dependenciesList.supportAnnotations
     androidTestImplementation dependenciesList.testRunner
