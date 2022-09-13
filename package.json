@@ -20,7 +20,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "@mapbox/cmake-node-module": "^1.2.0",
-    "@mapbox/node-pre-gyp": "^1.0.10",
+    "@mapbox/node-pre-gyp": "git+https://github.com/ronilan/node-pre-gyp.git#bbfd7b2cb40c83023f084e1f17cc5af6ac3314f4",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
     "minimatch": "^5.1.0",
     "npm-run-all": "^4.0.2"
