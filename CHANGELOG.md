@@ -6,7 +6,6 @@
 
 - *...Add new stuff here...*
 - [core] Add `ClientOptions` to configure client information [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
-- [qt] Build user agent based on `ClientOptions`, if available [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
 
 ### ✨ Technical Improvements
 
