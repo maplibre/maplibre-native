@@ -254,6 +254,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     strategy:
+      max-parallel: 1
       matrix:
         name: [Linux, macOS, win64_msvc2019, win64_mingw]
         qt_version: [5.15.2, 6.3.2]
