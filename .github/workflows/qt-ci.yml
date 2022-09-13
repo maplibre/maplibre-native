@@ -9,7 +9,7 @@ on:
       - 'qt-**'
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"
@@ -40,7 +40,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"

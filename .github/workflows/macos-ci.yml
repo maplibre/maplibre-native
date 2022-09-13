@@ -9,7 +9,7 @@ on:
       - '**'
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/glfw/**"
@@ -40,7 +40,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/glfw/**"

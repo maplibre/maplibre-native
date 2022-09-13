@@ -7,7 +7,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/darwin/**"
       - "platform/glfw/**"
