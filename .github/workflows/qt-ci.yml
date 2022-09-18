@@ -283,7 +283,7 @@ jobs:
         TAG_PLATFORM: ${{ matrix.name }}
         QT_VERSION: ${{ matrix.qt_version }}
       run: |
-        mv maplibre-gl-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 ../QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
+        mv maplibre-gl-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
 
     - name: Release
       uses: ncipollo/release-action@v1
