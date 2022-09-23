@@ -47,7 +47,7 @@ jobs:
         os:
           - macos-12
           - ubuntu-20.04
-        node: [ 10, 14, 16, 18 ]
+        node: [ 14, 16, 18 ]
     name: OS ${{ matrix.os }} Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     needs: bump_version
