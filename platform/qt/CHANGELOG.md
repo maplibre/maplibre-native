@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.1
+
+### 🐞 Bug fixes
+
+- Fixed issues with release tarballs.
+
 ## v2.0
 
 ### ✨ New features

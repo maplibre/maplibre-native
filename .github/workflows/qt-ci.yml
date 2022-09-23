@@ -242,11 +242,21 @@ jobs:
           ninja.exe
           ninja.exe install
 
+      - name: Create artifacts
+        shell: bash
+        env:
+          QT_ARCH: ${{ matrix.name }}
+          QT_VERSION: ${{ matrix.qt_version }}
+        run: |
+          pushd install
+          tar cjvf ../maplibre-gl-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2 *
+          popd
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-          path: install
+          path: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}.tar.bz2
 
   release:
     name: Release QMapLibreGL
@@ -266,16 +276,14 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-        path: install
 
-    - name: Make tarball
+    - name: Name tarball
       env:
         TAG_NAME: ${{ github.ref_name }}
         TAG_PLATFORM: ${{ matrix.name }}
         QT_VERSION: ${{ matrix.qt_version }}
       run: |
-        cd install
-        tar cjvf ../QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2 *
+        mv maplibre-gl-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
 
     - name: Release
       uses: ncipollo/release-action@v1

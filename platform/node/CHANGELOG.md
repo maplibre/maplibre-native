@@ -1,6 +1,7 @@
 
 # main
 * Add support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image). ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877))
+* [Breaking] Remove node 10 support. v5.x of the node package can be used a compatibility version.
 
 # 5.0.0
 * No longer supporting source-compile fallback ([#15748](https://github.com/mapbox/mapbox-gl-native/pull/15748))
