@@ -194,7 +194,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        if: runner.os == 'macOS'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
