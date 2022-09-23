@@ -30,6 +30,7 @@ on:
       - ".github/workflows/macos-ci.yml"
       - ".github/workflows/macos-release.yml"
       - ".github/workflows/node-ci.yml"
+      - ".github/workflows/node-release.yml"
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
