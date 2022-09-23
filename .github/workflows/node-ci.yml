@@ -99,7 +99,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Get OS Info
+      - name: Get OS Architecture
         run: uname -m
 
       - name: Setup node

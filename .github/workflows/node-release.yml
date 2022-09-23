@@ -72,7 +72,7 @@ jobs:
       - name: Get Latest Version
         run: git pull
 
-      - name: Get OS Info
+      - name: Get OS Architecture
         run: uname -m
 
       - name: Setup node
