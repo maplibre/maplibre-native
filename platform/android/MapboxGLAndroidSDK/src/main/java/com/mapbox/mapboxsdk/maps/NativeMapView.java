@@ -245,7 +245,14 @@ final class NativeMapView implements NativeMap {
     if (checkState("moveBy")) {
       return;
     }
-    nativeMoveBy(dx / pixelRatio, dy / pixelRatio, duration);
+
+    try {
+      nativeMoveBy(dx / pixelRatio, dy / pixelRatio, duration);
+    } catch (java.lang.Error error) {
+      // workaround for latitude must not be NaN issue
+      // which is thrown when gl-native can't convert a screen coordinate to location
+      Logger.d(TAG, "Error when executing NativeMapView#moveBy", error);
+    }
   }
 
   @Override
