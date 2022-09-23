@@ -113,12 +113,12 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install -q cmake
-          brew list ccache || brew install -q ccache
-          brew list ninja || brew install -q ninja
-          brew list pkg-config || brew install -q pkg-config
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkg-config || brew install pkg-config
           brew list glfw || brew install glfw
-          brew list libuv || brew install -q libuv
+          brew list libuv || brew install libuv
 
       - name: Install dependencies Linux
         if: runner.os == 'Linux'
@@ -165,14 +165,9 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        if: runner.os == 'MacOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
-
-      - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch == 'x86_64'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=x86_64
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
 
       - name: CMake
         if: runner.os == 'Linux'

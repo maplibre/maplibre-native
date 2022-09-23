@@ -86,12 +86,12 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install -q cmake
-          brew list ccache || brew install -q ccache
-          brew list ninja || brew install -q ninja
-          brew list pkg-config || brew install -q pkg-config
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkg-config || brew install pkg-config
           brew list glfw || brew install glfw
-          brew list libuv || brew install -q libuv
+          brew list libuv || brew install libuv
 
       - name: Install dependencies Linux
         if: runner.os == 'Linux'
@@ -181,7 +181,7 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
         run: |
           ./platform/node/scripts/publish.sh
 
@@ -190,7 +190,7 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
         run: |
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
