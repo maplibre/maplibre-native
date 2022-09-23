@@ -51,7 +51,7 @@ jobs:
             arch: x86_64
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: [self-hosted, macOS, ARM64]
+          - runs-on: macos-12-arm
             arch: arm64
     needs: bump_version
     continue-on-error: true
@@ -138,21 +138,18 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        if: runner.os == 'MacOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
-          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
-          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
-
-      - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch == 'x86_64'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=x86_64
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
 
       - name: CMake
         if: runner.os == 'Linux'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: Build
+        run: |
+          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
       #- name: Run render tests on macOS
       #  if: runner.os == 'macOS'
