@@ -61,9 +61,7 @@
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js",
-    "package": "node-pre-gyp package",
-    "release": "node-pre-gyp-github publish --release"
+    "test-query": "node -r esm platform/node/test/query.test.js"
   },
   "gypfile": true,
   "binary": {
