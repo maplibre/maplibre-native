@@ -1322,6 +1322,22 @@ const QVector<QPair<QString, QString>> &Map::defaultStyles() const
     return d_ptr->defaultStyles;
 }
 
+std::vector<Feature> Map::queryRenderedFeatures(const QPointF &point, QVector<QString> layerIds)
+{
+    std::vector<std::string> stdLayerIds;
+    for (const auto &layerId : layerIds)
+    {
+        stdLayerIds.push_back(layerId.toStdString());
+    }
+    auto features = d_ptr->queryRenderedFeatures({point.x(), point.y()}, mbgl::RenderedQueryOptions(stdLayerIds, {}));
+    std::vector<Feature> qtFeatures;
+    for (const auto &feature : features)
+    {
+        qtFeatures.push_back(GeoJSON::asFeature(feature));
+    }
+    return qtFeatures;
+}
+
 /*!
     \fn void QMapLibreGL::Map::needsRendering()
 
@@ -1549,4 +1565,8 @@ bool MapPrivate::setProperty(const PropertySetter& setter, const QString& layer,
     return true;
 }
 
+std::vector<mbgl::Feature> MapPrivate::queryRenderedFeatures(const mbgl::ScreenCoordinate &point, const mbgl::RenderedQueryOptions &options) const
+{
+    return m_mapRenderer->queryRenderedFeatures(point, options);
+}
 } // namespace QMapLibreGL
