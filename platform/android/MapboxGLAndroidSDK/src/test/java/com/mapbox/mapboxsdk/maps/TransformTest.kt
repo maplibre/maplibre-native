@@ -1,5 +1,6 @@
 package com.mapbox.mapboxsdk.maps
 
+import android.os.Looper.getMainLooper
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -8,6 +9,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class TransformTest {
@@ -16,12 +19,14 @@ class TransformTest {
     private lateinit var nativeMapView: NativeMap
     private lateinit var transform: Transform
     private lateinit var cameraChangeDispatcher: CameraChangeDispatcher
+    private lateinit var mainLooper: ShadowLooper
 
     @Before
     fun setup() {
         cameraChangeDispatcher = spyk()
         mapView = mockk()
         nativeMapView = mockk()
+        mainLooper = shadowOf(getMainLooper())
         transform = Transform(mapView, nativeMapView, cameraChangeDispatcher)
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.cameraPosition } returns CameraPosition.DEFAULT
@@ -51,6 +56,7 @@ class TransformTest {
         every { nativeMapView.cameraPosition } returns expected
         transform.moveCamera(mapboxMap, update, callback)
 
+        mainLooper.idle()
         verify { cameraChangeDispatcher.onCameraMove() }
         verify { nativeMapView.jumpTo(target, -1.0, -1.0, -1.0, null) }
         verify { callback.onFinish() }
@@ -91,6 +97,7 @@ class TransformTest {
 
         transform.easeCamera(mapboxMap, update, 100, false, callback)
 
+        mainLooper.idle()
         verify { nativeMapView.easeTo(target, -1.0, -1.0, -1.0, null, 100, false) }
         verify { callback.onFinish() }
     }
@@ -130,6 +137,7 @@ class TransformTest {
 
         transform.animateCamera(mapboxMap, update, 100, callback)
 
+        mainLooper.idle()
         verify { nativeMapView.flyTo(target, -1.0, -1.0, -1.0, null, 100) }
         verify { callback.onFinish() }
     }

@@ -12,7 +12,6 @@ import com.mapbox.mapboxsdk.log.Logger
 import com.mapbox.mapboxsdk.testapp.utils.ApiKeyUtils
 import com.mapbox.mapboxsdk.testapp.utils.TileLoadingMeasurementUtils
 import com.mapbox.mapboxsdk.testapp.utils.TimberLogger
-import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 
@@ -26,22 +25,9 @@ import timber.log.Timber.DebugTree
 class MapLibreApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        if (!initializeLeakCanary()) {
-            return
-        }
         initializeLogger()
         initializeStrictMode()
         initializeMapbox()
-    }
-
-    protected fun initializeLeakCanary(): Boolean {
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return false
-        }
-        LeakCanary.install(this)
-        return true
     }
 
     private fun initializeLogger() {

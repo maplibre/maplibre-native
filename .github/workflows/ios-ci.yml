@@ -7,7 +7,7 @@ on:
       - '**'
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"
@@ -22,6 +22,7 @@ on:
       - ".github/workflows/android-ci-pull.yml"
       - ".github/workflows/android-docker-base.yml"
       - ".github/workflows/android-docker-ndk-r21b.yml"
+      - ".github/workflows/android-release.yml"
       - ".github/workflows/gh-pages-android-api.yml"
       - ".github/workflows/gh-pages-ios-api.yml"
       - ".github/workflows/ios-pre-release.yml"
@@ -29,6 +30,7 @@ on:
       - ".github/workflows/macos-ci.yml"
       - ".github/workflows/macos-release.yml"
       - ".github/workflows/node-ci.yml"
+      - ".github/workflows/node-release.yml"
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
@@ -40,7 +42,7 @@ on:
       - main
     paths-ignore:
       - ".gitignore"
-      - "README.md"
+      - "**.md"
       # ignore other platforms
       - "platform/android/**"
       - "platform/darwin/**"
@@ -60,6 +62,7 @@ on:
       - ".github/workflows/macos-ci.yml"
       - ".github/workflows/macos-release.yml"
       - ".github/workflows/node-ci.yml"
+      - ".github/workflows/node-release.yml"
       - ".github/workflows/qt-ci-windows.yml"
       - ".github/workflows/qt-ci.yml"
       - ".github/workflows/update-gl-js.yml"
