@@ -195,7 +195,7 @@ jobs:
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
       - name: Publish to NPM (release)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -203,7 +203,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
