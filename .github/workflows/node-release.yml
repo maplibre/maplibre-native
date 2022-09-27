@@ -25,7 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
           token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
@@ -41,7 +40,7 @@ jobs:
           npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
           git push
 
-  build:
+  publish_binaries:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -194,8 +193,30 @@ jobs:
         run: |
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
+  publish_npm:
+    runs-on: ubuntu-20.04
+    needs: publish_binaries
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Latest Version
+        run: git pull
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Publish to NPM (release)
-        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -203,7 +224,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
