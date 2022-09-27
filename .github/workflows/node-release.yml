@@ -144,14 +144,8 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'MacOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
-
-      - name: CMake
-        if: runner.os == 'Linux'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build
         run: |
