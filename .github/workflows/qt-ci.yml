@@ -8,6 +8,8 @@ on:
     tags:
       - 'qt-**'
     paths:
+      - ".github/actions/qt5-build/**"
+      - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -25,6 +27,8 @@ on:
     branches:
       - main
     paths:
+      - ".github/actions/qt5-build/**"
+      - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
       - "bin/**"
       - "expression-test/**"
