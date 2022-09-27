@@ -8,6 +8,7 @@ on:
     tags:
       - 'qt-**'
     paths:
+      - ".github/workflows/qt-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
@@ -24,6 +25,7 @@ on:
     branches:
       - main
     paths:
+      - ".github/workflows/qt-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
