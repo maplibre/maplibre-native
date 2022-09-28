@@ -13,7 +13,6 @@ buildscript {
         classpath dependenciesList.licensesPlugin
         classpath dependenciesList.kotlinPlugin
         // classpath dependenciesList.jacocoPlugin
-        classpath dependenciesList.mapboxSdkVersions
         classpath dependenciesList.gradleNexus
     }
 }

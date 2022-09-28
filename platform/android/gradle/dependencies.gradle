@@ -34,7 +34,6 @@ ext {
             appcenter        : '1.4',
             ktlint           : '0.40.0',
             commonsIO        : '2.6',
-            mapboxSdkVersions: '1.0.1',
             assertj          : "3.11.1",
             gradleNexus      : "1.1.0"
     ]
@@ -80,7 +79,6 @@ ext {
             lintChecks             : "com.android.tools.lint:lint-checks:${versions.lint}",
             lintTests              : "com.android.tools.lint:lint-tests:${versions.lint}",
             ktlint                 : "com.pinterest:ktlint:${versions.ktlint}",
-            mapboxSdkVersions      : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${versions.mapboxSdkVersions}",
 
             gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}"
     ]
