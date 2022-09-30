@@ -8,7 +8,10 @@ on:
         required: true
         type: choice
         options:
-          - prerelease 
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
           - patch
           - minor
           - major
@@ -25,7 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
           token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
@@ -34,14 +36,21 @@ jobs:
         with:
           node-version: 18
 
-      - name: Bump Version
+      - name: npm version
+        id: npmversion
+        run: >-
+          echo "::set-output name=NPM_VERSION::$(
+            npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version
+          )"
+
+      - name: Push version to git
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
+          git commit -a -m "Update node version to ${{ steps.npmversion.outputs.NPM_VERSION }} (${{ github.event.inputs.version }})"
           git push
 
-  build:
+  publish_binaries:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -140,12 +149,12 @@ jobs:
       - name: CMake
         if: runner.os == 'MacOS'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: CMake
         if: runner.os == 'Linux'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 
       - name: Build
         run: |
@@ -194,8 +203,30 @@ jobs:
         run: |
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
+  publish_npm:
+    runs-on: ubuntu-20.04
+    needs: publish_binaries
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Latest Version
+        run: git pull
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Publish to NPM (release)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -203,7 +234,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
