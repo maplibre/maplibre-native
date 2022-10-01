@@ -1,5 +1,9 @@
 #!/bin/bash
 
+node -v
+cat /etc/os-release
+uname -m
+
 cd /usr/src/app
 npm ci --ignore-scripts
 ccache --clear --set-config cache_dir=~/.ccache
