@@ -212,6 +212,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
