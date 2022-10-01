@@ -1,5 +1,11 @@
 # Changelog
 
+## Upcoming
+
+### 🐞 Bug fixes
+
+- Fixed bitcode issues on iOS.
+
 ## v2.0.1
 
 ### 🐞 Bug fixes
