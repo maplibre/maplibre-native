@@ -212,15 +212,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install dependencies
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew install --cask docker
+      - uses: docker-practice/actions-setup-docker@master
 
       - name: Build the Docker image
-        run: docker build -f Dockerfile_Build -t build .
+        run: docker buildx -f Dockerfile_Build -t build .
 
       - name: Run the Docker image
         run:  docker run --rm -it -v $(pwd):/data -p 8080:80 build
