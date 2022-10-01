@@ -212,7 +212,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - uses: docker-practice/actions-setup-docker@master
+      - name: Install dependencies
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew install colima
+          colima start
 
       - name: Build the Docker image
         run: docker build -f Dockerfile_Build -t build .
