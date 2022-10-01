@@ -212,6 +212,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Build the Docker image
         run: docker build -f Dockerfile_Build -t build .
 
