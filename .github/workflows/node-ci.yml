@@ -212,13 +212,8 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Build the Docker image
         run: docker build -f Dockerfile_Build -t build .
