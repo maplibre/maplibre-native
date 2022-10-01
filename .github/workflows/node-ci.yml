@@ -217,7 +217,7 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list docker || brew install docker
+          brew install --cask docker
 
       - name: Build the Docker image
         run: docker build -f Dockerfile_Build -t build .
