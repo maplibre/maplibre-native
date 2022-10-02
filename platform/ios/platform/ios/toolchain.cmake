@@ -84,7 +84,7 @@
 #
 # DEPLOYMENT_TARGET: Minimum SDK version to target. Default 2.0 on watchOS and 9.0 on tvOS+iOS
 #
-# ENABLE_BITCODE: (1|0) Enables or disables bitcode support. Default 1 (true)
+# ENABLE_BITCODE: (1|0) Enables or disables bitcode support. Default 0 (false)
 #
 # ENABLE_ARC: (1|0) Enables or disables ARC support. Default 1 (true, ARC enabled by default)
 #
@@ -490,12 +490,8 @@ elseif(DEFINED CMAKE_OSX_SYSROOT_INT)
 endif()
 
 # Use bitcode or not
-if(NOT DEFINED ENABLE_BITCODE AND NOT ARCHS MATCHES "((^|;|, )(i386|x86_64))+")
-  # Unless specified, enable bitcode support by default
-  message(STATUS "[DEFAULTS] Enabling bitcode support by default. ENABLE_BITCODE not provided!")
-  set(ENABLE_BITCODE TRUE)
-elseif(NOT DEFINED ENABLE_BITCODE)
-  message(STATUS "[DEFAULTS] Disabling bitcode support by default on simulators. ENABLE_BITCODE not provided for override!")
+if(NOT DEFINED ENABLE_BITCODE)
+  message(STATUS "[DEFAULTS] Disabling bitcode support by default as it's deprecated. ENABLE_BITCODE not provided for override!")
   set(ENABLE_BITCODE FALSE)
 endif()
 set(ENABLE_BITCODE_INT ${ENABLE_BITCODE} CACHE BOOL
