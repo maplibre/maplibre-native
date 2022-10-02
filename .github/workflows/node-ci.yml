@@ -224,6 +224,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          platforms: linux/arm64
           push: false
           file: Dockerfile_Build
           tags: build
