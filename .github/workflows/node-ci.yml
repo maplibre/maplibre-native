@@ -205,6 +205,7 @@ jobs:
           
   test_linux_arm:
     runs-on: ubuntu-latest
+    name: test (ubuntu-20.04, arm64)
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -225,10 +226,10 @@ jobs:
         with:
           context: .
           platforms: linux/arm64
-          file: Dockerfile_Build
+          file: platform/node/scripts/Dockerfile_Build
           tags: build
           push: false
           load: true
 
       - name: Run the Docker image
-        run:  docker run --rm -v $(pwd):/data -p 8080:80 build
+        run:  docker run --rm -v $(pwd):/data build
