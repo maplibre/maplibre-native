@@ -225,9 +225,10 @@ jobs:
         with:
           context: .
           platforms: linux/arm64
-          push: false
           file: Dockerfile_Build
           tags: build
+          push: false
+          load: true
 
       - name: Run the Docker image
         run:  docker run --rm -v $(pwd):/data -p 8080:80 build
