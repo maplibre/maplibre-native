@@ -1,7 +1,5 @@
 FROM ubuntu:focal
 
-ENV NODE_ENV="production"
-
 RUN set -ex; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get -qq update; \
