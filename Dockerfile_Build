@@ -18,8 +18,8 @@ RUN set -ex; \
       libcurl4-openssl-dev \
       libglfw3-dev \
       libuv1-dev \
+      libicu-dev \
       libjpeg-turbo8 \
-      libicu66 \
       g++-10 \
       libc++-9-dev \
       libc++abi-9-dev; \
