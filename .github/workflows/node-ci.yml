@@ -216,7 +216,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           image: ubuntu:focal
-          platforms: arm64
+          platforms: arm64,amd64
 
       - name: Build and push
         uses: docker/build-push-action@v2
