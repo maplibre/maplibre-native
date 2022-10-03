@@ -161,7 +161,7 @@ git checkout tags/$TAG -b $TAG
 # clean, if you need to troubleshoot build dependencies by using `make clean`
 ```
 
-## Build using Bazel
+### Build using Bazel
 
 [Bazel](https://bazel.build) is also supported as a build option for getting a packaged release of the xcframework compiled for either static or dynamic linking.
 
@@ -171,7 +171,7 @@ Firstly you will have to ensure that Bazel is installed
 
 From there you can use the script in platform/ios/platform/ios/scripts/package-bazel.sh
 
-# There are 4 options:
+#### There are 4 options:
 
 `cd platform/ios/platform/ios/scripts`
 
@@ -193,7 +193,7 @@ Also you can use the link option to ensure that the framework is able to link.
 
 `./bazel-package.sh --link`
 
-# Bazel build files are placed in a few places throughout the project:
+#### Bazel build files are placed in a few places throughout the project:
 
 `BUILD.bazel`
 - Covering the base cpp in the root `src` directory.
@@ -213,7 +213,7 @@ Also you can use the link option to ensure that the framework is able to link.
 `platform/ios/BUILD.bazel`
 - Covering the source in `platform/ios/platform/ios/src` and `platform/ios/platform/darwin/src` as well as defining all the other BUILD.bazel files and defining the xcframework targets.
 
-# There are also some other areas that make bazel work:
+#### There are also some other areas that make bazel work:
 
 `WORKSPACE`
 - Defines the "repo" and the different modules that are loaded in order to compile for Apple.

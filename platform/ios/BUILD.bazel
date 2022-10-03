@@ -102,7 +102,12 @@ apple_static_xcframework(
 
 apple_xcframework(
     name = "Mapbox.dynamic",
+    bundle_id = "com.maplibre.mapbox",
     bundle_name = "Mapbox",
+    data = glob([
+        "platform/ios/resources/*.lproj/**",
+        "platform/ios/resources/*.xcassets/**",
+    ]),
     infoplists = ["build/Info.plist"],
     ios = {
         "simulator": [
@@ -115,7 +120,7 @@ apple_xcframework(
     public_hdrs = _PUBLIC_HEADERS,
     umbrella_header = "platform/ios/src/Mapbox.h",
     visibility = ["//visibility:public"],
-    deps = ["sdk"],
+    deps = ["sdk-dynamic"],
 )
 
 # This target allows you to link the SDK to emulate linking it in the app
@@ -130,9 +135,30 @@ ios_framework(
     deps = ["sdk"],
 )
 
+# sdk for the static target which includes the resources.
 objc_library(
     name = "sdk",
     data = ["resources"],
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    deps = [
+        "objc-sdk",
+        "objcpp-sdk",
+    ],
+)
+
+# sdk for the dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "sdk-dynamic",
     sdk_dylibs = [
         "libz",
         "libsqlite3",
