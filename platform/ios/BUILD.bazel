@@ -155,6 +155,26 @@ objc_library(
     ],
 )
 
+# sdk for the dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "sdk-dynamic",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    deps = [
+        "objc-sdk",
+        "objcpp-sdk",
+    ],
+)
+
 apple_resource_bundle(
     name = "resources",
     bundle_id = "com.maplibre.mapbox",
