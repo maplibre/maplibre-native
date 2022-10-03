@@ -24,7 +24,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
-
+- [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-gl-native/pull/498).
 - [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-gl-native/pull/198).
 
 ## maps-v1.6.0
