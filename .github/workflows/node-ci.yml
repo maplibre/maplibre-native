@@ -204,7 +204,7 @@ jobs:
           npm pack --dry-run
           
   test_linux_arm:
-    runs-on: ubuntu-latest
+    runs-on: macos-12-arm
     name: test (ubuntu-20.04, arm64)
     steps:
       - name: Checkout
@@ -213,10 +213,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'arm64'
+      - name: Install dependencies macOS
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew install docker docker-compose
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
