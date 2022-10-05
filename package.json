@@ -19,9 +19,10 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@mapbox/cmake-node-module": "^1.2.0",
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "@mapbox/cmake-node-module": "^1.2.0",
+    "cmake-js": "^6.3.2",
     "minimatch": "^5.1.0",
     "npm-run-all": "^4.0.2"
   },
