@@ -61,7 +61,7 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.3.2
+            qt_version: 6.4.0
             qt_target: desktop
           - name: macOS
             os: macos-12
@@ -73,7 +73,7 @@ jobs:
           - name: macOS
             os: macos-12
             build_type: RelWithDebInfo
-            qt_version: 6.3.2
+            qt_version: 6.4.0
             qt_target: desktop
             deployment_target: 10.14
             deployment_arch: "x86_64;arm64"
@@ -91,7 +91,7 @@ jobs:
             build_type: "RelWithDebInfo;Debug"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.3.2
+            qt_version: 6.4.0
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ''
@@ -109,7 +109,7 @@ jobs:
             build_type: RelWithDebInfo
             compiler_type: mingw1120_64
             compiler_version: 11.2.0
-            qt_version: 6.3.2
+            qt_version: 6.4.0
             qt_target: desktop
             qt_arch: win64_mingw
             qt_tools: tools_mingw90
@@ -245,7 +245,7 @@ jobs:
       max-parallel: 1
       matrix:
         name: [Linux, macOS, win64_msvc2019, win64_mingw]
-        qt_version: [5.15.2, 6.3.2]
+        qt_version: [5.15.2, 6.4.0]
     permissions:
       contents: write
 
