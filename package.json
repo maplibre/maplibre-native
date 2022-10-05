@@ -19,8 +19,6 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.11",
-    "@acalcutt/node-pre-gyp-github": "1.4.8",
     "@mapbox/cmake-node-module": "^1.2.0",
     "cmake-js": "^6.3.2",
     "minimatch": "^5.1.0",
@@ -57,19 +55,11 @@
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=true",
+    "install": "cmake-js compile",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
     "test-render": "node -r esm platform/node/test/render.test.js",
     "test-query": "node -r esm platform/node/test/query.test.js"
-  },
-  "gypfile": true,
-  "binary": {
-    "module_name": "mbgl",
-    "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/maplibre/maplibre-gl-native/releases/download/",
-    "remote_path": "node-v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
