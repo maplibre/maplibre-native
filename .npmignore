@@ -8,7 +8,10 @@ lib
 metrics
 misc
 node_modules
+platform/android
+platform/ios
 platform/node/test
+platform/qt
 scripts
 test
 ARCHITECTURE.md
