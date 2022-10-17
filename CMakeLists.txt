@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
-option(MBGL_WITH_QT "Build MapLibre GL Qt bindings" OFF)
+option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
 option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
 option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
@@ -13,7 +13,7 @@ if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-project("MapLibre GL Native" LANGUAGES CXX C)
+project("Mapbox GL Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Core)
@@ -1061,9 +1061,9 @@ export(TARGETS
 set_target_properties(
     mbgl-core
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "MapLibre GL Native"
+        INTERFACE_MAPBOX_NAME "Mapbox GL Native"
         INTERFACE_MAPBOX_URL "https://github.com/maplibre/maplibre-gl-native"
-        INTERFACE_MAPBOX_AUTHOR "MapLibre"
+        INTERFACE_MAPBOX_AUTHOR "Mapbox"
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
 
