@@ -1,10 +1,3 @@
-.git
-.github
-benchmark
-design-proposals
-expression-test
-metrics
-misc
-node_modules
-scripts
-test
+*
+platform/node/src
+platform/node/test
