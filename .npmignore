@@ -1,3 +1,11 @@
-*
-platform/node/src
-platform/node/test
+.git
+.github
+benchmark
+design-proposals
+expression-test
+metrics
+misc
+node_modules
+scripts
+src
+test
