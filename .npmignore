@@ -7,7 +7,6 @@ node_modules
 platform/android
 platform/ios
 platform/qt
-scripts
 ARCHITECTURE.md
 BUILD.bazel
 CODE-OF-CONDUCT.md
