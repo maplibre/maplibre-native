@@ -17,7 +17,7 @@ on:
           - major
 
 jobs:
-  Release:
+  bump_version:
     runs-on: ubuntu-20.04
 
     defaults:
@@ -28,7 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
           token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
