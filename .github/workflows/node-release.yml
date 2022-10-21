@@ -17,55 +17,8 @@ on:
           - major
 
 jobs:
-  bump_version:
+  Release:
     runs-on: ubuntu-20.04
-
-    defaults:
-      run:
-        working-directory: ./
-        shell: bash
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: npm version
-        id: npmversion
-        run: >-
-          echo "::set-output name=NPM_VERSION::$(
-            npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version
-          )"
-
-      - name: Push version to git
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git commit -a -m "Update node version to ${{ steps.npmversion.outputs.NPM_VERSION }} (${{ github.event.inputs.version }})"
-          git push
-
-  publish_binaries:
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runs-on: ubuntu-20.04
-            arch: x86_64
-          - runs-on: macos-12
-            arch: x86_64
-          - runs-on: macos-12-arm
-            arch: arm64
-    needs: bump_version
-    continue-on-error: true
-    env:
-      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
     defaults:
       run:
@@ -77,154 +30,24 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Get Latest Version
-        run: git pull
-
-      - name: Get OS Architecture
-        run: uname -m
+          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install dependencies macOS
-        if: runner.os == 'macOS'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
+      - name: npm version
         run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list ninja || brew install ninja
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-          brew list libuv || brew install libuv
+          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> $GITHUB_ENV
 
-      - name: Install dependencies Linux
-        if: runner.os == 'Linux'
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: Push version to git
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ccache \
-            cmake \
-            ninja-build \
-            pkg-config \
-            xvfb \
-            libcurl4-openssl-dev \
-            libglfw3-dev \
-            libuv1-dev \
-            g++-10 \
-            libc++-9-dev \
-            libc++abi-9-dev
-          /usr/sbin/update-ccache-symlinks
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
-      - name: Prepare ccache
-        run: ccache --clear --set-config cache_dir=~/.ccache
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache
-          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats --set-config cache_dir=~/.ccache
-          ccache --max-size=2G --set-config cache_dir=~/.ccache
-          ccache --show-stats --set-config cache_dir=~/.ccache
-
-      - name: CMake
-        if: runner.os == 'MacOS'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
-
-      - name: CMake
-        if: runner.os == 'Linux'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
-
-      - name: Build
-        run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
-
-      #- name: Run render tests on macOS
-      #  if: runner.os == 'macOS'
-      #  run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
-
-      #- name: Upload render test artifacts
-      #  uses: actions/upload-artifact@v3
-      #  if: always()
-      #  with:
-      #    name: render-query-test-results
-      #    path: metrics/macos-xcode11-release-style.html
-
-      #- name: Test
-      #  if: runner.os == 'Linux'
-      #  run: xvfb-run --auto-servernum npm test
-
-      #- name: Test
-      #  if: runner.os == 'macOS' && matrix.arch != 'arm64'
-      #  run: npm test
-
-      # On PRs make sure that the npm package can be packaged.
-      #- name: Pack
-      #  if: github.ref != 'refs/heads/main'
-      #  run: |
-      #    npm pack --dry-run
-
-      - name: Publish X64 Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-        run: |
-          ./platform/node/scripts/publish.sh
-
-      - name: Publish ARM Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'arm64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
-        run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
-
-  publish_npm:
-    runs-on: ubuntu-20.04
-    needs: publish_binaries
-
-    defaults:
-      run:
-        working-directory: ./
-        shell: bash
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Get Latest Version
-        run: git pull
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -a -m "Update node version to ${{ env.NPM_VERSION }} (${{ github.event.inputs.version }})"
+          git push
+  
       - name: Publish to NPM (release)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
         run: |
