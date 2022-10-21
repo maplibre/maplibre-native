@@ -19,8 +19,6 @@ add_node_module(
         47
         48
         51
-        57
-        59
         111
 )
 find_package(PkgConfig REQUIRED)
