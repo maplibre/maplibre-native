@@ -140,22 +140,8 @@ jobs:
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
-      # On PRs make sure that the npm package can be packaged.
-      - name: Pack
-        if: github.ref != 'refs/heads/main'
-        run: |
-          npm pack --dry-run
-
-      - name: npm install
-        run: npm install
-
-      - name: Test
-        if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum npm test
-
-      - name: Test
-        if: runner.os == 'macOS'
-        run: npm test
+      - name: npm build
+        run: npm run build
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
@@ -168,4 +154,16 @@ jobs:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
 
+      - name: Test
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
 
+      - name: Test
+        if: runner.os == 'macOS'
+        run: npm test
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        if: github.ref != 'refs/heads/main'
+        run: |
+          npm pack --dry-run
