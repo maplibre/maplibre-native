@@ -1,6 +1,7 @@
 .git
 .github
 .gitmodules
+build
 design-proposals
 lib
 metrics
