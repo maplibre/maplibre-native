@@ -57,6 +57,8 @@ jobs:
             arch: x86_64
           - runs-on: macos-12
             arch: x86_64
+          - runs-on: macos-12-arm
+            arch: arm64
     needs: bump_version
     continue-on-error: true
     env:
