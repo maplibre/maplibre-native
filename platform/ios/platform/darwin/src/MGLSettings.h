@@ -17,10 +17,6 @@ typedef NS_ENUM(NSUInteger, MGLWellKnownTileServer) {
      MapLibre
      */
     MGLMapLibre,
-    /**
-     Mapbox
-     */
-    MGLMapbox
 };
 
 /**

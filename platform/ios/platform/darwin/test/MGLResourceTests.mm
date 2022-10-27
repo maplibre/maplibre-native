@@ -4,27 +4,12 @@
 
 namespace mbgl {
     extern NSURL *resourceURL(const Resource& resource);
-    extern BOOL isValidMapboxEndpoint(NSURL *url);
 }
     
 @interface MGLResourceTests : XCTestCase
 @end
 
 @implementation MGLResourceTests
-
-- (void)testValidEndpoints {
-    using namespace mbgl;
-
-    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.com"]));
-    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.cn"]));
-    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.mapbox.com"]));
-    XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.mapbox.cn"]));
-
-    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.com"]));
-    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://example.cn"]));
-    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://examplemapbox.com"]));
-    XCTAssertFalse(isValidMapboxEndpoint([NSURL URLWithString:@"https://examplemapbox.cn"]));
-}
 
 - (void)internalTestOfflineQueryParameterIsAddedForOfflineResource:(std::string)testURL {
     

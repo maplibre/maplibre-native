@@ -271,11 +271,6 @@ namespace mbgl {
         static TileServerOptions MapLibreConfiguration();
 
         /**
-         * @brief Get the tile server options configured for Mapbox.
-         */
-        static TileServerOptions MapboxConfiguration();
-
-        /**
          * @brief Get the tile server options configured for MapTiler.
          */
         static TileServerOptions MapTilerConfiguration();

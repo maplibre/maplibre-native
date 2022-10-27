@@ -116,9 +116,6 @@
         case MGLMapLibre:
             [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapLibreConfiguration()];
             break;
-        case MGLMapbox:
-            [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapboxConfiguration()];
-            break;
         default:
             [MGLSettings setTileServerOptionsInternal:mbgl::TileServerOptions::DefaultConfiguration()];
     }

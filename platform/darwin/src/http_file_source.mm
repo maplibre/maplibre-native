@@ -214,36 +214,8 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const Cli
 HTTPFileSource::~HTTPFileSource() = default;
 
 MGL_APPLE_EXPORT
-BOOL isValidMapboxEndpoint(NSURL *url) {
-    return ([url.host isEqualToString:@"mapbox.com"] ||
-            [url.host hasSuffix:@".mapbox.com"] ||
-            [url.host isEqualToString:@"mapbox.cn"] ||
-            [url.host hasSuffix:@".mapbox.cn"]);
-}
-
-MGL_APPLE_EXPORT
 NSURL *resourceURL(const Resource& resource) {
-    
-    NSURL *url = [NSURL URLWithString:@(resource.url.c_str())];
-
-#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
-    if (isValidMapboxEndpoint(url)) {
-        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSMutableArray *queryItems = [NSMutableArray array];
-
-        if (resource.usage == Resource::Usage::Offline) {
-            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"offline" value:@"true"]];
-        }
-        
-        if (components.queryItems) {
-            [queryItems addObjectsFromArray:components.queryItems];
-        }
-        
-        components.queryItems = queryItems;
-        url = components.URL;
-    }
-#endif
-    return url;
+    return [NSURL URLWithString:@(resource.url.c_str())];
 }
     
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {

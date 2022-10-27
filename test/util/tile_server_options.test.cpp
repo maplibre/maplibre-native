@@ -4,7 +4,7 @@
 
 
 TEST(TileServerOptions, CopyAssignment) {
-    mbgl::TileServerOptions options = mbgl::TileServerOptions::MapboxConfiguration();
+    mbgl::TileServerOptions options = mbgl::TileServerOptions::MapLibreConfiguration();
     mbgl::TileServerOptions optionsCopy = options;
     
     EXPECT_FALSE(&optionsCopy == &options);
@@ -12,7 +12,7 @@ TEST(TileServerOptions, CopyAssignment) {
 }
 
 TEST(TileServerOptions, CopyConstructor) {
-    mbgl::TileServerOptions options = mbgl::TileServerOptions::MapboxConfiguration();
+    mbgl::TileServerOptions options = mbgl::TileServerOptions::MapLibreConfiguration();
     mbgl::TileServerOptions optionsCopy = mbgl::TileServerOptions(options);
     
     EXPECT_FALSE(&optionsCopy == &options);
