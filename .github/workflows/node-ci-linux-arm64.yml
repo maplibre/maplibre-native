@@ -39,3 +39,4 @@ jobs:
 
       - name: Run the docker build image and create node libs
         run:  docker run --rm -v $(pwd):/data build
+
