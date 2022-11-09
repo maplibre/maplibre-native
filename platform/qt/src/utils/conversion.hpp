@@ -50,7 +50,8 @@ public:
 #endif
             || QString(value.typeName()) == QStringLiteral("QMapLibreGL::Feature")
             || value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()
-            || value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>();
+            || value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()
+            || value.userType() == qMetaTypeId<std::list<QMapLibreGL::Feature>>();
     }
 
     static optional<QVariant> objectMember(const QVariant& value, const char* key) {
@@ -176,6 +177,8 @@ public:
             return featureCollectionToGeoJSON(value.value<QVector<QMapLibreGL::Feature>>());
         } else if (value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()) {
             return featureCollectionToGeoJSON(value.value<QList<QMapLibreGL::Feature>>());
+        } else if (value.userType() == qMetaTypeId<std::list<QMapLibreGL::Feature>>()) {
+            return featureCollectionToGeoJSON(value.value<std::list<QMapLibreGL::Feature>>());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         } else if (value.typeId() != QMetaType::QByteArray) {
 #else

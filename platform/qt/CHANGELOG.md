@@ -1,5 +1,15 @@
 # Changelog
 
+## Upcoming
+
+### ✨ New features
+
+- Support for GeoJSON feature collections using std::list ([#541](https://github.com/maplibre/maplibre-gl-native/pull/541)).
+
+### 🐞 Bug fixes
+
+- Fixed bitcode issues on iOS.
+
 ## v2.0.1
 
 ### 🐞 Bug fixes

@@ -18,3 +18,5 @@ qt-cmake ../source/ \
   -DMBGL_QT_LIBRARY_ONLY=ON
 ninja
 ninja install
+cd ../install
+ln -s lib64 lib

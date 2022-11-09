@@ -88,4 +88,4 @@ bazel build //platform/ios:"$target" --apple_platform_type=ios \
 popd
 
 echo "Done."
-echo "Package will be available in \"/bazel-bin/platform/ios/platform/ios/$target.xcframework.zip\""
+echo "Package will be available in \"/bazel-bin/platform/ios/$target.xcframework.zip\""
