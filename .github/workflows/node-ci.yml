@@ -140,8 +140,30 @@ jobs:
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: npm build
-        run: npm run build
+      - name: Prepare ccache
+        run: ccache --clear --set-config cache_dir=~/.ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v3
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache
+          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats --set-config cache_dir=~/.ccache
+          ccache --max-size=2G --set-config cache_dir=~/.ccache
+          ccache --show-stats --set-config cache_dir=~/.ccache
+
+      - name: Build
+        run: |
+          npm config set cmake_CMAKE_CXX_COMPILER_LAUNCHER ccache
+          npm run build
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
