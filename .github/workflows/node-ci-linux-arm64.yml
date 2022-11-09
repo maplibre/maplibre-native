@@ -1,0 +1,41 @@
+name: node-ci-linux-arm64
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  test_linux_arm:
+    runs-on: ubuntu-latest
+    name: test (ubuntu-20.04, arm64)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create the docker build image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/arm64
+          file: platform/node/scripts/Dockerfile_Build
+          tags: build
+          push: false
+          load: true
+
+      - name: Run the docker build image and create node libs
+        run:  docker run --rm -v $(pwd):/data build
