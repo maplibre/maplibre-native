@@ -1,0 +1,43 @@
+name: Build documentation
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build-docs:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: extractions/setup-just@v1
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+      - name: Install Dependencies
+        shell: bash
+        run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
+      - name: Build
+        working-directory: docs
+        shell: bash
+        run: mdbook build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: book
+          path: docs/book/
+  deploy-docs:
+    needs: build-docs
+    name: Deploy
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download book
+        uses: actions/download-artifact@v3
+        with:
+          name: book
+          path: artifacts/book
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: artifacts
+          target-folder: docs

@@ -236,11 +236,65 @@ jobs:
           name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
           path: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}.tar.bz2
 
+  test-tarball:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-22.04
+            qt_version: 6.4.0
+            qt_target: desktop
+          - name: macOS
+            os: macos-12
+            qt_version: 6.4.0
+            qt_target: desktop
+    runs-on: ${{ matrix.os }}
+    env:
+      QT_ARCH: ${{ matrix.name }}
+      QT_VERSION: ${{ matrix.qt_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: source
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+
+      - name: Download Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: ==2.1.*
+          version: ${{ env.QT_VERSION }}
+          dir: ${{ github.workspace }}
+          target: ${{ matrix.qt_target }}
+
+      - name: Setup Xcode
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build test app
+        run: |
+          mkdir install && cd install
+          tar xf ../maplibre-gl-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2
+          cd ..
+          export CMAKE_PREFIX_PATH=$PWD/install
+          mkdir build && cd build
+          cmake ../source/platform/qt/app/
+          make
+
   release:
     name: Release QMapLibreGL
     if: github.ref_type == 'tag'
     runs-on: ubuntu-22.04
-    needs: build
+    needs: test-tarball
     strategy:
       max-parallel: 1
       matrix:
