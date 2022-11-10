@@ -74,7 +74,7 @@ concurrency:
 jobs:
   build:
     name: MacOS CI Tests
-    runs-on: macos-12-arm
+    runs-on: [self-hosted, macOS, ARM64]
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
