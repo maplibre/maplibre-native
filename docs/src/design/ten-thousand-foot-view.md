@@ -180,26 +180,32 @@ is a Geometry Tile.
 check Appendix -* *Geometry Tile Worker.*
 
 ______________
-[^1]: A feature is the spatial description of a real-world entity such as a 
-road or a utility pole. Any geometry that is displayed on a map tile is either 
-an individual feature or a part of a feature.
+[^1]: To read in depth about the data flow for map initialization and
+    rendering in Android, please check Appendix - Android Map Rendering
+    Data Flow.
 
-[^2]: This document used the term glyph and character interchangeably. In 
-reality, a single character can have multiple glyphs. These are called 
-alternates. On the other hand, a single glyph can represent multiple 
-characters. These are called ligatures.
+[^2]: This document speaks of a simplified configuration for brevity.
+    These also includes viewport mode, constrain mode, and north
+    orientation.
 
-[^3]: In the Javascript counterpart, MapLibre GL JS, this is achieved through 
-usage of webworkers.
+[^3]: Platform SDKs might use a wrapper map view class atop the map
+    component. This is to help establish contract between the device
+    runtime running a different language. Android is a good example of
+    this behaviour.
 
-[^4]: A feature is the spatial description of a real-world entity such as a 
-road or a utility pole. Any geometry that is displayed on a map tile is either
-an individual feature or a part of a feature.
+[^4]: A feature is the spatial description of a real-world entity such
+    as a road or a utility pole. Any geometry that is displayed on a map
+    tile is either an individual feature or a part of a feature.
 
-[^5]: This document used the term glyph and character interchangeably. In reality, 
-a single character can have multiple glyphs. These are called alternates. 
-On the other hand, a single glyph can represent multiple characters. 
-These are called ligatures.
+[^5]: This document used the term glyph and character interchangeably.
+    In reality, a single character can have multiple glyphs. These are
+    called alternates. On the other hand, a single glyph can represent
+    multiple characters. These are called ligatures.
 
-[^6]: In the Javascript counterpart, MapLibre GL JS, this is achieved through usage 
-of webworkers.
+[^6]: In the Javascript counterpart, MapLibre GL JS, this is achieved
+    through usage of webworkers.
+
+[^7]: In iOS, the render thread runs on UI thread, as in it's a
+    foreground thread. Android offers wider range of devices in terms of
+    battery capacity. Hence, Android prefers to use a background thread
+    for rendering loop.
