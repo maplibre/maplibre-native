@@ -1,4 +1,4 @@
-# Android Data Flow
+# Android Map Rendering Data Flow
 
 ![](media/android-data-flow.jpg)    
 *Figure 5: Simplified data flow diagram of initializing a map in Android*

@@ -48,7 +48,7 @@ through observers[^3].
 
 Figure 1 does not display the explicit use of observers for brevity.
 
-##### Observers
+#### Observers
 
 Observers are a group of components that listen and publish events from
 and to a *Map View*. Observer come in two major flavours across
@@ -156,7 +156,7 @@ Android uses a *GLSurfaceView* with a *GLThread* where the iOS SDK uses
 
 ### Tile Worker
 
-We have noted early in the document that MapLibre GL Native uses message
+We have noted early in this document that MapLibre GL Native uses message
 passing to communicate with the renderer. These messages are *immutable*
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,
@@ -177,12 +177,12 @@ messages of a specific Tile type. For a Geometry Tile Worker, the type
 is a Geometry Tile.
 
 *To read in depth about the workflow of a Geometry Tile Worker, please
-check Appendix -* *Geometry Tile Worker.*
+check [Geometry Tile Worker](./geometry-tile-worker.md) chapter.
 
 ______________
 [^1]: To read in depth about the data flow for map initialization and
-    rendering in Android, please check Appendix - Android Map Rendering
-    Data Flow.
+    rendering in Android, please check 
+    [Android Map Rendering Data Flow](./android-map-rendering-data-flow.md.md)
 
 [^2]: This document speaks of a simplified configuration for brevity.
     These also includes viewport mode, constrain mode, and north

@@ -7,5 +7,5 @@
     - [Coordinate System](design/coordinate-system.md)
     - [Expressions](design/expressions.md)
     - [Architecural Problems and Recommendations](design/archictural-problems-and-recommendations.md)
-    - [Android Data Flow](design/android-data-flow.md)
+    - [Android Map Rendering Data Flow](design/android-map-rendering-data-flow.md)
     - [Geometry Tile Worker](design/geometry-tile-worker.md)
