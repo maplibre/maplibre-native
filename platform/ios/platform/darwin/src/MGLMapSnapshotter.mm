@@ -24,6 +24,8 @@
 #else
 #import "NSImage+MGLAdditions.h"
 #import <CoreGraphics/CoreGraphics.h>
+#import <CoreImage/CIContext.h>
+#import <CoreImage/CIFilter.h>
 #import <QuartzCore/QuartzCore.h>
 #endif
 
