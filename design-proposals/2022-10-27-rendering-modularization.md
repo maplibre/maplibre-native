@@ -102,7 +102,7 @@ Once developers can create their own shaders, we’ll need a way of managing the
 
 Layers already go through a level of indirection to instantiate or reference their associated programs.  The shader registry could be inserted into that get*LayerPrograms() pattern fairly easily.
 
-![Shader Registry](/resources/fig1.png)
+![Shader Registry](resources/fig1.png)
 
 The GLES version of the Shader Registry can encapsulate the simple (but fairly weird) logic of shader source lookup that exists now.
 
@@ -204,7 +204,7 @@ It’s kind of obvious why you’d have a subclass of Drawable for each SDK.  Yo
 
 Builders are actually doing the most specific SDK related work.  For OpenGL you build up fairly simple arrays of data, which MapLibre has good support for.  But for Metal, you can (and should) allocate space off a shared heap and put the data in there.  Each of these ends up looking fairly different and the way you wire things up at the low level is very different.  So Builders are very specific and let us hide all that.
 
-![Layer + Builder + Drawables](/resources/fig2.png)
+![Layer + Builder + Drawables](resources/fig2.png)
 
 Builders will be used primarily by Layers to emit Drawables for rendering.
 
