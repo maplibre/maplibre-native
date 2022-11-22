@@ -269,7 +269,7 @@ Switching to a Drawable/Builder approach helps consolidate the rendering SDK spe
 
 We can make things like the location puck simpler.  If we can expose much of this outside the toolkit we may even make it possible to do things like your own location puck, or similar functionality.
 
-By moving to this approach we can let the rendering logic deal only with its own classes.  Rather than letting implementaton propagate all the way down to the render_*_layer, which has to very specifically implement them, we can make layers ask for what they need and let the SDK level implement it however it may feel like.  This is particularly important for Metal's indirect mode.
+By moving to this approach we can let the rendering logic deal only with its own classes.  Rather than letting implementation propagate all the way down to the render_*_layer, which has to very specifically implement them, we can make layers ask for what they need and let the SDK level implement it however it may feel like.  This is particularly important for Metal's indirect mode.
 
 ### Atlases: Line, Image, Pattern, and Glyph
 
