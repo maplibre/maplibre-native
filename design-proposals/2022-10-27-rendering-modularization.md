@@ -2,7 +2,7 @@
 
 Before we dive in, a bit about our process.  Stamen Design, with a sub-contract to Wet Dog Weather, has been contracted by Amazon (AWS) to develop two proposals to upgrade MapLibre Native.  The goal is Metal support and the first proposal is this one: Modularizing the rendering support.
 
-We started with a sparse proposal, laying out the goals first.  Our intent was the let the MapLibre community add their own feedback and discussion.  We have finished our update to the PR and now look for more formal feedback on the way to adoption of the design.
+We started with a sparse proposal, laying out the goals first.  Our intent was to let the MapLibre community add their own feedback and discussion.  We have finished our update to the PR and now look for more formal feedback on the way to adoption of the design.
 
 The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the 21st of November.  
 
