@@ -16,6 +16,11 @@ Thus the graphics implementations must diverge, either by doing so within MapLib
 
 This is the MapLibre Rendering Modularization Design Plan and the biggest goal is to pave the way for Metal support on iOS. But while we’ve got the hood open, so to speak, we’d also like to fix a few other things. So let’s get to it!
 
+But before that, a quick note on terminology.
+- "toolkit" usually refers to MapLibre Native, but may also be used in context for another project at a similar level.
+- "SDK" or Software Development Kit usually refers to the rendering library, like OpenGL or Metal, at least in this document.
+- "API" refers to an Application Programming Interface.  In this context it refers to the classes and methods made available to a developer.
+
 ## Goals
 
 It is useful to split our goals into three sections to articulate what this proposal aims to accomplish:
@@ -92,7 +97,7 @@ We'll be able to:
 
 ### Shader(Program) Registry
 
-_Addresses core functionality [#3](#core) and [#4](#core)._
+_Addresses core functionality [#1](#core) and [#2](#core)._
 
 Once developers can create their own shaders, we’ll need a way of managing them, thus the Shader Registry.  This registry will associate a given shader (Program) with a name.  Basic functionality will include:
 - Add a new shader by name
@@ -218,10 +223,10 @@ What's going on here is that the toolkit has broken out a bunch of features from
 
 Now it's not redoing the work of consolidation each frame, but it is doing a lot and a lot that is very specific to what the layer wants.  This leads to a few interesting issues.
 - That's a lot of commands that are fairly similar in every render layer.  Not a tiny amount of duplication there.
-- This is more specific logic than I want to see in a rendering loop.  Remember, this runs every frame.
+- This is more specific logic than we'd want to see in a rendering loop.  Remember, this runs every frame.
 - If your data is not in tile form, it's going to be hard to render.
 
-That last one is really interesting and we can find an example in MapLibre Native itself.  I recommend the [Render Location Indicator Layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_location_indicator_layer.cpp).  Here's where this approach trips up... rolls down the hill... into a pile of broken glass.  You can feel the developers' pain in this module.
+That last one is really interesting and we can find an example in MapLibre Native itself.  Look to the [Render Location Indicator Layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_location_indicator_layer.cpp).  Here's where this approach trips up... rolls down the hill... into a pile of broken glass.  You can feel the developers' pain in this module.
 
 If you're not familiar with real time rendering toolkits, I'll put it this way.  Managing the logic for a location puck that updates every time the user moves should not involve direct OpenGL calls.  It should be abstracted, at least a little.
 
@@ -277,7 +282,7 @@ _Addresses core functionality [#3](#core)._
 
 Having a lot of little textures floating around is inefficient.  This was very much the case in OpenGL, but it's still true in Metal and other SDKs.  There's a long conversation to be had about that, but it's somewhat moot.  MapLibre Native uses atlases, so we need to consider them.
 
-All of these atlases are essentially Texture Atlases.  That is, a group of individual textures gathered together for efficiency.  Shaders reference these with a little offset into a larger texture.  The shaders may not even be aware of it, I haven't checked.
+All of these atlases are essentially Texture Atlases.  That is, a group of individual textures gathered together for efficiency.  Shaders reference these with a little offset into a larger texture.  The shaders may not even be aware of it.
 
 #### The way it is now
 
@@ -301,13 +306,17 @@ Making the atlas updates more generic might allow for new types, or even the fab
 
 _Addresses refactoring that make migration easier, particularly our [north stars](#north-stars)._
 
-Every real time rendering toolkit has a main rendering loop or something like it.  It's not actually a loop anymore, it's a callback.  Years ago there were big fights between the regular UI people and the real time rendering people and the first group won.  But we have our dignity, so it's a "rendering loop".
+Every real time rendering toolkit has a main rendering loop or something like it.  It's not actually a loop anymore, it's a callback.  Years ago there actually was a main rendering loop where the program in question would draw a frame, wait for a defined period and then draw another frame.  With modern OS' and the rise of modern UI toolkits, that loop has been replaced by time or event based callbacks.  We will still sometimes refer to it as a "rendering loop", however.
 
 On iOS this runs on the main thread and on Android this runs on its own separate thread.  You might think the latter is better, but it has its own problems (gesture lag).  In any case, MapLibre Native handles both just fine.
 
-The toolkit's main rendering "loop" lives in [renderer_impl](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) and it's worth a look.  When I was first investigating the toolkit I looked here and then followed classes outward from this point.
+The toolkit's main rendering "loop" lives in [renderer_impl](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) and it's worth a look.  It serves as a central point to begin examining the real time rendering.
 
 As you might suspect, the rendering loop logic and implementation are heavily influenced by OpenGL.
+
+#### The way it is now
+
+Since to toolkit supports one rendering SDK, OpenGL ES, there is only one rendering "loop" and it focuses on having Layers render themselves.
 
 #### Required Changes
 
@@ -338,13 +347,17 @@ The observer classes in MapLibre Native let the developer know when something ha
 
 That structure is just fine, but we should lean into it and go deeper.
 
+#### The way it is now
+
+At present we get a handful of events related to high level rendering stages.  These include a frame start/stop and rendering start/stop events.
+
 #### Required Changes
 
 For the main class we should consider adding events for each rendering pass.  We don't want to get down to the level of the new Drawables, but a bit more flexibility would make adding features easier.
 
 We do want to make Renderer Observers specific to each SDK.  Then we'll want to publish SDK specific events.  For OpenGL this isn't going to be terribly different, but for Metal or Vulkan it can get more granular.
 
-We could go all the way and just publish events on everything even down to the level of Drawables being drawn.  That's a specific implementation decision I would leave up to the developers.  There are performance implications.
+We could go all the way and just publish events on everything even down to the level of Drawable's being drawn.  That's a specific implementation decision left up to the developers.  There are performance implications.
 
 #### Benefits
 
@@ -352,7 +365,7 @@ By opening up access to some of the low level rendering events and objects we wo
 
 An example might be Apple's Metal based image processing.  Much of that works in real time and produces Metal textures which can be reused directly, rather than going through a GPU->CPU->GPU copy cycle.
 
-Another example is new functionality.  Rather than having to hack the toolkit itself, if we provide enough callbacks, developers can work on new functionality entirely outside MapLibre Native and then merge it in later if it seems important enough.  Ideally we could use that ourselves for features we may not need in a particular app, like heatmaps.
+Another example is new functionality.  Rather than having to hack the toolkit itself, if we provide enough callbacks, developers can work on new functionality entirely outside MapLibre Native and then merge it in later if it seems important enough.  Ideally we could use that ourselves for features we may not need in a particular app, like heat maps.
 
 ### Optimization
 
@@ -415,7 +428,7 @@ Sections covered:
 
 By the end we should have:
 * Shaders called out as individual objects accessible outside the toolkit
-* Shaders createable from outside the toolkit
+* Shaders create-able from outside the toolkit
 * Shaders replaceable from outside the toolkit
 * A compile time option to use shaders either from the compressed source (as now) or with individual shader source files
 
