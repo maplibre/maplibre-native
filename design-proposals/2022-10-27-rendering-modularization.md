@@ -344,7 +344,7 @@ For the main class we should consider adding events for each rendering pass.  We
 
 We do want to make Renderer Observers specific to each SDK.  Then we'll want to publish SDK specific events.  For OpenGL this isn't going to be terribly different, but for Metal or Vulkan it can get more granular.
 
-We could go all the way and just publish events on everything even down to the level of Drawable's being drawn.  That's a specific implementation decision I would leave up to the developers.  There are performance implications.
+We could go all the way and just publish events on everything even down to the level of Drawables being drawn.  That's a specific implementation decision I would leave up to the developers.  There are performance implications.
 
 #### Benefits
 
