@@ -223,7 +223,7 @@ Now it's not redoing the work of consolidation each frame, but it is doing a lot
 
 That last one is really interesting and we can find an example in MapLibre Native itself.  I recommend the [Render Location Indicator Layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_location_indicator_layer.cpp).  Here's where this approach trips up... rolls down the hill... into a pile of broken glass.  You can feel the developers' pain in this module.
 
-If you're not familar with real time rendering toolkits, I'll put it this way.  Managing the logic for a location puck that updates every time the user moves should not involve direct OpenGL calls.  It should be abstracted, at least a little.
+If you're not familiar with real time rendering toolkits, I'll put it this way.  Managing the logic for a location puck that updates every time the user moves should not involve direct OpenGL calls.  It should be abstracted, at least a little.
 
 Now the toolkit does have some help for assembling the necessary buffers and such, but there's raw OpenGL calls in the module, careful management of assets and just generally pain.  It shouldn't be this difficult to draw a location puck.  Imagine trying to do this outside of the toolkit.
 
