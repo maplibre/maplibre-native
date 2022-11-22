@@ -277,7 +277,7 @@ _Addresses core functionality [#3](#core)._
 
 Having a lot of little textures floating around is inefficient.  This was very much the case in OpenGL, but it's still true in Metal and other SDKs.  There's a long conversation to be had about that, but it's somewhat moot.  MapLibre Native uses atlases, so we need to consider them.
 
-All of these atlases are essentially Texture Atlases.  That is, a group of individual textures gathered together for efficiency.  Shaders reference these with a little offset into a larger texture.  The shaders may not even be a aware of it, I haven't checked.
+All of these atlases are essentially Texture Atlases.  That is, a group of individual textures gathered together for efficiency.  Shaders reference these with a little offset into a larger texture.  The shaders may not even be aware of it, I haven't checked.
 
 #### The way it is now
 
