@@ -122,7 +122,7 @@ _Addresses core functionality [#5](#core)._
 
 Modern graphics pipelines use more than one pass to create a visual representation.  It's actually pretty unusual to have a single rendering pass in your toolkit.  These are used for a dizzying array of purposes, including lightning effects, shadows, atmosphere and many others.  We (Wet Dog Weather) use separate rendering passes to draw data intermingled with map elements.
 
-Without getting too deep into specifics, early rendering passes allow the developer to use the power of the rasterizer for their own data.  Later rendering passes are typically using to decorate the map with effects.
+Without getting too deep into specifics, early rendering passes allow the developer to use the power of the rasterizer for their own data.  Later rendering passes are typically used to decorate the map with effects.
 
 #### The way it is now:
 The [low level rendering logic](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) in the toolkit seems to only support one explicit rendering pass.  
