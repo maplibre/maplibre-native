@@ -261,7 +261,7 @@ Each SDK specific Drawable subclass will do things like:
     Just to make this even more fun, modern renderers are going to have multiple frames in flight at any given time.  So you can’t just keep one set of values and update them periodically.  My preferred approach is to put memory copy commands into a command buffer with guard logic between them.  In Metal, anyway.  Vulkan will have its own way to do that and OpenGL just doesn't.  Well, there's probably an extension somewhere that does, but it's very hard to use and sparsely supported.
 - Tear down their data.   <br>Pretty simple for OpenGL, but with Metal when you’re using heaps (and you should) you actually want another thread to do this.  Thus it’s SDK specific.
 
-Now there is already logic to do lot of this spread throughout various classes in MapLibre Native.  Buckets have some of it, Programs actually own the draw() method, and so forth.  To switch to this approach we'll need to cut across the gl and glx levels of the toolkit, even a bit higher, to capture everything that builds geometry.  We'll need to convert that over to this approach and make sure we didn't miss anything, like all the fiddly per-program state.
+Now there is already logic to do a lot of this spread throughout various classes in MapLibre Native.  Buckets have some of it, Programs actually own the draw() method, and so forth.  To switch to this approach we'll need to cut across the gl and glx levels of the toolkit, even a bit higher, to capture everything that builds geometry.  We'll need to convert that over to this approach and make sure we didn't miss anything, like all the fiddly per-program state.
 
 #### Benefits
 
