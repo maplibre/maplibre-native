@@ -362,7 +362,7 @@ A number of our goals are related to improving the performance of the toolkit or
 
 For this PR let's restrict that to areas where we're likely to have made it worse and need to improve something to compensate.  For example, if we make the toolkit larger, we should try to make it smaller in another way.  If we make it slower, we'll try to make it faster to compensate.
 
-Before taking any action, the developers should generate a report on the three key ares:
+Before taking any action, the developers should generate a report on the three key areas:
 - Did the toolkit get larger on iOS or Android?
 - Did the frame rate go down on either platform?
 - Is the toolkit taking longer to startup on either platform?
