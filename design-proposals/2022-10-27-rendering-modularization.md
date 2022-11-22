@@ -307,7 +307,7 @@ On iOS this runs on the main thread and on Android this runs on its own separate
 
 The toolkit's main rendering "loop" lives in [renderer_impl](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) and it's worth a look.  When I was first investigating the toolkit I looked here and then followed classes outward from this point.
 
-As you might suspect, the rendering loop logic and implemention are heavily influenced by OpenGL.
+As you might suspect, the rendering loop logic and implementation are heavily influenced by OpenGL.
 
 #### Required Changes
 
