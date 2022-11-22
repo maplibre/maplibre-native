@@ -92,7 +92,7 @@ We'll be able to:
 
 ### Shader(Program) Registry
 
-_Addresses core functionality [#1](#core) and [#2](#core)._
+_Addresses core functionality [#3](#core) and [#4](#core)._
 
 Once developers can create their own shaders, we’ll need a way of managing them, thus the Shader Registry.  This registry will associate a given shader (Program) with a name.  Basic functionality will include:
 - Add a new shader by name
