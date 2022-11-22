@@ -479,7 +479,7 @@ Tests:
 
 #### PR 5: Optimization Pass
 
-This PR is here to address areas we may have made slower or bigger in the process of doing our work.  Our goals is to not make things worse, so this is the pass where we try to fix where we did.
+This PR is here to address areas we may have made slower or bigger in the process of doing our work.  Our goal is to not make things worse, so this is the pass where we try to fix where we did.
 
 Sections covered:
 * Optimization
