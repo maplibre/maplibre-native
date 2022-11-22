@@ -371,7 +371,7 @@ If the answer to any of these questions is 'yes', then we move to the next stage
 
 #### Required Changes
 
-These are contingent on what we may have made worse and why.  Opportunties to improve that specific situation will be strategic and hard to pin down at this point.  A lot depends on why the toolkit is bigger, slower, etc...  So this is speculation right now.
+These are contingent on what we may have made worse and why.  Opportunities to improve that specific situation will be strategic and hard to pin down at this point.  A lot depends on why the toolkit is bigger, slower, etc...  So this is speculation right now.
 
 It depends on the other changes, but let's break it down by type.
 - Is the toolkit slower to render?  Look at the frame logic and do more up front or on other threads.
