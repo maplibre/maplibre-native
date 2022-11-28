@@ -1,6 +1,6 @@
 # Ten Thousand Foot View
 
-![](./ten-thousand-foot-view-diagram.png)    
+![](media/ten-thousand-foot-view-diagram.png)    
 *Figure 1: MapLibre Native Components – Ten Thousand Foot view*
 
 From ten thousand foot, MapLibre Native is composed of *Map View* and a
