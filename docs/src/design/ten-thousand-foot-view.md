@@ -32,7 +32,9 @@ To summarize:
     composed of multiple *layers*.
 
 5.  A ***Layer*** requires ***Style***, ***Glyphs***, and ***Sprites***
-    for to be ready for rendering.
+    for to be ready for rendering. Features rendered in a ***Layer*** 
+    come from data sources. And a ***Layer*** is composed of tiles produced
+    from said features.
 
 We will look a bit more into these components going forward[^1].
 
