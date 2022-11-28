@@ -109,13 +109,23 @@ characters[^5]. Map tiles use labels of text to show name of cities,
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
-called *glyphs.* A glyph is loaded as a set of signed-distance-fields in
-protobuf format. For curious readers, a signed-distance-field which
-takes a position and desired glyph as input and returns the distance
-from that position to the desired glyph. This is used in a rendering
-technique called atlasing. To build a glyph atlas, MapLibre GL Native
-builds a single image that will be uploaded as a texture to the GPU
-along with the rest of the data for the tile.
+called *glyphs.* 
+
+*Glyphs* require resizing, rotation, and a halo for clarity in nearly every 
+interaction with the map. To achieve this, all *glyphs* are pre-rendered 
+in a shared texture, called *texture atlas*. This atlas is packed inside
+protobuf container. Each element of the atlas is an individual texture
+representing the SDF of the character to render.
+
+Each *glyph* bitmap inside is a field of floats, named signed distance. It
+represents how a *glyph* should be drawn by the GPU. Each *glyph* is of font 
+size 24 that stores the distance to the next outline in every pixel. Easily
+put if the pixel is inside the *glyph* outline it has a value between `192-255`.
+Every pixel outside the *glyph* outline has a value between `0-191`. This creates 
+a black and white atlas of all the *glyphs* inside.
+
+This document currently does not have a dedicated section on text rendering.
+When it does, we will dive more into *glyph* rendering.
 
 ### Actor Framework
 
