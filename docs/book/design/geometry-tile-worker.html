@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Geometry Tile Worker - MapLibre GL Native Documentation</title>
+        <!-- Custom HTML head -->
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../diff.css">
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="../design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="../design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="../design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="../design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="../design/geometry-tile-worker.html" class="active"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MapLibre GL Native Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="geometry-tile-worker"><a class="header" href="#geometry-tile-worker">Geometry Tile Worker</a></h1>
+<p><img src="media/geometry-tile-worker-state-machine.jpg" alt="" /><br />
+<em>Figure 8: Simplified Geometry Tile Worker State Machine</em></p>
+<p>Going back to Geometry Tile Worker, it is
+a state machine. The main principle is that Geometry Tile Worker should
+carry out each task till completion once it has begun even if it
+requires asynchronous waiting<sup class="footnote-reference"><a href="#21">1</a></sup>. When a Geometry Tile Worker is
+working on a task, any new message to said worker is queued. Messages
+per <em>unique tile</em> are grouped. Upon finishing work, Geometry Tile Worker
+picks the latest message from the queue. All changes introduced in the
+queued messages are <em>coalesced</em> for the next work item for the tile
+worker. This way, a Geometry Tile Worker saves itself from starvation
+when it is under heavy workload. <em>Coalescing</em> also helps at finalizing
+the result when all the messages are processed because the map has
+stopped moving.</p>
+<p>To dive a little bit deeper into this process, let's have a quick look
+at Figure 8. It shows a simplified representation of Geometry Tile
+Worker state machine. From a cursory look, the state transitions might
+not seem self-explanatory. We will take one step at a time to clarify.</p>
+<p><em>Going forward, this section will use the term <strong>worker</strong> to denote a
+<strong>Geometry Tile Worker</strong> for brevity.</em></p>
+<p>A <em>worker</em> is <em>Idle</em> when it has nothing to work on or completed
+<em>coalescing</em> queued messages. It is in <em>Coalescing</em> state when it has
+not finished processing all the messages in the queue. These two states
+are the two key states the <em>worker</em> floats between.</p>
+<p>The initial transition from <em>Idle</em> to <em>coalescing</em> starts from a
+<em><strong>set</strong></em> message. A worker can receive a <strong>set</strong> message for data or a
+layer that is dependent on data. Referring back to <strong>Figure 8</strong>, this is
+what the transition label (<strong>set</strong> {Data, Layers} ) from <em>Idle</em> to
+<em>Coalescing</em> state stands for. This initiates an internal workflow named
+<em><strong>Parsing.</strong></em> Parsing means understanding the features to be rendered
+in a layer. Parsing process is encapsulated in <em>parse()</em> method. In the
+end of this method, a worker will also deduce required glyphs and images
+to render the tile.</p>
+<p>A worker will send a message to the Tile it is working on fetching the
+necessary glyphs and images. From a threading perspective, it can happen
+in the same thread as the worker or in a different thread. Looking back
+to Figure 8, we also see another transition path from <em>Idle</em> state to
+<em>coalescing</em> state through <em>symbolDependenciesChanged</em> event. When a
+tile object is done with downloading pending glyphs and images it issues
+a <em>onImagesAvailable</em> or <em>onGlyphsAvailable</em> event to the worker<sup class="footnote-reference"><a href="#22">2</a></sup>.
+Both of these events will translate to <em>symbolDependenciesChanged</em> event
+in the end. When <em>symbolDependenciesChanged</em> is fired, if the worker is
+on <em>Idle</em> state, it will move to <em>Coalescing</em> state. If the worker was
+already working on a tile and <em>symbolDependenciesChanged</em> is fired in
+the middle, it will move to <em>NeedsSymbolLayout</em> state.</p>
+<h2 id="restart-a-worker-in-progress-needsparse-and-needssymbollayout-state"><a class="header" href="#restart-a-worker-in-progress-needsparse-and-needssymbollayout-state">Restart a worker in-progress: NeedsParse and NeedsSymbolLayout state</a></h2>
+<p>The logical question to ask right now is why does the worker have
+<em>NeedSymbolLayout</em> and <em>NeedsParse</em> state at all? Based on what we have
+seen so far, parsing and fetching symbols (glyphs, images) can be done
+in <em>Coalescing</em> state. This is to distinguish incremental changes
+introduced while the worker is already working on something. This was to
+facilitate a reset of current work and force the worker to <em>parse</em> and
+<em>fetch</em> symbols again from the <em>Coalescing</em> state. If we look back to
+Figure 8 now, we will see that <em>Coalescing</em> state goes to
+<em>NeedsSymbolLayout</em> if a symbol update (glyphs, images) has been
+encountered. <em>NeedsSymbolLayout</em> state will go to <em>NeedsParse</em> state
+with a <em><strong>set</strong></em> method invocation after updating the symbols.
+<em>Coalescing</em> state will go straight to <em>NeedsParse</em> state if only
+incremental data or layer change is introduced with a <em><strong>set</strong></em> method
+invocation.</p>
+<p>To summarize, restarting an in-progress <em>worker</em> requires:</p>
+<ol>
+<li>
+<p>Send <em>symbolDependenciesChanged</em> through <em>onImagesAvailable</em> or
+<em>onGlyphsAvailable event.</em> To re-emphasize, these are not messages
+passed to the worker, rather events invoked through methods.</p>
+</li>
+<li>
+<p>This will interrupt old parsing process and issue a new <em><strong>set</strong></em>
+method to re-parse data from <em>NeedsSymbolLayout</em> or <em>Coalescing</em>
+state. In both cases, the worker will end up in <em>NeedsParse</em> state
+to re-parse.</p>
+</li>
+</ol>
+<p><em>setShowCollisionBoxes</em> event works in similar fashion. This event is
+used to show text label collision boxes in the to-be-rendered tile. It
+is used for debugging collision detection of text labels.</p>
+<h2 id="finalization"><a class="header" href="#finalization">Finalization</a></h2>
+<p>A worker finalizes its work when all required data is parsed, and all
+symbols are loaded in a layout.</p>
+<p>A <em><strong>Symbol Layout</strong></em> is the process of turning raw features into OpenGL
+buffers ready to be rendered. To simplify, a <em>symbol layout</em> contains
+images, glyphs, and their collision metadata positions relative to the
+tile to be rendered.</p>
+<p>When a geometry tile worker has completed its work, it moves to <em>Idle</em>
+state by self-sending <em>coalesced</em> transition. Reiterating again, to
+consider the worker has coalesced, it has to <em>parse</em> all the <em>coalesced</em>
+data from available messages in the queue for a particular tile.</p>
+<hr />
+<div class="footnote-definition" id="21"><sup class="footnote-definition-label">1</sup>
+<p>This is not entirely true. Going forward this section will shed
+some light on <em>why.</em> For the time being, the assumption accelerates
+understanding.</p>
+</div>
+<div class="footnote-definition" id="22"><sup class="footnote-definition-label">2</sup>
+<p>In reality, <em>onGlyphsAvailable</em> and <em>onImagesAvailable</em> events
+will be fired from GlyphManager and ImageManger instances. For
+brevity, this document does not speak of these classes.</p>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../design/android-map-rendering-data-flow.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../design/android-map-rendering-data-flow.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
