@@ -260,7 +260,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build
+      - name: Create the docker build image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -270,7 +270,7 @@ jobs:
           push: false
           load: true
 
-      - name: Run the Docker image
+      - name: Run the docker build image and create node libs
         run:  docker run --rm -v $(pwd):/data build
 
       - name: Setup node
