@@ -373,4 +373,4 @@ _________________________
     document.
 
 [^16]: Matrix and examples produced from Chris Loers work hosted in:
-    <https://chrisloer.githuba.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60>
+    <https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60>
