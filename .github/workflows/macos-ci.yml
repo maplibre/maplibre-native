@@ -13,7 +13,6 @@ on:
       # ignore other platforms
       - "platform/android/**"
       - "platform/glfw/**"
-      - "platform/ios/**"
       - "platform/node/**"
       - "platform/qt/**"
       # ignore CI for other platforms

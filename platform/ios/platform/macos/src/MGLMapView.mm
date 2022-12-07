@@ -61,6 +61,8 @@
 #import "MGLReachability.h"
 #import "MGLSettings_Private.h"
 
+#import <CoreImage/CIFilter.h>
+
 class MGLAnnotationContext;
 
 /// Distance from the edge of the view to ornament views (logo, attribution, etc.).
