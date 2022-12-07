@@ -21,7 +21,7 @@ RUN set -ex; \
       g++-10 \
       libc++-9-dev \
       libc++abi-9-dev; \
-    wget -qO- https://deb.nodesource.com/setup_16.x | bash; \
+    wget -qO- https://deb.nodesource.com/setup_18.x | bash; \
     apt-get install -y nodejs;
 
 VOLUME /data
