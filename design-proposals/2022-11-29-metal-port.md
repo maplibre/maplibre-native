@@ -283,8 +283,21 @@ The goal here is to move as many setup stages as possible off the main thread.  
 
 #### Required Changes
 
+It's not clear what changes will need to be made here.  The process goes like this:
+- Find a good test case.  Usually something that involves a lot of zooming and panning.
+- Run the test case while recording one or more of: memory or CPU
+- Look for a bottleneck
+- Fix the bottleneck
+
+Typically bottlenecks are where the main CPU is waiting on something it shouldn't be, or tiles are only being loaded on a single thread or other similar issues.  It's never obvious until you start staring at the traces.
+
 #### Benefits
 
+MapLibre Native makes some use of threads, but not as much as it should.  With OpenGL it's not using shared contexts, though it does a lot of work in the Layers to prep for the GL work that has to be done on the main thread.  So it's not terrible, but it obviously could be better.
+
+Mobile devices, even the really cheap ones, now have a lot of CPU cores and a lot of opportunity for work to be done off the main thread.  Maps have an embarassing amount of high level parallelism.  It's worth periodically analyzing the performance to see what might be updated for data loading.
+
+The benefits are faster loading, lower latency, better responsiveness to the user.
 
 ### Shader optimization
 
@@ -292,18 +305,23 @@ The first version of shaders will work with the direct rendering in Metal.  They
 
 The second version of the shaders will consist of changes to support indirect rendering.  The way buffers are passed in is different when doing indirect rendering in a way that's not obvious.
 
+Further, this is the time to break the shaders to modular pieces to be reused by developers outside the toolkit.  Passing in a new shader to replace existing functionality works a lot better when you can call sub-routines to implement that MapLibre Native basics for you.
+
+#### Required Changes
+
 This pass is the last version of the shaders and would consist of:
 - Modularization.  We can make it easier to reuse shaders by sharing code where useful.  Even putting the core of a given shader into a subroutine would make it easier to reuse.
 - Data driven styling.  How much of that logic can be pushed into the shaders?  The more work they do, the less the CPU does.
 - Optimization.  Apple provides tools for analyzing time spent in the shaders.  Some optimization here is always useful.
 - Packaging.  Normally Metal shaders are pre-compiled and shipped with the app binary.  We may want to support a pure source version.
 
-Optimization tends to get lost in these projects, but it yields dividends later on.  Less time spent on the CPU, in particular, makes room for more functionality.
-
-#### Required Changes
+We'd also suggest writing a couple of examples here for implementing your own shaders.
 
 #### Benefits
 
+Optimization tends to get lost in these projects, but it yields dividends later on.  Less time spent on the CPU, in particular, makes room for more functionality.
+
+Adding your own shaders is one of the big goals.  If we can break up the common functionality in nice sub-routines that becomes much easier.  Ideally we can foster a community of incremental updates to add new features, rather than having to periodically do these big updates.
 
 ### Bug Roundup
 
@@ -313,8 +331,11 @@ To address this, we suggest allocating a bug squishing pass a head of time.  Thi
 
 #### Required Changes
 
+This depends entirely on the bugs we find.
+
 #### Benefits
 
+Big development projects do generate bugs.  We can certainly depend on a good number of testers.  The community is active and involved.  This will help immensely.  But we do want the big companies to adopt this new version and we want to fix what they find.  As such, scheduling a post-development bug sprint with the team that does the work would be a good idea.
 
 ## API Modifications
 
