@@ -28,10 +28,13 @@ It is useful to split our goals into three sections to articulate what this prop
 - **Evaluation metrics:** These are specific criteria we will accomplish through this proposal.
 
 ### <a name="north-stars">North Stars</a>
-1. The MapLibre Native toolkit should use Metal for rendering on iOS
-2. The MapLibre Native toolkit should use Metal for rendering on MacOS
+1. The MapLibre Native toolkit should use Metal for rendering on iOS & MacOS
+2. The Metal implementation should follow the pattern laid out the Rendering Modularization PR.
 
 ### <a name="core">Core Functionality</a>
+
+![OpenGL and Metal as plugins](resources/figs-7.png)
+
 1. The OpenGL renderer will still be available on iOS as a compile time flag
 2. Shaders will be reimplemented in Metal
 3. Off screen targets will be implemented in Metal and exposed in a such a way they can be read from and shared
@@ -46,6 +49,7 @@ It is useful to split our goals into three sections to articulate what this prop
 2. .... should not be any slower than the OpenGL version
 3. .... should be significantly faster in most test cases
 4. .... should use the main thread less than the previous version on iOS
+5. .... should look as similar to the old rendering as possible
 
 ## Proposed Changes
 
@@ -68,8 +72,6 @@ We're also going to deviate a bit from the format of the Renderer Modularization
 _Addresses North Stars [#1](#north-stars), [#2](#north-stars) and Core Functionality [#1](#core)._
 
 At the end of the Renderer Modularization work we'll have an OpenGL ES module for rendering to that SDK.  That will consist of a group of files, probably in a sub-directory, that can be included in the toolkit with a compile flag.
-
-![OpenGL and Metal as plugins](resources/figs-7.png)
 
 We'll want to do something similar for Metal.  We suggest building out the full set of files for that module in the most minimal way possible.  That is, a rendering loop that sets up, tears down, and renders nothing to the screen.  For textures, render targets, drawables and builders, again just stubs that do the minimum required to keep the toolkit from crashing.
 
