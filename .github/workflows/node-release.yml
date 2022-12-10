@@ -287,4 +287,4 @@ jobs:
           BUILDTYPE: RelWithDebInfo
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
         run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
+          ./platform/node/scripts/publish.sh --target_platform=linux --target_arch=arm64
