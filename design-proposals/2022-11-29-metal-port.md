@@ -136,7 +136,7 @@ Once all the basics are set up, it's time to get back to the specifics and Metal
 
 With the Modularization PR finished, we'll have a generic Builder interface that the Layers use to emit Drawables.  Each Builder variant will have a Metal Builder variant and it's those we'll need to build here.
 
-![Drawables and Builders](resources/figs-tmp-drawables.jpg)
+![Drawables and Builders](resources/figs-tmp-drawable.jpg)
 
 My suggestion for this development phase is to start with a fairly core function, like Fill, and implement the Metal version of that.  Use it to flesh out the Metal Drawable.  Practically speaking, that means allocating and filling out Buffers.
 
