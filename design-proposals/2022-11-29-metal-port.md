@@ -65,7 +65,7 @@ We're also going to deviate a bit from the format of the Renderer Modularization
 
 ### First, Do Nothing in Metal
 
-_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and [#1](#core)._
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and Core Functionality [#1](#core)._
 
 At the end of the Renderer Modularization work we'll have an OpenGL ES module for rendering to that SDK.  That will consist of a group of files, probably in a sub-directory, that can be included in the toolkit with a compile flag.
 
@@ -116,7 +116,7 @@ For the Metal implementation we'll just need a texture to render to.  There is a
 
 ### Renderer Observer, Rendering Passes
 
-_Addresses North Stars [#1](#north-stars), [#2](#north-stars), and Core Functionality [#3](#core), [#8](#core)._
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars), and Core Functionality [#3](#core), [#4](#core), [#8](#core)._
 
 When the developers have a basic render loop going with drawables that do nothing, the next step is to build out the observability and make the structure of the rendering itself more flexible.
 
