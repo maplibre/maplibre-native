@@ -4,6 +4,8 @@ Before we dive in, a bit about our process.  Stamen Design, with a sub-contract 
 
 The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the end of the year.  
 
+This proposal is to implement a rendering module as defined in the earlier Rendering Modularization proposal.  Some of those stages are reflected here directly, such as "Snapshotting".  Others are spread across multiple passes in this documents.  For example, the Shader Registry from the Modularization proposal is directly referenced but will be used in each of the Shader related passes.
+
 ## Motivation
 
 MapLibre Native is currently depending on a deprecated rendering SDK (OpenGL) for iOS. It needs to move to Metal for iOS in some form.  Thus the graphics implementations must diverge, either by doing so within MapLibre Native or depending on another toolkit to do the rendering entirely. 
@@ -34,7 +36,7 @@ It is useful to split our goals into three sections to articulate what this prop
 2. Shaders will be reimplemented in Metal
 3. Off screen targets will be implemented in Metal and exposed in a such a way they can be read from and shared
 4. Rendering passes will be implemented in Metal
-5. Snapshots will not block the rendering pipeline
+5. Screen snapshots will not block the rendering pipeline
 6. Atlases will be implemented for Metal and be accessible from any thread
 7. The Metal renderer will be optimized to the best of our abilities
 8. The toolkit will allow mixing of real time assets from other Metal based toolkits 
@@ -65,7 +67,7 @@ We're also going to deviate a bit from the format of the Renderer Modularization
 
 At the end of the Renderer Modularization work we'll have an OpenGL ES module for rendering to that SDK.  That will consist of a group of files, probably in a sub-directory, that can be included in the toolkit with a compile flag.
 
-Figure: OpenGL and Metal as plugins
+![OpenGL and Metal as plugins](resources/figs-7.png)
 
 We'll want to do something similar for Metal.  We suggest building out the full set of files for that module in the most minimal way possible.  That is, a rendering loop that sets up, tears down, and renders nothing to the screen.  For textures, render targets, drawables and builders, again just stubs that do the minimum required to keep the toolkit from crashing.
 
@@ -73,7 +75,7 @@ We'll want to do something similar for Metal.  We suggest building out the full 
 
 Once the renderer_impl module exists for Metal, it's time to start fleshing it out.  This is where the rendering "loop" begins, though subsequent development will change it.
 
-Figure: Metal Renderer (general)
+![Metal Renderer (general)](resources/figs-0.png)
 
 After the Rendering Modularization rework we'll have Layers using Builders to emit Drawables.  Initially the Metal Drawables will be stubs, but we can get started with a carefully curated Metal Drawable that consists of one polygon.  It can be matched with a single Metal Shader that does nothing more than draw it.
 
@@ -83,7 +85,7 @@ Getting the skeleton version of the Metal Renderer in place is the purpose of th
 
 The MapLibre Native toolkit already knows what a texture is, so this is the Metal Texture variant.  Metal textures don't deviate all that much from the OpenGL in concept, but the specifics very much do.
 
-Metal supports a whole host of texture formats that OpenGL doesn't (or does through extensions).  There are is the traditional RGBA, but there are also 32 bit float, or dual 16 bit float, or.... the list goes on and on.  We want to allow support for these without losing our minds representing them.
+Metal supports a whole host of texture formats that Maplibre Native doesn't (or does through extensions).  There is the traditional RGBA, but there are also 32 bit float, or dual 16 bit float, or.... the list goes on and on.  We want to allow support for these without losing our minds representing them.
 
 As it stands, supporting RGBA is probably sufficient, but the utility of a good single component 16 bit texture is not to be denied and neither is the flexibility of a 32 bit floating point texture.  
 
@@ -97,7 +99,7 @@ We also want a way of representing a texture that isn't ours.  That is, a textur
 
 Off screen render targets are used in a couple of ways.  The most obvious is when rendering an image of a map offline.  The developer sets up the toolkit, feeds in a map and captures the result from a particular viewpoint.
 
-Less obvious is for things like heatmaps or weather data.  In those cases we want to render a tile source to a particular target, bound to a texture, and then reuse that texture later in the rendering process.  We do this kind of thing a lot with weather data in WhirlyGlobe-Maply.  You do something very similar with heatmaps.  It's a very powerful technique.
+Less obvious is for things like heatmaps or weather data.  In those cases we want to render a tile source to a particular target, bound to a texture, and then reuse that texture later in the rendering process.  We do this kind of thing a lot with weather data in WhirlyGlobe-Maply.  MapLibre Native does something very similar with heatmaps.  It's a very powerful technique.
 
 The actual information around a render target is actually not that complex.  They just need to know what their format is (32 bit float?  RGBA?), how big they are and what's supposed to be drawn to them.  The rest is just an outer loop in the renderer.
 
@@ -153,7 +155,7 @@ As a first pass, we'll get the output of that logic in the existing renderer to 
 
 In Metal you may have several different frames in flight at once.  Ideally you don't want to slow them down to make a copy of the latest one for a screen shot.  You need to know when a frame is finished, but not block while you copy it.  Luckily, there are a couple of things to make this easier in Metal.
 
-Figure: Snapshotting
+![Snapshotting](resources/figs-2.png)
 
 First up, there are a separate set of memory blitting commands to encode as a part of a command buffer.  This lets you make an explicit copy of the the frame, even downsampling it if needed, to a separate memory buffer.
 
@@ -169,7 +171,7 @@ If you thought real time rendering was mostly about triangles, I have some bad n
 
 The boring way is to allocate Buffers and stick your geometry, indices, textures, uniforms, car keys, manifesto, and texture coordinates in them.  They're just memory.  You ask for how much you want, you get a handle, you copy what you need into place.  You fix whatever buffer overruns you created.  
 
-Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  Mostly.  So you build a little buffer management infrastructure and alway suse it.
+Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  Mostly.  So you build a little buffer management infrastructure and alway use it.
 
 The nice thing about Buffer allocation in Metal is it can be easily done from any thread.  The bad thing is all those little bits of memory are time consuming to track and control, just like in any system.  Thus there is a better way.
 
@@ -189,7 +191,7 @@ The developers will probably implement some Buffer allocation infrastructure in 
 
 We found the following to be useful in WhirlyGlobe-Maply:
 - Allocate a Buffer of a certain size with or without an NSData object to be copied in
-- Allocate a Texture Buffer ofa certain size with or without an NSData object to be copied in
+- Allocate a Texture Buffer of a certain size with or without an NSData object to be copied in
 - Return a handle to describe what was allocated.  If there's additional information, like a Heap, this is where to stash that.
 - If a given object is too large for the pre-allocated Heaps, just create it on its own
 - For a Drawable, reference the Heap and pass in the buffer offset as needed
@@ -202,7 +204,7 @@ Managing Metal memory with Heaps is more efficient than individual buffers.  Buf
 
 It's fast and it's a key step to getting as much work as possible off the main CPU.
 
-### Indirect Implementation
+### Indirect Encoding Implementation
 
 The implementation up to this point is Direct.  For each frame we fill out the same command buffers.  Sure, the data buffers are reused, but the command buffers are created, filled in, and handed over to Metal each and every frame.  This is not dissimilar to OpenGL, in a way, but still more efficient.
 
@@ -238,7 +240,7 @@ Developers might want to explore the other option here, which is a rotating list
 
 You can probably get away with only Direct rendering support.  You might say "oh, we'll do indirect later", but you won't.  It requires some fairly complex changes to shaders and the internal buffer management architecture.  It's not something easily done by an individual and when the team you assemble to do the first part of this project wanders off you'll have trouble assembling a new one just for this.
 
-Why do you want to do this?  Well, there's performance of course.  If MapLibre Native isn't used by millions of people now, it will be.  That's a lot of battery and a lot of responsibility.  You owe it to those users to carefully allocate the resources given to you.  Burning down the battery faster than MapKit and Google Maps is a bad look.
+Why do you want to do this?  Well, there's performance of course.  If MapLibre Native isn't used by millions of people now, it will be.  That's a lot of energy consumption and a lot of responsibility.  You owe it to those users to carefully allocate the resources given to you.  Burning down the battery faster than MapKit and Google Maps is a bad look.
 
 There's also prestige.  When a developer is comparing toolkits yours should be, if not the best, at least in the running.  That's the toolkit they want to use and the one they want to contribute to.  Plus hey, it's free.
 
@@ -248,7 +250,8 @@ Does that prestige matter?  Well, I (Steve G) have used MapLibre Native's OpenGL
 
 The various atlases are designed around OpenGL constraints, and single threaded constraints at that.  Metal is much more flexible in how these kinds of data structures can be accessed.  So flexible, in fact, that we can probably leave them as designed or seamlessly upgrade them without changing much in the way of interfaces.
 
-Figure: Atlases
+![Image Atlas](resources/figs-3.png)
+![Line Atlas](resources/figs-4.png)
 
 It's not obvious at this point how extensive an Altas rework should be.  At the very least, any Atlas related logic should be moved out of the main rendering "loop".  Beyond that the Metal Atlases could be made thread-safe fairly easily.  The OpenGL Atlases could be as well, but that's outside our scope here.
 
@@ -260,7 +263,7 @@ We may also want to consolidate all the texture atlases into a smaller number of
 
 #### Required Changes
 
-We've only dug into the Atlas implementation a bit.  Frankly the way they interact glyphs and line styles and such is a bit confusing and atlases aren't all that complex a concept to begin with.
+We've only dug into the Atlas implementation a bit.  Frankly the way they interact with glyphs and line styles and such is a bit confusing and atlases aren't all that complex a concept to begin with.
 
 As to what changes will need to be made, my sense is they'll be focused on:
 - Making it easier to user atlases from the Layers
