@@ -136,7 +136,7 @@ Once all the basics are set up, it's time to get back to the specifics and Metal
 
 With the Modularization PR finished, we'll have a generic Builder interface that the Layers use to emit Drawables.  Each Builder variant will have a Metal Builder variant and it's those we'll need to build here.
 
-Figure: Drawables and Builders
+![Drawables and Builders](resources/figs-tmp-drawables.jpg)
 
 My suggestion for this development phase is to start with a fairly core function, like Fill, and implement the Metal version of that.  Use it to flesh out the Metal Drawable.  Practically speaking, that means allocating and filling out Buffers.
 
@@ -200,11 +200,11 @@ Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  
 
 The nice thing about Buffer allocation in Metal is it can be easily done from any thread.  The bad thing is all those little bits of memory are time consuming to track and control, just like in any system.  Thus there is a better way.
 
-Figure: Heap Support
+![Heap Support](resources/figs-tmp-heap.jpg)
 
 The good way to do memory management is heaps.  Instead of allocating a buffer in random shared memory, you allocate it out of a Metal Heap.  Metal's attitude toward what's in that Heap is "you do you".  A lot of the guardrails go away and you're very much on your own for managing that memory.  But it is so very, very fast.
 
-The reason Metal Heaps are fast goes back to the Figure: Metal Renderer.  All of those lines related to wiring up buffers get much simpler.  Every time you tell Metal about a bit of memory needed to feed the Shader it has to figure out where that memory is, make sure you're allowed to access it, do the math for the offsets and make sure you're not outside the bounds.  You might pass in a lot of buffers to a particular shader and there are going to be thousands of the things for a given scene.
+The reason Metal Heaps are fast goes back to the Metal Renderer figure.  All of those lines related to wiring up buffers get much simpler.  Every time you tell Metal about a bit of memory needed to feed the Shader it has to figure out where that memory is, make sure you're allowed to access it, do the math for the offsets and make sure you're not outside the bounds.  You might pass in a lot of buffers to a particular shader and there are going to be thousands of the things for a given scene.
 
 If we allocate Buffers out of Heaps, then we just need to pass in the Heap and what amounts to an offset.  Metal does much less work for each shader and is less power hungry for the same frame rate.
 
@@ -237,7 +237,7 @@ The implementation up to this point is Direct.  For each frame we fill out the s
 
 Any time you're doing the same job over and over again, the question is:  Can you not?  It turns out you can... not... do the work.
 
-Figure: Direct vs Indirect version of the API
+![Direct vs Indirect version of the renderer](resources/figs-tmp-indirect.jpg)
 
 The trick with indirect rendering in Metal is to separate the parts that change a lot from the parts that don't change very often, or ever.  Uniforms for map position, lighting, etc may change every frame.  So you update them every frame.  But the geometry for a tile isn't going to.  Most of the uniforms for a set of roads won't either, except some might with data driven styling.
 
