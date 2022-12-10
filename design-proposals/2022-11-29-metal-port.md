@@ -65,6 +65,8 @@ We're also going to deviate a bit from the format of the Renderer Modularization
 
 ### First, Do Nothing in Metal
 
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and [#1](#core)._
+
 At the end of the Renderer Modularization work we'll have an OpenGL ES module for rendering to that SDK.  That will consist of a group of files, probably in a sub-directory, that can be included in the toolkit with a compile flag.
 
 ![OpenGL and Metal as plugins](resources/figs-7.png)
@@ -72,6 +74,9 @@ At the end of the Renderer Modularization work we'll have an OpenGL ES module fo
 We'll want to do something similar for Metal.  We suggest building out the full set of files for that module in the most minimal way possible.  That is, a rendering loop that sets up, tears down, and renders nothing to the screen.  For textures, render targets, drawables and builders, again just stubs that do the minimum required to keep the toolkit from crashing.
 
 ### Rendering Loop, Simple Metal Drawable, Simple Shader
+
+_Addresses North Stars [#1](#north-stars) and [#2](#north-stars)._
+_Addresses Core Functionality [#2](#north-stars)._
 
 Once the renderer_impl module exists for Metal, it's time to start fleshing it out.  This is where the rendering "loop" begins, though subsequent development will change it.
 
@@ -82,6 +87,8 @@ After the Rendering Modularization rework we'll have Layers using Builders to em
 Getting the skeleton version of the Metal Renderer in place is the purpose of this work.  When it's going, the developers should see a single rectangle moving around the screen as the user pans.  Not terribly exciting, but an easy start and a good place to branch off work with multiple developers.
 
 ### Textures
+
+_Addresses North Stars [#1](#north-stars) and [#2](#north-stars)._
 
 The MapLibre Native toolkit already knows what a texture is, so this is the Metal Texture variant.  Metal textures don't deviate all that much from the OpenGL in concept, but the specifics very much do.
 
@@ -97,6 +104,8 @@ We also want a way of representing a texture that isn't ours.  That is, a textur
 
 ### Off Screen Render Targets
 
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and Core Functionality [#3](#core)._
+
 Off screen render targets are used in a couple of ways.  The most obvious is when rendering an image of a map offline.  The developer sets up the toolkit, feeds in a map and captures the result from a particular viewpoint.
 
 Less obvious is for things like heatmaps or weather data.  In those cases we want to render a tile source to a particular target, bound to a texture, and then reuse that texture later in the rendering process.  We do this kind of thing a lot with weather data in WhirlyGlobe-Maply.  MapLibre Native does something very similar with heatmaps.  It's a very powerful technique.
@@ -107,6 +116,8 @@ For the Metal implementation we'll just need a texture to render to.  There is a
 
 ### Renderer Observer, Rendering Passes
 
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars), and Core Functionality [#3](#core), [#8](#core)._
+
 When the developers have a basic render loop going with drawables that do nothing, the next step is to build out the observability and make the structure of the rendering itself more flexible.
 
 After the Modularization PR is finished we'll have a representation for individual rendering passes.  This is similar to what the Heatmap makes use of internally, but it'll be more explicit.
@@ -116,6 +127,8 @@ The rendering loop itself is affected by these passes.  We want the output of on
 As for the renderer observer, we'd like to expose each level of that as appropriate.  As to why, exposing things like the command buffers at the right time allow integration of Metal compatible functionality from other toolkits.
 
 ### Full Drawables and Builders
+
+_Addresses North Stars [#1](#north-stars) and [#2](#north-stars)._
 
 Once all the basics are set up, it's time to get back to the specifics and Metal drawables are very specific.
 
@@ -129,6 +142,8 @@ Then I'd suggest moving to a more specific Builder, like the one for lines.  Tha
 
 ### Shaders (Basic)
 
+_Addresses North Stars [#1](#north-stars) and [#2](#north-stars) and Core Functionality [#2](#core)._
+
 Implementing the Metal version of the basic shaders should be intermingled with the last section.  Get a new type of Builder working, wire it up to a new type of shader.  Then go back and pick another type.
 
 For each shader, we suggest doing a straight conversion from the OpenGL.  Take the GLSL source and convert it manually, ideally with comments describing the choices you made.  There will be a chance to revisit the shaders in a later phase, so don't worry about efficiency quite yet.
@@ -136,6 +151,8 @@ For each shader, we suggest doing a straight conversion from the OpenGL.  Take t
 At the end of that process, all the Builders should be fleshed out and all the Shaders should be working.  
 
 ### Atlases
+
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and Core Functionality [#6](#core)._
 
 MapLibre Native makes use of atlases for 2D and 1D(ish) textures.  The distinction exists largely because of OpenGL texture wrapping logic.  When you go off the edge of a 2D texture in X or Y you can either clamp to the edge or wrap around.  In OpenGL that distinction is tied to the texture itself.  In Metal, it's the shader that decides.  That's much easier.
 
@@ -145,6 +162,8 @@ In either case there will need to be Atlas specific logic for Metal.  Most of th
 
 ### Data Drive Styling
 
+_Addresses North Stars [#1](#north-stars) and [#2](#north-stars)._
+
 Style Sheets support the concept of data driven styling.  That is, colors or widths or a variety of other attributes controlled by either global variables, like zoom level, or the values of attributes within a given vector tile, or.... other things.
 
 Some of this is implemented in the low level renderer in OpenGL.  We can copy that design over initially to get something working.  Longer term, we'll want to move more of this work into the shaders.  In any case we'll be updating little bits and pieces of the Drawables, which is useful functionality to have available.
@@ -152,6 +171,8 @@ Some of this is implemented in the low level renderer in OpenGL.  We can copy th
 As a first pass, we'll get the output of that logic in the existing renderer to update the bits and pieces as needed.  Then we'll propagate those changes to the Drawables themselves and pick them up in the direct encoding pass.  Things will change with Indirect rendering later on.
 
 ### Snapshots
+
+_Addresses North Stars [#1](#north-stars), [#2](#north-stars) and Core Functionality [#5](#core)._
 
 In Metal you may have several different frames in flight at once.  Ideally you don't want to slow them down to make a copy of the latest one for a screen shot.  You need to know when a frame is finished, but not block while you copy it.  Luckily, there are a couple of things to make this easier in Metal.
 
@@ -166,6 +187,8 @@ Do this fast enough and you may be able to take a series of snapshots or even en
 After this phase is finished, you'll have a working Metal renderer for MapLibre Native.  Congratulations!  The rest is optimization, but you don't want to skip it.  This is where you get to compete with the big dogs.
 
 ### Heap Support
+
+_Addresses Core Functionality [#7](#core)._
 
 If you thought real time rendering was mostly about triangles, I have some bad news.  It's more about memory management.  There are two ways for handling memory in Metal (that we'll deal with), the boring way and the good way.
 
@@ -205,6 +228,8 @@ Managing Metal memory with Heaps is more efficient than individual buffers.  Buf
 It's fast and it's a key step to getting as much work as possible off the main CPU.
 
 ### Indirect Encoding Implementation
+
+_Addresses Core Functionality [#7](#core)._
 
 The implementation up to this point is Direct.  For each frame we fill out the same command buffers.  Sure, the data buffers are reused, but the command buffers are created, filled in, and handed over to Metal each and every frame.  This is not dissimilar to OpenGL, in a way, but still more efficient.
 
@@ -248,6 +273,8 @@ Does that prestige matter?  Well, I (Steve G) have used MapLibre Native's OpenGL
 
 ### Atlas multi-thread support
 
+_Addresses Core Functionality [#6](#core)._
+
 The various atlases are designed around OpenGL constraints, and single threaded constraints at that.  Metal is much more flexible in how these kinds of data structures can be accessed.  So flexible, in fact, that we can probably leave them as designed or seamlessly upgrade them without changing much in the way of interfaces.
 
 ![Image Atlas](resources/figs-3.png)
@@ -278,6 +305,8 @@ Texture atlases do sit at the heart of many of the vector tile related features.
 
 ### Layer multi-thread support
 
+_Addresses Core Functionality [#7](#core)._
+
 There's no good reason Layers shouldn't be able to do all their work on separate threads.  On iOS, ideally separate dispatch queues.  This is possible up to a point right now, but the toolkit does not take advantage of shared OpenGL Contexts and those single threaded assumptions are built in.
 
 The Modularization rework should free this up a bit, but it's here that we'll want to actually try it out for Metal.  We'll see how far it can be pushed during this phase.  There may be bottlenecks in the non-rendering portion of the toolkit that assumed similar bottlenecks in the rendering that no longer exist.
@@ -303,6 +332,8 @@ Mobile devices, even the really cheap ones, now have a lot of CPU cores and a lo
 The benefits are faster loading, lower latency, better responsiveness to the user.
 
 ### Shader optimization
+
+_Addresses Core Functionality [#7](#core)._
 
 The first version of shaders will work with the direct rendering in Metal.  They'll be simple manual translations from the GLSL in the existing toolkit and they'll look and act similarly to the old shaders.
 
