@@ -15,7 +15,6 @@ import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.maplayout.DebugModeActivity.LayerListAdapter
 import timber.log.Timber
 import java.util.*
 
@@ -232,7 +231,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
             return position.toLong()
         }
 
-        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val layer = layers[position]
             var view = convertView
             if (view == null) {
@@ -243,7 +242,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
                 )
                 view.tag = holder
             }
-            val holder = view.tag as ViewHolder
+            val holder = view!!.tag as ViewHolder
             holder.text.text = layer.javaClass.simpleName
             holder.subText.text = layer.id
             return view
