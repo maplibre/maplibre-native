@@ -34,7 +34,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         val featureList = mapboxMap!!.queryRenderedFeatures(screenPoint, LAYER_ID)
         if (!featureList.isEmpty()) {
             val feature = featureList[0]
-            val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
+            val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED) ?: false
             isSelected = !selectedNow
             updateSource(mapboxMap!!.style)
         } else {
