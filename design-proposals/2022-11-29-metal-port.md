@@ -385,6 +385,8 @@ We do not intend for these changes to be incompatible with the existing version.
 
 The main alternative would be switching to an intermediate toolkit to implement both OpenGL and Metal.  The problem with that approach is toolkit size.  Quite a few users cannot abide with the toolkit growing considerably.
 
+We considered trans-piling the shaders from GLSL.  The advantage would be in skipping a shader writer step.  The disadvantage is that the existing shaders are designed off a fairly old model of how GPUs work.  They're very optimized for that approach and somewhat inscrutable as a result.  In Metal we'd like to start over with the functionality required of the shaders and build something more modular for future use.
+
 ## Pull Request Schedule
 
 At the request of the community we've put together a list of Pull Requests that we would organize the work into.  These would be individual pieces that would leave the toolkit in working shape (except for the first one) and set us up for the next PR.
