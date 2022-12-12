@@ -20,6 +20,8 @@ But before that, a quick note on terminology.
 - "toolkit" usually refers to MapLibre Native, but may also be used in context for another project at a similar level.
 - "SDK" or Software Development Kit usually refers to the rendering library, like OpenGL or Metal, at least in this document.
 - "API" refers to an Application Programming Interface.  In this context it refers to the classes and methods made available to a developer.
+- "Snapshot" refers to taking a picture of the active display buffer at a specific time.
+- "Direct" and "indirect" rendering refer to modes of rendering common to a number of graphics toolkits, but we're using the Metal definition here.  Direct rendering is when the developer constructs commands on the main thread in real time.  Indirect rendering is when they construct more of that off the main thread or ahead of time.
 
 ## Goals
 
@@ -55,6 +57,7 @@ It is useful to split our goals into three sections to articulate what this prop
 5. When implemented with a given style and set of tilesets, the compiled library should not decrease the rendering frame rate.
 6. This refactor will not introduce data loading or other bottlenecks that will negatively impact rendering performance.
 7. Developers currently using this library will not see any breaking API changes, and will be able to seamlessly upgrade versions.
+8. The library should continue to work on architectures and platforms it currently works on.
 
 ## Proposed Change
 
@@ -93,7 +96,8 @@ We'll be able to:
 
 #### For GLES we’ll need to:
 - Push aside the existing Program hierarchy and rename it with a GLES extension.
-- Allow for named uniforms for new Programs<br>We can probably ignore that requirement for the existing shaders and just wrap them
+- Allow for named uniforms for new Programs.    
+We can probably ignore that requirement for the existing shaders and just wrap them
 
 ### Shader(Program) Registry
 
@@ -119,7 +123,7 @@ The layers more or less pull their shaders out of a compressed block of text.  C
 
 We'll need to make a Shader Registry class, of course, but that's fairly simple.  It should be thread safe, but you're mostly going to be using it on the main thread.
 
-The layers should pull their shaders out of the shader on demand.  This will give developers a chance to replace or add shaders before they're needed.
+The layers should pull their shaders out of the shader registry on demand.  This will give developers a chance to replace or add shaders before they're needed.
 
 ### Rendering Passes
 
@@ -136,7 +140,7 @@ However, there is the [RenderPass](https://github.com/maplibre/maplibre-gl-nativ
 
 In any case, we need this filled out more explicitly for the render targets.
 
-#### Required changes:
+#### Required changes
 To flexibly implement multiple rendering passes we will need to:
 - Keep track of them by name and order
 - Implement Render Targets (see below)
@@ -158,7 +162,7 @@ The toolkit already has support for one offscreen render target.  You can either
 
 Having an explicit off screen render target lets the developer do something like a snapshot in real time.  That is, run some sort of logic on the data being rendered before it gets its final visual representation.
 
-#### Required Changes:
+#### Required Changes
 To support Rendering Passes we’ll need Render Targets we can access in a way similar to a texture.  They’ll be set up with:
 - Settings such as bit depth and width/height (you don’t always want full screen resolution)
 - Allowing geometry to specify which one(s) they’ll render to as a “target”
@@ -178,7 +182,7 @@ When you take a snapshot of the map, the toolkit will return an image to you.  T
 
 For OpenGL this will be about the same.  For other SDKs this can be much more efficient.
 
-#### Required Changes:
+#### Required Changes
 
 The snapshot method will need to take a callback and notify it when a snapshot is ready.
 We may also want to expand this out to get multiple snapshots, or at least allow for that in the future.
@@ -254,19 +258,24 @@ The shared Drawable super-class would contain core functionality across all plat
 In any case the Drawable acts as a basic container that is handed around between the parts of the system that build things and the part that renders things.
 
 Each SDK specific Drawable subclass will do things like:
-- Upload/Bind their data to the SDK.  <br>Ideally this can happen on non-rendering threads, but you never know.
+- Upload/Bind their data to the SDK.    
+    Ideally this can happen on non-rendering threads, but you never know.
     This includes figuring out what the shader is asking for and providing it, or convincing defaults.  The way MapLibre Native does this now is a bit static, with templates.  Clever, but perhaps too clever.  It’s okay to wire things up dynamically.
-- Draw directly.   <br>OpenGL is big on this.  You have to set things up, draw, then tear them down.
+- Draw directly.    
+    OpenGL is big on this.  You have to set things up, draw, then tear them down.
     It has the virtue of being simple.  If you’re making changes, you just do them directly.
-- Draw indirectly.   <br>Metal does this.  You add your data to a command buffer where it may be drawn for many frames.
+- Draw indirectly.    
+    Metal does this.  You add your data to a command buffer where it may be drawn for many frames.
     This is the fastest and best way to do things, but there are updates you must make between frames.  Obviously, the overall map state needs to be updated, otherwise you’re just redrawing in the same way each time.  Sometimes Drawable specific state changes too and data driven rendering will come into play here.
-- Update for frame.   <br>If you’re drawing indirectly, this is all the state that must be changed for a given frame.
+- Update for frame.    
+    If you’re drawing indirectly, this is all the state that must be changed for a given frame.
     Some of this is shared, like the map state (e.g. the matrix controlling positioning, lighting and so forth).
     Some can be specific to a particular Drawable.  Data driven visuals may fall into this category depending on what the data is.<br>
     Just to make this even more fun, modern renderers are going to have multiple frames in flight at any given time.  So you can’t just keep one set of values and update them periodically.  My preferred approach is to put memory copy commands into a command buffer with guard logic between them.  In Metal, anyway.  Vulkan will have its own way to do that and OpenGL just doesn't.  Well, there's probably an extension somewhere that does, but it's very hard to use and sparsely supported.
-- Tear down their data.   <br>Pretty simple for OpenGL, but with Metal when you’re using heaps (and you should) you actually want another thread to do this.  Thus it’s SDK specific.
+- Tear down their data.    
+    Pretty simple for OpenGL, but with Metal when you’re using heaps (and you should) you actually want another thread to do this.  Thus it’s SDK specific.
 
-Now there is already logic to do a lot of this spread throughout various classes in MapLibre Native.  Buckets have some of it, Programs actually own the draw() method, and so forth.  To switch to this approach we'll need to cut across the gl and glx levels of the toolkit, even a bit higher, to capture everything that builds geometry.  We'll need to convert that over to this approach and make sure we didn't miss anything, like all the fiddly per-program state.
+Now there is already logic to do a lot of this spread throughout various classes in MapLibre Native.  Buckets have some of it, Programs actually own the draw() method, and so forth.  To switch to this approach we'll need to cut across the gl and gfx levels of the toolkit, even a bit higher, to capture everything that builds geometry.  We'll need to convert that over to this approach and make sure we didn't miss anything, like all the fiddly per-program state.
 
 #### Benefits
 
