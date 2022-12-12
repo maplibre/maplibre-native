@@ -59,7 +59,7 @@ Anyone who has worked with OpenGL knows that first you get nothing.  Traditional
 
 With Metal, you get crashes with error messages usually related to what you actually did.  This is a huge improvement!  And the debugging tools... well they do exist and they mostly work.  They work better in direct mode and with smaller test cases, so we plan accordingly.  When they do work, you can actually debug a shader!  That's very helpful.
 
-A Metal implementation is conceptually easier than OpenGL, but it's still real time rendering and you can still do a variety of frustrating things that are a difficult to debug (like crash the hardware).  Developers will run into weird cases that are hard to debug and you need to plan to lose a few days here and there.
+With modern toolkits, Metal included, you start out with what the GPU is expecting and work from there.  This can be conceptually easier, but it's still real time rendering and you can still do a variety of frustrating things that are a difficult to debug (like crash the hardware).  Developers will run into weird cases that are hard to debug and you need to plan to lose a few days here and there.
 
 What that means for planning is a lot of little stages and a gradual hike up the difficulty curve.  We start with the simpler stuff and work our way to the more complex and we emphasize getting something to look at sooner.
 
@@ -295,7 +295,7 @@ We may also want to consolidate all the texture atlases into a smaller number of
 We've only dug into the Atlas implementation a bit.  Frankly the way they interact with glyphs and line styles and such is a bit confusing and atlases aren't all that complex a concept to begin with.
 
 As to what changes will need to be made, my sense is they'll be focused on:
-- Making it easier to user atlases from the Layers
+- Making it easier to use atlases from the Layers
 - Dealing with life cycle issues.  In other words, don't delete the texture while it's still being used.
 - Possible consolidation of two or more of the types.  Metal treats texture parameters differently so less needs to be broken out.
 
