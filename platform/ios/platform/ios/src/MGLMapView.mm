@@ -74,7 +74,7 @@
 #include <cstdlib>
 #include <map>
 #include <unordered_set>
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
 #include <sys/sysctl.h>
 
 // The m1 simulator's gesture's velocity is wrong and here is a workaround to fix it.
@@ -753,7 +753,7 @@ public:
     
     self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
     
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
     bool isM1Simulator = processIsTranslated() > 0;
     if (isM1Simulator) {
         _pan = [[MBGLPanGesture alloc] initWithTarget:self action:@selector(handlePanGesture:)];
@@ -769,7 +769,7 @@ public:
     _scrollEnabled = YES;
     _panScrollingMode = MGLPanScrollingModeDefault;
 
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
     if (isM1Simulator) {
         _pinch = [[MBGLPinchGesture alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
     } else {
@@ -782,7 +782,7 @@ public:
     [self addGestureRecognizer:_pinch];
     _zoomEnabled = YES;
 
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
     if (isM1Simulator) {
         _rotate = [[MBGLRotationGesture alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
     } else {
