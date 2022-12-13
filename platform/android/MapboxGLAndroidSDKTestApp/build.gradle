@@ -8,6 +8,8 @@ android {
         applicationId "com.mapbox.mapboxsdk.testapp"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
+
+        multiDexEnabled true
         versionCode 13
         versionName "6.0.0"
         testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
@@ -23,6 +25,7 @@ android {
         resources {
             excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'LICENSE.txt']
         }
+        pickFirst "**"
     }
 
 
@@ -41,11 +44,6 @@ android {
         }
     }
 
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
-    }
     lint {
         abortOnError false
         baseline file('lint-baseline-local.xml')
@@ -68,6 +66,8 @@ dependencies {
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
 
+    implementation 'com.android.support:multidex:1.0.3'
+
     implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber
 
@@ -75,6 +75,7 @@ dependencies {
 
     implementation dependenciesList.leakCanary
     implementation dependenciesList.gson
+    implementation 'androidx.core:core-ktx:1.9.0'
 
     androidTestImplementation dependenciesList.supportAnnotations
     androidTestImplementation dependenciesList.testRunner
@@ -92,6 +93,6 @@ apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-lint.gradle"
 
 
-
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+// apply plugin: 'org.jetbrains.kotlin.android'

@@ -65,7 +65,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
                         delayed = null
                         flyTo(mapboxMap, place, zoom)
                     }
-                    handler!!.postDelayed(delayed, 2000)
+                    handler!!.postDelayed(delayed!!, 2000)
                 }
 
                 override fun onFinish() {
@@ -101,7 +101,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
         super.onStop()
         mapView!!.onStop()
         if (handler != null && delayed != null) {
-            handler!!.removeCallbacks(delayed)
+            handler!!.removeCallbacks(delayed!!)
         }
     }
 

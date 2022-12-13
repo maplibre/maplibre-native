@@ -1,9 +1,13 @@
+plugins {
+    id 'org.jetbrains.kotlin.android'
+}
 apply plugin: 'com.android.library'
 apply plugin: "com.jaredsburrows.license"
 apply plugin: 'kotlin-android'
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 dependencies {
+    implementation 'androidx.core:core-ktx:1.9.0'
     lintChecks project(":MapboxGLAndroidSDKLint")
     api dependenciesList.mapboxJavaGeoJSON
     api dependenciesList.mapboxAndroidGestures
