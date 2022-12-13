@@ -26,7 +26,7 @@ ext {
             robolectric      : '4.7.3',
             timber           : '4.7.1',
             okhttp           : '3.12.3',
-            kotlin           : '1.3.72',
+            kotlin           : '1.6.21',
             licenses         : '0.8.80',
             lint             : '26.4.2',
             gms              : '17.0.0',
@@ -35,7 +35,8 @@ ext {
             ktlint           : '0.40.0',
             commonsIO        : '2.6',
             assertj          : "3.11.1",
-            gradleNexus      : "1.1.0"
+            gradleNexus      : "1.1.0",
+            gson              : "2.10"
     ]
 
     dependenciesList = [
@@ -68,6 +69,7 @@ ext {
             timber                 : "com.jakewharton.timber:timber:${versions.timber}",
             okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             leakCanary             : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
+            gson                   : "com.google.code.gson:gson:${versions.gson}",
 
             kotlinLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",

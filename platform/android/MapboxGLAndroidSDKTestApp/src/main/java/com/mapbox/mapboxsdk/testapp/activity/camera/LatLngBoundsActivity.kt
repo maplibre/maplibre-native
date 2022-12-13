@@ -6,7 +6,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.FeatureCollection.fromJson
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
@@ -49,7 +48,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
             mapboxMap = map
 
             val featureCollection: FeatureCollection =
-                fromJson(loadStringFromAssets(this, "points-sf.geojson"))
+                FeatureCollection.fromJson(loadStringFromAssets(this, "points-sf.geojson"))
             bounds = createBounds(featureCollection)
 
             map.getCameraForLatLngBounds(bounds, createPadding(peekHeight))?.let {

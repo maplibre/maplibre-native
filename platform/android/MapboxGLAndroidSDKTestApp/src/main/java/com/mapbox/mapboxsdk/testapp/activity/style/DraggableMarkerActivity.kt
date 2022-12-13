@@ -152,10 +152,15 @@ class DraggableMarkerActivity : AppCompatActivity() {
     }
 
     private fun addMarker(latLng: LatLng) {
-        featureCollection.features()?.add(
-            Feature.fromGeometry(Point.fromLngLat(latLng.longitude, latLng.latitude), null, generateMarkerId())
+        val combinedCollection = featureCollection.features()?.plus(
+            Feature.fromGeometry(
+                Point.fromLngLat(latLng.longitude, latLng.latitude),
+                null,
+                generateMarkerId()
+            )
         )
-        source.setGeoJson(featureCollection)
+            ?: emptyList()
+        source.setGeoJson(FeatureCollection.fromFeatures(combinedCollection))
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -199,20 +204,24 @@ class DraggableMarkerActivity : AppCompatActivity() {
         private val touchAreaMaxY: Int = mapView.height
     ) {
 
-        private val androidGesturesManager: AndroidGesturesManager = AndroidGesturesManager(mapView.context, false)
+        private val androidGesturesManager: AndroidGesturesManager =
+            AndroidGesturesManager(mapView.context, false)
         private var draggedSymbolId: String? = null
-        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> = mutableListOf<OnSymbolDragListener>()
+        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> =
+            mutableListOf<OnSymbolDragListener>()
 
         init {
             mapboxMap.addOnMapLongClickListener {
                 // Starting the drag process on long click
-                draggedSymbolId = mapboxMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()?.also { id ->
-                    mapboxMap.uiSettings.setAllGesturesEnabled(false)
-                    mapboxMap.gesturesManager.moveGestureDetector.interrupt()
-                    notifyOnSymbolDragListeners {
-                        onSymbolDragStarted(id)
-                    }
-                }
+                draggedSymbolId =
+                    mapboxMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()
+                        ?.also { id ->
+                            mapboxMap.uiSettings.setAllGesturesEnabled(false)
+                            mapboxMap.gesturesManager.moveGestureDetector.interrupt()
+                            notifyOnSymbolDragListeners {
+                                onSymbolDragStarted(id)
+                            }
+                        }
                 false
             }
 
@@ -252,8 +261,13 @@ class DraggableMarkerActivity : AppCompatActivity() {
                                 properties,
                                 draggedSymbolId
                             )
-                            symbolsCollection.features()?.set(index, newFeature)
-                            symbolsSource.setGeoJson(symbolsCollection)
+                            val mutableFeatures = symbolsCollection.features()?.toMutableList()
+                            if (mutableFeatures != null) {
+                                mutableFeatures.set(index, newFeature)
+                                val modifiedFeatures =
+                                    FeatureCollection.fromFeatures(mutableFeatures)
+                                symbolsSource.setGeoJson(modifiedFeatures)
+                            }
                             notifyOnSymbolDragListeners {
                                 onSymbolDrag(draggedSymbolId)
                             }

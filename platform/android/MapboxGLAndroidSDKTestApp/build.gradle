@@ -26,13 +26,6 @@ android {
         exclude 'LICENSE.txt'
     }
 
-    lintOptions {
-        baseline file("lint-baseline-local.xml")
-        checkAllWarnings true
-        warningsAsErrors true
-        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
-        abortOnError false
-    }
 
     buildTypes {
         debug {
@@ -54,6 +47,15 @@ android {
         javaMaxHeapSize "2g"
         preDexLibraries true
     }
+    lint {
+        abortOnError false
+        baseline file('lint-baseline-local.xml')
+        checkAllWarnings true
+        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
+        warningsAsErrors true
+    }
+    namespace 'com.mapbox.mapboxsdk.testapp'
+    testNamespace '${applicationId}'
 }
 
 dependencies {
@@ -73,6 +75,7 @@ dependencies {
     implementation dependenciesList.okhttp3
 
     implementation dependenciesList.leakCanary
+    implementation dependenciesList.gson
 
     androidTestImplementation dependenciesList.supportAnnotations
     androidTestImplementation dependenciesList.testRunner
