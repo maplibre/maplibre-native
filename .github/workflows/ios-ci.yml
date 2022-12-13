@@ -10,7 +10,6 @@ on:
       - "**.md"
       # ignore other platforms
       - "platform/android/**"
-      - "platform/darwin/**"
       - "platform/glfw/**"
       - "platform/macos/**"
       - "platform/node/**"
@@ -45,7 +44,6 @@ on:
       - "**.md"
       # ignore other platforms
       - "platform/android/**"
-      - "platform/darwin/**"
       - "platform/glfw/**"
       - "platform/node/**"
       - "platform/qt/**"
