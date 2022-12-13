@@ -21,8 +21,8 @@ public class MapboxConfigurationException extends RuntimeException {
    * Creates a Mapbox configuration exception thrown by MapboxMap when the SDK hasn't been properly initialised.
    */
   public MapboxConfigurationException() {
-    super("\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey, " +
-            "WellKnownTileServer wellKnownTileServer) before inflating or creating the view.");
+    super("\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey, "
+            + "WellKnownTileServer wellKnownTileServer) before inflating or creating the view.");
   }
 
   /**

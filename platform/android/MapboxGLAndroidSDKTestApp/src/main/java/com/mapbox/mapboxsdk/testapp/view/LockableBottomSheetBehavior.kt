@@ -34,6 +34,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
         return handled
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onStartNestedScroll(
         coordinatorLayout: CoordinatorLayout,
         child: V,
@@ -54,6 +55,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
         return handled
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onNestedPreScroll(
         coordinatorLayout: CoordinatorLayout,
         child: V,
@@ -67,6 +69,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: Attribute
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onStopNestedScroll(coordinatorLayout: CoordinatorLayout, child: V, target: View) {
         if (!locked) {
             super.onStopNestedScroll(coordinatorLayout, child, target)

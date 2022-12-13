@@ -168,7 +168,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                     == markerFeatures[0].getStringProperty(ID_FEATURE_PROPERTY)
                 ) {
                     // use DDS
-                    val selected = feature.getBooleanProperty(SELECTED_FEATURE_PROPERTY)
+                    val selected = feature.getBooleanProperty(SELECTED_FEATURE_PROPERTY) ?: false
                     feature.addBooleanProperty(SELECTED_FEATURE_PROPERTY, !selected)
 
                     // validate symbol flicker regression for #13407
@@ -178,7 +178,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                                 Expression.get(ID_FEATURE_PROPERTY),
                                 Expression.literal(1.0f),
                                 Expression.stop(
-                                    feature.getStringProperty("id"),
+                                    feature.getStringProperty("id")!!,
                                     if (selected) 0.3f else 1.0f
                                 )
                             )

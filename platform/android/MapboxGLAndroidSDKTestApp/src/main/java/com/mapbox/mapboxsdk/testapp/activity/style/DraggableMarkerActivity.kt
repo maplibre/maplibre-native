@@ -135,7 +135,10 @@ class DraggableMarkerActivity : AppCompatActivity() {
                     val point = featureCollection.features()?.find {
                         it.id() == id
                     }?.geometry() as Point
-                    draggedMarkerPositionTv.text = "Dragged marker's position: %.4f, %.4f".format(point.latitude(), point.longitude())
+                    draggedMarkerPositionTv.text = "Dragged marker's position: %.4f, %.4f".format(
+                        point.latitude(),
+                        point.longitude()
+                    )
                 }
 
                 override fun onSymbolDragFinished(id: String) {
@@ -147,15 +150,21 @@ class DraggableMarkerActivity : AppCompatActivity() {
                     )
                         .show()
                 }
-            })
+            }
+            )
         }
     }
 
     private fun addMarker(latLng: LatLng) {
-        featureCollection.features()?.add(
-            Feature.fromGeometry(Point.fromLngLat(latLng.longitude, latLng.latitude), null, generateMarkerId())
+        val combinedCollection = featureCollection.features()?.plus(
+            Feature.fromGeometry(
+                Point.fromLngLat(latLng.longitude, latLng.latitude),
+                null,
+                generateMarkerId()
+            )
         )
-        source.setGeoJson(featureCollection)
+            ?: emptyList()
+        source.setGeoJson(FeatureCollection.fromFeatures(combinedCollection))
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -199,20 +208,24 @@ class DraggableMarkerActivity : AppCompatActivity() {
         private val touchAreaMaxY: Int = mapView.height
     ) {
 
-        private val androidGesturesManager: AndroidGesturesManager = AndroidGesturesManager(mapView.context, false)
+        private val androidGesturesManager: AndroidGesturesManager =
+            AndroidGesturesManager(mapView.context, false)
         private var draggedSymbolId: String? = null
-        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> = mutableListOf<OnSymbolDragListener>()
+        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> =
+            mutableListOf<OnSymbolDragListener>()
 
         init {
             mapboxMap.addOnMapLongClickListener {
                 // Starting the drag process on long click
-                draggedSymbolId = mapboxMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()?.also { id ->
-                    mapboxMap.uiSettings.setAllGesturesEnabled(false)
-                    mapboxMap.gesturesManager.moveGestureDetector.interrupt()
-                    notifyOnSymbolDragListeners {
-                        onSymbolDragStarted(id)
-                    }
-                }
+                draggedSymbolId =
+                    mapboxMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()
+                        ?.also { id ->
+                            mapboxMap.uiSettings.setAllGesturesEnabled(false)
+                            mapboxMap.gesturesManager.moveGestureDetector.interrupt()
+                            notifyOnSymbolDragListeners {
+                                onSymbolDragStarted(id)
+                            }
+                        }
                 false
             }
 
@@ -224,7 +237,11 @@ class DraggableMarkerActivity : AppCompatActivity() {
                 return true
             }
 
-            override fun onMove(detector: MoveGestureDetector, distanceX: Float, distanceY: Float): Boolean {
+            override fun onMove(
+                detector: MoveGestureDetector,
+                distanceX: Float,
+                distanceY: Float
+            ): Boolean {
                 if (detector.pointersCount > 1) {
                     // Stopping the drag when we don't work with a simple, on-pointer move anymore
                     stopDragging()
@@ -234,7 +251,10 @@ class DraggableMarkerActivity : AppCompatActivity() {
                 // Updating symbol's position
                 draggedSymbolId?.also { draggedSymbolId ->
                     val moveObject = detector.getMoveObject(0)
-                    val point = PointF(moveObject.currentX - touchAreaShiftX, moveObject.currentY - touchAreaShiftY)
+                    val point = PointF(
+                        moveObject.currentX - touchAreaShiftX,
+                        moveObject.currentY - touchAreaShiftY
+                    )
 
                     if (point.x < 0 || point.y < 0 || point.x > touchAreaMaxX || point.y > touchAreaMaxY) {
                         stopDragging()
@@ -252,8 +272,13 @@ class DraggableMarkerActivity : AppCompatActivity() {
                                 properties,
                                 draggedSymbolId
                             )
-                            symbolsCollection.features()?.set(index, newFeature)
-                            symbolsSource.setGeoJson(symbolsCollection)
+                            val mutableFeatures = symbolsCollection.features()?.toMutableList()
+                            if (mutableFeatures != null) {
+                                mutableFeatures.set(index, newFeature)
+                                val modifiedFeatures =
+                                    FeatureCollection.fromFeatures(mutableFeatures)
+                                symbolsSource.setGeoJson(modifiedFeatures)
+                            }
                             notifyOnSymbolDragListeners {
                                 onSymbolDrag(draggedSymbolId)
                             }
@@ -265,7 +290,11 @@ class DraggableMarkerActivity : AppCompatActivity() {
                 return false
             }
 
-            override fun onMoveEnd(detector: MoveGestureDetector, velocityX: Float, velocityY: Float) {
+            override fun onMoveEnd(
+                detector: MoveGestureDetector,
+                velocityX: Float,
+                velocityY: Float
+            ) {
                 // Stopping the drag when move ends
                 stopDragging()
             }

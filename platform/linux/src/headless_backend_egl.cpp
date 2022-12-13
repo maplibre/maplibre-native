@@ -104,7 +104,7 @@ public:
         }
     }
 
-    ~EGLBackendImpl() final {
+    ~EGLBackendImpl()  {
         if (eglSurface != EGL_NO_SURFACE) {
             if (!eglDestroySurface(eglDisplay->display, eglSurface)) {
                 Log::Error(Event::OpenGL, "Failed to destroy EGL surface.");
