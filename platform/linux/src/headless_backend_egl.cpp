@@ -68,7 +68,7 @@ public:
     EGLConfig config = 0;
 };
 
-class EGLBackendImpl : public HeadlessBackend::Impl {
+class EGLBackendImpl final : public HeadlessBackend::Impl {
 public:
     EGLBackendImpl() {
         // EGL initializes the context client version to 1 by default. We want to

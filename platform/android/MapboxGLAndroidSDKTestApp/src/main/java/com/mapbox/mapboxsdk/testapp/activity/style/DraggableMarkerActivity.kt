@@ -152,10 +152,10 @@ class DraggableMarkerActivity : AppCompatActivity() {
     }
 
     private fun addMarker(latLng: LatLng) {
-        featureCollection.features()?.add(
-            Feature.fromGeometry(Point.fromLngLat(latLng.longitude, latLng.latitude), null, generateMarkerId())
-        )
-        source.setGeoJson(featureCollection)
+        val combinedCollection = featureCollection.features()?.plus( 
+                Feature.fromGeometry(Point.fromLngLat(latLng.longitude, latLng.latitude), null, generateMarkerId()))
+                    ?: emptyList()
+        source.setGeoJson(FeatureCollection.fromFeatures(combinedCollection))
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -252,8 +252,12 @@ class DraggableMarkerActivity : AppCompatActivity() {
                                 properties,
                                 draggedSymbolId
                             )
-                            symbolsCollection.features()?.set(index, newFeature)
-                            symbolsSource.setGeoJson(symbolsCollection)
+                            val mutableFeatures = symbolsCollection.features()?.toMutableList()
+                            if(mutableFeatures != null) {
+                                mutableFeatures.set(index, newFeature)
+                                val modifiedFeatures = FeatureCollection.fromFeatures(mutableFeatures)
+                                symbolsSource.setGeoJson(modifiedFeatures)
+                            }
                             notifyOnSymbolDragListeners {
                                 onSymbolDrag(draggedSymbolId)
                             }

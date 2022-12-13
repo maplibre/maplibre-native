@@ -13,6 +13,7 @@ dependencies {
     implementation dependenciesList.supportFragmentV4
     implementation dependenciesList.okhttp3
     implementation dependenciesList.gmsLocation
+    implementation dependenciesList.gson 
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockito
@@ -55,11 +56,6 @@ android {
         main.res.srcDirs += 'src/main/res-public'
     }
 
-    lintOptions {
-        disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
-        checkAllWarnings true
-        warningsAsErrors false
-    }
 
     testOptions {
         unitTests {
@@ -77,6 +73,12 @@ android {
             jniDebuggable true
         }
     }
+    lint {
+        checkAllWarnings true
+        disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
+        warningsAsErrors false
+    }
+    namespace 'com.mapbox.mapboxsdk'
 }
 
 licenseReport {

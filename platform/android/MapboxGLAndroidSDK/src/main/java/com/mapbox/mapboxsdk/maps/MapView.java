@@ -12,6 +12,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.util.Log;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
@@ -23,6 +24,7 @@ import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.R;
+import com.mapbox.mapboxsdk.WellKnownTileServer;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
@@ -99,24 +101,28 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
+    Log.d("MapLibreLibrary", "MapView constructed with context");
     initialize(context, MapboxMapOptions.createFromAttributes(context));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
+    Log.d("MapLibreLibrary", "MapView constructed with context and attribute set");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    Log.d("MapLibreLibrary", "MapView constructed with context, attributeSet and defStyleAttr");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable MapboxMapOptions options) {
     super(context);
+    Log.d("MapLibreLibrary", "MapView constructed with context and MapboxMapOptions");
     initialize(context, options == null ? MapboxMapOptions.createFromAttributes(context) : options);
   }
 
@@ -289,11 +295,11 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * You must call this method from the parent's Activity#onCreate(Bundle)} or
    * Fragment#onViewCreated(View, Bundle).
    * </p>
-   * You must set a valid access token with {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String)}
+   * You must set a valid access token with {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)}
    * before you call this method or an exception will be thrown.
    *
    * @param savedInstanceState Pass in the parent's savedInstanceState.
-   * @see com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String)
+   * @see com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)
    */
   @UiThread
   public void onCreate(@Nullable Bundle savedInstanceState) {
