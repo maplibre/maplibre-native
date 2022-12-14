@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ubuntu-20.04]
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: platform/android
@@ -19,6 +19,8 @@ jobs:
       JOBS: 8
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
+      # Avoids read timeouts, see https://github.com/maplibre/maplibre-gl-native/pull/591
+      MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 -Dmaven.wagon.http.retryHandler.count=3
     steps:
 
       - uses: actions/checkout@v3

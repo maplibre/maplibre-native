@@ -90,6 +90,8 @@ The Android API documentation is available at https://maplibre.org/maplibre-gl-n
 
 The iOS API documentation is available at https://maplibre.org/maplibre-gl-native/ios/api/
 
+Architecture: https://maplibre.org/maplibre-gl-native/docs/book/
+
 ## Installation
 
 ### Android

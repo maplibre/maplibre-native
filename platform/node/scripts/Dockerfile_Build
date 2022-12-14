@@ -1,0 +1,32 @@
+FROM ubuntu:focal
+
+RUN set -ex; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get -qq update; \
+    apt-get -y --no-install-recommends install \
+      ca-certificates \
+      wget \
+      libjpeg-dev \
+      libpng-dev \
+      ccache \
+      cmake \
+      ninja-build \
+      pkg-config \
+      xvfb \
+      libcurl4-openssl-dev \
+      libglfw3-dev \
+      libuv1-dev \
+      libicu-dev \
+      libjpeg-turbo8 \
+      g++-10 \
+      libc++-9-dev \
+      libc++abi-9-dev; \
+    wget -qO- https://deb.nodesource.com/setup_18.x | bash; \
+    apt-get install -y nodejs;
+
+VOLUME /data
+
+RUN mkdir -p /usr/src/app
+COPY / /usr/src/app
+ENTRYPOINT ["/usr/src/app/platform/node/scripts/docker_build_entrypoint.sh"]
+RUN ["chmod", "+x", "/usr/src/app/platform/node/scripts/docker_build_entrypoint.sh"]
