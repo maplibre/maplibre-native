@@ -1,6 +1,11 @@
 #import "MGLAnnotationImage_Private.h"
 #import "MGLLoggingConfiguration_Private.h"
 
+
+@interface UIImage (MGLAdditions)
+- (BOOL)isDataEqualTo:(UIImage*)otherImage;
+@end
+
 @interface MGLAnnotationImage ()
 
 @property (nonatomic, strong) NSString *reuseIdentifier;
@@ -61,7 +66,7 @@
     return ((!_reuseIdentifier && !otherAnnotationImage.reuseIdentifier)
             || [_reuseIdentifier isEqualToString:otherAnnotationImage.reuseIdentifier])
     && _enabled == otherAnnotationImage.enabled
-    && (_image == otherAnnotationImage.image || [UIImagePNGRepresentation(_image) isEqualToData:UIImagePNGRepresentation(otherAnnotationImage.image)]);
+    && (_image == otherAnnotationImage.image || [_image isDataEqualTo:otherAnnotationImage.image]);
 }
 
 - (NSUInteger)hash {
