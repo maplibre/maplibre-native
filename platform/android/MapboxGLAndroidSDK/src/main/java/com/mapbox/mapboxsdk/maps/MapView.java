@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.collection.LongSparseArray;
+import timber.log.Timber;
 
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.mapboxsdk.MapStrictMode;
@@ -101,28 +102,28 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
-    Log.d("MapLibreLibrary", "MapView constructed with context");
+    Timber.d("MapView constructed with context");
     initialize(context, MapboxMapOptions.createFromAttributes(context));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
-    Log.d("MapLibreLibrary", "MapView constructed with context and attribute set");
+    Timber.d("MapView constructed with context and attribute set");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    Log.d("MapLibreLibrary", "MapView constructed with context, attributeSet and defStyleAttr");
+    Timber.d( "MapView constructed with context, attributeSet and defStyleAttr");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable MapboxMapOptions options) {
     super(context);
-    Log.d("MapLibreLibrary", "MapView constructed with context and MapboxMapOptions");
+    Timber.d("MapView constructed with context and MapboxMapOptions");
     initialize(context, options == null ? MapboxMapOptions.createFromAttributes(context) : options);
   }
 
