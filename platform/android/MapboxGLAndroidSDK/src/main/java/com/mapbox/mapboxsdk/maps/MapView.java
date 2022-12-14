@@ -295,7 +295,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * You must call this method from the parent's Activity#onCreate(Bundle)} or
    * Fragment#onViewCreated(View, Bundle).
    * </p>
-   * You must set a valid access token with {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)}
+   * You must set a valid access token with
+   * {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)}
    * before you call this method or an exception will be thrown.
    *
    * @param savedInstanceState Pass in the parent's savedInstanceState.
