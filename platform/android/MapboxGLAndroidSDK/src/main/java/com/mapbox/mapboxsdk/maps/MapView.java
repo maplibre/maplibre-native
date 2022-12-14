@@ -12,7 +12,6 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.util.Log;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
