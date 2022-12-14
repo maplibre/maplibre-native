@@ -20,6 +20,8 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLResourceNotFoundException
 
 + (UIImage *)mgl_resourceImageNamed:(NSString *)imageName;
 
+- (BOOL)isDataEqualTo:(UIImage*)otherImage;
+
 @end
 
 NS_ASSUME_NONNULL_END
