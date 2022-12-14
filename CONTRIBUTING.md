@@ -1,6 +1,6 @@
 # Contributing
 
-If you have a usage question for a product built on MapLibre GL (such as our iOS or Android SDKs), please visit #maplibre Slack channel at [osmus.slack.com](https://osmus.slack.com/). Feel free to [join here](https://osmus-slack.herokuapp.com/).
+If you have a usage question for a product built on MapLibre GL (such as our iOS or Android SDKs), please visit `#maplibre-native` Slack channel at https://slack.openstreetmap.us/.
 
 If you want to contribute code:
 
