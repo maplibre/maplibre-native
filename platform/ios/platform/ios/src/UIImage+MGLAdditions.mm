@@ -109,4 +109,20 @@ BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
     return image;
 }
 
++(UIImage *)NormalizedImage:(UIImage *)sourceImage {
+    CGSize scaledSize = CGSizeMake(sourceImage.size.width * sourceImage.scale, sourceImage.size.height * sourceImage.scale);
+    UIGraphicsBeginImageContextWithOptions(scaledSize, NO, UIScreen.mainScreen.scale);
+    [sourceImage drawInRect:(CGRect){ .origin = CGPointZero, .size = scaledSize }];
+    UIImage *normalizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return normalizedImage;
+}
+
+
+- (BOOL)isDataEqualTo:(UIImage*)otherImage {
+    NSData *leftData = UIImagePNGRepresentation([UIImage NormalizedImage:self]);
+    NSData *rightData = UIImagePNGRepresentation([UIImage NormalizedImage:otherImage]);
+    return [leftData isEqualToData:rightData];
+}
+
 @end
