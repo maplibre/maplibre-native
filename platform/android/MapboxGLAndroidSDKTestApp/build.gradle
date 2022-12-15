@@ -11,6 +11,7 @@ android {
         versionCode 13
         versionName "6.0.0"
         testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        multiDexEnabled = true
     }
 
     compileOptions {
@@ -66,6 +67,8 @@ dependencies {
     implementation dependenciesList.supportRecyclerView
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
+
+    implementation dependenciesList.multidex
 
     implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber

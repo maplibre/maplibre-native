@@ -35,7 +35,8 @@ ext {
             ktlint          : '0.40.0',
             commonsIO       : '2.6',
             assertj         : "3.11.1",
-            gradleNexus     : "1.1.0"
+            gradleNexus     : "1.1.0",
+            multidex        : "2.0.1"
     ]
 
     dependenciesList = [
@@ -61,6 +62,7 @@ ext {
             supportRecyclerView    : "androidx.recyclerview:recyclerview:${versions.recyclerView}",
             supportConstraintLayout: "androidx.constraintlayout:constraintlayout:${versions.constraintLayout}",
             supportDesign          : "com.google.android.material:material:${versions.material}",
+            multidex               : "androidx.multidex:multidex:${versions.multidex}",
 
             appCenter              : "com.microsoft.appcenter:espresso-test-extension:${versions.appcenter}",
             commonsIO              : "commons-io:commons-io:${versions.commonsIO}",
@@ -72,7 +74,7 @@ ext {
             kotlinLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
             licensesPlugin         : "com.jaredsburrows:gradle-license-plugin:${versions.licenses}",
-    //        jacocoPlugin           : "org.jacoco:org.jacoco.core:${versions.jacoco}",
+            //        jacocoPlugin           : "org.jacoco:org.jacoco.core:${versions.jacoco}",
 
             lint                   : "com.android.tools.lint:lint:${versions.lint}",
             lintApi                : "com.android.tools.lint:lint-api:${versions.lint}",
