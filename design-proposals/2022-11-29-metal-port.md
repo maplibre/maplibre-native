@@ -200,7 +200,7 @@ Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  
 
 The nice thing about Buffer allocation in Metal is it can be easily done from any thread.  The bad thing is all those little bits of memory are time consuming to track and control, just like in any system.  Thus there is a better way.
 
-![Heap Support](resources/figs-tmp-heap.jpg)
+![Heap Support](resources/figs-heap.png)
 
 The good way to do memory management is heaps.  Instead of allocating a buffer in random shared memory, you allocate it out of a Metal Heap.  Metal's attitude toward what's in that Heap is "you do you".  A lot of the guardrails go away and you're very much on your own for managing that memory.  But it is so very, very fast.
 
@@ -237,7 +237,7 @@ The implementation up to this point is Direct.  For each frame we fill out the s
 
 Any time you're doing the same job over and over again, the question is:  Can you not?  It turns out you can... not... do the work.
 
-![Direct vs Indirect version of the renderer](resources/figs-tmp-indirect.jpg)
+![Direct vs Indirect version of the renderer](resources/figs-indirect.png)
 
 The trick with indirect rendering in Metal is to separate the parts that change a lot from the parts that don't change very often, or ever.  Uniforms for map position, lighting, etc may change every frame.  So you update them every frame.  But the geometry for a tile isn't going to.  Most of the uniforms for a set of roads won't either, except some might with data driven styling.
 
