@@ -111,6 +111,9 @@ jobs:
           restore-keys: |
             - ${{ env.cache-name }}
 
+      - name: Generate javadoc
+        run: make android-javadoc
+
       - name: Check code style
         run: make android-check
 
