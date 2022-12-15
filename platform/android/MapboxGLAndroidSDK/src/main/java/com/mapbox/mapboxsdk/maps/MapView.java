@@ -18,11 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.collection.LongSparseArray;
+import timber.log.Timber;
 
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.R;
+import com.mapbox.mapboxsdk.WellKnownTileServer;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
@@ -99,24 +101,28 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
+    Timber.d("MapView constructed with context");
     initialize(context, MapboxMapOptions.createFromAttributes(context));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
+    Timber.d("MapView constructed with context and attribute set");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    Timber.d( "MapView constructed with context, attributeSet and defStyleAttr");
     initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable MapboxMapOptions options) {
     super(context);
+    Timber.d("MapView constructed with context and MapboxMapOptions");
     initialize(context, options == null ? MapboxMapOptions.createFromAttributes(context) : options);
   }
 
@@ -160,18 +166,18 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Polylines polylines = new PolylineContainer(nativeMapView, annotationsArray);
     ShapeAnnotations shapeAnnotations = new ShapeAnnotationContainer(nativeMapView, annotationsArray);
     AnnotationManager annotationManager = new AnnotationManager(this, annotationsArray, iconManager,
-      annotations, markers, polygons, polylines, shapeAnnotations);
+            annotations, markers, polygons, polylines, shapeAnnotations);
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
     // MapboxMap
     List<MapboxMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     mapboxMap = new MapboxMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
-      developerAnimationListeners);
+            developerAnimationListeners);
     mapboxMap.injectAnnotationManager(annotationManager);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,
-      annotationManager, cameraDispatcher);
+            annotationManager, cameraDispatcher);
     mapKeyListener = new MapKeyListener(transform, uiSettings, mapGestureDetector);
 
     // LocationComponent
@@ -245,7 +251,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private MapboxMap.OnCompassAnimationListener createCompassAnimationListener(@NonNull final CameraChangeDispatcher
-                                                                                cameraChangeDispatcher) {
+                                                                                      cameraChangeDispatcher) {
     return new MapboxMap.OnCompassAnimationListener() {
       @Override
       public void onCompassAnimation() {
@@ -289,11 +295,12 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * You must call this method from the parent's Activity#onCreate(Bundle)} or
    * Fragment#onViewCreated(View, Bundle).
    * </p>
-   * You must set a valid access token with {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String)}
+   * You must set a valid access token with
+   * {@link com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)}
    * before you call this method or an exception will be thrown.
    *
    * @param savedInstanceState Pass in the parent's savedInstanceState.
-   * @see com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String)
+   * @see com.mapbox.mapboxsdk.Mapbox#getInstance(Context, String, WellKnownTileServer)
    */
   @UiThread
   public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -308,7 +315,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       TextureView textureView = new TextureView(getContext());
       boolean translucentSurface = options.getTranslucentTextureSurface();
       mapRenderer = new TextureViewMapRenderer(getContext(),
-        textureView, localFontFamily, translucentSurface) {
+              textureView, localFontFamily, translucentSurface) {
         @Override
         protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
           MapView.this.onSurfaceCreated();
@@ -335,7 +342,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     boolean crossSourceCollisions = mapboxMapOptions.getCrossSourceCollisions();
     nativeMapView = new NativeMapView(
-      getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
+            getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
   }
 
@@ -1272,7 +1279,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     public void setGesturesManager(AndroidGesturesManager gesturesManager, boolean attachDefaultListeners,
                                    boolean setDefaultMutuallyExclusives) {
       mapGestureDetector.setGesturesManager(
-        getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
+              getContext(), gesturesManager, attachDefaultListeners, setDefaultMutuallyExclusives);
     }
 
     @Override
@@ -1282,8 +1289,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private class MapCallback implements OnDidFinishLoadingStyleListener,
-    OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
-    OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
+          OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
+          OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
 
     private final List<OnMapReadyCallback> onMapReadyCallbackList = new ArrayList<>();
 
