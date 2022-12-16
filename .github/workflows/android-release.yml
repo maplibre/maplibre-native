@@ -5,20 +5,19 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ubuntu-20.04]
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: platform/android
     container:
       image: ghcr.io/maplibre/android-ndk-r21b
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
+      # Avoids read timeouts, see https://github.com/maplibre/maplibre-gl-native/pull/591
+      MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 -Dmaven.wagon.http.retryHandler.count=3
     steps:
 
       - uses: actions/checkout@v3

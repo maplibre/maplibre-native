@@ -1,6 +1,53 @@
-# Changelog for the Mapbox Maps SDK for Android
+# Changelog for the MapLibre Maps SDK for Android
 
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/main/CONTRIBUTING.md) to get started.
+
+## main
+
+### ✨ Features and improvements
+
+* Add your pull request...
+* Add missing header guards ([#543](https://github.com/maplibre/maplibre-gl-native/pull/543))
+* Removing unused versions sdk ([#515](https://github.com/maplibre/maplibre-gl-native/pull/515))
+* (tag: node-v5.0.1-pre.0) Upgrade libs and remove Jetifier ([#218](https://github.com/maplibre/maplibre-gl-native/pull/218))
+* Migrate examples in android TestApp to Kotlin ([#416](https://github.com/maplibre/maplibre-gl-native/pull/416))
+* Add ClientOptions to be able to pass around client name and version ([#365](https://github.com/maplibre/maplibre-gl-native/pull/365))
+* Use maplibre docs for more links ([#354](https://github.com/maplibre/maplibre-gl-native/pull/354))
+* Use the MapLibre style spec docs website ([#353](https://github.com/maplibre/maplibre-gl-native/pull/353))
+* Refresh iOS & Android build docs ([5f679b55b](https://github.com/maplibre/maplibre-gl-native/commit/5f679b55b))
+* Qt build improvements and documentation ([#277](https://github.com/maplibre/maplibre-gl-native/pull/277))
+* Replace Mapbox with MapLibre in README titles ([#297](https://github.com/maplibre/maplibre-gl-native/pull/297))
+* Rename MaptilerFileSource to MBTilesFileSource ([#198](https://github.com/maplibre/maplibre-gl-native/pull/198))
+* Changed missed MapBox reference to MapLibre ([#253](https://github.com/maplibre/maplibre-gl-native/pull/253))
+* Implement map projection functionality ([#254](https://github.com/maplibre/maplibre-gl-native/pull/254))
+* chore: rename master -> main in CI and scripts ([#246](https://github.com/maplibre/maplibre-gl-native/pull/246))
+* Feature - Bring back node support ([#217](https://github.com/maplibre/maplibre-gl-native/pull/217))
+* Remove obsolete CI configurations ([#219](https://github.com/maplibre/maplibre-gl-native/pull/219))
+
+### 🐞 Bug fixes
+
+* Add your pull request...
+* Fixes potential NaN when calling `NativeMapView::nativeMoveBy` ([#501](https://github.com/maplibre/maplibre-gl-native/pull/501))
+* Fix android ci workflows ([#476](https://github.com/maplibre/maplibre-gl-native/pull/476))
+* Fix typo in geo.cpp ([#412](https://github.com/maplibre/maplibre-gl-native/pull/412))
+* Fix render tests ([#351](https://github.com/maplibre/maplibre-gl-native/pull/351))
+* fix shiftY calculation typo ([#285](https://github.com/maplibre/maplibre-gl-native/pull/285))
+* [msvc] Fix warnings, mainly casting to smaller types ([#270](https://github.com/maplibre/maplibre-gl-native/pull/270))
+* Fix street label appearance while animating near zoom level threshhold ([#267](https://github.com/maplibre/maplibre-gl-native/pull/267))
+
+### ⛵ Dependencies
+
+* Add your pull request...
+* Bump semver from 7.3.7 to 7.3.8 in /platform/android ([#530](https://github.com/maplibre/maplibre-gl-native/pull/530))
+* Bump to JDK 11 in android CI and generate Gradle Wrapper ([#474](https://github.com/maplibre/maplibre-gl-native/pull/474))
+* Bump ejs from 3.1.7 to 3.1.8 in /platform/android ([#470](https://github.com/maplibre/maplibre-gl-native/pull/470))
+* Upgrade Gradle from 3.6.3 to 3.6.4 ([#456](https://github.com/maplibre/maplibre-gl-native/pull/456))
+* Bump semver from 5.7.1 to 7.3.7 in /platform/android ([#461](https://github.com/maplibre/maplibre-gl-native/pull/461))
+* Bump pixelmatch from 4.0.2 to 5.3.0 in /platform/android ([#460](https://github.com/maplibre/maplibre-gl-native/pull/460))
+* Bump esm from 3.1.0 to 3.2.25 in /platform/android ([#463](https://github.com/maplibre/maplibre-gl-native/pull/463))
+* Bump ejs from 2.7.4 to 3.1.7 in /platform/android ([#299](https://github.com/maplibre/maplibre-gl-native/pull/299))
+* Bump lodash from 4.17.19 to 4.17.21 in /platform/android ([#195](https://github.com/maplibre/maplibre-gl-native/pull/195))
+
 
 ## 9.5.2 - December 02, 2021
 

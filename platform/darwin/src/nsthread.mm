@@ -22,7 +22,7 @@ void setCurrentThreadName(const std::string& name) {
 }
 
 void makeThreadLowPriority() {
-    [[NSThread currentThread] setThreadPriority:0.0];
+    [NSThread currentThread].qualityOfService = NSQualityOfServiceUtility;
 }
 
 void setCurrentThreadPriority(double priority) {
@@ -30,8 +30,16 @@ void setCurrentThreadPriority(double priority) {
         Log::Warning(Event::General, "Invalid thread priority was provided");
         return;
     }
-
-    [[NSThread currentThread] setThreadPriority:priority];
+    
+    if (priority < 0.25) {
+        [NSThread currentThread].qualityOfService = NSQualityOfServiceBackground;
+    } else if (priority < 0.5) {
+        [NSThread currentThread].qualityOfService = NSQualityOfServiceUtility;
+    } else if (priority < 0.75) {
+        [NSThread currentThread].qualityOfService = NSQualityOfServiceUserInitiated;
+    } else {
+        [NSThread currentThread].qualityOfService = NSQualityOfServiceUserInteractive;
+    }
 }
 
 void attachThread() {
