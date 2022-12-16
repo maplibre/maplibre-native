@@ -11,9 +11,6 @@ jobs:
         working-directory: platform/android
     container:
       image: ghcr.io/maplibre/android-ndk-r21b
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
