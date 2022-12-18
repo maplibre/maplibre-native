@@ -13,7 +13,7 @@ To make an Android release, do the following:
 
 * Due to maven timeouts, the `android-release.yml` workflows currently needs a self-hosted runner
   * Go to https://github.com/maplibre/maplibre-gl-native/settings/actions/runners
-  * Press "New self-hosted runner
+  * Press "New self-hosted runner"
   * Spin up a self-hosted Linux x64 runner
   * Make sure the runner has the tags `Linux` and `self-hosted`
 
