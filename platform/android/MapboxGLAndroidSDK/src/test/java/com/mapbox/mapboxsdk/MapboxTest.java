@@ -85,8 +85,8 @@ public class MapboxTest {
 
     expectedException.expect(MapboxConfigurationException.class);
     expectedException.expectMessage(
-      "\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey) before "
-      + "inflating or creating the view."
+      "\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey,"
+              + " WellKnownTileServer wellKnownTileServer) before inflating or creating the view."
     );
     new MapView(context);
   }

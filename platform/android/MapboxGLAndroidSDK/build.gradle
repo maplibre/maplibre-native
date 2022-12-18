@@ -13,6 +13,7 @@ dependencies {
     implementation dependenciesList.supportFragmentV4
     implementation dependenciesList.okhttp3
     implementation dependenciesList.gmsLocation
+    implementation dependenciesList.timber
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockito

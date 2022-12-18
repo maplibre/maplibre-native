@@ -1,10 +1,10 @@
 package com.mapbox.mapboxsdk.testapp
 
-import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
+import androidx.multidex.MultiDexApplication
 import com.mapbox.mapboxsdk.MapStrictMode
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.WellKnownTileServer
@@ -22,7 +22,7 @@ import timber.log.Timber.DebugTree
  * Initialises components as LeakCanary, Strictmode, Timber and Mapbox
  *
  */
-class MapLibreApplication : Application() {
+class MapLibreApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         initializeLogger()

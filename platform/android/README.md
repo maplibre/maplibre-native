@@ -66,7 +66,7 @@ make aproj
 
 # Build package
 BUILDTYPE=Debug make apackage
-#BUILDTYPE=Release make apackage
+# BUILDTYPE=Release make apackage
 
 # Build release Test App
 make android
