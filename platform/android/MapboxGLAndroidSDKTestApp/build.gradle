@@ -8,9 +8,10 @@ android {
         applicationId "com.mapbox.mapboxsdk.testapp"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
-        versionCode 13
-        versionName "6.0.0"
+        versionCode 14
+        versionName "6.0.1"
         testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        multiDexEnabled = true
     }
 
     compileOptions {
@@ -66,6 +67,8 @@ dependencies {
     implementation dependenciesList.supportRecyclerView
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
+
+    implementation dependenciesList.multidex
 
     implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber

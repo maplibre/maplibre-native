@@ -63,6 +63,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
+          
+      - name: Setup Android SDK for accepting tool licenses
+        uses: android-actions/setup-android@v2
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -116,9 +119,17 @@ jobs:
 
       - name: Run Android unit tests
         run: make run-android-unit-test
-
+    
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.10.2
+          ninjaVersion: latest
+      
       - name: Build libmapbox-gl.so for arm-v8
-        run: make android-lib-arm-v8
+        run: |
+          cmake --version
+          make android-lib-arm-v8
 
       - name: Generate Espresso sanity tests
         run: make test-code-android
