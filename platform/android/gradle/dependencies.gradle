@@ -29,7 +29,7 @@ ext {
             kotlin           : '1.3.72',
             licenses         : '0.8.80',
             lint             : '26.4.2',
-            gms              : '17.0.0',
+            gms              : '21.0.1',
     //        jacoco           : '0.8.5',
             appcenter        : '1.4',
             ktlint           : '0.40.0',
