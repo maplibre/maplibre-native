@@ -14,7 +14,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
-* Add your pull request...
+* Update com.google.android.gms:play-services-location to 21.0.1 ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 
 ## 9.6.0 - December 18, 2022
 
