@@ -480,7 +480,7 @@ final class MapGestureDetector {
     @Override
     public boolean onMove(@NonNull MoveGestureDetector detector, float distanceX, float distanceY) {
       // first move event is often delivered with no displacement
-      if (distanceX != 0 || distanceY != 0) {
+      if (!Float.isNaN(distanceX) && !Float.isNaN(distanceY) && (distanceX != 0 || distanceY != 0)) {
         // dispatching camera start event only when the movement actually occurred
         cameraChangeDispatcher.onCameraMoveStarted(CameraChangeDispatcher.REASON_API_GESTURE);
 
