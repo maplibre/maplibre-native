@@ -15,6 +15,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -81,26 +82,25 @@ class GoogleLocationEngineImpl implements LocationEngineImpl<LocationCallback> {
   }
 
   private static LocationRequest toGMSLocationRequest(LocationEngineRequest request) {
-    LocationRequest locationRequest = new LocationRequest();
-    locationRequest.setInterval(request.getInterval());
-    locationRequest.setFastestInterval(request.getFastestInterval());
-    locationRequest.setSmallestDisplacement(request.getDisplacement());
-    locationRequest.setMaxWaitTime(request.getMaxWaitTime());
-    locationRequest.setPriority(toGMSLocationPriority(request.getPriority()));
-    return locationRequest;
+    LocationRequest.Builder builder = new LocationRequest.Builder(request.getInterval());
+    builder.setMinUpdateIntervalMillis(request.getFastestInterval());
+    builder.setMinUpdateDistanceMeters(request.getDisplacement());
+    builder.setMaxUpdateDelayMillis(request.getMaxWaitTime());
+    builder.setPriority(toGMSLocationPriority(request.getPriority()));
+    return builder.build();
   }
 
   private static int toGMSLocationPriority(int enginePriority) {
     switch (enginePriority) {
       case LocationEngineRequest.PRIORITY_HIGH_ACCURACY:
-        return LocationRequest.PRIORITY_HIGH_ACCURACY;
+        return Priority.PRIORITY_HIGH_ACCURACY;
       case LocationEngineRequest.PRIORITY_BALANCED_POWER_ACCURACY:
-        return LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        return Priority.PRIORITY_BALANCED_POWER_ACCURACY;
       case LocationEngineRequest.PRIORITY_LOW_POWER:
-        return LocationRequest.PRIORITY_LOW_POWER;
+        return Priority.PRIORITY_LOW_POWER;
       case LocationEngineRequest.PRIORITY_NO_POWER:
       default:
-        return LocationRequest.PRIORITY_NO_POWER;
+        return Priority.PRIORITY_PASSIVE;
     }
   }
 
