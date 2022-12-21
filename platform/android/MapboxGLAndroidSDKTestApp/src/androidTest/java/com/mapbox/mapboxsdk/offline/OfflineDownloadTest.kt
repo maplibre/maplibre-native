@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.offline
 
-import androidx.test.rule.ActivityTestRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
+import androidx.test.rule.ActivityTestRule
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.log.Logger
 import com.mapbox.mapboxsdk.maps.Style
@@ -43,7 +43,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
                         Logger.e(TAG, "Error while creating offline region: $error")
                     }
                 },
-            )   
+            )
         }
 
         if (!countDownLatch.await(60, TimeUnit.SECONDS)) {

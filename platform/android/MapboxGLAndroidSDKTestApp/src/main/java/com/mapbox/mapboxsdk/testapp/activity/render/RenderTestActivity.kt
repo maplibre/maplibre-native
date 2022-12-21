@@ -20,12 +20,8 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.Exception
-import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset
-import java.util.ArrayList
-import java.util.HashMap
 
 /**
  * Activity that generates map snapshots based on the node render test suite.
@@ -86,14 +82,14 @@ class RenderTestActivity : AppCompatActivity() {
         protected override fun doInBackground(vararg p0: Void?): List<RenderTestDefinition>? {
             val definitions: MutableList<RenderTestDefinition> = ArrayList()
             val assetManager = renderTestActivityWeakReference.get()!!.assets
-            val categories = 
+            val categories =
                 try {
                     assetManager.list(RENDER_TEST_BASE_PATH)
                 } catch (exception: IOException) {
                     Timber.e(exception)
                     throw exception
                 }
-            
+
             for (counter in categories!!.indices.reversed()) {
                 try {
                     val tests = assetManager.list(

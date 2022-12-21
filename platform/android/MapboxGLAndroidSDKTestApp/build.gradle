@@ -49,12 +49,6 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
-    }
 }
 
 dependencies {

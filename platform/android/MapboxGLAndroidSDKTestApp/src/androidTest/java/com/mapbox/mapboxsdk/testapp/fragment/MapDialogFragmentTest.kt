@@ -4,8 +4,8 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.filters.LargeTest
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.testapp.R
@@ -26,7 +26,7 @@ class MapDialogFragmentTest : AppCenter() {
     var activityRule: ActivityTestRule<MapInDialogActivity> = ActivityTestRule(MapInDialogActivity::class.java)
 
     @Test
-    @Ignore
+    @Ignore("Probably does not work")
     fun openCloseDialog() {
         onView(withId(R.id.button_open_dialog)).perform(click())
         Thread.sleep(2500)
