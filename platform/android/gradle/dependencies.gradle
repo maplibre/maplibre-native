@@ -33,7 +33,6 @@ ext {
             gms             : '21.0.1',
             //        jacoco           : '0.8.5',
             appcenter       : '1.5',
-            ktlint          : '0.48.0',
             commonsIO       : '2.11.0',
             assertj         : '3.23.1',
             gradleNexus     : "1.1.0",
@@ -83,7 +82,6 @@ ext {
             lintApi                : "com.android.tools.lint:lint-api:${versions.lint}",
             lintChecks             : "com.android.tools.lint:lint-checks:${versions.lint}",
             lintTests              : "com.android.tools.lint:lint-tests:${versions.lint}",
-            ktlint                 : "com.pinterest:ktlint:${versions.ktlint}",
 
             gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}"
     ]
