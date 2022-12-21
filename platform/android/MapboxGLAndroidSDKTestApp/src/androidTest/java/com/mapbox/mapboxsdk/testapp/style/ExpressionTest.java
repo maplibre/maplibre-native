@@ -2,7 +2,7 @@ package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
@@ -70,7 +70,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class ExpressionTest extends EspressoTest {
 
   private FillLayer layer;
@@ -766,13 +766,9 @@ public class ExpressionTest extends EspressoTest {
     invoke(mapboxMap, (uiController, mapboxMap) -> {
       // Add a source
       Source source;
-      try {
-        source = new GeoJsonSource("amsterdam-parks-source",
-          ResourceUtils.readRawResource(rule.getActivity(), R.raw.amsterdam));
-        mapboxMap.getStyle().addSource(source);
-      } catch (IOException ioException) {
-        return;
-      }
+      source = new GeoJsonSource("amsterdam-parks-source",
+        ResourceUtils.readRawResource(rule.getActivity(), R.raw.amsterdam));
+      mapboxMap.getStyle().addSource(source);
 
       // Add a fill layer
       mapboxMap.getStyle().addLayer(layer = new FillLayer("amsterdam-parks-layer", source.getId())

@@ -206,9 +206,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
-            mapView.onSaveInstanceState(it)
-        }
+        mapView.onSaveInstanceState(outState)
     }
 
     private fun bufferLineStringGeometry(): Polygon {

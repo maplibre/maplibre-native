@@ -4,7 +4,7 @@ import android.view.View;
 
 import androidx.annotation.RawRes;
 import androidx.test.espresso.ViewAction;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests for {@link GeoJsonSource}
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class GeoJsonSourceTests extends EspressoTest {
 
   @Test
@@ -43,12 +43,8 @@ public class GeoJsonSourceTests extends EspressoTest {
     validateTestSetup();
     MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = null;
-      try {
-        source = new GeoJsonSource("source", FeatureCollection
-          .fromJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_collection)));
-      } catch (IOException exception) {
-        Timber.e(exception);
-      }
+      source = new GeoJsonSource("source", FeatureCollection
+        .fromJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_collection)));
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
     });
@@ -69,12 +65,8 @@ public class GeoJsonSourceTests extends EspressoTest {
     validateTestSetup();
     MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = null;
-      try {
-        source = new GeoJsonSource("source",
-          ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
-      } catch (IOException exception) {
-        Timber.e(exception);
-      }
+      source = new GeoJsonSource("source",
+        ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
     });
@@ -90,11 +82,7 @@ public class GeoJsonSourceTests extends EspressoTest {
 
       source.setGeoJson(Point.fromLngLat(0, 0));
       source.setGeoJson(Point.fromLngLat(-25, -25));
-      try {
-        source.setGeoJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
-      } catch (IOException exception) {
-        Timber.e(exception);
-      }
+      source.setGeoJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
 
       source.setGeoJson(Point.fromLngLat(20, 55));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
@@ -163,11 +151,7 @@ public class GeoJsonSourceTests extends EspressoTest {
       Layer layer = new CircleLayer("layer", source.getId());
       mapboxMap.getStyle().addLayer(layer);
 
-      try {
-        source.setGeoJson(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
-      } catch (IOException exception) {
-        Timber.e(exception);
-      }
+      source.setGeoJson(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
 
       mapboxMap.getStyle().removeLayer(layer);
       mapboxMap.getStyle().removeSource(source);

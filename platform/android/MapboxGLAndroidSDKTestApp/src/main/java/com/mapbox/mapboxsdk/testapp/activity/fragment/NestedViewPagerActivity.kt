@@ -151,9 +151,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
 
             override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-                val textView = TextView(inflater.context)
-                textView.text = "This is an empty Fragment"
-                return textView
+                return TextView(inflater.context)
             }
         }
     }

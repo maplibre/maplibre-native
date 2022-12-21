@@ -23,6 +23,8 @@ dependencies {
     testImplementation dependenciesList.kotlinLib
     testImplementation dependenciesList.commonsIO
     testImplementation dependenciesList.assertjcore
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
 }
 
 android {

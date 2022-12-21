@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.testapp.offline
 
 import android.content.Context
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.offline.OfflineManager
@@ -18,7 +18,7 @@ import java.io.IOException
 import java.util.concurrent.CountDownLatch
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class OfflineManagerTest : AppCenter() {
 
     companion object {

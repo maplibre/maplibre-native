@@ -46,6 +46,7 @@ ext {
             mapboxJavaTurf         : "org.maplibre.gl:android-sdk-turf:${versions.mapLibreServices}",
 
             junit                  : "junit:junit:${versions.junit}",
+            amdroidxJunit          : "androidx.test.ext:junit:1.1.4",
             mockito                : "org.mockito:mockito-core:${versions.mockito}",
             mockk                  : "io.mockk:mockk:${versions.mockk}",
             robolectric            : "org.robolectric:robolectric:${versions.robolectric}",

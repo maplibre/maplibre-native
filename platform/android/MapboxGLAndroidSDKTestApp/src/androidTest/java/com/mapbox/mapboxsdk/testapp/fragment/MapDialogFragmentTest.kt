@@ -4,7 +4,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 /**
  * Regression test that validates that a map inside a DialogFragment can be opened and closed.
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 @LargeTest
 class MapDialogFragmentTest : AppCenter() {
 

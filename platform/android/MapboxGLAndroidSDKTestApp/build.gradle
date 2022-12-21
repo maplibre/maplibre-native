@@ -85,6 +85,7 @@ dependencies {
     androidTestImplementation dependenciesList.testEspressoContrib
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"
