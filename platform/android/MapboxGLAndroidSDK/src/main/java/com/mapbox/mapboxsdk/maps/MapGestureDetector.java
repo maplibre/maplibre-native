@@ -41,6 +41,8 @@ import static com.mapbox.mapboxsdk.constants.MapboxConstants.ZOOM_RATE;
 import static com.mapbox.mapboxsdk.maps.MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE;
 import static com.mapbox.mapboxsdk.utils.MathUtils.normalize;
 
+import timber.log.Timber;
+
 /**
  * Manages gestures events on a MapView.
  */
@@ -493,6 +495,8 @@ final class MapGestureDetector {
         transform.moveBy(-distanceX, -distanceY, 0 /*no duration*/);
 
         notifyOnMoveListeners(detector);
+      } else {
+        Timber.e("Could not call onMove with parameters %s,%s", distanceX, distanceY);
       }
       return true;
     }
