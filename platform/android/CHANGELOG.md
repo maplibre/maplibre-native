@@ -10,7 +10,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
-* Add your pull request...
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
 
 ### ⛵ Dependencies
 
