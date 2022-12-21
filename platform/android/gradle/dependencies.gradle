@@ -17,7 +17,8 @@ ext {
             material        : '1.7.0',
             uiAutomator     : '2.2.0',
             espresso        : '3.5.0',
-            testRunner      : '1.5.0',
+            testRunner      : '1.1.4',
+            testRules       : '1.5.0',
             fragment        : '1.5.5',
             annotation      : '1.5.0',
             leakCanary      : '2.10',
@@ -52,7 +53,7 @@ ext {
             assertjcore            : "org.assertj:assertj-core:${versions.assertj}",
 
             testRunner             : "androidx.test.ext:junit:${versions.testRunner}",
-            testRules              : "androidx.test:rules:${versions.testRunner}",
+            testRules              : "androidx.test:rules:${versions.testRules}",
             testEspressoCore       : "androidx.test.espresso:espresso-core:${versions.espresso}",
             testEspressoIntents    : "androidx.test.espresso:espresso-intents:${versions.espresso}",
             testEspressoContrib    : "androidx.test.espresso:espresso-contrib:${versions.espresso}",
