@@ -8,8 +8,11 @@ import com.google.gson.JsonObject
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
@@ -78,10 +81,11 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     }
 
     private fun createFeatureCollection(): FeatureCollection {
-        val point = if (isInitialPosition) Point.fromLngLat(
-            -74.01618140,
-            40.701745
-        ) else Point.fromLngLat(-73.988097, 40.749864)
+        val point = if (isInitialPosition) {
+            Point.fromLngLat(-74.01618140, 40.701745)
+        } else {
+            Point.fromLngLat(-73.988097, 40.749864)
+        }
         val properties = JsonObject()
         properties.addProperty(KEY_PROPERTY_SELECTED, isSelected)
         val feature = Feature.fromGeometry(point, properties)

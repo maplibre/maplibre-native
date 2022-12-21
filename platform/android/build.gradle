@@ -20,7 +20,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.4'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath dependenciesList.licensesPlugin
         classpath dependenciesList.kotlinPlugin
         // classpath dependenciesList.jacocoPlugin
@@ -60,7 +60,7 @@ nexusPublishing {
             username = ossrhUsername
             password = ossrhPassword
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))            
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
 }

@@ -3,7 +3,7 @@ package com.mapbox.mapboxsdk.maps
 import android.content.Context
 import android.graphics.PointF
 import androidx.test.annotation.UiThreadTest
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.Mapbox
@@ -14,7 +14,6 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters
 import com.mapbox.mapboxsdk.maps.renderer.MapRenderer
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
-import com.mapbox.mapboxsdk.testapp.MapboxApplication
 import com.mapbox.mapboxsdk.testapp.utils.TestConstants
 import junit.framework.Assert.*
 import org.junit.After
@@ -23,7 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class NativeMapViewTest : AppCenter() {
 
     private lateinit var nativeMapView: NativeMap
@@ -55,7 +54,7 @@ class NativeMapViewTest : AppCenter() {
     fun after() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiKey = Mapbox.getApiKey()
-        Mapbox.getInstance(context, apiKey, MapboxApplication.TILE_SERVER)
+        Mapbox.getInstance(context)
         nativeMapView.destroy()
     }
 

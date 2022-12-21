@@ -10,11 +10,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
-* Add your pull request...
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
 
 ### ⛵ Dependencies
 
 * Add your pull request...
+* Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
 
 ## 9.6.0 - December 18, 2022
 
