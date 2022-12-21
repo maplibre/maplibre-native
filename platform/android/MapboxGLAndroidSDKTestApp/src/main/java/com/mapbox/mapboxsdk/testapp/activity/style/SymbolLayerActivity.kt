@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
@@ -14,8 +15,12 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
+import com.mapbox.mapboxsdk.maps.MapboxMapOptions
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.expressions.Expression.FormatEntry
 import com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption
@@ -28,7 +33,9 @@ import com.mapbox.mapboxsdk.style.sources.Source
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import timber.log.Timber
-import java.util.*
+import java.util.Arrays
+import java.util.Objects
+import java.util.Random
 
 /**
  * Test activity showcasing runtime manipulation of symbol layers.
@@ -72,7 +79,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
             if (style != null) {
                 Timber.e("Adding image with id: %s", id)
                 val androidIcon =
-                    BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_android_2))
+                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
                 style.addImage(id!!, Objects.requireNonNull(androidIcon)!!)
             }
         }
@@ -81,7 +88,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         val carBitmap = BitmapUtils.getBitmapFromDrawable(
-            resources.getDrawable(R.drawable.ic_directions_car_black)
+            ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
         )
 
         // marker source
@@ -201,9 +208,11 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
             val size: Number? = markerSymbolLayer!!.textSize.getValue()
             if (size != null) {
                 markerSymbolLayer!!.setProperties(
-                    if (size as Float > 10) PropertyFactory.textSize(
-                        10f
-                    ) else PropertyFactory.textSize(20f)
+                    if (size as Float > 10) {
+                        PropertyFactory.textSize(10f)
+                    } else {
+                        PropertyFactory.textSize(20f)
+                    }
                 )
             }
         }
@@ -320,14 +329,17 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                 toggleTextSize()
                 true
             }
+
             R.id.action_toggle_text_field -> {
                 toggleTextField()
                 true
             }
+
             R.id.action_toggle_text_font -> {
                 toggleTextFont()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

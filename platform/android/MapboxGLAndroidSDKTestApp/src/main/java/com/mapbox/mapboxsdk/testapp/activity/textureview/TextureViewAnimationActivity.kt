@@ -45,7 +45,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
             setFpsView(mapboxMap)
 
             // Animate the map view
-            val animation = ObjectAnimator.ofFloat(mapView, "rotationY", 0.0f, 360f)
+            val animation = ObjectAnimator.ofFloat(mapView!!, "rotationY", 0.0f, 360f)
             animation.duration = 3600
             animation.repeatCount = ObjectAnimator.INFINITE
             animation.start()
@@ -65,7 +65,9 @@ class TextureViewAnimationActivity : AppCompatActivity() {
                         delayed = null
                         flyTo(mapboxMap, place, zoom)
                     }
-                    handler!!.postDelayed(delayed, 2000)
+                    delayed?.let {
+                        handler!!.postDelayed(it, 2000)
+                    }
                 }
 
                 override fun onFinish() {
@@ -101,7 +103,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
         super.onStop()
         mapView!!.onStop()
         if (handler != null && delayed != null) {
-            handler!!.removeCallbacks(delayed)
+            handler!!.removeCallbacks(delayed!!)
         }
     }
 

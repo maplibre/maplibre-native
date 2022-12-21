@@ -33,6 +33,7 @@ class MapboxMapTest {
 
     @Mock
     private lateinit var context: Context
+
     @Mock
     private lateinit var appContext: Context
 

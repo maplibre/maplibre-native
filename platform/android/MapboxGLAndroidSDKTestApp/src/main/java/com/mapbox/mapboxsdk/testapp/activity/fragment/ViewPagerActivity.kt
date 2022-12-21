@@ -41,7 +41,7 @@ class ViewPagerActivity : AppCompatActivity() {
             return NUM_ITEMS
         }
 
-        override fun getItem(position: Int): androidx.fragment.app.Fragment? {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val options = MapboxMapOptions.createFromAttributes(context)
             options.textureMode(true)
             options.camera(

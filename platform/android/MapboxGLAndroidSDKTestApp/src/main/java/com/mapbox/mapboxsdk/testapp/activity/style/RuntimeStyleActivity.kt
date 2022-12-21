@@ -13,17 +13,32 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.CancelableCallback
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.*
-import com.mapbox.mapboxsdk.style.sources.*
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.FillLayer
+import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.LineLayer
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.RasterLayer
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.style.sources.RasterSource
+import com.mapbox.mapboxsdk.style.sources.Source
+import com.mapbox.mapboxsdk.style.sources.TileSet
+import com.mapbox.mapboxsdk.style.sources.VectorSource
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.IOException
-import java.lang.StringBuilder
-import java.util.*
+import java.util.Arrays
+import java.util.Collections
 
 /**
  * Test activity showcasing the runtime style API.
@@ -140,84 +155,105 @@ class RuntimeStyleActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (!styleLoaded) {
             false
-        } else when (item.itemId) {
-            R.id.action_list_layers -> {
-                listLayers()
-                true
+        } else {
+            when (item.itemId) {
+                R.id.action_list_layers -> {
+                    listLayers()
+                    true
+                }
+
+                R.id.action_list_sources -> {
+                    listSources()
+                    true
+                }
+
+                R.id.action_water_color -> {
+                    setWaterColor()
+                    true
+                }
+
+                R.id.action_background_opacity -> {
+                    setBackgroundOpacity()
+                    true
+                }
+
+                R.id.action_road_avoid_edges -> {
+                    setRoadSymbolPlacement()
+                    true
+                }
+
+                R.id.action_layer_visibility -> {
+                    setLayerInvisible()
+                    true
+                }
+
+                R.id.action_remove_layer -> {
+                    removeBuildings()
+                    true
+                }
+
+                R.id.action_add_parks_layer -> {
+                    addParksLayer()
+                    true
+                }
+
+                R.id.action_add_dynamic_parks_layer -> {
+                    addDynamicParksLayer()
+                    true
+                }
+
+                R.id.action_add_terrain_layer -> {
+                    addTerrainLayer()
+                    true
+                }
+
+                R.id.action_add_satellite_layer -> {
+                    addSatelliteLayer()
+                    true
+                }
+
+                R.id.action_update_water_color_on_zoom -> {
+                    updateWaterColorOnZoom()
+                    true
+                }
+
+                R.id.action_add_custom_tiles -> {
+                    addCustomTileSource()
+                    true
+                }
+
+                R.id.action_fill_filter -> {
+                    styleFillFilterLayer()
+                    true
+                }
+
+                R.id.action_textsize_filter -> {
+                    styleTextSizeFilterLayer()
+                    true
+                }
+
+                R.id.action_line_filter -> {
+                    styleLineFilterLayer()
+                    true
+                }
+
+                R.id.action_numeric_filter -> {
+                    styleNumericFillLayer()
+                    true
+                }
+
+                R.id.action_bring_water_to_front -> {
+                    bringWaterToFront()
+                    true
+                }
+
+                R.id.action_fill_filter_color -> {
+                    styleFillColorLayer()
+                    true
+                }
+
+                else -> super.onOptionsItemSelected(item)
             }
-            R.id.action_list_sources -> {
-                listSources()
-                true
-            }
-            R.id.action_water_color -> {
-                setWaterColor()
-                true
-            }
-            R.id.action_background_opacity -> {
-                setBackgroundOpacity()
-                true
-            }
-            R.id.action_road_avoid_edges -> {
-                setRoadSymbolPlacement()
-                true
-            }
-            R.id.action_layer_visibility -> {
-                setLayerInvisible()
-                true
-            }
-            R.id.action_remove_layer -> {
-                removeBuildings()
-                true
-            }
-            R.id.action_add_parks_layer -> {
-                addParksLayer()
-                true
-            }
-            R.id.action_add_dynamic_parks_layer -> {
-                addDynamicParksLayer()
-                true
-            }
-            R.id.action_add_terrain_layer -> {
-                addTerrainLayer()
-                true
-            }
-            R.id.action_add_satellite_layer -> {
-                addSatelliteLayer()
-                true
-            }
-            R.id.action_update_water_color_on_zoom -> {
-                updateWaterColorOnZoom()
-                true
-            }
-            R.id.action_add_custom_tiles -> {
-                addCustomTileSource()
-                true
-            }
-            R.id.action_fill_filter -> {
-                styleFillFilterLayer()
-                true
-            }
-            R.id.action_textsize_filter -> {
-                styleTextSizeFilterLayer()
-                true
-            }
-            R.id.action_line_filter -> {
-                styleLineFilterLayer()
-                true
-            }
-            R.id.action_numeric_filter -> {
-                styleNumericFillLayer()
-                true
-            }
-            R.id.action_bring_water_to_front -> {
-                bringWaterToFront()
-                true
-            }
-            R.id.action_fill_filter_color -> {
-                styleFillColorLayer()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
