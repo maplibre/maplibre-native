@@ -86,13 +86,15 @@ class RenderTestActivity : AppCompatActivity() {
         protected override fun doInBackground(vararg p0: Void?): List<RenderTestDefinition>? {
             val definitions: MutableList<RenderTestDefinition> = ArrayList()
             val assetManager = renderTestActivityWeakReference.get()!!.assets
-            var categories = arrayOfNulls<String>(0)
-            try {
-                categories = assetManager.list(RENDER_TEST_BASE_PATH)
-            } catch (exception: IOException) {
-                Timber.e(exception)
-            }
-            for (counter in categories.indices.reversed()) {
+            val categories = 
+                try {
+                    assetManager.list(RENDER_TEST_BASE_PATH)
+                } catch (exception: IOException) {
+                    Timber.e(exception)
+                    throw exception
+                }
+            
+            for (counter in categories!!.indices.reversed()) {
                 try {
                     val tests = assetManager.list(
                         String.format(
@@ -101,7 +103,7 @@ class RenderTestActivity : AppCompatActivity() {
                             categories[counter]
                         )
                     )
-                    for (test in tests) {
+                    for (test in tests!!) {
                         val styleJson = loadStyleJson(assetManager, categories[counter], test)
                         val renderTestStyleDefinition = Gson()
                             .fromJson(styleJson, RenderTestStyleDefinition::class.java)

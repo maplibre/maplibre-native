@@ -54,39 +54,43 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
                 .withLayer(layer)
         ) { style: Style? ->
             runnable = RefreshImageRunnable(imageSource, handler)
-            handler.postDelayed(runnable, 100)
+            runnable?.let {
+                handler.postDelayed(it, 100)
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     public override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     public override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
-        handler.removeCallbacks(runnable)
+        mapView.onStop()
+        runnable?.let {
+            handler.removeCallbacks(it)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private class RefreshImageRunnable internal constructor(
