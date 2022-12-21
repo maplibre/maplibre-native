@@ -1,18 +1,17 @@
 package com.mapbox.mapboxsdk.maps
 
 import androidx.test.annotation.UiThreadTest
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.WellKnownTileServer
 import com.mapbox.mapboxsdk.storage.FileSource
-import com.mapbox.mapboxsdk.testapp.MapboxApplication
 import com.mapbox.mapboxsdk.util.TileServerOptions
 import org.junit.*
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class BootstrapTest : AppCenter() {
 
     var apiKeyBackup: String? = null
@@ -27,7 +26,7 @@ class BootstrapTest : AppCenter() {
     @UiThreadTest
     fun after() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        Mapbox.getInstance(context, apiKeyBackup, MapboxApplication.TILE_SERVER)
+        Mapbox.getInstance(context)
     }
 
     @Test

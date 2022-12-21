@@ -14,6 +14,7 @@ dependencies {
     implementation dependenciesList.okhttp3
     implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber
+    implementation dependenciesList.interpolator
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockito
@@ -22,6 +23,9 @@ dependencies {
     testImplementation dependenciesList.kotlinLib
     testImplementation dependenciesList.commonsIO
     testImplementation dependenciesList.assertjcore
+
+    androidTestImplementation dependenciesList.testRunner
+    androidTestImplementation dependenciesList.testRules
 }
 
 android {
@@ -56,11 +60,6 @@ android {
         main.res.srcDirs += 'src/main/res-public'
     }
 
-    lintOptions {
-        disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
-        checkAllWarnings true
-        warningsAsErrors false
-    }
 
     testOptions {
         unitTests {
@@ -77,6 +76,12 @@ android {
             testCoverageEnabled false
             jniDebuggable true
         }
+    }
+    namespace 'com.mapbox.mapboxsdk'
+    lint {
+        checkAllWarnings true
+        disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
+        warningsAsErrors false
     }
 }
 

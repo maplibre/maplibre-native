@@ -2,7 +2,7 @@ package com.mapbox.mapboxsdk.testapp.style
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.action.MapboxMapAction
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest
@@ -15,7 +15,7 @@ import java.util.*
 /**
  * CRUD tests around Image
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class ImageTest : EspressoTest() {
 
     companion object {

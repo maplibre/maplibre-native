@@ -20,20 +20,12 @@ android {
     }
 
     nativeBuild(["example-custom-layer"])
-
     packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'LICENSE.txt'
+        resources {
+            excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'LICENSE.txt']
+        }
     }
 
-    lintOptions {
-        baseline file("lint-baseline-local.xml")
-        checkAllWarnings true
-        warningsAsErrors true
-        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
-        abortOnError false
-    }
 
     buildTypes {
         debug {
@@ -49,11 +41,14 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
+    namespace 'com.mapbox.mapboxsdk.testapp'
+    testNamespace '${applicationId}'
+    lint {
+        abortOnError false
+        baseline file('lint-baseline-local.xml')
+        checkAllWarnings true
+        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
+        warningsAsErrors true
     }
 }
 
@@ -85,6 +80,7 @@ dependencies {
     androidTestImplementation dependenciesList.testEspressoContrib
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"

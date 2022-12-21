@@ -49,7 +49,9 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
             // loop refresh geojson
             handler = Handler()
             runnable = RefreshGeoJsonRunnable(mapboxMap!!, handler!!)
-            handler!!.postDelayed(runnable, 2000)
+            runnable?.let {
+                handler!!.postDelayed(it, 2000)
+            }
         }
     }
 
@@ -71,7 +73,9 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         mapView!!.onStop()
-        handler!!.removeCallbacks(runnable)
+        runnable?.let {
+            handler!!.removeCallbacks(it)
+        }
     }
 
     override fun onDestroy() {

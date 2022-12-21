@@ -5,7 +5,7 @@ import android.Manifest;
 import androidx.test.espresso.IdlingPolicies;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResourceTimeoutException;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
@@ -32,7 +32,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 /**
  * Instrumentation render tests
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class RenderTest extends AppCenter {
 
   private static final int RENDER_TEST_TIMEOUT = 30;

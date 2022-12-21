@@ -96,7 +96,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
         }
 
-        class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager?) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
+        class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
             override fun getItem(position: Int): androidx.fragment.app.Fragment {
                 val options = MapboxMapOptions.createFromAttributes(context)
@@ -151,9 +151,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
 
             override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-                val textView = TextView(inflater.context)
-                textView.text = "This is an empty Fragment"
-                return textView
+                return TextView(inflater.context)
             }
         }
     }
