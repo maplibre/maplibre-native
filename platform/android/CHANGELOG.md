@@ -14,7 +14,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
-* Add your pull request...
+* Incremented minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014
+*    and lessens the backward compatibility burden
 * Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
 
 ## 9.6.0 - December 18, 2022
