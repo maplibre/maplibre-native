@@ -1,5 +1,7 @@
 FROM ubuntu:focal
 
+RUN docker system prune --force
+
 RUN set -ex; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get -qq update; \
