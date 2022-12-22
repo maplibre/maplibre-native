@@ -1,638 +1,544 @@
-package com.mapbox.mapboxsdk.camera;
+package com.mapbox.mapboxsdk.camera
 
-import android.graphics.Point;
-import android.graphics.PointF;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Projection;
-import com.mapbox.mapboxsdk.maps.UiSettings;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
+import android.graphics.Point
+import android.graphics.PointF
+import androidx.annotation.IntDef
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import timber.log.Timber
+import java.lang.Double.min
+import java.util.Arrays
 
 /**
  * Factory for creating CameraUpdate objects.
  */
-public final class CameraUpdateFactory {
-
-  /**
-   * Returns a CameraUpdate that moves the camera to a specified CameraPosition.
-   *
-   * @param cameraPosition Camera Position to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newCameraPosition(@NonNull CameraPosition cameraPosition) {
-    return new CameraPositionUpdate(cameraPosition.bearing, cameraPosition.target, cameraPosition.tilt,
-      cameraPosition.zoom, cameraPosition.padding);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
-   * specified by a LatLng object. This centers the camera on the LatLng object.
-   *
-   * @param latLng Target location to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLng(@NonNull LatLng latLng) {
-    return new CameraPositionUpdate(-1, latLng, -1, -1, null);
-  }
-
-  /**
-   * Returns a CameraUpdate that transforms the camera such that the specified
-   * latitude/longitude bounds are centered on screen at the greatest possible zoom level while maintaining
-   * current camera position bearing and tilt values.
-   * <p>
-   * You can specify padding, in order to inset the bounding box from the map view's edges.
-   * The padding will not persist and impact following camera transformations.
-   * </p>
-   *
-   * @param bounds  Bounds to match Camera position with
-   * @param padding Padding added to the bounds
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngBounds(@NonNull LatLngBounds bounds, int padding) {
-    return newLatLngBounds(bounds, padding, padding, padding, padding);
-  }
-
-  /**
-   * Returns a CameraUpdate that transforms the camera such that the specified
-   * latitude/longitude bounds are centered on screen at the greatest possible zoom level while using
-   * provided bearing and tilt values.
-   * <p>
-   * You can specify padding, in order to inset the bounding box from the map view's edges.
-   * The padding will not persist and impact following camera transformations.
-   * </p>
-   *
-   * @param bounds  Bounds to match Camera position with
-   * @param bearing Bearing to take in account when generating the bounds
-   * @param tilt    Tilt to take in account when generating the bounds
-   * @param padding Padding added to the bounds
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngBounds(@NonNull LatLngBounds bounds, double bearing, double tilt, int padding) {
-    return newLatLngBounds(bounds, bearing, tilt, padding, padding, padding, padding);
-  }
-
-  /**
-   * Returns a CameraUpdate that transforms the camera such that the specified
-   * latitude/longitude bounds are centered on screen at the greatest possible zoom level while maintaining
-   * current camera position bearing and tilt values.
-   * <p>
-   * You can specify padding, in order to inset the bounding box from the map view's edges.
-   * The padding will not persist and impact following camera transformations.
-   * </p>
-   *
-   * @param bounds        Bounds to base the Camera position out of
-   * @param paddingLeft   Padding left of the bounds
-   * @param paddingTop    Padding top of the bounds
-   * @param paddingRight  Padding right of the bounds
-   * @param paddingBottom Padding bottom of the bounds
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngBounds(@NonNull LatLngBounds bounds, int paddingLeft, int paddingTop,
-                                             int paddingRight, int paddingBottom) {
-    return new CameraBoundsUpdate(bounds, null, null, paddingLeft, paddingTop, paddingRight, paddingBottom);
-  }
-
-  /**
-   * Returns a CameraUpdate that transforms the camera such that the specified
-   * latitude/longitude bounds are centered on screen at the greatest possible zoom level while using
-   * provided bearing and tilt values.
-   * <p>
-   * You can specify padding, in order to inset the bounding box from the map view's edges.
-   * The padding will not persist and impact following camera transformations.
-   * </p>
-   *
-   * @param bounds        Bounds to base the Camera position out of
-   * @param bearing       Bearing to take in account when generating the bounds
-   * @param tilt          Tilt to take in account when generating the bounds
-   * @param paddingLeft   Padding left of the bounds
-   * @param paddingTop    Padding top of the bounds
-   * @param paddingRight  Padding right of the bounds
-   * @param paddingBottom Padding bottom of the bounds
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngBounds(@NonNull LatLngBounds bounds, double bearing, double tilt,
-                                             int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
-    return new CameraBoundsUpdate(bounds, bearing, tilt, paddingLeft, paddingTop, paddingRight, paddingBottom);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
-   * specified by a LatLng object taking the specified padding into account.
-   *
-   * @param latLng Target location to change to
-   * @param zoom   Zoom level to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngZoom(@NonNull LatLng latLng, double zoom) {
-    return new CameraPositionUpdate(-1, latLng, -1, zoom, null);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
-   * specified by a LatLng object, and moves to the given zoom level.
-   * Applied padding is going to persist and impact following camera transformations.
-   *
-   * @param latLng Target location to change to
-   * @param left   Left padding
-   * @param top    Top padding
-   * @param right  Right padding
-   * @param bottom Bottom padding
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate newLatLngPadding(@NonNull LatLng latLng,
-                                              double left, double top, double right, double bottom) {
-    return new CameraPositionUpdate(-1, latLng, -1, -1, new double[] {left, top, right, bottom});
-  }
-
-  /**
-   * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
-   *
-   * @param amount Amount of zoom level to change with
-   * @param focus  Focus point of zoom
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate zoomBy(double amount, Point focus) {
-    return new ZoomUpdate(amount, focus.x, focus.y);
-  }
-
-  /**
-   * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
-   *
-   * @param amount Amount of zoom level to change with
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate zoomBy(double amount) {
-    return new ZoomUpdate(ZoomUpdate.ZOOM_BY, amount);
-  }
-
-  /**
-   * Returns a CameraUpdate that zooms in on the map by moving the viewpoint's height closer to
-   * the Earth's surface. The zoom increment is 1.0.
-   *
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate zoomIn() {
-    return new ZoomUpdate(ZoomUpdate.ZOOM_IN);
-  }
-
-  /**
-   * Returns a CameraUpdate that zooms out on the map by moving the viewpoint's height farther
-   * away from the Earth's surface. The zoom increment is -1.0.
-   *
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate zoomOut() {
-    return new ZoomUpdate(ZoomUpdate.ZOOM_OUT);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the camera viewpoint to a particular zoom level.
-   *
-   * @param zoom Zoom level to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate zoomTo(double zoom) {
-    return new ZoomUpdate(ZoomUpdate.ZOOM_TO, zoom);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the camera viewpoint to a particular bearing.
-   *
-   * @param bearing Bearing to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate bearingTo(double bearing) {
-    return new CameraPositionUpdate(bearing, null, -1, -1, null);
-  }
-
-  /**
-   * Returns a CameraUpdate that moves the camera viewpoint to a particular tilt.
-   *
-   * @param tilt Tilt to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate tiltTo(double tilt) {
-    return new CameraPositionUpdate(-1, null, tilt, -1, null);
-  }
-
-  /**
-   * Returns a CameraUpdate that when animated changes the camera padding.
-   * Applied padding is going to persist and impact following camera transformations.
-   * <p>
-   * Specified in left, top, right, bottom order.
-   * </p>
-   *
-   * @param padding Padding to change to
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate paddingTo(double[] padding) {
-    return new CameraPositionUpdate(-1, null, -1, -1, padding);
-  }
-
-  /**
-   * Returns a CameraUpdate that when animated changes the camera padding.
-   * Applied padding is going to persist and impact following camera transformations.
-   * <p>
-   * Specified in left, top, right, bottom order.
-   * </p>
-   *
-   * @return CameraUpdate Final Camera Position
-   */
-  public static CameraUpdate paddingTo(double left, double top, double right, double bottom) {
-    return paddingTo(new double[] {left, top, right, bottom});
-  }
-
-  //
-  // CameraUpdate types
-  //
-
-  static final class CameraPositionUpdate implements CameraUpdate {
-
-    private final double bearing;
-    private final LatLng target;
-    private final double tilt;
-    private final double zoom;
-    private final double[] padding;
-
-    CameraPositionUpdate(double bearing, LatLng target, double tilt, double zoom, double[] padding) {
-      this.bearing = bearing;
-      this.target = target;
-      this.tilt = tilt;
-      this.zoom = zoom;
-      this.padding = padding;
+object CameraUpdateFactory {
+    /**
+     * Returns a CameraUpdate that moves the camera to a specified CameraPosition.
+     *
+     * @param cameraPosition Camera Position to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newCameraPosition(cameraPosition: CameraPosition): CameraUpdate {
+        return CameraPositionUpdate(
+            cameraPosition.bearing, cameraPosition.target, cameraPosition.tilt,
+            cameraPosition.zoom, cameraPosition.padding
+        )
     }
 
-    public LatLng getTarget() {
-      return target;
+    /**
+     * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
+     * specified by a LatLng object. This centers the camera on the LatLng object.
+     *
+     * @param latLng Target location to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLng(latLng: LatLng): CameraUpdate {
+        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, null)
     }
 
-    public double getBearing() {
-      return bearing;
+    /**
+     * Returns a CameraUpdate that transforms the camera such that the specified
+     * latitude/longitude bounds are centered on screen at the greatest possible zoom level while maintaining
+     * current camera position bearing and tilt values.
+     *
+     *
+     * You can specify padding, in order to inset the bounding box from the map view's edges.
+     * The padding will not persist and impact following camera transformations.
+     *
+     *
+     * @param bounds  Bounds to match Camera position with
+     * @param padding Padding added to the bounds
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngBounds(bounds: LatLngBounds, padding: Int): CameraUpdate {
+        return newLatLngBounds(bounds, padding, padding, padding, padding)
     }
 
-    public double getTilt() {
-      return tilt;
+    /**
+     * Returns a CameraUpdate that transforms the camera such that the specified
+     * latitude/longitude bounds are centered on screen at the greatest possible zoom level while using
+     * provided bearing and tilt values.
+     *
+     *
+     * You can specify padding, in order to inset the bounding box from the map view's edges.
+     * The padding will not persist and impact following camera transformations.
+     *
+     *
+     * @param bounds  Bounds to match Camera position with
+     * @param bearing Bearing to take in account when generating the bounds
+     * @param tilt    Tilt to take in account when generating the bounds
+     * @param padding Padding added to the bounds
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngBounds(bounds: LatLngBounds, bearing: Double, tilt: Double, padding: Int): CameraUpdate {
+        return newLatLngBounds(bounds, bearing, tilt, padding, padding, padding, padding)
     }
 
-    public double getZoom() {
-      return zoom;
+    /**
+     * Returns a CameraUpdate that transforms the camera such that the specified
+     * latitude/longitude bounds are centered on screen at the greatest possible zoom level while maintaining
+     * current camera position bearing and tilt values.
+     *
+     *
+     * You can specify padding, in order to inset the bounding box from the map view's edges.
+     * The padding will not persist and impact following camera transformations.
+     *
+     *
+     * @param bounds        Bounds to base the Camera position out of
+     * @param paddingLeft   Padding left of the bounds
+     * @param paddingTop    Padding top of the bounds
+     * @param paddingRight  Padding right of the bounds
+     * @param paddingBottom Padding bottom of the bounds
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngBounds(
+        bounds: LatLngBounds, paddingLeft: Int, paddingTop: Int,
+        paddingRight: Int, paddingBottom: Int
+    ): CameraUpdate {
+        return CameraBoundsUpdate(bounds, null, null, paddingLeft, paddingTop, paddingRight, paddingBottom)
     }
 
-    public double[] getPadding() {
-      return padding;
+    /**
+     * Returns a CameraUpdate that transforms the camera such that the specified
+     * latitude/longitude bounds are centered on screen at the greatest possible zoom level while using
+     * provided bearing and tilt values.
+     *
+     *
+     * You can specify padding, in order to inset the bounding box from the map view's edges.
+     * The padding will not persist and impact following camera transformations.
+     *
+     *
+     * @param bounds        Bounds to base the Camera position out of
+     * @param bearing       Bearing to take in account when generating the bounds
+     * @param tilt          Tilt to take in account when generating the bounds
+     * @param paddingLeft   Padding left of the bounds
+     * @param paddingTop    Padding top of the bounds
+     * @param paddingRight  Padding right of the bounds
+     * @param paddingBottom Padding bottom of the bounds
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngBounds(
+        bounds: LatLngBounds, bearing: Double, tilt: Double,
+        paddingLeft: Int, paddingTop: Int, paddingRight: Int, paddingBottom: Int
+    ): CameraUpdate {
+        return CameraBoundsUpdate(bounds, bearing, tilt, paddingLeft, paddingTop, paddingRight, paddingBottom)
     }
 
-    @Override
-    public CameraPosition getCameraPosition(@NonNull MapboxMap mapboxMap) {
-      if (target == null) {
-        CameraPosition previousPosition = mapboxMap.getCameraPosition();
-        return new CameraPosition.Builder(this)
-          .target(previousPosition.target)
-          .build();
-      }
-      return new CameraPosition.Builder(this).build();
+    /**
+     * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
+     * specified by a LatLng object taking the specified padding into account.
+     *
+     * @param latLng Target location to change to
+     * @param zoom   Zoom level to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngZoom(latLng: LatLng, zoom: Double): CameraUpdate {
+        return CameraPositionUpdate(-1.0, latLng, -1.0, zoom, null)
     }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-
-      CameraPositionUpdate that = (CameraPositionUpdate) o;
-
-      if (Double.compare(that.bearing, bearing) != 0) {
-        return false;
-      }
-      if (Double.compare(that.tilt, tilt) != 0) {
-        return false;
-      }
-      if (Double.compare(that.zoom, zoom) != 0) {
-        return false;
-      }
-      if (target != null ? !target.equals(that.target) : that.target != null) {
-        return false;
-      }
-      return Arrays.equals(padding, that.padding);
+    /**
+     * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
+     * specified by a LatLng object, and moves to the given zoom level.
+     * Applied padding is going to persist and impact following camera transformations.
+     *
+     * @param latLng Target location to change to
+     * @param left   Left padding
+     * @param top    Top padding
+     * @param right  Right padding
+     * @param bottom Bottom padding
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun newLatLngPadding(
+        latLng: LatLng,
+        left: Double, top: Double, right: Double, bottom: Double
+    ): CameraUpdate {
+        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, doubleArrayOf(left, top, right, bottom))
     }
 
-    @Override
-    public int hashCode() {
-      int result;
-      long temp;
-      temp = Double.doubleToLongBits(bearing);
-      result = (int) (temp ^ (temp >>> 32));
-      result = 31 * result + (target != null ? target.hashCode() : 0);
-      temp = Double.doubleToLongBits(tilt);
-      result = 31 * result + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(zoom);
-      result = 31 * result + (int) (temp ^ (temp >>> 32));
-      result = 31 * result + Arrays.hashCode(padding);
-      return result;
+    /**
+     * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
+     *
+     * @param amount Amount of zoom level to change with
+     * @param focus  Focus point of zoom
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun zoomBy(amount: Double, focus: Point): CameraUpdate {
+        return ZoomUpdate(amount, focus.x.toFloat(), focus.y.toFloat())
     }
 
-    @Override
-    public String toString() {
-      return "CameraPositionUpdate{"
-        + "bearing=" + bearing
-        + ", target=" + target
-        + ", tilt=" + tilt
-        + ", zoom=" + zoom
-        + ", padding=" + Arrays.toString(padding)
-        + '}';
-    }
-  }
-
-  static final class CameraBoundsUpdate implements CameraUpdate {
-
-    private final LatLngBounds bounds;
-    private final int[] padding;
-    private final Double bearing;
-    private final Double tilt;
-
-    CameraBoundsUpdate(LatLngBounds bounds, Double bearing, Double tilt, int[] padding) {
-      this.bounds = bounds;
-      this.padding = padding;
-      this.bearing = bearing;
-      this.tilt = tilt;
+    /**
+     * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
+     *
+     * @param amount Amount of zoom level to change with
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun zoomBy(amount: Double): CameraUpdate {
+        return ZoomUpdate(ZoomUpdate.ZOOM_BY, amount)
     }
 
-    CameraBoundsUpdate(LatLngBounds bounds, Double bearing, Double tilt, int paddingLeft,
-                       int paddingTop, int paddingRight, int paddingBottom) {
-      this(bounds, bearing, tilt, new int[] {paddingLeft, paddingTop, paddingRight, paddingBottom});
+    /**
+     * Returns a CameraUpdate that zooms in on the map by moving the viewpoint's height closer to
+     * the Earth's surface. The zoom increment is 1.0.
+     *
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun zoomIn(): CameraUpdate {
+        return ZoomUpdate(ZoomUpdate.ZOOM_IN)
     }
 
-    public LatLngBounds getBounds() {
-      return bounds;
+    /**
+     * Returns a CameraUpdate that zooms out on the map by moving the viewpoint's height farther
+     * away from the Earth's surface. The zoom increment is -1.0.
+     *
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun zoomOut(): CameraUpdate {
+        return ZoomUpdate(ZoomUpdate.ZOOM_OUT)
     }
 
-    public int[] getPadding() {
-      return padding;
+    /**
+     * Returns a CameraUpdate that moves the camera viewpoint to a particular zoom level.
+     *
+     * @param zoom Zoom level to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun zoomTo(zoom: Double): CameraUpdate {
+        return ZoomUpdate(ZoomUpdate.ZOOM_TO, zoom)
     }
 
-    @Override
-    public CameraPosition getCameraPosition(@NonNull MapboxMap mapboxMap) {
-      if (bearing == null && tilt == null) {
-        // use current camera position tilt and bearing
-        return mapboxMap.getCameraForLatLngBounds(bounds, padding);
-      } else {
-        // use provided tilt and bearing
-        assert bearing != null;
-        assert tilt != null;
-        return mapboxMap.getCameraForLatLngBounds(bounds, padding, bearing, tilt);
-      }
+    /**
+     * Returns a CameraUpdate that moves the camera viewpoint to a particular bearing.
+     *
+     * @param bearing Bearing to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun bearingTo(bearing: Double): CameraUpdate {
+        return CameraPositionUpdate(bearing, null, -1.0, -1.0, null)
     }
 
-    @Override
-    public boolean equals(@Nullable Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-
-      CameraBoundsUpdate that = (CameraBoundsUpdate) o;
-
-      if (!bounds.equals(that.bounds)) {
-        return false;
-      }
-      return Arrays.equals(padding, that.padding);
+    /**
+     * Returns a CameraUpdate that moves the camera viewpoint to a particular tilt.
+     *
+     * @param tilt Tilt to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun tiltTo(tilt: Double): CameraUpdate {
+        return CameraPositionUpdate(-1.0, null, tilt, -1.0, null)
     }
 
-    @Override
-    public int hashCode() {
-      int result = bounds.hashCode();
-      result = 31 * result + Arrays.hashCode(padding);
-      return result;
+    /**
+     * Returns a CameraUpdate that when animated changes the camera padding.
+     * Applied padding is going to persist and impact following camera transformations.
+     *
+     *
+     * Specified in left, top, right, bottom order.
+     *
+     *
+     * @param padding Padding to change to
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun paddingTo(padding: DoubleArray?): CameraUpdate {
+        return CameraPositionUpdate(-1.0, null, -1.0, -1.0, padding)
     }
 
-    @Override
-    public String toString() {
-      return "CameraBoundsUpdate{"
-        + "bounds=" + bounds
-        + ", padding=" + Arrays.toString(padding)
-        + '}';
-    }
-  }
-
-  static final class CameraMoveUpdate implements CameraUpdate {
-
-    private float x;
-    private float y;
-
-    CameraMoveUpdate(float x, float y) {
-      this.x = x;
-      this.y = y;
+    /**
+     * Returns a CameraUpdate that when animated changes the camera padding.
+     * Applied padding is going to persist and impact following camera transformations.
+     *
+     *
+     * Specified in left, top, right, bottom order.
+     *
+     *
+     * @return CameraUpdate Final Camera Position
+     */
+    @JvmStatic
+    fun paddingTo(left: Double, top: Double, right: Double, bottom: Double): CameraUpdate {
+        return paddingTo(doubleArrayOf(left, top, right, bottom))
     }
 
-    @Override
-    public CameraPosition getCameraPosition(@NonNull MapboxMap mapboxMap) {
-      UiSettings uiSettings = mapboxMap.getUiSettings();
-      Projection projection = mapboxMap.getProjection();
-      // Calculate the new center point
-      float viewPortWidth = uiSettings.getWidth();
-      float viewPortHeight = uiSettings.getHeight();
-      int[] padding = mapboxMap.getPadding();
+    //
+    // CameraUpdate types
+    //
+    class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val tilt: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
 
-      // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
-      PointF targetPoint = new PointF(
-        (viewPortWidth - padding[0] + padding[1]) / 2 + x,
-        (viewPortHeight + padding[1] - padding[3]) / 2 + y
-      );
+        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
+            if (target == null) {
+                val previousPosition = mapboxMap.cameraPosition
+                return CameraPosition.Builder(this)
+                    .target(previousPosition.target)
+                    .build()
+            }
+            return CameraPosition.Builder(this).build()
+        }
 
-      LatLng latLng = projection.fromScreenLocation(targetPoint);
-      CameraPosition previousPosition = mapboxMap.getCameraPosition();
-      CameraPosition position =
-        new CameraPosition.Builder()
-          .target(latLng)
-          .zoom(previousPosition.zoom)
-          .tilt(previousPosition.tilt)
-          .bearing(previousPosition.bearing)
-          .build();
-      return position;
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            val that = other as CameraPositionUpdate
+            if (java.lang.Double.compare(that.bearing, bearing) != 0) {
+                return false
+            }
+            if (java.lang.Double.compare(that.tilt, tilt) != 0) {
+                return false
+            }
+            if (java.lang.Double.compare(that.zoom, zoom) != 0) {
+                return false
+            }
+            return if (if (target != null) target != that.target else that.target != null) {
+                false
+            } else Arrays.equals(padding, that.padding)
+        }
+
+        override fun hashCode(): Int {
+            var result: Int
+            var temp: Long
+            temp = java.lang.Double.doubleToLongBits(bearing)
+            result = (temp xor (temp ushr 32)).toInt()
+            result = 31 * result + (target?.hashCode() ?: 0)
+            temp = java.lang.Double.doubleToLongBits(tilt)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(zoom)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            result = 31 * result + Arrays.hashCode(padding)
+            return result
+        }
+
+        override fun toString(): String {
+            return ("CameraPositionUpdate{"
+                    + "bearing=" + bearing
+                    + ", target=" + target
+                    + ", tilt=" + tilt
+                    + ", zoom=" + zoom
+                    + ", padding=" + Arrays.toString(padding)
+                    + '}')
+        }
     }
 
-    @Override
-    public boolean equals(@Nullable Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
+    internal class CameraBoundsUpdate(val bounds: LatLngBounds, private val bearing: Double?, private val tilt: Double?, val padding: IntArray) : CameraUpdate {
+        constructor(
+            bounds: LatLngBounds, bearing: Double?, tilt: Double?, paddingLeft: Int,
+            paddingTop: Int, paddingRight: Int, paddingBottom: Int
+        ) : this(bounds, bearing, tilt, intArrayOf(paddingLeft, paddingTop, paddingRight, paddingBottom)) {
+        }
 
-      CameraMoveUpdate that = (CameraMoveUpdate) o;
+        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition? {
+            return if (bearing == null && tilt == null) {
+                // use current camera position tilt and bearing
+                mapboxMap.getCameraForLatLngBounds(bounds, padding)
+            } else {
+                // use provided tilt and bearing
+                assert(bearing != null)
+                assert(tilt != null)
+                mapboxMap.getCameraForLatLngBounds(bounds, padding, bearing!!, tilt!!)
+            }
+        }
 
-      if (Float.compare(that.x, x) != 0) {
-        return false;
-      }
-      return Float.compare(that.y, y) == 0;
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            val that = other as CameraBoundsUpdate
+            return if (bounds != that.bounds) {
+                false
+            } else Arrays.equals(padding, that.padding)
+        }
+
+        override fun hashCode(): Int {
+            var result = bounds.hashCode()
+            result = 31 * result + Arrays.hashCode(padding)
+            return result
+        }
+
+        override fun toString(): String {
+            return ("CameraBoundsUpdate{"
+                    + "bounds=" + bounds
+                    + ", padding=" + Arrays.toString(padding)
+                    + '}')
+        }
     }
 
-    @Override
-    public int hashCode() {
-      int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
-      result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
-      return result;
+    internal class CameraMoveUpdate(private val x: Float, private val y: Float) : CameraUpdate {
+        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
+            val uiSettings = mapboxMap.uiSettings
+            val projection = mapboxMap.projection
+            // Calculate the new center point
+            val viewPortWidth = uiSettings.width
+            val viewPortHeight = uiSettings.height
+            val padding = mapboxMap.padding
+
+            // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
+            val targetPoint = PointF(
+                (viewPortWidth - padding[0] + padding[1]) / 2 + x,
+                (viewPortHeight + padding[1] - padding[3]) / 2 + y
+            )
+            val latLng = projection.fromScreenLocation(targetPoint)
+            val previousPosition = mapboxMap.cameraPosition
+            return CameraPosition.Builder()
+                .target(latLng)
+                .zoom(previousPosition.zoom)
+                .tilt(previousPosition.tilt)
+                .bearing(previousPosition.bearing)
+                .build()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            val that = other as CameraMoveUpdate
+            return if (java.lang.Float.compare(that.x, x) != 0) {
+                false
+            } else java.lang.Float.compare(that.y, y) == 0
+        }
+
+        override fun hashCode(): Int {
+            var result = if (x != +0.0f) java.lang.Float.floatToIntBits(x) else 0
+            result = 31 * result + if (y != +0.0f) java.lang.Float.floatToIntBits(y) else 0
+            return result
+        }
+
+        override fun toString(): String {
+            return ("CameraMoveUpdate{"
+                    + "x=" + x
+                    + ", y=" + y
+                    + '}')
+        }
     }
 
-    @Override
-    public String toString() {
-      return "CameraMoveUpdate{"
-        + "x=" + x
-        + ", y=" + y
-        + '}';
+    class ZoomUpdate : CameraUpdate {
+        @IntDef(ZOOM_IN, ZOOM_OUT, ZOOM_BY, ZOOM_TO, ZOOM_TO_POINT)
+        @Retention(AnnotationRetention.SOURCE)
+        internal annotation class Type
+
+        @get:Type
+        @Type
+        val type: Int
+        val zoom: Double
+        var x = 0f
+            private set
+        var y = 0f
+            private set
+
+        constructor(@Type type: Int) {
+            this.type = type
+            zoom = 0.0
+        }
+
+        constructor(@Type type: Int, zoom: Double) {
+            this.type = type
+            this.zoom = zoom
+        }
+
+        constructor(zoom: Double, x: Float, y: Float) {
+            type = ZOOM_TO_POINT
+            this.zoom = zoom
+            this.x = x
+            this.y = y
+        }
+
+        private fun transformZoom(currentZoomArg: Double): Double {
+            return when (type) {
+                ZOOM_IN -> currentZoomArg + 1
+                ZOOM_OUT -> {
+                    min(currentZoomArg - 1, 0.0)
+                }
+
+                ZOOM_TO -> zoom
+                ZOOM_BY, ZOOM_TO_POINT -> currentZoomArg + zoom
+                else -> {
+                    Timber.e("Unprocessed when branch")
+                    4.0
+                }
+            }
+        }
+
+        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
+            val cameraPosition = mapboxMap.cameraPosition
+            return if (type != ZOOM_TO_POINT) {
+                CameraPosition.Builder(cameraPosition)
+                    .zoom(transformZoom(cameraPosition.zoom))
+                    .build()
+            } else {
+                CameraPosition.Builder(cameraPosition)
+                    .zoom(transformZoom(cameraPosition.zoom))
+                    .target(mapboxMap.projection.fromScreenLocation(PointF(x, y)))
+                    .build()
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            val that = other as ZoomUpdate
+            if (type != that.type) {
+                return false
+            }
+            if (java.lang.Double.compare(that.zoom, zoom) != 0) {
+                return false
+            }
+            return if (java.lang.Float.compare(that.x, x) != 0) {
+                false
+            } else java.lang.Float.compare(that.y, y) == 0
+        }
+
+        override fun hashCode(): Int {
+            var result: Int
+            val temp: Long
+            result = type
+            temp = java.lang.Double.doubleToLongBits(zoom)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            result = 31 * result + if (x != +0.0f) java.lang.Float.floatToIntBits(x) else 0
+            result = 31 * result + if (y != +0.0f) java.lang.Float.floatToIntBits(y) else 0
+            return result
+        }
+
+        override fun toString(): String {
+            return ("ZoomUpdate{"
+                    + "type=" + type
+                    + ", zoom=" + zoom
+                    + ", x=" + x
+                    + ", y=" + y
+                    + '}')
+        }
+
+        companion object {
+            const val ZOOM_IN = 0
+            const val ZOOM_OUT = 1
+            const val ZOOM_BY = 2
+            const val ZOOM_TO = 3
+            const val ZOOM_TO_POINT = 4
+        }
     }
-  }
-
-  static final class ZoomUpdate implements CameraUpdate {
-
-    @IntDef( {ZOOM_IN, ZOOM_OUT, ZOOM_BY, ZOOM_TO, ZOOM_TO_POINT})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface Type {
-    }
-
-    static final int ZOOM_IN = 0;
-    static final int ZOOM_OUT = 1;
-    static final int ZOOM_BY = 2;
-    static final int ZOOM_TO = 3;
-    static final int ZOOM_TO_POINT = 4;
-
-    @Type
-    private final int type;
-    private final double zoom;
-    private float x;
-    private float y;
-
-    ZoomUpdate(@Type int type) {
-      this.type = type;
-      this.zoom = 0;
-    }
-
-    ZoomUpdate(@Type int type, double zoom) {
-      this.type = type;
-      this.zoom = zoom;
-    }
-
-    ZoomUpdate(double zoom, float x, float y) {
-      this.type = ZOOM_TO_POINT;
-      this.zoom = zoom;
-      this.x = x;
-      this.y = y;
-    }
-
-    public double getZoom() {
-      return zoom;
-    }
-
-    @Type
-    public int getType() {
-      return type;
-    }
-
-    public float getX() {
-      return x;
-    }
-
-    public float getY() {
-      return y;
-    }
-
-    double transformZoom(double currentZoom) {
-      switch (getType()) {
-        case CameraUpdateFactory.ZoomUpdate.ZOOM_IN:
-          currentZoom++;
-          break;
-        case CameraUpdateFactory.ZoomUpdate.ZOOM_OUT:
-          currentZoom--;
-          if (currentZoom < 0) {
-            currentZoom = 0;
-          }
-          break;
-        case CameraUpdateFactory.ZoomUpdate.ZOOM_TO:
-          currentZoom = getZoom();
-          break;
-        case CameraUpdateFactory.ZoomUpdate.ZOOM_BY:
-          currentZoom = currentZoom + getZoom();
-          break;
-        case CameraUpdateFactory.ZoomUpdate.ZOOM_TO_POINT:
-          currentZoom = currentZoom + getZoom();
-          break;
-      }
-      return currentZoom;
-    }
-
-    @Override
-    public CameraPosition getCameraPosition(@NonNull MapboxMap mapboxMap) {
-      CameraPosition cameraPosition = mapboxMap.getCameraPosition();
-      if (getType() != CameraUpdateFactory.ZoomUpdate.ZOOM_TO_POINT) {
-        return new CameraPosition.Builder(cameraPosition)
-          .zoom(transformZoom(cameraPosition.zoom))
-          .build();
-      } else {
-        return new CameraPosition.Builder(cameraPosition)
-          .zoom(transformZoom(cameraPosition.zoom))
-          .target(mapboxMap.getProjection().fromScreenLocation(new PointF(getX(), getY())))
-          .build();
-      }
-    }
-
-    @Override
-    public boolean equals(@Nullable Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-
-      ZoomUpdate that = (ZoomUpdate) o;
-
-      if (type != that.type) {
-        return false;
-      }
-      if (Double.compare(that.zoom, zoom) != 0) {
-        return false;
-      }
-      if (Float.compare(that.x, x) != 0) {
-        return false;
-      }
-      return Float.compare(that.y, y) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-      int result;
-      long temp;
-      result = type;
-      temp = Double.doubleToLongBits(zoom);
-      result = 31 * result + (int) (temp ^ (temp >>> 32));
-      result = 31 * result + (x != +0.0f ? Float.floatToIntBits(x) : 0);
-      result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
-      return result;
-    }
-
-    @Override
-    public String toString() {
-      return "ZoomUpdate{"
-        + "type=" + type
-        + ", zoom=" + zoom
-        + ", x=" + x
-        + ", y=" + y
-        + '}';
-    }
-  }
 }

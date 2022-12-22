@@ -103,8 +103,8 @@ final class LocationAnimatorCoordinator {
 
     LatLng previousLayerLatLng = getPreviousLayerLatLng();
     float previousLayerBearing = getPreviousLayerGpsBearing();
-    LatLng previousCameraLatLng = currentCameraPosition.target;
-    float previousCameraBearing = normalize((float) currentCameraPosition.bearing);
+    LatLng previousCameraLatLng = currentCameraPosition.getTarget();
+    float previousCameraBearing = normalize((float) currentCameraPosition.getBearing());
 
     // generate targets for layer
     LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
@@ -163,7 +163,7 @@ final class LocationAnimatorCoordinator {
     }
 
     float previousLayerBearing = getPreviousLayerCompassBearing();
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
+    float previousCameraBearing = (float) currentCameraPosition.getBearing();
 
     updateCompassAnimators(targetCompassBearing, previousLayerBearing, previousCameraBearing);
     playAnimators(
@@ -212,13 +212,13 @@ final class LocationAnimatorCoordinator {
 
   void feedNewZoomLevel(double targetZoomLevel, @NonNull CameraPosition currentCameraPosition, long animationDuration,
                         @Nullable MapboxMap.CancelableCallback callback) {
-    updateZoomAnimator((float) targetZoomLevel, (float) currentCameraPosition.zoom, callback);
+    updateZoomAnimator((float) targetZoomLevel, (float) currentCameraPosition.getZoom(), callback);
     playAnimators(animationDuration, ANIMATOR_ZOOM);
   }
 
   void feedNewTilt(double targetTilt, @NonNull CameraPosition currentCameraPosition, long animationDuration,
                    @Nullable MapboxMap.CancelableCallback callback) {
-    updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.tilt, callback);
+    updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.getTilt(), callback);
     playAnimators(animationDuration, ANIMATOR_TILT);
   }
 
@@ -406,7 +406,7 @@ final class LocationAnimatorCoordinator {
     }
 
     LatLng currentTarget = animator.getTarget();
-    LatLng previousCameraTarget = currentCameraPosition.target;
+    LatLng previousCameraTarget = currentCameraPosition.getTarget();
     createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, previousCameraTarget, currentTarget);
 
     return immediateAnimation(projection, previousCameraTarget, currentTarget);
@@ -420,7 +420,7 @@ final class LocationAnimatorCoordinator {
 
     float currentTargetBearing = animator.getTarget();
     currentTargetBearing = checkGpsNorth(isGpsNorth, currentTargetBearing);
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
+    float previousCameraBearing = (float) currentCameraPosition.getBearing();
     float normalizedCameraBearing = Utils.shortestRotation(currentTargetBearing, previousCameraBearing);
     createNewFloatAnimator(ANIMATOR_CAMERA_GPS_BEARING, previousCameraBearing, normalizedCameraBearing);
   }
@@ -433,7 +433,7 @@ final class LocationAnimatorCoordinator {
     }
 
     float currentTargetBearing = animator.getTarget();
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
+    float previousCameraBearing = (float) currentCameraPosition.getBearing();
     float normalizedCameraBearing = Utils.shortestRotation(currentTargetBearing, previousCameraBearing);
     createNewFloatAnimator(ANIMATOR_CAMERA_COMPASS_BEARING, previousCameraBearing, normalizedCameraBearing);
   }

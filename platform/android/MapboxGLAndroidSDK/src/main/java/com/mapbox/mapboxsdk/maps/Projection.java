@@ -41,7 +41,7 @@ public class Projection {
   }
 
   int[] getContentPadding() {
-    double[] padding = nativeMapView.getCameraPosition().padding;
+    double[] padding = nativeMapView.getCameraPosition().getPadding();
     return new int[] {(int) padding[0], (int) padding[1], (int) padding[2], (int) padding[3]};
   }
 

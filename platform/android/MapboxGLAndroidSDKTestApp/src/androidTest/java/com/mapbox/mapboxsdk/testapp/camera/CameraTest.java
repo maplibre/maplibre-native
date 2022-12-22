@@ -147,13 +147,13 @@ public abstract class CameraTest extends BaseTest {
         new MapboxMap.CancelableCallback() {
           @Override
           public void onCancel() {
-            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().zoom, 0, 0, new double[4]);
+            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().getZoom(), 0, 0, new double[4]);
             latch.countDown();
           }
 
           @Override
           public void onFinish() {
-            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().zoom, 0, 0, new double[4]);
+            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().getZoom(), 0, 0, new double[4]);
             latch.countDown();
           }
         });
@@ -173,13 +173,13 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.zoomIn(), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + 1, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + 1, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -198,13 +198,13 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -220,13 +220,13 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.zoomOut(), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom - 1, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom - 1, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -247,13 +247,13 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.zoomBy(zoomBy), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -273,13 +273,13 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.zoomTo(zoomTo), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoomTo, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoomTo, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -295,13 +295,13 @@ public abstract class CameraTest extends BaseTest {
   private void verifyCameraPosition(MapboxMap mapboxMap, LatLng moveTarget, double moveZoom, double moveBearing,
                                     double moveTilt, double[] padding) {
     CameraPosition cameraPosition = mapboxMap.getCameraPosition();
-    assertEquals("Moved camera position latitude should match", cameraPosition.target.getLatitude(),
+    assertEquals("Moved camera position latitude should match", cameraPosition.getTarget().getLatitude(),
       moveTarget.getLatitude(), TestConstants.LAT_LNG_DELTA);
-    assertEquals("Moved camera position longitude should match", cameraPosition.target.getLongitude(),
+    assertEquals("Moved camera position longitude should match", cameraPosition.getTarget().getLongitude(),
       moveTarget.getLongitude(), TestConstants.LAT_LNG_DELTA);
-    assertEquals("Moved zoom should match", cameraPosition.zoom, moveZoom, TestConstants.ZOOM_DELTA);
-    assertEquals("Moved zoom should match", cameraPosition.tilt, moveTilt, TestConstants.TILT_DELTA);
-    assertEquals("Moved bearing should match", cameraPosition.bearing, moveBearing, TestConstants.BEARING_DELTA);
-    assertArrayEquals("Moved padding should match", cameraPosition.padding, padding, TestConstants.PADDING_DELTA);
+    assertEquals("Moved zoom should match", cameraPosition.getZoom(), moveZoom, TestConstants.ZOOM_DELTA);
+    assertEquals("Moved zoom should match", cameraPosition.getTilt(), moveTilt, TestConstants.TILT_DELTA);
+    assertEquals("Moved bearing should match", cameraPosition.getBearing(), moveBearing, TestConstants.BEARING_DELTA);
+    assertArrayEquals("Moved padding should match", cameraPosition.getPadding(), padding, TestConstants.PADDING_DELTA);
   }
 }

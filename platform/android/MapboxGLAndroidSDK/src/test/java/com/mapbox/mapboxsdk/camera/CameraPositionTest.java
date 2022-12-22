@@ -34,11 +34,11 @@ public class CameraPositionTest {
   public void testDefaultTypedArrayBuilder() {
     TypedArray typedArray = null;
     CameraPosition cameraPosition = new CameraPosition.Builder(typedArray).build();
-    assertEquals("bearing should match", -1, cameraPosition.bearing, DELTA);
-    assertNull("latlng should be null", cameraPosition.target);
-    assertEquals("tilt should match", -1, cameraPosition.tilt, DELTA);
-    assertEquals("zoom should match", -1, cameraPosition.zoom, DELTA);
-    assertNull("padding should be null", cameraPosition.padding);
+    assertEquals("bearing should match", -1, cameraPosition.getBearing(), DELTA);
+    assertNull("latlng should be null", cameraPosition.getTarget());
+    assertEquals("tilt should match", -1, cameraPosition.getTilt(), DELTA);
+    assertEquals("zoom should match", -1, cameraPosition.getZoom(), DELTA);
+    assertNull("padding should be null", cameraPosition.getPadding());
   }
 
   @Test
@@ -58,10 +58,10 @@ public class CameraPositionTest {
     doNothing().when(typedArray).recycle();
 
     CameraPosition cameraPosition = new CameraPosition.Builder(typedArray).build();
-    assertEquals("bearing should match", bearing, cameraPosition.bearing, DELTA);
-    assertEquals("latlng should match", new LatLng(latitude, longitude), cameraPosition.target);
-    assertEquals("tilt should match", tilt, cameraPosition.tilt, DELTA);
-    assertEquals("zoom should match", zoom, cameraPosition.zoom, DELTA);
+    assertEquals("bearing should match", bearing, cameraPosition.getBearing(), DELTA);
+    assertEquals("latlng should match", new LatLng(latitude, longitude), cameraPosition.getTarget());
+    assertEquals("tilt should match", tilt, cameraPosition.getTilt(), DELTA);
+    assertEquals("zoom should match", zoom, cameraPosition.getZoom(), DELTA);
   }
 
   @Test
@@ -84,7 +84,7 @@ public class CameraPositionTest {
     float zoomLevel = 5;
     CameraPosition.Builder builder = new CameraPosition.Builder(
       (CameraUpdateFactory.ZoomUpdate) CameraUpdateFactory.zoomTo(zoomLevel));
-    assertEquals("zoom should match", zoomLevel, builder.build().zoom, 0);
+    assertEquals("zoom should match", zoomLevel, builder.build().getZoom(), 0);
   }
 
   @Test

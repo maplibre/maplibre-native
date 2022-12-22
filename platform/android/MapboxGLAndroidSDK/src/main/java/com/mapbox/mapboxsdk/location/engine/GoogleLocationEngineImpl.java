@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Wraps implementation of Fused Location Provider
  */
-class GoogleLocationEngineImpl implements LocationEngineImpl<LocationCallback> {
+public class GoogleLocationEngineImpl implements LocationEngineImpl<LocationCallback> {
   private final FusedLocationProviderClient fusedLocationProviderClient;
 
   @VisibleForTesting
@@ -68,9 +68,7 @@ class GoogleLocationEngineImpl implements LocationEngineImpl<LocationCallback> {
 
   @Override
   public void removeLocationUpdates(@NonNull LocationCallback listener) {
-    if (listener != null) {
-      fusedLocationProviderClient.removeLocationUpdates(listener);
-    }
+    fusedLocationProviderClient.removeLocationUpdates(listener);
   }
 
   @Override
@@ -135,7 +133,7 @@ class GoogleLocationEngineImpl implements LocationEngineImpl<LocationCallback> {
     @Override
     public void onSuccess(Location location) {
       callback.onSuccess(location != null ? LocationEngineResult.create(location) :
-        LocationEngineResult.create(Collections.<Location>emptyList()));
+        LocationEngineResult.create(Collections.emptyList()));
     }
 
     @Override

@@ -56,7 +56,7 @@ class CameraPositionActivity :
             toggleLogCameraChanges()
 
             // listen to long click events to toggle logging camera changes
-            mapboxMap!!.addOnMapLongClickListener(this)
+            mapboxMap.addOnMapLongClickListener(this)
         }
     }
 
@@ -82,49 +82,51 @@ class CameraPositionActivity :
     private fun toggleLogCameraChanges() {
         logCameraChanges = !logCameraChanges
         if (logCameraChanges) {
-            mapboxMap!!.addOnCameraIdleListener(idleListener)
-            mapboxMap!!.addOnCameraMoveCancelListener(moveCanceledListener)
-            mapboxMap!!.addOnCameraMoveListener(moveListener)
-            mapboxMap!!.addOnCameraMoveStartedListener(moveStartedListener)
+            mapboxMap.addOnCameraIdleListener(idleListener)
+            mapboxMap.addOnCameraMoveCancelListener(moveCanceledListener)
+            mapboxMap.addOnCameraMoveListener(moveListener)
+            mapboxMap.addOnCameraMoveStartedListener(moveStartedListener)
         } else {
-            mapboxMap!!.removeOnCameraIdleListener(idleListener)
-            mapboxMap!!.removeOnCameraMoveCancelListener(moveCanceledListener)
-            mapboxMap!!.removeOnCameraMoveListener(moveListener)
-            mapboxMap!!.removeOnCameraMoveStartedListener(moveStartedListener)
+            mapboxMap.removeOnCameraIdleListener(idleListener)
+            mapboxMap.removeOnCameraMoveCancelListener(moveCanceledListener)
+            mapboxMap.removeOnCameraMoveListener(moveListener)
+            mapboxMap.removeOnCameraMoveStartedListener(moveStartedListener)
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapLongClickListener(this)
+        if (::mapboxMap.isInitialized) {
+            mapboxMap.removeOnMapLongClickListener(this)
         }
-        mapView!!.onDestroy()
+        if(::mapView.isInitialized) {
+            mapView.onDestroy()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private fun onInflateDialogContent(view: View): View {
@@ -152,13 +154,13 @@ class CameraPositionActivity :
 
     private val idleListener = OnCameraIdleListener {
         Timber.e("OnCameraIdle")
-        fab!!.setColorFilter(
+        fab.setColorFilter(
             ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_green_dark)
         )
     }
     private val moveListener = OnCameraMoveListener {
         Timber.e("OnCameraMove")
-        fab!!.setColorFilter(
+        fab.setColorFilter(
             ContextCompat.getColor(
                 this@CameraPositionActivity,
                 android.R.color.holo_orange_dark
@@ -179,7 +181,7 @@ class CameraPositionActivity :
 
             override fun onCameraMoveStarted(reason: Int) {
                 // reason ranges from 1 <-> 3
-                fab!!.setColorFilter(
+                fab.setColorFilter(
                     ContextCompat.getColor(
                         this@CameraPositionActivity,
                         android.R.color.holo_red_dark

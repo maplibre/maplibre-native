@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.location.engine.Utils.isBetterLocation;
 
@@ -20,7 +21,7 @@ import static com.mapbox.mapboxsdk.location.engine.Utils.isBetterLocation;
  * <p>
  * Note: fusion will not work in background mode.
  */
-class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
+public class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
   private static final String TAG = "MapboxLocationEngine";
 
   MapboxFusedLocationEngineImpl(@NonNull Context context) {
@@ -121,17 +122,17 @@ class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-      Log.d(TAG, "onStatusChanged: " + provider);
+      Timber.d( "onStatusChanged: " + provider);
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-      Log.d(TAG, "onProviderEnabled: " + provider);
+      Timber.d( "onProviderEnabled: " + provider);
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-      Log.d(TAG, "onProviderDisabled: " + provider);
+      Timber.d("onProviderDisabled: " + provider);
     }
   }
 }

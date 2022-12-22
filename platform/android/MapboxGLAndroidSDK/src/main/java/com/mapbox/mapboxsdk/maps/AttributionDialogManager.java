@@ -123,8 +123,8 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
     CameraPosition cameraPosition = mapboxMap.getCameraPosition();
     if (cameraPosition != null) {
       builder.encodedFragment(String.format(Locale.getDefault(), MAP_FEEDBACK_URL_LOCATION_FRAGMENT_FORMAT,
-              cameraPosition.target.getLongitude(), cameraPosition.target.getLatitude(),
-              cameraPosition.zoom, cameraPosition.bearing, (int) cameraPosition.tilt));
+              cameraPosition.getTarget().getLongitude(), cameraPosition.getTarget().getLatitude(),
+              cameraPosition.getZoom(), cameraPosition.getBearing(), (int) cameraPosition.getTilt()));
     }
 
     String packageName = context.getApplicationContext().getPackageName();

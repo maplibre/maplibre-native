@@ -439,7 +439,7 @@ final class NativeMapView implements NativeMap {
       return new double[] {0, 0, 0, 0};
     }
     // if cached insets are not applied yet, return them, otherwise, get the padding from the camera
-    return edgeInsets != null ? edgeInsets : getCameraPosition().padding;
+    return edgeInsets != null ? edgeInsets : getCameraPosition().getPadding();
   }
 
   @Override
