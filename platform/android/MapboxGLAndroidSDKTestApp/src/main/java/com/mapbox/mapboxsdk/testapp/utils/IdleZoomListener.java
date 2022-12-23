@@ -21,6 +21,6 @@ public class IdleZoomListener implements MapboxMap.OnCameraIdleListener {
   public void onCameraIdle() {
     Context context = textView.getContext();
     CameraPosition position = mapboxMap.getCameraPosition();
-    textView.setText(String.format(context.getString(R.string.debug_zoom), position.getZoom()));
+    textView.setText(String.format(context.getString(R.string.debug_zoom), position.zoom));
   }
 }

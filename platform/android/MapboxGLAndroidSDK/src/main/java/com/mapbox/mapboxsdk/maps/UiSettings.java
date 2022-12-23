@@ -491,7 +491,7 @@ public final class UiSettings {
   }
 
   void update(@NonNull CameraPosition cameraPosition) {
-    clockwiseBearing = -cameraPosition.getBearing();
+    clockwiseBearing = -cameraPosition.bearing;
     if (compassView != null) {
       compassView.update(clockwiseBearing);
     }

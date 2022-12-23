@@ -33,30 +33,47 @@ class CameraPosition
  * @throws NullPointerException     if target is null
  * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
  */ @Keep internal constructor(
+
     /**
      * The location that the camera is pointing at.
      */
-    @field:Keep val target: LatLng?,
+    @field:Keep
+    @JvmField
+    val target: LatLng?,
+
     /**
      * Zoom level near the center of the screen. See [Builder.zoom] for the definition of the camera's
      * zoom level.
      */
-    @field:Keep val zoom: Double,
+    @field:Keep
+    @JvmField
+    val zoom: Double,
+
     /**
      * The angle, in degrees, of the camera angle from the nadir (directly facing the Earth).
      * See [Builder.tilt] for details of restrictions on the range of values.
      */
-    @field:Keep val tilt: Double,
+    @field:Keep
+    @JvmField
+    val tilt: Double,
+
     /**
      * Direction that the camera is pointing in, in degrees clockwise from north.
      */
-    @field:Keep val bearing: Double,
+    @field:Keep
+    @JvmField
+    val bearing: Double,
+
     /**
      * Padding in pixels. Specified in left, top, right, bottom order.
      * See [Builder.padding] for the definition of the camera's padding.
      */
-    @field:Keep val padding: DoubleArray?
+    @field:Keep
+    @JvmField
+    val padding: DoubleArray?
+
 ) : Parcelable {
+
     /**
      * Constructs a CameraPosition.
      *

@@ -173,7 +173,7 @@ final class LocationCameraController {
       };
 
       CameraPosition currentPosition = mapboxMap.getCameraPosition();
-      if (Utils.immediateAnimation(mapboxMap.getProjection(), currentPosition.getTarget(), target)) {
+      if (Utils.immediateAnimation(mapboxMap.getProjection(), currentPosition.target, target)) {
         transform.moveCamera(
           mapboxMap,
           update,
@@ -245,7 +245,7 @@ final class LocationCameraController {
       @Override
       public void onNewAnimationValue(Float value) {
         boolean trackingNorth = cameraMode == CameraMode.TRACKING_GPS_NORTH
-          && mapboxMap.getCameraPosition().getBearing() == 0;
+          && mapboxMap.getCameraPosition().bearing == 0;
 
         if (!trackingNorth) {
           setBearing(value);

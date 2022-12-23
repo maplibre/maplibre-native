@@ -1502,19 +1502,19 @@ public final class LocationComponent {
     CameraPosition position = mapboxMap.getCameraPosition();
     if (lastCameraPosition == null || forceUpdate) {
       lastCameraPosition = position;
-      locationLayerController.cameraBearingUpdated(position.getBearing());
-      locationLayerController.cameraTiltUpdated(position.getTilt());
+      locationLayerController.cameraBearingUpdated(position.bearing);
+      locationLayerController.cameraTiltUpdated(position.tilt);
       updateAccuracyRadius(getLastKnownLocation(), true);
       return;
     }
 
-    if (position.getBearing() != lastCameraPosition.getBearing()) {
-      locationLayerController.cameraBearingUpdated(position.getBearing());
+    if (position.bearing != lastCameraPosition.bearing) {
+      locationLayerController.cameraBearingUpdated(position.bearing);
     }
-    if (position.getTilt() != lastCameraPosition.getTilt()) {
-      locationLayerController.cameraTiltUpdated(position.getTilt());
+    if (position.tilt != lastCameraPosition.tilt) {
+      locationLayerController.cameraTiltUpdated(position.tilt);
     }
-    if (position.getZoom() != lastCameraPosition.getZoom()) {
+    if (position.zoom != lastCameraPosition.zoom) {
       updateAccuracyRadius(getLastKnownLocation(), true);
     }
     lastCameraPosition = position;
