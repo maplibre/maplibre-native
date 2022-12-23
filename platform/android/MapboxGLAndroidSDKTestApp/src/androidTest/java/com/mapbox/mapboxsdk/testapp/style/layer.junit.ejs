@@ -12,7 +12,7 @@ package com.mapbox.mapboxsdk.testapp.style;
 
 import android.graphics.Color;
 import androidx.test.annotation.UiThreadTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.MultiLineString;
@@ -53,7 +53,7 @@ import java.util.List;
 /**
  * Basic smoke tests for <%- camelize(type) %>Layer
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
 
   private <%- camelize(type) %>Layer layer;

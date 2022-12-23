@@ -27,7 +27,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import java.util.ArrayList
 
 /**
  * This activity shows how to customize the LocationComponent's pulsing circle.
@@ -244,9 +243,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
             pulsingCircleDurationButton!!.text = selectedMode
             if (selectedMode.contentEquals(
                     String.format(
-                            "%sms",
-                            DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                        )
+                        "%sms",
+                        DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                    )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS
@@ -256,9 +255,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
                 )
             } else if (selectedMode.contentEquals(
                     String.format(
-                            "%sms",
-                            SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                        )
+                        "%sms",
+                        SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                    )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS
@@ -268,9 +267,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
                 )
             } else if (selectedMode.contentEquals(
                     String.format(
-                            "%sms",
-                            THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                        )
+                        "%sms",
+                        THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                    )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS

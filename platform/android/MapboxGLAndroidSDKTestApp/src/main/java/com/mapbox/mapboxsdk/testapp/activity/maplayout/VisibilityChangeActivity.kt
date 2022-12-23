@@ -40,7 +40,7 @@ class VisibilityChangeActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
         handler.post(
             VisibilityRunner(
                 mapView,
@@ -52,7 +52,7 @@ class VisibilityChangeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     private class VisibilityRunner internal constructor(
@@ -85,43 +85,43 @@ class VisibilityChangeActivity : AppCompatActivity() {
         }
 
         private val visibilityForStep: Int
-            private get() = if (currentStep == 1 || currentStep == 5) View.GONE else View.INVISIBLE
+            get() = if (currentStep == 1 || currentStep == 5) View.GONE else View.INVISIBLE
         private val isFifthOrSeventhStep: Boolean
-            private get() = currentStep == 5 || currentStep == 7
+            get() = currentStep == 5 || currentStep == 7
         private val isFirstOrThirdStep: Boolean
-            private get() = currentStep == 1 || currentStep == 3
+            get() = currentStep == 1 || currentStep == 3
         private val isEvenStep: Boolean
-            private get() = currentStep == 0 || currentStep % 2 == 0
+            get() = currentStep == 0 || currentStep % 2 == 0
         private val isViewHiearchyReady: Boolean
-            private get() = mapView != null && viewParent != null
+            get() = mapView != null && viewParent != null
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        if (runnable != null) {
-            handler.removeCallbacks(runnable)
+        runnable?.let {
+            handler.removeCallbacks(it)
             runnable = null
         }
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 }

@@ -63,21 +63,25 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
     private fun debugOutput(features: List<Feature>) {
         Timber.i("Got %s features", features.size)
         for (feature in features) {
-            if (feature != null) {
-                Timber.i(
-                    "Got feature %s with %s properties and Geometry %s",
-                    feature.id(),
-                    if (feature.properties() != null) feature.properties()!!
-                        .entrySet().size else "<null>",
-                    if (feature.geometry() != null) feature.geometry()!!::class.java.simpleName else "<null>"
-                )
+            Timber.i(
+                "Got feature %s with %s properties and Geometry %s",
+                feature.id(),
                 if (feature.properties() != null) {
-                    for ((key, value) in feature.properties()!!.entrySet()) {
-                        Timber.i("Prop %s - %s", key, value)
-                    }
+                    feature.properties()!!
+                        .entrySet().size
+                } else {
+                    "<null>"
+                },
+                if (feature.geometry() != null) {
+                    feature.geometry()!!::class.java.simpleName
+                } else {
+                    "<null>"
                 }
-            } else {
-                Timber.i("Got 0 features")
+            )
+            if (feature.properties() != null) {
+                for ((key, value) in feature.properties()!!.entrySet()) {
+                    Timber.i("Prop %s - %s", key, value)
+                }
             }
         }
     }
