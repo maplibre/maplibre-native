@@ -247,13 +247,15 @@ public abstract class CameraTest extends BaseTest {
       executeCameraMovement(CameraUpdateFactory.zoomBy(zoomBy), new MapboxMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy,
+                  0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().getTarget(), zoom + zoomBy,
+                  0, 0, new double[4]);
           latch.countDown();
         }
       });

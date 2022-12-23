@@ -219,14 +219,14 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if(::mapView.isInitialized) {
+        if (::mapView.isInitialized) {
             mapView.onDestroy()
         }
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        if(::mapView.isInitialized) {
+        if (::mapView.isInitialized) {
             mapView.onLowMemory()
         }
     }

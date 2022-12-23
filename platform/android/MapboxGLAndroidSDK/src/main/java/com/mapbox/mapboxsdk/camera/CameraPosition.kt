@@ -113,8 +113,7 @@ class CameraPosition
      * @return A String with CameraPosition information.
      */
     override fun toString(): String {
-        return ("Target: " + target + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt
-                + ", Padding:" + Arrays.toString(padding))
+        return ("Target: " + target + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt + ", Padding:" + Arrays.toString(padding))
     }
 
     /**
@@ -344,6 +343,7 @@ class CameraPosition
     companion object {
         @JvmField
         val DEFAULT = CameraPosition(LatLng(), 0.0, 0.0, 0.0, doubleArrayOf(0.0, 0.0, 0.0, 0.0))
+
         @JvmField
         val CREATOR: Parcelable.Creator<CameraPosition> = object : Parcelable.Creator<CameraPosition> {
             override fun createFromParcel(`in`: Parcel): CameraPosition {
