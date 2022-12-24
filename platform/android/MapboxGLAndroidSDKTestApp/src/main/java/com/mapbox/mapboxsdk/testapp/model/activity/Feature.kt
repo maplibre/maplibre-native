@@ -19,10 +19,10 @@ class Feature : Parcelable {
     }
 
     private constructor(`in`: Parcel) {
-        name = `in`.readString()
+        name = `in`.readString().toString()
         label = `in`.readString()
         description = `in`.readString()
-        category = `in`.readString()
+        category = `in`.readString().toString()
     }
 
     val simpleName: String

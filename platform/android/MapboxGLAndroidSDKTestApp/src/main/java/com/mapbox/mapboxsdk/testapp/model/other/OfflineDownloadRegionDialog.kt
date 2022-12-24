@@ -24,7 +24,7 @@ class OfflineDownloadRegionDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(
-            activity!!
+            requireActivity()
         )
 
         // Let the user choose a name for the region

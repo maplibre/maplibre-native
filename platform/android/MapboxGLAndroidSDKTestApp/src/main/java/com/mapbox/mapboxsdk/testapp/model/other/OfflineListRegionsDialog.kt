@@ -11,7 +11,7 @@ import timber.log.Timber
 class OfflineListRegionsDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(
-            activity!!
+            requireActivity()
         )
 
         // Read args

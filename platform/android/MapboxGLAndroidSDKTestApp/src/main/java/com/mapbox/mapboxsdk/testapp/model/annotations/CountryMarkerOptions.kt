@@ -26,7 +26,7 @@ class CountryMarkerOptions : BaseMarkerOptions<CountryMarker?, CountryMarkerOpti
         snippet(`in`.readString())
         val iconId = `in`.readString()
         val iconBitmap = `in`.readParcelable<Bitmap>(Bitmap::class.java.classLoader)
-        val icon = IconFactory.recreate(iconId, iconBitmap)
+        val icon = iconBitmap?.let { IconFactory.recreate(iconId.toString(), it) }
         icon(icon)
         title(`in`.readString())
     }
