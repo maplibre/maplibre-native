@@ -674,8 +674,8 @@ class LocationLayerControllerTest : EspressoTest() {
 
                 assertThat(
                     Math.abs(zoom - mapboxMap.cameraPosition.zoom) < 0.1 &&
-                        Math.abs(target.latitude - mapboxMap.cameraPosition.target.latitude) < 0.1 &&
-                        Math.abs(target.longitude - mapboxMap.cameraPosition.target.longitude) < 0.1,
+                        Math.abs(target.latitude - mapboxMap.cameraPosition.target!!.latitude) < 0.1 &&
+                        Math.abs(target!!.longitude - mapboxMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 
@@ -720,8 +720,8 @@ class LocationLayerControllerTest : EspressoTest() {
 
                 assertThat(
                     abs(zoom - mapboxMap.cameraPosition.zoom) < 0.1 &&
-                        abs(target.latitude - mapboxMap.cameraPosition.target.latitude) < 0.1 &&
-                        abs(target.longitude - mapboxMap.cameraPosition.target.longitude) < 0.1,
+                        abs(target.latitude - mapboxMap.cameraPosition.target!!.latitude) < 0.1 &&
+                        abs(target!!.longitude - mapboxMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 
