@@ -315,12 +315,6 @@ enum { MGLAnnotationTagNotFound = UINT32_MAX };
 /// The threshold used to consider when a tilt gesture should start.
 const CLLocationDegrees MGLHorizontalTiltToleranceDegrees = 45.0;
 
-/// The time between background snapshot attempts.
-const NSTimeInterval MGLBackgroundSnapshotImageInterval = 60.0;
-
-/// The delay after the map has idled before a background snapshot is attempted.
-const NSTimeInterval MGLBackgroundSnapshotImageIdleDelay = 3.0;
-
 /// Mapping from an annotation tag to metadata about that annotation, including
 /// the annotation itself.
 typedef std::unordered_map<MGLAnnotationTag, MGLAnnotationContext> MGLAnnotationTagContextMap;
@@ -359,8 +353,6 @@ public:
                           MGLCalloutViewDelegate,
                           MGLMultiPointDelegate,
                           MGLAnnotationImageDelegate>
-
-@property (nonatomic) UIImageView *glSnapshotView;
 
 @property (nonatomic) NSMutableArray<NSLayoutConstraint *> *scaleBarConstraints;
 @property (nonatomic, readwrite) MGLScaleBar *scaleBar;
@@ -419,7 +411,6 @@ public:
 @property (nonatomic) MGLUserLocation *userLocation;
 @property (nonatomic) NSMutableDictionary<NSString *, NSMutableArray<MGLAnnotationView *> *> *annotationViewReuseQueueByIdentifier;
 @property (nonatomic, readonly) BOOL enablePresentsWithTransaction;
-@property (nonatomic) UIImage *lastSnapshotImage;
 @property (nonatomic) NSMutableArray *pendingCompletionBlocks;
 
 /// Experimental rendering performance measurement.
@@ -965,8 +956,6 @@ public:
     {
         _rendererFrontend->reduceMemoryUse();
     }
-    
-    self.lastSnapshotImage = nil;
 }
 
 - (MGLMapViewImpl *)viewImpl
@@ -1903,11 +1892,6 @@ public:
 
     self.dormant = YES;
 
-    // We want to add a snapshot image over the top of the map view, so that
-    // there are no glitches when the application comes back into the foreground
-
-    [self enableSnapshotView];
-
     // Handle non-rendering issues.
     [self validateLocationServices];
 }
@@ -1937,10 +1921,8 @@ public:
         }
     }
     self.dormant = NO;
-    // Note: We do not remove the snapshot view (if there is one) until we have become
-    // active.
-    [self validateLocationServices];
     
+    [self validateLocationServices];
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
@@ -1974,32 +1956,6 @@ public:
     BOOL supportsBackgroundRendering =  (screen && (screen != [UIScreen mainScreen]));
     MGLLogDebug(@"supportsBackgroundRendering=%d",supportsBackgroundRendering);
     return supportsBackgroundRendering;
-}
-
-- (void)enableSnapshotView {
-    if (self.lastSnapshotImage)
-    {
-        if ( ! self.glSnapshotView)
-        {
-            self.glSnapshotView = [[UIImageView alloc] initWithFrame: _mbglView->getView().frame];
-            self.glSnapshotView.autoresizingMask = _mbglView->getView().autoresizingMask;
-            self.glSnapshotView.contentMode = UIViewContentModeCenter;
-            [self insertSubview:self.glSnapshotView aboveSubview:_mbglView->getView()];
-        }
-
-        self.glSnapshotView.image = self.lastSnapshotImage;
-        self.glSnapshotView.hidden = NO;
-        self.glSnapshotView.opaque = NO;
-        self.glSnapshotView.alpha = 1;
-
-        if (self.debugMask && [self.glSnapshotView.subviews count] == 0)
-        {
-            UIView *snapshotTint = [[UIView alloc] initWithFrame:self.glSnapshotView.bounds];
-            snapshotTint.autoresizingMask = self.glSnapshotView.autoresizingMask;
-            snapshotTint.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.25];
-            [self.glSnapshotView addSubview:snapshotTint];
-        }
-    }
 }
 
 - (void)resumeRenderingIfNecessary {
@@ -2037,20 +1993,6 @@ public:
                 [self stopDisplayLink];
             }
         }
-    }
-
-    // Reveal the snapshot view
-
-    if (self.glSnapshotView && !self.glSnapshotView.isHidden) {
-        [UIView transitionWithView:self
-                          duration:0.25
-                           options:UIViewAnimationOptionTransitionCrossDissolve
-                        animations:^{
-            self.glSnapshotView.hidden = YES;
-        }
-                        completion:^(BOOL finished) {
-            [self.glSnapshotView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        }];
     }
 }
 
@@ -6839,8 +6781,6 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewWillStartRenderingFrame {
-    [self cancelBackgroundSnapshot];
-
     if (!_mbglMap)
     {
         return;
@@ -6900,10 +6840,6 @@ static void *windowScreenContext = &windowScreenContext;
     if (!_mbglMap) {
         return;
     }
-
-#ifdef MBGL_ENABLE_MAP_SNAPSHOTS
-    [self queueBackgroundSnapshot];
-#endif
 
     if ([self.delegate respondsToSelector:@selector(mapViewDidBecomeIdle:)]) {
         [self.delegate mapViewDidBecomeIdle:self];
@@ -7381,40 +7317,6 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
-}
-
-// MARK: - Snapshot image -
-
-- (void)attemptBackgroundSnapshot {
-    static NSTimeInterval lastSnapshotTime = 0.0;
-
-    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
-        return;
-    }
-
-    NSTimeInterval now = CACurrentMediaTime();
-
-    if (lastSnapshotTime == 0.0 || (now - lastSnapshotTime > MGLBackgroundSnapshotImageInterval)) {
-        MGLLogDebug(@"Taking snapshot");
-        self.lastSnapshotImage = _mbglView->snapshot();
-        lastSnapshotTime = now;
-    }
-}
-
-- (void)cancelBackgroundSnapshot
-{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(attemptBackgroundSnapshot) object:nil];
-}
-
-- (void)queueBackgroundSnapshot {
-    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
-        return;
-    }
-
-    [self cancelBackgroundSnapshot];
-    [self performSelector:@selector(attemptBackgroundSnapshot)
-               withObject:nil
-               afterDelay:MGLBackgroundSnapshotImageIdleDelay];
 }
 
 @end
