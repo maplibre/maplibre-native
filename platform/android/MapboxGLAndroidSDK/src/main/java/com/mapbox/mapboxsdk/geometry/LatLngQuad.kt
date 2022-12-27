@@ -1,95 +1,60 @@
-package com.mapbox.mapboxsdk.geometry;
+package com.mapbox.mapboxsdk.geometry
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.annotation.Keep
 
 /**
  * A geographical area representing a non-aligned quadrilateral
- * <p>
+ *
+ *
  * This class does not wrap values to the world bounds
- * </p>
+ *
  */
-public class LatLngQuad implements Parcelable {
+class LatLngQuad
+/**
+ * Construct a new LatLngQuad based on its corners,
+ * in order top left, top right, bottom left, bottom right
+ */
+@Keep constructor(@field:Keep val topLeft: LatLng, @field:Keep val topRight: LatLng, @field:Keep val bottomRight: LatLng, @field:Keep val bottomLeft: LatLng) : Parcelable {
 
-  @Keep
-  private final LatLng topLeft;
-  @Keep
-  private final LatLng topRight;
-  @Keep
-  private final LatLng bottomRight;
-  @Keep
-  private final LatLng bottomLeft;
-
-  /**
-   * Construct a new LatLngQuad based on its corners,
-   * in order top left, top right, bottom left, bottom right
-   */
-  @Keep
-  public LatLngQuad(final LatLng topLeft, final LatLng topRight, final LatLng bottomRight, final LatLng bottomLeft) {
-    this.topLeft = topLeft;
-    this.topRight = topRight;
-    this.bottomRight = bottomRight;
-    this.bottomLeft = bottomLeft;
-  }
-
-  public LatLng getTopLeft() {
-    return this.topLeft;
-  }
-
-  public LatLng getTopRight() {
-    return this.topRight;
-  }
-
-  public LatLng getBottomRight() {
-    return this.bottomRight;
-  }
-
-  public LatLng getBottomLeft() {
-    return this.bottomLeft;
-  }
-
-  public static final Parcelable.Creator<LatLngQuad> CREATOR = new Parcelable.Creator<LatLngQuad>() {
-    @Override
-    public LatLngQuad createFromParcel(@NonNull final Parcel in) {
-      return readFromParcel(in);
+    override fun hashCode(): Int {
+        var code = topLeft.hashCode()
+        code = (code xor (code ushr 31)) + topRight.hashCode()
+        code = (code xor (code ushr 31)) + bottomRight.hashCode()
+        code = (code xor (code ushr 31)) + bottomLeft.hashCode()
+        return code
     }
 
-    @Override
-    public LatLngQuad[] newArray(final int size) {
-      return new LatLngQuad[size];
+    override fun describeContents(): Int {
+        return 0
     }
-  };
 
-  @Override
-  public int hashCode() {
-    int code = topLeft.hashCode();
-    code = (code ^ code >>> 31) + topRight.hashCode();
-    code = (code ^ code >>> 31) + bottomRight.hashCode();
-    code = (code ^ code >>> 31) + bottomLeft.hashCode();
-    return code;
-  }
+    override fun writeToParcel(out: Parcel, arg1: Int) {
+        topLeft.writeToParcel(out, arg1)
+        topRight.writeToParcel(out, arg1)
+        bottomRight.writeToParcel(out, arg1)
+        bottomLeft.writeToParcel(out, arg1)
+    }
 
-  @Override
-  public int describeContents() {
-    return 0;
-  }
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<LatLngQuad> = object : Parcelable.Creator<LatLngQuad> {
+            override fun createFromParcel(parcel: Parcel): LatLngQuad {
+                return readFromParcel(parcel)
+            }
 
-  @Override
-  public void writeToParcel(@NonNull final Parcel out, final int arg1) {
-    topLeft.writeToParcel(out, arg1);
-    topRight.writeToParcel(out, arg1);
-    bottomRight.writeToParcel(out, arg1);
-    bottomLeft.writeToParcel(out, arg1);
-  }
+            override fun newArray(size: Int): Array<LatLngQuad?> {
+                return arrayOfNulls(size)
+            }
+        }
 
-  private static LatLngQuad readFromParcel(@NonNull final Parcel in) {
-    final LatLng topLeft = new LatLng(in);
-    final LatLng topRight = new LatLng(in);
-    final LatLng bottomRight = new LatLng(in);
-    final LatLng bottomLeft = new LatLng(in);
-    return new LatLngQuad(topLeft, topRight, bottomRight, bottomLeft);
-  }
+        private fun readFromParcel(parcel: Parcel): LatLngQuad {
+            val topLeft = LatLng(parcel)
+            val topRight = LatLng(parcel)
+            val bottomRight = LatLng(parcel)
+            val bottomLeft = LatLng(parcel)
+            return LatLngQuad(topLeft, topRight, bottomRight, bottomLeft)
+        }
+    }
 }

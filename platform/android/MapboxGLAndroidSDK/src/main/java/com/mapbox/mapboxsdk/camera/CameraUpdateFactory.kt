@@ -372,10 +372,11 @@ object CameraUpdateFactory {
             // Calculate the new center point
             val viewPortWidth = uiSettings.width
             val viewPortHeight = uiSettings.height
-            val padding = mapboxMap.padding
+            val padding = mapboxMap.cameraPosition.padding!!
 
             // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
-            val targetPoint = PointF((viewPortWidth - padding[0] + padding[1]) / 2 + x, (viewPortHeight + padding[1] - padding[3]) / 2 + y)
+            val targetPoint = PointF((viewPortWidth - padding[0].toFloat() + padding[1].toFloat()) / 2 + x,
+                (viewPortHeight + padding[1].toFloat() - padding[3].toFloat()) / 2 + y)
             val latLng = projection.fromScreenLocation(targetPoint)
             val previousPosition = mapboxMap.cameraPosition
             return CameraPosition.Builder().target(latLng).zoom(previousPosition.zoom).tilt(previousPosition.tilt).bearing(previousPosition.bearing).build()

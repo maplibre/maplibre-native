@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.google.gson.JsonObject
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -223,7 +224,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         style!!.addSource(randomCarSource!!)
         style!!.addImage(
             RANDOM_CAR_IMAGE_ID,
-            (resources.getDrawable(R.drawable.ic_car_top) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.ic_car_top, null) as BitmapDrawable).bitmap
         )
         val symbolLayer = SymbolLayer(RANDOM_CAR_LAYER, RANDOM_CAR_SOURCE)
         symbolLayer.withProperties(
@@ -249,7 +250,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         )
         style!!.addImage(
             PASSENGER,
-            (resources.getDrawable(R.drawable.icon_burned) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.icon_burned, null) as BitmapDrawable).bitmap
         )
         val geoJsonSource = GeoJsonSource(PASSENGER_SOURCE, featureCollection)
         style!!.addSource(geoJsonSource)
@@ -277,7 +278,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         taxi = Car(feature, passenger, duration)
         style!!.addImage(
             TAXI,
-            (resources.getDrawable(R.drawable.ic_taxi_top) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.ic_taxi_top, null) as BitmapDrawable).bitmap
         )
         taxiSource = GeoJsonSource(TAXI_SOURCE, featureCollection)
         style!!.addSource(taxiSource!!)
@@ -292,7 +293,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     }
 
     private val latLngInBounds: LatLng
-        private get() {
+        get() {
             val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
             val generator = Random()
             val randomLat = bounds.latSouth + generator.nextDouble() * bounds.latNorth - bounds.latSouth
@@ -302,27 +303,27 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
@@ -333,12 +334,12 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
                 animator.cancel()
             }
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     /**
@@ -347,14 +348,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private class LatLngEvaluator : TypeEvaluator<LatLng> {
         private val latLng = LatLng()
         override fun evaluate(fraction: Float, startValue: LatLng, endValue: LatLng): LatLng {
-            latLng.latitude = (
-                startValue.latitude +
-                    (endValue.latitude - startValue.latitude) * fraction
-                )
-            latLng.longitude = (
-                startValue.longitude +
-                    (endValue.longitude - startValue.longitude) * fraction
-                )
+            latLng.setLatitude(startValue.latitude + (endValue.latitude - startValue.latitude) * fraction)
+            latLng.setLongitude(startValue.longitude + (endValue.longitude - startValue.longitude) * fraction)
             return latLng
         }
     }

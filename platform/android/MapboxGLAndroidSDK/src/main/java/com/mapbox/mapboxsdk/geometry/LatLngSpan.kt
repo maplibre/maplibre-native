@@ -1,140 +1,116 @@
-package com.mapbox.mapboxsdk.geometry;
+package com.mapbox.mapboxsdk.geometry
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
+import android.os.Parcel
+import android.os.Parcelable
 
 /**
  * A geographical span defined by its latitude and longitude span.
  */
-public class LatLngSpan implements Parcelable {
+class LatLngSpan : Parcelable {
+    /**
+     * Returns the latitude span.
+     *
+     * @return The latitude span.
+     */
+    /**
+     * Sets the latitude span.
+     *
+     * @param latitudeSpan The latitude span to set.
+     */
+    var latitudeSpan: Double
+    /**
+     * Returns to longitude span.
+     *
+     * @return The longitude span.
+     */
+    /**
+     * Sets the longitude span.
+     *
+     * @param longitudeSpan The longitude span to set.
+     */
+    var longitudeSpan: Double
 
-  private double mLatitudeSpan;
-  private double mLongitudeSpan;
-
-  private LatLngSpan(@NonNull Parcel in) {
-    mLatitudeSpan = in.readDouble();
-    mLongitudeSpan = in.readDouble();
-  }
-
-  /**
-   * Creates a LatLgnSpan.
-   *
-   * @param latitudeSpan  The span used for latitude.
-   * @param longitudeSpan The span used for longitude.
-   */
-  public LatLngSpan(double latitudeSpan, double longitudeSpan) {
-    mLatitudeSpan = latitudeSpan;
-    mLongitudeSpan = longitudeSpan;
-  }
-
-  /**
-   * Returns the latitude span.
-   *
-   * @return The latitude span.
-   */
-  public double getLatitudeSpan() {
-    return mLatitudeSpan;
-  }
-
-  /**
-   * Sets the latitude span.
-   *
-   * @param latitudeSpan The latitude span to set.
-   */
-  public void setLatitudeSpan(double latitudeSpan) {
-    mLatitudeSpan = latitudeSpan;
-  }
-
-  /**
-   * Returns to longitude span.
-   *
-   * @return The longitude span.
-   */
-  public double getLongitudeSpan() {
-    return mLongitudeSpan;
-  }
-
-  /**
-   * Sets the longitude span.
-   *
-   * @param longitudeSpan The longitude span to set.
-   */
-  public void setLongitudeSpan(double longitudeSpan) {
-    mLongitudeSpan = longitudeSpan;
-  }
-
-  /**
-   * Indicates whether some other object is "equal to" this one.
-   *
-   * @param object The object to compare
-   * @return True if equal, false if not
-   */
-  @Override
-  public boolean equals(Object object) {
-    if (this == object) {
-      return true;
+    private constructor(parcel: Parcel) {
+        latitudeSpan = parcel.readDouble()
+        longitudeSpan = parcel.readDouble()
     }
-    if (object instanceof LatLngSpan) {
-      LatLngSpan other = (LatLngSpan) object;
-      return mLongitudeSpan == other.getLongitudeSpan()
-        && mLatitudeSpan == other.getLatitudeSpan();
+
+    /**
+     * Creates a LatLgnSpan.
+     *
+     * @param latitudeSpan  The span used for latitude.
+     * @param longitudeSpan The span used for longitude.
+     */
+    constructor(latitudeSpan: Double, longitudeSpan: Double) {
+        this.latitudeSpan = latitudeSpan
+        this.longitudeSpan = longitudeSpan
     }
-    return false;
-  }
 
-  /**
-   * Inner class responsible for recreating Parcels into objects.
-   */
-  public static final Parcelable.Creator<LatLngSpan> CREATOR =
-    new Parcelable.Creator<LatLngSpan>() {
-      @Override
-      public LatLngSpan createFromParcel(@NonNull Parcel in) {
-        return new LatLngSpan(in);
-      }
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * @param other The object to compare
+     * @return True if equal, false if not
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other is LatLngSpan) {
+            val other = other
+            return (longitudeSpan == other.longitudeSpan && latitudeSpan == other.latitudeSpan)
+        }
+        return false
+    }
 
-      @Override
-      public LatLngSpan[] newArray(int size) {
-        return new LatLngSpan[size];
-      }
-    };
+    /**
+     * Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.
+     *
+     * @return a bitmask indicating the set of special object types marshaled by this Parcelable object instance.
+     */
+    override fun describeContents(): Int {
+        return 0
+    }
 
-  /**
-   * Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.
-   *
-   * @return a bitmask indicating the set of special object types marshaled by this Parcelable object instance.
-   */
-  @Override
-  public int describeContents() {
-    return 0;
-  }
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param out   Parcel in which the object should be written
+     * @param flags Additional flags about how the object should be written
+     */
+    override fun writeToParcel(out: Parcel, flags: Int) {
+        out.writeDouble(latitudeSpan)
+        out.writeDouble(longitudeSpan)
+    }
 
-  /**
-   * Flatten this object in to a Parcel.
-   *
-   * @param out   Parcel in which the object should be written
-   * @param flags Additional flags about how the object should be written
-   */
-  @Override
-  public void writeToParcel(@NonNull Parcel out, int flags) {
-    out.writeDouble(mLatitudeSpan);
-    out.writeDouble(mLongitudeSpan);
-  }
+    /**
+     * Returns a hash code value for the object.
+     *
+     * @return hash code value of this
+     */
+    override fun hashCode(): Int {
+        var result: Int
+        var temp: Long
+        temp = java.lang.Double.doubleToLongBits(latitudeSpan)
+        result = (temp xor (temp ushr 32)).toInt()
+        temp = java.lang.Double.doubleToLongBits(longitudeSpan)
+        result = 31 * result + (temp xor (temp ushr 32)).toInt()
+        return result
+    }
 
-  /**
-   * Returns a hash code value for the object.
-   *
-   * @return hash code value of this
-   */
-  @Override
-  public int hashCode() {
-    int result;
-    long temp;
-    temp = Double.doubleToLongBits(mLatitudeSpan);
-    result = (int) (temp ^ (temp >>> 32));
-    temp = Double.doubleToLongBits(mLongitudeSpan);
-    result = 31 * result + (int) (temp ^ (temp >>> 32));
-    return result;
-  }
+    companion object {
+        /**
+         * Inner class responsible for recreating Parcels into objects.
+         */
+        @JvmField
+        val CREATOR: Parcelable.Creator<LatLngSpan> = object : Parcelable.Creator<LatLngSpan> {
+            override fun createFromParcel(parcel: Parcel): LatLngSpan {
+                return LatLngSpan(parcel)
+            }
+
+            override fun newArray(size: Int): Array<LatLngSpan?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
 }
