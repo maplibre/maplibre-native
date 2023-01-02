@@ -8,14 +8,6 @@ import com.mapbox.mapboxsdk.constants.GeometryConstants
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException
 import com.mapbox.mapboxsdk.utils.isInfinite
 import com.mapbox.mapboxsdk.utils.isNaN
-import kotlin.Any
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.String
-import kotlin.arrayOf
-import kotlin.arrayOfNulls
-import kotlin.require
 
 /**
  * A geographical area representing a latitude/longitude aligned rectangle.
@@ -37,35 +29,35 @@ class LatLngBounds
  * the NE point as (10, -170) and the SW point as (-10, 170),
  * use (10, -190) and (-10, -170), or (10, -170) and (-10, -150).
  *
- * @param northLatitude Northern Latitude
- * @param eastLongitude Eastern Longitude
- * @param southLatitude Southern Latitude
- * @param westLongitude Western Longitude
+ * @param latNorth Northern Latitude
+ * @param lonEast Eastern Longitude
+ * @param latSouth Southern Latitude
+ * @param lonWest Western Longitude
  */ @Keep internal constructor(
     /**
      * Get the north latitude value of this bounds.
      *
      * @return double latitude value for north
      */
-    @field:Keep val latNorth: kotlin.Double,
+    @field:Keep val latNorth: Double,
     /**
      * Get the east longitude value of this bounds.
      *
      * @return double longitude value for east
      */
-    @field:Keep val lonEast: kotlin.Double,
+    @field:Keep val lonEast: Double,
     /**
      * Get the south latitude value of this bounds.
      *
      * @return double latitude value for south
      */
-    @field:Keep val latSouth: kotlin.Double,
+    @field:Keep val latSouth: Double,
     /**
      * Get the west longitude value of this bounds.
      *
      * @return double longitude value for west
      */
-    @field:Keep val lonWest: kotlin.Double
+    @field:Keep val lonWest: Double
 ) : Parcelable {
 
     /**
@@ -127,7 +119,7 @@ class LatLngBounds
      *
      * @return Span distance
      */
-    val latitudeSpan: kotlin.Double
+    val latitudeSpan: Double
         get() = Math.abs(latNorth - latSouth)
 
     /**
@@ -136,7 +128,7 @@ class LatLngBounds
      *
      * @return Span distance
      */
-    val longitudeSpan: kotlin.Double
+    val longitudeSpan: Double
         get() = Math.abs(lonEast - lonWest)
 
     /**
@@ -191,11 +183,11 @@ class LatLngBounds
         return false
     }
 
-    private fun containsLatitude(latitude: kotlin.Double): Boolean {
+    private fun containsLatitude(latitude: Double): Boolean {
         return latitude <= latNorth && latitude >= latSouth
     }
 
-    private fun containsLongitude(longitude: kotlin.Double): Boolean {
+    private fun containsLongitude(longitude: Double): Boolean {
         return longitude <= lonEast && longitude >= lonWest
     }
 
@@ -252,14 +244,14 @@ class LatLngBounds
      * @return LatLngBounds
      */
     fun union(
-        northLat: kotlin.Double, eastLon: kotlin.Double, southLat: kotlin.Double, westLon: kotlin.Double
+        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
     ): LatLngBounds {
         checkParams(northLat, eastLon, southLat, westLon)
         return unionNoParamCheck(northLat, eastLon, southLat, westLon)
     }
 
     private fun unionNoParamCheck(
-        northLat: kotlin.Double, eastLon: kotlin.Double, southLat: kotlin.Double, westLon: kotlin.Double
+        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
     ): LatLngBounds {
         return LatLngBounds(
             if (latNorth < northLat) northLat else latNorth, if (lonEast < eastLon) eastLon else lonEast, if (latSouth > southLat) southLat else latSouth, if (lonWest > westLon) westLon else lonWest
@@ -297,14 +289,14 @@ class LatLngBounds
      * @return LatLngBounds
      */
     fun intersect(
-        northLat: kotlin.Double, eastLon: kotlin.Double, southLat: kotlin.Double, westLon: kotlin.Double
+        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
     ): LatLngBounds {
         checkParams(northLat, eastLon, southLat, westLon)
         return intersectNoParamCheck(northLat, eastLon, southLat, westLon)!!
     }
 
     private fun intersectNoParamCheck(
-        northLat: kotlin.Double, eastLon: kotlin.Double, southLat: kotlin.Double, westLon: kotlin.Double
+        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
     ): LatLngBounds? {
         val minLonWest = Math.max(lonWest, westLon)
         val maxLonEast = Math.min(lonEast, eastLon)
@@ -448,37 +440,36 @@ class LatLngBounds
          */
         @JvmStatic
         fun from(
-            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: kotlin.Double,
-            lonEast: kotlin.Double,
-            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: kotlin.Double,
-            lonWest: kotlin.Double
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: Double,
+            lonEast: Double,
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: Double,
+            lonWest: Double
         ): LatLngBounds {
             checkParams(latNorth, lonEast, latSouth, lonWest)
             return LatLngBounds(latNorth, lonEast, latSouth, lonWest)
         }
 
         private fun checkParams(
-            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: kotlin.Double,
-            lonEast: kotlin.Double,
-            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: kotlin.Double,
-            lonWest: kotlin.Double
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: Double,
+            lonEast: Double,
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: Double,
+            lonWest: Double
         ) {
             require(!(Double.isNaN(latNorth) || Double.isNaN(latSouth))) { "latitude must not be NaN" }
             require(!(Double.isNaN(lonEast) || Double.isNaN(lonWest))) { "longitude must not be NaN" }
             require(!(Double.isInfinite(lonEast) || Double.isInfinite(lonWest))) { "longitude must not be infinite" }
-            require(latNorth > GeometryConstants.MAX_LATITUDE || latNorth < GeometryConstants.MIN_LATITUDE
-                || latSouth > GeometryConstants.MAX_LATITUDE || latSouth < GeometryConstants.MIN_LATITUDE) 
-            { "latitude must be between -90 and 90" }
+            require(!(latNorth > GeometryConstants.MAX_LATITUDE || latNorth < GeometryConstants.MIN_LATITUDE
+                || latSouth > GeometryConstants.MAX_LATITUDE || latSouth < GeometryConstants.MIN_LATITUDE)) { "latitude must be between -90 and 90" }
             require(latNorth >= latSouth) { "latNorth cannot be less than latSouth" }
             require(lonEast >= lonWest) { "lonEast cannot be less than lonWest" }
         }
 
-        private fun lat_(z: Int, y: Int): kotlin.Double {
+        private fun lat_(z: Int, y: Int): Double {
             val n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z.toDouble())
             return Math.toDegrees(Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))))
         }
 
-        private fun lon_(z: Int, x: Int): kotlin.Double {
+        private fun lon_(z: Int, x: Int): Double {
             return x / Math.pow(2.0, z.toDouble()) * 360.0 - GeometryConstants.MAX_WRAP_LONGITUDE
         }
 
