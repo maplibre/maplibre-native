@@ -418,7 +418,12 @@ public final class LocationComponent {
   public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
                                         @Nullable LocationEngine locationEngine,
                                         @NonNull LocationEngineRequest locationEngineRequest) {
-    activateLocationComponent(context, style, locationEngine, locationEngineRequest, R.style.maplibre_LocationComponent);
+    activateLocationComponent(
+            context,
+            style,
+            locationEngine,
+            locationEngineRequest,
+            R.style.maplibre_LocationComponent);
   }
 
   /**
