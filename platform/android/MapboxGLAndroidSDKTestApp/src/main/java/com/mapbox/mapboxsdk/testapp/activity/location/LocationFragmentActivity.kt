@@ -108,7 +108,7 @@ class LocationFragmentActivity : AppCompatActivity() {
 
                     component.activateLocationComponent(
                         LocationComponentActivationOptions
-                            .builder(activity!!, style)
+                            .builder(requireActivity(), style)
                             .useDefaultLocationEngine(true)
                             .build()
                     )
@@ -120,7 +120,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
 
         override fun onSuccess(result: LocationEngineResult?) {
-            if (!mapView.isDestroyed) mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation), 12.0))
+            if (!mapView.isDestroyed) mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation!!), 12.0))
         }
 
         override fun onFailure(exception: Exception) {
@@ -173,7 +173,7 @@ class LocationFragmentActivity : AppCompatActivity() {
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             val textView = TextView(inflater.context)
-            textView.text = "This is an empty Fragment"
+            textView.text = getString(R.string.this_is_an_empty_fragment)
             return textView
         }
     }

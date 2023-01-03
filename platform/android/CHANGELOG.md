@@ -7,6 +7,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ✨ Features and improvements
 
 * Add your pull request...
+* GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 
 ### 🐞 Bug fixes
 
@@ -17,6 +18,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ⛵ Dependencies
 
 * Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
+
 
 ## 9.6.0 - December 18, 2022
 

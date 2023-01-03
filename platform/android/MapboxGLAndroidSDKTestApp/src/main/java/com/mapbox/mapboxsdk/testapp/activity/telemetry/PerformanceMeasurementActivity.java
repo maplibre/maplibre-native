@@ -1,3 +1,5 @@
+package com.mapbox.mapboxsdk.testapp.activity.telemetry;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
@@ -6,6 +8,7 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
@@ -89,7 +92,7 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
   }
@@ -101,7 +104,7 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
     attributes.add(
             new Attribute<>("test_perf_event", "true"));
 
-    List<Attribute<Long>> counters = new ArrayList();
+    List<Attribute<Long>> counters = new ArrayList<>();
     counters.add(new Attribute<>("elapsed", elapsed));
 
 
@@ -146,7 +149,7 @@ public class PerformanceMeasurementActivity extends AppCompatActivity {
 
   private static class EventListener extends okhttp3.EventListener {
 
-    private Map<String, Long> startTimes = new HashMap<>();
+    private final Map<String, Long> startTimes = new HashMap<>();
 
     @Override
     public void callStart(Call call) {
