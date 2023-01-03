@@ -45,9 +45,9 @@ public class LocationComponentActivationOptionsTest {
 
   @Before
   public void setUp() throws Exception {
-    when(context.obtainStyledAttributes(R.style.mapbox_LocationComponent, R.styleable.mapbox_LocationComponent))
+    when(context.obtainStyledAttributes(R.style.maplibre_LocationComponent, R.styleable.maplibre_LocationComponent))
       .thenReturn(array);
-    when(array.getResourceId(R.styleable.mapbox_LocationComponent_maplibre_foregroundDrawable, -1))
+    when(array.getResourceId(R.styleable.maplibre_LocationComponent_maplibre_foregroundDrawable, -1))
       .thenReturn(R.drawable.maplibre_user_icon);
     when(context.getResources()).thenReturn(resources);
   }
@@ -121,7 +121,7 @@ public class LocationComponentActivationOptionsTest {
 
     LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(locationComponentOptions)
-      .styleRes(R.style.mapbox_LocationComponent)
+      .styleRes(R.style.maplibre_LocationComponent)
       .build();
   }
 

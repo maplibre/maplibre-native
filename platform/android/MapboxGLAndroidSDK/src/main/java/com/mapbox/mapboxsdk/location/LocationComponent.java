@@ -248,7 +248,7 @@ public final class LocationComponent {
   @Deprecated
   public void activateLocationComponent(@NonNull Context context, @NonNull Style style) {
     activateLocationComponent(context, style,
-      LocationComponentOptions.createFromAttributes(context, R.style.mapbox_LocationComponent));
+      LocationComponentOptions.createFromAttributes(context, R.style.maplibre_LocationComponent));
   }
 
   /**
@@ -265,9 +265,9 @@ public final class LocationComponent {
   public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
                                         boolean useDefaultLocationEngine) {
     if (useDefaultLocationEngine) {
-      activateLocationComponent(context, style, R.style.mapbox_LocationComponent);
+      activateLocationComponent(context, style, R.style.maplibre_LocationComponent);
     } else {
-      activateLocationComponent(context, style, null, R.style.mapbox_LocationComponent);
+      activateLocationComponent(context, style, null, R.style.maplibre_LocationComponent);
     }
   }
 
@@ -288,9 +288,9 @@ public final class LocationComponent {
                                         @NonNull LocationEngineRequest locationEngineRequest) {
     setLocationEngineRequest(locationEngineRequest);
     if (useDefaultLocationEngine) {
-      activateLocationComponent(context, style, R.style.mapbox_LocationComponent);
+      activateLocationComponent(context, style, R.style.maplibre_LocationComponent);
     } else {
-      activateLocationComponent(context, style, null, R.style.mapbox_LocationComponent);
+      activateLocationComponent(context, style, null, R.style.maplibre_LocationComponent);
     }
   }
 
@@ -402,7 +402,7 @@ public final class LocationComponent {
   @Deprecated
   public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
                                         @Nullable LocationEngine locationEngine) {
-    activateLocationComponent(context, style, locationEngine, R.style.mapbox_LocationComponent);
+    activateLocationComponent(context, style, locationEngine, R.style.maplibre_LocationComponent);
   }
 
   /**
@@ -418,7 +418,7 @@ public final class LocationComponent {
   public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
                                         @Nullable LocationEngine locationEngine,
                                         @NonNull LocationEngineRequest locationEngineRequest) {
-    activateLocationComponent(context, style, locationEngine, locationEngineRequest, R.style.mapbox_LocationComponent);
+    activateLocationComponent(context, style, locationEngine, locationEngineRequest, R.style.maplibre_LocationComponent);
   }
 
   /**
@@ -472,7 +472,7 @@ public final class LocationComponent {
     if (options == null) {
       int styleRes = activationOptions.styleRes();
       if (styleRes == 0) {
-        styleRes = R.style.mapbox_LocationComponent;
+        styleRes = R.style.maplibre_LocationComponent;
       }
       options = LocationComponentOptions.createFromAttributes(activationOptions.context(), styleRes);
     }

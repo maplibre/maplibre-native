@@ -204,7 +204,7 @@ class LocationModesActivity :
         defaultStyle = !defaultStyle
         var options = LocationComponentOptions.createFromAttributes(
             this,
-            if (defaultStyle) R.style.mapbox_LocationComponent else R.style.CustomLocationComponent
+            if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
             val padding: IntArray

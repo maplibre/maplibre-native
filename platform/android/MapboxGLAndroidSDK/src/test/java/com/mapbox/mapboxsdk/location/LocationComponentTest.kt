@@ -93,7 +93,7 @@ class LocationComponentTest {
         Assert.assertEquals(locationEngineRequest, locationComponent.locationEngineRequest)
 
         doReturn(mock(TypedArray::class.java)).`when`(context)
-            .obtainStyledAttributes(R.style.mapbox_LocationComponent, R.styleable.mapbox_LocationComponent)
+            .obtainStyledAttributes(R.style.maplibre_LocationComponent, R.styleable.maplibre_LocationComponent)
 
         val resources = mock(Resources::class.java)
 

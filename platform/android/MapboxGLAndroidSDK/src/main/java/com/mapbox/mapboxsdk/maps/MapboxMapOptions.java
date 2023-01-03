@@ -173,7 +173,7 @@ public class MapboxMapOptions implements Parcelable {
    */
   @NonNull
   public static MapboxMapOptions createFromAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
-    TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.mapbox_MapView, 0, 0);
+    TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.maplibre_MapView, 0, 0);
     return createFromAttributes(new MapboxMapOptions(), context, typedArray);
   }
 
@@ -186,103 +186,103 @@ public class MapboxMapOptions implements Parcelable {
       mapboxMapOptions.camera(new CameraPosition.Builder(typedArray).build());
 
       // deprecated
-      mapboxMapOptions.apiBaseUrl(typedArray.getString(R.styleable.mapbox_MapView_maplibre_apiBaseUrl));
+      mapboxMapOptions.apiBaseUrl(typedArray.getString(R.styleable.maplibre_MapView_maplibre_apiBaseUrl));
 
-      String baseUri = typedArray.getString(R.styleable.mapbox_MapView_maplibre_apiBaseUri);
+      String baseUri = typedArray.getString(R.styleable.maplibre_MapView_maplibre_apiBaseUri);
       if (!TextUtils.isEmpty(baseUri)) {
         // override deprecated property if a value of the new type was provided
         mapboxMapOptions.apiBaseUri(baseUri);
       }
 
       mapboxMapOptions.zoomGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiZoomGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiZoomGestures, true));
       mapboxMapOptions.scrollGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiScrollGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiScrollGestures, true));
       mapboxMapOptions.horizontalScrollGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiHorizontalScrollGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiHorizontalScrollGestures, true));
       mapboxMapOptions.rotateGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiRotateGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiRotateGestures, true));
       mapboxMapOptions.tiltGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiTiltGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiTiltGestures, true));
       mapboxMapOptions.doubleTapGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiDoubleTapGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiDoubleTapGestures, true));
       mapboxMapOptions.quickZoomGesturesEnabled(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiQuickZoomGestures, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiQuickZoomGestures, true));
 
-      mapboxMapOptions.maxZoomPreference(typedArray.getFloat(R.styleable.mapbox_MapView_maplibre_cameraZoomMax,
+      mapboxMapOptions.maxZoomPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoomMax,
         MapboxConstants.MAXIMUM_ZOOM));
-      mapboxMapOptions.minZoomPreference(typedArray.getFloat(R.styleable.mapbox_MapView_maplibre_cameraZoomMin,
+      mapboxMapOptions.minZoomPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoomMin,
         MapboxConstants.MINIMUM_ZOOM));
-      mapboxMapOptions.maxPitchPreference(typedArray.getFloat(R.styleable.mapbox_MapView_maplibre_cameraPitchMax,
+      mapboxMapOptions.maxPitchPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraPitchMax,
         MapboxConstants.MAXIMUM_PITCH));
-      mapboxMapOptions.minPitchPreference(typedArray.getFloat(R.styleable.mapbox_MapView_maplibre_cameraPitchMin,
+      mapboxMapOptions.minPitchPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraPitchMin,
         MapboxConstants.MINIMUM_PITCH));
 
-      mapboxMapOptions.compassEnabled(typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiCompass, true));
-      mapboxMapOptions.compassGravity(typedArray.getInt(R.styleable.mapbox_MapView_maplibre_uiCompassGravity,
+      mapboxMapOptions.compassEnabled(typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiCompass, true));
+      mapboxMapOptions.compassGravity(typedArray.getInt(R.styleable.maplibre_MapView_maplibre_uiCompassGravity,
         Gravity.TOP | Gravity.END));
       mapboxMapOptions.compassMargins(new int[] {
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiCompassMarginLeft,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiCompassMarginLeft,
           FOUR_DP * pxlRatio)),
-        ((int) typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiCompassMarginTop,
+        ((int) typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiCompassMarginTop,
           FOUR_DP * pxlRatio)),
-        ((int) typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiCompassMarginRight,
+        ((int) typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiCompassMarginRight,
           FOUR_DP * pxlRatio)),
-        ((int) typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiCompassMarginBottom,
+        ((int) typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiCompassMarginBottom,
           FOUR_DP * pxlRatio))});
       mapboxMapOptions.compassFadesWhenFacingNorth(typedArray.getBoolean(
-        R.styleable.mapbox_MapView_maplibre_uiCompassFadeFacingNorth, true));
+        R.styleable.maplibre_MapView_maplibre_uiCompassFadeFacingNorth, true));
       Drawable compassDrawable = typedArray.getDrawable(
-        R.styleable.mapbox_MapView_maplibre_uiCompassDrawable);
+        R.styleable.maplibre_MapView_maplibre_uiCompassDrawable);
       if (compassDrawable == null) {
         compassDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.maplibre_compass_icon, null);
       }
       mapboxMapOptions.compassImage(compassDrawable);
 
-      mapboxMapOptions.logoEnabled(typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_uiLogo, true));
-      mapboxMapOptions.logoGravity(typedArray.getInt(R.styleable.mapbox_MapView_maplibre_uiLogoGravity,
+      mapboxMapOptions.logoEnabled(typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiLogo, true));
+      mapboxMapOptions.logoGravity(typedArray.getInt(R.styleable.maplibre_MapView_maplibre_uiLogoGravity,
         Gravity.BOTTOM | Gravity.START));
       mapboxMapOptions.logoMargins(new int[] {
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiLogoMarginLeft,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiLogoMarginLeft,
           FOUR_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiLogoMarginTop,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiLogoMarginTop,
           FOUR_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiLogoMarginRight,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiLogoMarginRight,
           FOUR_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiLogoMarginBottom,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiLogoMarginBottom,
           FOUR_DP * pxlRatio))});
 
       mapboxMapOptions.attributionTintColor(typedArray.getColor(
-        R.styleable.mapbox_MapView_maplibre_uiAttributionTintColor, UNDEFINED_COLOR));
+        R.styleable.maplibre_MapView_maplibre_uiAttributionTintColor, UNDEFINED_COLOR));
       mapboxMapOptions.attributionEnabled(typedArray.getBoolean(
-        R.styleable.mapbox_MapView_maplibre_uiAttribution, true));
+        R.styleable.maplibre_MapView_maplibre_uiAttribution, true));
       mapboxMapOptions.attributionGravity(typedArray.getInt(
-        R.styleable.mapbox_MapView_maplibre_uiAttributionGravity, Gravity.BOTTOM | Gravity.START));
+        R.styleable.maplibre_MapView_maplibre_uiAttributionGravity, Gravity.BOTTOM | Gravity.START));
       mapboxMapOptions.attributionMargins(new int[] {
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiAttributionMarginLeft,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiAttributionMarginLeft,
           NINETY_TWO_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiAttributionMarginTop,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiAttributionMarginTop,
           FOUR_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiAttributionMarginRight,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiAttributionMarginRight,
           FOUR_DP * pxlRatio)),
-        (int) (typedArray.getDimension(R.styleable.mapbox_MapView_maplibre_uiAttributionMarginBottom,
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiAttributionMarginBottom,
           FOUR_DP * pxlRatio))});
       mapboxMapOptions.textureMode(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_renderTextureMode, false));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_renderTextureMode, false));
       mapboxMapOptions.translucentTextureSurface(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_renderTextureTranslucentSurface, false));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_renderTextureTranslucentSurface, false));
       mapboxMapOptions.setPrefetchesTiles(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_enableTilePrefetch, true));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_enableTilePrefetch, true));
       mapboxMapOptions.setPrefetchZoomDelta(
-        typedArray.getInt(R.styleable.mapbox_MapView_maplibre_prefetchZoomDelta, 4));
+        typedArray.getInt(R.styleable.maplibre_MapView_maplibre_prefetchZoomDelta, 4));
       mapboxMapOptions.renderSurfaceOnTop(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_enableZMediaOverlay, false));
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_enableZMediaOverlay, false));
 
       mapboxMapOptions.localIdeographFontFamilyEnabled =
-        typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_localIdeographEnabled, true);
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_localIdeographEnabled, true);
 
       int localIdeographFontFamiliesResId =
-        typedArray.getResourceId(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamilies, 0);
+        typedArray.getResourceId(R.styleable.maplibre_MapView_maplibre_localIdeographFontFamilies, 0);
       if (localIdeographFontFamiliesResId != 0) {
         String[] localIdeographFontFamilies =
           context.getResources().getStringArray(localIdeographFontFamiliesResId);
@@ -290,7 +290,7 @@ public class MapboxMapOptions implements Parcelable {
       } else {
         // did user provide xml font string?
         String localIdeographFontFamily =
-          typedArray.getString(R.styleable.mapbox_MapView_maplibre_localIdeographFontFamily);
+          typedArray.getString(R.styleable.maplibre_MapView_maplibre_localIdeographFontFamily);
         if (localIdeographFontFamily == null) {
           localIdeographFontFamily = MapboxConstants.DEFAULT_FONT;
         }
@@ -298,12 +298,12 @@ public class MapboxMapOptions implements Parcelable {
       }
 
       mapboxMapOptions.pixelRatio(
-        typedArray.getFloat(R.styleable.mapbox_MapView_maplibre_pixelRatio, 0));
+        typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_pixelRatio, 0));
       mapboxMapOptions.foregroundLoadColor(
-        typedArray.getInt(R.styleable.mapbox_MapView_maplibre_foregroundLoadColor, LIGHT_GRAY)
+        typedArray.getInt(R.styleable.maplibre_MapView_maplibre_foregroundLoadColor, LIGHT_GRAY)
       );
       mapboxMapOptions.crossSourceCollisions(
-        typedArray.getBoolean(R.styleable.mapbox_MapView_maplibre_cross_source_collisions, true)
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_cross_source_collisions, true)
       );
     } finally {
       typedArray.recycle();

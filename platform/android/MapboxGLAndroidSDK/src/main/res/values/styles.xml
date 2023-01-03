@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <style name="mapbox_LocationComponent">
+  <style name="maplibre_LocationComponent">
     <item name="maplibre_foregroundDrawable">@drawable/maplibre_user_icon</item>
     <item name="maplibre_backgroundDrawable">@drawable/maplibre_user_stroke_icon</item>
     <item name="maplibre_bearingDrawable">@drawable/maplibre_user_bearing_icon</item>
-    <item name="mapbox_gpsDrawable">@drawable/maplibre_user_puck_icon</item>
+    <item name="maplibre_gpsDrawable">@drawable/maplibre_user_puck_icon</item>
 
     <item name="maplibre_foregroundDrawableStale">@drawable/maplibre_user_icon_stale</item>
     <item name="maplibre_backgroundDrawableStale">@drawable/maplibre_user_stroke_icon</item>

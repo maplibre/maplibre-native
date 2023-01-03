@@ -1,15 +1,15 @@
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ResourceName">
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- these are public -->
-    <declare-styleable name="mapbox_MapView" >
+    <declare-styleable name="maplibre_MapView" >
 
         <!--DEPRECATED use maplibre_apiBaseUri instead -->
         <attr name="maplibre_apiBaseUrl" format="string"/>
 
         <!--Configuration-->
         <attr name="maplibre_apiBaseUri" format="string"/>
-        <attr name="mapbox_localIdeographEnabled" format="boolean"/>
+        <attr name="maplibre_localIdeographEnabled" format="boolean"/>
         <attr name="maplibre_localIdeographFontFamily" format="string"/>
-        <attr name="mapbox_localIdeographFontFamilies" format="reference"/>
+        <attr name="maplibre_localIdeographFontFamilies" format="reference"/>
         <attr name="maplibre_cross_source_collisions" format="boolean"/>
 
         <!--Camera-->
@@ -120,16 +120,16 @@
 
     </declare-styleable>
 
-    <declare-styleable name="mapbox_BubbleLayout">
-        <attr name="mapbox_bl_arrowWidth" format="dimension|reference"/>
-        <attr name="mapbox_bl_cornersRadius" format="dimension|reference"/>
-        <attr name="mapbox_bl_arrowHeight" format="dimension|reference"/>
-        <attr name="mapbox_bl_arrowPosition" format="dimension|reference"/>
-        <attr name="mapbox_bl_bubbleColor" format="color|reference"/>
-        <attr name="mapbox_bl_strokeWidth" format="dimension|reference"/>
-        <attr name="mapbox_bl_strokeColor" format="color|reference"/>
+    <declare-styleable name="maplibre_BubbleLayout">
+        <attr name="maplibre_bl_arrowWidth" format="dimension|reference"/>
+        <attr name="maplibre_bl_cornersRadius" format="dimension|reference"/>
+        <attr name="maplibre_bl_arrowHeight" format="dimension|reference"/>
+        <attr name="maplibre_bl_arrowPosition" format="dimension|reference"/>
+        <attr name="maplibre_bl_bubbleColor" format="color|reference"/>
+        <attr name="maplibre_bl_strokeWidth" format="dimension|reference"/>
+        <attr name="maplibre_bl_strokeColor" format="color|reference"/>
 
-        <attr name="mapbox_bl_arrowDirection" format="enum">
+        <attr name="maplibre_bl_arrowDirection" format="enum">
             <enum name="left" value="0"/>
             <enum name="right" value="1"/>
             <enum name="top" value="2"/>
@@ -137,14 +137,14 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="mapbox_LocationComponent">
+    <declare-styleable name="maplibre_LocationComponent">
         <attr name="maplibre_foregroundDrawable" format="reference"/>
         <attr name="maplibre_foregroundTintColor" format="color"/>
         <attr name="maplibre_backgroundDrawable" format="reference"/>
         <attr name="maplibre_backgroundTintColor" format="color"/>
         <attr name="maplibre_bearingDrawable" format="reference"/>
         <attr name="maplibre_bearingTintColor" format="color"/>
-        <attr name="mapbox_gpsDrawable" format="reference"/>
+        <attr name="maplibre_gpsDrawable" format="reference"/>
 
         <attr name="maplibre_foregroundDrawableStale" format="reference"/>
         <attr name="maplibre_foregroundStaleTintColor" format="color"/>
