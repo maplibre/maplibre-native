@@ -278,19 +278,19 @@ public final class PolygonOptions implements Parcelable {
     if (Float.compare(polygon.getAlpha(), getAlpha()) != 0) {
       return false;
     }
-    
+
     if (getFillColor() != polygon.getFillColor()) {
       return false;
     }
-    
+
     if (getStrokeColor() != polygon.getStrokeColor()) {
       return false;
     }
-    
+
     if (!getPoints().equals(polygon.getPoints())) {
       return false;
     }
-    
+
     return getHoles().equals(polygon.getHoles());
   }
 
