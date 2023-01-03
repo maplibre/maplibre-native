@@ -4,14 +4,14 @@ package com.mapbox.mapboxsdk.lint
 import com.android.tools.lint.checks.infrastructure.TestFiles.java
 import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
 import org.junit.Test
-*/
+
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+    @Test
 @RunWith(RobolectricTestRunner::class)
 class KeepDetectorTest {
 
-/*    @Test
     fun correctClassName() {
         lint()
             .allowMissingSdk()
@@ -31,5 +31,5 @@ class KeepDetectorTest {
             .issues(KeepDetector.ISSUE_NOT_KEPT)
             .run()
             .expectClean()
-    }*/
-}
+    }
+} */

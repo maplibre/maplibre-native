@@ -55,6 +55,7 @@ public final class Polygon extends BasePointCollection {
    *
    * @return A {@link List} of {@link List} of {@link LatLng} points making up the holes.
    */
+  @NonNull
   public List<List<LatLng>> getHoles() {
     return new ArrayList<>(holes);
   }

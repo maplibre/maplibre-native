@@ -239,6 +239,7 @@ public final class PolygonOptions implements Parcelable {
    *
    * @return The list made up of {@link LatLng} points defining the polygon.
    */
+  @NonNull
   public List<LatLng> getPoints() {
     // the getter gives us a copy, which is the safe thing to do...
     return polygon.getPoints();
@@ -249,6 +250,7 @@ public final class PolygonOptions implements Parcelable {
    *
    * @return The list made up of {@link List} of {@link List} of {@link LatLng} points defining the holes.
    */
+  @NonNull
   public List<List<LatLng>> getHoles() {
     return polygon.getHoles();
   }
@@ -276,16 +278,20 @@ public final class PolygonOptions implements Parcelable {
     if (Float.compare(polygon.getAlpha(), getAlpha()) != 0) {
       return false;
     }
+
     if (getFillColor() != polygon.getFillColor()) {
       return false;
     }
+
     if (getStrokeColor() != polygon.getStrokeColor()) {
       return false;
     }
-    if (getPoints() != null ? !getPoints().equals(polygon.getPoints()) : polygon.getPoints() != null) {
+
+    if (!getPoints().equals(polygon.getPoints())) {
       return false;
     }
-    return !(getHoles() != null ? !getHoles().equals(polygon.getHoles()) : polygon.getHoles() != null);
+
+    return getHoles().equals(polygon.getHoles());
   }
 
   /**
@@ -302,8 +308,8 @@ public final class PolygonOptions implements Parcelable {
     result = 31 * result + (getAlpha() != +0.0f ? Float.floatToIntBits(getAlpha()) : 0);
     result = 31 * result + getFillColor();
     result = 31 * result + getStrokeColor();
-    result = 31 * result + (getPoints() != null ? getPoints().hashCode() : 0);
-    result = 31 * result + (getHoles() != null ? getHoles().hashCode() : 0);
+    result = 31 * result + getPoints().hashCode();
+    result = 31 * result + getHoles().hashCode();
     return result;
   }
 }

@@ -1,6 +1,7 @@
 package com.mapbox.mapboxsdk.camera
 
 import android.content.res.TypedArray
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.FloatRange
@@ -363,17 +364,23 @@ class CameraPosition
 
         @JvmField
         val CREATOR: Parcelable.Creator<CameraPosition> = object : Parcelable.Creator<CameraPosition> {
-            override fun createFromParcel(`in`: Parcel): CameraPosition {
-                val bearing = `in`.readDouble()
-                val target = `in`.readParcelable<LatLng>(LatLng::class.java.classLoader)
-                val tilt = `in`.readDouble()
-                val zoom = `in`.readDouble()
+            override fun createFromParcel(parcel: Parcel): CameraPosition {
+                val bearing = parcel.readDouble()
+
+                @Suppress("DEPRECATION")
+                val target = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
+                } else {
+                    parcel.readParcelable(LatLng::class.java.classLoader)
+                }
+                val tilt = parcel.readDouble()
+                val zoom = parcel.readDouble()
                 var padding: DoubleArray? = null
-                val paddingSize = `in`.readInt()
+                val paddingSize = parcel.readInt()
                 if (paddingSize > 0) {
                     padding = DoubleArray(paddingSize)
                     for (i in 0 until paddingSize) {
-                        padding[i] = `in`.readDouble()
+                        padding[i] = parcel.readDouble()
                     }
                 }
                 return CameraPosition(target, zoom, tilt, bearing, padding)
