@@ -383,7 +383,7 @@ public final class UiSettings {
   /**
    * Specifies the CompassView image.
    * <p>
-   * By default this value is R.drawable.mapbox_compass_icon.
+   * By default this value is R.drawable.maplibre_compass_icon.
    * </p>
    *
    * @param compass the drawable to show as image compass

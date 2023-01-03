@@ -83,7 +83,7 @@ class MapboxMapOptionsAttrsTest {
 
     private fun mockLocalIdeographString(font: String) {
         every {
-            typedArray.getString(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamily)
+            typedArray.getString(R.styleable.mapbox_MapView_maplibre_localIdeographFontFamily)
         }.returns(font)
     }
 
