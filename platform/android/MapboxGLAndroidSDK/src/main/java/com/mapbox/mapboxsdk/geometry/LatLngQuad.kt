@@ -18,14 +18,6 @@ class LatLngQuad
  */
 @Keep constructor(@field:Keep val topLeft: LatLng, @field:Keep val topRight: LatLng, @field:Keep val bottomRight: LatLng, @field:Keep val bottomLeft: LatLng) : Parcelable {
 
-    override fun hashCode(): Int {
-        var code = topLeft.hashCode()
-        code = (code xor (code ushr 31)) + topRight.hashCode()
-        code = (code xor (code ushr 31)) + bottomRight.hashCode()
-        code = (code xor (code ushr 31)) + bottomLeft.hashCode()
-        return code
-    }
-
     override fun describeContents(): Int {
         return 0
     }
@@ -35,6 +27,28 @@ class LatLngQuad
         topRight.writeToParcel(out, arg1)
         bottomRight.writeToParcel(out, arg1)
         bottomLeft.writeToParcel(out, arg1)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LatLngQuad
+
+        if (topLeft != other.topLeft) return false
+        if (topRight != other.topRight) return false
+        if (bottomRight != other.bottomRight) return false
+        if (bottomLeft != other.bottomLeft) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = topLeft.hashCode()
+        result = 31 * result + topRight.hashCode()
+        result = 31 * result + bottomRight.hashCode()
+        result = 31 * result + bottomLeft.hashCode()
+        return result
     }
 
     companion object {

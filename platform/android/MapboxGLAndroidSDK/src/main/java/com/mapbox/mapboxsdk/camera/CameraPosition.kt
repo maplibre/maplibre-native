@@ -366,8 +366,10 @@ class CameraPosition
         val CREATOR: Parcelable.Creator<CameraPosition> = object : Parcelable.Creator<CameraPosition> {
             override fun createFromParcel(parcel: Parcel): CameraPosition {
                 val bearing = parcel.readDouble()
-                @Suppress("DEPRECATION") val target = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    parcel.readParcelable(LatLng::class.java.classLoader,LatLng::class.java)
+
+                @Suppress("DEPRECATION")
+                val target = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
                 } else {
                     parcel.readParcelable(LatLng::class.java.classLoader)
                 }

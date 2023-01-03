@@ -15,7 +15,7 @@ class LatLngSpan : Parcelable {
     /**
      * Sets the latitude span.
      *
-     * @param latitudeSpan The latitude span to set.
+     * @var latitudeSpan The latitude span to set.
      */
     var latitudeSpan: Double
     /**
@@ -26,7 +26,7 @@ class LatLngSpan : Parcelable {
     /**
      * Sets the longitude span.
      *
-     * @param longitudeSpan The longitude span to set.
+     * @var longitudeSpan The longitude span to set.
      */
     var longitudeSpan: Double
 
@@ -57,7 +57,6 @@ class LatLngSpan : Parcelable {
             return true
         }
         if (other is LatLngSpan) {
-            val other = other
             return (longitudeSpan == other.longitudeSpan && latitudeSpan == other.latitudeSpan)
         }
         return false

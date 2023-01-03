@@ -361,11 +361,11 @@ object CameraUpdateFactory {
         }
 
         override fun toString(): String {
-            return ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + Arrays.toString(padding) + '}')
+            return ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + padding.contentToString() + '}')
         }
     }
 
-    /* This class 1. Does not seem to be used 2. The code that calculates targetPoint seems to be a bit suspicious. 
+    /* This class 1. Does not seem to be used 2. The code that calculates targetPoint seems to be a bit suspicious.
         commenting out for now.
      */
     /*

@@ -218,9 +218,7 @@ class LatLngBounds
      * @return LatLngBounds
      */
     fun union(bounds: LatLngBounds): LatLngBounds {
-        return unionNoParamCheck(
-            bounds.latNorth, bounds.lonEast, bounds.latSouth, bounds.lonWest
-        )
+        return unionNoParamCheck(bounds.latNorth, bounds.lonEast, bounds.latSouth, bounds.lonWest)
     }
 
     /**
@@ -243,18 +241,17 @@ class LatLngBounds
      * @param westLon  Western Longitude corner point
      * @return LatLngBounds
      */
-    fun union(
-        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
-    ): LatLngBounds {
+    fun union(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
         checkParams(northLat, eastLon, southLat, westLon)
         return unionNoParamCheck(northLat, eastLon, southLat, westLon)
     }
 
-    private fun unionNoParamCheck(
-        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
-    ): LatLngBounds {
+    private fun unionNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
         return LatLngBounds(
-            if (latNorth < northLat) northLat else latNorth, if (lonEast < eastLon) eastLon else lonEast, if (latSouth > southLat) southLat else latSouth, if (lonWest > westLon) westLon else lonWest
+            if (latNorth < northLat) northLat else latNorth,
+            if (lonEast < eastLon) eastLon else lonEast,
+            if (latSouth > southLat) southLat else latSouth,
+            if (lonWest > westLon) westLon else lonWest
         )
     }
 
@@ -288,16 +285,12 @@ class LatLngBounds
      * @param westLon  Western Longitude corner point
      * @return LatLngBounds
      */
-    fun intersect(
-        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
-    ): LatLngBounds {
+    fun intersect(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
         checkParams(northLat, eastLon, southLat, westLon)
         return intersectNoParamCheck(northLat, eastLon, southLat, westLon)!!
     }
 
-    private fun intersectNoParamCheck(
-        northLat: Double, eastLon: Double, southLat: Double, westLon: Double
-    ): LatLngBounds? {
+    private fun intersectNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds? {
         val minLonWest = Math.max(lonWest, westLon)
         val maxLonEast = Math.min(lonEast, eastLon)
         if (maxLonEast >= minLonWest) {
@@ -394,9 +387,7 @@ class LatLngBounds
          */
         @JvmStatic
         fun world(): LatLngBounds {
-            return from(
-                GeometryConstants.MAX_LATITUDE, GeometryConstants.MAX_WRAP_LONGITUDE, GeometryConstants.MIN_LATITUDE, GeometryConstants.MIN_WRAP_LONGITUDE
-            )
+            return from(GeometryConstants.MAX_LATITUDE, GeometryConstants.MAX_WRAP_LONGITUDE, GeometryConstants.MIN_LATITUDE, GeometryConstants.MIN_WRAP_LONGITUDE)
         }
 
         /**
@@ -458,8 +449,9 @@ class LatLngBounds
             require(!(Double.isNaN(latNorth) || Double.isNaN(latSouth))) { "latitude must not be NaN" }
             require(!(Double.isNaN(lonEast) || Double.isNaN(lonWest))) { "longitude must not be NaN" }
             require(!(Double.isInfinite(lonEast) || Double.isInfinite(lonWest))) { "longitude must not be infinite" }
-            require(!(latNorth > GeometryConstants.MAX_LATITUDE || latNorth < GeometryConstants.MIN_LATITUDE
-                || latSouth > GeometryConstants.MAX_LATITUDE || latSouth < GeometryConstants.MIN_LATITUDE)) { "latitude must be between -90 and 90" }
+            require(
+                !(latNorth > GeometryConstants.MAX_LATITUDE || latNorth < GeometryConstants.MIN_LATITUDE || latSouth > GeometryConstants.MAX_LATITUDE || latSouth < GeometryConstants.MIN_LATITUDE)
+            ) { "latitude must be between -90 and 90" }
             require(latNorth >= latSouth) { "latNorth cannot be less than latSouth" }
             require(lonEast >= lonWest) { "lonEast cannot be less than lonWest" }
         }

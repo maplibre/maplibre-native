@@ -9,14 +9,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.constants.GeometryConstants
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import kotlin.Any
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.Long
-import kotlin.String
-import kotlin.arrayOfNulls
-import kotlin.require
 
 /**
  * A geographical location which contains a single latitude, longitude pair, with
@@ -65,8 +57,8 @@ class LatLng : Parcelable {
      */
     @Keep
     var longitude = 0.0
-        private set   
-    
+        private set
+
     /**
      * Get the altitude, in meters.
      *
@@ -75,7 +67,7 @@ class LatLng : Parcelable {
     /**
      * Set the altitude, in meters.
      *
-     * @param altitude the altitude in meters
+     * @var altitude the altitude in meters
      */
     var altitude = 0.0
 
@@ -94,7 +86,7 @@ class LatLng : Parcelable {
      * @param longitude Longitude in degrees
      */
     @Keep
-    constructor(latitude: kotlin.Double, longitude: kotlin.Double) {
+    constructor(latitude: Double, longitude: Double) {
         setLatitude(latitude)
         setLongitude(longitude)
     }
@@ -106,7 +98,7 @@ class LatLng : Parcelable {
      * @param longitude Longitude in degress
      * @param altitude  Altitude in meters
      */
-    constructor(latitude: kotlin.Double, longitude: kotlin.Double, altitude: kotlin.Double) {
+    constructor(latitude: Double, longitude: Double, altitude: Double) {
         setLatitude(latitude)
         setLongitude(longitude)
         this.altitude = altitude
@@ -155,13 +147,12 @@ class LatLng : Parcelable {
      * @see GeometryConstants.MAX_LATITUDE
      */
     fun setLatitude(
-        @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude: kotlin.Double
+        @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude: Double
     ) {
         require(!latitude.isNaN()) { "latitude must not be NaN" }
         require(Math.abs(latitude) <= GeometryConstants.MAX_LATITUDE) { "latitude must be between -90 and 90" }
         this.latitude = latitude
     }
-
 
     /**
      * Set the longitude, in degrees.
@@ -176,7 +167,7 @@ class LatLng : Parcelable {
      *
      * @see GeometryConstants.MAX_LONGITUDE
      */
-    fun setLongitude(@FloatRange(from = GeometryConstants.MIN_LONGITUDE, to = GeometryConstants.MAX_LONGITUDE) longitude: kotlin.Double) {
+    fun setLongitude(@FloatRange(from = GeometryConstants.MIN_LONGITUDE, to = GeometryConstants.MAX_LONGITUDE) longitude: Double) {
         require(!longitude.isNaN()) { "longitude must not be NaN" }
         require(!longitude.isInfinite()) { "longitude must not be infinite" }
         this.longitude = longitude
@@ -190,9 +181,8 @@ class LatLng : Parcelable {
      */
     fun wrap(): LatLng {
         return LatLng(
-            latitude, wrap(
-                longitude, GeometryConstants.MIN_WRAP_LONGITUDE, GeometryConstants.MAX_WRAP_LONGITUDE
-            )
+            latitude,
+            wrap(longitude, GeometryConstants.MIN_WRAP_LONGITUDE, GeometryConstants.MAX_WRAP_LONGITUDE)
         )
     }
 
@@ -266,10 +256,8 @@ class LatLng : Parcelable {
      * @param other Other LatLng to compare to
      * @return distance in meters
      */
-    fun distanceTo(other: LatLng): kotlin.Double {
-        return TurfMeasurement.distance(
-            Point.fromLngLat(longitude, latitude), Point.fromLngLat(other.longitude, other.latitude), TurfConstants.UNIT_METRES
-        )
+    fun distanceTo(other: LatLng): Double {
+        return TurfMeasurement.distance(Point.fromLngLat(longitude, latitude), Point.fromLngLat(other.longitude, other.latitude), TurfConstants.UNIT_METRES)
     }
 
     companion object {
@@ -304,13 +292,15 @@ class LatLng : Parcelable {
          * @param max   Maximum value
          * @return Wrapped value
          */
-        fun wrap(value: kotlin.Double, min: kotlin.Double, max: kotlin.Double): kotlin.Double {
+        fun wrap(value: Double, min: Double, max: Double): Double {
             val delta = max - min
             val firstMod = (value - min) % delta
             val secondMod = (firstMod + delta) % delta
             return if (value >= max && secondMod == 0.0) {
                 max
-            } else secondMod + min
+            } else {
+                secondMod + min
+            }
         }
     }
 }
