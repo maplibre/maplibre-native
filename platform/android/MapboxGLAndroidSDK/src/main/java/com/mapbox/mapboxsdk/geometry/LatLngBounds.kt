@@ -1,0 +1,508 @@
+package com.mapbox.mapboxsdk.geometry
+
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.annotation.FloatRange
+import androidx.annotation.Keep
+import com.mapbox.mapboxsdk.constants.GeometryConstants
+import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException
+import com.mapbox.mapboxsdk.utils.isInfinite
+import com.mapbox.mapboxsdk.utils.isNaN
+
+/**
+ * A geographical area representing a latitude/longitude aligned rectangle.
+ *
+ *
+ * This class does not wrap values to the world bounds.
+ *
+ */
+class LatLngBounds
+/**
+ * Construct a new LatLngBounds based on its corners, given in NESW
+ * order.
+ *
+ *
+ * @since 7.0.0 LatLngBounds cannot be wrapped any more, i.e longitudeWest has to be
+ * less or equal to longitudeEast.
+ *
+ * For example, to represent bounds spanning 20 degrees crossing antimeridian with
+ * the NE point as (10, -170) and the SW point as (-10, 170),
+ * use (10, -190) and (-10, -170), or (10, -170) and (-10, -150).
+ *
+ * @param latNorth Northern Latitude
+ * @param lonEast Eastern Longitude
+ * @param latSouth Southern Latitude
+ * @param lonWest Western Longitude
+ */ @Keep internal constructor(
+    /**
+     * Get the north latitude value of this bounds.
+     *
+     * @return double latitude value for north
+     */
+    @field:Keep val latNorth: Double,
+    /**
+     * Get the east longitude value of this bounds.
+     *
+     * @return double longitude value for east
+     */
+    @field:Keep val lonEast: Double,
+    /**
+     * Get the south latitude value of this bounds.
+     *
+     * @return double latitude value for south
+     */
+    @field:Keep val latSouth: Double,
+    /**
+     * Get the west longitude value of this bounds.
+     *
+     * @return double longitude value for west
+     */
+    @field:Keep val lonWest: Double
+) : Parcelable {
+
+    /**
+     * Calculates the centerpoint of this LatLngBounds by simple interpolation and returns
+     * it as a point. This is a non-geodesic calculation which is not the geographic center.
+     *
+     * @return LatLng center of this LatLngBounds
+     */
+    val center: LatLng
+        get() {
+            val latCenter = (latNorth + latSouth) / 2.0
+            val longCenter = (lonEast + lonWest) / 2.0
+            return LatLng(latCenter, longCenter)
+        }
+
+    /**
+     * Get the latitude-longitude pair of the south west corner of this bounds.
+     *
+     * @return LatLng of the south west corner
+     */
+    val southWest: LatLng
+        get() = LatLng(latSouth, lonWest)
+
+    /**
+     * Get the latitude-longitude paur if the north east corner of this bounds.
+     *
+     * @return LatLng of the north east corner
+     */
+    val northEast: LatLng
+        get() = LatLng(latNorth, lonEast)
+
+    /**
+     * Get the latitude-longitude pair of the south east corner of this bounds.
+     *
+     * @return LatLng of the south east corner
+     */
+    val southEast: LatLng
+        get() = LatLng(latSouth, lonEast)
+
+    /**
+     * Get the latitude-longitude pair of the north west corner of this bounds.
+     *
+     * @return LatLng of the north west corner
+     */
+    val northWest: LatLng
+        get() = LatLng(latNorth, lonWest)
+
+    /**
+     * Get the area spanned by this LatLngBounds
+     *
+     * @return LatLngSpan area
+     */
+    val span: LatLngSpan
+        get() = LatLngSpan(latitudeSpan, longitudeSpan)
+
+    /**
+     * Get the absolute distance, in degrees, between the north and
+     * south boundaries of this LatLngBounds
+     *
+     * @return Span distance
+     */
+    val latitudeSpan: Double
+        get() = Math.abs(latNorth - latSouth)
+
+    /**
+     * Get the absolute distance, in degrees, between the west and
+     * east boundaries of this LatLngBounds
+     *
+     * @return Span distance
+     */
+    val longitudeSpan: Double
+        get() = Math.abs(lonEast - lonWest)
+
+    /**
+     * Validate if LatLngBounds is empty, determined if absolute distance is
+     *
+     * @return boolean indicating if span is empty
+     */
+    val isEmptySpan: Boolean
+        get() = longitudeSpan == 0.0 || latitudeSpan == 0.0
+
+    /**
+     * Returns a string representaton of the object.
+     *
+     * @return the string representation
+     */
+    override fun toString(): String {
+        return ("N:" + latNorth + "; E:" + lonEast + "; S:" + latSouth + "; W:" + lonWest)
+    }
+
+    /**
+     * Return an array of LatLng objects resembling this bounds.
+     *
+     * @return an array of 2 LatLng objects.
+     */
+    fun toLatLngs(): Array<LatLng> {
+        return arrayOf(northEast, southWest)
+    }
+
+    /**
+     * Constructs a LatLngBounds from current bounds with an additional latitude-longitude pair.
+     *
+     * @param latLng the latitude lognitude pair to include in the bounds.
+     * @return the newly constructed bounds
+     */
+    fun include(latLng: LatLng): LatLngBounds {
+        return Builder().include(northEast).include(southWest).include(latLng).build()
+    }
+
+    /**
+     * Determines whether this LatLngBounds matches another one via LatLng.
+     *
+     * @param other another object
+     * @return a boolean indicating whether the LatLngBounds are equal
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other is LatLngBounds) {
+            return latNorth == other.latNorth && latSouth == other.latSouth && lonEast == other.lonEast && lonWest == other.lonWest
+        }
+        return false
+    }
+
+    private fun containsLatitude(latitude: Double): Boolean {
+        return latitude <= latNorth && latitude >= latSouth
+    }
+
+    private fun containsLongitude(longitude: Double): Boolean {
+        return longitude <= lonEast && longitude >= lonWest
+    }
+
+    /**
+     * Determines whether this LatLngBounds contains a point.
+     *
+     * @param latLng the point which may be contained
+     * @return true, if the point is contained within the bounds
+     */
+    operator fun contains(latLng: LatLng): Boolean {
+        return (containsLatitude(latLng.latitude) && containsLongitude(latLng.longitude))
+    }
+
+    /**
+     * Determines whether this LatLngBounds contains another bounds.
+     *
+     * @param other the bounds which may be contained
+     * @return true, if the bounds is contained within the bounds
+     */
+    operator fun contains(other: LatLngBounds): Boolean {
+        return (contains(other.northEast) && contains(other.southWest))
+    }
+
+    /**
+     * Returns a new LatLngBounds that stretches to contain both this and another LatLngBounds.
+     *
+     * @param bounds LatLngBounds to add
+     * @return LatLngBounds
+     */
+    fun union(bounds: LatLngBounds): LatLngBounds {
+        return unionNoParamCheck(bounds.latNorth, bounds.lonEast, bounds.latSouth, bounds.lonWest)
+    }
+
+    /**
+     * Returns a new LatLngBounds that stretches to contain both this and another LatLngBounds.
+     *
+     *
+     *
+     * This values of northLat and southLat should be in the range of [-90, 90],
+     * see [GeometryConstants.MIN_LATITUDE] and [GeometryConstants.MAX_LATITUDE],
+     * otherwise IllegalArgumentException will be thrown.
+     * northLat should be greater or equal southLat, otherwise  IllegalArgumentException will be thrown.
+     *
+     *
+     *
+     * eastLon should be greater or equal westLon, otherwise  IllegalArgumentException will be thrown.
+     *
+     * @param northLat Northern Latitude corner point
+     * @param eastLon  Eastern Longitude corner point
+     * @param southLat Southern Latitude corner point
+     * @param westLon  Western Longitude corner point
+     * @return LatLngBounds
+     */
+    fun union(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
+        checkParams(northLat, eastLon, southLat, westLon)
+        return unionNoParamCheck(northLat, eastLon, southLat, westLon)
+    }
+
+    private fun unionNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
+        return LatLngBounds(
+            if (latNorth < northLat) northLat else latNorth,
+            if (lonEast < eastLon) eastLon else lonEast,
+            if (latSouth > southLat) southLat else latSouth,
+            if (lonWest > westLon) westLon else lonWest
+        )
+    }
+
+    /**
+     * Returns a new LatLngBounds that is the intersection of this with another LatLngBounds,
+     *
+     * @param box LatLngBounds to intersect with
+     * @return LatLngBounds
+     */
+    fun intersect(box: LatLngBounds): LatLngBounds? {
+        return intersectNoParamCheck(box.latNorth, box.lonEast, box.latSouth, box.lonWest)
+    }
+
+    /**
+     * Returns a new LatLngBounds that is the intersection of this with another box.
+     *
+     *
+     *
+     * This values of northLat and southLat should be in the range of [-90, 90],
+     * see [GeometryConstants.MIN_LATITUDE] and [GeometryConstants.MAX_LATITUDE],
+     * otherwise IllegalArgumentException will be thrown.
+     * northLat should be greater or equal southLat, otherwise  IllegalArgumentException will be thrown.
+     *
+     *
+     *
+     * eastLon should be greater or equal westLon, otherwise  IllegalArgumentException will be thrown.
+     *
+     * @param northLat Northern Latitude corner point
+     * @param eastLon  Eastern Longitude corner point
+     * @param southLat Southern Latitude corner point
+     * @param westLon  Western Longitude corner point
+     * @return LatLngBounds
+     */
+    fun intersect(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
+        checkParams(northLat, eastLon, southLat, westLon)
+        return intersectNoParamCheck(northLat, eastLon, southLat, westLon)!!
+    }
+
+    private fun intersectNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds? {
+        val minLonWest = Math.max(lonWest, westLon)
+        val maxLonEast = Math.min(lonEast, eastLon)
+        if (maxLonEast >= minLonWest) {
+            val minLatSouth = Math.max(latSouth, southLat)
+            val maxLatNorth = Math.min(latNorth, northLat)
+            if (maxLatNorth >= minLatSouth) {
+                return LatLngBounds(maxLatNorth, maxLonEast, minLatSouth, minLonWest)
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     *
+     * @return the hash code
+     */
+    override fun hashCode(): Int {
+        return (latNorth + 90 + (latSouth + 90) * 1000 + (lonEast + 180) * 1000000 + (lonWest + 180) * 1000000000).toInt()
+    }
+
+    /**
+     * Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.
+     *
+     * @return a bitmask indicating the set of special object types marshaled by this Parcelable object instance.
+     */
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param out   The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written
+     */
+    override fun writeToParcel(out: Parcel, flags: Int) {
+        out.writeDouble(latNorth)
+        out.writeDouble(lonEast)
+        out.writeDouble(latSouth)
+        out.writeDouble(lonWest)
+    }
+
+    /**
+     * Builder for composing LatLngBounds objects.
+     */
+    class Builder {
+        private val latLngList: MutableList<LatLng> = ArrayList()
+
+        /**
+         * Builds a new LatLngBounds.
+         *
+         *
+         * Throws an [InvalidLatLngBoundsException] when no LatLngBounds can be created.
+         *
+         *
+         * @return the build LatLngBounds
+         */
+        fun build(): LatLngBounds {
+            if (latLngList.size < 2) {
+                throw InvalidLatLngBoundsException(latLngList.size)
+            }
+            return fromLatLngs(latLngList)
+        }
+
+        /**
+         * Adds a LatLng object to the LatLngBounds.Builder.
+         *
+         * @param latLngs the List of LatLng objects to be added
+         * @return this
+         */
+        fun includes(latLngs: List<LatLng>): Builder {
+            latLngList.addAll(latLngs)
+            return this
+        }
+
+        /**
+         * Adds a LatLng object to the LatLngBounds.Builder.
+         *
+         * @param latLng the LatLng to be added
+         * @return this
+         */
+        fun include(latLng: LatLng): Builder {
+            latLngList.add(latLng)
+            return this
+        }
+    }
+
+    companion object {
+        /**
+         * Returns the world bounds.
+         *
+         * @return the bounds representing the world
+         */
+        @JvmStatic
+        fun world(): LatLngBounds {
+            return from(GeometryConstants.MAX_LATITUDE, GeometryConstants.MAX_WRAP_LONGITUDE, GeometryConstants.MIN_LATITUDE, GeometryConstants.MIN_WRAP_LONGITUDE)
+        }
+
+        /**
+         * Constructs a LatLngBounds that contains all of a list of LatLng
+         * objects. Empty lists will yield invalid LatLngBounds.
+         *
+         * @param latLngs List of LatLng objects
+         * @return LatLngBounds
+         */
+        fun fromLatLngs(latLngs: List<LatLng>): LatLngBounds {
+            var minLat = GeometryConstants.MAX_LATITUDE
+            var minLon = GeometryConstants.MAX_LONGITUDE
+            var maxLat = GeometryConstants.MIN_LATITUDE
+            var maxLon = GeometryConstants.MIN_LONGITUDE
+            for (gp in latLngs) {
+                val latitude = gp.latitude
+                val longitude = gp.longitude
+                minLat = Math.min(minLat, latitude)
+                minLon = Math.min(minLon, longitude)
+                maxLat = Math.max(maxLat, latitude)
+                maxLon = Math.max(maxLon, longitude)
+            }
+            return LatLngBounds(maxLat, maxLon, minLat, minLon)
+        }
+
+        /**
+         * Constructs a LatLngBounds from doubles representing a LatLng pair.
+         *
+         *
+         * This values of latNorth and latSouth should be in the range of [-90, 90],
+         * see [GeometryConstants.MIN_LATITUDE] and [GeometryConstants.MAX_LATITUDE],
+         * otherwise IllegalArgumentException will be thrown.
+         * latNorth should be greater or equal latSouth, otherwise  IllegalArgumentException will be thrown.
+         *
+         *
+         * This method doesn't recalculate most east or most west boundaries.
+         * Note @since 7.0.0  lonEast and lonWest will NOT be wrapped to be in the range of [-180, 180],
+         * see [GeometryConstants.MIN_LONGITUDE] and [GeometryConstants.MAX_LONGITUDE]
+         * lonEast should be greater or equal lonWest, otherwise  IllegalArgumentException will be thrown.
+         *
+         */
+        @JvmStatic
+        fun from(
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: Double,
+            lonEast: Double,
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: Double,
+            lonWest: Double
+        ): LatLngBounds {
+            checkParams(latNorth, lonEast, latSouth, lonWest)
+            return LatLngBounds(latNorth, lonEast, latSouth, lonWest)
+        }
+
+        private fun checkParams(
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latNorth: Double,
+            lonEast: Double,
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latSouth: Double,
+            lonWest: Double
+        ) {
+            require(!(Double.isNaN(latNorth) || Double.isNaN(latSouth))) { "latitude must not be NaN" }
+            require(!(Double.isNaN(lonEast) || Double.isNaN(lonWest))) { "longitude must not be NaN" }
+            require(!(Double.isInfinite(lonEast) || Double.isInfinite(lonWest))) { "longitude must not be infinite" }
+            require(
+                !(latNorth > GeometryConstants.MAX_LATITUDE || latNorth < GeometryConstants.MIN_LATITUDE || latSouth > GeometryConstants.MAX_LATITUDE || latSouth < GeometryConstants.MIN_LATITUDE)
+            ) { "latitude must be between -90 and 90" }
+            require(latNorth >= latSouth) { "latNorth cannot be less than latSouth" }
+            require(lonEast >= lonWest) { "lonEast cannot be less than lonWest" }
+        }
+
+        private fun lat_(z: Int, y: Int): Double {
+            val n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z.toDouble())
+            return Math.toDegrees(Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))))
+        }
+
+        private fun lon_(z: Int, x: Int): Double {
+            return x / Math.pow(2.0, z.toDouble()) * 360.0 - GeometryConstants.MAX_WRAP_LONGITUDE
+        }
+
+        /**
+         * Constructs a LatLngBounds from a Tile identifier.
+         *
+         *
+         * Returned bounds will have latitude in the range of Mercator projection.
+         *
+         * @param z Tile zoom level.
+         * @param x Tile X coordinate.
+         * @param y Tile Y coordinate.
+         * @see GeometryConstants.MIN_MERCATOR_LATITUDE
+         *
+         * @see GeometryConstants.MAX_MERCATOR_LATITUDE
+         */
+        @JvmStatic
+        fun from(z: Int, x: Int, y: Int): LatLngBounds {
+            return LatLngBounds(lat_(z, y), lon_(z, x + 1), lat_(z, y + 1), lon_(z, x))
+        }
+
+        /**
+         * Inner class responsible for recreating Parcels into objects.
+         */
+        @JvmField
+        val CREATOR: Parcelable.Creator<LatLngBounds?> = object : Parcelable.Creator<LatLngBounds?> {
+            override fun createFromParcel(parcel: Parcel): LatLngBounds {
+                return readFromParcel(parcel)
+            }
+
+            override fun newArray(size: Int): Array<LatLngBounds?> {
+                return arrayOfNulls(size)
+            }
+        }
+
+        private fun readFromParcel(parcel: Parcel): LatLngBounds {
+            val northLat = parcel.readDouble()
+            val eastLon = parcel.readDouble()
+            val southLat = parcel.readDouble()
+            val westLon = parcel.readDouble()
+            return LatLngBounds(northLat, eastLon, southLat, westLon)
+        }
+    }
+}

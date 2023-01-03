@@ -361,10 +361,14 @@ object CameraUpdateFactory {
         }
 
         override fun toString(): String {
-            return ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + Arrays.toString(padding) + '}')
+            return ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + padding.contentToString() + '}')
         }
     }
 
+    /* This class 1. Does not seem to be used 2. The code that calculates targetPoint seems to be a bit suspicious.
+        commenting out for now.
+     */
+    /*
     internal class CameraMoveUpdate(private val x: Float, private val y: Float) : CameraUpdate {
         override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
             val uiSettings = mapboxMap.uiSettings
@@ -372,10 +376,11 @@ object CameraUpdateFactory {
             // Calculate the new center point
             val viewPortWidth = uiSettings.width
             val viewPortHeight = uiSettings.height
-            val padding = mapboxMap.padding
+            val padding = mapboxMap.cameraPosition.padding!!
 
-            // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
-            val targetPoint = PointF((viewPortWidth - padding[0] + padding[1]) / 2 + x, (viewPortHeight + padding[1] - padding[3]) / 2 + y)
+             // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
+            val targetPoint = PointF((viewPortWidth - padding[0].toFloat() + padding[1].toFloat()) / 2 + x,
+                (viewPortHeight + padding[1].toFloat() - padding[3].toFloat()) / 2 + y)
             val latLng = projection.fromScreenLocation(targetPoint)
             val previousPosition = mapboxMap.cameraPosition
             return CameraPosition.Builder().target(latLng).zoom(previousPosition.zoom).tilt(previousPosition.tilt).bearing(previousPosition.bearing).build()
@@ -406,6 +411,7 @@ object CameraUpdateFactory {
             return ("CameraMoveUpdate{" + "x=" + x + ", y=" + y + '}')
         }
     }
+     */
 
     class ZoomUpdate : CameraUpdate {
         @IntDef(ZOOM_IN, ZOOM_OUT, ZOOM_BY, ZOOM_TO, ZOOM_TO_POINT)
