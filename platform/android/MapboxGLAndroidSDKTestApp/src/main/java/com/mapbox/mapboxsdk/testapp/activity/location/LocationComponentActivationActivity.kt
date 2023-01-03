@@ -73,7 +73,7 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
             .elevation(5f)
             .accuracyAlpha(.6f)
             .accuracyColor(Color.GREEN)
-            .foregroundDrawable(R.drawable.mapbox_logo_helmet)
+            .foregroundDrawable(R.drawable.maplibre_logo_helmet)
             .build()
         val locationComponentActivationOptions = LocationComponentActivationOptions
             .builder(this, style)

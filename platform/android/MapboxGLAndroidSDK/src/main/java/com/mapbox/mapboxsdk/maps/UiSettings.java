@@ -189,12 +189,12 @@ public final class UiSettings {
     if (compassMargins != null) {
       setCompassMargins(compassMargins[0], compassMargins[1], compassMargins[2], compassMargins[3]);
     } else {
-      int tenDp = (int) resources.getDimension(R.dimen.mapbox_four_dp);
+      int tenDp = (int) resources.getDimension(R.dimen.maplibre_four_dp);
       setCompassMargins(tenDp, tenDp, tenDp, tenDp);
     }
     setCompassFadeFacingNorth(options.getCompassFadeFacingNorth());
     if (options.getCompassImage() == null) {
-      options.compassImage(ResourcesCompat.getDrawable(resources, R.drawable.mapbox_compass_icon, null));
+      options.compassImage(ResourcesCompat.getDrawable(resources, R.drawable.maplibre_compass_icon, null));
     }
     setCompassImage(options.getCompassImage());
   }
@@ -241,7 +241,7 @@ public final class UiSettings {
       setLogoMargins(logoMargins[0], logoMargins[1], logoMargins[2], logoMargins[3]);
     } else {
       // user did not specify margins when programmatically creating a map
-      int fourDp = (int) resources.getDimension(R.dimen.mapbox_four_dp);
+      int fourDp = (int) resources.getDimension(R.dimen.maplibre_four_dp);
       setLogoMargins(fourDp, fourDp, fourDp, fourDp);
     }
   }
@@ -287,8 +287,8 @@ public final class UiSettings {
     } else {
       // user did not specify margins when programmatically creating a map
       Resources resources = context.getResources();
-      int margin = (int) resources.getDimension(R.dimen.mapbox_four_dp);
-      int leftMargin = (int) resources.getDimension(R.dimen.mapbox_ninety_two_dp);
+      int margin = (int) resources.getDimension(R.dimen.maplibre_four_dp);
+      int leftMargin = (int) resources.getDimension(R.dimen.maplibre_ninety_two_dp);
       setAttributionMargins(leftMargin, margin, margin, margin);
     }
   }
@@ -718,7 +718,7 @@ public final class UiSettings {
     }
     if (Color.alpha(tintColor) == 0) {
       ColorUtils.setTintList(attributionsView,
-        ContextCompat.getColor(attributionsView.getContext(), R.color.mapbox_blue));
+        ContextCompat.getColor(attributionsView.getContext(), R.color.maplibre_blue));
     } else {
       ColorUtils.setTintList(attributionsView, tintColor);
     }

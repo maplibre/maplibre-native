@@ -235,7 +235,7 @@ public class MapboxMapOptions implements Parcelable {
       Drawable compassDrawable = typedArray.getDrawable(
         R.styleable.mapbox_MapView_mapbox_uiCompassDrawable);
       if (compassDrawable == null) {
-        compassDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.mapbox_compass_icon, null);
+        compassDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.maplibre_compass_icon, null);
       }
       mapboxMapOptions.compassImage(compassDrawable);
 

@@ -5,6 +5,6 @@
     <solid android:color="@android:color/white" />
 
     <size
-        android:width="@dimen/mapbox_my_locationview_outer_circle"
-        android:height="@dimen/mapbox_my_locationview_outer_circle" />
+        android:width="@dimen/maplibre_my_locationview_outer_circle"
+        android:height="@dimen/maplibre_my_locationview_outer_circle" />
 </shape>

@@ -43,7 +43,7 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
                     R.raw.test_points_utrecht
                 )
                 val markerImage =
-                    BitmapFactory.decodeResource(resources, R.drawable.mapbox_marker_icon_default)
+                    BitmapFactory.decodeResource(resources, R.drawable.maplibre_marker_icon_default)
                 mapboxMap.setStyle(
                     Style.Builder()
                         .withLayer(

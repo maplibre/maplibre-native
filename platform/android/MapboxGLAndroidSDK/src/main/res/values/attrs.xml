@@ -1,6 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ResourceName">
     <!-- these are public -->
-    <declare-styleable name="mapbox_MapView">
+    <declare-styleable name="mapbox_MapView" >
 
         <!--DEPRECATED use mapbox_apiBaseUri instead -->
         <attr name="mapbox_apiBaseUrl" format="string"/>

@@ -307,10 +307,10 @@ public class LocationComponentOptions implements Parcelable {
       R.styleable.mapbox_LocationComponent_mapbox_trackingGesturesManagement, false));
     builder.trackingInitialMoveThreshold(typedArray.getDimension(
       R.styleable.mapbox_LocationComponent_mapbox_trackingInitialMoveThreshold,
-      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingInitialMoveThreshold)));
+      context.getResources().getDimension(R.dimen.maplibre_locationComponentTrackingInitialMoveThreshold)));
     builder.trackingMultiFingerMoveThreshold(typedArray.getDimension(
       R.styleable.mapbox_LocationComponent_mapbox_trackingMultiFingerMoveThreshold,
-      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)));
+      context.getResources().getDimension(R.dimen.maplibre_locationComponentTrackingMultiFingerMoveThreshold)));
 
     builder.padding(new int[] {
       typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingLeft, 0),

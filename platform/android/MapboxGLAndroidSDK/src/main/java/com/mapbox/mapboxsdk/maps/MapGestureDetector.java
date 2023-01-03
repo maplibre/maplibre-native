@@ -126,16 +126,16 @@ final class MapGestureDetector {
           com.mapbox.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
       MoveGestureListener moveGestureListener = new MoveGestureListener();
       ScaleGestureListener scaleGestureListener = new ScaleGestureListener(
-        context.getResources().getDimension(R.dimen.mapbox_density_constant),
-        context.getResources().getDimension(R.dimen.mapbox_minimum_scale_speed),
-        context.getResources().getDimension(R.dimen.mapbox_minimum_angled_scale_speed),
-        context.getResources().getDimension(R.dimen.mapbox_minimum_scale_velocity)
+        context.getResources().getDimension(R.dimen.maplibre_density_constant),
+        context.getResources().getDimension(R.dimen.maplibre_minimum_scale_speed),
+        context.getResources().getDimension(R.dimen.maplibre_minimum_angled_scale_speed),
+        context.getResources().getDimension(R.dimen.maplibre_minimum_scale_velocity)
       );
       RotateGestureListener rotateGestureListener = new RotateGestureListener(
-        context.getResources().getDimension(R.dimen.mapbox_minimum_scale_span_when_rotating),
-        context.getResources().getDimension(R.dimen.mapbox_density_constant),
-        context.getResources().getDimension(R.dimen.mapbox_angular_velocity_multiplier),
-        context.getResources().getDimension(R.dimen.mapbox_minimum_angular_velocity),
+        context.getResources().getDimension(R.dimen.maplibre_minimum_scale_span_when_rotating),
+        context.getResources().getDimension(R.dimen.maplibre_density_constant),
+        context.getResources().getDimension(R.dimen.maplibre_angular_velocity_multiplier),
+        context.getResources().getDimension(R.dimen.maplibre_minimum_angular_velocity),
         context.getResources().getDimension(
           com.mapbox.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
       ShoveGestureListener shoveGestureListener = new ShoveGestureListener();

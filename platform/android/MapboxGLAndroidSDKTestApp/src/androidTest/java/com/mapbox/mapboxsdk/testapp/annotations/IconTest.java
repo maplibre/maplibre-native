@@ -108,7 +108,7 @@ public class IconTest extends EspressoTest {
       .position(new LatLng(3, 1))
     );
     mapboxMap.addMarker(new MarkerOptions()
-      .icon(iconFactory.fromResource(R.drawable.mapbox_compass_icon))
+      .icon(iconFactory.fromResource(R.drawable.maplibre_compass_icon))
       .position(new LatLng(4, 1))
     );
     mapboxMap.addMarker(new MarkerOptions()

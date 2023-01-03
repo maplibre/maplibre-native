@@ -85,7 +85,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
                     IconUtils.drawableToIcon(
                         this,
                         R.drawable.ic_location_city,
-                        ResourcesCompat.getColor(resources, R.color.mapbox_blue, theme)
+                        ResourcesCompat.getColor(resources, R.color.maplibre_blue, theme)
                     )
                 )
         )

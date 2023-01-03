@@ -86,7 +86,7 @@ class MapSnapshotterBitMapOverlayActivity :
     private fun addMarker(snapshot: MapSnapshot): Bitmap {
         val canvas = Canvas(snapshot.bitmap)
         val marker =
-            BitmapFactory.decodeResource(resources, R.drawable.mapbox_marker_icon_default, null)
+            BitmapFactory.decodeResource(resources, R.drawable.maplibre_marker_icon_default, null)
         // Dom toren
         val markerLocation = snapshot.pixelForLatLng(LatLng(52.090649433011315, 5.121310651302338))
         canvas.drawBitmap(

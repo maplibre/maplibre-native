@@ -99,9 +99,9 @@ class LocationComponentTest {
 
         doReturn(resources).`when`(context).resources
         doReturn(0f).`when`(resources)
-            .getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)
+            .getDimension(R.dimen.maplibre_locationComponentTrackingMultiFingerMoveThreshold)
         doReturn(0f).`when`(resources)
-            .getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)
+            .getDimension(R.dimen.maplibre_locationComponentTrackingMultiFingerMoveThreshold)
         locationComponent.activateLocationComponent(context, mock(Style::class.java), true, locationEngineRequest)
         Assert.assertEquals(locationEngineRequest, locationComponent.locationEngineRequest)
     }
