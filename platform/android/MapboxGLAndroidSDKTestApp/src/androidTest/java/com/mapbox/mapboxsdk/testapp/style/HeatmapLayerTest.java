@@ -3,7 +3,7 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import androidx.test.annotation.UiThreadTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.MultiLineString;
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Basic smoke tests for HeatmapLayer
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class HeatmapLayerTest extends BaseLayerTest {
 
   private HeatmapLayer layer;

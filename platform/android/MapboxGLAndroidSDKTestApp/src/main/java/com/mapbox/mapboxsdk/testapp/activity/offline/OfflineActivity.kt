@@ -181,7 +181,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
     /*
    * Dialogs
    */
-    override fun onDownloadRegionDialogPositiveClick(regionName: String) {
+    override fun onDownloadRegionDialogPositiveClick(regionName: String?) {
         if (TextUtils.isEmpty(regionName)) {
             Toast.makeText(this@OfflineActivity, "Region name cannot be empty.", Toast.LENGTH_SHORT)
                 .show()

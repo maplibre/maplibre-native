@@ -10,11 +10,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
-* Add your pull request...
+* Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014
+*    and lessens the backward compatibility burden ([630](https://github.com/maplibre/maplibre-gl-native/pull/630))
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
 
 ### ⛵ Dependencies
 
-* Add your pull request...
 * Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
 * Update com.google.android.gms:play-services-location to 21.0.1 ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 

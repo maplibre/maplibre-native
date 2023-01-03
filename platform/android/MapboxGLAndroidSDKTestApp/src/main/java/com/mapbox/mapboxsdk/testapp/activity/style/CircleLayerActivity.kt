@@ -159,29 +159,34 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
             )
             val pointCount = Expression.toNumber(Expression.get("point_count"))
             circles.setFilter(
-                if (i == 0) Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(
-                        pointCount,
-                        Expression.literal(
-                            layers[i][0]
+                if (i == 0) {
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(
+                                layers[i][0]
+                            )
+                        )
+
+                    )
+                } else {
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gt(
+                            pointCount,
+                            Expression.literal(
+                                layers[i][0]
+                            )
+                        ),
+                        Expression.lt(
+                            pointCount,
+                            Expression.literal(
+                                layers[i - 1][0]
+                            )
                         )
                     )
-                ) else Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gt(
-                        pointCount,
-                        Expression.literal(
-                            layers[i][0]
-                        )
-                    ),
-                    Expression.lt(
-                        pointCount,
-                        Expression.literal(
-                            layers[i - 1][0]
-                        )
-                    )
-                )
+                }
             )
             mapboxMap!!.style!!.addLayer(circles)
         }
