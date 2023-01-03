@@ -7,7 +7,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ✨ Features and improvements
 
 * Add your pull request...
-* GMS location: Use "LocationRequest.Builder" instead of deprecated "new LocationRequest()" ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
+* GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 
 ### 🐞 Bug fixes
 
