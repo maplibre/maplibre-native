@@ -5,20 +5,22 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.mapboxsdk.offline.OfflineManager
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_cache_management.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityCacheManagementBinding
 
 /**
  * Test activity showcasing the cache management APIs
  */
 class CacheManagementActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityCacheManagementBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_cache_management)
+        binding = ActivityCacheManagementBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val fileSource = OfflineManager.getInstance(this)
-        resetDatabaseButton.setOnClickListener {
+        binding.resetDatabaseButton.setOnClickListener {
             fileSource.resetDatabase(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     showSnackbar("Reset database success")
@@ -30,7 +32,7 @@ class CacheManagementActivity : AppCompatActivity() {
             })
         }
 
-        invalidateAmbientCacheButton.setOnClickListener {
+        binding.invalidateAmbientCacheButton.setOnClickListener {
             fileSource.invalidateAmbientCache(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     showSnackbar("Invalidate ambient cache success")
@@ -42,7 +44,7 @@ class CacheManagementActivity : AppCompatActivity() {
             })
         }
 
-        clearAmbientCacheButton.setOnClickListener {
+        binding.clearAmbientCacheButton.setOnClickListener {
             fileSource.clearAmbientCache(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     showSnackbar("Clear ambient cache success")
@@ -54,7 +56,7 @@ class CacheManagementActivity : AppCompatActivity() {
             })
         }
 
-        setMaximumAmbientCacheSizeButton.setOnClickListener {
+        binding.setMaximumAmbientCacheSizeButton.setOnClickListener {
             fileSource.setMaximumAmbientCacheSize(
                 5000000,
                 object : OfflineManager.FileSourceCallback {
@@ -75,6 +77,6 @@ class CacheManagementActivity : AppCompatActivity() {
         assert(Looper.myLooper() == Looper.getMainLooper())
 
         // show snackbar
-        Snackbar.make(container, message, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(binding.container, message, Snackbar.LENGTH_SHORT).show()
     }
 }

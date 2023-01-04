@@ -7,8 +7,7 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_snapshot.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivitySnapshotBinding
 import timber.log.Timber
 
 /**
@@ -16,16 +15,18 @@ import timber.log.Timber
  */
 class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    private lateinit var binding: ActivitySnapshotBinding
+
     private lateinit var mapboxMap: MapboxMap
 
     private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
         override fun onDidFinishRenderingFrame(fully: Boolean) {
             if (fully) {
-                mapView.removeOnDidFinishRenderingFrameListener(this)
+                binding.mapView.removeOnDidFinishRenderingFrameListener(this)
                 Logger.v(TAG, LOG_MESSAGE)
                 mapboxMap.snapshot { snapshot ->
-                    imageView.setImageBitmap(snapshot)
-                    mapView.addOnDidFinishRenderingFrameListener(this)
+                    binding.imageView.setImageBitmap(snapshot)
+                    binding.mapView.addOnDidFinishRenderingFrameListener(this)
                 }
             }
         }
@@ -33,24 +34,25 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_snapshot)
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
+        binding = ActivitySnapshotBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync(this)
     }
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))) { mapView.addOnDidFinishRenderingFrameListener(idleListener) }
+        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))) { binding.mapView.addOnDidFinishRenderingFrameListener(idleListener) }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
@@ -58,28 +60,28 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.snapshot {
             Timber.e("Regression test for https://github.com/mapbox/mapbox-gl-native/pull/11358")
         }
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView.removeOnDidFinishRenderingFrameListener(idleListener)
-        mapView.onDestroy()
+        binding.mapView.removeOnDidFinishRenderingFrameListener(idleListener)
+        binding.mapView.onDestroy()
     }
 
     companion object {

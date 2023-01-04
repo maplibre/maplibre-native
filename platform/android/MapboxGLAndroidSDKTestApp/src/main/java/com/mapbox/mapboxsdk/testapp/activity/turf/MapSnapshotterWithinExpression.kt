@@ -21,15 +21,13 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_physical_circle.mapView
-import kotlinx.android.synthetic.main.activity_snapshot.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityMapsnapshotterWithinExpressionBinding
 
 /**
  * An Activity that showcases the use of MapSnapshotter with 'within' expression
  */
 class MapSnapshotterWithinExpression : AppCompatActivity() {
-
+    private lateinit var binding: ActivityMapsnapshotterWithinExpressionBinding
     private lateinit var mapboxMap: MapboxMap
     private lateinit var snapshotter: MapSnapshotter
     private var snapshotInProgress = false
@@ -40,7 +38,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
                 snapshotInProgress = true
                 snapshotter.setCameraPosition(mapboxMap.cameraPosition)
                 snapshotter.start {
-                    imageView.setImageBitmap(it.bitmap)
+                    binding.imageView.setImageBitmap(it.bitmap)
                     snapshotInProgress = false
                 }
             }
@@ -67,10 +65,11 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mapsnapshotter_within_expression)
+        binding = ActivityMapsnapshotterWithinExpressionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { map ->
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync { map ->
             mapboxMap = map
 
             // Setup camera position above Georgetown
@@ -80,7 +79,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
                 .build()
 
             // Wait for the map to become idle before manipulating the style and camera of the map
-            mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
+            binding.mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
                 override fun onDidBecomeIdle() {
                     mapboxMap.easeCamera(
                         CameraUpdateFactory.newCameraPosition(
@@ -93,7 +92,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
                         ),
                         1000
                     )
-                    mapView.removeOnDidBecomeIdleListener(this)
+                    binding.mapView.removeOnDidBecomeIdleListener(this)
                 }
             })
             // Load mapbox streets and add lines and circles
@@ -128,10 +127,13 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
             Style.Builder()
                 .fromUri(Style.getPredefinedStyle("Streets"))
         ) {
-            mapView.addOnCameraDidChangeListener(cameraListener)
+            binding.mapView.addOnCameraDidChangeListener(cameraListener)
         }
 
-        val options = MapSnapshotter.Options(imageView.measuredWidth / 2, imageView.measuredHeight / 2)
+        val options = MapSnapshotter.Options(
+            binding.imageView.measuredWidth / 2,
+            binding.imageView.measuredHeight / 2
+        )
             .withCameraPosition(mapboxMap.cameraPosition)
             .withPixelRatio(2.0f)
             .withStyleBuilder(
@@ -176,37 +178,37 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        mapView.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
     }
 
     private fun bufferLineStringGeometry(): Polygon {

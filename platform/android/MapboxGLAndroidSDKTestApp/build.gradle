@@ -41,6 +41,11 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
     namespace 'com.mapbox.mapboxsdk.testapp'
     testNamespace '${applicationId}'
     lint {
@@ -91,4 +96,3 @@ apply from: "${rootDir}/gradle/gradle-lint.gradle"
 
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
