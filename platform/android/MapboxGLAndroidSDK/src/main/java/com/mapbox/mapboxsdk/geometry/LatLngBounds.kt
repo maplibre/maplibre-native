@@ -16,6 +16,8 @@ import com.mapbox.mapboxsdk.utils.isNaN
  * This class does not wrap values to the world bounds.
  *
  */
+
+@Keep
 class LatLngBounds
 /**
  * Construct a new LatLngBounds based on its corners, given in NESW
@@ -29,35 +31,43 @@ class LatLngBounds
  * the NE point as (10, -170) and the SW point as (-10, 170),
  * use (10, -190) and (-10, -170), or (10, -170) and (-10, -150).
  *
- * @param latNorth Northern Latitude
- * @param lonEast Eastern Longitude
- * @param latSouth Southern Latitude
- * @param lonWest Western Longitude
+ * @param latitudeNorth Northern Latitude
+ * @param longitudeEast Eastern Longitude
+ * @param latitudeSouth Southern Latitude
+ * @param longitudeWest Western Longitude
  */ @Keep internal constructor(
     /**
      * Get the north latitude value of this bounds.
      *
      * @return double latitude value for north
      */
-    @field:Keep val latNorth: Double,
+    @field:Keep
+    @JvmField
+    val latitudeNorth: Double,
     /**
      * Get the east longitude value of this bounds.
      *
      * @return double longitude value for east
      */
-    @field:Keep val lonEast: Double,
+    @field:Keep
+    @JvmField
+    val longitudeEast: Double,
     /**
      * Get the south latitude value of this bounds.
      *
      * @return double latitude value for south
      */
-    @field:Keep val latSouth: Double,
+    @field:Keep
+    @JvmField
+    val latitudeSouth: Double,
     /**
      * Get the west longitude value of this bounds.
      *
      * @return double longitude value for west
      */
-    @field:Keep val lonWest: Double
+    @field:Keep
+    @JvmField
+    val longitudeWest: Double
 ) : Parcelable {
 
     /**
@@ -68,10 +78,46 @@ class LatLngBounds
      */
     val center: LatLng
         get() {
-            val latCenter = (latNorth + latSouth) / 2.0
-            val longCenter = (lonEast + lonWest) / 2.0
+            val latCenter = (latitudeNorth + latitudeSouth) / 2.0
+            val longCenter = (longitudeEast + longitudeWest) / 2.0
             return LatLng(latCenter, longCenter)
         }
+
+    /**
+     * Get the north latitude value of this bounds.
+     *
+     * @return double latitude value for north
+     */
+    fun getLatNorth(): Double {
+        return latitudeNorth
+    }
+
+    /**
+     * Get the south latitude value of this bounds.
+     *
+     * @return double latitude value for south
+     */
+    fun getLatSouth(): Double {
+        return latitudeSouth
+    }
+
+    /**
+     * Get the east longitude value of this bounds.
+     *
+     * @return double longitude value for east
+     */
+    fun getLonEast(): Double {
+        return longitudeEast
+    }
+
+    /**
+     * Get the west longitude value of this bounds.
+     *
+     * @return double longitude value for west
+     */
+    fun getLonWest(): Double {
+        return longitudeWest
+    }
 
     /**
      * Get the latitude-longitude pair of the south west corner of this bounds.
@@ -79,15 +125,15 @@ class LatLngBounds
      * @return LatLng of the south west corner
      */
     val southWest: LatLng
-        get() = LatLng(latSouth, lonWest)
+        get() = LatLng(latitudeSouth, longitudeWest)
 
     /**
-     * Get the latitude-longitude paur if the north east corner of this bounds.
+     * Get the latitude-longitude pair if the north east corner of this bounds.
      *
      * @return LatLng of the north east corner
      */
     val northEast: LatLng
-        get() = LatLng(latNorth, lonEast)
+        get() = LatLng(latitudeNorth, longitudeEast)
 
     /**
      * Get the latitude-longitude pair of the south east corner of this bounds.
@@ -95,7 +141,7 @@ class LatLngBounds
      * @return LatLng of the south east corner
      */
     val southEast: LatLng
-        get() = LatLng(latSouth, lonEast)
+        get() = LatLng(latitudeSouth, longitudeEast)
 
     /**
      * Get the latitude-longitude pair of the north west corner of this bounds.
@@ -103,7 +149,7 @@ class LatLngBounds
      * @return LatLng of the north west corner
      */
     val northWest: LatLng
-        get() = LatLng(latNorth, lonWest)
+        get() = LatLng(latitudeNorth, longitudeWest)
 
     /**
      * Get the area spanned by this LatLngBounds
@@ -120,7 +166,7 @@ class LatLngBounds
      * @return Span distance
      */
     val latitudeSpan: Double
-        get() = Math.abs(latNorth - latSouth)
+        get() = Math.abs(latitudeNorth - latitudeSouth)
 
     /**
      * Get the absolute distance, in degrees, between the west and
@@ -129,7 +175,7 @@ class LatLngBounds
      * @return Span distance
      */
     val longitudeSpan: Double
-        get() = Math.abs(lonEast - lonWest)
+        get() = Math.abs(longitudeEast - longitudeWest)
 
     /**
      * Validate if LatLngBounds is empty, determined if absolute distance is
@@ -145,7 +191,7 @@ class LatLngBounds
      * @return the string representation
      */
     override fun toString(): String {
-        return ("N:" + latNorth + "; E:" + lonEast + "; S:" + latSouth + "; W:" + lonWest)
+        return ("N:" + latitudeNorth + "; E:" + longitudeEast + "; S:" + latitudeSouth + "; W:" + longitudeWest)
     }
 
     /**
@@ -178,17 +224,17 @@ class LatLngBounds
             return true
         }
         if (other is LatLngBounds) {
-            return latNorth == other.latNorth && latSouth == other.latSouth && lonEast == other.lonEast && lonWest == other.lonWest
+            return latitudeNorth == other.latitudeNorth && latitudeSouth == other.latitudeSouth && longitudeEast == other.longitudeEast && longitudeWest == other.longitudeWest
         }
         return false
     }
 
     private fun containsLatitude(latitude: Double): Boolean {
-        return latitude <= latNorth && latitude >= latSouth
+        return latitude <= latitudeNorth && latitude >= latitudeSouth
     }
 
     private fun containsLongitude(longitude: Double): Boolean {
-        return longitude <= lonEast && longitude >= lonWest
+        return longitude <= longitudeEast && longitude >= longitudeWest
     }
 
     /**
@@ -218,7 +264,7 @@ class LatLngBounds
      * @return LatLngBounds
      */
     fun union(bounds: LatLngBounds): LatLngBounds {
-        return unionNoParamCheck(bounds.latNorth, bounds.lonEast, bounds.latSouth, bounds.lonWest)
+        return unionNoParamCheck(bounds.latitudeNorth, bounds.longitudeEast, bounds.latitudeSouth, bounds.longitudeWest)
     }
 
     /**
@@ -248,10 +294,10 @@ class LatLngBounds
 
     private fun unionNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds {
         return LatLngBounds(
-            if (latNorth < northLat) northLat else latNorth,
-            if (lonEast < eastLon) eastLon else lonEast,
-            if (latSouth > southLat) southLat else latSouth,
-            if (lonWest > westLon) westLon else lonWest
+            if (latitudeNorth < northLat) northLat else latitudeNorth,
+            if (longitudeEast < eastLon) eastLon else longitudeEast,
+            if (latitudeSouth > southLat) southLat else latitudeSouth,
+            if (longitudeWest > westLon) westLon else longitudeWest
         )
     }
 
@@ -262,7 +308,7 @@ class LatLngBounds
      * @return LatLngBounds
      */
     fun intersect(box: LatLngBounds): LatLngBounds? {
-        return intersectNoParamCheck(box.latNorth, box.lonEast, box.latSouth, box.lonWest)
+        return intersectNoParamCheck(box.latitudeNorth, box.longitudeEast, box.latitudeSouth, box.longitudeWest)
     }
 
     /**
@@ -291,11 +337,11 @@ class LatLngBounds
     }
 
     private fun intersectNoParamCheck(northLat: Double, eastLon: Double, southLat: Double, westLon: Double): LatLngBounds? {
-        val minLonWest = Math.max(lonWest, westLon)
-        val maxLonEast = Math.min(lonEast, eastLon)
+        val minLonWest = Math.max(longitudeWest, westLon)
+        val maxLonEast = Math.min(longitudeEast, eastLon)
         if (maxLonEast >= minLonWest) {
-            val minLatSouth = Math.max(latSouth, southLat)
-            val maxLatNorth = Math.min(latNorth, northLat)
+            val minLatSouth = Math.max(latitudeSouth, southLat)
+            val maxLatNorth = Math.min(latitudeNorth, northLat)
             if (maxLatNorth >= minLatSouth) {
                 return LatLngBounds(maxLatNorth, maxLonEast, minLatSouth, minLonWest)
             }
@@ -309,7 +355,7 @@ class LatLngBounds
      * @return the hash code
      */
     override fun hashCode(): Int {
-        return (latNorth + 90 + (latSouth + 90) * 1000 + (lonEast + 180) * 1000000 + (lonWest + 180) * 1000000000).toInt()
+        return (latitudeNorth + 90 + (latitudeSouth + 90) * 1000 + (longitudeEast + 180) * 1000000 + (longitudeWest + 180) * 1000000000).toInt()
     }
 
     /**
@@ -328,10 +374,10 @@ class LatLngBounds
      * @param flags Additional flags about how the object should be written
      */
     override fun writeToParcel(out: Parcel, flags: Int) {
-        out.writeDouble(latNorth)
-        out.writeDouble(lonEast)
-        out.writeDouble(latSouth)
-        out.writeDouble(lonWest)
+        out.writeDouble(latitudeNorth)
+        out.writeDouble(longitudeEast)
+        out.writeDouble(latitudeSouth)
+        out.writeDouble(longitudeWest)
     }
 
     /**

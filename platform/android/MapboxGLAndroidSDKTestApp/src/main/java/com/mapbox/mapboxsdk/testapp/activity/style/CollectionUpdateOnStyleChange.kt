@@ -130,8 +130,8 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
         private fun getLatLngInBounds(bounds: LatLngBounds): LatLng {
             val generator = Random()
-            val randomLat = bounds.latSouth + generator.nextDouble() * (bounds.latNorth - bounds.latSouth)
-            val randomLon = bounds.lonWest + generator.nextDouble() * (bounds.lonEast - bounds.lonWest)
+            val randomLat = bounds.latitudeSouth + generator.nextDouble() * (bounds.latitudeNorth - bounds.latitudeSouth)
+            val randomLon = bounds.longitudeWest + generator.nextDouble() * (bounds.longitudeEast - bounds.longitudeWest)
             return LatLng(randomLat, randomLon)
         }
     }

@@ -25,7 +25,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.style.AnimatedSymbolLayerActivity.Car
 import com.mapbox.turf.TurfMeasurement
 import java.util.*
 
@@ -296,8 +295,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         get() {
             val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
             val generator = Random()
-            val randomLat = bounds.latSouth + generator.nextDouble() * bounds.latNorth - bounds.latSouth
-            val randomLon = bounds.lonWest + generator.nextDouble() * bounds.lonEast - bounds.lonWest
+            val randomLat = bounds.latitudeSouth + generator.nextDouble() * bounds.latitudeNorth - bounds.latitudeSouth
+            val randomLon = bounds.longitudeWest + generator.nextDouble() * bounds.longitudeEast - bounds.longitudeWest
             return LatLng(randomLat, randomLon)
         }
 

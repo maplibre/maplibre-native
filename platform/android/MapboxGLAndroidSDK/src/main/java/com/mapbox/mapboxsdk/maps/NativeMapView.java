@@ -273,7 +273,12 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public CameraPosition getCameraForLatLngBounds(LatLngBounds bounds, int[] padding, double bearing, double tilt) {
+  public CameraPosition getCameraForLatLngBounds(
+          @NonNull LatLngBounds bounds,
+          int[] padding,
+          double bearing,
+          double tilt
+  ) {
     if (checkState("getCameraForLatLngBounds")) {
       return null;
     }
@@ -289,7 +294,7 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public CameraPosition getCameraForGeometry(Geometry geometry, int[] padding, double bearing, double tilt) {
+  public CameraPosition getCameraForGeometry(@NonNull Geometry geometry, int[] padding, double bearing, double tilt) {
     if (checkState("getCameraForGeometry")) {
       return null;
     }
@@ -1521,14 +1526,7 @@ final class NativeMapView implements NativeMap {
           mapRenderer.setOnFpsChangedListener(new MapboxMap.OnFpsChangedListener() {
             @Override
             public void onFpsChanged(final double fps) {
-              handler.post(new Runnable() {
-
-                @Override
-                public void run() {
-                  listener.onFpsChanged(fps);
-                }
-
-              });
+              handler.post(() -> listener.onFpsChanged(fps));
             }
           });
         } else {
