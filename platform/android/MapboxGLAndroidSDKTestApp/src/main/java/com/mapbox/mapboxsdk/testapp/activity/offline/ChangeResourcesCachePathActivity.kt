@@ -17,7 +17,7 @@ import com.mapbox.mapboxsdk.offline.OfflineManager
 import com.mapbox.mapboxsdk.offline.OfflineRegion
 import com.mapbox.mapboxsdk.storage.FileSource
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_change_resources_cache_path.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityChangeResourcesCachePathBinding
 import java.io.File
 
 class ChangeResourcesCachePathActivity :
@@ -29,6 +29,8 @@ class ChangeResourcesCachePathActivity :
         private const val TAG = "Mbgl-ChangeResourcesCachePathActivity"
     }
 
+    private lateinit var binding: ActivityChangeResourcesCachePathBinding
+
     private lateinit var adapter: PathAdapter
 
     private lateinit var offlineManager: OfflineManager
@@ -37,12 +39,13 @@ class ChangeResourcesCachePathActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_change_resources_cache_path)
+        binding = ActivityChangeResourcesCachePathBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         adapter = PathAdapter(this, obtainExternalFilesPaths())
-        listView.adapter = adapter
-        listView.emptyView = empty
-        listView.onItemClickListener = this
+        binding.listView.adapter = adapter
+        binding.listView.emptyView = binding.empty
+        binding.listView.onItemClickListener = this
 
         offlineManager = OfflineManager.getInstance(this)
     }
@@ -59,18 +62,18 @@ class ChangeResourcesCachePathActivity :
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        listView.onItemClickListener = null
+        binding.listView.onItemClickListener = null
         val path: String = adapter.getItem(position) as String
         FileSource.setResourcesCachePath(path, callback)
     }
 
     override fun onError(message: String) {
-        listView.onItemClickListener = this
+        binding.listView.onItemClickListener = this
         Toast.makeText(this, "Error: $message", Toast.LENGTH_LONG).show()
     }
 
     override fun onSuccess(path: String) {
-        listView.onItemClickListener = this
+        binding.listView.onItemClickListener = this
         Toast.makeText(this, "New path: $path", Toast.LENGTH_LONG).show()
 
         offlineManager.listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {

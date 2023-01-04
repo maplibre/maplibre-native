@@ -19,16 +19,20 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_location_layer_fragment.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityLocationLayerFragmentBinding
 
 class LocationFragmentActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityLocationLayerFragmentBinding
+
     private lateinit var permissionsManager: PermissionsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_location_layer_fragment)
+        binding = ActivityLocationLayerFragmentBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             val fragment = supportFragmentManager.findFragmentByTag(EmptyFragment.TAG)
             if (fragment == null) {
                 supportFragmentManager
