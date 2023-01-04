@@ -5,4 +5,4 @@ contact_links:
     about: If you have a question about using MapLibre GL Native
   - name: "💬 Chat with us on Slack"
     url: https://slack.openstreetmap.us/
-    about: Join \#maplibre-native on the Open Street Map Slack
+    about: "Join #maplibre-native on the Open Street Map Slack"
