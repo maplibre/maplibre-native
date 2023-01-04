@@ -9,7 +9,6 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.offline.OfflineManager
 import com.mapbox.mapboxsdk.offline.OfflineRegion
 import com.mapbox.mapboxsdk.storage.FileSource
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityMergeOfflineRegionsBinding
 import com.mapbox.mapboxsdk.testapp.utils.FileUtils
 

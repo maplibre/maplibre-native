@@ -21,7 +21,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityMapsnapshotterWithinExpressionBinding
 
 /**
@@ -133,7 +132,8 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
         val options = MapSnapshotter.Options(
             binding.imageView.measuredWidth / 2,
-            binding.imageView.measuredHeight / 2)
+            binding.imageView.measuredHeight / 2
+        )
             .withCameraPosition(mapboxMap.cameraPosition)
             .withPixelRatio(2.0f)
             .withStyleBuilder(

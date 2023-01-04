@@ -8,7 +8,6 @@ import android.os.PersistableBundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityOverlayBinding
 
 /**

@@ -5,7 +5,6 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.mapboxsdk.offline.OfflineManager
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityCacheManagementBinding
 
 /**

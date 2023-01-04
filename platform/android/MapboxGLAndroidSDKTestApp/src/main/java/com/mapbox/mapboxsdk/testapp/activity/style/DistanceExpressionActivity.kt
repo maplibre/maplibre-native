@@ -16,7 +16,6 @@ import com.mapbox.mapboxsdk.style.layers.Property.NONE
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityWithinExpressionBinding
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfTransformation

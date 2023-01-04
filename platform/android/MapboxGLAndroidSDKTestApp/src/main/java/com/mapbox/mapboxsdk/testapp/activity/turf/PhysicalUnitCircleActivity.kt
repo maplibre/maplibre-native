@@ -13,7 +13,6 @@ import com.mapbox.mapboxsdk.style.expressions.Expression.*
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityPhysicalCircleBinding
 import com.mapbox.turf.TurfTransformation
 

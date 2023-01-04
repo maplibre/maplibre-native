@@ -8,7 +8,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.maps.SupportMapFragment
-import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityViewpagerBinding
 
 /**
