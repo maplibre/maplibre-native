@@ -25,9 +25,9 @@ class BubblePopupHelper {
     // change background color to transparent
     Drawable drawable;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      drawable = context.getDrawable(R.drawable.mapbox_popup_window_transparent);
+      drawable = context.getDrawable(R.drawable.maplibre_popup_window_transparent);
     } else {
-      drawable = context.getResources().getDrawable(R.drawable.mapbox_popup_window_transparent);
+      drawable = context.getResources().getDrawable(R.drawable.maplibre_popup_window_transparent);
     }
     popupWindow.setBackgroundDrawable(drawable);
 

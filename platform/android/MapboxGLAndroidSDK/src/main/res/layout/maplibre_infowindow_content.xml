@@ -9,14 +9,14 @@
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
     android:paddingTop="14dp"
-    app:mapbox_bl_arrowDirection="bottom"
-    app:mapbox_bl_arrowHeight="8dp"
-    app:mapbox_bl_arrowPosition="16dp"
-    app:mapbox_bl_arrowWidth="8dp"
-    app:mapbox_bl_bubbleColor="@android:color/white"
-    app:mapbox_bl_cornersRadius="6dp"
-    app:mapbox_bl_strokeColor="@android:color/darker_gray"
-    app:mapbox_bl_strokeWidth="1dp">
+    app:maplibre_bl_arrowDirection="bottom"
+    app:maplibre_bl_arrowHeight="8dp"
+    app:maplibre_bl_arrowPosition="16dp"
+    app:maplibre_bl_arrowWidth="8dp"
+    app:maplibre_bl_bubbleColor="@android:color/white"
+    app:maplibre_bl_cornersRadius="6dp"
+    app:maplibre_bl_strokeColor="@android:color/darker_gray"
+    app:maplibre_bl_strokeWidth="1dp">
 
     <TextView
         android:id="@+id/infowindow_title"
@@ -38,7 +38,7 @@
         android:textIsSelectable="false"
         android:lineSpacingExtra="1dp"
         android:maxEms="17"
-        android:textColor="@color/mapbox_gray"
+        android:textColor="@color/maplibre_gray"
         android:textSize="14sp"/>
 
     <TextView

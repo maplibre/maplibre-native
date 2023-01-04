@@ -74,7 +74,7 @@ public class AttributionTest extends EspressoTest {
 
     // click on View to open dialog
     onView(withTagValue(is("attrView"))).perform(click());
-    onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
+    onView(withText(R.string.maplibre_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
     Matcher<Intent> expectedIntent = allOf(hasAction(Intent.ACTION_VIEW), hasData(Uri.parse(urlSpans[0].getURL())));
@@ -95,7 +95,7 @@ public class AttributionTest extends EspressoTest {
 
     // click on View to open dialog
     onView(withTagValue(is("attrView"))).perform(click());
-    onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
+    onView(withText(R.string.maplibre_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
     Matcher<Intent> expectedIntent = allOf(hasAction(Intent.ACTION_VIEW), hasData(Uri.parse(urlSpans[1].getURL())));
@@ -116,7 +116,7 @@ public class AttributionTest extends EspressoTest {
 
     // click on View to open dialog
     onView(withTagValue(is("attrView"))).perform(click());
-    onView(withText(R.string.mapbox_attributionsDialogTitle)).check(matches(isDisplayed()));
+    onView(withText(R.string.maplibre_attributionsDialogTitle)).check(matches(isDisplayed()));
 
     // test for trigger url intent
     Matcher<Intent> expectedIntent = hasAction(Intent.ACTION_VIEW);

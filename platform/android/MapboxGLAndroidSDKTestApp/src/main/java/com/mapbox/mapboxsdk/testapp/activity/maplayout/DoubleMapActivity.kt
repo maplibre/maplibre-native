@@ -20,7 +20,7 @@ import com.mapbox.mapboxsdk.utils.MapFragmentUtils
  * Test activity showcasing having 2 maps on top of each other.
  *
  *
- * The small map is using the `mapbox_enableZMediaOverlay="true"` configuration
+ * The small map is using the `maplibre_enableZMediaOverlay="true"` configuration
  *
  */
 class DoubleMapActivity : AppCompatActivity() {

@@ -35,10 +35,10 @@ public class LocationComponentOptionsTest {
 
   @Before
   public void setUp() throws Exception {
-    when(context.obtainStyledAttributes(R.style.mapbox_LocationComponent, R.styleable.mapbox_LocationComponent))
+    when(context.obtainStyledAttributes(R.style.maplibre_LocationComponent, R.styleable.maplibre_LocationComponent))
       .thenReturn(array);
-    when(array.getResourceId(R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawable, -1))
-      .thenReturn(R.drawable.mapbox_user_icon);
+    when(array.getResourceId(R.styleable.maplibre_LocationComponent_maplibre_foregroundDrawable, -1))
+      .thenReturn(R.drawable.maplibre_user_icon);
     when(context.getResources()).thenReturn(resources);
   }
 
