@@ -17,19 +17,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 * Fix for "NSExpression function is forbidden" [#411](https://github.com/maplibre/maplibre-gl-native/pull/411)
 * Xcode 14 compatibility [#494](https://github.com/maplibre/maplibre-gl-native/pull/494) [#599](https://github.com/maplibre/maplibre-gl-native/pull/599)
 
-## 5.12.3 - January 05, 2023
-
-* Fix missing attribution #236
-* Fix logging format strings #266
-* Implement map projection functionality #254
-* Fix warnings, mainly casting to smaller types #270
-* Remove an unused static library (savings of 97 KB from iOS binary)
-* Add ClientOptions to be able to pass around client name and version #365
-* Remove account from xcconfig #382
-* Remove observation of key-path #380
-* Fix for "NSExpression function is forbidden" #411
-* Xcode 14 compatibility #494 #599
-
 ## 5.12.2 - December 02, 2021
 
 ### Improvements
