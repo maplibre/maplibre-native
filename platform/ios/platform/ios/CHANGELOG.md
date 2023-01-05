@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## 5.12.3 - January 05, 2023
+## 5.13.0 - January 05, 2023
 
 * Fix missing attribution [#236](https://github.com/maplibre/maplibre-gl-native/pull/236)
 * Fix logging format strings [#266](https://github.com/maplibre/maplibre-gl-native/pull/266)
