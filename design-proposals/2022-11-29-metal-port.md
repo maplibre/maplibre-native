@@ -84,9 +84,9 @@ Once the renderer_impl module exists for Metal, it's time to start fleshing it o
 
 ![Metal Renderer (general)](resources/figs-0.png)
 
-After the Rendering Modularization rework we'll have Layers using Builders to emit Drawables.  Initially the Metal Drawables will be stubs, but we can get started with a carefully curated Metal Drawable that consists of one polygon.  It can be matched with a single Metal Shader that does nothing more than draw it.
+The easiest place to start with the Metal renderer is in the overlay layers.  We'll start with a single overlay layer that draws a rectangle over part of the screen.  This will consist of a custom Metal shader paired with simple vertex data.
 
-Getting the skeleton version of the Metal Renderer in place is the purpose of this work.  When it's going, the developers should see a single rectangle moving around the screen as the user pans.  Not terribly exciting, but an easy start and a good place to branch off work with multiple developers.
+Getting the skeleton version of the Metal Renderer in place is the purpose of this work.  When it's going, the developers should see a single rectangle overlaid on the clear color.  Not terribly exciting, but an easy start and a good place to branch off work with multiple developers.
 
 ### Textures
 
@@ -112,7 +112,7 @@ Off screen render targets are used in a couple of ways.  The most obvious is whe
 
 Less obvious is for things like heatmaps or weather data.  In those cases we want to render a tile source to a particular target, bound to a texture, and then reuse that texture later in the rendering process.  We do this kind of thing a lot with weather data in WhirlyGlobe-Maply.  MapLibre Native does something very similar with heatmaps.  It's a very powerful technique.
 
-The actual information around a render target is actually not that complex.  They just need to know what their format is (32 bit float?  RGBA?), how big they are and what's supposed to be drawn to them.  The rest is just an outer loop in the renderer.
+The actual information around a render target is actually not that complex.  They just need to know what their format is (32 bit float?  RGBA?), how big they are, an optional stencil component and what's supposed to be drawn to them.  The rest is just an outer loop in the renderer.
 
 For the Metal implementation we'll just need a texture to render to.  There is also an advanced case where the texture only exists on the GPU and can only be read by the GPU.  This can speed things up considerably and can be represented with a simple setting.
 
