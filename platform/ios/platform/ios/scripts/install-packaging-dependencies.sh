@@ -21,32 +21,4 @@ else
     echo "Found awscli"
 fi
 
-if [[ "${CILAUNCH}" == true ]]; then
-    sudo="sudo"
-else
-    sudo=""
-fi
-
-##
-## jazzy
-##
-if [[ -z `which jazzy` || $(jazzy -v) != "jazzy version: ${JAZZY_VERSION}" ]]; then
-    step "Installing jazzy…"
-
-    $sudo gem install jazzy -v $JAZZY_VERSION --no-document
-
-    if [ -z `which jazzy` ]; then
-        echo "Unable to install jazzy ($JAZZY_VERSION). See https://github.com/mapbox/mapbox-gl-native-ios/blob/master/platform/ios/INSTALL.md"
-        exit 1
-    fi
-else
-    echo "Found jazzy (${JAZZY_VERSION})"
-fi
-
-# fix for jazzy on M1/ARM https://github.com/realm/jazzy/issues/1259
-if [[ $(uname -p) == 'arm' ]]; then
-    step "Installing ffi, to run jazzy on M1/ARM chip…"
-    $sudo gem install --user-install ffi -- --enable-libffi-alloc
-fi
-
 step "Finished installing packaging dependencies"
