@@ -36,11 +36,13 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             .eventListener(eventListener)
             .build()
         HttpRequestUtil.setOkHttpClient(okHttpClient)
-        mapView.getMapAsync(OnMapReadyCallback { mapboxMap: MapboxMap ->
-            mapboxMap.setStyle(
-                Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            )
-        })
+        mapView.getMapAsync(
+            OnMapReadyCallback { mapboxMap: MapboxMap ->
+                mapboxMap.setStyle(
+                    Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+                )
+            }
+        )
     }
 
     override fun onStart() {
