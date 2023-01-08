@@ -20,21 +20,21 @@ import java.net.URISyntaxException
  *
  */
 class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var handler: Handler? = null
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_default)
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync(this)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
     }
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
             try {
                 style.addSource(GeoJsonSource(ID_GEOJSON_SOURCE, URI(URL_GEOJSON_SOURCE)))
             } catch (malformedUriException: URISyntaxException) {
@@ -57,22 +57,22 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     public override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     public override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
         runnable?.let {
             handler!!.removeCallbacks(it)
         }
@@ -80,12 +80,12 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private class RefreshGeoJsonRunnable internal constructor(

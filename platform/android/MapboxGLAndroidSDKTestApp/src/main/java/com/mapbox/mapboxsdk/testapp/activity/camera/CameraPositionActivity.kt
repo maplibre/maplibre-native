@@ -204,7 +204,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
 
             val cameraPosition = CameraPosition.Builder().target(LatLng(latitude, longitude)).zoom(zoom).bearing(bearing).tilt(tilt).build()
 
-            mapboxMap!!.animateCamera(
+            mapboxMap?.animateCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 5000,
                 object : CancelableCallback {

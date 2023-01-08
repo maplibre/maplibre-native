@@ -13,8 +13,8 @@ import com.mapbox.mapboxsdk.testapp.R
  * Test activity for unit test execution
  */
 class RuntimeStyleTimingTestActivity : AppCompatActivity() {
-    var mapView: MapView? = null
-    var mapboxMap: MapboxMap? = null
+    lateinit var mapView: MapView
+    lateinit var mapboxMap: MapboxMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +23,8 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
 
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             this@RuntimeStyleTimingTestActivity.mapboxMap = mapboxMap
             val parksLayer = CircleLayer("parks", "parks_source")
             parksLayer.sourceLayer = "parks"
@@ -48,36 +48,36 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

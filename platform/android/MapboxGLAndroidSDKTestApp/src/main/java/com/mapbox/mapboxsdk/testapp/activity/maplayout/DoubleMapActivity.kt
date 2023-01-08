@@ -62,8 +62,8 @@ class DoubleMapActivity : AppCompatActivity() {
 
             // MapView large
             mapView = MapView(view.context, MapFragmentUtils.resolveArgs(view.context, arguments))
-            mapView!!.onCreate(savedInstanceState)
-            mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+            mapView.onCreate(savedInstanceState)
+            mapView.getMapAsync { mapboxMap: MapboxMap ->
                 mapboxMap.setStyle(
                     Style.getPredefinedStyle(
                         "Streets"
@@ -106,43 +106,43 @@ class DoubleMapActivity : AppCompatActivity() {
 
         override fun onResume() {
             super.onResume()
-            mapView!!.onResume()
+            mapView.onResume()
             mapViewMini!!.onResume()
         }
 
         override fun onStart() {
             super.onStart()
-            mapView!!.onStart()
+            mapView.onStart()
             mapViewMini!!.onStart()
         }
 
         override fun onPause() {
             super.onPause()
-            mapView!!.onPause()
+            mapView.onPause()
             mapViewMini!!.onPause()
         }
 
         override fun onStop() {
             super.onStop()
-            mapView!!.onStop()
+            mapView.onStop()
             mapViewMini!!.onStop()
         }
 
         override fun onDestroyView() {
             super.onDestroyView()
-            mapView!!.onDestroy()
+            mapView.onDestroy()
             mapViewMini!!.onDestroy()
         }
 
         override fun onLowMemory() {
             super.onLowMemory()
-            mapView!!.onLowMemory()
+            mapView.onLowMemory()
             mapViewMini!!.onLowMemory()
         }
 
         override fun onSaveInstanceState(outState: Bundle) {
             super.onSaveInstanceState(outState)
-            mapView!!.onSaveInstanceState(outState)
+            mapView.onSaveInstanceState(outState)
             // Mini map view is not interactive in this case, so we shouldn't save the instance.
             // If we'd like to support state saving for both maps, they'd have to be kept in separate fragments.
             // mapViewMini.onSaveInstanceState(outState);

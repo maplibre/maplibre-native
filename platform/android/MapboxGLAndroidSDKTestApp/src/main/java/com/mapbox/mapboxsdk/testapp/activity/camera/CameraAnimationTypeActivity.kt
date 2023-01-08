@@ -50,7 +50,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
     private var cameraState = false
     private val cameraIdleListener = OnCameraIdleListener {
         if (mapboxMap != null) {
-            Timber.w(mapboxMap!!.cameraPosition.toString())
+            Timber.w(mapboxMap.cameraPosition.toString())
         }
     }
 
@@ -64,10 +64,10 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap!!.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
-        mapboxMap!!.uiSettings.isAttributionEnabled = false
-        mapboxMap!!.uiSettings.isLogoEnabled = false
-        mapboxMap!!.addOnCameraIdleListener(cameraIdleListener)
+        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
+        mapboxMap.uiSettings.isAttributionEnabled = false
+        mapboxMap.uiSettings.isLogoEnabled = false
+        mapboxMap.addOnCameraIdleListener(cameraIdleListener)
 
         // handle move button clicks
         val moveButton = findViewById<View>(R.id.cameraMoveButton)
@@ -79,7 +79,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .tilt(30.0)
                     .tilt(0.0)
                     .build()
-            mapboxMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         }
 
         // handle ease button clicks
@@ -92,7 +92,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .bearing(180.0)
                     .tilt(30.0)
                     .build()
-            mapboxMap!!.easeCamera(
+            mapboxMap.easeCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
                 callback
@@ -104,7 +104,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         animateButton?.setOnClickListener { view: View? ->
             val cameraPosition =
                 CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
-            mapboxMap!!.animateCamera(
+            mapboxMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
                 callback
@@ -120,40 +120,40 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnCameraIdleListener(cameraIdleListener)
+            mapboxMap.removeOnCameraIdleListener(cameraIdleListener)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {

@@ -34,7 +34,7 @@ import java.util.*
 class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private val random = Random()
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var style: Style? = null
     private val randomCars: MutableList<Car> = ArrayList()
     private var randomCarSource: GeoJsonSource? = null
@@ -293,7 +293,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
 
     private val latLngInBounds: LatLng
         get() {
-            val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
+            val bounds = mapboxMap.projection.visibleRegion.latLngBounds
             val generator = Random()
             val randomLat = bounds.latitudeSouth + generator.nextDouble() * bounds.latitudeNorth - bounds.latitudeSouth
             val randomLon = bounds.longitudeWest + generator.nextDouble() * bounds.longitudeEast - bounds.longitudeWest

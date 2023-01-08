@@ -12,7 +12,7 @@ import com.mapbox.mapboxsdk.testapp.R
  */
 class HillshadeLayerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fill_extrusion_layer)
@@ -20,10 +20,12 @@ class HillshadeLayerActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map
+                if (map != null) {
+                    mapboxMap = map
+                }
                 val rasterDemSource = RasterDemSource(SOURCE_ID, SOURCE_URL)
                 val hillshadeLayer = HillshadeLayer(LAYER_ID, SOURCE_ID)
-                mapboxMap!!.setStyle(
+                mapboxMap.setStyle(
                     Style.Builder()
                         .fromUri(Style.getPredefinedStyle("Streets"))
                         .withLayerBelow(hillshadeLayer, LAYER_BELOW_ID)
@@ -35,37 +37,37 @@ class HillshadeLayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     companion object {
