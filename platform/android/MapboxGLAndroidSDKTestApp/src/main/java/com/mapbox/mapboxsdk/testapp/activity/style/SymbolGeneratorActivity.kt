@@ -1,369 +1,346 @@
-package com.mapbox.mapboxsdk.testapp.activity.style;
+package com.mapbox.mapboxsdk.testapp.activity.style
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.concat;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.downcase;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.match;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.number;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.pi;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.product;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.rgba;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.step;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.string;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.upcase;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
-import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
-import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_TOP;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOpacity;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PointF;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.style.sources.Source;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils;
-
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.List;
-
-import timber.log.Timber;
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.os.AsyncTask
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.style.sources.Source
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils.readRawResource
+import timber.log.Timber
+import java.lang.ref.WeakReference
 
 /**
  * Test activity showcasing using a symbol generator that generates Bitmaps from Android SDK Views.
  */
-public class SymbolGeneratorActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-  private static final String SOURCE_ID = "com.mapbox.mapboxsdk.style.layers.symbol.source.id";
-  private static final String LAYER_ID = "com.mapbox.mapboxsdk.style.layers.symbol.layer.id";
-  private static final String FEATURE_ID = "brk_name";
-  private static final String FEATURE_RANK = "scalerank";
-  private static final String FEATURE_NAME = "name_sort";
-  private static final String FEATURE_TYPE = "type";
-  private static final String FEATURE_REGION = "continent";
-
-  private MapView mapView;
-  private MapboxMap mapboxMap;
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_symbol_generator);
-
-    mapView = (MapView) findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-  }
-
-  @Override
-  public void onMapReady(@NonNull final MapboxMap map) {
-    mapboxMap = map;
-    map.setStyle(Style.getPredefinedStyle("Outdoor"), style -> {
-      addSymbolClickListener();
-      new LoadDataTask(SymbolGeneratorActivity.this).execute();
-    });
-  }
-
-  private void addSymbolClickListener() {
-    mapboxMap.addOnMapClickListener(point -> {
-      PointF screenPoint = mapboxMap.getProjection().toScreenLocation(point);
-      List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID);
-      if (!features.isEmpty()) {
-        Feature feature = features.get(0);
-        // validate symbol flicker regression for #13407
-        SymbolLayer layer = mapboxMap.getStyle().getLayerAs(LAYER_ID);
-        layer.setProperties(iconOpacity(match(
-          get(FEATURE_ID), literal(1.0f),
-          stop(feature.getStringProperty(FEATURE_ID), 0.3f)
-        )));
-        Timber.v("Feature was clicked with data: %s", feature.toJson());
-        Toast.makeText(
-          SymbolGeneratorActivity.this,
-          "hello from: " + feature.getStringProperty(FEATURE_NAME),
-          Toast.LENGTH_LONG).show();
-      }
-
-      return false;
-    });
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_generator_symbol, menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.menu_action_icon_overlap) {
-      SymbolLayer layer = mapboxMap.getStyle().getLayerAs(LAYER_ID);
-      layer.setProperties(iconAllowOverlap(!layer.getIconAllowOverlap().getValue()));
-      return true;
-    } else if (item.getItemId() == R.id.menu_action_filter) {
-      SymbolLayer layer = mapboxMap.getStyle().getLayerAs(LAYER_ID);
-      layer.setFilter(eq(get(FEATURE_RANK), literal(1)));
-      Timber.e("Filter that was set: %s", layer.getFilter());
-      return true;
+class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_symbol_generator)
+        mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
     }
-    return super.onOptionsItemSelected(item);
-  }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onMapReady(map: MapboxMap) {
+        mapboxMap = map
+        map.setStyle(Style.getPredefinedStyle("Outdoor")) { style: Style? ->
+            addSymbolClickListener()
+            LoadDataTask(this@SymbolGeneratorActivity).execute()
+        }
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    private fun addSymbolClickListener() {
+        mapboxMap.addOnMapClickListener { point: LatLng? ->
+            val screenPoint = mapboxMap.projection.toScreenLocation(
+                point!!
+            )
+            val features = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID)
+            if (!features.isEmpty()) {
+                val feature = features[0]
+                // validate symbol flicker regression for #13407
+                val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+                layer!!.setProperties(
+                    PropertyFactory.iconOpacity(
+                        Expression.match(
+                            Expression.get(FEATURE_ID),
+                            Expression.literal(1.0f),
+                            Expression.stop(feature.getStringProperty(FEATURE_ID), 0.3f)
+                        )
+                    )
+                )
+                Timber.v("Feature was clicked with data: %s", feature.toJson())
+                Toast.makeText(
+                    this@SymbolGeneratorActivity,
+                    "hello from: " + feature.getStringProperty(FEATURE_NAME),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            false
+        }
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_generator_symbol, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_action_icon_overlap) {
+            val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+            layer!!.setProperties(PropertyFactory.iconAllowOverlap(!layer.iconAllowOverlap.getValue()!!))
+            return true
+        } else if (item.itemId == R.id.menu_action_filter) {
+            val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+            layer!!.setFilter(Expression.eq(Expression.get(FEATURE_RANK), Expression.literal(1)))
+            Timber.e("Filter that was set: %s", layer.filter)
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
-  @Override
-  public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
 
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
 
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
 
-  /**
-   * Utility class to generate Bitmaps for Symbol.
-   * <p>
-   * Bitmaps can be added to the map with {@link com.mapbox.mapboxsdk.maps.MapboxMap#addImage(String, Bitmap)}
-   * </p>
-   */
-  private static class SymbolGenerator {
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    public override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    public override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
 
     /**
-     * Generate a Bitmap from an Android SDK View.
+     * Utility class to generate Bitmaps for Symbol.
      *
-     * @param view the View to be drawn to a Bitmap
-     * @return the generated bitmap
+     *
+     * Bitmaps can be added to the map with [com.mapbox.mapboxsdk.maps.MapboxMap.addImage]
+     *
      */
-    public static Bitmap generate(@NonNull View view) {
-      int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-      view.measure(measureSpec, measureSpec);
-
-      int measuredWidth = view.getMeasuredWidth();
-      int measuredHeight = view.getMeasuredHeight();
-
-      view.layout(0, 0, measuredWidth, measuredHeight);
-      Bitmap bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
-      bitmap.eraseColor(Color.TRANSPARENT);
-      Canvas canvas = new Canvas(bitmap);
-      view.draw(canvas);
-      return bitmap;
-    }
-  }
-
-  private static class LoadDataTask extends AsyncTask<Void, Void, FeatureCollection> {
-
-    private WeakReference<SymbolGeneratorActivity> activity;
-
-    LoadDataTask(SymbolGeneratorActivity activity) {
-      this.activity = new WeakReference<>(activity);
-    }
-
-    @Override
-    protected FeatureCollection doInBackground(Void... params) {
-      Context context = activity.get();
-      if (context != null) {
-        // read local geojson from raw folder
-        String tinyCountriesJson = ResourceUtils.readRawResource(context, R.raw.tiny_countries);
-        return FeatureCollection.fromJson(tinyCountriesJson);
-
-      }
-      return null;
-    }
-
-    @Override
-    protected void onPostExecute(FeatureCollection featureCollection) {
-      super.onPostExecute(featureCollection);
-      SymbolGeneratorActivity activity = this.activity.get();
-      if (featureCollection == null || activity == null) {
-        return;
-      }
-
-      activity.onDataLoaded(featureCollection);
-    }
-  }
-
-  public void onDataLoaded(@NonNull FeatureCollection featureCollection) {
-    if (mapView.isDestroyed()) {
-      return;
-    }
-
-    // create expressions
-    Expression iconImageExpression = string(get(literal(FEATURE_ID)));
-    Expression iconSizeExpression = division(number(get(literal(FEATURE_RANK))), literal(2.0f));
-    Expression textSizeExpression = product(get(literal(FEATURE_RANK)), pi());
-    Expression textFieldExpression = concat(upcase(literal("a ")), upcase(string(get(literal(FEATURE_TYPE)))),
-      downcase(literal(" IN ")), string(get(literal(FEATURE_REGION)))
-    );
-    Expression textColorExpression = match(get(literal(FEATURE_RANK)),
-      literal(1), rgba(255, 0, 0, 1.0f),
-      literal(2), rgba(0, 0, 255.0f, 1.0f),
-      rgba(0.0f, 255.0f, 0.0f, 1.0f)
-    );
-
-    rgba(
-      division(literal(255), get(FEATURE_RANK)),
-      literal(0.0f),
-      literal(0.0f),
-      literal(1.0f)
-    );
-
-    // create symbol layer
-    SymbolLayer symbolLayer = new SymbolLayer(LAYER_ID, SOURCE_ID)
-      .withProperties(
-        // icon configuration
-        iconImage(iconImageExpression),
-        iconAllowOverlap(false),
-        iconSize(iconSizeExpression),
-        iconAnchor(ICON_ANCHOR_BOTTOM),
-        iconOffset(step(zoom(), literal(new float[] {0f, 0f}),
-          stop(1, new Float[] {0f, 0f}),
-          stop(10, new Float[] {0f, -35f})
-        )),
-
-        // text field configuration
-        textField(textFieldExpression),
-        textSize(textSizeExpression),
-        textAnchor(TEXT_ANCHOR_TOP),
-        textColor(textColorExpression)
-      );
-
-    // add a geojson source to the map
-    Source source = new GeoJsonSource(SOURCE_ID, featureCollection);
-    mapboxMap.getStyle().addSource(source);
-
-    // add symbol layer
-    mapboxMap.getStyle().addLayer(symbolLayer);
-
-    // get expressions
-    Expression iconImageExpressionResult = symbolLayer.getIconImage().getExpression();
-    Expression iconSizeExpressionResult = symbolLayer.getIconSize().getExpression();
-    Expression textSizeExpressionResult = symbolLayer.getTextSize().getExpression();
-    Expression textFieldExpressionResult = symbolLayer.getTextField().getExpression();
-    Expression textColorExpressionResult = symbolLayer.getTextColor().getExpression();
-
-    // log expressions
-    Timber.e(iconImageExpressionResult.toString());
-    Timber.e(iconSizeExpressionResult.toString());
-    Timber.e(textSizeExpressionResult.toString());
-    Timber.e(textFieldExpressionResult.toString());
-    Timber.e(textColorExpressionResult.toString());
-
-    // reset expressions
-    symbolLayer.setProperties(
-      iconImage(iconImageExpressionResult),
-      iconSize(iconSizeExpressionResult),
-      textSize(textSizeExpressionResult),
-      textField(textFieldExpressionResult),
-      textColor(textColorExpressionResult)
-    );
-
-    new GenerateSymbolTask(mapboxMap, this).execute(featureCollection);
-  }
-
-  private static class GenerateSymbolTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>> {
-
-    private MapboxMap mapboxMap;
-    private WeakReference<Context> context;
-
-    GenerateSymbolTask(MapboxMap mapboxMap, Context context) {
-      this.mapboxMap = mapboxMap;
-      this.context = new WeakReference<>(context);
-    }
-
-    @SuppressWarnings("WrongThread")
-    @Override
-    protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params) {
-      HashMap<String, Bitmap> imagesMap = new HashMap<>();
-      Context context = this.context.get();
-      List<Feature> features = params[0].features();
-      if (context != null && features != null) {
-        for (Feature feature : features) {
-          String countryName = feature.getStringProperty(FEATURE_ID);
-          TextView textView = new TextView(context);
-          textView.setBackgroundColor(context.getResources().getColor(R.color.blueAccent));
-          textView.setPadding(10, 5, 10, 5);
-          textView.setTextColor(Color.WHITE);
-          textView.setText(countryName);
-          imagesMap.put(countryName, SymbolGenerator.generate(textView));
+    private object SymbolGenerator {
+        /**
+         * Generate a Bitmap from an Android SDK View.
+         *
+         * @param view the View to be drawn to a Bitmap
+         * @return the generated bitmap
+         */
+        fun generate(view: View): Bitmap {
+            val measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            view.measure(measureSpec, measureSpec)
+            val measuredWidth = view.measuredWidth
+            val measuredHeight = view.measuredHeight
+            view.layout(0, 0, measuredWidth, measuredHeight)
+            val bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
+            bitmap.eraseColor(Color.TRANSPARENT)
+            val canvas = Canvas(bitmap)
+            view.draw(canvas)
+            return bitmap
         }
-      }
-      return imagesMap;
     }
 
-    @Override
-    protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap) {
-      super.onPostExecute(bitmapHashMap);
-      mapboxMap.getStyle(new Style.OnStyleLoaded() {
-        @Override
-        public void onStyleLoaded(@NonNull Style style) {
-          style.addImagesAsync(bitmapHashMap);
+    private class LoadDataTask internal constructor(activity: SymbolGeneratorActivity) :
+        AsyncTask<Void?, Void?, FeatureCollection?>() {
+        private val activity: WeakReference<SymbolGeneratorActivity>
+
+        init {
+            this.activity = WeakReference(activity)
         }
-      });
+
+        override fun doInBackground(vararg p0: Void?): FeatureCollection? {
+            val context: Context? = activity.get()
+            if (context != null) {
+                // read local geojson from raw folder
+                val tinyCountriesJson = readRawResource(context, R.raw.tiny_countries)
+                return FeatureCollection.fromJson(tinyCountriesJson)
+            }
+            return null
+        }
+
+        override fun onPostExecute(featureCollection: FeatureCollection?) {
+            super.onPostExecute(featureCollection)
+            val activity = activity.get()
+            if (featureCollection == null || activity == null) {
+                return
+            }
+            activity.onDataLoaded(featureCollection)
+        }
     }
-  }
+
+    fun onDataLoaded(featureCollection: FeatureCollection) {
+        if (mapView.isDestroyed) {
+            return
+        }
+
+        // create expressions
+        val iconImageExpression = Expression.string(Expression.get(Expression.literal(FEATURE_ID)))
+        val iconSizeExpression = Expression.division(
+            Expression.number(
+                Expression.get(
+                    Expression.literal(
+                        FEATURE_RANK
+                    )
+                )
+            ),
+            Expression.literal(2.0f)
+        )
+        val textSizeExpression = Expression.product(
+            Expression.get(
+                Expression.literal(
+                    FEATURE_RANK
+                )
+            ),
+            Expression.pi()
+        )
+        val textFieldExpression = Expression.concat(
+            Expression.upcase(Expression.literal("a ")),
+            Expression.upcase(
+                Expression.string(
+                    Expression.get(Expression.literal(FEATURE_TYPE))
+                )
+            ),
+            Expression.downcase(Expression.literal(" IN ")),
+            Expression.string(
+                Expression.get(
+                    Expression.literal(
+                        FEATURE_REGION
+                    )
+                )
+            )
+        )
+        val textColorExpression = Expression.match(
+            Expression.get(Expression.literal(FEATURE_RANK)),
+            Expression.literal(1),
+            Expression.rgba(255, 0, 0, 1.0f),
+            Expression.literal(2),
+            Expression.rgba(0, 0, 255.0f, 1.0f),
+            Expression.rgba(0.0f, 255.0f, 0.0f, 1.0f)
+        )
+        Expression.rgba(
+            Expression.division(Expression.literal(255), Expression.get(FEATURE_RANK)),
+            Expression.literal(0.0f),
+            Expression.literal(0.0f),
+            Expression.literal(1.0f)
+        )
+
+        // create symbol layer
+        val symbolLayer = SymbolLayer(LAYER_ID, SOURCE_ID)
+            .withProperties( // icon configuration
+                PropertyFactory.iconImage(iconImageExpression),
+                PropertyFactory.iconAllowOverlap(false),
+                PropertyFactory.iconSize(iconSizeExpression),
+                PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
+                PropertyFactory.iconOffset(
+                    Expression.step(
+                        Expression.zoom(),
+                        Expression.literal(floatArrayOf(0f, 0f)),
+                        Expression.stop(1, arrayOf(0f, 0f)),
+                        Expression.stop(10, arrayOf(0f, -35f))
+                    )
+                ), // text field configuration
+                PropertyFactory.textField(textFieldExpression),
+                PropertyFactory.textSize(textSizeExpression),
+                PropertyFactory.textAnchor(Property.TEXT_ANCHOR_TOP),
+                PropertyFactory.textColor(textColorExpression)
+            )
+
+        // add a geojson source to the map
+        val source: Source = GeoJsonSource(SOURCE_ID, featureCollection)
+        mapboxMap.style!!.addSource(source)
+
+        // add symbol layer
+        mapboxMap.style!!.addLayer(symbolLayer)
+
+        // get expressions
+        val iconImageExpressionResult = symbolLayer.iconImage.expression
+        val iconSizeExpressionResult = symbolLayer.iconSize.expression
+        val textSizeExpressionResult = symbolLayer.textSize.expression
+        val textFieldExpressionResult = symbolLayer.textField.expression
+        val textColorExpressionResult = symbolLayer.textColor.expression
+
+        // log expressions
+        Timber.e(iconImageExpressionResult.toString())
+        Timber.e(iconSizeExpressionResult.toString())
+        Timber.e(textSizeExpressionResult.toString())
+        Timber.e(textFieldExpressionResult.toString())
+        Timber.e(textColorExpressionResult.toString())
+
+        // reset expressions
+        symbolLayer.setProperties(
+            PropertyFactory.iconImage(iconImageExpressionResult),
+            PropertyFactory.iconSize(iconSizeExpressionResult),
+            PropertyFactory.textSize(textSizeExpressionResult),
+            PropertyFactory.textField(textFieldExpressionResult),
+            PropertyFactory.textColor(textColorExpressionResult)
+        )
+        GenerateSymbolTask(mapboxMap, this).execute(featureCollection)
+    }
+
+    private class GenerateSymbolTask internal constructor(
+        private val mapboxMap: MapboxMap?,
+        context: Context
+    ) : AsyncTask<FeatureCollection?, Void?, HashMap<String, Bitmap>>() {
+        private val context: WeakReference<Context>
+
+        init {
+            this.context = WeakReference(context)
+        }
+
+        override fun doInBackground(vararg p0: FeatureCollection?): HashMap<String, Bitmap>? {
+            val imagesMap = HashMap<String, Bitmap>()
+            val context = context.get()
+            val features = p0[0]?.features()
+            if (context != null && features != null) {
+                for (feature in features) {
+                    val countryName = feature.getStringProperty(FEATURE_ID)
+                    val textView = TextView(context)
+                    textView.setBackgroundColor(context.resources.getColor(R.color.blueAccent))
+                    textView.setPadding(10, 5, 10, 5)
+                    textView.setTextColor(Color.WHITE)
+                    textView.text = countryName
+                    imagesMap[countryName] = SymbolGenerator.generate(textView)
+                }
+            }
+            return imagesMap
+        }
+
+        override fun onPostExecute(bitmapHashMap: HashMap<String, Bitmap>) {
+            super.onPostExecute(bitmapHashMap)
+            mapboxMap?.getStyle { style -> style.addImagesAsync(bitmapHashMap) }
+        }
+    }
+
+    companion object {
+        private const val SOURCE_ID = "com.mapbox.mapboxsdk.style.layers.symbol.source.id"
+        private const val LAYER_ID = "com.mapbox.mapboxsdk.style.layers.symbol.layer.id"
+        private const val FEATURE_ID = "brk_name"
+        private const val FEATURE_RANK = "scalerank"
+        private const val FEATURE_NAME = "name_sort"
+        private const val FEATURE_TYPE = "type"
+        private const val FEATURE_REGION = "continent"
+    }
 }

@@ -1,131 +1,123 @@
-package com.mapbox.mapboxsdk.testapp.activity.style;
+package com.mapbox.mapboxsdk.testapp.activity.style
 
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.testapp.R;
-import com.mapbox.mapboxsdk.utils.BitmapUtils;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption.formatFontScale;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption.formatTextColor;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption.formatTextFont;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.formatEntry;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.image;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import android.graphics.Color
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.utils.BitmapUtils
 
 /**
  * Test image in label.
  */
-public class ImageInLabelActivity extends AppCompatActivity implements OnMapReadyCallback {
-  private static final String ORIGINAL_SOURCE = "ORIGINAL_SOURCE";
-  private static final String ORIGINAL_LAYER = "ORIGINAL_LAYER";
-  private MapView mapView;
+class ImageInLabelActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var mapView: MapView
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_stretchable_image)
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+    }
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_stretchable_image);
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-  }
-
-  @Override
-  public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"), style -> {
-      Bitmap us = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.ic_us));
-      Bitmap android = BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.ic_android));
-
-      style.addImage("us", us);
-      style.addImage("android", android);
-
-      Point point = Point.fromLngLat(-10, 0);
-      Feature feature = Feature.fromGeometry(point);
-      FeatureCollection originalCollection = FeatureCollection.fromFeature(feature);
-      GeoJsonSource originalSource = new GeoJsonSource(ORIGINAL_SOURCE, originalCollection);
-      SymbolLayer originalLayer = new SymbolLayer(ORIGINAL_LAYER, ORIGINAL_SOURCE)
-        .withProperties(
-          textAllowOverlap(true),
-          textField(Expression
-            .format(
-              formatEntry(literal("Android: "),
-                formatFontScale(1.0),
-                formatTextColor(Color.BLUE),
-                formatTextFont(new String[] {"Ubuntu Medium", "Arial Unicode MS Regular"})),
-              formatEntry(image(literal("android"))),
-              formatEntry(literal("Us: "),
-                formatFontScale(1.5),
-                formatTextColor(Color.YELLOW)),
-              formatEntry(image(literal("us"))),
-              formatEntry(literal("suffix"),
-                formatFontScale(2.0),
-                formatTextColor(Color.CYAN))
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+            val us = BitmapUtils.getBitmapFromDrawable(
+                resources.getDrawable(R.drawable.ic_us)
             )
-          )
+            val android =
+                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_android))
+            style.addImage("us", us!!)
+            style.addImage("android", android!!)
+            val point = Point.fromLngLat(-10.0, 0.0)
+            val feature = Feature.fromGeometry(point)
+            val originalCollection = FeatureCollection.fromFeature(feature)
+            val originalSource = GeoJsonSource(ORIGINAL_SOURCE, originalCollection)
+            val originalLayer = SymbolLayer(ORIGINAL_LAYER, ORIGINAL_SOURCE)
+                .withProperties(
+                    PropertyFactory.textAllowOverlap(true),
+                    PropertyFactory.textField(
+                        Expression
+                            .format(
+                                Expression.formatEntry(
+                                    Expression.literal("Android: "),
+                                    FormatOption.formatFontScale(1.0),
+                                    FormatOption.formatTextColor(Color.BLUE),
+                                    FormatOption.formatTextFont(
+                                        arrayOf(
+                                            "Ubuntu Medium",
+                                            "Arial Unicode MS Regular"
+                                        )
+                                    )
+                                ),
+                                Expression.formatEntry(Expression.image(Expression.literal("android"))),
+                                Expression.formatEntry(
+                                    Expression.literal("Us: "),
+                                    FormatOption.formatFontScale(1.5),
+                                    FormatOption.formatTextColor(Color.YELLOW)
+                                ),
+                                Expression.formatEntry(Expression.image(Expression.literal("us"))),
+                                Expression.formatEntry(
+                                    Expression.literal("suffix"),
+                                    FormatOption.formatFontScale(2.0),
+                                    FormatOption.formatTextColor(Color.CYAN)
+                                )
+                            )
+                    )
+                )
+            style.addSource(originalSource)
+            style.addLayer(originalLayer)
+        }
+    }
 
-        );
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
 
-      style.addSource(originalSource);
-      style.addLayer(originalLayer);
-    });
-  }
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
+    public override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
 
-  @Override
-  public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
+    public override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
 
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
+    companion object {
+        private const val ORIGINAL_SOURCE = "ORIGINAL_SOURCE"
+        private const val ORIGINAL_LAYER = "ORIGINAL_LAYER"
+    }
 }

@@ -1,81 +1,65 @@
-package com.mapbox.mapboxsdk.testapp.activity.espresso;
+package com.mapbox.mapboxsdk.testapp.activity.espresso
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.testapp.R
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+class DeviceIndependentTestActivity : AppCompatActivity(), OnMapReadyCallback {
+    lateinit var mapView: MapView
+    lateinit var mapboxMap: MapboxMap
+        protected set
 
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.testapp.R;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_camera_test)
 
-public class DeviceIndependentTestActivity extends AppCompatActivity implements OnMapReadyCallback {
+        // Initialize map as normal
+        mapView = findViewById(R.id.mapView)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+    }
 
-  public MapView mapView;
-  protected MapboxMap mapboxMap;
+    override fun onMapReady(map: MapboxMap) {
+        mapboxMap = map
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+    }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_camera_test);
+    public override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
 
-    // Initialize map as normal
-    mapView = findViewById(R.id.mapView);
-    mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-  }
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
 
-  @Override
-  public void onMapReady(@NonNull MapboxMap map) {
-    mapboxMap = map;
-    mapboxMap.setStyle(Style.getPredefinedStyle("Streets"));
-  }
+    public override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
 
-  public MapboxMap getMapboxMap() {
-    return mapboxMap;
-  }
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
 
-  @Override
-  public void onResume() {
-    super.onResume();
-    mapView.onResume();
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-    mapView.onStart();
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
 
-  @Override
-  public void onPause() {
-    super.onPause();
-    mapView.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    mapView.onStop();
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mapView.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
-  }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
 }
