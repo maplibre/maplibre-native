@@ -1,39 +1,31 @@
 package com.mapbox.mapboxsdk.testapp.activity.telemetry
 
-import okhttp3.OkHttpClient.Builder.eventListener
-import okhttp3.OkHttpClient.Builder.build
-import okhttp3.Call.request
-import okhttp3.Request.url
-import okhttp3.HttpUrl.toString
-import okhttp3.EventListener.callStart
-import okhttp3.EventListener.callEnd
-import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.mapboxsdk.maps.MapView
-import android.os.Bundle
-import com.mapbox.mapboxsdk.testapp.R
-import okhttp3.OkHttpClient
-import com.mapbox.mapboxsdk.module.http.HttpRequestUtil
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import timber.log.Timber
-import com.mapbox.mapboxsdk.testapp.activity.telemetry.PerformanceMeasurementActivity
-import com.google.gson.Gson
 import android.app.ActivityManager
 import android.os.Build
-import com.mapbox.mapboxsdk.Mapbox
-import android.view.WindowManager
+import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.module.http.HttpRequestUtil
+import com.mapbox.mapboxsdk.testapp.R
 import okhttp3.Call
-import okhttp3.EventListener
+import okhttp3.OkHttpClient
+import okhttp3.OkHttpClient.Builder
+import timber.log.Timber
 import java.util.*
 
 /**
  * Test activity showcasing gathering performance measurement data.
  */
 class PerformanceMeasurementActivity : AppCompatActivity() {
-    private var mapView: MapView? = null
+    private lateinit var mapView: MapView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_simple)
@@ -103,7 +95,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             if (start != null) {
                 val elapsed = System.nanoTime() - start
                 triggerPerformanceEvent(url.substring(0, url.indexOf('?')), elapsed)
-                startTimes.remove(start)
+                startTimes.remove(url)
                 Timber.e("callEnd: %s took %d", url, elapsed)
             }
             super.callEnd(call)
