@@ -209,21 +209,23 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
         val metadata = OfflineUtils.convertRegionName(regionName)
 
         // Create region
-        offlineManager!!.createOfflineRegion(
-            definition,
-            metadata,
-            object : CreateOfflineRegionCallback {
-                override fun onCreate(offlineRegion: OfflineRegion) {
-                    Timber.d("Offline region created: %s", regionName)
-                    this@OfflineActivity.offlineRegion = offlineRegion
-                    launchDownload()
-                }
+        if (metadata != null) {
+            offlineManager!!.createOfflineRegion(
+                definition,
+                metadata,
+                object : CreateOfflineRegionCallback {
+                    override fun onCreate(offlineRegion: OfflineRegion) {
+                        Timber.d("Offline region created: %s", regionName)
+                        this@OfflineActivity.offlineRegion = offlineRegion
+                        launchDownload()
+                    }
 
-                override fun onError(error: String) {
-                    Timber.e("Error: %s", error)
+                    override fun onError(error: String) {
+                        Timber.e("Error: %s", error)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun launchDownload() {
@@ -308,7 +310,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
     companion object {
         // JSON encoding/decoding
-        const val JSON_CHARSET = "UTF-8"
+        val JSON_CHARSET = Charsets.UTF_8
         const val JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME"
 
         // Style URL
