@@ -22,8 +22,8 @@ import java.util.*
  * Test activity showcasing the different debug modes and allows to cycle between the default map styles.
  */
 open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsChangedListener {
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var cameraMoveListener: OnCameraMoveListener? = null
     private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
     private var currentStyleIndex = 0
@@ -59,15 +59,15 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         val mapboxMapOptions = setupMapboxMapOptions()
         mapView = MapView(this, mapboxMapOptions)
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView, 0)
-        mapView!!.addOnDidFinishLoadingStyleListener {
+        mapView.addOnDidFinishLoadingStyleListener {
             if (mapboxMap != null) {
-                setupNavigationView(mapboxMap!!.style!!.layers)
+                setupNavigationView(mapboxMap.style!!.layers)
             }
         }
-        mapView!!.tag = true
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync(this)
-        mapView!!.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
+        mapView.tag = true
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+        mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
     protected open fun setupMapboxMapOptions(): MapboxMapOptions {
@@ -76,7 +76,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap!!.setStyle(
+        mapboxMap.setStyle(
             Style.Builder().fromUri(STYLES[currentStyleIndex])
         ) { style: Style -> setupNavigationView(style.layers) }
         setupZoomView()
@@ -85,7 +85,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     private fun setFpsView() {
         fpsView = findViewById(R.id.fpsView)
-        mapboxMap!!.setOnFpsChangedListener(this)
+        mapboxMap.setOnFpsChangedListener(this)
     }
 
     override fun onFpsChanged(fps: Double) {
@@ -93,7 +93,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     }
 
     private fun setupNavigationView(layerList: List<Layer>) {
-        Timber.v("New style loaded with JSON: %s", mapboxMap!!.style!!.json)
+        Timber.v("New style loaded with JSON: %s", mapboxMap.style!!.json)
         val adapter = LayerListAdapter(this, layerList)
         val listView = findViewById<ListView>(R.id.listView)
         listView.adapter = adapter
@@ -121,13 +121,13 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     private fun setupZoomView() {
         val textView = findViewById<TextView>(R.id.textZoom)
-        mapboxMap!!.addOnCameraMoveListener(
+        mapboxMap.addOnCameraMoveListener(
             OnCameraMoveListener {
                 textView.text = String.format(
                     this@DebugModeActivity.getString(
                         R.string.debug_zoom
                     ),
-                    mapboxMap!!.cameraPosition.zoom
+                    mapboxMap.cameraPosition.zoom
                 )
             }.also { cameraMoveListener = it }
         )
@@ -137,8 +137,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabDebug)
         fabDebug.setOnClickListener { view: View? ->
             if (mapboxMap != null) {
-                mapboxMap!!.isDebugActive = !mapboxMap!!.isDebugActive
-                Timber.d("Debug FAB: isDebug Active? %s", mapboxMap!!.isDebugActive)
+                mapboxMap.isDebugActive = !mapboxMap.isDebugActive
+                Timber.d("Debug FAB: isDebug Active? %s", mapboxMap.isDebugActive)
             }
         }
     }
@@ -151,7 +151,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
                 if (currentStyleIndex == STYLES.size) {
                     currentStyleIndex = 0
                 }
-                mapboxMap!!.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]))
+                mapboxMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]))
             }
         }
     }
@@ -161,11 +161,11 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         if (itemId == R.id.menu_action_toggle_report_fps) {
             isReportFps = !isReportFps
             fpsView!!.visibility = if (isReportFps) View.VISIBLE else View.GONE
-            mapboxMap!!.setOnFpsChangedListener(if (isReportFps) this else null)
+            mapboxMap.setOnFpsChangedListener(if (isReportFps) this else null)
         } else if (itemId == R.id.menu_action_limit_to_30_fps) {
-            mapView!!.setMaximumFps(30)
+            mapView.setMaximumFps(30)
         } else if (itemId == R.id.menu_action_limit_to_60_fps) {
-            mapView!!.setMaximumFps(60)
+            mapView.setMaximumFps(60)
         }
         return actionBarDrawerToggle!!.onOptionsItemSelected(item) || super.onOptionsItemSelected(
             item
@@ -179,40 +179,40 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnCameraMoveListener(cameraMoveListener!!)
+            mapboxMap.removeOnCameraMoveListener(cameraMoveListener!!)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     private class LayerListAdapter(context: Context?, layers: List<Layer>) :

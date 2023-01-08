@@ -15,7 +15,7 @@ import com.mapbox.mapboxsdk.testapp.activity.maplayout.VisibilityChangeActivity.
  */
 class VisibilityChangeActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private val handler = Handler()
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,9 +25,11 @@ class VisibilityChangeActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map
-                mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets"))
-                mapboxMap!!.animateCamera(
+                if (map != null) {
+                    mapboxMap = map
+                }
+                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+                mapboxMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(55.754020, 37.620948),
                         12.0
@@ -65,9 +67,9 @@ class VisibilityChangeActivity : AppCompatActivity() {
             if (isViewHiearchyReady) {
                 if (isEvenStep) {
                     viewParent!!.visibility = View.VISIBLE
-                    mapView!!.visibility = View.VISIBLE
+                    mapView?.visibility = View.VISIBLE
                 } else if (isFirstOrThirdStep) {
-                    mapView!!.visibility = visibilityForStep
+                    mapView?.visibility = visibilityForStep
                 } else if (isFifthOrSeventhStep) {
                     viewParent!!.visibility = visibilityForStep
                 }

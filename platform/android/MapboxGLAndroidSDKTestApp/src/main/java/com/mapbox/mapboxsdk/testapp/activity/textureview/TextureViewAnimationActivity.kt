@@ -17,8 +17,8 @@ import java.util.*
  * Test animating a [android.view.TextureView] backed map.
  */
 class TextureViewAnimationActivity : AppCompatActivity() {
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +39,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
 
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             this@TextureViewAnimationActivity.mapboxMap = mapboxMap
             mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
             setFpsView(mapboxMap)
@@ -86,22 +86,22 @@ class TextureViewAnimationActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
         if (handler != null && delayed != null) {
             handler!!.removeCallbacks(delayed!!)
         }
@@ -109,17 +109,17 @@ class TextureViewAnimationActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {

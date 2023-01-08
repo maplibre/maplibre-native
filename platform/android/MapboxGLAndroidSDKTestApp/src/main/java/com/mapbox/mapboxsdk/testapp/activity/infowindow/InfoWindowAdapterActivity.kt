@@ -40,10 +40,10 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
     }
 
     private fun addMarkers() {
-        mapboxMap!!.addMarker(generateCityStateMarker("Andorra", 42.505777, 1.52529, "#F44336"))
-        mapboxMap!!.addMarker(generateCityStateMarker("Luxembourg", 49.815273, 6.129583, "#3F51B5"))
-        mapboxMap!!.addMarker(generateCityStateMarker("Monaco", 43.738418, 7.424616, "#673AB7"))
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(generateCityStateMarker("Andorra", 42.505777, 1.52529, "#F44336"))
+        mapboxMap.addMarker(generateCityStateMarker("Luxembourg", 49.815273, 6.129583, "#3F51B5"))
+        mapboxMap.addMarker(generateCityStateMarker("Monaco", 43.738418, 7.424616, "#673AB7"))
+        mapboxMap.addMarker(
             generateCityStateMarker(
                 "Vatican City",
                 41.902916,
@@ -51,7 +51,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                 "#009688"
             )
         )
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(
             generateCityStateMarker(
                 "San Marino",
                 43.942360,
@@ -59,7 +59,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                 "#795548"
             )
         )
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(
             generateCityStateMarker(
                 "Liechtenstein",
                 47.166000,
@@ -86,7 +86,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
     }
 
     private fun addCustomInfoWindowAdapter() {
-        mapboxMap!!.infoWindowAdapter = object : InfoWindowAdapter {
+        mapboxMap.infoWindowAdapter = object : InfoWindowAdapter {
             private val tenDp = resources.getDimension(R.dimen.attr_margin).toInt()
             override fun getInfoWindow(marker: Marker): View? {
                 val textView = TextView(this@InfoWindowAdapterActivity)
@@ -103,36 +103,36 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

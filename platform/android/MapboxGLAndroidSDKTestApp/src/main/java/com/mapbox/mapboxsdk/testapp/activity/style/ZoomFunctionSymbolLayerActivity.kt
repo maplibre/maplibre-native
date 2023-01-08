@@ -26,20 +26,20 @@ import timber.log.Timber
  */
 class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var source: GeoJsonSource? = null
     private var layer: SymbolLayer? = null
     private var isInitialPosition = true
     private var isSelected = false
     private var isShowingSymbolLayer = true
     private val mapClickListener = OnMapClickListener { point ->
-        val screenPoint = mapboxMap!!.projection.toScreenLocation(point)
-        val featureList = mapboxMap!!.queryRenderedFeatures(screenPoint, LAYER_ID)
+        val screenPoint = mapboxMap.projection.toScreenLocation(point)
+        val featureList = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID)
         if (!featureList.isEmpty()) {
             val feature = featureList[0]
             val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
             isSelected = !selectedNow
-            updateSource(mapboxMap!!.style)
+            updateSource(mapboxMap.style)
         } else {
             Timber.e("No features found")
         }
@@ -123,7 +123,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         if (mapboxMap != null) {
             if (item.itemId == R.id.menu_action_change_location) {
                 isInitialPosition = !isInitialPosition
-                updateSource(mapboxMap!!.style)
+                updateSource(mapboxMap.style)
             } else if (item.itemId == R.id.menu_action_toggle_source) {
                 toggleSymbolLayerVisibility()
             }
@@ -133,37 +133,37 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     companion object {

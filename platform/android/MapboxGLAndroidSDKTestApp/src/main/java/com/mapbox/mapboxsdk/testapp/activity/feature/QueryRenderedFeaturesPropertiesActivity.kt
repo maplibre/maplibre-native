@@ -23,13 +23,13 @@ import timber.log.Timber
  * Test activity showcasing using the query rendered features API to query feature properties on Map click.
  */
 class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
-    var mapView: MapView? = null
-    var mapboxMap: MapboxMap? = null
+    lateinit var mapView: MapView
+    lateinit var mapboxMap: MapboxMap
         private set
     private var marker: Marker? = null
     private val mapClickListener = OnMapClickListener { point ->
         val density = resources.displayMetrics.density
-        val pixel = mapboxMap!!.projection.toScreenLocation(point)
+        val pixel = mapboxMap.projection.toScreenLocation(point)
         Timber.i(
             "Requesting features for %sx%s (%sx%s adjusted for density)",
             pixel.x,
@@ -37,19 +37,19 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
             pixel.x / density,
             pixel.y / density
         )
-        val features = mapboxMap!!.queryRenderedFeatures(pixel)
+        val features = mapboxMap.queryRenderedFeatures(pixel)
 
         // Debug output
         debugOutput(features)
 
         // Remove any previous markers
         if (marker != null) {
-            mapboxMap!!.removeMarker(marker!!)
+            mapboxMap.removeMarker(marker!!)
         }
 
         // Add a marker on the clicked point
-        marker = mapboxMap!!.addMarker(CustomMarkerOptions().position(point)!!.features(features))
-        mapboxMap!!.selectMarker(marker!!)
+        marker = mapboxMap.addMarker(CustomMarkerOptions().position(point)!!.features(features))
+        mapboxMap.selectMarker(marker!!)
         true
     }
 
@@ -59,8 +59,8 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                 this@QueryRenderedFeaturesPropertiesActivity.mapboxMap = mapboxMap
 
@@ -135,40 +135,40 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapClickListener(mapClickListener)
+            mapboxMap.removeOnMapClickListener(mapClickListener)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     private class CustomMarker internal constructor(

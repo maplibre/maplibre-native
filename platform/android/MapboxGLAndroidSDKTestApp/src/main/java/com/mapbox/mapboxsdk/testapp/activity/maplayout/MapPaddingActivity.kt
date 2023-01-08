@@ -16,7 +16,7 @@ import com.mapbox.mapboxsdk.testapp.R
  */
 class MapPaddingActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_padding)
@@ -43,37 +43,37 @@ class MapPaddingActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -89,8 +89,8 @@ class MapPaddingActivity : AppCompatActivity() {
             .bearing(40.0)
             .tilt(45.0)
             .build()
-        mapboxMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-        mapboxMap!!.addMarker(MarkerOptions().title("Center map").position(bangalore))
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        mapboxMap.addMarker(MarkerOptions().title("Center map").position(bangalore))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
