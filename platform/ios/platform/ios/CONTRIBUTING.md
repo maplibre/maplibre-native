@@ -1,6 +1,6 @@
-# Contributing to the MapLibre Maps SDK for iOS
+# Contributing to MapLibre GL Native for iOS
 
-This document explains how to build the MapLibre SDK for iOS from source. It is intended for advanced developers who wish to contribute to MapLibre Native GL and the MapLibre SDK for iOS.
+This document explains how to build MapLibre GL Native for iOS from source. It is intended for advanced developers who wish to contribute to the library.
 
 ## Requirements
 
