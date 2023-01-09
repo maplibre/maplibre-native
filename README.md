@@ -33,6 +33,10 @@ To get started with MapLibre GL Native, go to your platform below.
 
 To contribute to MapLibre GL Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) and (if applicable) the specific instructions for the platform you want to contribute to.
 
+### Getting Involved
+
+Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
+
 ## Build Status
 
 | SDK                                                           | Build   | Build status                                                                                                                                                                                  |
