@@ -30,3 +30,45 @@ The steps for a Design Proposal are the following:
 4. Discuss the details of your Design Proposal with the community in the pull request. Adjust where needed.
 5. Call a vote on the Design Proposal once discussions have settled. People in favor of your Design Proposal shall approve the pull request. People against your Design Proposal shall comment on the pull request with something like "Rejected".
 6. Give the community at least 72 hours to vote. If a majority of the people who voted accept your Proposal, it can be merged.
+
+## Semantic Versioning
+
+MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancements or debugging.
+
+You can list available tags by issuing the command `git tag`, then use the result
+
+```bash
+# 1. Obtain a list of tags, which matches to release versions
+git tag
+
+# 2.  Set a convenience variable with the desired TAG
+# TAG=android-v9.4.2
+# TAG=android-v9.5.2
+TAG=ios-v5.12.0
+# TAG=ios-v5.12.0-pre.1
+
+# 3.  Check out a particular TAG
+git checkout tags/$TAG -b $TAG
+
+# 4. build, debug or enhance features based on the tag
+# clean, if you need to troubleshoot build dependencies by using `make clean`
+```
+
+### Source code checkout
+
+```bash
+git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+```
+
+## Building
+
+MapLibre GL Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
+
+To build, run the following from the root directory
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+```
+
+`CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
+`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+Built artifacts should be available on `build` folder.

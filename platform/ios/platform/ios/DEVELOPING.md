@@ -1,6 +1,6 @@
-# Contributing to the Mapbox Maps SDK for iOS
+# Contributing to the MapLibre Maps SDK for iOS
 
-This document explains how to build the Mapbox Maps SDK for iOS from source. It is intended for advanced developers who wish to contribute to Mapbox GL and the Mapbox Maps SDK for iOS.
+This document explains how to build the MapLibre SDK for iOS from source. It is intended for advanced developers who wish to contribute to MapLibre Native GL and the MapLibre SDK for iOS.
 
 ## Requirements
 
@@ -16,6 +16,9 @@ make iproj
 
 # make Xcode workspace, but run in headless mode
 make iproj CI=1
+
+# Make Frameworks
+make xcframework BUILDTYPE=Release
 ```
 
 ### Xcode schemes
@@ -88,7 +91,7 @@ To add any Objective-C type, constant, or member to the iOS SDK’s public inter
 
 1. Ensure that the symbol is pure Objective-C and does not rely on any language features specific to Objective-C++ or the C11 dialect of C – so no namespaced types or classes named with emoji! 🙃 Most projects that depend on this SDK are either written in pure Objective-C (GNU99 dialect) or Swift, which cannot yet bridge C++ types.
 1. Name the symbol according to [Cocoa naming conventions](https://developer.apple.com/library/prerelease/content/documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html#//apple_ref/doc/uid/10000146i). Use the `MGL` class prefix to avoid conflicts with client code. If the symbol has an analogue in MapKit, name the symbol according to MapKit.
-1. Provide full documentation comments. We use [jazzy](https://github.com/realm/jazzy/) to produce the documentation found in the SDK distribution and [on the website for this SDK](https://docs.mapbox.com/ios/api/maps/). We also recognize that many developers rely on Xcode’s Quick Help feature. jazzy supports Markdown formatting; however, Quick Help supports only [HeaderDoc](https://developer.apple.com/legacy/library/documentation/DeveloperTools/Conceptual/HeaderDoc/intro/intro.html) syntax and a subset of Doxygen syntax. For hyperlinks, use HTML syntax, which is recognized by both tools.
+1. Provide full documentation comments. We use [jazzy](https://github.com/realm/jazzy/) to produce the documentation found in the SDK distribution and [on the website for this SDK](https://maplibre.org/maplibre-gl-native/ios/api/). We also recognize that many developers rely on Xcode’s Quick Help feature. jazzy supports Markdown formatting; however, Quick Help supports only [HeaderDoc](https://developer.apple.com/legacy/library/documentation/DeveloperTools/Conceptual/HeaderDoc/intro/intro.html) syntax and a subset of Doxygen syntax. For hyperlinks, use HTML syntax, which is recognized by both tools.
 
 ### Making a type or constant public
 
@@ -129,6 +132,9 @@ To add or update text that the user may see in the iOS maps SDK:
 1. Run `make genstrings` and commit any changes it makes to .strings files. The make rule also updates the macOS maps SDK’s strings tables.
 
 ### Adding a localization
+
+> **Warning**
+> This section is outdated.
 
 Translations of all the Mapbox GL Native SDKs are managed [in Transifex](https://www.transifex.com/mapbox/mapbox-gl-native/). If your language already has a translation, feel free to complete or proofread it. Otherwise, please [request your language](https://www.transifex.com/mapbox/mapbox-gl-native/languages/). Note that we’re primarily interested in languages that iOS supports as system languages.
 
@@ -185,6 +191,7 @@ You can review test results in  `$(IOS_OUTPUT_PATH)/Logs/Test`.
 * `make ios-static-analyzer` runs unit tests from the "CI" scheme with the Static Analyzer enabled.
 * `make ios-uitest` runs user interface testing from the "iosapp" scheme.
 
+
 These commands are run by default on a single Simulator. To enable legacy iOS versions and more device types, add `MORE_SIMULATORS=YES`. Use `IOS_LATEST=YES`, `IOS_11=YES`, etc. to test on specific iOS versions.
 
 To only run a specific test or class of tests, add `ONLY_TESTING=test/MGLNameOfTestClass/testNameOfTest`.
@@ -194,8 +201,8 @@ To skip a specific test or class of tests, add `SKIP_TESTING=test/MGLNameOfTestC
 To run the cross-platform tests in Xcode instead of on the command line:
 
 1. Run `make iproj` to set up the workspace.
-1. Change the scheme to “test (platform project)” and press Command-R (⌘-R) to run core unit tests.
-1. Change the scheme to “CI” and press Command-U (⌘-U) to run SDK integration tests.
+2. Change the scheme to “test (platform project)” and press Command-R (⌘-R) to run core unit tests.
+3. Change the scheme to “CI” and press Command-U (⌘-U) to run SDK integration tests.
 
 ### Testing from the command line
 
@@ -220,6 +227,9 @@ xcodebuild test -scheme CI -testPlan CI-Expressions \
 
 ## Access tokens
 
+> **Warning**
+> This section is outdated.
+
 The included applications use Mapbox vector tiles, which require a Mapbox account and API access token. Obtain an access token on the [Mapbox account page](https://www.mapbox.com/studio/account/tokens/). 
 
 Before running the demo ("`iosapp`") or benchmarking ("`bench`") applications, first create a new text file called `.mapbox` or `mapbox` in your home directory containing your access token. The access token will then be automatically inserted into the application's Info.plist at runtime.
@@ -233,3 +243,7 @@ Before running the demo ("`iosapp`") or benchmarking ("`bench`") applications, f
 - Two-finger single-tap to zoom out one level
 - Double-tap, long-pressing the second, then pan up and down to "quick zoom" (meant for one-handed use)
 - Use the debug menu to add test annotations, reset position, and cycle through the debug options.
+
+## Simulator
+
+You can run automated test on a Simulator or Device by changing to the Scheme `iosapp` and choosing `Product` > `Test` (or use `⌘-U`).  Use `⌘-9` to navigate to `Reports` to see results and browse through screenshots.  This method of testing should work well with CI tools such as GitHub Actions, Xcode Server Bots, & AWS Device Farm.
