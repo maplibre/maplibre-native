@@ -8,7 +8,7 @@ Put interactive, scalable world maps into your native Cocoa application with Map
 
 ![](docs/img/screenshot.jpg)
 
-The MapLibre GL Native for macOS is compatible with macOS 10.10.0 and above for Cocoa applications developed in Objective-C, Swift, Interface Builder, or AppleScript. For hybrid applications, consider [MapLibre GL JS]([https://github.com/mapbox/mapbox-gl-js/](https://github.com/maplibre/maplibre-gl-js)).
+MapLibre GL Native for macOS is compatible with macOS 10.10.0 and above for Cocoa applications developed in Objective-C, Swift, Interface Builder, or AppleScript. For hybrid applications, consider [MapLibre GL JS]([https://github.com/mapbox/mapbox-gl-js/](https://github.com/maplibre/maplibre-gl-js)).
 
 ## Contributing
 
