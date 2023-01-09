@@ -13,7 +13,7 @@ MapLibre GL Native for macOS is compatible with macOS 10.10.0 and above for Coco
 ## Contributing
 
 * [Build the MapLibre GL Native for macOS from source](INSTALL.md)
-* [Contribute to MapLibre GL Native for macOS](DEVELOPING.md)
+* [Contribute to MapLibre GL Native for macOS](CONTRIBUTING.md)
 * [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/)
 * [Mapbox Vector Tile Specification](https://www.mapbox.com/developers/vector-tiles/)
 
