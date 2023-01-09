@@ -16,12 +16,13 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
 
 - [Android](platform/android/README.md)
 - [iOS](platform/ios/platform/ios/README.md)
-- [Linux](platform/linux/README.md)
-- [macOS](platform/ios/platform/macos/README.md)
+
 
 ### Community maintained
 
 - [GLFW](platform/glfw/README.md)
+- [Linux](platform/linux/README.md)
+- [macOS](platform/ios/platform/macos/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
 
