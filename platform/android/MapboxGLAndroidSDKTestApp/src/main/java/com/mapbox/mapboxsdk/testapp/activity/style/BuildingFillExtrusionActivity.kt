@@ -24,7 +24,7 @@ import com.mapbox.mapboxsdk.utils.ColorUtils
  */
 class BuildingFillExtrusionActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var light: Light? = null
     private var isMapAnchorLight = false
     private var isLowIntensityLight = false
@@ -37,8 +37,10 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map
-                mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+                if (map != null) {
+                    mapboxMap = map
+                }
+                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     setupBuildings(style)
                     setupLight()
                 }
@@ -66,7 +68,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
     }
 
     private fun setupLight() {
-        light = mapboxMap!!.style!!.light
+        light = mapboxMap.style!!.light
         findViewById<View>(R.id.fabLightPosition).setOnClickListener { v: View? ->
             isInitPosition = !isInitPosition
             if (isInitPosition) {
@@ -103,36 +105,36 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 }

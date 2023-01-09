@@ -63,6 +63,9 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
+      - name: Setup Android SDK for accepting tool licenses
+        uses: android-actions/setup-android@v2
+        
       - name: Cache node modules
         uses: actions/cache@v3
         env:

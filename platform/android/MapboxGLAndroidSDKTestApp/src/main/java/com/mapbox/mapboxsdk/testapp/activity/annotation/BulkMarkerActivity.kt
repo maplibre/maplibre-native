@@ -79,10 +79,10 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
 
     private fun showMarkers(amount: Int) {
         var amount = amount
-        if (mapboxMap == null || locations == null || mapView!!.isDestroyed) {
+        if (mapboxMap == null || locations == null || mapView.isDestroyed) {
             return
         }
-        mapboxMap!!.clear()
+        mapboxMap.clear()
         if (locations!!.size < amount) {
             amount = locations!!.size
         }
@@ -101,10 +101,10 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                 MarkerOptions()
                     .position(latLng)
                     .title(i.toString())
-                    .snippet(formatter.format(latLng.latitude) + ", " + formatter.format(latLng.longitude))
+                    .snippet(formatter.format(latLng.latitude) + "`, " + formatter.format(latLng.longitude))
             )
         }
-        mapboxMap!!.addMarkers(markerOptionsList)
+        mapboxMap.addMarkers(markerOptionsList)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -113,27 +113,27 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
@@ -141,12 +141,12 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         if (progressDialog != null) {
             progressDialog!!.dismiss()
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     private class LoadLocationTask constructor(

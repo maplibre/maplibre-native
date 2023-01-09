@@ -19,16 +19,20 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_location_layer_fragment.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityLocationLayerFragmentBinding
 
 class LocationFragmentActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityLocationLayerFragmentBinding
+
     private lateinit var permissionsManager: PermissionsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_location_layer_fragment)
+        binding = ActivityLocationLayerFragmentBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             val fragment = supportFragmentManager.findFragmentByTag(EmptyFragment.TAG)
             if (fragment == null) {
                 supportFragmentManager
@@ -108,7 +112,7 @@ class LocationFragmentActivity : AppCompatActivity() {
 
                     component.activateLocationComponent(
                         LocationComponentActivationOptions
-                            .builder(activity!!, style)
+                            .builder(requireActivity(), style)
                             .useDefaultLocationEngine(true)
                             .build()
                     )
@@ -120,7 +124,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
 
         override fun onSuccess(result: LocationEngineResult?) {
-            if (!mapView.isDestroyed) mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation), 12.0))
+            if (!mapView.isDestroyed) mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation!!), 12.0))
         }
 
         override fun onFailure(exception: Exception) {
@@ -173,7 +177,7 @@ class LocationFragmentActivity : AppCompatActivity() {
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             val textView = TextView(inflater.context)
-            textView.text = "This is an empty Fragment"
+            textView.text = getString(R.string.this_is_an_empty_fragment)
             return textView
         }
     }

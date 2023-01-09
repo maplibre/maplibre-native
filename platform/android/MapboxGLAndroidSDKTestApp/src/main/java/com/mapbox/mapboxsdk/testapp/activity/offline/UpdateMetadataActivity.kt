@@ -29,7 +29,7 @@ class UpdateMetadataActivity :
     AdapterView.OnItemClickListener,
     AdapterView.OnItemLongClickListener {
     private var adapter: OfflineRegionMetadataAdapter? = null
-    private var mapView: MapView? = null
+    private lateinit var mapView: MapView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_metadata_update)
@@ -55,10 +55,12 @@ class UpdateMetadataActivity :
         builder.setPositiveButton(
             "OK"
         ) { dialog: DialogInterface?, which: Int ->
-            updateMetadata(
-                region,
-                OfflineUtils.convertRegionName(input.text.toString())
-            )
+            OfflineUtils.convertRegionName(input.text.toString())?.let {
+                updateMetadata(
+                    region,
+                    it
+                )
+            }
         }
         builder.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int -> dialog.cancel() }
         builder.show()
@@ -73,14 +75,14 @@ class UpdateMetadataActivity :
         val container = findViewById<ViewGroup>(R.id.container)
         container.removeAllViews()
         container.addView(MapView(view.context).also { mapView = it })
-        mapView!!.onCreate(null)
-        mapView!!.getMapAsync { map: MapboxMap ->
+        mapView.onCreate(null)
+        mapView.getMapAsync { map: MapboxMap ->
             map.setOfflineRegionDefinition(
                 adapter!!.getItem(position).definition
             )
         }
-        mapView!!.onStart()
-        mapView!!.onResume()
+        mapView.onStart()
+        mapView.onResume()
         return true
     }
 
@@ -129,9 +131,9 @@ class UpdateMetadataActivity :
     override fun onDestroy() {
         super.onDestroy()
         if (mapView != null) {
-            mapView!!.onPause()
-            mapView!!.onStop()
-            mapView!!.onDestroy()
+            mapView.onPause()
+            mapView.onStop()
+            mapView.onDestroy()
         }
     }
 

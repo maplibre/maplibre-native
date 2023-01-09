@@ -141,10 +141,10 @@ public class OfflineTilePyramidRegionDefinition implements OfflineRegionDefiniti
   @Override
   public void writeToParcel(@NonNull Parcel dest, int flags) {
     dest.writeString(styleURL);
-    dest.writeDouble(bounds.getLatNorth());
-    dest.writeDouble(bounds.getLonEast());
-    dest.writeDouble(bounds.getLatSouth());
-    dest.writeDouble(bounds.getLonWest());
+    dest.writeDouble(bounds.latitudeNorth);
+    dest.writeDouble(bounds.longitudeEast);
+    dest.writeDouble(bounds.latitudeSouth);
+    dest.writeDouble(bounds.longitudeWest);
     dest.writeDouble(minZoom);
     dest.writeDouble(maxZoom);
     dest.writeFloat(pixelRatio);

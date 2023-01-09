@@ -8,6 +8,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import timber.log.Timber;
 
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
@@ -92,6 +93,7 @@ public final class Mapbox {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
+      Timber.plant(new Timber.DebugTree());
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);

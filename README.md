@@ -13,6 +13,16 @@ Beside merging in platform specific SDKs, the following changes were made compar
     * The Android binaries are distributed to GitHub maven package repository.
 
 > The mapbox-gl-native was forked from [d60fd30 - mgbl 1.6.0](https://github.com/mapbox/mapbox-gl-native/tree/d60fd302b1f6563e7d16952f8855122fdcc85f73), mapbox-gl-native-ios from [a139216](https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216) and mapbox-gl-native-android from [4c12fb2](https://github.com/mapbox/mapbox-gl-native-android/commit/4c12fb2c)
+
+**Call for Bounties💰** If you have ideas for new features in MapLibre, you can now nominate them for the MapLibre Bounty Program at https://maplibre.org/news/2022-10-16-call-for-bounties/
+## Documentation
+MapLibre GL Native documentation is a work in progress. To know about the current state of MapLibre and it's path forward, 
+read the Markdown book. To know about API references for Android and iOS, please follow the API Reference links.
+
+1. [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/)
+2. [MapLibre GL Native iOS API Reference](https://maplibre.org/maplibre-gl-native/ios/api/)
+2. [MapLibre GL Native Android API Reference](https://maplibre.org/maplibre-gl-native/android/api/)
+
 ## Build Status
 
 | SDK                                                           | Build   | Build status                                                                                                                                                                                  |
@@ -76,12 +86,6 @@ Backers and Supporters:
 <a href="https://opencollective.com/maplibre/backer/29/website?requireActive=false" target="_blank"><img src="https://opencollective.com/maplibre/backer/29/avatar.svg?requireActive=false"></a>
 <a href="https://opencollective.com/maplibre/backer/30/website?requireActive=false" target="_blank"><img src="https://opencollective.com/maplibre/backer/30/avatar.svg?requireActive=false"></a>
 
-## Documentation
-
-The Android API documentation is available at https://maplibre.org/maplibre-gl-native/android/api/
-
-The iOS API documentation is available at https://maplibre.org/maplibre-gl-native/ios/api/
-
 ## Installation
 
 ### Android
@@ -140,7 +144,7 @@ git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.gi
 
 ## Build
 
-MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancments or debugging.
+MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancements or debugging.
 
 You can list available tags by issuing the command `git tag`, then use the result
 
@@ -160,6 +164,7 @@ git checkout tags/$TAG -b $TAG
 # 4. build, debug or enhance features based on the tag
 # clean, if you need to troubleshoot build dependencies by using `make clean`
 ```
+
 
 ### Build using Bazel
 
@@ -293,3 +298,15 @@ Please refer to [Mapbox Maps SDK for macos](platform/ios/platform/macos/) for de
 #### Linux
 
 See [the Linux platform build section](platform/linux/) for instructions.
+
+### Building MapLibre-GL-Native Core
+MapLibre GL Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
+
+To build, run the following from the root directory
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+```
+
+`CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
+`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+Built artifacts should be available on `build` folder.

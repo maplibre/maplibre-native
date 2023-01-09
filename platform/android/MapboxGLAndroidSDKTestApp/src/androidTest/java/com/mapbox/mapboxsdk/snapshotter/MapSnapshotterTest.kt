@@ -1,6 +1,6 @@
 package com.mapbox.mapboxsdk.snapshotter
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates if a snapshotter creation
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class MapSnapshotterTest {
 
     @Rule

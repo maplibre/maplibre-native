@@ -75,8 +75,8 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
 
   protected void showAttributionDialog(@NonNull String[] attributionTitles) {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(R.string.mapbox_attributionsDialogTitle);
-    builder.setAdapter(new ArrayAdapter<>(context, R.layout.mapbox_attribution_list_item, attributionTitles), this);
+    builder.setTitle(R.string.maplibre_attributionsDialogTitle);
+    builder.setAdapter(new ArrayAdapter<>(context, R.layout.maplibre_attribution_list_item, attributionTitles), this);
     dialog = builder.show();
   }
 
@@ -162,7 +162,7 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
       context.startActivity(intent);
     } catch (ActivityNotFoundException exception) {
       // explicitly handling if the device hasn't have a web browser installed. #8899
-      Toast.makeText(context, R.string.mapbox_attributionErrorNoBrowser, Toast.LENGTH_LONG).show();
+      Toast.makeText(context, R.string.maplibre_attributionErrorNoBrowser, Toast.LENGTH_LONG).show();
       MapStrictMode.strictModeViolation(exception);
     }
   }

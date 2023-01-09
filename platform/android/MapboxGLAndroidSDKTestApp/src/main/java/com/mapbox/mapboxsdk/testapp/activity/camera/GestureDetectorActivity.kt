@@ -57,52 +57,52 @@ class GestureDetectorActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
         gestureAlertsAdapter!!.cancelUpdates()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private fun initializeMap() {
-        gesturesManager = mapboxMap!!.gesturesManager
+        gesturesManager = mapboxMap.gesturesManager
         val layoutParams = recyclerView!!.layoutParams as RelativeLayout.LayoutParams
-        layoutParams.height = (mapView!!.height / 1.75).toInt()
-        layoutParams.width = mapView!!.width / 3
+        layoutParams.height = (mapView.height / 1.75).toInt()
+        layoutParams.width = mapView.width / 3
         recyclerView!!.layoutParams = layoutParams
         attachListeners()
-        fixedFocalPointEnabled(mapboxMap!!.uiSettings.focalPoint != null)
+        fixedFocalPointEnabled(mapboxMap.uiSettings.focalPoint != null)
     }
 
     fun attachListeners() {
-        mapboxMap!!.addOnMoveListener(
+        mapboxMap.addOnMoveListener(
             object : OnMoveListener {
                 override fun onMoveBegin(detector: MoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
@@ -124,7 +124,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                 }
             }
         )
-        mapboxMap!!.addOnRotateListener(
+        mapboxMap.addOnRotateListener(
             object : OnRotateListener {
                 override fun onRotateBegin(detector: RotateGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
@@ -146,7 +146,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                 }
             }
         )
-        mapboxMap!!.addOnScaleListener(
+        mapboxMap.addOnScaleListener(
             object : OnScaleListener {
                 override fun onScaleBegin(detector: StandardScaleGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
@@ -194,7 +194,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                 }
             }
         )
-        mapboxMap!!.addOnShoveListener(
+        mapboxMap.addOnShoveListener(
             object : OnShoveListener {
                 override fun onShoveBegin(detector: ShoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
@@ -223,7 +223,7 @@ class GestureDetectorActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val uiSettings = mapboxMap!!.uiSettings
+        val uiSettings = mapboxMap.uiSettings
         when (item.itemId) {
             R.id.menu_gesture_focus_point -> {
                 fixedFocalPointEnabled(focalPointLatLng == null)
@@ -274,8 +274,8 @@ class GestureDetectorActivity : AppCompatActivity() {
     private fun fixedFocalPointEnabled(enabled: Boolean) {
         if (enabled) {
             focalPointLatLng = LatLng(51.50325, -0.12968)
-            marker = mapboxMap!!.addMarker(MarkerOptions().position(focalPointLatLng))
-            mapboxMap!!.easeCamera(
+            marker = mapboxMap.addMarker(MarkerOptions().position(focalPointLatLng))
+            mapboxMap.easeCamera(
                 CameraUpdateFactory.newLatLngZoom(focalPointLatLng!!, 16.0),
                 object : CancelableCallback {
                     override fun onCancel() {
@@ -289,18 +289,18 @@ class GestureDetectorActivity : AppCompatActivity() {
             )
         } else {
             if (marker != null) {
-                mapboxMap!!.removeMarker(marker!!)
+                mapboxMap.removeMarker(marker!!)
                 marker = null
             }
             focalPointLatLng = null
-            mapboxMap!!.uiSettings.focalPoint = null
+            mapboxMap.uiSettings.focalPoint = null
         }
     }
 
     private fun recalculateFocalPoint() {
         if (focalPointLatLng != null) {
-            mapboxMap!!.uiSettings.focalPoint =
-                mapboxMap!!.projection.toScreenLocation(focalPointLatLng!!)
+            mapboxMap.uiSettings.focalPoint =
+                mapboxMap.projection.toScreenLocation(focalPointLatLng!!)
         }
     }
 

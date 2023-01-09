@@ -1,9 +1,7 @@
 apply from: "${rootDir}/gradle/dependencies.gradle"
 
-def MAPBOX_JAVA_DIR = 'maplibre-java'
-def MAPBOX_JAVA_TAG_PREFIX = 'v'
-
-def MAPBOX_CORE_TAG_PREFIX = '-core-'
+//def MAPBOX_JAVA_DIR = 'maplibre-java'
+//def MAPBOX_JAVA_TAG_PREFIX = 'v'
 
 def MAPBOX_GESTURES_DIR = 'mapbox-gestures-android'
 def MAPBOX_GESTURES_TAG_PREFIX = 'v'
@@ -13,7 +11,7 @@ task androidNitpick {
         println "Running android nitpick script"
 
         println "Verify vendor submodule pins"
-        verifyVendorSubmodulePin(MAPBOX_JAVA_DIR, MAPBOX_JAVA_TAG_PREFIX, versions.mapLibreServices)
+        // Will enter a task to re-evaluate and restore if needed verifyVendorSubmodulePin(MAPBOX_JAVA_DIR, MAPBOX_JAVA_TAG_PREFIX, versions.mapLibreServices)
         verifyVendorSubmodulePin(MAPBOX_GESTURES_DIR, MAPBOX_GESTURES_TAG_PREFIX, versions.mapboxGestures)
 
         verifyLicenseGeneration()

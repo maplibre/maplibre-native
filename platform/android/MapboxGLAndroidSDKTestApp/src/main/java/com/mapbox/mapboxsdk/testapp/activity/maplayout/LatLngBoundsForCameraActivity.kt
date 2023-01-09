@@ -16,7 +16,7 @@ import com.mapbox.mapboxsdk.testapp.R
  */
 class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_restricted_bounds)
@@ -58,12 +58,12 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupBounds(bounds: LatLngBounds?) {
-        mapboxMap!!.setLatLngBoundsForCameraTarget(bounds)
+        mapboxMap.setLatLngBoundsForCameraTarget(bounds)
         showBoundsArea(bounds)
     }
 
     private fun showBoundsArea(bounds: LatLngBounds?) {
-        mapboxMap!!.clear()
+        mapboxMap.clear()
         if (bounds != null) {
             val boundsArea = PolygonOptions()
                 .add(bounds.northWest)
@@ -72,7 +72,7 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
                 .add(bounds.southWest)
             boundsArea.alpha(0.25f)
             boundsArea.fillColor(Color.RED)
-            mapboxMap!!.addPolygon(boundsArea)
+            mapboxMap.addPolygon(boundsArea)
         }
     }
 
@@ -80,42 +80,42 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
         val crosshair = View(this)
         crosshair.layoutParams = FrameLayout.LayoutParams(10, 10, Gravity.CENTER)
         crosshair.setBackgroundColor(Color.BLUE)
-        mapView!!.addView(crosshair)
+        mapView.addView(crosshair)
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {

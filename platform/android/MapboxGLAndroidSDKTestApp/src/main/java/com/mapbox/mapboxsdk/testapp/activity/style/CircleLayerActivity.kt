@@ -32,7 +32,7 @@ import java.net.URISyntaxException
  */
 class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private lateinit var styleFab: FloatingActionButton
     private lateinit var routeFab: FloatingActionButton
     private var layer: CircleLayer? = null
@@ -46,11 +46,13 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map
-                mapboxMap!!.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                if (map != null) {
+                    mapboxMap = map
+                }
+                mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
                 mapView.addOnDidFinishLoadingStyleListener(
                     OnDidFinishLoadingStyleListener {
-                        val style = mapboxMap!!.style
+                        val style = mapboxMap.style
                         addBusStopSource(style)
                         addBusStopCircleLayer(style)
                         initFloatingActionButtons()
@@ -105,13 +107,13 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun removeOldSource() {
-        mapboxMap!!.style!!.removeSource(SOURCE_ID)
-        mapboxMap!!.style!!.removeLayer(LAYER_ID)
+        mapboxMap.style!!.removeSource(SOURCE_ID)
+        mapboxMap.style!!.removeLayer(LAYER_ID)
     }
 
     private fun addClusteredSource() {
         try {
-            mapboxMap!!.style!!.addSource(
+            mapboxMap.style!!.addSource(
                 GeoJsonSource(
                     SOURCE_ID_CLUSTER,
                     URI(URL_BUS_ROUTES),
@@ -149,7 +151,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         unclustered.setProperties(
             PropertyFactory.iconImage("bus-15")
         )
-        mapboxMap!!.style!!.addLayer(unclustered)
+        mapboxMap.style!!.addLayer(unclustered)
         for (i in layers.indices) {
             // Add some nice circles
             val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
@@ -159,31 +161,36 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
             )
             val pointCount = Expression.toNumber(Expression.get("point_count"))
             circles.setFilter(
-                if (i == 0) Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(
-                        pointCount,
-                        Expression.literal(
-                            layers[i][0]
+                if (i == 0) {
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(
+                                layers[i][0]
+                            )
+                        )
+
+                    )
+                } else {
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gt(
+                            pointCount,
+                            Expression.literal(
+                                layers[i][0]
+                            )
+                        ),
+                        Expression.lt(
+                            pointCount,
+                            Expression.literal(
+                                layers[i - 1][0]
+                            )
                         )
                     )
-                ) else Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gt(
-                        pointCount,
-                        Expression.literal(
-                            layers[i][0]
-                        )
-                    ),
-                    Expression.lt(
-                        pointCount,
-                        Expression.literal(
-                            layers[i - 1][0]
-                        )
-                    )
-                )
+                }
             )
-            mapboxMap!!.style!!.addLayer(circles)
+            mapboxMap.style!!.addLayer(circles)
         }
 
         // Add the count labels
@@ -195,7 +202,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
             PropertyFactory.textIgnorePlacement(true),
             PropertyFactory.textAllowOverlap(true)
         )
-        mapboxMap!!.style!!.addLayer(count)
+        mapboxMap.style!!.addLayer(count)
     }
 
     private fun removeFabs() {
@@ -210,17 +217,17 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun removeBusStop() {
-        mapboxMap!!.style!!.removeLayer(layer!!)
-        mapboxMap!!.style!!.removeSource(source!!)
+        mapboxMap.style!!.removeLayer(layer!!)
+        mapboxMap.style!!.removeSource(source!!)
     }
 
     private fun loadNewStyle() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri(nextStyle))
+        mapboxMap.setStyle(Style.Builder().fromUri(nextStyle))
     }
 
     private fun addBusStop() {
-        mapboxMap!!.style!!.addLayer(layer!!)
-        mapboxMap!!.style!!.addSource(source!!)
+        mapboxMap.style!!.addLayer(layer!!)
+        mapboxMap.style!!.addSource(source!!)
     }
 
     private val nextStyle: String
@@ -234,37 +241,37 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     private object Data {

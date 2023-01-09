@@ -16,7 +16,6 @@ import com.mapbox.mapboxsdk.style.layers.*
 import com.mapbox.mapboxsdk.style.sources.CustomGeometrySource
 import com.mapbox.mapboxsdk.style.sources.GeometryTileProvider
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.style.GridSourceActivity.GridProvider
 import java.util.*
 
 /**
@@ -59,24 +58,24 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
                 20.0
             }
             var gridLines: MutableList<Any?> = ArrayList<Any?>()
-            var y = Math.ceil(bounds.latNorth / gridSpacing) * gridSpacing
-            while (y >= Math.floor(bounds.latSouth / gridSpacing) * gridSpacing) {
+            var y = Math.ceil(bounds.latitudeNorth / gridSpacing) * gridSpacing
+            while (y >= Math.floor(bounds.latitudeSouth / gridSpacing) * gridSpacing) {
                 gridLines.add(
                     Arrays.asList(
-                        Point.fromLngLat(bounds.lonWest, y),
-                        Point.fromLngLat(bounds.lonEast, y)
+                        Point.fromLngLat(bounds.longitudeWest, y),
+                        Point.fromLngLat(bounds.longitudeEast, y)
                     )
                 )
                 y -= gridSpacing
             }
             features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines as MutableList<MutableList<Point>>)))
             gridLines = ArrayList<Any?>()
-            var x = Math.floor(bounds.lonWest / gridSpacing) * gridSpacing
-            while (x <= Math.ceil(bounds.lonEast / gridSpacing) * gridSpacing) {
+            var x = Math.floor(bounds.longitudeWest / gridSpacing) * gridSpacing
+            while (x <= Math.ceil(bounds.longitudeEast / gridSpacing) * gridSpacing) {
                 gridLines.add(
                     Arrays.asList(
-                        Point.fromLngLat(x, bounds.latSouth),
-                        Point.fromLngLat(x, bounds.latNorth)
+                        Point.fromLngLat(x, bounds.latitudeSouth),
+                        Point.fromLngLat(x, bounds.latitudeNorth)
                     )
                 )
                 x += gridSpacing
@@ -110,32 +109,32 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     public override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     public override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     companion object {

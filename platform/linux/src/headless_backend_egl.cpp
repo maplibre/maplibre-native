@@ -68,7 +68,7 @@ public:
     EGLConfig config = 0;
 };
 
-class EGLBackendImpl : public HeadlessBackend::Impl {
+class EGLBackendImpl final : public HeadlessBackend::Impl {
 public:
     EGLBackendImpl() {
         // EGL initializes the context client version to 1 by default. We want to
@@ -76,8 +76,8 @@ public:
         // objects and also to write vertex and fragment shaders in the OpenGL ES
         // Shading Language.
         const EGLint attribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
+                EGL_CONTEXT_CLIENT_VERSION, 2,
+                EGL_NONE
         };
 
         eglContext = eglCreateContext(eglDisplay->display, eglDisplay->config, EGL_NO_CONTEXT, attribs);

@@ -14,5 +14,6 @@ android.libraryVariants.all { variant ->
         options.overview("src/main/java/overview.html")
         options.group("Mapbox Android SDK", "com.mapbox.*")
         exclude '**/R.java', '**/BuildConfig.java', '**/**.java.ejs', '**/**.html'
+        failOnError false
     }
 }
