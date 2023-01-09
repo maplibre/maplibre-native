@@ -1,8 +1,30 @@
 # Contributing
 
+## Documentation
+
 There is a high-level overview of MapLibre GL Native avaiable:
 
 - [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/)
+
+## Source code checkout
+
+```bash
+git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+```
+
+## Building
+
+MapLibre GL Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
+
+To build, run the following from the root directory
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+```
+
+`CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
+`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+Built artifacts should be available on `build` folder.
+
 
 ## Guidelines
 
@@ -58,22 +80,3 @@ git checkout tags/$TAG -b $TAG
 # 4. build, debug or enhance features based on the tag
 # clean, if you need to troubleshoot build dependencies by using `make clean`
 ```
-
-### Source code checkout
-
-```bash
-git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
-```
-
-## Building
-
-MapLibre GL Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
-
-To build, run the following from the root directory
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
-```
-
-`CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
-`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
-Built artifacts should be available on `build` folder.
