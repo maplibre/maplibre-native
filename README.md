@@ -12,11 +12,14 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
   <img src="https://user-images.githubusercontent.com/649392/211420612-99cff12d-a8b9-471e-8017-e548bd1352bd.png" alt="Android device with MapLibre" width="24%">   <img src="https://user-images.githubusercontent.com/649392/211420622-954f8484-61c6-4234-bcc2-0527713412d1.png" alt="iOS device with MapLibre" width="25%">
 </p>
 
+## Getting Started
+
+To get started with MapLibre GL Native, go to your platform below.
+
 ## Platforms
 
 - [Android](platform/android/README.md)
 - [iOS](platform/ios/platform/ios/README.md)
-
 
 ### Community maintained
 
@@ -26,14 +29,9 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
 
-## Documentation
+## Contributing
 
-MapLibre GL Native documentation is a work in progress. To know about the current state of MapLibre and it's path forward, 
-read the Markdown book. To know about API references for Android and iOS, please follow the API Reference links.
-
-1. [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/)
-2. [MapLibre GL Native iOS API Reference](https://maplibre.org/maplibre-gl-native/ios/api/)
-3. [MapLibre GL Native Android API Reference](https://maplibre.org/maplibre-gl-native/android/api/)
+To contribute to MapLibre GL Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) and (if applicable) the specific instructions for the platform you want to contribute to.
 
 ## Build Status
 
