@@ -1,20 +1,25 @@
 # Contributing
 
-If you have a usage question for a product built on MapLibre GL (such as our iOS or Android SDKs), please visit `#maplibre-native` Slack channel at https://slack.openstreetmap.us/.
+There is a high-level overview of MapLibre GL Native avaiable:
+
+- [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/)
+
+## Guidelines
 
 If you want to contribute code:
 
-1. Please familiarize yourself with the [install process](README.md#installation).
+1. Please familiarize yourself with the installation process of your chosen platform.
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
 
-1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **master** section of the relevant changelog(s):
-  * [MapLibre Maps SDK for iOS](platform/ios/CHANGELOG.md)
-  * [MapLibre Maps SDK for macOS](platform/macos/CHANGELOG.md)
+1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant changelog(s):
+  * [MapLibre GL Native for iOS](platform/ios/platform/ios/CHANGELOG.md)
+  * [MapLibre GL Native for macOS](platform/macos/CHANGELOG.md)
+  * [MapLibre GL Native for Android](platform/android/CHANGELOG.md)
 
-1. Prefix your commit messages with the platform(s) your changes affect: `[ios]` or `[macos]`.
+4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to the [iOS SDK](platform/ios/DEVELOPING.md) or [macOS SDK](platform/macos/DEVELOPING.md).
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native GL for [iOS SDK](platform/ios/CONTRIBUTING.md), [Android](platform/android/CONTRIBUTING.md) or [macOS](platform/ios/platform/macos/CONTRIBUTING.md).
 
 ## Design Proposals
 
