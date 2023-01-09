@@ -57,7 +57,9 @@ class MapLibreApplication : MultiDexApplication() {
 
     private fun initializeMapbox() {
         val apiKey = ApiKeyUtils.getApiKey(applicationContext)
-        validateApiKey(apiKey)
+        if (apiKey != null) {
+            validateApiKey(apiKey)
+        }
         Mapbox.getInstance(applicationContext, apiKey, TILE_SERVER)
         TileLoadingMeasurementUtils.setUpTileLoadingMeasurement()
         MapStrictMode.setStrictModeEnabled(true)

@@ -55,10 +55,12 @@ class UpdateMetadataActivity :
         builder.setPositiveButton(
             "OK"
         ) { dialog: DialogInterface?, which: Int ->
-            updateMetadata(
-                region,
-                OfflineUtils.convertRegionName(input.text.toString())
-            )
+            OfflineUtils.convertRegionName(input.text.toString())?.let {
+                updateMetadata(
+                    region,
+                    it
+                )
+            }
         }
         builder.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int -> dialog.cancel() }
         builder.show()

@@ -18,7 +18,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.databinding.ActivityLatlngboundsBinding
-import com.mapbox.mapboxsdk.testapp.utils.GeoParseUtil.loadStringFromAssets
+import com.mapbox.mapboxsdk.testapp.utils.GeoParseUtil
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.net.URISyntaxException
 
@@ -52,7 +52,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
             mapboxMap = map
 
             val featureCollection: FeatureCollection =
-                fromJson(loadStringFromAssets(this, "points-sf.geojson"))
+                fromJson(GeoParseUtil.loadStringFromAssets(this, "points-sf.geojson"))
             bounds = createBounds(featureCollection)
 
             map.getCameraForLatLngBounds(bounds, createPadding(peekHeight))?.let {
