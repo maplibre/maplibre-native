@@ -3,7 +3,6 @@
 A library based on [MapLibre GL Native](https://github.com/maplibre/maplibre-gl-native) for embedding interactive map views with scalable, customizable vector maps into Cocoa Touch applications on iOS using Objective-C, Swift, or Interface Builder.
 
 * [Learn about custom builds](INSTALL.md)
-* [Contribute to the MapLibre Maps SDK for iOS](DEVELOPING.md)
 
 ![](docs/img/screenshot.png)
 
@@ -14,6 +13,10 @@ A library based on [MapLibre GL Native](https://github.com/maplibre/maplibre-gl-
 2. Either add MapLibre GitHub distribution URL (https://github.com/maplibre/maplibre-gl-native-distribution) or search for `maplibre-gl-native` package.
 
 3. Choose "next". Xcode should clone the distribution repository and download the binaries.
+
+## Documentation
+
+- [MapLibre GL Native for iOS API Reference](https://maplibre.org/maplibre-gl-native/ios/api/)
 
 ## Contributing
 
