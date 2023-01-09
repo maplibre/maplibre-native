@@ -9,7 +9,7 @@ It originated as a fork of Mapbox GL Native, before their switch to a non-OSS li
 **Call for Bounties💰** If you have ideas for new features in MapLibre, you can now nominate them for the MapLibre Bounty Program at https://maplibre.org/news/2022-10-16-call-for-bounties/
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/649392/211420612-99cff12d-a8b9-471e-8017-e548bd1352bd.png" width="24%">   <img src="https://user-images.githubusercontent.com/649392/211420622-954f8484-61c6-4234-bcc2-0527713412d1.png" width="25%">
+  <img src="https://user-images.githubusercontent.com/649392/211420612-99cff12d-a8b9-471e-8017-e548bd1352bd.png" alt="Android device with MapLibre" width="24%">   <img src="https://user-images.githubusercontent.com/649392/211420622-954f8484-61c6-4234-bcc2-0527713412d1.png" alt="iOS device with MapLibre" width="25%">
 </p>
 
 ## Platforms
