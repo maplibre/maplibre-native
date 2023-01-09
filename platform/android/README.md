@@ -45,4 +45,4 @@ Visit [https://maplibre.org/maplibre-gl-native/android/api/](https://maplibre.or
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
