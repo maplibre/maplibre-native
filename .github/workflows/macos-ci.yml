@@ -141,6 +141,10 @@ jobs:
         run: |
           make macos-test
 
+      - name: Build macos cpp test
+        run: |
+          make macos-cpp-test
+
       - name: Check public symbols
         run: make darwin-check-public-symbols
 
