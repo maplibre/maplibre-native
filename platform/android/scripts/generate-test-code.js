@@ -27,17 +27,17 @@ console.log("\nGenerating test activities:\n");
 var generatedClasses = [];
 var excludedClasses = [];
 for(const subPackage of subPackages) {
-  if(!(subPackage.slice(-5) == '.java')) {
-    const activities = fs.readdirSync(appBasePath+'/'+subPackage);
+  if(!(subPackage.slice(-5) === '.kt')) {
+    const activities = fs.readdirSync(`${appBasePath}/${subPackage}`);
 
     // create directories for package
-    if (!fs.existsSync(testBasePath+"/"+subPackage)){
-        fs.mkdirSync(testBasePath+"/"+subPackage);
+    if (!fs.existsSync(`${testBasePath}/${subPackage}`)){
+        fs.mkdirSync(`${testBasePath}/${subPackage}`);
     }
 
     for (const activity of activities) {
       var activityName;
-      if (activity.slice(-5) === '.java') {
+      if (activity.slice(-5) === '.kt') {
         // .java file
         activityName = activity.slice(0, -5);
       } else {
@@ -46,7 +46,7 @@ for(const subPackage of subPackages) {
       }
 
       // create path for test file
-      const filePath = testBasePath+"/"+subPackage+"/"+activityName+'Test.java';
+      const filePath = `${testBasePath}/${subPackage}/${activityName}Test.kt`;
 
       // try removing previous generated files
       try {
@@ -67,7 +67,7 @@ for(const subPackage of subPackages) {
 }
 
 for(const generatedClass of generatedClasses){
-  console.log(generatedClass+"Test");
+  console.log(`${generatedClass}Test`);
 }
 
-console.log("\nFinished generating " + generatedClasses.length + " activity sanity tests, excluded " + excludeClasses.length + " classes.\n");
+console.log(`\nFinished generating ${generatedClasses.length} activity sanity tests, excluded ${excludeClasses.length} classes.\n`);
