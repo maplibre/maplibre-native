@@ -112,7 +112,7 @@ class UpdateMetadataActivity :
 
     private fun loadOfflineRegions() {
         OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<OfflineRegion>) {
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 if (offlineRegions != null && offlineRegions.size > 0) {
                     adapter!!.setOfflineRegions(Arrays.asList(*offlineRegions))
                 }
@@ -137,7 +137,7 @@ class UpdateMetadataActivity :
         }
     }
 
-    private class OfflineRegionMetadataAdapter internal constructor(private val context: Context) :
+    private class OfflineRegionMetadataAdapter(private val context: Context) :
         BaseAdapter() {
         private var offlineRegions: List<OfflineRegion>
         fun setOfflineRegions(offlineRegions: List<OfflineRegion>) {
@@ -157,8 +157,8 @@ class UpdateMetadataActivity :
             return position.toLong()
         }
 
-        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
-            var convertView = convertView
+        override fun getView(position: Int, convertViewParam: View?, parent: ViewGroup): View {
+            var convertView = convertViewParam
             val holder: ViewHolder
             if (convertView == null) {
                 holder = ViewHolder()
@@ -170,7 +170,7 @@ class UpdateMetadataActivity :
                 holder = convertView.tag as ViewHolder
             }
             holder.text!!.text = OfflineUtils.convertRegionName(getItem(position).metadata)
-            return convertView
+            return convertView!!
         }
 
         internal class ViewHolder {

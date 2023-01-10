@@ -1,92 +1,59 @@
-package com.mapbox.mapboxsdk.offline;
+package com.mapbox.mapboxsdk.offline
 
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import androidx.annotation.Keep
+import androidx.annotation.StringDef
 
 /**
  * An Offline Region error
  */
-public class OfflineRegionError {
+class OfflineRegionError // For JNI use only // Constructors
+@Keep private constructor( // Getters
+    @field:ErrorReason
+    @get:ErrorReason
+    val reason: String,
+    /**
+     * / * An error message from the request handler, e.g. a server message or a system message
+     * / * informing the user about the reason for the failure.
+     */
+    val message: String
+) {
+    /**
+     * Error code, as a string, self-explanatory.
+     */
+    @StringDef(*[REASON_SUCCESS, REASON_NOT_FOUND, REASON_SERVER, REASON_CONNECTION, REASON_OTHER])
+    @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
+    annotation class ErrorReason
 
-  /**
-   * Error code, as a string, self-explanatory.
-   */
-  @StringDef( {REASON_SUCCESS, REASON_NOT_FOUND, REASON_SERVER, REASON_CONNECTION, REASON_OTHER})
-  @Retention(RetentionPolicy.SOURCE)
-  public @interface ErrorReason {
-  }
-
-  public static final String REASON_SUCCESS = "REASON_SUCCESS";
-  public static final String REASON_NOT_FOUND = "REASON_NOT_FOUND";
-  public static final String REASON_SERVER = "REASON_SERVER";
-  public static final String REASON_CONNECTION = "REASON_CONNECTION";
-  public static final String REASON_OTHER = "REASON_OTHER";
-
-  @NonNull
-  @ErrorReason
-  private final String reason;
-
-  /**
-   * /* An error message from the request handler, e.g. a server message or a system message
-   * /* informing the user about the reason for the failure.
-   */
-  @NonNull
-  private final String message;
-
-  // Constructors
-  @Keep
-  private OfflineRegionError(@NonNull String reason, @NonNull String message) {
-    // For JNI use only
-    this.reason = reason;
-    this.message = message;
-  }
-
-  // Getters
-
-  @NonNull
-  @ErrorReason
-  public String getReason() {
-    return reason;
-  }
-
-  @NonNull
-  public String getMessage() {
-    return message;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    override fun equals(o: Any?): Boolean {
+        if (this === o) {
+            return true
+        }
+        if (o == null || javaClass != o.javaClass) {
+            return false
+        }
+        val that = o as OfflineRegionError
+        return if (reason != that.reason) {
+            false
+        } else {
+            message == that.message
+        }
     }
 
-    OfflineRegionError that = (OfflineRegionError) o;
-
-    if (!reason.equals(that.reason)) {
-      return false;
+    override fun hashCode(): Int {
+        var result = reason.hashCode()
+        result = 31 * result + message.hashCode()
+        return result
     }
-    return message.equals(that.message);
-  }
 
-  @Override
-  public int hashCode() {
-    int result = reason.hashCode();
-    result = 31 * result + message.hashCode();
-    return result;
-  }
+    override fun toString(): String {
+        return ("OfflineRegionError{" + "reason='" + reason + '\'' + ", message='" + message + '\'' + '}')
+    }
 
-  @Override
-  public String toString() {
-    return "OfflineRegionError{"
-      + "reason='" + reason + '\''
-      + ", message='" + message + '\''
-      + '}';
-  }
+    companion object {
+        const val REASON_SUCCESS = "REASON_SUCCESS"
+        const val REASON_NOT_FOUND = "REASON_NOT_FOUND"
+        const val REASON_SERVER = "REASON_SERVER"
+        const val REASON_CONNECTION = "REASON_CONNECTION"
+        const val REASON_OTHER = "REASON_OTHER"
+    }
 }

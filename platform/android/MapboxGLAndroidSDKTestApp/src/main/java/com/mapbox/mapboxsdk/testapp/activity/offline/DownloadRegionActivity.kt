@@ -89,10 +89,10 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
             definition,
             byteArrayOf(),
             object : OfflineManager.CreateOfflineRegionCallback {
-                override fun onCreate(region: OfflineRegion) {
-                    logMessage("Region with id ${region.id} created")
-                    offlineRegion = region
-                    startDownload(region)
+                override fun onCreate(offlineRegion: OfflineRegion) {
+                    logMessage("Region with id ${offlineRegion.id} created")
+                    this@DownloadRegionActivity.offlineRegion = offlineRegion
+                    startDownload(offlineRegion)
                     binding.fab.visibility = View.VISIBLE
                 }
 
@@ -181,12 +181,12 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     fun deleteOldOfflineRegions(onCompleted: () -> Unit) {
         offlineManager.listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<out OfflineRegion>) {
-                val count = offlineRegions.size
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
+                val count = offlineRegions?.size ?: 0
                 var remainingCount = count
                 if (count > 0) {
                     logMessage("Deleting $count old region...")
-                    offlineRegions.forEach {
+                    offlineRegions?.forEach {
                         it.delete(object : OfflineRegion.OfflineRegionDeleteCallback {
                             override fun onDelete() {
                                 Timber.d("Deleted region with id ${it.id}")
