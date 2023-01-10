@@ -22,20 +22,15 @@ The documentation of MapLibre GL Native is a work in progress. To get an archite
 
 ## Platforms
 
-Platforms by [project tier](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
-
-## Core Projects
-
-- [Android](platform/android/README.md)
-- [iOS](platform/ios/platform/ios/README.md)
-
-### Hosted Projects
-
+- [⭐️ Android](platform/android/README.md) 
+- [⭐️ iOS](platform/ios/platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [macOS](platform/ios/platform/macos/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
+
+Platforms with a ⭐️ are MapLibre Core Projects and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
 ## Contributing
 
