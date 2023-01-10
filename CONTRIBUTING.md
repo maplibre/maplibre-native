@@ -33,14 +33,11 @@ If you want to contribute code:
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
 
-1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant changelog(s):
-  * [MapLibre GL Native for iOS](platform/ios/platform/ios/CHANGELOG.md)
-  * [MapLibre GL Native for macOS](platform/macos/CHANGELOG.md)
-  * [MapLibre GL Native for Android](platform/android/CHANGELOG.md)
+1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 
 4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native GL for [iOS SDK](platform/ios/CONTRIBUTING.md), [Android](platform/android/CONTRIBUTING.md) or [macOS](platform/ios/platform/macos/CONTRIBUTING.md).
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre GL Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/ios/platform/macos/DEVELOPING.md).
 
 ## Design Proposals
 
