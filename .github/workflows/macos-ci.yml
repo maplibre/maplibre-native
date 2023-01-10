@@ -9,6 +9,7 @@ on:
       - 'macos-*'
     paths:
       - 'platform/ios/**'
+      - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -28,6 +29,7 @@ on:
       - main
     paths:
       - 'platform/ios/**'
+      - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
       - "bin/**"
       - "expression-test/**"

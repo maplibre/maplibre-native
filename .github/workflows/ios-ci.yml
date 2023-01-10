@@ -9,6 +9,7 @@ on:
       - 'ios-*'
     paths:
       - 'platform/ios/**'
+      - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -28,6 +29,7 @@ on:
       - main
     paths:
       - 'platform/ios/**'
+      - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
       - "bin/**"
       - "expression-test/**"
