@@ -59,7 +59,7 @@ The steps for a Design Proposal are the following:
 
 ## Semantic Versioning
 
-MapLibre uses tags for its Android & iOS releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancements or debugging.
+MapLibre uses tags for releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancements or debugging.
 
 You can list available tags by issuing the command `git tag`, then use the result
 
