@@ -1,4 +1,4 @@
-![MapLibre Logo](https://maplibre.org/img/maplibre-logo-big.svg)
+[![MapLibre Logo](https://maplibre.org/img/maplibre-logo-big.svg)](https://maplibre.org/)
 
 # MapLibre GL Native
 
@@ -46,6 +46,12 @@ Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://sla
 | [Maps SDK for Android](platform/android/)      | CI      | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci)           |
 | [Maps SDK for Android](platform/android/)     | Release | [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/workflows/android-release) |
 
+## The Future of MapLibre GL Native
+
+MapLibre GL Native is being actively developed.
+
+- Check out the [news](https://maplibre.org/news/) on MapLibre's website.
+- See the [Design Proposals](https://github.com/louwers/maplibre-gl-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent being the [Rendering Modularization Design Proposal](https://github.com/louwers/maplibre-gl-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md).
 
 ## Sponsors
 
