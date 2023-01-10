@@ -10,7 +10,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng
  *
  * @see MapSnapshotter
  */
-class MapSnapshot @Keep private constructor(@Keep val nativePtr: Long, bitmap: Bitmap, attributions: Array<String>, showLogo: Boolean) {
+@Keep
+class MapSnapshot private constructor(val nativePtr: Long, bitmap: Bitmap, attributions: Array<String>, showLogo: Boolean) {
 
     /**
      * @return the large
