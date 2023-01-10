@@ -198,6 +198,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         }
         options.withStyleBuilder(builder)
         val snapshotter = MapSnapshotter(this@MapSnapshotterActivity, options)
+
         snapshotter.setObserver(object : MapSnapshotter.Observer {
             override fun onDidFinishLoadingStyle() {
                 Timber.i("onDidFinishLoadingStyle")
@@ -209,15 +210,21 @@ class MapSnapshotterActivity : AppCompatActivity() {
                 snapshotter.addImage(imageName, androidIcon!!, false)
             }
         })
-        snapshotter.start { snapshot: MapSnapshot ->
-            Timber.i("Got the snapshot")
-            val imageView = ImageView(this@MapSnapshotterActivity)
-            imageView.setImageBitmap(snapshot.bitmap)
-            grid.addView(
-                imageView,
-                GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(column))
-            )
-        }
+
+        snapshotter.start(
+            object : MapSnapshotter.SnapshotReadyCallback {
+                override fun onSnapshotReady(snapshot: MapSnapshot) {
+                    Timber.i("Got the snapshot")
+                    val imageView = ImageView(this@MapSnapshotterActivity)
+                    imageView.setImageBitmap(snapshot.bitmap)
+                    grid.addView(
+                        imageView,
+                        GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(column))
+                    )
+                }
+            }
+        )
+
         snapshotters.add(snapshotter)
     }
 

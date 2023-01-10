@@ -145,9 +145,9 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
         // Query the DB asynchronously
         offlineManager!!.listOfflineRegions(object : ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<OfflineRegion>) {
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 // Check result
-                if (offlineRegions == null || offlineRegions.size == 0) {
+                if (offlineRegions == null || offlineRegions.isEmpty()) {
                     Toast.makeText(
                         this@OfflineActivity,
                         "You have no regions yet.",
