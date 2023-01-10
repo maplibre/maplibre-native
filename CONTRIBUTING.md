@@ -5,6 +5,7 @@
 There is a high-level overview of MapLibre GL Native avaiable:
 
 - [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/)
+- See [`DEVELOPING.md`](DEVELOPING.md) for getting started with development.
 
 ## Source code checkout
 

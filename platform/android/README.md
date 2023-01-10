@@ -39,10 +39,10 @@ MapLibre GL Native for Android is a library for embedding interactive map views 
 >    }
 > ```
 
-## Docs
+## Documentation
 
 Visit [https://maplibre.org/maplibre-gl-native/android/api/](https://maplibre.org/maplibre-gl-native/android/api/) to view the current API reference Javadoc files for MapLibre GL Native for Android.
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+See [`DEVELOPING.md`](./DEVELOPING.md) for instructions on how to get started working on the codebase.

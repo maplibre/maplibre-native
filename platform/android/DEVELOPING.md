@@ -1,4 +1,4 @@
-# Contributing - MapLibre GL Native for Android
+# Developing - MapLibre GL Native for Android
 
 These instructions are for developers interested in making code-level contributions to the SDK itself.
 
