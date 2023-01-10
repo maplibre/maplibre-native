@@ -23,7 +23,7 @@ To get started with MapLibre GL Native, go to your platform below.
 
 ### Community maintained
 
-- [GLFW](platform/glfw/README.md)
+- [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [macOS](platform/ios/platform/macos/README.md)
 - [Node.js](platform/node/README.md)
