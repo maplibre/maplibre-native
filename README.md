@@ -16,6 +16,10 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
 
 To get started with MapLibre GL Native, go to your platform below.
 
+## Documentation
+
+The documentation of MapLibre GL Native is a work in progress. To get an architectural overview and to learn about the current state of the project and its path forward read the [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/). See below for platform-specific documentation.
+
 ## Platforms
 
 - [Android](platform/android/README.md)
