@@ -1,5 +1,7 @@
 # MapLibre GL Native for macOS
 
+[![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-release.yml)
+
 Put interactive, scalable world maps into your native Cocoa application with MapLibre GL Native for macOS.
 
 * High-performance OpenGL rendering and multitouch gestures keep your users happy.
