@@ -27,7 +27,7 @@ console.log("\nGenerating test activities:\n");
 var generatedClasses = [];
 var excludedClasses = [];
 for(const subPackage of subPackages) {
-  if(!(subPackage.slice(-5) === '.kt')) {
+  if(!(subPackage.slice(-5) === '.java')) {
     const activities = fs.readdirSync(`${appBasePath}/${subPackage}`);
 
     // create directories for package
@@ -37,16 +37,16 @@ for(const subPackage of subPackages) {
 
     for (const activity of activities) {
       var activityName;
-      if (activity.slice(-5) === '.kt') {
+      if (activity.slice(-5) === '.java') {
         // .java file
         activityName = activity.slice(0, -5);
       } else {
-        // .kt file
+        // .java file
         activityName = activity.slice(0, -3);
       }
 
       // create path for test file
-      const filePath = `${testBasePath}/${subPackage}/${activityName}Test.kt`;
+      const filePath = `${testBasePath}/${subPackage}/${activityName}Test.java`;
 
       // try removing previous generated files
       try {
