@@ -18,9 +18,9 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.maplibre.testUtils.Assert as MapLibreAssert
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
+import org.maplibre.testUtils.Assert as MapLibreAssert
 
 @RunWith(RobolectricTestRunner::class)
 class LocationAnimatorCoordinatorTest {
