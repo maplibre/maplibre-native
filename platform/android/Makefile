@@ -266,7 +266,7 @@ test-code-android:
 
 # Runs checkstyle and lint on the java code
 .PHONY: android-check
-android-check : android-checkstyle android-lint-sdk android-lint-test-app run-android-nitpick
+android-check : android-ktlint android-checkstyle android-lint-sdk android-lint-test-app run-android-nitpick
 
 # Runs checkstyle on the java code
 .PHONY: android-checkstyle
