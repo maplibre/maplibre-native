@@ -11,13 +11,13 @@ To check Kotlin style, we use [ktlint](https://pinterest.github.io/ktlint/). Thi
 To check the style of all Kotlin source files, use:
 
 ```
-$ gradle checkStyle
+$ ./gradlew checkStyle
 ```
 
 To format all Kotlin source files, use:
 
 ```
-$ gradle formatStyle
+$ ./gradlew formatStyle
 ```
 
 You might find it helpful to install the [Ktlint](https://plugins.jetbrains.com/plugin/15057-ktlint-unofficial-) Android Studio plugin.
