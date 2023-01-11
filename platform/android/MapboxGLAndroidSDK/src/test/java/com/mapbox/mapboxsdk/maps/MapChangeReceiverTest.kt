@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ExecutionError
 import com.mapbox.mapboxsdk.log.Logger
 import com.mapbox.mapboxsdk.log.LoggerDefinition
 import com.mapbox.mapboxsdk.maps.MapView.*
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers

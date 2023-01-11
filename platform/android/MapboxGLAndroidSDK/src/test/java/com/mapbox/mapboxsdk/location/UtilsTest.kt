@@ -1,6 +1,6 @@
 package com.mapbox.mapboxsdk.location
 
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Test
 
 class UtilsTest {

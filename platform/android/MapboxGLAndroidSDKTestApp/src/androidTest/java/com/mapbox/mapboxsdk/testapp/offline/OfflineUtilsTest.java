@@ -12,8 +12,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import static com.mapbox.mapboxsdk.testapp.activity.offline.OfflineActivity.JSON_CHARSET;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class OfflineUtilsTest extends AppCenter {

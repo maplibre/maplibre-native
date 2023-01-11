@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.annotation.WorkerThread
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.storage.FileSource
-import junit.framework.Assert
+import org.junit.Assert
 import java.io.File
 import java.util.concurrent.CountDownLatch
 
