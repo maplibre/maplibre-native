@@ -17,7 +17,7 @@ $ ./gradlew checkStyle
 To format all Kotlin source files, use:
 
 ```
-$ ./gradlew formatStyle
+$ ./gradlew formatKotlin
 ```
 
 You might find it helpful to install the [Ktlint](https://plugins.jetbrains.com/plugin/15057-ktlint-unofficial-) Android Studio plugin.
