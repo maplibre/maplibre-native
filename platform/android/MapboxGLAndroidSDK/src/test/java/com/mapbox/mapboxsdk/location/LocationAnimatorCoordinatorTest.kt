@@ -18,6 +18,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.testUtils.assertions.assertEquals
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 
