@@ -23,9 +23,8 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
 
-import junit.framework.Assert;
-
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

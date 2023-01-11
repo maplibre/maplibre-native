@@ -5,7 +5,7 @@ import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException
 import com.mapbox.mapboxsdk.geometry.LatLngBounds.Companion.from
 import com.mapbox.mapboxsdk.geometry.LatLngBounds.Companion.world
 import com.mapbox.mapboxsdk.utils.MockParcel
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,7 +41,7 @@ class LatLngBoundsTest {
 
     @Test
     fun latitiudeSpan() {
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "Span should be the same",
             2.0,
             latLngBounds!!.latitudeSpan,
@@ -51,7 +51,7 @@ class LatLngBoundsTest {
 
     @Test
     fun longitudeSpan() {
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "Span should be the same",
             2.0,
             latLngBounds!!.longitudeSpan,
@@ -62,7 +62,7 @@ class LatLngBoundsTest {
     @Test
     fun coordinateSpan() {
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(2.0, 2.0),
             latLngSpan
@@ -76,7 +76,7 @@ class LatLngBoundsTest {
             .include(LatLng(-10.0, 170.0))
             .build()
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 340.0),
             latLngSpan
@@ -90,7 +90,7 @@ class LatLngBoundsTest {
             .include(LatLng(10.0, 170.0))
             .build()
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 340.0),
             latLngSpan
@@ -101,7 +101,7 @@ class LatLngBoundsTest {
     fun dateLineSpanFrom1() {
         latLngBounds = from(10.0, -170.0, -10.0, -190.0)
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 20.0),
             latLngSpan
@@ -112,7 +112,7 @@ class LatLngBoundsTest {
     fun dateLineSpanFrom2() {
         latLngBounds = from(10.0, 170.0, -10.0, -170.0)
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 340.0),
             latLngSpan
@@ -123,7 +123,7 @@ class LatLngBoundsTest {
     fun zeroLongitudeSpan() {
         latLngBounds = from(10.0, 10.0, -10.0, 10.0)
         val latLngSpan = latLngBounds!!.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be shortest distance",
             LatLngSpan(20.0, 0.0),
             latLngSpan
@@ -134,55 +134,55 @@ class LatLngBoundsTest {
     fun nearDateLineCenter1() {
         latLngBounds = from(10.0, -175.0, -10.0, -195.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, -185.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, -185.0), center)
     }
 
     @Test
     fun nearDateLineCenter2() {
         latLngBounds = from(10.0, 195.0, -10.0, 175.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, 185.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, 185.0), center)
     }
 
     @Test
     fun nearDateLineCenter3() {
         latLngBounds = from(10.0, -170.0, -10.0, -190.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, -180.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, -180.0), center)
     }
 
     @Test
     fun nearDateLineCenter4() {
         latLngBounds = from(10.0, 180.0, -10.0, 0.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, 90.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, 90.0), center)
     }
 
     @Test
     fun nearDateLineCenter5() {
         latLngBounds = from(10.0, 180.0, -10.0, 0.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, 90.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, 90.0), center)
     }
 
     @Test
     fun centerForBoundsWithSameLongitude() {
         latLngBounds = from(10.0, 10.0, -10.0, 10.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(0.0, 10.0), center)
+        Assert.assertEquals("Center should match", LatLng(0.0, 10.0), center)
     }
 
     @Test
     fun centerForBoundsWithSameLatitude() {
         latLngBounds = from(10.0, 10.0, 10.0, -10.0)
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(10.0, 0.0), center)
+        Assert.assertEquals("Center should match", LatLng(10.0, 0.0), center)
     }
 
     @Test
     fun center() {
         val center = latLngBounds!!.center
-        org.junit.Assert.assertEquals("Center should match", LatLng(1.0, 1.0), center)
+        Assert.assertEquals("Center should match", LatLng(1.0, 1.0), center)
     }
 
     @Test
@@ -191,7 +191,7 @@ class LatLngBoundsTest {
             .include(LAT_LNG_NOT_NULL_ISLAND)
             .include(LAT_LNG_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertFalse("Should not be empty", latLngBounds!!.isEmptySpan)
+        Assert.assertFalse("Should not be empty", latLngBounds!!.isEmptySpan)
     }
 
     @Test
@@ -202,8 +202,8 @@ class LatLngBoundsTest {
             .include(LAT_LNG_NULL_ISLAND)
             .include(LAT_LNG_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertEquals(latLngBounds!!.northEast, LAT_LNG_NOT_NULL_ISLAND)
-        org.junit.Assert.assertEquals(latLngBounds!!.southWest, LAT_LNG_NULL_ISLAND)
+        Assert.assertEquals(latLngBounds!!.northEast, LAT_LNG_NOT_NULL_ISLAND)
+        Assert.assertEquals(latLngBounds!!.southWest, LAT_LNG_NULL_ISLAND)
     }
 
     @Test
@@ -212,7 +212,7 @@ class LatLngBoundsTest {
             .include(LAT_LNG_NOT_NULL_ISLAND)
             .include(LAT_LNG_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertArrayEquals(
+        Assert.assertArrayEquals(
             "LatLngs should match",
             arrayOf(LAT_LNG_NOT_NULL_ISLAND, LAT_LNG_NULL_ISLAND),
             latLngBounds!!.toLatLngs()
@@ -221,7 +221,7 @@ class LatLngBoundsTest {
 
     @Test
     fun include() {
-        org.junit.Assert.assertTrue(
+        Assert.assertTrue(
             "LatLng should be included",
             latLngBounds!!.contains(LatLng(1.0, 1.0))
         )
@@ -239,7 +239,7 @@ class LatLngBoundsTest {
             .include(LAT_LNG_NULL_ISLAND)
             .include(LAT_LNG_NOT_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertEquals("LatLngBounds should match", latLngBounds1, latLngBounds2)
+        Assert.assertEquals("LatLngBounds should match", latLngBounds1, latLngBounds2)
     }
 
     @Test
@@ -258,7 +258,7 @@ class LatLngBoundsTest {
             .include(LatLng(60.0, 20.0)) // northEast
             .include(LatLng(50.0, 20.0))
             .build()
-        org.junit.Assert.assertEquals(sameLatitudeFirst, sameLongitudeFirst)
+        Assert.assertEquals(sameLatitudeFirst, sameLongitudeFirst)
     }
 
     @Test
@@ -269,7 +269,7 @@ class LatLngBoundsTest {
             .include(LatLng(0.0, -190.0))
             .build()
         val latLngSpan = latLngBounds.span
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 20.0),
             latLngSpan
@@ -283,7 +283,7 @@ class LatLngBoundsTest {
             .include(LatLng(-10.0, 175.0))
             .include(LatLng(0.0, 190.0))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 20.0),
             latLngBounds.span
@@ -298,7 +298,7 @@ class LatLngBoundsTest {
             .include(LatLng(0.0, -180.0))
             .include(LatLng(5.0, -180.0))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngSpan should be the same",
             LatLngSpan(20.0, 20.0),
             latLngBounds.span
@@ -307,7 +307,7 @@ class LatLngBoundsTest {
 
     @Test
     fun containsNot() {
-        org.junit.Assert.assertFalse(
+        Assert.assertFalse(
             "LatLng should not be included",
             latLngBounds!!.contains(LatLng(3.0, 1.0))
         )
@@ -315,7 +315,7 @@ class LatLngBoundsTest {
 
     @Test
     fun containsBoundsInWorld() {
-        org.junit.Assert.assertTrue(
+        Assert.assertTrue(
             "LatLngBounds should be contained in the world",
             world().contains(latLngBounds!!)
         )
@@ -323,13 +323,13 @@ class LatLngBoundsTest {
 
     @Test
     fun worldSpan() {
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngBounds world span should be 180, 360",
             GeometryConstants.LATITUDE_SPAN,
             world().latitudeSpan,
             DELTA
         )
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "LatLngBounds world span should be 180, 360",
             GeometryConstants.LONGITUDE_SPAN,
             world().longitudeSpan,
@@ -345,7 +345,7 @@ class LatLngBoundsTest {
             GeometryConstants.MIN_LATITUDE,
             GeometryConstants.MAX_LONGITUDE
         )
-        org.junit.Assert.assertTrue("LatLngBounds empty span", latLngBounds.isEmptySpan)
+        Assert.assertTrue("LatLngBounds empty span", latLngBounds.isEmptySpan)
     }
 
     @Test
@@ -358,13 +358,13 @@ class LatLngBoundsTest {
             .include(LatLng(-10.0, -10.0))
             .include(LatLng(10.0, 10.0))
             .build()
-        org.junit.Assert.assertTrue(outer.contains(inner))
-        org.junit.Assert.assertFalse(inner.contains(outer))
+        Assert.assertTrue(outer.contains(inner))
+        Assert.assertFalse(inner.contains(outer))
     }
 
     @Test
     fun testHashCode() {
-        org.junit.Assert.assertEquals(2147483647f, latLngBounds.hashCode().toFloat(), -1946419200f)
+        Assert.assertEquals(2147483647f, latLngBounds.hashCode().toFloat(), -1946419200f)
     }
 
     @Test
@@ -373,8 +373,8 @@ class LatLngBoundsTest {
             .include(LAT_LNG_NULL_ISLAND)
             .include(LAT_LNG_NOT_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertEquals("equality should match", this.latLngBounds, latLngBounds)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals("equality should match", this.latLngBounds, latLngBounds)
+        Assert.assertEquals(
             "not equal to a different object type",
             this.latLngBounds!!.equals(LAT_LNG_NOT_NULL_ISLAND),
             false
@@ -383,7 +383,7 @@ class LatLngBoundsTest {
 
     @Test
     fun testToString() {
-        org.junit.Assert.assertEquals(latLngBounds.toString(), "N:2.0; E:2.0; S:0.0; W:0.0")
+        Assert.assertEquals(latLngBounds.toString(), "N:2.0; E:2.0; S:0.0; W:0.0")
     }
 
     @Test
@@ -392,7 +392,7 @@ class LatLngBoundsTest {
             .include(LatLng(1.0, 1.0))
             .include(LAT_LNG_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "intersect should match",
             latLngBounds,
             latLngBounds.intersect(
@@ -410,7 +410,7 @@ class LatLngBoundsTest {
             .include(LatLng(10.0, 10.0))
             .include(LatLng(9.0, 8.0))
             .build()
-        org.junit.Assert.assertNull(latLngBounds.intersect(this.latLngBounds!!))
+        Assert.assertNull(latLngBounds.intersect(this.latLngBounds!!))
     }
 
     @Test
@@ -449,8 +449,8 @@ class LatLngBoundsTest {
         val latLngBounds1 = from(10.0, 210.0, 0.0, 0.0)
         val latLngBounds2 = from(90.0, 200.0, 0.0, 0.0)
         val intersectLatLngBounds = from(10.0, 200.0, 0.0, 0.0)
-        org.junit.Assert.assertEquals(latLngBounds1.intersect(latLngBounds2), intersectLatLngBounds)
-        org.junit.Assert.assertEquals(latLngBounds2.intersect(latLngBounds1), intersectLatLngBounds)
+        Assert.assertEquals(latLngBounds1.intersect(latLngBounds2), intersectLatLngBounds)
+        Assert.assertEquals(latLngBounds2.intersect(latLngBounds1), intersectLatLngBounds)
     }
 
     @Test
@@ -458,8 +458,8 @@ class LatLngBoundsTest {
         val latLngBounds1 = from(0.0, 0.0, -10.0, -210.0)
         val latLngBounds2 = from(0.0, 0.0, -90.0, -200.0)
         val intersectLatLngBounds = from(0.0, 0.0, -10.0, -200.0)
-        org.junit.Assert.assertEquals(latLngBounds1.intersect(latLngBounds2), intersectLatLngBounds)
-        org.junit.Assert.assertEquals(latLngBounds2.intersect(latLngBounds1), intersectLatLngBounds)
+        Assert.assertEquals(latLngBounds1.intersect(latLngBounds2), intersectLatLngBounds)
+        Assert.assertEquals(latLngBounds2.intersect(latLngBounds1), intersectLatLngBounds)
     }
 
     @Test
@@ -468,7 +468,7 @@ class LatLngBoundsTest {
             .include(LatLng(1.0, 1.0))
             .include(LAT_LNG_NULL_ISLAND)
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "union should match",
             latLngBounds,
             latLngBounds.intersect(
@@ -483,7 +483,7 @@ class LatLngBoundsTest {
             .include(LatLng(10.0, 10.0))
             .include(LatLng(9.0, 8.0))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "outer union should match",
             latLngBounds.union(this.latLngBounds!!),
             LatLngBounds.Builder()
@@ -505,14 +505,14 @@ class LatLngBoundsTest {
             .build()
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             union1,
             LatLngBounds.Builder()
                 .include(LatLng(10.0, 160.0))
                 .include(LatLng(-10.0, 200.0))
                 .build()
         )
-        org.junit.Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, union2)
     }
 
     @Test
@@ -527,14 +527,14 @@ class LatLngBoundsTest {
             .build()
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             union1,
             LatLngBounds.Builder()
                 .include(LatLng(10.0, 160.0))
                 .include(LatLng(-10.0, 200.0))
                 .build()
         )
-        org.junit.Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, union2)
     }
 
     @Test
@@ -549,14 +549,14 @@ class LatLngBoundsTest {
             .build()
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             union1,
             LatLngBounds.Builder()
                 .include(LatLng(10.0, 160.0))
                 .include(LatLng(-10.0, 200.0))
                 .build()
         )
-        org.junit.Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, union2)
     }
 
     @Test
@@ -571,14 +571,14 @@ class LatLngBoundsTest {
             .build()
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             union1,
             LatLngBounds.Builder()
                 .include(LatLng(10.0, -200.0))
                 .include(LatLng(-10.0, -160.0))
                 .build()
         )
-        org.junit.Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, union2)
     }
 
     @Test
@@ -593,14 +593,14 @@ class LatLngBoundsTest {
             .build()
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             union1,
             LatLngBounds.Builder()
                 .include(LatLng(10.0, 160.0))
                 .include(LatLng(-10.0, 200.0))
                 .build()
         )
-        org.junit.Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, union2)
     }
 
     @Test
@@ -609,8 +609,8 @@ class LatLngBoundsTest {
         val latLngBounds2 = from(10.0, 10.0, -10.0, -200.0)
         val union1 = latLngBounds1.union(latLngBounds2)
         val union2 = latLngBounds2.union(latLngBounds1)
-        org.junit.Assert.assertEquals(union1, union2)
-        org.junit.Assert.assertEquals(union1, from(10.0, 200.0, -10.0, -200.0))
+        Assert.assertEquals(union1, union2)
+        Assert.assertEquals(union1, from(10.0, 200.0, -10.0, -200.0))
     }
 
     @Test
@@ -642,8 +642,8 @@ class LatLngBoundsTest {
         val latLngBounds1 = from(10.0, 10.0, 0.0, 0.0)
         val latLngBounds2 = from(90.0, 200.0, 0.0, 0.0)
         val unionLatLngBounds = from(90.0, 200.0, 0.0, 0.0)
-        org.junit.Assert.assertEquals(latLngBounds1.union(latLngBounds2), unionLatLngBounds)
-        org.junit.Assert.assertEquals(latLngBounds2.union(latLngBounds1), unionLatLngBounds)
+        Assert.assertEquals(latLngBounds1.union(latLngBounds2), unionLatLngBounds)
+        Assert.assertEquals(latLngBounds2.union(latLngBounds1), unionLatLngBounds)
     }
 
     @Test
@@ -651,8 +651,8 @@ class LatLngBoundsTest {
         val latLngBounds1 = from(0.0, 0.0, -10.0, -10.0)
         val latLngBounds2 = from(0.0, 0.0, -90.0, -200.0)
         val unionLatLngBounds = from(0.0, 0.0, -90.0, -200.0)
-        org.junit.Assert.assertEquals(latLngBounds1.union(latLngBounds2), unionLatLngBounds)
-        org.junit.Assert.assertEquals(latLngBounds2.union(latLngBounds1), unionLatLngBounds)
+        Assert.assertEquals(latLngBounds1.union(latLngBounds2), unionLatLngBounds)
+        Assert.assertEquals(latLngBounds2.union(latLngBounds1), unionLatLngBounds)
     }
 
     @Test
@@ -665,7 +665,7 @@ class LatLngBoundsTest {
             .include(LatLng(minLat, minLon))
             .include(LatLng(maxLat, maxLon))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "NorthWest should match",
             latLngBounds.northWest,
             LatLng(maxLat, minLon)
@@ -682,7 +682,7 @@ class LatLngBoundsTest {
             .include(LatLng(minLat, minLon))
             .include(LatLng(maxLat, maxLon))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "SouthWest should match",
             latLngBounds.southWest,
             LatLng(minLat, minLon)
@@ -699,7 +699,7 @@ class LatLngBoundsTest {
             .include(LatLng(minLat, minLon))
             .include(LatLng(maxLat, maxLon))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "NorthEast should match",
             latLngBounds.northEast,
             LatLng(maxLat, maxLon)
@@ -716,7 +716,7 @@ class LatLngBoundsTest {
             .include(LatLng(minLat, minLon))
             .include(LatLng(maxLat, maxLon))
             .build()
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             "SouthEast should match",
             latLngBounds.southEast,
             LatLng(minLat, maxLon)
@@ -730,37 +730,37 @@ class LatLngBoundsTest {
             .include(LatLng(9.0, 8.0))
             .build()
         val parcel = MockParcel.obtain(latLngBounds)
-        org.junit.Assert.assertEquals("Parcel should match original object", parcel, latLngBounds)
+        Assert.assertEquals("Parcel should match original object", parcel, latLngBounds)
     }
 
     @Test
     fun fromTileID() {
         var bounds = from(0, 0, 0)
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             GeometryConstants.MIN_WRAP_LONGITUDE,
             bounds.getLonWest(),
             DELTA
         )
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             GeometryConstants.MIN_MERCATOR_LATITUDE,
             bounds.getLatSouth(),
             DELTA
         )
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             GeometryConstants.MAX_WRAP_LONGITUDE,
             bounds.getLonEast(),
             DELTA
         )
-        org.junit.Assert.assertEquals(
+        Assert.assertEquals(
             GeometryConstants.MAX_MERCATOR_LATITUDE,
             bounds.getLatNorth(),
             DELTA
         )
         bounds = from(10, 288, 385)
-        org.junit.Assert.assertEquals(-78.75, bounds.getLonWest(), DELTA)
-        org.junit.Assert.assertEquals(40.446947059600497, bounds.getLatSouth(), DELTA)
-        org.junit.Assert.assertEquals(-78.3984375, bounds.getLonEast(), DELTA)
-        org.junit.Assert.assertEquals(40.713955826286039, bounds.getLatNorth(), DELTA)
+        Assert.assertEquals(-78.75, bounds.getLonWest(), DELTA)
+        Assert.assertEquals(40.446947059600497, bounds.getLatSouth(), DELTA)
+        Assert.assertEquals(-78.3984375, bounds.getLonEast(), DELTA)
+        Assert.assertEquals(40.713955826286039, bounds.getLatNorth(), DELTA)
     }
 
     @Rule @JvmField

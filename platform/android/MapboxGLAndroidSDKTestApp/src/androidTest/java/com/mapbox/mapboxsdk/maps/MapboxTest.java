@@ -14,10 +14,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertTrue;
-
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class MapboxTest extends AppCenter {
 
