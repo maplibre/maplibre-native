@@ -119,9 +119,6 @@ jobs:
           cmake --version
           make android-lib-arm-v8
 
-      - name: Generate Espresso sanity tests
-        run: make test-code-android
-
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
