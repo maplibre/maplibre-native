@@ -21,24 +21,24 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testDebugEnabled() {
-        junit.framework.Assert.assertFalse(MapboxMapOptions().debugActive)
+        Assert.assertFalse(MapboxMapOptions().debugActive)
         Assert.assertTrue(MapboxMapOptions().debugActive(true).debugActive)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().debugActive(false).debugActive)
+        Assert.assertFalse(MapboxMapOptions().debugActive(false).debugActive)
     }
 
     @Test
     fun testCompassEnabled() {
         Assert.assertTrue(MapboxMapOptions().compassEnabled(true).compassEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().compassEnabled(false).compassEnabled)
+        Assert.assertFalse(MapboxMapOptions().compassEnabled(false).compassEnabled)
     }
 
     @Test
     fun testCompassGravity() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.TOP or Gravity.END,
             MapboxMapOptions().compassGravity
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.BOTTOM,
             MapboxMapOptions().compassGravity(Gravity.BOTTOM).compassGravity
         )
@@ -56,7 +56,7 @@ class MapboxMapOptionsTest {
                 MapboxMapOptions().compassMargins(intArrayOf(0, 1, 2, 3)).compassMargins
             )
         )
-        junit.framework.Assert.assertFalse(
+        Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapboxMapOptions().compassMargins(intArrayOf(0, 0, 0, 0)).compassMargins
@@ -67,16 +67,16 @@ class MapboxMapOptionsTest {
     @Test
     fun testLogoEnabled() {
         Assert.assertTrue(MapboxMapOptions().logoEnabled(true).logoEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().logoEnabled(false).logoEnabled)
+        Assert.assertFalse(MapboxMapOptions().logoEnabled(false).logoEnabled)
     }
 
     @Test
     fun testLogoGravity() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.BOTTOM or Gravity.START,
             MapboxMapOptions().logoGravity
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.BOTTOM,
             MapboxMapOptions().logoGravity(Gravity.BOTTOM).logoGravity
         )
@@ -94,7 +94,7 @@ class MapboxMapOptionsTest {
                 MapboxMapOptions().logoMargins(intArrayOf(0, 1, 2, 3)).logoMargins
             )
         )
-        junit.framework.Assert.assertFalse(
+        Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapboxMapOptions().logoMargins(intArrayOf(0, 0, 0, 0)).logoMargins
@@ -104,8 +104,8 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testAttributionTintColor() {
-        junit.framework.Assert.assertEquals(-1, MapboxMapOptions().attributionTintColor)
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(-1, MapboxMapOptions().attributionTintColor)
+        Assert.assertEquals(
             Color.RED,
             MapboxMapOptions().attributionTintColor(Color.RED).attributionTintColor
         )
@@ -114,16 +114,16 @@ class MapboxMapOptionsTest {
     @Test
     fun testAttributionEnabled() {
         Assert.assertTrue(MapboxMapOptions().attributionEnabled(true).attributionEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().attributionEnabled(false).attributionEnabled)
+        Assert.assertFalse(MapboxMapOptions().attributionEnabled(false).attributionEnabled)
     }
 
     @Test
     fun testAttributionGravity() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.BOTTOM or Gravity.START,
             MapboxMapOptions().attributionGravity
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             Gravity.BOTTOM,
             MapboxMapOptions().attributionGravity(Gravity.BOTTOM).attributionGravity
         )
@@ -141,7 +141,7 @@ class MapboxMapOptionsTest {
                 MapboxMapOptions().attributionMargins(intArrayOf(0, 1, 2, 3)).attributionMargins
             )
         )
-        junit.framework.Assert.assertFalse(
+        Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapboxMapOptions().attributionMargins(intArrayOf(0, 0, 0, 0)).attributionMargins
@@ -151,12 +151,12 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testMinZoom() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             MapboxConstants.MINIMUM_ZOOM.toDouble(),
             MapboxMapOptions().minZoomPreference,
             DELTA
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             5.0,
             MapboxMapOptions().minZoomPreference(5.0).minZoomPreference,
             DELTA
@@ -170,12 +170,12 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testMaxZoom() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             MapboxConstants.MAXIMUM_ZOOM.toDouble(),
             MapboxMapOptions().maxZoomPreference,
             DELTA
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             5.0,
             MapboxMapOptions().maxZoomPreference(5.0).maxZoomPreference,
             DELTA
@@ -189,12 +189,12 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testMinPitch() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             MapboxConstants.MINIMUM_PITCH.toDouble(),
             MapboxMapOptions().minPitchPreference,
             DELTA
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             5.0,
             MapboxMapOptions().minPitchPreference(5.0).minPitchPreference,
             DELTA
@@ -208,12 +208,12 @@ class MapboxMapOptionsTest {
 
     @Test
     fun testMaxPitch() {
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             MapboxConstants.MAXIMUM_PITCH.toDouble(),
             MapboxMapOptions().maxPitchPreference,
             DELTA
         )
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             5.0,
             MapboxMapOptions().maxPitchPreference(5.0).maxPitchPreference,
             DELTA
@@ -229,41 +229,41 @@ class MapboxMapOptionsTest {
     fun testTiltGesturesEnabled() {
         Assert.assertTrue(MapboxMapOptions().tiltGesturesEnabled)
         Assert.assertTrue(MapboxMapOptions().tiltGesturesEnabled(true).tiltGesturesEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().tiltGesturesEnabled(false).tiltGesturesEnabled)
+        Assert.assertFalse(MapboxMapOptions().tiltGesturesEnabled(false).tiltGesturesEnabled)
     }
 
     @Test
     fun testScrollGesturesEnabled() {
         Assert.assertTrue(MapboxMapOptions().scrollGesturesEnabled)
         Assert.assertTrue(MapboxMapOptions().scrollGesturesEnabled(true).scrollGesturesEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().scrollGesturesEnabled(false).scrollGesturesEnabled)
+        Assert.assertFalse(MapboxMapOptions().scrollGesturesEnabled(false).scrollGesturesEnabled)
     }
 
     @Test
     fun testHorizontalScrollGesturesEnabled() {
         Assert.assertTrue(MapboxMapOptions().horizontalScrollGesturesEnabled)
         Assert.assertTrue(MapboxMapOptions().horizontalScrollGesturesEnabled(true).horizontalScrollGesturesEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().horizontalScrollGesturesEnabled(false).horizontalScrollGesturesEnabled)
+        Assert.assertFalse(MapboxMapOptions().horizontalScrollGesturesEnabled(false).horizontalScrollGesturesEnabled)
     }
 
     @Test
     fun testZoomGesturesEnabled() {
         Assert.assertTrue(MapboxMapOptions().zoomGesturesEnabled)
         Assert.assertTrue(MapboxMapOptions().zoomGesturesEnabled(true).zoomGesturesEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().zoomGesturesEnabled(false).zoomGesturesEnabled)
+        Assert.assertFalse(MapboxMapOptions().zoomGesturesEnabled(false).zoomGesturesEnabled)
     }
 
     @Test
     fun testRotateGesturesEnabled() {
         Assert.assertTrue(MapboxMapOptions().rotateGesturesEnabled)
         Assert.assertTrue(MapboxMapOptions().rotateGesturesEnabled(true).rotateGesturesEnabled)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().rotateGesturesEnabled(false).rotateGesturesEnabled)
+        Assert.assertFalse(MapboxMapOptions().rotateGesturesEnabled(false).rotateGesturesEnabled)
     }
 
     @Test
     fun testCamera() {
         val position = CameraPosition.Builder().build()
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             CameraPosition.Builder(position).build(),
             MapboxMapOptions().camera(position).camera
         )
@@ -271,7 +271,7 @@ class MapboxMapOptionsTest {
             CameraPosition.Builder().target(LatLng(1.0, 1.0)),
             MapboxMapOptions().camera(position)
         )
-        junit.framework.Assert.assertNull(MapboxMapOptions().camera)
+        Assert.assertNull(MapboxMapOptions().camera)
     }
 
     @Test
@@ -281,16 +281,16 @@ class MapboxMapOptionsTest {
 
         // Check mutations
         Assert.assertTrue(MapboxMapOptions().setPrefetchesTiles(true).prefetchesTiles)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().setPrefetchesTiles(false).prefetchesTiles)
+        Assert.assertFalse(MapboxMapOptions().setPrefetchesTiles(false).prefetchesTiles)
     }
 
     @Test
     fun testPrefetchZoomDelta() {
         // Default value
-        junit.framework.Assert.assertEquals(4, MapboxMapOptions().prefetchZoomDelta)
+        Assert.assertEquals(4, MapboxMapOptions().prefetchZoomDelta)
 
         // Check mutations
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             5,
             MapboxMapOptions().setPrefetchZoomDelta(5).prefetchZoomDelta
         )
@@ -303,13 +303,13 @@ class MapboxMapOptionsTest {
 
         // check mutations
         Assert.assertTrue(MapboxMapOptions().crossSourceCollisions(true).crossSourceCollisions)
-        junit.framework.Assert.assertFalse(MapboxMapOptions().crossSourceCollisions(false).crossSourceCollisions)
+        Assert.assertFalse(MapboxMapOptions().crossSourceCollisions(false).crossSourceCollisions)
     }
 
     @Test
     fun testLocalIdeographFontFamily_enabledByDefault() {
         val options = MapboxMapOptions.createFromAttributes(RuntimeEnvironment.application, null)
-        junit.framework.Assert.assertEquals(
+        Assert.assertEquals(
             MapboxConstants.DEFAULT_FONT,
             options.localIdeographFontFamily
         )

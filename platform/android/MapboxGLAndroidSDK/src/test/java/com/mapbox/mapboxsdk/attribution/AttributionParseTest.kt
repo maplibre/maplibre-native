@@ -1,6 +1,6 @@
 package com.mapbox.mapboxsdk.attribution
 
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,8 +16,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 3, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -52,7 +51,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 
@@ -64,8 +62,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 2, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -88,7 +85,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 
@@ -101,8 +97,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 1, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -117,7 +112,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 
@@ -129,8 +123,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 3, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -165,7 +158,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 
@@ -178,8 +170,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 3, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -214,7 +205,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 
@@ -227,8 +217,7 @@ class AttributionParseTest {
             .build()
         val attributionList = attributionParser.attributions
         Assert.assertEquals("Size of list should match", 3, attributionList.size)
-        var counter = 0
-        for (attribution in attributionList) {
+        for ((counter, attribution) in attributionList.withIndex()) {
             when (counter) {
                 0 -> {
                     Assert.assertEquals(
@@ -263,7 +252,6 @@ class AttributionParseTest {
                     )
                 }
             }
-            counter++
         }
     }
 

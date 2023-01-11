@@ -7,7 +7,6 @@ import com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.utils.ColorUtils
-import junit.framework.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.utils
 
 import android.graphics.Color
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Test
 
 class ColorUtilsTest {
