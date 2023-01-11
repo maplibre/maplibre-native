@@ -1,4 +1,8 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'org.jmailen.kotlinter'
+    id 'com.android.application'
+}
+
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 android {
