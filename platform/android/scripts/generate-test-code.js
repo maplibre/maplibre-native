@@ -46,7 +46,7 @@ for(const subPackage of subPackages) {
       }
 
       // create path for test file
-      const filePath = `${testBasePath}/${subPackage}/${activityName}Test.java`;
+      const filePath = `${testBasePath}/${subPackage}/${activityName}Test.kt`;
 
       // try removing previous generated files
       try {
