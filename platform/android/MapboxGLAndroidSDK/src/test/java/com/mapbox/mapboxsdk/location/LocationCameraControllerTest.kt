@@ -17,6 +17,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap.OnCameraMoveListener
 import com.mapbox.mapboxsdk.maps.Projection
 import com.mapbox.mapboxsdk.maps.Transform
 import com.mapbox.mapboxsdk.maps.UiSettings
+import org.junit.Assert
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers

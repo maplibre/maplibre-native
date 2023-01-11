@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
