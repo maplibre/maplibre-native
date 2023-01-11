@@ -110,9 +110,6 @@ jobs:
       - name: Build libmapbox-gl.so for arm-v8
         run: make android-lib-arm-v8
 
-      - name: Generate Espresso sanity tests
-        run: make test-code-android
-
       - name: Build Test APK
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
