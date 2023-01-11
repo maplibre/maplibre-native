@@ -1,16 +1,12 @@
-package com.mapbox.mapboxsdk.testapp.utils;
+package com.mapbox.mapboxsdk.testapp.utils
 
-import android.app.Activity;
-import android.content.Intent;
+import android.app.Activity
+import android.content.Intent
+import com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity
 
-import androidx.annotation.NonNull;
-
-import com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity;
-
-public class NavUtils {
-
-  public static void navigateHome(@NonNull Activity context) {
-    context.startActivity(new Intent(context, FeatureOverviewActivity.class));
-    context.finish();
-  }
+object NavUtils {
+    fun navigateHome(context: Activity) {
+        context.startActivity(Intent(context, FeatureOverviewActivity::class.java))
+        context.finish()
+    }
 }
