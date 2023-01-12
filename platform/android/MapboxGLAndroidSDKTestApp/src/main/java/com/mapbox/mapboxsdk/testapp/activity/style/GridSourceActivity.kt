@@ -33,26 +33,25 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
      * grid.
      */
     internal class GridProvider : GeometryTileProvider {
-        override fun getFeaturesForBounds(bounds: LatLngBounds, zoom: Int): FeatureCollection {
+        override fun getFeaturesForBounds(bounds: LatLngBounds, zoomLevel: Int): FeatureCollection {
             val features: MutableList<Feature> = ArrayList()
-            val gridSpacing: Double
-            gridSpacing = if (zoom >= 13) {
+            val gridSpacing = if (zoomLevel >= 13) {
                 0.01
-            } else if (zoom >= 11) {
+            } else if (zoomLevel >= 11) {
                 0.05
-            } else if (zoom == 10) {
+            } else if (zoomLevel == 10) {
                 .1
-            } else if (zoom == 9) {
+            } else if (zoomLevel == 9) {
                 0.25
-            } else if (zoom == 8) {
+            } else if (zoomLevel == 8) {
                 0.5
-            } else if (zoom >= 6) {
+            } else if (zoomLevel >= 6) {
                 1.0
-            } else if (zoom == 5) {
+            } else if (zoomLevel == 5) {
                 2.0
-            } else if (zoom >= 4) {
+            } else if (zoomLevel >= 4) {
                 5.0
-            } else if (zoom == 2) {
+            } else if (zoomLevel == 2) {
                 10.0
             } else {
                 20.0
