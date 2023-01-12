@@ -45,7 +45,7 @@ Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://sla
 MapLibre GL Native is being actively developed.
 
 - Check out the [news](https://maplibre.org/news/) on MapLibre's website.
-- See the [Design Proposals](https://github.com/louwers/maplibre-gl-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent being the [Rendering Modularization Design Proposal](https://github.com/louwers/maplibre-gl-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md).
+- See the [Design Proposals](https://github.com/louwers/maplibre-gl-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent being the [Rendering Modularization Design Proposal](design-proposals/2022-10-27-rendering-modularization.md) and the [Metal Port Design Proposal](design-proposals/2022-11-29-metal-port.md).
 
 ## Sponsors
 
