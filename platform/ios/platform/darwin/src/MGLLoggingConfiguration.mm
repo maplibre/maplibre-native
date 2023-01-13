@@ -76,6 +76,10 @@ public:
     
 }
 
+- (void)logCallingFunction:(const char *)callingFunction functionLine:(NSUInteger)functionLine messageType:(MGLLoggingLevel)type message:(NSString *)message {
+    _handler(type, @(callingFunction), functionLine, message);
+}
+
 - (MGLLoggingBlockHandler)defaultBlockHandler {
     MGLLoggingBlockHandler mapboxHandler = ^(MGLLoggingLevel level, NSString *fileName, NSUInteger line, NSString *message) {
         

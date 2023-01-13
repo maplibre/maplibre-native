@@ -122,11 +122,11 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
 }
 
 - (void)debugLog:(NSString *)message {
-    MGLLogDebug(message);
+    MGLLogDebugMessage(message)
 }
 
 - (void)errorLog:(NSString *)message {
-    MGLLogError(message);
+    MGLLogErrorMessage(message)
 }
 
 #pragma mark - Event management

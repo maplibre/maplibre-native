@@ -22,14 +22,17 @@ NS_INLINE NSString *MGLStringFromNSEdgeInsets(NSEdgeInsets insets) {
 
 #if MGL_LOGGING_ENABLE_DEBUG
     #define MGLLogDebug(message, ...) MGLLogWithType(MGLLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
+    #define MGLLogDebugMessage(message) MGLLogWithTypeMessage(MGLLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message)
 #else
     #define MGLLogDebug(...)
+    #define MGLLogDebugMessage(...)
 #endif
 
 #define MGLLogInfo(message, ...)     MGLLogWithType(MGLLoggingLevelInfo, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
 #define MGLLogWarning(message, ...)  MGLLogWithType(MGLLoggingLevelWarning, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
 #define MGLLogError(message, ...)    MGLLogWithType(MGLLoggingLevelError, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
 #define MGLLogFault(message, ...)    MGLLogWithType(MGLLoggingLevelFault, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
+#define MGLLogErrorMessage(message)  MGLLogWithTypeMessage(MGLLoggingLevelError, __PRETTY_FUNCTION__, __LINE__, message)
 
 #endif
 
@@ -59,9 +62,18 @@ NS_INLINE NSString *MGLStringFromNSEdgeInsets(NSEdgeInsets insets) {
     } \
 }
 
+#define MGLLogWithTypeMessage(type, function, line, message) \
+{ \
+    if ([MGLLoggingConfiguration sharedConfiguration].loggingLevel != MGLLoggingLevelNone && type <= [MGLLoggingConfiguration sharedConfiguration].loggingLevel) \
+    { \
+        [[MGLLoggingConfiguration sharedConfiguration] logCallingFunction:function functionLine:line messageType:type message:(message)]; \
+    } \
+}
+
 @interface MGLLoggingConfiguration (Private)
 
 - (void)logCallingFunction:(const char *)callingFunction functionLine:(NSUInteger)functionLine messageType:(MGLLoggingLevel)type format:(id)messageFormat, ...;
+- (void)logCallingFunction:(const char *)callingFunction functionLine:(NSUInteger)functionLine messageType:(MGLLoggingLevel)type message:(NSString *)message;
 
 @end
 #endif
