@@ -22,7 +22,7 @@
     "@mapbox/cmake-node-module": "^1.2.0",
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
-    "minimatch": "^5.1.0",
+    "minimatch": "^6.0.4",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
