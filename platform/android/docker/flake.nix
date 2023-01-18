@@ -1,5 +1,5 @@
 {
-  description = "My Android project";
+  description = "MapLibre GL Native for Android CI Docker Container";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -28,11 +28,11 @@
         jdk = pkgs.jdk;
         android-sdk = android.sdk.${system} (sdkPkgs: with sdkPkgs; [
           # Useful packages for building and testing.
-          build-tools-30-0-3
+          build-tools-31-0-0
           cmdline-tools-latest
           emulator
           platform-tools
-          platforms-android-30
+          platforms-android-31
 
           # Other useful packages for a development environment.
           # sources-android-30
@@ -50,6 +50,10 @@
           gnused
           git
           gradle
+          /*   pkgs.androidStudioPackages.stable; */
+          /*   pkgs.androidStudioPackages.beta; */
+          /*   pkgs.androidStudioPackages.preview; */
+          /*   pkgs.androidStudioPackage.canary; */
         ];
         dockerImage = pkgs.dockerTools.buildLayeredImage {
           name = "maplibre-gl-native-android-builder";
@@ -62,7 +66,7 @@
                 ''JAVA_HOME=${jdk.home}''
                 ''ANDROID_SDK_ROOT=${androidHome}''
                 ''ANDROID_HOME=${androidHome}''
-                ''GRADLE_OPTS=-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/30.0.3/aapt2''
+                ''GRADLE_OPTS=-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/31.0.0/aapt2''
               ];
           };
           contents = paths ++ [ pkgs.dockerTools.usrBinEnv ];
@@ -71,17 +75,10 @@
       {
         packages = {
 
-          /*   android-studio = pkgs.androidStudioPackages.stable; */
-          /*   # android-studio = pkgs.androidStudioPackages.beta; */
-          /*   # android-studio = pkgs.androidStudioPackages.preview; */
-          /*   # android-studio = pkgs.androidStudioPackage.canary; */
-          /*   inherit (pkgs) cmake nodejs gnumake coreutils gnugrep gnused git; */
           docker = dockerImage;
         };
 
         defaultPackage = dockerImage;
-
-        devShell = import ./devshell.nix { inherit pkgs; };
       }
     );
 }

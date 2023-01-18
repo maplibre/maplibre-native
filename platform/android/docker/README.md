@@ -1,5 +1,8 @@
+# MapLibre GL Native for Android - Docker Container for CI
+
+This directory contains files to build the Docker container which is used to test and build MapLibre GL Native for Android on CI. [Nix](https://nixos.org/) is used which is a declarative language and package manager for reproducible builds.
 
 ```
-docker build -t maplibre/android-base -f android-base .
-docker build -t maplibre/android-ndk-r21b -f android-ndk-r21b .
+nix build --extra-experimental-features nix-command --extra-experimental-features flakes
+docker load < result
 ```
