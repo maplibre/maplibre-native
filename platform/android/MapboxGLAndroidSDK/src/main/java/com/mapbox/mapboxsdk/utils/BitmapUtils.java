@@ -54,7 +54,7 @@ public class BitmapUtils {
    * @return the merged bitmap
    */
   public static Bitmap mergeBitmap(@NonNull Bitmap background, @NonNull Bitmap foreground) {
-    return mergeBitmap(background, foreground, 10f, 10f);
+    return mergeBitmap(background, foreground, 0f, 0f);
   }
 
   /**
