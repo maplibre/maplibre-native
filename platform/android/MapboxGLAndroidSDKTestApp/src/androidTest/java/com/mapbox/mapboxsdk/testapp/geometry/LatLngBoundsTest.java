@@ -1,5 +1,7 @@
 package com.mapbox.mapboxsdk.testapp.geometry;
 
+import static org.junit.Assert.assertEquals;
+
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
@@ -9,8 +11,6 @@ import com.mapbox.mapboxsdk.testapp.activity.feature.QueryRenderedFeaturesBoxHig
 import com.mapbox.mapboxsdk.testapp.utils.TestConstants;
 
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Instrumentation test to validate integration of LatLngBounds

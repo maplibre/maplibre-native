@@ -153,17 +153,22 @@ class RenderTestActivity : AppCompatActivity() {
         Timber.d("Render test %s,%s", renderTestDefinition.name, renderTestDefinition.category)
         mapSnapshotter = RenderTestSnapshotter(this, renderTestDefinition.toOptions())
         mapSnapshotter.start(
-            MapSnapshotter.SnapshotReadyCallback { result: MapSnapshot ->
-                val snapshot = result.bitmap
-                imageView!!.setImageBitmap(snapshot)
-                renderResultMap[renderTestDefinition] = snapshot
-                if (renderResultMap.size != testSize) {
-                    continueTesting(renderTestDefinition)
-                } else {
-                    finishTesting()
+            object : MapSnapshotter.SnapshotReadyCallback {
+                override fun onSnapshotReady(snapshot: MapSnapshot) {
+                    imageView!!.setImageBitmap(snapshot.bitmap)
+                    renderResultMap[renderTestDefinition] = snapshot.bitmap
+                    if (renderResultMap.size != testSize) {
+                        continueTesting(renderTestDefinition)
+                    } else {
+                        finishTesting()
+                    }
                 }
             },
-            MapSnapshotter.ErrorHandler { error: String? -> Timber.e(error) }
+            object : MapSnapshotter.ErrorHandler {
+                override fun onError(error: String) {
+                    Timber.e(error)
+                }
+            }
         )
     }
 

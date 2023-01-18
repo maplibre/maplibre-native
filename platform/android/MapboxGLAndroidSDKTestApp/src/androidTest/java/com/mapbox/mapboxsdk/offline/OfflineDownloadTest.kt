@@ -42,7 +42,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
                     override fun onError(error: String) {
                         Logger.e(TAG, "Error while creating offline region: $error")
                     }
-                },
+                }
             )
         }
 
@@ -74,7 +74,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
             17.0,
             17.0,
             1.0f,
-            false,
+            false
         )
     }
 

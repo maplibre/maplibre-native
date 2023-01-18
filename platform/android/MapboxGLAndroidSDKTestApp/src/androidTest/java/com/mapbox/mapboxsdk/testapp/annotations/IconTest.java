@@ -1,5 +1,10 @@
 package com.mapbox.mapboxsdk.testapp.annotations;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -19,11 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Tests integration between Icons and Markers

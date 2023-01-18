@@ -23,6 +23,8 @@ on:
       - "test/**"
       - "vendor/**"
       - ".gitmodules"
+      - "!**/*.md"
+
   pull_request:
     branches:
       - main
@@ -42,6 +44,7 @@ on:
       - "test/**"
       - "vendor/**"
       - ".gitmodules"
+      - "!**/*.md"
 
 concurrency:
   # cancel jobs on PRs only

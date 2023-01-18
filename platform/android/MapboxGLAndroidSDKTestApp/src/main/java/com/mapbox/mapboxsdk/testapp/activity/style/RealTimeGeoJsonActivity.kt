@@ -93,11 +93,8 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
         private val handler: Handler
     ) : Runnable {
         override fun run() {
-            (
-                mapboxMap.style!!
-                    .getSource(ID_GEOJSON_SOURCE) as GeoJsonSource?
-                )!!.url =
-                URL_GEOJSON_SOURCE
+            val geoJsonSource = mapboxMap.style!!.getSource(ID_GEOJSON_SOURCE) as GeoJsonSource
+            geoJsonSource.url = URL_GEOJSON_SOURCE
             handler.postDelayed(this, 2000)
         }
     }

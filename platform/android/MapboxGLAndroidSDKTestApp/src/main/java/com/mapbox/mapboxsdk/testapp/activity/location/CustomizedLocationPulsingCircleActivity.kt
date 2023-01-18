@@ -243,9 +243,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
             pulsingCircleDurationButton!!.text = selectedMode
             if (selectedMode.contentEquals(
                     String.format(
-                        "%sms",
-                        DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                    )
+                            "%sms",
+                            DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                        )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = DEFAULT_LOCATION_CIRCLE_PULSE_DURATION_MS
@@ -255,9 +255,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
                 )
             } else if (selectedMode.contentEquals(
                     String.format(
-                        "%sms",
-                        SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                    )
+                            "%sms",
+                            SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                        )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = SECOND_LOCATION_CIRCLE_PULSE_DURATION_MS
@@ -267,9 +267,9 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
                 )
             } else if (selectedMode.contentEquals(
                     String.format(
-                        "%sms",
-                        THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
-                    )
+                            "%sms",
+                            THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS.toString()
+                        )
                 )
             ) {
                 LOCATION_CIRCLE_PULSE_DURATION = THIRD_LOCATION_CIRCLE_PULSE_DURATION_MS

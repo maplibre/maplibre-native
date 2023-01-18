@@ -531,7 +531,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         // Add a fill layer
         mapboxMap.style!!
             .addLayer(
-                FillLayer(AMSTERDAM_PARKS_LAYER, source.getId())
+                FillLayer(AMSTERDAM_PARKS_LAYER, source.id)
                     .withProperties(
                         PropertyFactory.fillColor(Expression.color(Color.GREEN)),
                         PropertyFactory.fillOutlineColor(Expression.rgb(0, 0, 255)),
