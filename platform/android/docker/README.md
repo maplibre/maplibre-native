@@ -6,3 +6,15 @@ This directory contains files to build the Docker container which is used to tes
 nix build --extra-experimental-features nix-command --extra-experimental-features flakes
 docker load < result
 ```
+
+## Updating
+
+All dependencies are pinned in the lock file. To update all inputs
+
+```
+nix flake update --commit-lock-file
+```
+
+Individual inputs can also be updated. See [nix flake update(https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html).
+
+
