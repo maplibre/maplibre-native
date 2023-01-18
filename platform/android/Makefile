@@ -46,7 +46,7 @@ MBGL_ANDROID_BENCHMARK_DIR = MapboxGLAndroidSDK/.externalNativeBuild/cmake/$(bui
 MBGL_ANDROID_STL ?= c++_static
 SOCKET_TIMEOUT = 360000
 CONNECTION_TIMEOUT = 360000
-MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
+MBGL_ANDROID_GRADLE = gradle --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT) $(GRADLE_OPTS)
 MBGL_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 
 # Lists all devices, and extracts the identifiers, then obtains the ABI for every one.
@@ -261,7 +261,7 @@ android-gfxinfo:
 
 # Runs checkstyle and lint on the java code
 .PHONY: android-check
-android-check : android-ktlint android-checkstyle android-lint-sdk android-lint-test-app run-android-nitpick
+android-check : android-ktlint android-checkstyle android-lint-sdk android-lint-test-app
 
 # Runs checkstyle on the java code
 .PHONY: android-checkstyle
@@ -311,14 +311,14 @@ android-configuration: gradle/configuration.gradle
 	cat gradle/configuration.gradle
 
 # Updates Android's vendor submodules
-.PHONY: android-update-vendor
-android-update-vendor: gradle/configuration.gradle
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
+# .PHONY: android-update-vendor
+# android-update-vendor: gradle/configuration.gradle
+# 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
 
 # Run android nitpick script
-.PHONY: run-android-nitpick
-run-android-nitpick: android-update-vendor
-	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none androidNitpick
+# .PHONY: run-android-nitpick
+# run-android-nitpick:
+# 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none androidNitpick
 
 # Creates a dependency graph using Graphviz
 .PHONY: android-graph

@@ -2,9 +2,9 @@ buildscript {
     apply from: "${rootDir}/gradle/dependencies.gradle"
 
     repositories {
+        google()
         maven { url "https://plugins.gradle.org/m2/" }
         mavenCentral()
-        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.0'
@@ -22,8 +22,8 @@ plugins {
 
 allprojects {
     repositories {
-        mavenCentral()
         google()
+        mavenCentral()
     }
 }
 
