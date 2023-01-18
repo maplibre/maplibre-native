@@ -72,6 +72,9 @@ android {
             // Roboelectric 4.0 required config
             // http://robolectric.org/migrating/#migrating-to-40
             includeAndroidResources = true
+
+            // https://github.com/robolectric/robolectric/issues/4534
+            systemProperty 'user.home', System.getenv('HOME')
         }
     }
 
