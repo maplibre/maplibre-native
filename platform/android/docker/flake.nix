@@ -33,6 +33,7 @@
           emulator
           platform-tools
           platforms-android-31
+          ndk-25-1-8937393
 
           # Other useful packages for a development environment.
           # sources-android-30
