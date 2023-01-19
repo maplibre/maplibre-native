@@ -3,25 +3,26 @@ name: android-ci
 on:
   workflow_dispatch:
   push:
-    # branches:
-    #   - main
-    # tags:
-    #   - 'android-*'
-    # paths:
-    #   - 'platform/android/**'
-    #   - ".github/workflows/android-ci.yml"
-    #   - "bin/**"
-    #   - "expression-test/**"
-    #   - "include/**"
-    #   - "metrics/**"
-    #   - "platform/default/**"
-    #   - "render-test/**"
-    #   - "scripts/**"
-    #   - "src/**"
-    #   - "test/**"
-    #   - "vendor/**"
-    #   - ".gitmodules"
-    #   - "!**/*.md"
+    branches:
+      - main
+    tags:
+      - 'android-*'
+    paths:
+      - 'platform/android/**'
+      - ".github/workflows/android-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - ".gitmodules"
+      - "CMakeLists.txt"
+      - "!**/*.md"
 
 jobs:
   build:
@@ -29,8 +30,7 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
-        shell: >
-          nix develop ./ci#shell --command bash -c "set -e; source {0}"
+        shell: nix develop ./ci#shell --command bash -c "set -e; source {0}"
     env:
       JOBS: 8
       BUILDTYPE: Debug
