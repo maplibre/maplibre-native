@@ -26,6 +26,7 @@
         env = let androidHome = "${android-sdk}/share/android-sdk"; in
           {
             JAVA_HOME = jdk.home;
+            ANDROID_HOME = androidHome;
             ANDROID_SDK_ROOT = androidHome;
             GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/31.0.0/aapt2 -Dorg.gradle.daemon=false";
           };
