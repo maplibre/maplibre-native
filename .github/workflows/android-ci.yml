@@ -29,7 +29,7 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
-        shell: nix develop ./ci#shell --command "bash -e {0}"
+        shell: nix develop ./ci#shell --command "/bin/bash -e {0}"
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
@@ -58,6 +58,9 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      - name: Set up and activate environment using Nix flake
+        run: [ ! -z $IN_NIX_SHELL ]
 
       - name: npm install
         run: npm install --ignore-scripts
