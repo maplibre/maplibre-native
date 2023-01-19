@@ -55,6 +55,7 @@
           gnused
           git
           gradle
+          google-cloud-sdk
           /*   pkgs.androidStudioPackages.stable; */
           /*   pkgs.androidStudioPackages.beta; */
           /*   pkgs.androidStudioPackages.preview; */
