@@ -29,6 +29,7 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
+        shell: nix develop ./ci#shell
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
@@ -46,9 +47,6 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up and activate environment using Nix flake
-        run: nix develop ./ci#shell
-        
       - name: Cache node modules
         uses: actions/cache@v3
         env:
