@@ -94,7 +94,7 @@ jobs:
 
       - name: Check code style
         run: |
-          nix develop ci#shell
+          nix develop ./ci#shell
           make android-check
 
       # - name: Run Android unit tests
