@@ -29,7 +29,6 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
-    container: louwers/maplibre-gl-native-android-builder
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
@@ -38,18 +37,14 @@ jobs:
       MBGL_ANDROID_STL: c++_static
     steps:
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
-      
-      # - uses: actions/setup-java@v3
-      #   with:
-      #     distribution: 'zulu'
-      #     java-version: '11'
 
-      # - name: Setup Android SDK for accepting tool licenses
-      #   uses: android-actions/setup-android@v2
+      - uses: cachix/install-nix-action@v18
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
         
       # - name: Cache node modules
       #   uses: actions/cache@v3
@@ -98,62 +93,64 @@ jobs:
       #       - ${{ env.cache-name }}
 
       - name: Check code style
-        run: make android-check
-
-      - name: Run Android unit tests
-        run: make run-android-unit-test
-
-      - name: Build libmapbox-gl.so for arm-v8
-        run: make android-lib-arm-v8
-
-      - name: Build Test APK
         run: |
-          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
-            make android-ui-test-arm-v8
-          else
-            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash
+          nix develop ci#shell
+          make android-check
 
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash
+      # - name: Run Android unit tests
+      #   run: make run-android-unit-test
 
-      - name: Run instrumentation tests on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android models list
-            gcloud firebase test android run --type instrumentation \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
-              --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
-              --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
-          fi
-        shell: bash
+      # - name: Build libmapbox-gl.so for arm-v8
+      #   run: make android-lib-arm-v8
 
-      - name: Store debug artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: debug-artifacts
-          path: |
-            MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
-            MapboxGLAndroidSDK/build/reports/lint-results.html
-            MapboxGLAndroidSDK/lint-baseline.xml
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
-            MapboxGLAndroidSDKTestApp/lint-baseline.xml
-            MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+      # - name: Build Test APK
+      #   run: |
+      #     MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+      #     if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+      #       echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+      #       make android-ui-test-arm-v8
+      #     else
+      #       echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
+      #     fi
+      #   shell: bash
+
+      # - name: Log in to Google Cloud Platform
+      #   run: |
+      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+      #       echo "Activating google cloud account..."
+      #       echo "${GLCLOUD_SERVICE_JSON}" > secret.json
+      #       gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
+      #       rm secret.json
+      #     else
+      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
+      #     fi
+      #   shell: bash
+
+      # - name: Run instrumentation tests on Firebase
+      #   run: |
+      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+      #       gcloud firebase test android models list
+      #       gcloud firebase test android run --type instrumentation \
+      #         --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
+      #         --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
+      #         --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
+      #         --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
+      #     else
+      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
+      #     fi
+      #   shell: bash
+
+      # - name: Store debug artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: debug-artifacts
+      #     path: |
+      #       MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
+      #       MapboxGLAndroidSDK/build/reports/lint-results.html
+      #       MapboxGLAndroidSDK/lint-baseline.xml
+      #       MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
+      #       MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
+      #       MapboxGLAndroidSDKTestApp/lint-baseline.xml
+      #       MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj

@@ -3,12 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
-    devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     android.url = "github:tadfisher/android-nixpkgs";
   };
 
-  outputs = { self, nixpkgs, devshell, flake-utils, android }:
+  outputs = { self, nixpkgs, flake-utils, android }:
     {
       overlay = final: prev: {
         inherit (self.packages.${final.system}) android-sdk android-studio;
@@ -21,10 +20,15 @@
           inherit system;
           config.allowUnfree = true;
           overlays = [
-            devshell.overlay
             self.overlay
           ];
         };
+        env = let androidHome = "${android-sdk}/share/android-sdk"; in
+          {
+            JAVA_HOME = jdk.home;
+            ANDROID_SDK_ROOT = androidHome;
+            GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/31.0.0/aapt2";
+          };
         jdk = pkgs.jdk;
         android-sdk = android.sdk.${system} (sdkPkgs: with sdkPkgs; [
           # Useful packages for building and testing.
@@ -62,24 +66,19 @@
           extraCommands = ''mkdir tmp
 					chmod 1777 tmp'';
           config = {
-            Env = let androidHome = "${android-sdk}/share/android-sdk"; in
-              [
-                ''JAVA_HOME=${jdk.home}''
-                ''ANDROID_SDK_ROOT=${androidHome}''
-                ''ANDROID_HOME=${androidHome}''
-                ''GRADLE_OPTS=-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/31.0.0/aapt2''
-              ];
+            Env = map (name: "${name}=${env.${name}}") (builtins.attrNames env);
           };
           contents = paths ++ [ pkgs.dockerTools.usrBinEnv ];
         };
       in
       {
         packages = {
-
-          docker = dockerImage;
+          shell = pkgs.mkShell {
+            inherit env;
+            paths = paths;
+          };
+          dockerImage = dockerImage;
         };
-
-        defaultPackage = dockerImage;
       }
     );
 }
