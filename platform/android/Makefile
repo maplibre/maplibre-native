@@ -46,7 +46,7 @@ MBGL_ANDROID_BENCHMARK_DIR = MapboxGLAndroidSDK/.externalNativeBuild/cmake/$(bui
 MBGL_ANDROID_STL ?= c++_static
 SOCKET_TIMEOUT = 360000
 CONNECTION_TIMEOUT = 360000
-MBGL_ANDROID_GRADLE = gradle --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT) $(GRADLE_OPTS)
+MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT) $(GRADLE_OPTS)
 MBGL_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 
 # Lists all devices, and extracts the identifiers, then obtains the ABI for every one.
