@@ -11,7 +11,7 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.rule.GrantPermissionRule.grant
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -40,7 +40,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.math.abs
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class LocationLayerControllerTest : EspressoTest() {
 
     @Rule
@@ -674,8 +674,8 @@ class LocationLayerControllerTest : EspressoTest() {
 
                 assertThat(
                     Math.abs(zoom - mapboxMap.cameraPosition.zoom) < 0.1 &&
-                        Math.abs(target.latitude - mapboxMap.cameraPosition.target.latitude) < 0.1 &&
-                        Math.abs(target.longitude - mapboxMap.cameraPosition.target.longitude) < 0.1,
+                        Math.abs(target.latitude - mapboxMap.cameraPosition.target!!.latitude) < 0.1 &&
+                        Math.abs(target!!.longitude - mapboxMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 
@@ -720,8 +720,8 @@ class LocationLayerControllerTest : EspressoTest() {
 
                 assertThat(
                     abs(zoom - mapboxMap.cameraPosition.zoom) < 0.1 &&
-                        abs(target.latitude - mapboxMap.cameraPosition.target.latitude) < 0.1 &&
-                        abs(target.longitude - mapboxMap.cameraPosition.target.longitude) < 0.1,
+                        abs(target.latitude - mapboxMap.cameraPosition.target!!.latitude) < 0.1 &&
+                        abs(target!!.longitude - mapboxMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 

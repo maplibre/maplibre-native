@@ -18,8 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="?android:attr/actionBarSize"
-            app:mapbox_localIdeographFontFamilies="@array/array_local_ideograph_family_test"
-            app:mapbox_uiAttributionTintColor="@color/redAccent"/>
+            app:maplibre_localIdeographFontFamilies="@array/array_local_ideograph_family_test"
+            app:maplibre_uiAttributionTintColor="@color/redAccent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

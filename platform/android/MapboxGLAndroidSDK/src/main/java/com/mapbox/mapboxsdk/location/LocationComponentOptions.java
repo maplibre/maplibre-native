@@ -246,7 +246,7 @@ public class LocationComponentOptions implements Parcelable {
                                                               @StyleRes int styleRes) {
 
     TypedArray typedArray = context.obtainStyledAttributes(
-      styleRes, R.styleable.mapbox_LocationComponent);
+      styleRes, R.styleable.maplibre_LocationComponent);
 
     LocationComponentOptions.Builder builder = new LocationComponentOptions.Builder()
       .enableStaleState(true)
@@ -256,120 +256,120 @@ public class LocationComponentOptions implements Parcelable {
       .padding(PADDING_DEFAULT);
 
     builder.foregroundDrawable(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawable, -1));
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_foregroundTintColor)) {
+      R.styleable.maplibre_LocationComponent_maplibre_foregroundDrawable, -1));
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_foregroundTintColor)) {
       builder.foregroundTintColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_foregroundTintColor, -1));
+        R.styleable.maplibre_LocationComponent_maplibre_foregroundTintColor, -1));
     }
     builder.backgroundDrawable(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawable, -1));
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_backgroundTintColor)) {
+      R.styleable.maplibre_LocationComponent_maplibre_backgroundDrawable, -1));
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_backgroundTintColor)) {
       builder.backgroundTintColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_backgroundTintColor, -1));
+        R.styleable.maplibre_LocationComponent_maplibre_backgroundTintColor, -1));
     }
     builder.foregroundDrawableStale(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_foregroundDrawableStale, -1));
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_foregroundStaleTintColor)) {
+      R.styleable.maplibre_LocationComponent_maplibre_foregroundDrawableStale, -1));
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_foregroundStaleTintColor)) {
       builder.foregroundStaleTintColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_foregroundStaleTintColor, -1));
+        R.styleable.maplibre_LocationComponent_maplibre_foregroundStaleTintColor, -1));
     }
     builder.backgroundDrawableStale(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_backgroundDrawableStale, -1));
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_backgroundStaleTintColor)) {
+      R.styleable.maplibre_LocationComponent_maplibre_backgroundDrawableStale, -1));
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_backgroundStaleTintColor)) {
       builder.backgroundStaleTintColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_backgroundStaleTintColor, -1));
+        R.styleable.maplibre_LocationComponent_maplibre_backgroundStaleTintColor, -1));
     }
     builder.bearingDrawable(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_bearingDrawable, -1));
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_bearingTintColor)) {
+      R.styleable.maplibre_LocationComponent_maplibre_bearingDrawable, -1));
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_bearingTintColor)) {
       builder.bearingTintColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_bearingTintColor, -1));
+        R.styleable.maplibre_LocationComponent_maplibre_bearingTintColor, -1));
     }
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_enableStaleState)) {
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_enableStaleState)) {
       builder.enableStaleState(typedArray.getBoolean(
-        R.styleable.mapbox_LocationComponent_mapbox_enableStaleState, true));
+        R.styleable.maplibre_LocationComponent_maplibre_enableStaleState, true));
     }
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_staleStateTimeout)) {
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_staleStateTimeout)) {
       builder.staleStateTimeout(typedArray.getInteger(
-        R.styleable.mapbox_LocationComponent_mapbox_staleStateTimeout, (int) STALE_STATE_DELAY_MS));
+        R.styleable.maplibre_LocationComponent_maplibre_staleStateTimeout, (int) STALE_STATE_DELAY_MS));
     }
     builder.gpsDrawable(typedArray.getResourceId(
-      R.styleable.mapbox_LocationComponent_mapbox_gpsDrawable, -1));
+      R.styleable.maplibre_LocationComponent_maplibre_gpsDrawable, -1));
     float elevation = typedArray.getDimension(
-      R.styleable.mapbox_LocationComponent_mapbox_elevation, 0);
+      R.styleable.maplibre_LocationComponent_maplibre_elevation, 0);
     builder.accuracyColor(typedArray.getColor(
-      R.styleable.mapbox_LocationComponent_mapbox_accuracyColor, -1));
+      R.styleable.maplibre_LocationComponent_maplibre_accuracyColor, -1));
     builder.accuracyAlpha(typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_accuracyAlpha, ACCURACY_ALPHA_DEFAULT));
+      R.styleable.maplibre_LocationComponent_maplibre_accuracyAlpha, ACCURACY_ALPHA_DEFAULT));
     builder.elevation(elevation);
 
     builder.trackingGesturesManagement(typedArray.getBoolean(
-      R.styleable.mapbox_LocationComponent_mapbox_trackingGesturesManagement, false));
+      R.styleable.maplibre_LocationComponent_maplibre_trackingGesturesManagement, false));
     builder.trackingInitialMoveThreshold(typedArray.getDimension(
-      R.styleable.mapbox_LocationComponent_mapbox_trackingInitialMoveThreshold,
-      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingInitialMoveThreshold)));
+      R.styleable.maplibre_LocationComponent_maplibre_trackingInitialMoveThreshold,
+      context.getResources().getDimension(R.dimen.maplibre_locationComponentTrackingInitialMoveThreshold)));
     builder.trackingMultiFingerMoveThreshold(typedArray.getDimension(
-      R.styleable.mapbox_LocationComponent_mapbox_trackingMultiFingerMoveThreshold,
-      context.getResources().getDimension(R.dimen.mapbox_locationComponentTrackingMultiFingerMoveThreshold)));
+      R.styleable.maplibre_LocationComponent_maplibre_trackingMultiFingerMoveThreshold,
+      context.getResources().getDimension(R.dimen.maplibre_locationComponentTrackingMultiFingerMoveThreshold)));
 
     builder.padding(new int[] {
-      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingLeft, 0),
-      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingTop, 0),
-      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingRight, 0),
-      typedArray.getInt(R.styleable.mapbox_LocationComponent_mapbox_iconPaddingBottom, 0),
+      typedArray.getInt(R.styleable.maplibre_LocationComponent_maplibre_iconPaddingLeft, 0),
+      typedArray.getInt(R.styleable.maplibre_LocationComponent_maplibre_iconPaddingTop, 0),
+      typedArray.getInt(R.styleable.maplibre_LocationComponent_maplibre_iconPaddingRight, 0),
+      typedArray.getInt(R.styleable.maplibre_LocationComponent_maplibre_iconPaddingBottom, 0),
     });
 
     builder.layerAbove(
-      typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_above));
+      typedArray.getString(R.styleable.maplibre_LocationComponent_maplibre_layer_above));
 
     builder.layerBelow(
-      typedArray.getString(R.styleable.mapbox_LocationComponent_mapbox_layer_below));
+      typedArray.getString(R.styleable.maplibre_LocationComponent_maplibre_layer_below));
 
     float minScale = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
+      R.styleable.maplibre_LocationComponent_maplibre_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
     float maxScale = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_maxZoomIconScale, MAX_ZOOM_ICON_SCALE_DEFAULT);
+      R.styleable.maplibre_LocationComponent_maplibre_maxZoomIconScale, MAX_ZOOM_ICON_SCALE_DEFAULT);
     builder.minZoomIconScale(minScale);
     builder.maxZoomIconScale(maxScale);
 
     float trackingAnimationDurationMultiplier = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_trackingAnimationDurationMultiplier,
+      R.styleable.maplibre_LocationComponent_maplibre_trackingAnimationDurationMultiplier,
       TRACKING_ANIMATION_DURATION_MULTIPLIER_DEFAULT
     );
     builder.trackingAnimationDurationMultiplier(trackingAnimationDurationMultiplier);
 
     builder.compassAnimationEnabled = typedArray.getBoolean(
-      R.styleable.mapbox_LocationComponent_mapbox_compassAnimationEnabled, true
+      R.styleable.maplibre_LocationComponent_maplibre_compassAnimationEnabled, true
     );
 
     builder.accuracyAnimationEnabled = typedArray.getBoolean(
-      R.styleable.mapbox_LocationComponent_mapbox_accuracyAnimationEnabled, true
+      R.styleable.maplibre_LocationComponent_maplibre_accuracyAnimationEnabled, true
     );
 
     builder.pulseEnabled = typedArray.getBoolean(
-      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleEnabled, false
+      R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleEnabled, false
     );
 
     builder.pulseFadeEnabled = typedArray.getBoolean(
-      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleFadeEnabled, true
+      R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleFadeEnabled, true
     );
 
-    if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor)) {
+    if (typedArray.hasValue(R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleColor)) {
       builder.pulseColor(typedArray.getColor(
-        R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor,
+        R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleColor,
         -1));
     }
 
     builder.pulseSingleDuration = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleDuration, CIRCLE_PULSING_DURATION_DEFAULT_MS
+      R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleDuration, CIRCLE_PULSING_DURATION_DEFAULT_MS
     );
 
     builder.pulseMaxRadius = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleRadius, CIRCLE_PULSING_MAX_RADIUS_DEFAULT
+      R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleRadius, CIRCLE_PULSING_MAX_RADIUS_DEFAULT
     );
 
     builder.pulseAlpha = typedArray.getFloat(
-      R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleAlpha, CIRCLE_PULSING_ALPHA_DEFAULT);
+      R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleAlpha, CIRCLE_PULSING_ALPHA_DEFAULT);
 
     typedArray.recycle();
 
@@ -399,7 +399,7 @@ public class LocationComponentOptions implements Parcelable {
   @NonNull
   public static Builder builder(@NonNull Context context) {
     return LocationComponentOptions.createFromAttributes(context,
-      R.style.mapbox_LocationComponent).toBuilder();
+      R.style.maplibre_LocationComponent).toBuilder();
   }
 
   /**
@@ -438,7 +438,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will use this image in place of the provided or default mapbox_foregroundDrawableStale.
+   * component, will use this image in place of the provided or default maplibre_foregroundDrawableStale.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -465,7 +465,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will used this image in place of the provided or default mapbox_foregroundDrawableStale.
+   * component, will used this image in place of the provided or default maplibre_foregroundDrawableStale.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -492,7 +492,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will used this image in place of the provided or default mapbox_gpsDrawable.
+   * component, will used this image in place of the provided or default maplibre_gpsDrawable.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -519,7 +519,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will used this image in place of the provided or default mapbox_foregroundDrawable.
+   * component, will used this image in place of the provided or default maplibre_foregroundDrawable.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -546,7 +546,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will used this image in place of the provided or default mapbox_backgroundDrawable.
+   * component, will used this image in place of the provided or default maplibre_backgroundDrawable.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -573,7 +573,7 @@ public class LocationComponentOptions implements Parcelable {
   /**
    * String image name, identical to one used in
    * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-   * component, will used this image in place of the provided or default mapbox_bearingDrawable.
+   * component, will used this image in place of the provided or default maplibre_bearingDrawable.
    * <p>
    * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
    * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1438,7 +1438,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_backgroundDrawableStale.
+     * component, will used this image in place of the provided or default maplibre_backgroundDrawableStale.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1469,7 +1469,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_foregroundDrawableStale.
+     * component, will used this image in place of the provided or default maplibre_foregroundDrawableStale.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1500,7 +1500,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_gpsDrawable.
+     * component, will used this image in place of the provided or default maplibre_gpsDrawable.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1531,7 +1531,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_foregroundDrawable.
+     * component, will used this image in place of the provided or default maplibre_foregroundDrawable.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1562,7 +1562,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_backgroundDrawable.
+     * component, will used this image in place of the provided or default maplibre_backgroundDrawable.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.
@@ -1593,7 +1593,7 @@ public class LocationComponentOptions implements Parcelable {
     /**
      * Given a String image name, identical to one used in
      * the first parameter of {@link com.mapbox.mapboxsdk.maps.Style.Builder#addImage(String, Bitmap)}, the
-     * component, will used this image in place of the provided or default mapbox_bearingDrawable.
+     * component, will used this image in place of the provided or default maplibre_bearingDrawable.
      * <p>
      * A maki-icon name (example: "circle-15") may also be provided.  These are images that can be loaded
      * with certain styles.  Note, this will fail if the provided icon name is not provided by the loaded map style.

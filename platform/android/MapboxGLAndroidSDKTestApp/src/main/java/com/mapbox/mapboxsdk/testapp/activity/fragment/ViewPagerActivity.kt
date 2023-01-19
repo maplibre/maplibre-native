@@ -8,29 +8,32 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.maps.SupportMapFragment
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_viewpager.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityViewpagerBinding
 
 /**
  * Test activity showcasing using the Android SDK ViewPager API to show MapFragments.
  */
 class ViewPagerActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityViewpagerBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_viewpager)
-        viewPager.adapter = MapFragmentAdapter(this, supportFragmentManager)
+        binding = ActivityViewpagerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.viewPager.adapter = MapFragmentAdapter(this, supportFragmentManager)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val currentPosition = viewPager.currentItem
-        val offscreenLimit = viewPager.offscreenPageLimit
+        val currentPosition = binding.viewPager.currentItem
+        val offscreenLimit = binding.viewPager.offscreenPageLimit
         for (i in currentPosition - offscreenLimit..currentPosition + offscreenLimit) {
-            if (i < 0 || i > viewPager.adapter?.count ?: 0) {
+            if (i < 0 || i > binding.viewPager.adapter?.count ?: 0) {
                 continue
             }
-            val mapFragment = viewPager.adapter?.instantiateItem(viewPager, i) as SupportMapFragment
+            val mapFragment =
+                binding.viewPager.adapter?.instantiateItem(binding.viewPager, i) as SupportMapFragment
             mapFragment.getMapAsync(i)
         }
     }
@@ -41,7 +44,7 @@ class ViewPagerActivity : AppCompatActivity() {
             return NUM_ITEMS
         }
 
-        override fun getItem(position: Int): androidx.fragment.app.Fragment? {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val options = MapboxMapOptions.createFromAttributes(context)
             options.textureMode(true)
             options.camera(

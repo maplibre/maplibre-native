@@ -3,7 +3,7 @@
 package com.mapbox.mapboxsdk.testapp.style;
 
 import androidx.test.annotation.UiThreadTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.maps.BaseLayerTest;
@@ -38,7 +38,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Basic smoke tests for RasterLayer
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class RasterLayerTest extends BaseLayerTest {
 
   private RasterLayer layer;

@@ -53,7 +53,11 @@ class MapSnapshotterLocalStyleActivity : AppCompatActivity(), MapSnapshotter.Sna
                     )
                     mapSnapshotter!!.start(
                         this@MapSnapshotterLocalStyleActivity,
-                        MapSnapshotter.ErrorHandler { error: String? -> Timber.e(error) }
+                        object : MapSnapshotter.ErrorHandler {
+                            override fun onError(error: String) {
+                                Timber.e(error)
+                            }
+                        }
                     )
                 }
             })

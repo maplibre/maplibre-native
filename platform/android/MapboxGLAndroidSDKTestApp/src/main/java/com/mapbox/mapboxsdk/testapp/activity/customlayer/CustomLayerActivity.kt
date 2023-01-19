@@ -37,13 +37,13 @@ class CustomLayerActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
                 mapboxMap = map!!
-                mapboxMap!!.moveCamera(
+                mapboxMap.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(39.91448, -243.60947),
                         10.0
                     )
                 )
-                mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? -> initFab() }
+                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? -> initFab() }
             }
         )
     }
@@ -61,7 +61,7 @@ class CustomLayerActivity : AppCompatActivity() {
     }
 
     private fun swapCustomLayer() {
-        val style = mapboxMap!!.style
+        val style = mapboxMap.style
         if (customLayer != null) {
             style!!.removeLayer(customLayer!!)
             customLayer = null
@@ -78,43 +78,43 @@ class CustomLayerActivity : AppCompatActivity() {
 
     private fun updateLayer() {
         if (mapboxMap != null) {
-            mapboxMap!!.triggerRepaint()
+            mapboxMap.triggerRepaint()
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -1,5 +1,6 @@
 package com.mapbox.mapboxsdk.testapp.activity.offline
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -14,7 +15,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.offline.*
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_region_download.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityRegionDownloadBinding
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -30,6 +31,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     private val handler: Handler = Handler()
     private lateinit var offlineManager: OfflineManager
+    private lateinit var binding: ActivityRegionDownloadBinding
     private var offlineRegion: OfflineRegion? = null
     private var downloading = false
     private var previousCompletedResourceCount: Long = 0
@@ -37,15 +39,16 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_region_download)
+        binding = ActivityRegionDownloadBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         offlineManager = OfflineManager.getInstance(this)
         offlineManager.setOfflineMapboxTileCountLimit(Long.MAX_VALUE)
         initUi()
 
         deleteOldOfflineRegions {
-            container.visibility = View.VISIBLE
-            fab.visibility = View.VISIBLE
+            binding.container.visibility = View.VISIBLE
+            binding.fab.visibility = View.VISIBLE
         }
     }
 
@@ -56,13 +59,13 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
     }
 
     private fun createOfflineRegion() {
-        val latitudeNorth = editTextLatNorth.text.toString().toDouble()
-        val longitudeEast = editTextLonEast.text.toString().toDouble()
-        val latitudeSouth = editTextLatSouth.text.toString().toDouble()
-        val longitudeWest = editTextLonWest.text.toString().toDouble()
-        val styleUrl = spinnerStyleUrl.selectedItem as String
-        val maxZoom = seekbarMaxZoom.progress.toFloat()
-        val minZoom = seekbarMinZoom.progress.toFloat()
+        val latitudeNorth = binding.editTextLatNorth.text.toString().toDouble()
+        val longitudeEast = binding.editTextLonEast.text.toString().toDouble()
+        val latitudeSouth = binding.editTextLatSouth.text.toString().toDouble()
+        val longitudeWest = binding.editTextLonWest.text.toString().toDouble()
+        val styleUrl = binding.spinnerStyleUrl.selectedItem as String
+        val maxZoom = binding.seekbarMaxZoom.progress.toFloat()
+        val minZoom = binding.seekbarMinZoom.progress.toFloat()
 
         if (!validCoordinates(latitudeNorth, longitudeEast, latitudeSouth, longitudeWest)) {
             Toast.makeText(this, "coordinates need to be in valid range", Toast.LENGTH_LONG).show()
@@ -86,11 +89,11 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
             definition,
             byteArrayOf(),
             object : OfflineManager.CreateOfflineRegionCallback {
-                override fun onCreate(region: OfflineRegion) {
-                    logMessage("Region with id ${region.id} created")
-                    offlineRegion = region
-                    startDownload(region)
-                    fab.visibility = View.VISIBLE
+                override fun onCreate(offlineRegion: OfflineRegion) {
+                    logMessage("Region with id ${offlineRegion.id} created")
+                    this@DownloadRegionActivity.offlineRegion = offlineRegion
+                    startDownload(offlineRegion)
+                    binding.fab.visibility = View.VISIBLE
                 }
 
                 override fun onError(error: String) {
@@ -102,7 +105,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     private fun startDownload(region: OfflineRegion) {
         downloading = true
-        fab.setImageResource(R.drawable.ic_pause_black_24dp)
+        binding.fab.setImageResource(R.drawable.ic_pause_black_24dp)
         logMessage("Downloading...")
 
         region.setObserver(this)
@@ -125,12 +128,12 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     private fun pauseDownload(region: OfflineRegion) {
         downloading = false
-        fab.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+        binding.fab.setImageResource(R.drawable.ic_play_arrow_black_24dp)
         handler.removeCallbacksAndMessages(null)
         region.setDownloadState(OfflineRegion.STATE_INACTIVE)
         "Paused".let {
             logMessage(it)
-            download_status.text = it
+            binding.downloadStatus.text = it
         }
     }
 
@@ -138,9 +141,9 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
         if (status.isComplete) {
             "Completed".let {
                 logMessage("SUCCESS! $it")
-                download_status.text = it
+                binding.downloadStatus.text = it
             }
-            fab.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+            binding.fab.setImageResource(R.drawable.ic_play_arrow_black_24dp)
             handler.removeCallbacksAndMessages(null)
             offlineRegion?.setObserver(null)
             offlineRegion?.setDownloadState(OfflineRegion.STATE_INACTIVE)
@@ -148,7 +151,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
             val statusText = "Downloaded ${status.completedResourceCount}/${status.requiredResourceCount}"
             statusText.let {
                 logMessage(it)
-                download_status.text = it
+                binding.downloadStatus.text = it
             }
 
             if (status.completedResourceCount > status.requiredResourceCount &&
@@ -178,12 +181,12 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
 
     fun deleteOldOfflineRegions(onCompleted: () -> Unit) {
         offlineManager.listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<out OfflineRegion>) {
-                val count = offlineRegions.size
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
+                val count = offlineRegions?.size ?: 0
                 var remainingCount = count
                 if (count > 0) {
                     logMessage("Deleting $count old region...")
-                    offlineRegions.forEach {
+                    offlineRegions?.forEach {
                         it.delete(object : OfflineRegion.OfflineRegionDeleteCallback {
                             override fun onDelete() {
                                 Timber.d("Deleted region with id ${it.id}")
@@ -231,19 +234,20 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
         initFab()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initEditTexts() {
-        editTextLatNorth.setText("62.0")
-        editTextLonEast.setText("24.0")
-        editTextLatSouth.setText("60.0")
-        editTextLonWest.setText("22.5")
+        binding.editTextLatNorth.setText("62.0")
+        binding.editTextLonEast.setText("24.0")
+        binding.editTextLatSouth.setText("60.0")
+        binding.editTextLonWest.setText("22.5")
     }
 
     private fun initSeekbars() {
         val maxZoom = MapboxConstants.MAXIMUM_ZOOM.toInt()
-        seekbarMinZoom.max = maxZoom
-        seekbarMinZoom.progress = 1
-        seekbarMaxZoom.max = maxZoom
-        seekbarMaxZoom.progress = 15
+        binding.seekbarMinZoom.max = maxZoom
+        binding.seekbarMinZoom.progress = 1
+        binding.seekbarMaxZoom.max = maxZoom
+        binding.seekbarMaxZoom.progress = 15
     }
 
     private fun initSpinner() {
@@ -254,19 +258,19 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
         styles.add(Style.getPredefinedStyle("Outdoor"))
         val spinnerArrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, styles)
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerStyleUrl.adapter = spinnerArrayAdapter
+        binding.spinnerStyleUrl.adapter = spinnerArrayAdapter
     }
 
     private fun initZoomLevelTextviews() {
-        textViewMaxText.text = String.format("Max zoom: %s", seekbarMaxZoom.progress)
-        textViewMinText.text = String.format("Min zoom: %s", seekbarMinZoom.progress)
+        binding.textViewMaxText.text = String.format("Max zoom: %s", binding.seekbarMaxZoom.progress)
+        binding.textViewMinText.text = String.format("Min zoom: %s", binding.seekbarMinZoom.progress)
     }
 
     private fun initFab() {
-        fab.setOnClickListener {
-            container.visibility = View.GONE
+        binding.fab.setOnClickListener {
+            binding.container.visibility = View.GONE
             if (offlineRegion == null) {
-                fab.visibility = View.GONE
+                binding.fab.visibility = View.GONE
                 createOfflineRegion()
             } else {
                 offlineRegion?.let {
@@ -281,9 +285,9 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
     }
 
     private fun initSeekbarListeners() {
-        seekbarMaxZoom.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekbarMaxZoom.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                textViewMaxText.text = String.format("Max zoom: %s", progress)
+                binding.textViewMaxText.text = String.format("Max zoom: %s", progress)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -293,9 +297,9 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
             }
         })
 
-        seekbarMinZoom.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekbarMinZoom.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                textViewMinText.text = String.format("Min zoom: %s", progress)
+                binding.textViewMinText.text = String.format("Min zoom: %s", progress)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {

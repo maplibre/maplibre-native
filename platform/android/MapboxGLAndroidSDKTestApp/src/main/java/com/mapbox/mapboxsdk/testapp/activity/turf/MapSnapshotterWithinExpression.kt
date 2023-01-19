@@ -11,6 +11,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.snapshotter.MapSnapshot
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter
 import com.mapbox.mapboxsdk.style.expressions.Expression.within
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
@@ -21,15 +22,13 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_physical_circle.mapView
-import kotlinx.android.synthetic.main.activity_snapshot.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityMapsnapshotterWithinExpressionBinding
 
 /**
  * An Activity that showcases the use of MapSnapshotter with 'within' expression
  */
 class MapSnapshotterWithinExpression : AppCompatActivity() {
-
+    private lateinit var binding: ActivityMapsnapshotterWithinExpressionBinding
     private lateinit var mapboxMap: MapboxMap
     private lateinit var snapshotter: MapSnapshotter
     private var snapshotInProgress = false
@@ -39,16 +38,18 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
             if (!snapshotInProgress) {
                 snapshotInProgress = true
                 snapshotter.setCameraPosition(mapboxMap.cameraPosition)
-                snapshotter.start {
-                    imageView.setImageBitmap(it.bitmap)
-                    snapshotInProgress = false
-                }
+                snapshotter.start(object : MapSnapshotter.SnapshotReadyCallback {
+                    override fun onSnapshotReady(snapshot: MapSnapshot) {
+                        binding.imageView.setImageBitmap(snapshot.bitmap)
+                        snapshotInProgress = false
+                    }
+                })
             }
         }
     }
 
     private val snapshotterObserver = object : MapSnapshotter.Observer {
-        override fun onStyleImageMissing(imageName: String?) {
+        override fun onStyleImageMissing(imageName: String) {
         }
 
         override fun onDidFinishLoadingStyle() {
@@ -67,33 +68,26 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mapsnapshotter_within_expression)
+        binding = ActivityMapsnapshotterWithinExpressionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { map ->
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync { map ->
             mapboxMap = map
 
             // Setup camera position above Georgetown
-            mapboxMap.cameraPosition = CameraPosition.Builder()
-                .target(LatLng(38.90628988399711, -77.06574689337494))
-                .zoom(15.5)
-                .build()
+            mapboxMap.cameraPosition = CameraPosition.Builder().target(LatLng(38.90628988399711, -77.06574689337494)).zoom(15.5).build()
 
             // Wait for the map to become idle before manipulating the style and camera of the map
-            mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
+            binding.mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
                 override fun onDidBecomeIdle() {
                     mapboxMap.easeCamera(
                         CameraUpdateFactory.newCameraPosition(
-                            CameraPosition.Builder()
-                                .zoom(16.0)
-                                .target(LatLng(38.905156245642814, -77.06535338052844))
-                                .bearing(80.68015859462369)
-                                .tilt(55.0)
-                                .build()
+                            CameraPosition.Builder().zoom(16.0).target(LatLng(38.905156245642814, -77.06535338052844)).bearing(80.68015859462369).tilt(55.0).build()
                         ),
                         1000
                     )
-                    mapView.removeOnDidBecomeIdleListener(this)
+                    binding.mapView.removeOnDidBecomeIdleListener(this)
                 }
             })
             // Load mapbox streets and add lines and circles
@@ -104,71 +98,55 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
     private fun setupStyle() {
         // Assume the route is represented by an array of coordinates.
         val coordinates = listOf<Point>(
-            Point.fromLngLat(
-                -77.06866264343262,
-                38.90506061276737
-            ),
-            Point.fromLngLat(
-                -77.06283688545227,
-                38.905194197410545
-            ),
-            Point.fromLngLat(
-                -77.06285834312439,
-                38.906429843444094
-            ),
-            Point.fromLngLat(
-                -77.0630407333374,
-                38.90680554236621
-            )
+            Point.fromLngLat(-77.06866264343262, 38.90506061276737),
+            Point.fromLngLat(-77.06283688545227, 38.905194197410545),
+            Point.fromLngLat(-77.06285834312439, 38.906429843444094),
+            Point.fromLngLat(-77.0630407333374, 38.90680554236621)
         )
 
         // Setup style with additional layers,
         // using streets as a base style
         mapboxMap.setStyle(
-            Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+            Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
         ) {
-            mapView.addOnCameraDidChangeListener(cameraListener)
+            binding.mapView.addOnCameraDidChangeListener(cameraListener)
         }
 
-        val options = MapSnapshotter.Options(imageView.measuredWidth / 2, imageView.measuredHeight / 2)
+        val options = MapSnapshotter.Options(binding.imageView.measuredWidth / 2, binding.imageView.measuredHeight / 2)
             .withCameraPosition(mapboxMap.cameraPosition)
-            .withPixelRatio(2.0f)
-            .withStyleBuilder(
-                Style.Builder()
-                    .fromUri(Style.getPredefinedStyle("Streets"))
-                    .withSources(
-                        GeoJsonSource(
-                            POINT_ID,
-                            LineString.fromLngLats(coordinates)
+            .withPixelRatio(2.0f).withStyleBuilder(
+                Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withSources(
+                    GeoJsonSource(
+                        POINT_ID,
+                        LineString.fromLngLats(coordinates)
+                    ),
+                    GeoJsonSource(
+                        FILL_ID,
+                        FeatureCollection.fromFeature(
+                            Feature.fromGeometry(bufferLineStringGeometry())
                         ),
-                        GeoJsonSource(
-                            FILL_ID,
-                            FeatureCollection.fromFeature(Feature.fromGeometry(bufferLineStringGeometry())),
-                            GeoJsonOptions().withBuffer(0).withTolerance(0.0f)
-                        )
+                        GeoJsonOptions().withBuffer(0).withTolerance(0.0f)
                     )
-                    .withLayerBelow(
-                        LineLayer(LINE_ID, POINT_ID)
-                            .withProperties(lineWidth(7.5f), lineColor(Color.LTGRAY)),
-                        "poi-label"
-                    )
-                    .withLayerBelow(
-                        CircleLayer(POINT_ID, POINT_ID)
-                            .withProperties(
-                                circleRadius(7.5f),
-                                circleColor(Color.DKGRAY),
-                                circleOpacity(0.75f)
-                            ),
-                        "poi-label"
-                    ).withLayerBelow(
-                        FillLayer(FILL_ID, FILL_ID)
-                            .withProperties(
-                                fillOpacity(0.12f),
-                                fillColor(Color.YELLOW)
-                            ),
-                        LINE_ID
-                    )
+                ).withLayerBelow(
+                    LineLayer(LINE_ID, POINT_ID).withProperties(
+                        lineWidth(7.5f),
+                        lineColor(Color.LTGRAY)
+                    ),
+                    "poi-label"
+                ).withLayerBelow(
+                    CircleLayer(POINT_ID, POINT_ID).withProperties(
+                        circleRadius(7.5f),
+                        circleColor(Color.DKGRAY),
+                        circleOpacity(0.75f)
+                    ),
+                    "poi-label"
+                ).withLayerBelow(
+                    FillLayer(FILL_ID, FILL_ID).withProperties(
+                        fillOpacity(0.12f),
+                        fillColor(Color.YELLOW)
+                    ),
+                    LINE_ID
+                )
             )
         snapshotter = MapSnapshotter(this, options)
         snapshotter.setObserver(snapshotterObserver)
@@ -176,39 +154,37 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
-            mapView.onSaveInstanceState(it)
-        }
+        binding.mapView.onSaveInstanceState(outState)
     }
 
     private fun bufferLineStringGeometry(): Polygon {

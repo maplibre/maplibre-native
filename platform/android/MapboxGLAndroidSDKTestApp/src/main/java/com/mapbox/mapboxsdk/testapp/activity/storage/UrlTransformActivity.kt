@@ -16,7 +16,7 @@ import timber.log.Timber
  * Test activity showcasing the url transform
  */
 class UrlTransformActivity : AppCompatActivity() {
-    private var mapView: MapView? = null
+    private lateinit var mapView: MapView
 
     /**
      * Be sure to use an isolated class so the activity is not leaked when
@@ -38,11 +38,11 @@ class UrlTransformActivity : AppCompatActivity() {
 
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
+        mapView.onCreate(savedInstanceState)
 
         // Get a handle to the file source and set the resource transform
         FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(Transform())
-        mapView!!.getMapAsync { map: MapboxMap ->
+        mapView.getMapAsync { map: MapboxMap ->
             Timber.i("Map loaded")
             map.setStyle(Style.getPredefinedStyle("Streets"))
         }
@@ -50,27 +50,27 @@ class UrlTransformActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
@@ -78,11 +78,11 @@ class UrlTransformActivity : AppCompatActivity() {
 
         // Example of how to reset the transform callback
         FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(null)
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

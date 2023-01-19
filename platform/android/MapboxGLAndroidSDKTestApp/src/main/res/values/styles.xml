@@ -38,20 +38,20 @@
 
     <style name="AppTheme" parent="AppBaseTheme" />
 
-    <style name="CustomLocationComponent" parent="mapbox_LocationComponent">
-        <item name="mapbox_foregroundDrawable">@drawable/custom_user_icon</item>
+    <style name="CustomLocationComponent" parent="maplibre_LocationComponent">
+        <item name="maplibre_foregroundDrawable">@drawable/custom_user_icon</item>
 
-        <item name="mapbox_bearingDrawable">@drawable/custom_user_arrow</item>
-        <item name="mapbox_gpsDrawable">@drawable/custom_user_puck_icon</item>
+        <item name="maplibre_bearingDrawable">@drawable/custom_user_arrow</item>
+        <item name="maplibre_gpsDrawable">@drawable/custom_user_puck_icon</item>
 
-        <item name="mapbox_accuracyAlpha">0.15</item>
-        <item name="mapbox_accuracyColor">#FF82C6</item>
+        <item name="maplibre_accuracyAlpha">0.15</item>
+        <item name="maplibre_accuracyColor">#FF82C6</item>
 
-        <item name="mapbox_elevation">0dp</item>
-        <item name="mapbox_compassAnimationEnabled">false</item>
-        <item name="mapbox_accuracyAnimationEnabled">false</item>
+        <item name="maplibre_elevation">0dp</item>
+        <item name="maplibre_compassAnimationEnabled">false</item>
+        <item name="maplibre_accuracyAnimationEnabled">false</item>
         
-        <item name="mapbox_layer_above">road-label</item>
+        <item name="maplibre_layer_above">road-label</item>
     </style>
 
 </resources>

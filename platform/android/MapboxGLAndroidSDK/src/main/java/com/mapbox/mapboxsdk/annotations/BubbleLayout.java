@@ -67,22 +67,22 @@ public class BubbleLayout extends LinearLayout {
   public BubbleLayout(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
 
-    TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.mapbox_BubbleLayout);
+    TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.maplibre_BubbleLayout);
     @ArrowDirection.Value
-    int location = a.getInt(R.styleable.mapbox_BubbleLayout_mapbox_bl_arrowDirection,
+    int location = a.getInt(R.styleable.maplibre_BubbleLayout_maplibre_bl_arrowDirection,
       ArrowDirection.LEFT);
     arrowDirection = new ArrowDirection(location);
-    arrowWidth = a.getDimension(R.styleable.mapbox_BubbleLayout_mapbox_bl_arrowWidth,
+    arrowWidth = a.getDimension(R.styleable.maplibre_BubbleLayout_maplibre_bl_arrowWidth,
       convertDpToPixel(8, context));
-    arrowHeight = a.getDimension(R.styleable.mapbox_BubbleLayout_mapbox_bl_arrowHeight,
+    arrowHeight = a.getDimension(R.styleable.maplibre_BubbleLayout_maplibre_bl_arrowHeight,
       convertDpToPixel(8, context));
-    arrowPosition = a.getDimension(R.styleable.mapbox_BubbleLayout_mapbox_bl_arrowPosition,
+    arrowPosition = a.getDimension(R.styleable.maplibre_BubbleLayout_maplibre_bl_arrowPosition,
       convertDpToPixel(12, context));
-    cornersRadius = a.getDimension(R.styleable.mapbox_BubbleLayout_mapbox_bl_cornersRadius, 0);
-    bubbleColor = a.getColor(R.styleable.mapbox_BubbleLayout_mapbox_bl_bubbleColor, Color.WHITE);
+    cornersRadius = a.getDimension(R.styleable.maplibre_BubbleLayout_maplibre_bl_cornersRadius, 0);
+    bubbleColor = a.getColor(R.styleable.maplibre_BubbleLayout_maplibre_bl_bubbleColor, Color.WHITE);
     strokeWidth =
-      a.getDimension(R.styleable.mapbox_BubbleLayout_mapbox_bl_strokeWidth, DEFAULT_STROKE_WIDTH);
-    strokeColor = a.getColor(R.styleable.mapbox_BubbleLayout_mapbox_bl_strokeColor, Color.GRAY);
+      a.getDimension(R.styleable.maplibre_BubbleLayout_maplibre_bl_strokeWidth, DEFAULT_STROKE_WIDTH);
+    strokeColor = a.getColor(R.styleable.maplibre_BubbleLayout_maplibre_bl_strokeColor, Color.GRAY);
 
     a.recycle();
     initPadding();

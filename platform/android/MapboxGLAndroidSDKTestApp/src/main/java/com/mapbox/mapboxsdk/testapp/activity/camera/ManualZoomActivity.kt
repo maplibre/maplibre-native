@@ -24,13 +24,13 @@ class ManualZoomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manual_zoom)
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             this@ManualZoomActivity.mapboxMap = mapboxMap
             mapboxMap.setStyle(
                 Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
             )
-            val uiSettings = this@ManualZoomActivity.mapboxMap!!.uiSettings
+            val uiSettings = this@ManualZoomActivity.mapboxMap.uiSettings
             uiSettings.setAllGesturesEnabled(false)
         }
     }
@@ -43,24 +43,24 @@ class ManualZoomActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_zoom_in -> {
-                mapboxMap!!.animateCamera(CameraUpdateFactory.zoomIn())
+                mapboxMap.animateCamera(CameraUpdateFactory.zoomIn())
                 true
             }
             R.id.action_zoom_out -> {
-                mapboxMap!!.animateCamera(CameraUpdateFactory.zoomOut())
+                mapboxMap.animateCamera(CameraUpdateFactory.zoomOut())
                 true
             }
             R.id.action_zoom_by -> {
-                mapboxMap!!.animateCamera(CameraUpdateFactory.zoomBy(2.0))
+                mapboxMap.animateCamera(CameraUpdateFactory.zoomBy(2.0))
                 true
             }
             R.id.action_zoom_to -> {
-                mapboxMap!!.animateCamera(CameraUpdateFactory.zoomTo(2.0))
+                mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(2.0))
                 true
             }
             R.id.action_zoom_to_point -> {
                 val view = window.decorView
-                mapboxMap!!.animateCamera(
+                mapboxMap.animateCamera(
                     CameraUpdateFactory.zoomBy(
                         1.0,
                         Point(view.measuredWidth / 4, view.measuredHeight / 4)
@@ -74,36 +74,36 @@ class ManualZoomActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

@@ -6,7 +6,7 @@ package com.mapbox.mapboxsdk.testapp.style;
 import android.graphics.Color;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import android.view.View;
 
 import com.mapbox.mapboxsdk.style.light.Light;
@@ -35,10 +35,10 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHei
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionOpacity;
 
 import static com.mapbox.mapboxsdk.testapp.action.MapboxMapAction.invoke;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class LightTest extends BaseTest {
 
   private Light light;

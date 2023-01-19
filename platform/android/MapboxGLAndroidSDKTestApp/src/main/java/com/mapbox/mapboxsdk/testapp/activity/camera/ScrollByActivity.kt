@@ -53,14 +53,14 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap!!.setStyle(Style.getPredefinedStyle("Pastel"))
-        val uiSettings = mapboxMap!!.uiSettings
+        mapboxMap.setStyle(Style.getPredefinedStyle("Pastel"))
+        val uiSettings = mapboxMap.uiSettings
         uiSettings.isLogoEnabled = false
         uiSettings.isAttributionEnabled = false
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this@ScrollByActivity, R.color.primary))
         fab.setOnClickListener { view: View? ->
-            mapboxMap!!.scrollBy(
+            mapboxMap.scrollBy(
                 (seekBarX!!.progress * MULTIPLIER_PER_PIXEL).toFloat(),
                 (seekBarY!!.progress * MULTIPLIER_PER_PIXEL).toFloat()
             )
@@ -69,37 +69,37 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

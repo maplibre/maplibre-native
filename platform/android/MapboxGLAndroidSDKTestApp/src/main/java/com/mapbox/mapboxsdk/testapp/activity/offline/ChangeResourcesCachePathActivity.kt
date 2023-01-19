@@ -1,8 +1,6 @@
 package com.mapbox.mapboxsdk.testapp.activity.offline
 
-import android.annotation.TargetApi
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +15,7 @@ import com.mapbox.mapboxsdk.offline.OfflineManager
 import com.mapbox.mapboxsdk.offline.OfflineRegion
 import com.mapbox.mapboxsdk.storage.FileSource
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_change_resources_cache_path.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityChangeResourcesCachePathBinding
 import java.io.File
 
 class ChangeResourcesCachePathActivity :
@@ -29,6 +27,8 @@ class ChangeResourcesCachePathActivity :
         private const val TAG = "Mbgl-ChangeResourcesCachePathActivity"
     }
 
+    private lateinit var binding: ActivityChangeResourcesCachePathBinding
+
     private lateinit var adapter: PathAdapter
 
     private lateinit var offlineManager: OfflineManager
@@ -37,12 +37,13 @@ class ChangeResourcesCachePathActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_change_resources_cache_path)
+        binding = ActivityChangeResourcesCachePathBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         adapter = PathAdapter(this, obtainExternalFilesPaths())
-        listView.adapter = adapter
-        listView.emptyView = empty
-        listView.onItemClickListener = this
+        binding.listView.adapter = adapter
+        binding.listView.emptyView = binding.empty
+        binding.listView.onItemClickListener = this
 
         offlineManager = OfflineManager.getInstance(this)
     }
@@ -59,26 +60,26 @@ class ChangeResourcesCachePathActivity :
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        listView.onItemClickListener = null
+        binding.listView.onItemClickListener = null
         val path: String = adapter.getItem(position) as String
         FileSource.setResourcesCachePath(path, callback)
     }
 
     override fun onError(message: String) {
-        listView.onItemClickListener = this
+        binding.listView.onItemClickListener = this
         Toast.makeText(this, "Error: $message", Toast.LENGTH_LONG).show()
     }
 
     override fun onSuccess(path: String) {
-        listView.onItemClickListener = this
+        binding.listView.onItemClickListener = this
         Toast.makeText(this, "New path: $path", Toast.LENGTH_LONG).show()
 
         offlineManager.listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<out OfflineRegion>?) {
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 Logger.i(TAG, "Number of saved offline regions in the new path: ${offlineRegions?.size}")
             }
 
-            override fun onError(error: String?) {
+            override fun onError(error: String) {
                 Logger.e(TAG, error)
             }
         })
@@ -87,34 +88,11 @@ class ChangeResourcesCachePathActivity :
     private fun Context.obtainExternalFilesPaths(): List<String> {
         val paths = ArrayList<String>()
         paths.add(this.filesDir.absolutePath)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            paths.addAll(obtainExternalFilesPathsKitKat())
-        } else {
-            paths.addAll(obtainExternalFilesPathsLegacy())
-        }
+        paths.addAll(obtainExternalFilesPathsKitKat())
         paths.add("${File.separator}invalid${File.separator}cache${File.separator}path")
         return paths
     }
 
-    private fun Context.obtainExternalFilesPathsLegacy(): List<String> {
-        val postFix =
-            "${File.separator}Android${File.separator}data${File.separator}${this.packageName}${File.separator}files"
-        val paths = ArrayList<String>()
-        val externalStorage = System.getenv("EXTERNAL_STORAGE")
-        val secondaryStorage = System.getenv("SECONDARY_STORAGE")
-        if (externalStorage != null) {
-            paths.add(externalStorage + postFix)
-        }
-        if (secondaryStorage != null) {
-            val secPaths = secondaryStorage.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            for (path in secPaths) {
-                paths.add(path + postFix)
-            }
-        }
-        return paths
-    }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     private fun Context.obtainExternalFilesPathsKitKat(): List<String> {
         val paths = ArrayList<String>()
         val extDirs = this.getExternalFilesDirs(null)

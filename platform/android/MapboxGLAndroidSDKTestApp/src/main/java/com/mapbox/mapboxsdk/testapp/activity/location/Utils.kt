@@ -41,8 +41,8 @@ object Utils {
      */
     fun getRandomLocation(bounds: LatLngBounds): Location {
         val random = Random()
-        val randomLat = bounds.latSouth + (bounds.latNorth - bounds.latSouth) * random.nextDouble()
-        val randomLon = bounds.lonWest + (bounds.lonEast - bounds.lonWest) * random.nextDouble()
+        val randomLat = bounds.latitudeSouth + (bounds.latitudeNorth - bounds.latitudeSouth) * random.nextDouble()
+        val randomLon = bounds.longitudeWest + (bounds.longitudeEast - bounds.longitudeWest) * random.nextDouble()
         val location = Location("random-loc")
         location.longitude = randomLon
         location.latitude = randomLat

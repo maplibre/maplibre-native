@@ -28,8 +28,7 @@ import com.mapbox.mapboxsdk.testapp.R
 import timber.log.Timber
 
 /** Test activity showcasing how to listen to camera change events. */
-class CameraPositionActivity :
-    FragmentActivity(), OnMapReadyCallback, View.OnClickListener, OnMapLongClickListener {
+class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnClickListener, OnMapLongClickListener {
     private lateinit var mapView: MapView
     private lateinit var mapboxMap: MapboxMap
     private lateinit var fab: FloatingActionButton
@@ -56,7 +55,7 @@ class CameraPositionActivity :
             toggleLogCameraChanges()
 
             // listen to long click events to toggle logging camera changes
-            mapboxMap!!.addOnMapLongClickListener(this)
+            mapboxMap.addOnMapLongClickListener(this)
         }
     }
 
@@ -68,8 +67,7 @@ class CameraPositionActivity :
     @SuppressLint("InflateParams")
     override fun onClick(view: View) {
         val context = view.context
-        val dialogContent =
-            LayoutInflater.from(context).inflate(R.layout.dialog_camera_position, null)
+        val dialogContent = LayoutInflater.from(context).inflate(R.layout.dialog_camera_position, null)
         val builder = AlertDialog.Builder(context)
         builder.setTitle(R.string.dialog_camera_position)
         builder.setView(onInflateDialogContent(dialogContent))
@@ -82,49 +80,51 @@ class CameraPositionActivity :
     private fun toggleLogCameraChanges() {
         logCameraChanges = !logCameraChanges
         if (logCameraChanges) {
-            mapboxMap!!.addOnCameraIdleListener(idleListener)
-            mapboxMap!!.addOnCameraMoveCancelListener(moveCanceledListener)
-            mapboxMap!!.addOnCameraMoveListener(moveListener)
-            mapboxMap!!.addOnCameraMoveStartedListener(moveStartedListener)
+            mapboxMap.addOnCameraIdleListener(idleListener)
+            mapboxMap.addOnCameraMoveCancelListener(moveCanceledListener)
+            mapboxMap.addOnCameraMoveListener(moveListener)
+            mapboxMap.addOnCameraMoveStartedListener(moveStartedListener)
         } else {
-            mapboxMap!!.removeOnCameraIdleListener(idleListener)
-            mapboxMap!!.removeOnCameraMoveCancelListener(moveCanceledListener)
-            mapboxMap!!.removeOnCameraMoveListener(moveListener)
-            mapboxMap!!.removeOnCameraMoveStartedListener(moveStartedListener)
+            mapboxMap.removeOnCameraIdleListener(idleListener)
+            mapboxMap.removeOnCameraMoveCancelListener(moveCanceledListener)
+            mapboxMap.removeOnCameraMoveListener(moveListener)
+            mapboxMap.removeOnCameraMoveStartedListener(moveStartedListener)
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapLongClickListener(this)
+        if (::mapboxMap.isInitialized) {
+            mapboxMap.removeOnMapLongClickListener(this)
         }
-        mapView!!.onDestroy()
+        if (::mapView.isInitialized) {
+            mapView.onDestroy()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private fun onInflateDialogContent(view: View): View {
@@ -136,13 +136,7 @@ class CameraPositionActivity :
         return view
     }
 
-    private fun linkTextView(
-        view: View,
-        @IdRes textViewRes: Int,
-        @IdRes seekBarRes: Int,
-        listener: ValueChangeListener,
-        defaultValue: Int
-    ) {
+    private fun linkTextView(view: View, @IdRes textViewRes: Int, @IdRes seekBarRes: Int, listener: ValueChangeListener, defaultValue: Int) {
         val value = view.findViewById<View>(textViewRes) as TextView
         val seekBar = view.findViewById<View>(seekBarRes) as SeekBar
         listener.setLinkedValueView(value)
@@ -152,42 +146,30 @@ class CameraPositionActivity :
 
     private val idleListener = OnCameraIdleListener {
         Timber.e("OnCameraIdle")
-        fab!!.setColorFilter(
+        fab.setColorFilter(
             ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_green_dark)
         )
     }
     private val moveListener = OnCameraMoveListener {
         Timber.e("OnCameraMove")
-        fab!!.setColorFilter(
-            ContextCompat.getColor(
-                this@CameraPositionActivity,
-                android.R.color.holo_orange_dark
-            )
+        fab.setColorFilter(
+            ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_orange_dark)
         )
     }
     private val moveCanceledListener = OnCameraMoveCanceledListener {
         Timber.e("OnCameraMoveCanceled")
     }
-    private val moveStartedListener: OnCameraMoveStartedListener =
-        object : OnCameraMoveStartedListener {
-            private val REASONS =
-                arrayOf(
-                    "REASON_API_GESTURE",
-                    "REASON_DEVELOPER_ANIMATION",
-                    "REASON_API_ANIMATION"
-                )
+    private val moveStartedListener: OnCameraMoveStartedListener = object : OnCameraMoveStartedListener {
+        private val REASONS = arrayOf("REASON_API_GESTURE", "REASON_DEVELOPER_ANIMATION", "REASON_API_ANIMATION")
 
-            override fun onCameraMoveStarted(reason: Int) {
-                // reason ranges from 1 <-> 3
-                fab!!.setColorFilter(
-                    ContextCompat.getColor(
-                        this@CameraPositionActivity,
-                        android.R.color.holo_red_dark
-                    )
-                )
-                Timber.e("OnCameraMoveStarted: %s", REASONS[reason - 1])
-            }
+        override fun onCameraMoveStarted(reason: Int) {
+            // reason ranges from 1 <-> 3
+            fab.setColorFilter(
+                ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_red_dark)
+            )
+            Timber.e("OnCameraMoveStarted: %s", REASONS[reason - 1])
         }
+    }
 
     private open inner class ValueChangeListener : OnSeekBarChangeListener {
         protected var textView: TextView? = null
@@ -208,59 +190,21 @@ class CameraPositionActivity :
         }
     }
 
-    private class DialogClickListener(
-        private val mapboxMap: MapboxMap?,
-        private val dialogContent: View
-    ) : DialogInterface.OnClickListener {
+    private class DialogClickListener(private val mapboxMap: MapboxMap?, private val dialogContent: View) : DialogInterface.OnClickListener {
         override fun onClick(dialog: DialogInterface, which: Int) {
-            val latitude =
-                (dialogContent.findViewById<View>(R.id.value_lat) as TextView)
-                    .text
-                    .toString()
-                    .toDouble()
-            val longitude =
-                (dialogContent.findViewById<View>(R.id.value_lon) as TextView)
-                    .text
-                    .toString()
-                    .toDouble()
-            val zoom =
-                (dialogContent.findViewById<View>(R.id.value_zoom) as TextView)
-                    .text
-                    .toString()
-                    .toDouble()
-            val bearing =
-                (dialogContent.findViewById<View>(R.id.value_bearing) as TextView)
-                    .text
-                    .toString()
-                    .toDouble()
-            val tilt =
-                (dialogContent.findViewById<View>(R.id.value_tilt) as TextView)
-                    .text
-                    .toString()
-                    .toDouble()
-            if (latitude < GeometryConstants.MIN_LATITUDE ||
-                latitude > GeometryConstants.MAX_LATITUDE
-            ) {
-                Toast.makeText(
-                    dialogContent.context,
-                    "latitude value must be set " +
-                        " between " +
-                        GeometryConstants.MIN_LATITUDE +
-                        " and " +
-                        GeometryConstants.MAX_LATITUDE,
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+            val latitude = (dialogContent.findViewById<View>(R.id.value_lat) as TextView).text.toString().toDouble()
+            val longitude = (dialogContent.findViewById<View>(R.id.value_lon) as TextView).text.toString().toDouble()
+            val zoom = (dialogContent.findViewById<View>(R.id.value_zoom) as TextView).text.toString().toDouble()
+            val bearing = (dialogContent.findViewById<View>(R.id.value_bearing) as TextView).text.toString().toDouble()
+            val tilt = (dialogContent.findViewById<View>(R.id.value_tilt) as TextView).text.toString().toDouble()
+            if (latitude < GeometryConstants.MIN_LATITUDE || latitude > GeometryConstants.MAX_LATITUDE) {
+                Toast.makeText(dialogContent.context, "latitude value must be set between " + GeometryConstants.MIN_LATITUDE + " and " + GeometryConstants.MAX_LATITUDE, Toast.LENGTH_SHORT).show()
                 return
             }
-            val cameraPosition =
-                CameraPosition.Builder()
-                    .target(LatLng(latitude, longitude))
-                    .zoom(zoom)
-                    .bearing(bearing)
-                    .tilt(tilt)
-                    .build()
-            mapboxMap!!.animateCamera(
+
+            val cameraPosition = CameraPosition.Builder().target(LatLng(latitude, longitude)).zoom(zoom).bearing(bearing).tilt(tilt).build()
+
+            mapboxMap?.animateCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 5000,
                 object : CancelableCallback {

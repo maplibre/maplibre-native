@@ -12,13 +12,14 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_map_simple.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityMapSimpleBinding
 import java.net.URI
 
 /**
  * Activity showcasing how to load symbols on a map without a Style URI or Style JSON.
  */
 class NoStyleActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMapSimpleBinding
 
     private val imageIcon: Drawable by lazy {
         ResourcesCompat.getDrawable(resources, R.drawable.ic_add_white, theme)!!
@@ -26,8 +27,10 @@ class NoStyleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_simple)
-        mapView.getMapAsync { map ->
+        binding = ActivityMapSimpleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.mapView.getMapAsync { map ->
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, cameraZoom))
             map.setStyle(
                 Style.Builder()
@@ -40,38 +43,38 @@ class NoStyleActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
-            mapView.onSaveInstanceState(it)
+            binding.mapView.onSaveInstanceState(it)
         }
     }
 

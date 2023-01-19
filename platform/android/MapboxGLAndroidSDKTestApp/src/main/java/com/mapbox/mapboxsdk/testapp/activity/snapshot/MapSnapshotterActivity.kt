@@ -6,6 +6,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.GridLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
@@ -19,14 +20,18 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshot
 import com.mapbox.mapboxsdk.snapshotter.MapSnapshotter
 import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.*
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.RasterLayer
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.style.sources.RasterSource
 import com.mapbox.mapboxsdk.style.sources.Source
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import timber.log.Timber
-import java.util.*
+import java.util.Objects
+import java.util.Random
 
 /**
  * Test activity showing how to use a the [com.mapbox.mapboxsdk.snapshotter.MapSnapshotter]
@@ -52,8 +57,8 @@ class MapSnapshotterActivity : AppCompatActivity() {
 
     private fun addSnapshots() {
         Timber.i("Creating snapshotters")
-        for (row in 0 until grid!!.rowCount) {
-            for (column in 0 until grid!!.columnCount) {
+        for (row in 0 until grid.rowCount) {
+            for (column in 0 until grid.columnCount) {
                 startSnapShot(row, column)
             }
         }
@@ -63,15 +68,19 @@ class MapSnapshotterActivity : AppCompatActivity() {
         // Optionally the style
         val builder = Style.Builder()
             .fromUri(
-                if ((column + row) % 2 == 0) Style.getPredefinedStyle("Streets") else Style.getPredefinedStyle(
-                    "Pastel"
+                Style.getPredefinedStyle(
+                    if ((column + row) % 2 == 0) {
+                        "Streets"
+                    } else {
+                        "Pastel"
+                    }
                 )
             )
 
         // Define the dimensions
         val options = MapSnapshotter.Options(
-            grid!!.measuredWidth / grid!!.columnCount,
-            grid!!.measuredHeight / grid!!.rowCount
+            grid.measuredWidth / grid.columnCount,
+            grid.measuredHeight / grid.rowCount
         ) // Optionally the pixel ratio
             .withPixelRatio(1f)
             .withLocalIdeographFontFamily(MapboxConstants.DEFAULT_FONT)
@@ -103,11 +112,15 @@ class MapSnapshotterActivity : AppCompatActivity() {
             options.withCameraPosition(
                 CameraPosition.Builder()
                     .target(
-                        if (options.region != null) options.region!!.center else LatLng(
-                            randomInRange(-80f, 80f).toDouble(),
-                            randomInRange(-160f, 160f)
-                                .toDouble()
-                        )
+                        if (options.region != null) {
+                            options.region!!.center
+                        } else {
+                            LatLng(
+                                randomInRange(-80f, 80f).toDouble(),
+                                randomInRange(-160f, 160f)
+                                    .toDouble()
+                            )
+                        }
                     )
                     .bearing(randomInRange(0f, 360f).toDouble())
                     .tilt(randomInRange(0f, 60f).toDouble())
@@ -122,12 +135,12 @@ class MapSnapshotterActivity : AppCompatActivity() {
                 RasterSource("my-raster-source", "maptiler://sources/satellite", 512)
             builder.withLayerAbove(
                 RasterLayer("satellite-layer", "my-raster-source"),
-                if ((column + row) % 2 == 0) "country_1" else "country_label"
+                "country_1"
             )
             builder.withSource(source)
         } else if (row == 0 && column == 2) {
             val carBitmap = BitmapUtils.getBitmapFromDrawable(
-                resources.getDrawable(R.drawable.ic_directions_car_black)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
             )
 
             // marker source
@@ -165,7 +178,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
                     PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
                     PropertyFactory.iconColor(Color.BLUE)
                 )
-            builder.withImage("Car", Objects.requireNonNull(carBitmap)!!, false)
+            builder.withImage("Car", Objects.requireNonNull(carBitmap!!), false)
                 .withSources(markerSource)
                 .withLayers(markerSymbolLayer)
             options
@@ -185,6 +198,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         }
         options.withStyleBuilder(builder)
         val snapshotter = MapSnapshotter(this@MapSnapshotterActivity, options)
+
         snapshotter.setObserver(object : MapSnapshotter.Observer {
             override fun onDidFinishLoadingStyle() {
                 Timber.i("onDidFinishLoadingStyle")
@@ -192,19 +206,25 @@ class MapSnapshotterActivity : AppCompatActivity() {
 
             override fun onStyleImageMissing(imageName: String) {
                 val androidIcon =
-                    BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_android_2))
+                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
                 snapshotter.addImage(imageName, androidIcon!!, false)
             }
         })
-        snapshotter.start { snapshot: MapSnapshot ->
-            Timber.i("Got the snapshot")
-            val imageView = ImageView(this@MapSnapshotterActivity)
-            imageView.setImageBitmap(snapshot.bitmap)
-            grid!!.addView(
-                imageView,
-                GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(column))
-            )
-        }
+
+        snapshotter.start(
+            object : MapSnapshotter.SnapshotReadyCallback {
+                override fun onSnapshotReady(snapshot: MapSnapshot) {
+                    Timber.i("Got the snapshot")
+                    val imageView = ImageView(this@MapSnapshotterActivity)
+                    imageView.setImageBitmap(snapshot.bitmap)
+                    grid.addView(
+                        imageView,
+                        GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(column))
+                    )
+                }
+            }
+        )
+
         snapshotters.add(snapshotter)
     }
 

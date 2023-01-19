@@ -16,7 +16,6 @@ import com.mapbox.mapboxsdk.style.layers.*
 import com.mapbox.mapboxsdk.style.sources.CustomGeometrySource
 import com.mapbox.mapboxsdk.style.sources.GeometryTileProvider
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.style.GridSourceActivity.GridProvider
 import java.util.*
 
 /**
@@ -34,49 +33,48 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
      * grid.
      */
     internal class GridProvider : GeometryTileProvider {
-        override fun getFeaturesForBounds(bounds: LatLngBounds, zoom: Int): FeatureCollection {
+        override fun getFeaturesForBounds(bounds: LatLngBounds, zoomLevel: Int): FeatureCollection {
             val features: MutableList<Feature> = ArrayList()
-            val gridSpacing: Double
-            gridSpacing = if (zoom >= 13) {
+            val gridSpacing = if (zoomLevel >= 13) {
                 0.01
-            } else if (zoom >= 11) {
+            } else if (zoomLevel >= 11) {
                 0.05
-            } else if (zoom == 10) {
+            } else if (zoomLevel == 10) {
                 .1
-            } else if (zoom == 9) {
+            } else if (zoomLevel == 9) {
                 0.25
-            } else if (zoom == 8) {
+            } else if (zoomLevel == 8) {
                 0.5
-            } else if (zoom >= 6) {
+            } else if (zoomLevel >= 6) {
                 1.0
-            } else if (zoom == 5) {
+            } else if (zoomLevel == 5) {
                 2.0
-            } else if (zoom >= 4) {
+            } else if (zoomLevel >= 4) {
                 5.0
-            } else if (zoom == 2) {
+            } else if (zoomLevel == 2) {
                 10.0
             } else {
                 20.0
             }
             var gridLines: MutableList<Any?> = ArrayList<Any?>()
-            var y = Math.ceil(bounds.latNorth / gridSpacing) * gridSpacing
-            while (y >= Math.floor(bounds.latSouth / gridSpacing) * gridSpacing) {
+            var y = Math.ceil(bounds.latitudeNorth / gridSpacing) * gridSpacing
+            while (y >= Math.floor(bounds.latitudeSouth / gridSpacing) * gridSpacing) {
                 gridLines.add(
                     Arrays.asList(
-                        Point.fromLngLat(bounds.lonWest, y),
-                        Point.fromLngLat(bounds.lonEast, y)
+                        Point.fromLngLat(bounds.longitudeWest, y),
+                        Point.fromLngLat(bounds.longitudeEast, y)
                     )
                 )
                 y -= gridSpacing
             }
             features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines as MutableList<MutableList<Point>>)))
             gridLines = ArrayList<Any?>()
-            var x = Math.floor(bounds.lonWest / gridSpacing) * gridSpacing
-            while (x <= Math.ceil(bounds.lonEast / gridSpacing) * gridSpacing) {
+            var x = Math.floor(bounds.longitudeWest / gridSpacing) * gridSpacing
+            while (x <= Math.ceil(bounds.longitudeEast / gridSpacing) * gridSpacing) {
                 gridLines.add(
                     Arrays.asList(
-                        Point.fromLngLat(x, bounds.latSouth),
-                        Point.fromLngLat(x, bounds.latNorth)
+                        Point.fromLngLat(x, bounds.latitudeSouth),
+                        Point.fromLngLat(x, bounds.latitudeNorth)
                     )
                 )
                 x += gridSpacing
@@ -110,32 +108,32 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     public override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     public override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     companion object {
