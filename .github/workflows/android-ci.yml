@@ -29,7 +29,7 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
-        shell: nix develop ./ci#shell --command "/bin/bash -e {0}"
+        shell: nix develop ./ci#shell --command "/bin/bash -e" -c {0}
     env:
       LIBSYSCONFCPUS: 8
       JOBS: 8
