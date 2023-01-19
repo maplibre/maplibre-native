@@ -15,11 +15,12 @@ jobs:
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     steps:
-
       - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - uses: cachix/install-nix-action@v18
 
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh        
