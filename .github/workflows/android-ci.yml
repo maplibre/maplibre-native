@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: Set up and activate environment using Nix flake
-        run: [ ! -z $IN_NIX_SHELL ]
+        run: "[[ ! -z $IN_NIX_SHELL ]]"
 
       - name: npm install
         run: npm install --ignore-scripts
