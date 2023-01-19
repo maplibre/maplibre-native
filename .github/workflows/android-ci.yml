@@ -97,8 +97,8 @@ jobs:
           nix develop ./ci#shell
           make android-check
 
-      # - name: Run Android unit tests
-      #   run: make run-android-unit-test
+      - name: Run Android unit tests
+        run: make run-android-unit-test
 
       # - name: Build libmapbox-gl.so for arm-v8
       #   run: make android-lib-arm-v8
