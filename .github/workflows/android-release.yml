@@ -5,14 +5,12 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
+        shell: nix develop ./ci#shell --command bash -c "set -e; source {0}"
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
@@ -26,7 +24,7 @@ jobs:
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh        
         working-directory: platform/android
-        shell: bash 
+        shell: bash
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -42,7 +40,6 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts          
-        working-directory: platform/android
 
       - name: Prepare ccache
         run: ccache --clear       
@@ -87,7 +84,6 @@ jobs:
             echo "MapboxGLAndroidSDK/gradle.properties:"
             cat MapboxGLAndroidSDK/gradle.properties
           fi
-        shell: bash
 
       - name: Build package
         run: make apackage
@@ -101,7 +97,6 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
-        shell: bash
       
       - name: Generate javadoc
         run: make android-javadoc  
@@ -114,7 +109,6 @@ jobs:
           ./scripts/release-notes.js > ${RELEASE_NOTES_PATH}
           echo ::set-output name=release_notes::${RELEASE_NOTES_PATH}
           echo ::set-output name=version_tag::$( git describe --tags --match=android-v*.*.* --abbrev=0 )
-        shell: bash          
 
       - name: Create release
         id: create_release
@@ -142,14 +136,12 @@ jobs:
       - name: Clean release
         run: |
           rm -f ${{ steps.prepare_release.outputs.release_notes }}
-        shell: bash                    
 
       - name: Prepare MavenCentral release
         env:
           GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
         run: |
           echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
-        shell: bash
 
       - name: Publish to MavenCentral
         run: make run-android-publish
