@@ -29,7 +29,6 @@
             ANDROID_HOME = androidHome;
             ANDROID_SDK_ROOT = androidHome;
             GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${android-sdk}/share/android-sdk/build-tools/31.0.0/aapt2 -Dorg.gradle.daemon=false";
-            HOME = "/tmp";
           };
         jdk = pkgs.jdk;
         android-sdk = android.sdk.${system} (sdkPkgs: with sdkPkgs; [
