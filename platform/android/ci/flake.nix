@@ -37,7 +37,7 @@
           cmdline-tools-latest
           # emulator
           platform-tools
-          platforms-android-31
+          platforms-android-33
           ndk-25-1-8937393
 
           # Other useful packages for a development environment.

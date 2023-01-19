@@ -1,6 +1,7 @@
 ext.nativeBuild = { nativeTargets ->
     android {
-        ndkVersion "25.1.8937393"
+        ndkVersion androidSdkVersions.ndkVersion
+        buildToolsVersion androidSdkVersions.buildToolsVersion
 
         defaultPublishConfig project.hasProperty("mapbox.buildtype") ? project.getProperty("mapbox.buildtype") : "debug"
 
@@ -24,7 +25,7 @@ ext.nativeBuild = { nativeTargets ->
             externalNativeBuild {
                 cmake {
                     path "../MapboxGLAndroidSDK/src/cpp/CMakeLists.txt"
-                    version "3.18.1+"
+                    version androidSdkVersions.cmakeVersion
                 }
             }
         }
