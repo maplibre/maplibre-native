@@ -71,9 +71,6 @@ jobs:
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
           restore-keys: |
             - ${{ env.cache-name }}   
-
-      - name: Android nitpick
-        run: make run-android-nitpick
         
       - name: Update version name
         run: |

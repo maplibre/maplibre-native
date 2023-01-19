@@ -315,11 +315,6 @@ android-configuration: gradle/configuration.gradle
 # android-update-vendor: gradle/configuration.gradle
 # 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
 
-# Run android nitpick script
-# .PHONY: run-android-nitpick
-# run-android-nitpick:
-# 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none androidNitpick
-
 # Creates a dependency graph using Graphviz
 .PHONY: android-graph
 android-graph: gradle/configuration.gradle
