@@ -1,6 +1,6 @@
 find_program(NodeJS_EXECUTABLE NAMES nodejs node)
 if (NOT NodeJS_EXECUTABLE)
-    message(FATAL_ERROR "Could not find Node.js")
+    message("Could not find Node.js test server may not work")
 endif()
 
 add_library(
