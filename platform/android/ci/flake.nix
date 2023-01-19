@@ -58,6 +58,7 @@
           gradle
           google-cloud-sdk
           ccache
+
           /*   pkgs.androidStudioPackages.stable; */
           /*   pkgs.androidStudioPackages.beta; */
           /*   pkgs.androidStudioPackages.preview; */
