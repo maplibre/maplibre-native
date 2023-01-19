@@ -45,6 +45,9 @@ jobs:
       - uses: cachix/install-nix-action@v18
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up and activate environment using Nix flake
+        run: nix develop ./ci#shell
         
       - name: Cache node modules
         uses: actions/cache@v3
@@ -91,9 +94,6 @@ jobs:
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}
           restore-keys: |
             - ${{ env.cache-name }}
-
-      - name: Set up environment using Nix flake
-        run: nix develop ./ci#shell
 
       - name: Check code style
         run: make android-check
