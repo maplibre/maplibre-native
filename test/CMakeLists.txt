@@ -1,3 +1,8 @@
+find_program(NodeJS_EXECUTABLE NAMES nodejs node)
+if (NOT NodeJS_EXECUTABLE)
+    message(FATAL_ERROR "Could not find Node.js")
+endif()
+
 add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
@@ -153,7 +158,7 @@ else()
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
-        -Wno-shadow
+        "-Wno-shadow -DNODE_EXECUTABLE='${NodeJS_EXECUTABLE}'"
     )
     set_source_files_properties(
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
