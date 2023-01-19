@@ -93,7 +93,11 @@ jobs:
           node-version: 18
       
       - name: npm install
-        run: npm ci --ignore-scripts
+        run: |
+          npm ci --ignore-scripts
+          cd ../../
+          npm install express
+          cd platform/ios
 
       - name: Prepare ccache
         run: ccache --clear
