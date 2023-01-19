@@ -310,11 +310,6 @@ endif
 android-configuration: gradle/configuration.gradle
 	cat gradle/configuration.gradle
 
-# Updates Android's vendor submodules
-# .PHONY: android-update-vendor
-# android-update-vendor: gradle/configuration.gradle
-# 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
-
 # Creates a dependency graph using Graphviz
 .PHONY: android-graph
 android-graph: gradle/configuration.gradle
