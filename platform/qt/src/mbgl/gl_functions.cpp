@@ -286,7 +286,7 @@ void (* const glGetShaderSource)(GLuint, GLsizei, GLsizei *, GLchar *) = [](auto
     return QOpenGLContext::currentContext()->functions()->glGetShaderSource(args...);
 };
 
-const GLubyte *(*glGetString)(GLenum) = [](auto... args) {
+const GLubyte *(* const glGetString)(GLenum) = [](auto... args) {
     return QOpenGLContext::currentContext()->functions()->glGetString(args...);
 };
 
