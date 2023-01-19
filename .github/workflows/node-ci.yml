@@ -196,6 +196,9 @@ jobs:
           tags: build
           push: false
           load: true
+          # experimental: https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#cache-backend-api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Run the docker build image and create node libs
         run:  docker run --rm -v $(pwd):/data build
