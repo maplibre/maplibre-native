@@ -68,6 +68,15 @@ private:
     std::thread serverThread;
 };
 
+class NodeHttpServer {
+public:
+    NodeHttpServer(const char* script);
+    ~NodeHttpServer();
+
+private:
+    int fd = -1;
+};
+
 void checkImage(const std::string& base,
                 const PremultipliedImage& actual,
                 double imageThreshold = 0,
