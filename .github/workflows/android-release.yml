@@ -22,6 +22,9 @@ jobs:
 
       - uses: cachix/install-nix-action@v18
 
+      - name: Set up and activate environment using Nix flake
+        run: "[[ ! -z $IN_NIX_SHELL ]]"
+
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh        
         working-directory: platform/android

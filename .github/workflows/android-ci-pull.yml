@@ -47,6 +47,9 @@ jobs:
 
       - uses: cachix/install-nix-action@v18
 
+      - name: Set up and activate environment using Nix flake
+        run: "[[ ! -z $IN_NIX_SHELL ]]"
+
       - name: Cache node modules
         uses: actions/cache@v3
         env:
