@@ -34,7 +34,7 @@
           # Useful packages for building and testing.
           build-tools-31-0-0
           cmdline-tools-latest
-          emulator
+          # emulator
           platform-tools
           platforms-android-31
           ndk-25-1-8937393
@@ -77,7 +77,7 @@
         packages = {
           shell = pkgs.mkShell {
             inherit env;
-            paths = paths;
+            packages = paths;
           };
           dockerImage = dockerImage;
         };
