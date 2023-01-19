@@ -7,7 +7,7 @@ This directory contains files to set up the CI environment which is used to test
 To enter a shell with the CI environment, use:
 
 ```
-nix build --extra-experimental-features nix-command --extra-experimental-features flakes .#shell
+nix develop .#shell
 ```
 
 ## Docker container
@@ -15,7 +15,7 @@ nix build --extra-experimental-features nix-command --extra-experimental-feature
 To create a Docker container which contains the CI environment:
 
 ```
-nix build --extra-experimental-features nix-command --extra-experimental-features flakes .#dockerImage
+nix build .#dockerImage
 docker load < result
 ```
 
@@ -27,6 +27,6 @@ All dependencies are pinned in the lock file. To update all inputs
 nix flake update --commit-lock-file
 ```
 
-Individual inputs can also be updated. See [nix flake update(https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html).
+Individual inputs can also be updated. See [`nix flake update`](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html).
 
 
