@@ -46,111 +46,109 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
         
-      # - name: Cache node modules
-      #   uses: actions/cache@v3
-      #   env:
-      #     cache-name: cache-node-modules
-      #   with:
-      #     path: ~/.npm
-      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-build-${{ env.cache-name }}-
-      #       ${{ runner.os }}-build-
-      #       ${{ runner.os }}-
+      - name: Cache node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
-      # - name: npm install
-      #   run: npm install --ignore-scripts
+      - name: npm install
+        run: npm install --ignore-scripts
 
-      # - name: Prepare ccache
-      #   run: ccache --clear
+      - name: Prepare ccache
+        run: ccache --clear
 
-      # - name: Cache ccache
-      #   uses: actions/cache@v3
-      #   env:
-      #     cache-name: ccache-v1
-      #   with:
-      #     path: ~/.ccache'
-      #     key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-      #     restore-keys: |
-      #       ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-      #       ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-      #       ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
+      - name: Cache ccache
+        uses: actions/cache@v3
+        env:
+          cache-name: ccache-v1
+        with:
+          path: ~/.ccache'
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
-      # - name: Clear ccache statistics
-      #   run: |
-      #     ccache --zero-stats
-      #     ccache --max-size=2G
-      #     ccache --show-stats
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats
+          ccache --max-size=2G
+          ccache --show-stats
 
-      # - name: restore-gradle-cache
-      #   uses: actions/cache@v3
-      #   env:
-      #     cache-name: gradle-v1
-      #   with:
-      #     path: ~/.gradle'
-      #     key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
-      #     restore-keys: |
-      #       - ${{ env.cache-name }}
+      - name: restore-gradle-cache
+        uses: actions/cache@v3
+        env:
+          cache-name: gradle-v1
+        with:
+          path: ~/.gradle
+          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}
+          restore-keys: |
+            - ${{ env.cache-name }}
+
+      - name: Set up environment using Nix flake
+        run: nix develop ./ci#shell
 
       - name: Check code style
-        run: |
-          nix develop ./ci#shell
-          make android-check
+        run: make android-check
 
       - name: Run Android unit tests
         run: make run-android-unit-test
 
-      # - name: Build libmapbox-gl.so for arm-v8
-      #   run: make android-lib-arm-v8
+      - name: Build libmapbox-gl.so for arm-v8
+        run: make android-lib-arm-v8
 
-      # - name: Build Test APK
-      #   run: |
-      #     MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-      #     if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-      #       echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
-      #       make android-ui-test-arm-v8
-      #     else
-      #       echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-      #     fi
-      #   shell: bash
+      - name: Build Test APK
+        run: |
+          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+            make android-ui-test-arm-v8
+          else
+            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
+          fi
 
-      # - name: Log in to Google Cloud Platform
-      #   run: |
-      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-      #       echo "Activating google cloud account..."
-      #       echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-      #       gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-      #       rm secret.json
-      #     else
-      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-      #     fi
-      #   shell: bash
+      - name: Log in to Google Cloud Platform
+        run: |
+          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+            echo "Activating google cloud account..."
+            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
+            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
+            rm secret.json
+          else
+            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
+          fi
 
-      # - name: Run instrumentation tests on Firebase
-      #   run: |
-      #     GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-      #     if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-      #       gcloud firebase test android models list
-      #       gcloud firebase test android run --type instrumentation \
-      #         --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
-      #         --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
-      #         --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-      #         --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
-      #     else
-      #       echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
-      #     fi
-      #   shell: bash
+      - name: Run instrumentation tests on Firebase
+        run: |
+          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
+          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
+            gcloud firebase test android models list
+            gcloud firebase test android run --type instrumentation \
+              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
+              --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
+              --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
+              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
+          else
+            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
+          fi
 
-      # - name: Store debug artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: debug-artifacts
-      #     path: |
-      #       MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
-      #       MapboxGLAndroidSDK/build/reports/lint-results.html
-      #       MapboxGLAndroidSDK/lint-baseline.xml
-      #       MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
-      #       MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
-      #       MapboxGLAndroidSDKTestApp/lint-baseline.xml
-      #       MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+      - name: Store debug artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-artifacts
+          path: |
+            MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
+            MapboxGLAndroidSDK/build/reports/lint-results.html
+            MapboxGLAndroidSDK/lint-baseline.xml
+            MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
+            MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
+            MapboxGLAndroidSDKTestApp/lint-baseline.xml
+            MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
