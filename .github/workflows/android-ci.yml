@@ -29,9 +29,6 @@ jobs:
     defaults:
       run:
         working-directory: platform/android
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
       JOBS: 8
       BUILDTYPE: Debug
