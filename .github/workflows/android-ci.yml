@@ -25,17 +25,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
@@ -47,14 +44,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-
-      - name: Setup Android SDK for accepting tool licenses
-        uses: android-actions/setup-android@v2
-        
       - name: Cache node modules
         uses: actions/cache@v3
         env:
