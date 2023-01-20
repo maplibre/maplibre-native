@@ -41,6 +41,9 @@ jobs:
         run: npm install --ignore-scripts          
         working-directory: platform/android
 
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
+
       - name: Prepare ccache
         run: ccache --clear       
 
