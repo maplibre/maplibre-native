@@ -6,8 +6,6 @@ MapLibre GL Native is a free and open-source library for publishing maps in your
 
 This project originated as a fork of Mapbox GL Native, before their switch to a non-OSS license in December 2020. For more information, see: [`FORK.md`](./FORK.md).
 
-**Call for Bounties💰** If you have ideas for new features in MapLibre, you can now nominate them for the MapLibre Bounty Program at https://maplibre.org/news/2022-10-16-call-for-bounties/
-
 <p align="center">
   <img src="https://user-images.githubusercontent.com/649392/211550776-8779041a-7c12-4bed-a7bd-c2ec80af2b29.png" alt="Android device with MapLibre" width="24%">   <img src="https://user-images.githubusercontent.com/649392/211550762-0f42ebc9-05ab-4d89-bd59-c306453ea9af.png" alt="iOS device with MapLibre" width="25%">
 </p>
