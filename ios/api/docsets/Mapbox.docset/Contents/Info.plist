@@ -17,6 +17,6 @@
     <key>DashDocSetFamily</key>
       <string>dashtoc</string>
     <key>DashDocSetFallbackURL</key>
-      <string>https://docs.mapbox.com/ios/api/maps/5.12.2/</string>
+      <string>https://docs.mapbox.com/ios/api/maps/5.13.0/</string>
   </dict>
 </plist>

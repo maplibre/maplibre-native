@@ -34,7 +34,7 @@
         <p class="header-col header-col--primary">
           <a class="header-link" href="index.html">
             <img style="height: 25px;"  class="header-icon" src="https://maplibre.org/img/maplibre-logo.svg" alt="Mapbox Docs"/>
-            <span class='header-tag'>Maps SDK for iOS Reference (5.12.2)</span>
+            <span class='header-tag'>Maps SDK for iOS Reference (5.13.0)</span>
           </a>
           
         </p>
@@ -876,50 +876,23 @@
 <p>For setup information, check out the <a href="https://www.mapbox.com/ios-sdk/">Mapbox Maps SDK for iOS homepage</a>. For detailed usage instructions, read “<a href="https://www.mapbox.com/help/first-steps-ios-sdk/">First steps with the Mapbox Maps SDK for iOS</a>” and consult the <a href="https://www.mapbox.com/ios-sdk/examples/">online examples</a>.</p>
 
 <p>If you have any questions, please see <a href="https://www.mapbox.com/help/">our help page</a>. We welcome your <a href="https://github.com/mapbox/mapbox-gl-native-ios/issues/">bug reports, feature requests, and contributions</a>.</p>
-<h2 id='changes-in-version-5-12-2' class='heading'>Changes in version 5.12.2</h2>
-<h3 id='improvements' class='heading'>Improvements</h3>
+<h2 id='changes-in-version-5-13-0' class='heading'>Changes in version 5.13.0</h2>
 
 <ul>
-<li>Exposes the windowBit value from zlib in the compress/decompress helper utils <a href="https://github.com/maplibre/maplibre-gl-native/pull/147">#147</a></li>
-<li>Fix camera paddings reset on map view gestures performing <a href="https://github.com/maplibre/maplibre-gl-native/pull/188">#188</a></li>
+<li>Fix missing attribution <a href="https://github.com/maplibre/maplibre-gl-native/pull/236">#236</a></li>
+<li>Fix logging format strings <a href="https://github.com/maplibre/maplibre-gl-native/pull/266">#266</a></li>
+<li>Implement map projection functionality <a href="https://github.com/maplibre/maplibre-gl-native/pull/254">#254</a></li>
+<li>Fix warnings, mainly casting to smaller types <a href="https://github.com/maplibre/maplibre-gl-native/pull/270">#270</a></li>
+<li>Remove an unused static library (savings of 97 KB from iOS binary)</li>
+<li>Add ClientOptions to be able to pass around client name and version <a href="https://github.com/maplibre/maplibre-gl-native/pull/365">#365</a></li>
+<li>Remove account from xcconfig <a href="https://github.com/maplibre/maplibre-gl-native/pull/382">#382</a></li>
+<li>Remove observation of key-path <a href="https://github.com/maplibre/maplibre-gl-native/pull/380">#380</a></li>
+<li>Fix for &ldquo;NSExpression function is forbidden&rdquo; <a href="https://github.com/maplibre/maplibre-gl-native/pull/411">#411</a></li>
+<li>Xcode 14 compatibility <a href="https://github.com/maplibre/maplibre-gl-native/pull/494">#494</a> <a href="https://github.com/maplibre/maplibre-gl-native/pull/599">#599</a></li>
 </ul>
 <h2 id='recent-changes' class='heading'>Recent changes</h2>
-<h3 id='5-12-1' class='heading'>5.12.1</h3>
-<h4 id='bug-fixes' class='heading'>Bug Fixes</h4>
 
-<ul>
-<li>ScaleBar enhancements <a href="https://github.com/maplibre/maplibre-gl-native/pull/120">#120</a>, <a href="https://github.com/maplibre/maplibre-gl-native/pull/121">#121</a></li>
-<li>Invalid tile url template for MapLibre style <a href="https://github.com/maplibre/maplibre-gl-native/pull/107">#107</a></li>
-<li>Address crash when localFontFamilyName is nil <a href="https://github.com/maplibre/maplibre-gl-native/pull/109">#109</a></li>
-<li>Fix for annotations stuttering and drifting when panning <a href="https://github.com/maplibre/maplibre-gl-native/pull/113">#113</a></li>
-<li>Adjust local glyphs <a href="https://github.com/maplibre/maplibre-gl-native/pull/122">#122</a></li>
-<li>Return correct Mapbox TileServerOptions <a href="https://github.com/maplibre/maplibre-gl-native/pull/132">#132</a></li>
-</ul>
-<h4 id='other' class='heading'>Other</h4>
-
-<ul>
-<li>Fix perf regression in cached tiles of tile pyramid <a href="https://github.com/maplibre/maplibre-gl-native/pull/129">#129</a></li>
-<li>Upgrade to newest protozero <a href="https://github.com/maplibre/maplibre-gl-native/pull/148">#148</a></li>
-<li>Fix build for Xcode 12.5 &amp; 13-beta. <a href="https://github.com/maplibre/maplibre-gl-native/pull/153">#153</a></li>
-</ul>
-<h3 id='5-12-0' class='heading'>5.12.0</h3>
-<h4 id='features' class='heading'>Features</h4>
-
-<ul>
-<li>Added allowScrollGesturesDuringRotateOrZoom <a href="https://github.com/maplibre/maplibre-gl-native/pull/62">#60</a></li>
-<li>Replacing hardcoded configuration with configurable API and removing Mapbox assets and dependencies <a href="https://github.com/maplibre/maplibre-gl-native/pull/90">#90</a></li>
-</ul>
-<h4 id='bug-fixes' class='heading'>Bug Fixes</h4>
-
-<ul>
-<li>Fix map stuttering by switching render call to use setNeedsDisplay <a href="https://github.com/maplibre/maplibre-gl-native/pull/60">#60</a></li>
-<li>Dispatch to main queue, rather than global <a href="https://github.com/maplibre/maplibre-gl-native/pull/64">#64</a></li>
-<li>Use DisplayLink to prevent crashes in willResignActive <a href="https://github.com/maplibre/maplibre-gl-native/pull/68">#68</a></li>
-<li>Ignore sizing and positioning for hidden elements in assertions <a href="https://github.com/maplibre/maplibre-gl-native/pull/80">#80</a></li>
-<li>Disable map snapshots by default <a href="https://github.com/maplibre/maplibre-gl-native/pull/83">#83</a></li>
-</ul>
-
-<p>See the <a href="https://github.com/mapbox/mapbox-gl-native-ios/blob/ios-v5.12.2/platform/ios/CHANGELOG.md">full changelog</a> for previous releases.</p>
+<p>See the <a href="https://github.com/mapbox/mapbox-gl-native-ios/blob/ios-v5.13.0/platform/ios/CHANGELOG.md">full changelog</a> for previous releases.</p>
 
           </div>
         </section>
@@ -928,7 +901,7 @@
       </article>
     </div>
     <section class="footer limiter">
-      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
+      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
     </section>
   </body>
 </div>

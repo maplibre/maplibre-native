@@ -2,21 +2,21 @@
   "warnings": [
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
-      "line": 313,
+      "line": 318,
       "symbol": "MGLCircleStyleLayer.circlePitchScale",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
-      "line": 472,
+      "line": 477,
       "symbol": "MGLCircleStyleLayer.circleTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
-      "line": 504,
+      "line": 509,
       "symbol": "MGLCircleStyleLayer.circleTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
@@ -128,21 +128,21 @@
     },
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
-      "line": 364,
+      "line": 369,
       "symbol": "MGLLineStyleLayer.lineDasharray",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
-      "line": 575,
+      "line": 580,
       "symbol": "MGLLineStyleLayer.lineTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/maplibre-gl-native/maplibre-gl-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
-      "line": 607,
+      "line": 612,
       "symbol": "MGLLineStyleLayer.lineTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"

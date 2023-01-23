@@ -35,7 +35,7 @@
         <p class="header-col header-col--primary">
           <a class="header-link" href="../index.html">
             <img style="height: 25px;"  class="header-icon" src="https://maplibre.org/img/maplibre-logo.svg" alt="Mapbox Docs"/>
-            <span class='header-tag'>Maps SDK for iOS Reference (5.12.2)</span>
+            <span class='header-tag'>Maps SDK for iOS Reference (5.13.0)</span>
           </a>
           
         </p>
@@ -908,9 +908,14 @@ layer.</p>
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">layer</span> <span class="o">=</span> <span class="kt">MGLCircleStyleLayer</span><span class="p">(</span><span class="nv">identifier</span><span class="p">:</span> <span class="s">"circles"</span><span class="p">,</span> <span class="nv">source</span><span class="p">:</span> <span class="n">population</span><span class="p">)</span>
 <span class="n">layer</span><span class="o">.</span><span class="n">sourceLayerIdentifier</span> <span class="o">=</span> <span class="s">"population"</span>
 <span class="n">layer</span><span class="o">.</span><span class="n">circleColor</span> <span class="o">=</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">forConstantValue</span><span class="p">:</span> <span class="kt">UIColor</span><span class="o">.</span><span class="n">green</span><span class="p">)</span>
-<span class="n">layer</span><span class="o">.</span><span class="n">circleRadius</span> <span class="o">=</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'exponential', 1.75, %@)"</span><span class="p">,</span>
-                                  <span class="p">[</span><span class="mi">12</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                                   <span class="mi">22</span><span class="p">:</span> <span class="mi">180</span><span class="p">])</span>
+
+<span class="k">let</span> <span class="nv">stops</span> <span class="o">=</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">forConstantValue</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                                            <span class="mi">22</span><span class="p">:</span> <span class="mi">180</span><span class="p">])</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">circleRadius</span> <span class="o">=</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">forMGLInterpolating</span><span class="p">:</span> <span class="o">.</span><span class="n">zoomLevelVariable</span><span class="p">,</span>
+                                  <span class="nv">curveType</span><span class="p">:</span> <span class="o">.</span><span class="n">exponential</span><span class="p">,</span>
+                                  <span class="nv">parameters</span><span class="p">:</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">forConstantValue</span><span class="p">:</span> <span class="mf">1.75</span><span class="p">),</span>
+                                  <span class="nv">stops</span><span class="p">:</span> <span class="n">stops</span><span class="p">)</span>
+
 <span class="n">layer</span><span class="o">.</span><span class="n">circleOpacity</span> <span class="o">=</span> <span class="kt">NSExpression</span><span class="p">(</span><span class="nv">forConstantValue</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">)</span>
 <span class="n">layer</span><span class="o">.</span><span class="n">predicate</span> <span class="o">=</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%K == %@"</span><span class="p">,</span> <span class="s">"marital-status"</span><span class="p">,</span> <span class="s">"married"</span><span class="p">)</span>
 <span class="n">mapView</span><span class="o">.</span><span class="n">style</span><span class="p">?</span><span class="o">.</span><span class="nf">addLayer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
@@ -993,7 +998,7 @@ has not yet been added to the current style, the behavior is undefined.</p>
                         <p>An initialized foreground style layer.</p>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L121">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L126">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1052,7 +1057,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L138">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L143">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1114,7 +1119,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L158">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L163">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1152,7 +1157,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L165">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L170">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1203,7 +1208,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L184">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L189">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1241,7 +1246,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L210">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L215">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1291,7 +1296,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L227">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L232">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1329,7 +1334,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L234">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L239">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1388,7 +1393,7 @@ attributes.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L257">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L262">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1440,7 +1445,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L276">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L281">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1478,7 +1483,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L283">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L288">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1542,7 +1547,7 @@ attributes.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L311">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L316">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1593,7 +1598,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L332">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L337">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1631,7 +1636,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L358">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L363">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1681,7 +1686,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L375">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L380">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1719,7 +1724,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L382">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L387">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1772,7 +1777,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L402">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L407">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1810,7 +1815,7 @@ feature attributes</li>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L409">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L414">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1869,7 +1874,7 @@ feature attributes.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L436">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L441">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1907,7 +1912,7 @@ feature attributes.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L470">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L475">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1973,7 +1978,7 @@ attributes.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLCircleStyleLayer.h#L502">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLCircleStyleLayer.h#L507">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1989,7 +1994,7 @@ attributes.</p>
       </article>
     </div>
     <section class="footer limiter">
-      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
+      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
     </section>
   </body>
 </div>

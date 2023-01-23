@@ -35,7 +35,7 @@
         <p class="header-col header-col--primary">
           <a class="header-link" href="../index.html">
             <img style="height: 25px;"  class="header-icon" src="https://maplibre.org/img/maplibre-logo.svg" alt="Mapbox Docs"/>
-            <span class='header-tag'>Maps SDK for iOS Reference (5.12.2)</span>
+            <span class='header-tag'>Maps SDK for iOS Reference (5.13.0)</span>
           </a>
           
         </p>
@@ -978,7 +978,7 @@ according to the given options.</p>
                         <p>An initialized map snapshotter.</p>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L237">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L237">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1010,7 +1010,7 @@ according to the given options.</p>
                         </div>
                         <div class="language keyline-purple">
                           <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="nv">completionHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Other%20Type%20Definitions.html#/c:MGLMapSnapshotter.h@T@MGLMapSnapshotCompletionHandler">MGLMapSnapshotCompletionHandler</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">()</span> <span class="n">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MGLMapSnapshot.html">MGLMapSnapshot</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1035,7 +1035,7 @@ is executed on the main queue.</p>
                         </table>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L245">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L245">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1069,7 +1069,7 @@ on the specified queue.</p>
                         </div>
                         <div class="language keyline-purple">
                           <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">with</span> <span class="nv">queue</span><span class="p">:</span> <span class="kt">DispatchQueue</span><span class="p">,</span> <span class="nv">completionHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Other%20Type%20Definitions.html#/c:MGLMapSnapshotter.h@T@MGLMapSnapshotCompletionHandler">MGLMapSnapshotCompletionHandler</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">with</span> <span class="nv">queue</span><span class="p">:</span> <span class="kt">DispatchQueue</span><span class="p">)</span> <span class="n">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MGLMapSnapshot.html">MGLMapSnapshot</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1107,7 +1107,7 @@ is executed on the queue specified in the <code>queue</code> parameter.</p>
                         </table>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L256">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L256">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1143,7 +1143,7 @@ top of the resulting <code><a href="../Classes/MGLMapSnapshot.html">MGLMapSnapsh
                         </div>
                         <div class="language keyline-purple">
                           <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="nv">overlayHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Other%20Type%20Definitions.html#/c:MGLMapSnapshotter.h@T@MGLMapSnapshotOverlayHandler">MGLMapSnapshotOverlayHandler</a></span><span class="p">,</span> <span class="nv">completionHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Other%20Type%20Definitions.html#/c:MGLMapSnapshotter.h@T@MGLMapSnapshotCompletionHandler">MGLMapSnapshotCompletionHandler</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="nv">overlayHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Other%20Type%20Definitions.html#/c:MGLMapSnapshotter.h@T@MGLMapSnapshotOverlayHandler">MGLMapSnapshotOverlayHandler</a></span><span class="p">)</span> <span class="n">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MGLMapSnapshot.html">MGLMapSnapshot</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1183,7 +1183,7 @@ is executed on the main queue.</p>
                         </table>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L270">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L270">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1222,7 +1222,7 @@ the snapshot, create a new <code>MGLMapSnapshotter</code> object.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L278">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L278">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1258,7 +1258,7 @@ the snapshot, create a new <code>MGLMapSnapshotter</code> object.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L283">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L283">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1294,7 +1294,7 @@ the snapshot, create a new <code>MGLMapSnapshotter</code> object.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L288">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L288">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1339,7 +1339,7 @@ ensure that your style customizations apply.</p>
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L302">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L302">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1394,7 +1394,7 @@ explicitly versioned style using a convenience method like
                         </div>
                       </div>
                       <div class="show-on-github">
-                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.12.2/platform/darwin/src/MGLMapSnapshotter.h#L323">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MGLMapSnapshotter.h#L323">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1410,7 +1410,7 @@ explicitly versioned style using a convenience method like
       </article>
     </div>
     <section class="footer limiter">
-      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
+      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
     </section>
   </body>
 </div>
