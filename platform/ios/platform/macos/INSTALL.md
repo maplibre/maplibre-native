@@ -23,7 +23,7 @@ Before building, follow these steps to install prerequisites:
    # To install the CMake documentation
    brew list cmake-docs || brew install cmake-docs
    ```
-1. Install [xcpretty](https://github.com/supermarin/xcpretty) (optional, used for prettifying command line builds):
+1. Install [xcpretty](https://github.com/supermarin/xcpretty) (used for prettifying command line builds):
    ```
    [sudo] gem install xcpretty
    ```
@@ -46,6 +46,8 @@ To build the SDK from source:
    this repository.
 1. Run:
    ```
+   npm install
+   cd platform/ios
    make xpackage
    ```
    This produces a `Mapbox.framework` in the `build/macos/pkg/` folder.
