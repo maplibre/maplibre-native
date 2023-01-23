@@ -48,5 +48,5 @@ jazzy \
     --theme ${THEME} \
     --head "${CUSTOM_HEAD}" \
     --output ${OUTPUT} \
-    --title "Maps SDK for iOS" \
+    --title "MapLibre GL Native for iOS" \
     --module-version ${SHORT_VERSION}
