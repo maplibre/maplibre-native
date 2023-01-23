@@ -78,9 +78,9 @@ int main(int argc, char *argv[]) {
 
     util::RunLoop loop;
 
-    HeadlessFrontend frontend({ width, height }, pixelRatio);
+    HeadlessFrontend frontend({ width, height }, static_cast<float>(pixelRatio));
     Map map(frontend, MapObserver::nullObserver(),
-            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(static_cast<float>(pixelRatio)),
             ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration));
 
     if (style.find("://") == std::string::npos) {

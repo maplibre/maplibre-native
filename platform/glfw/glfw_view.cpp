@@ -283,7 +283,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             case GLFW_KEY_S:
                 if (view->changeStyleCallback) view->changeStyleCallback();
                 break;
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
         case GLFW_KEY_B: {
             auto debug = view->map->getDebug();
             if (debug & mbgl::MapDebugOptions::StencilClip) {
@@ -679,7 +679,7 @@ void GLFWView::updateAnimatedAnnotations() {
 
 void GLFWView::cycleDebugOptions() {
     auto debug = map->getDebug();
-#if not MBGL_USE_GLES2
+#if !MBGL_USE_GLES2
     if (debug & mbgl::MapDebugOptions::StencilClip)
         debug = mbgl::MapDebugOptions::NoDebug;
     else if (debug & mbgl::MapDebugOptions::Overdraw)
