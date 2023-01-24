@@ -30,7 +30,7 @@ The documentation of MapLibre GL Native is a work in progress. To get an archite
 
 Platforms with a ⭐️ are **MapLibre Core Projects** and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
-## Metal
+## Renderer Modularization & Metal
 
 ![image-metal](https://user-images.githubusercontent.com/53421382/214308933-66cd4efb-b5a5-4de3-b4b4-7ed59045a1c3.png)
 
