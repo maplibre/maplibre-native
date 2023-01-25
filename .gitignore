@@ -40,4 +40,3 @@ node_modules
 /lib
 
 /bazel-*
-CMakeLists.txt.user
