@@ -28,10 +28,10 @@ template <class Object>
 class EstablishedActor {
 public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
-    template <typename U = Object, class... Args, typename std::enable_if<
-        std::is_constructible<U, Args...>::value ||
-        std::is_constructible<U, ActorRef<U>, Args...>::value
-    >::type * = nullptr>
+    template <typename U = Object, class... Args, typename std::enable_if_t<
+        std::is_constructible_v<U, Args...> ||
+        std::is_constructible_v<U, ActorRef<U>, Args...>
+    > * = nullptr>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&& ... args)
     :   parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
@@ -56,13 +56,13 @@ public:
     
 private:
     // Enabled for Objects with a constructor taking ActorRef<Object> as the first parameter
-    template <typename U = Object, class... Args, typename std::enable_if<std::is_constructible<U, ActorRef<U>, Args...>::value>::type * = nullptr>
+    template <typename U = Object, class... Args, typename std::enable_if_t<std::is_constructible_v<U, ActorRef<U>, Args...>> * = nullptr>
     void emplaceObject(Args&&... args_) {
         new (&parent.objectStorage) Object(parent.self(), std::forward<Args>(args_)...);
     }
 
     // Enabled for plain Objects
-    template <typename U = Object, class... Args, typename std::enable_if<std::is_constructible<U, Args...>::value>::type * = nullptr>
+    template <typename U = Object, class... Args, typename std::enable_if_t<std::is_constructible_v<U, Args...>> * = nullptr>
     void emplaceObject(Args&&... args_) {
         new (&parent.objectStorage) Object(std::forward<Args>(args_)...);
     }
