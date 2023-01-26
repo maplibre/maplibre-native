@@ -178,7 +178,7 @@ typedef NS_ENUM(NSUInteger, MGLDEMEncoding) {
 MGL_EXPORT
 @interface MGLTileSource : MGLSource
 
-#pragma mark Accessing a Source’s Content
+// MARK: Accessing a Source’s Content
 
 /**
  The URL to the TileJSON configuration file that specifies the contents of the
@@ -189,7 +189,7 @@ MGL_EXPORT
  */
 @property (nonatomic, copy, nullable, readonly) NSURL *configurationURL;
 
-#pragma mark Accessing Attribution Strings
+// MARK: Accessing Attribution Strings
 
 /**
  An array of `MGLAttributionInfo` objects that define the attribution

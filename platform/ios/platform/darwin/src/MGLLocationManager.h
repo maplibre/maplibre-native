@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-#pragma mark Configuring Location Update Precision
+// MARK: Configuring Location Update Precision
 
 /**
  Specifies the minimum distance (measured in meters) a device must move horizontally
@@ -111,7 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, weak) id<MGLLocationManagerDelegate> delegate;
 
-#pragma mark Requesting Authorization for Location Services
+// MARK: Requesting Authorization for Location Services
 
 /**
  Returns the current localization authorization status.
@@ -131,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)requestWhenInUseAuthorization;
 
-#pragma mark Initiating Location Updates
+// MARK: Initiating Location Updates
 
 /**
  Starts the generation of location updates that reports the user's current location.
@@ -143,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)stopUpdatingLocation;
 
-#pragma mark Initiating Heading Updates
+// MARK: Initiating Heading Updates
 
 /**
  Specifies a physical device orientation.
@@ -174,7 +174,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol MGLLocationManagerDelegate <NSObject>
 
-#pragma mark Responding to Location Updates
+// MARK: Responding to Location Updates
 
 /**
  Notifies the delegate with the new location data.
@@ -188,7 +188,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)locationManager:(id<MGLLocationManager>)manager
      didUpdateLocations:(NSArray<CLLocation *> *)locations;
 
-#pragma mark Responding to Heading Updates
+// MARK: Responding to Heading Updates
 
 /**
  Notifies the delegate with the new heading data.
@@ -206,7 +206,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)locationManagerShouldDisplayHeadingCalibration:(id<MGLLocationManager>)manager;
 
-#pragma mark Responding to Location Updates Errors
+// MARK: Responding to Location Updates Errors
 
 /**
  Notifies the delegate that the location manager was unable to retrieve

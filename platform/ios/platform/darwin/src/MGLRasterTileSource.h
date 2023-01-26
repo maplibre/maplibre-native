@@ -61,7 +61,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLTileSourceOption MGLTileSourceOptionTileSi
 MGL_EXPORT
 @interface MGLRasterTileSource : MGLTileSource
 
-#pragma mark Initializing a Source
+// MARK: Initializing a Source
 
 /**
  Returns a raster tile source initialized with an identifier and configuration

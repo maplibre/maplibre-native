@@ -73,7 +73,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithStyleURL:(nullable NSURL *)styleURL camera:(MGLMapCamera *)camera size:(CGSize)size;
 
-#pragma mark - Configuring the Map
+// MARK: - Configuring the Map
 
 /**
  URL of the map style to snapshot.
@@ -106,7 +106,7 @@ MGL_EXPORT
  */
 @property (nonatomic) MGLCoordinateBounds coordinateBounds;
 
-#pragma mark - Configuring the Image
+// MARK: - Configuring the Image
 
 /**
  The size of the output image, measured in points.

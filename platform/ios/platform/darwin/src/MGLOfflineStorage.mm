@@ -214,7 +214,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     }
 }
 
-#pragma mark Database management methods
+// MARK: Database management methods
 
 - (NSString *)databasePath {
     return self.databaseURL.path;
@@ -404,7 +404,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     });
 }
 
-#pragma mark Pack management methods
+// MARK: Pack management methods
 
 - (void)addPackForRegion:(id <MGLOfflineRegion>)region withContext:(NSData *)context completionHandler:(MGLOfflinePackAdditionCompletionHandler)completion {
     MGLLogDebug(@"Adding packForRegion: %@ contextLength: %lu completionHandler: %@", region, (unsigned long)context.length, completion);
@@ -544,7 +544,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
     _mbglDatabaseFileSource->setOfflineMapboxTileCountLimit(maximumCount);
 }
 
-#pragma mark - Ambient cache management
+// MARK: - Ambient cache management
 
 - (void)setMaximumAmbientCacheSize:(NSUInteger)cacheSize withCompletionHandler:(void (^)(NSError  * _Nullable))completion {
     _mbglDatabaseFileSource->setMaximumAmbientCacheSize(cacheSize, [&, completion](std::exception_ptr exception) {
@@ -610,7 +610,7 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         }
     });
 }
-#pragma mark -
+// MARK: -
 
 - (unsigned long long)countOfBytesCompleted {
     NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:self.databasePath error:NULL];

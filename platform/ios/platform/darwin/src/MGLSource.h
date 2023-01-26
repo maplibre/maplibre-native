@@ -28,7 +28,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLInvalidStyleSourceExcepti
 MGL_EXPORT
 @interface MGLSource : NSObject
 
-#pragma mark Initializing a Source
+// MARK: Initializing a Source
 
 - (instancetype)init __attribute__((unavailable("Use -initWithIdentifier: instead.")));
 
@@ -44,7 +44,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier;
 
-#pragma mark Identifying a Source
+// MARK: Identifying a Source
 
 /**
  A string that uniquely identifies the source in the style to which it is added.

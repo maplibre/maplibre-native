@@ -63,13 +63,13 @@ typedef NS_ENUM(NSInteger, MBXEmbeddedControl) {
     }
 }
 
-#pragma mark UIScrollViewDelegate methods
+// MARK: UIScrollViewDelegate methods
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
     return self.mapView;
 }
 
-#pragma mark Class method
+// MARK: Class method
 
 + (NSString *)titleForControl:(MBXEmbeddedControl) control {
     switch (control) {

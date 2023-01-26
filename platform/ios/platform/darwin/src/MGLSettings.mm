@@ -15,7 +15,7 @@
 
 @implementation MGLSettings
 
-#pragma mark - Internal
+// MARK: - Internal
 
 - (instancetype)init {
     if (self = [super init]) {
