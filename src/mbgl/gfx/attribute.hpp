@@ -156,7 +156,7 @@ template <class A1>
 struct Descriptor<VertexType<A1>> {
     using Type = VertexType<A1>;
     static_assert(sizeof(Type) < 256, "vertex type must be smaller than 256 bytes");
-    static_assert(std::is_standard_layout<Type>::value, "vertex type must use standard layout");
+    static_assert(std::is_standard_layout_v<Type>, "vertex type must use standard layout");
     static constexpr const VertexDescriptor data = { sizeof(Type), 1, {
         { A1::DataType, offsetof(Type, a1) },
     }};
@@ -169,7 +169,7 @@ template <class A1, class A2>
 struct Descriptor<VertexType<A1, A2>> {
     using Type = VertexType<A1, A2>;
     static_assert(sizeof(Type) < 256, "vertex type must be smaller than 256 bytes");
-    static_assert(std::is_standard_layout<Type>::value, "vertex type must use standard layout");
+    static_assert(std::is_standard_layout_v<Type>, "vertex type must use standard layout");
     static constexpr const VertexDescriptor data = { sizeof(Type), 2, {
        { A1::DataType, offsetof(Type, a1) },
        { A2::DataType, offsetof(Type, a2) },
@@ -183,7 +183,7 @@ template <class A1, class A2, class A3>
 struct Descriptor<VertexType<A1, A2, A3>> {
     using Type = VertexType<A1, A2, A3>;
     static_assert(sizeof(Type) < 256, "vertex type must be smaller than 256 bytes");
-    static_assert(std::is_standard_layout<Type>::value, "vertex type must use standard layout");
+    static_assert(std::is_standard_layout_v<Type>, "vertex type must use standard layout");
     static constexpr const VertexDescriptor data = { sizeof(Type), 3, {
         { A1::DataType, offsetof(Type, a1) },
         { A2::DataType, offsetof(Type, a2) },
@@ -198,7 +198,7 @@ template <class A1, class A2, class A3, class A4>
 struct Descriptor<VertexType<A1, A2, A3, A4>> {
     using Type = VertexType<A1, A2, A3, A4>;
     static_assert(sizeof(Type) < 256, "vertex type must be smaller than 256 bytes");
-    static_assert(std::is_standard_layout<Type>::value, "vertex type must use standard layout");
+    static_assert(std::is_standard_layout_v<Type>, "vertex type must use standard layout");
     static constexpr const VertexDescriptor data = { sizeof(Type), 4, {
         { A1::DataType, offsetof(Type, a1) },
         { A2::DataType, offsetof(Type, a2) },
@@ -214,7 +214,7 @@ template <class A1, class A2, class A3, class A4, class A5>
 struct Descriptor<VertexType<A1, A2, A3, A4, A5>> {
     using Type = VertexType<A1, A2, A3, A4, A5>;
     static_assert(sizeof(Type) < 256, "vertex type must be smaller than 256 bytes");
-    static_assert(std::is_standard_layout<Type>::value, "vertex type must use standard layout");
+    static_assert(std::is_standard_layout_v<Type>, "vertex type must use standard layout");
     static constexpr const VertexDescriptor data = { sizeof(Type), 5, {
         { A1::DataType, offsetof(Type, a1) },
         { A2::DataType, offsetof(Type, a2) },
