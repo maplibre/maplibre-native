@@ -14,7 +14,7 @@
       };
     }
     //
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-darwin" ] (system:
       let
         pkgs = import nixpkgs {
           inherit system;
@@ -75,11 +75,13 @@
         };
       in
       {
-        packages = {
-          shell = pkgs.mkShell {
+				devShells = {
+				  default = pkgs.mkShell {
             inherit env;
             packages = paths;
           };
+				};
+        packages = {
           dockerImage = dockerImage;
         };
       }
