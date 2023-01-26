@@ -4,9 +4,9 @@ This directory contains files to set up the CI environment which is used to test
 
 You can also re-create the CI environment locally.
 
-First [install Nix](https://nixos.org/download.html). A good introduction if you want to learn more about Nix is [Zero to Nix](https://zero-to-nix.com/). A Nix Flake are used, which is an experimental feature which needs to be enabled in your settings or via flags passed to the commands below. See [Nix Flakes - Enable Flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes).
+A good introduction to Nix is [Zero to Nix](https://zero-to-nix.com/). If you don't want to delve too deep for now, the provided installer may be helpful for setting up Nix on your system.
 
-You need to add the flags `--extra-experimental-features nix-command --extra-experimental-features flakes` to the commands below or add
+A 'Nix flake' is used, which is an experimental feature which needs to be enabled in your settings or via flags passed to the commands below. See [Nix Flakes - Enable Flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes). You need to add the flags `--extra-experimental-features nix-command --extra-experimental-features flakes` to the commands below or add:
 
 ```
 experimental-features = nix-command flakes
