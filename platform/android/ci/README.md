@@ -9,7 +9,7 @@ Nix Flakes are used, which is an experimental feature which needs to be enabled 
 To enter a shell with the CI environment, use:
 
 ```
-nix develop .#shell
+nix develop
 ```
 
 ## Docker container

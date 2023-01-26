@@ -75,11 +75,13 @@
         };
       in
       {
-        packages = {
-          shell = pkgs.mkShell {
+        devShells = {
+          default = pkgs.mkShell {
             inherit env;
             packages = paths;
           };
+        };
+        packages = {
           dockerImage = dockerImage;
         };
       }
