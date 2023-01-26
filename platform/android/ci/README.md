@@ -4,15 +4,19 @@ This directory contains files to set up the CI environment which is used to test
 
 You can also re-create the CI environment locally.
 
-A good introduction to Nix is [Zero to Nix](https://zero-to-nix.com/). If you don't want to delve too deep for now, the provided installer may be helpful for setting up Nix on your system.
+First [install Nix](https://nixos.org/download.html); Linux, macOS and Windows ([WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) are supported. If you want to learn how Nix works, a good introduction is [Zero to Nix](https://zero-to-nix.com/).
 
-A 'Nix flake' is used, which is an experimental feature which needs to be enabled in your settings or via flags passed to the commands below. See [Nix Flakes - Enable Flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes). You need to add the flags `--extra-experimental-features nix-command --extra-experimental-features flakes` to the commands below or add:
+## Nix Flake
+
+A *Nix flake* is used to set up the environment, which is a description of dependencies pinned to a specific version (see `flake.nix` and `flake.lock` in this directory). Flakes are an an experimental feature of Nix which needs to be enabled in your settings or via flags passed to the commands below.  You need to add the flags `--extra-experimental-features nix-command --extra-experimental-features flakes` to the commands below or add:
 
 ```
 experimental-features = nix-command flakes
 ```
 
 to your `~/.config/nix/nix.conf`.
+
+See also [Nix Flakes - Enable Flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes).
 
 
 ## Shell
