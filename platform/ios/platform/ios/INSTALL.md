@@ -25,7 +25,7 @@ Before building, follow these steps to install prerequisites:
 1. Install [Homebrew](http://brew.sh)
 1. Install additional dependencies.
    ```bash
-   brew install cmake ccache pkg-config glfw cmake-docs
+   brew install node cmake ccache pkg-config glfw cmake-docs
    ```
 
 1. Install [xcpretty](https://github.com/supermarin/xcpretty) for prettifying command line builds. (optional):
