@@ -44,6 +44,11 @@ jobs:
 
       - uses: cachix/install-nix-action@v18
 
+    - uses: cachix/cachix-action@v11
+      with:
+        name: maplibre
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
       - name: Set up and activate environment using Nix flake
         run: "[[ ! -z $IN_NIX_SHELL ]]"
 
