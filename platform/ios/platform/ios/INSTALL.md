@@ -47,6 +47,12 @@ make iproj
 
 Xcode should automatically open, and you can then build the Demo App (iosapp).
 
+![iosapp](https://user-images.githubusercontent.com/556367/214957991-7ddb56b1-937e-4a15-a03c-36f355677cf6.png)
+
+If you wish to deploy on attached hardware, you need to setup your Apple Developer account and select it in the *Signing and Capabilities* menu.
+
+![Team](https://user-images.githubusercontent.com/556367/214957613-2d565b1a-6590-495e-8979-2022096e02f1.png)
+
 ### Building the SDK
 
 1. Clone the git repository:
