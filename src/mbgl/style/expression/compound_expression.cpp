@@ -203,7 +203,7 @@ struct SignatureType<R (T::*)(Params...) const>
 { using Type = R (Params...);  };
 
 template <class Lambda>
-struct SignatureType<Lambda, std::enable_if_t<std::is_class<Lambda>::value>>
+struct SignatureType<Lambda, std::enable_if_t<std::is_class_v<Lambda>>>
 { using Type = typename SignatureType<decltype(&Lambda::operator())>::Type; };
 
 template <typename Fn>

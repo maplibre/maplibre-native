@@ -2811,9 +2811,8 @@
 					};
 					DA1DC9491CB6C1C2006E619F = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = KBDAWM7T4E;
 						LastSwiftMigration = 0820;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					DA2E88501CC036F400F24E7B = {
 						CreatedOnToolsVersion = 7.3;
@@ -3741,13 +3740,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = KBDAWM7T4E;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
 				PRODUCT_NAME = "MapLibre GL";
-				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = RelWithDebInfo;
 		};
@@ -4328,13 +4328,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = KBDAWM7T4E;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
 				PRODUCT_NAME = "MapLibre GL";
-				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -4345,13 +4346,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = KBDAWM7T4E;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.maplibre.maplibregl;
 				PRODUCT_NAME = "MapLibre GL";
-				PROVISIONING_PROFILE_SPECIFIER = "MapLibre GL TestApp Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

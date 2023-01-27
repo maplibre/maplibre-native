@@ -103,7 +103,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const m
                 [&writer](bool b) { writer.Bool(b); },
                 [&writer](uint64_t u) { writer.Uint64(u); },
                 [&writer](int64_t i) { writer.Int64(i); },
-                [&writer](double d) { d == std::floor(d) ? writer.Int64(d) : writer.Double(d); },
+                [&writer](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
                 [&writer](const std::string& s) { writer.String(s); },
                 [&writer](const std::vector<mbgl::Value>& arr) {
                     writer.StartArray();
@@ -929,7 +929,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             std::string path = std::string(operationArray[2].GetString(), operationArray[2].GetStringLength());
             assert(!path.empty());
 
-            float tolerance = operationArray[3].GetDouble();
+            float tolerance = static_cast<float>(operationArray[3].GetDouble());
             mbgl::filesystem::path filePath(path);
 
             bool compressed = false;
@@ -1189,7 +1189,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             }
 
             std::string mark = operationArray[1].GetString();
-            int duration = operationArray[2].GetFloat();
+            int duration = static_cast<int>(operationArray[2].GetFloat());
             mbgl::LatLng startPos, endPos;
             double startZoom, endZoom;
 
@@ -1235,7 +1235,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     samples.push_back(frameTime);
                 }
 
-                float averageFps = totalTime > 0.0 ? frames / totalTime : 0.0;
+                float averageFps = totalTime > 0.0f ? frames / totalTime : 0.0f;
                 float minFrameTime = 0.0;
 
                 // Use 1% of the longest frames to compute the minimum fps

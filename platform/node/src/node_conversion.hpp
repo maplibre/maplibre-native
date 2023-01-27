@@ -39,7 +39,7 @@ public:
         Nan::EscapableHandleScope scope;
         // const_cast because v8::Local<T>::As is not marked const until node v8.0
         v8::Local<v8::Array> array = const_cast<v8::Local<v8::Value>&>(value).As<v8::Array>();
-        return scope.Escape(Nan::Get(array, i).ToLocalChecked());
+        return scope.Escape(Nan::Get(array, static_cast<uint32_t>(i)).ToLocalChecked());
     }
 
     static bool isObject(const v8::Local<v8::Value>& value) {

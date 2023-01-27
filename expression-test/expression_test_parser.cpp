@@ -29,7 +29,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const V
         [&] (bool b) { writer.Bool(b); },
         [&] (uint64_t u) { writer.Uint64(u); },
         [&] (int64_t i) { writer.Int64(i); },
-        [&] (double d) { d == std::floor(d) ? writer.Int64(d) : writer.Double(d); },
+        [&] (double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
         [&] (const std::string& s) { writer.String(s); },
         [&] (const std::vector<Value>& arr) {
             writer.StartArray();
@@ -217,7 +217,7 @@ void parsePropertySpec(const JSValue& value, TestData& data) {
 
     if (propertySpec.HasMember("length")) {
         assert(propertySpec["length"].IsNumber());
-        spec.length = propertySpec["length"].GetDouble();
+        spec.length = static_cast<size_t>(propertySpec["length"].GetDouble());
     }
 
     if (propertySpec.HasMember("property-type")) {
@@ -246,7 +246,7 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
         const auto& evaluationContext = input[0].GetObject();
         if (evaluationContext.HasMember("zoom")) {
             assert(evaluationContext["zoom"].IsNumber());
-            zoom = evaluationContext["zoom"].GetDouble();
+            zoom = static_cast<float>(evaluationContext["zoom"].GetDouble());
         }
 
         // Parse heatmap density
