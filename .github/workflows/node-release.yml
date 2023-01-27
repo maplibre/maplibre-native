@@ -141,6 +141,7 @@ jobs:
       - name: Build
         run: |
           npm config set cmake_CMAKE_CXX_COMPILER_LAUNCHER ccache
+          npm config set cmake_CMAKE_BUILD_TYPE ${{ env.BUILDTYPE }}
           npm run build
 
       #- name: Run render tests on macOS
