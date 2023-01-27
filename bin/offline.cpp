@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
             try {
                 std::string json = readFile(geometryValue.Get());
                 auto geometry = parseGeometry(json);
-                return OfflineRegionDefinition{ OfflineGeometryRegionDefinition(style, geometry, minZoom, maxZoom, pixelRatio, includeIdeographs) };
+                return OfflineRegionDefinition{ OfflineGeometryRegionDefinition(style, geometry, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs) };
             } catch(const std::runtime_error& e) {
                 std::cerr << "Could not parse geojson file " << geometryValue.Get() << ": " << e.what() << std::endl;
                 exit(1);
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
             const double south = southValue ? args::get(southValue) : 38.1;
             const double east = eastValue ? args::get(eastValue) : -121.7;
             LatLngBounds boundingBox = LatLngBounds::hull(LatLng(north, west), LatLng(south, east));
-            return OfflineRegionDefinition{ OfflineTilePyramidRegionDefinition(style, boundingBox, minZoom, maxZoom, pixelRatio, includeIdeographs) };
+            return OfflineRegionDefinition{ OfflineTilePyramidRegionDefinition(style, boundingBox, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs) };
         }
     }();
 

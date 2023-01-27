@@ -30,12 +30,12 @@ struct Converter<std::string> {
 };
 
 template <class T>
-struct Converter<T, typename std::enable_if_t<std::is_enum<T>::value>> {
+struct Converter<T, typename std::enable_if_t<std::is_enum_v<T>>> {
     optional<T> operator()(const Convertible& value, Error& error) const;
 };
 
 template <class T>
-struct Converter<std::vector<T>, typename std::enable_if_t<std::is_enum<T>::value>> {
+struct Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>> {
     optional<std::vector<T>> operator()(const Convertible& value, Error& error) const;
 };
 

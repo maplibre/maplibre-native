@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 add_subdirectory(../../../../../
                  ../../../../../${ANDROID_ABI})
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 target_compile_options(mbgl-compiler-options INTERFACE -frtti)
 
 add_library(mapbox-gl SHARED

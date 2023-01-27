@@ -28,20 +28,20 @@ static void Util_dtoa(::benchmark::State& state) {
 
 static void Util_standardDtoa(::benchmark::State& state) {
     while (state.KeepRunning()) {
-        std::to_string(0.);
-        std::to_string(M_E);
-        std::to_string(M_LOG2E);
-        std::to_string(M_LOG10E);
-        std::to_string(M_LN2);
-        std::to_string(M_LN10);
-        std::to_string(M_PI);
-        std::to_string(M_PI_2);
-        std::to_string(M_PI_4);
-        std::to_string(M_1_PI);
-        std::to_string(M_2_PI);
-        std::to_string(M_2_SQRTPI);
-        std::to_string(M_SQRT2);
-        std::to_string(M_SQRT1_2);
+        std::ignore = std::to_string(0.);
+        std::ignore = std::to_string(M_E);
+        std::ignore = std::to_string(M_LOG2E);
+        std::ignore = std::to_string(M_LOG10E);
+        std::ignore = std::to_string(M_LN2);
+        std::ignore = std::to_string(M_LN10);
+        std::ignore = std::to_string(M_PI);
+        std::ignore = std::to_string(M_PI_2);
+        std::ignore = std::to_string(M_PI_4);
+        std::ignore = std::to_string(M_1_PI);
+        std::ignore = std::to_string(M_2_PI);
+        std::ignore = std::to_string(M_2_SQRTPI);
+        std::ignore = std::to_string(M_SQRT2);
+        std::ignore = std::to_string(M_SQRT1_2);
     }
 }
 
@@ -54,8 +54,8 @@ static void Util_dtoaLimits(::benchmark::State& state) {
 
 static void Util_standardDtoaLimits(::benchmark::State& state) {
     while (state.KeepRunning()) {
-        std::to_string(DBL_MIN);
-        std::to_string(DBL_MAX);
+        std::ignore = std::to_string(DBL_MIN);
+        std::ignore = std::to_string(DBL_MAX);
     }
 }
 
