@@ -79,9 +79,7 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     auto success = [&cons, &info](std::unique_ptr<Expression> result) {
         auto nodeExpr = new NodeExpression(std::move(result));
-        const int argc = 0;
-        v8::Local<v8::Value> argv[0] = {};
-        auto wrapped = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
+        auto wrapped = Nan::NewInstance(cons).ToLocalChecked();
         nodeExpr->Wrap(wrapped);
         info.GetReturnValue().Set(wrapped);
     };
@@ -243,7 +241,7 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 
     mbgl::optional<float> zoom;
     v8::Local<v8::Value> v8zoom = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("zoom").ToLocalChecked()).ToLocalChecked();
-    if (v8zoom->IsNumber()) zoom = Nan::To<double>(v8zoom).FromJust();
+    if (v8zoom->IsNumber()) zoom = static_cast<float>(Nan::To<double>(v8zoom).FromJust());
 
     mbgl::optional<double> heatmapDensity;
     v8::Local<v8::Value> v8heatmapDensity = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("heatmapDensity").ToLocalChecked()).ToLocalChecked();

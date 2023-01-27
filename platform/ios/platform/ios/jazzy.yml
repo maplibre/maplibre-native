@@ -1,8 +1,7 @@
-module: Mapbox
-author: Mapbox
+module: MapLibre
+author: MapLibre Contributors
 author_url: https://maplibre.org/
 github_url: https://github.com/maplibre/maplibre-gl-native
-dash_url: https://docs.mapbox.com/ios/docsets/Mapbox.xml
 copyright: '[License](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md)'
 
 head: |

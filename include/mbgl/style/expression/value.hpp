@@ -128,7 +128,7 @@ struct ValueConverter<Position> {
 };
 
 template <typename T>
-struct ValueConverter<T, std::enable_if_t< std::is_enum<T>::value >> {
+struct ValueConverter<T, std::enable_if_t< std::is_enum_v<T> >> {
     static type::Type expressionType() { return type::String; }
     static Value toExpressionValue(const T& value);
     static optional<T> fromExpressionValue(const Value& value);
