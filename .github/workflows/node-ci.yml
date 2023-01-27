@@ -136,19 +136,15 @@ jobs:
           ccache --max-size=2G --set-config cache_dir=~/.ccache
           ccache --show-stats --set-config cache_dir=~/.ccache
 
-      - name: Linux Build
+      - name: Linux cmake-js config
         if: runner.os == 'Linux'
         run: |
-          npm config set cmake_CMAKE_CXX_COMPILER_LAUNCHER ccache
           npm config set cmake_CMAKE_C_COMPILER gcc-10
           npm config set cmake_CMAKE_CXX_COMPILER g++-10
-          npm run build
 
-      - name: MacOS Build
-        if: runner.os == 'macOS'
+      - name: Build
         run: |
           npm config set cmake_CMAKE_CXX_COMPILER_LAUNCHER ccache
-          npm config set cmake_CMAKE_BUILD_TYPE ${{ env.BUILDTYPE }}
           npm run build
 
       - name: Run render tests on macOS
