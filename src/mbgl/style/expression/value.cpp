@@ -279,12 +279,12 @@ optional<Rotation> ValueConverter<Rotation>::fromExpressionValue(const Value& v)
 }
 
 template <typename T>
-Value ValueConverter<T, std::enable_if_t< std::is_enum<T>::value >>::toExpressionValue(const T& value) {
+Value ValueConverter<T, std::enable_if_t< std::is_enum_v<T>>>::toExpressionValue(const T& value) {
     return std::string(Enum<T>::toString(value));
 }
 
 template <typename T>
-optional<T> ValueConverter<T, std::enable_if_t< std::is_enum<T>::value >>::fromExpressionValue(const Value& value) {
+optional<T> ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>>::fromExpressionValue(const Value& value) {
     return value.match(
         [&] (const std::string& v) { return Enum<T>::toEnum(v); },
         [&] (const auto&) { return optional<T>(); }

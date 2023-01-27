@@ -34,14 +34,14 @@ public:
     void queryLocations(const ProgramID& id) {
         locations = Locations{
             queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())... };
-        using TypeOfFirst = typename std::tuple_element<0, std::tuple<As...>>::type;
+        using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
         auto first = locations.template get<TypeOfFirst>();
         assert(first && first.value() == 0);
     }
 
     static constexpr const char* getFirstAttribName() {
         // Static assert that attribute list starts with position: we bind it on location 0.
-        using TypeOfFirst = typename std::tuple_element<0, std::tuple<As...>>::type;
+        using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
         static_assert(std::is_same<attributes::pos, TypeOfFirst>::value || std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
                       std::is_same<attributes::pos_normal, TypeOfFirst>::value, "Program must start with position related attribute.");
         return concat_literals<&string_literal<'a', '_'>::value, TypeOfFirst::name>::value();

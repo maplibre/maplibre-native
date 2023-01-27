@@ -176,7 +176,7 @@ struct Interpolator<bool>
     : Uninterpolated {};
 
 template <class T>
-struct Interpolator<T, typename std::enable_if_t<std::is_enum<T>::value>>
+struct Interpolator<T, typename std::enable_if_t<std::is_enum_v<T>>>
     : Uninterpolated {};
 
 template <>
@@ -190,7 +190,7 @@ struct Interpolator<std::vector<T>>
 template <class T>
 struct Interpolatable
     : std::conditional_t<
-      !std::is_base_of<Uninterpolated, Interpolator<T>>::value,
+      !std::is_base_of_v<Uninterpolated, Interpolator<T>>,
       std::true_type,
       std::false_type> {};
 
