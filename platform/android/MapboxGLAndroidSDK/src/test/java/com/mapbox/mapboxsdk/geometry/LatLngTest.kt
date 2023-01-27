@@ -59,14 +59,14 @@ class LatLngTest {
     @Test
     fun testLatitudeSetter() {
         val latLng = LatLng(1.2, 3.4)
-        latLng.setLatitude(3.0)
+        latLng.latitude = 3.0
         Assert.assertEquals("latitude should match", 3.0, latLng.latitude, DELTA)
     }
 
     @Test
     fun testLongitudeSetter() {
         val latLng = LatLng(1.2, 3.4)
-        latLng.setLongitude(3.0)
+        latLng.longitude = 3.0
         Assert.assertEquals("longitude should match", 3.0, latLng.longitude, DELTA)
     }
 
@@ -112,35 +112,35 @@ class LatLngTest {
     fun testLatitudeSetterChecksNaN() {
         exception.expect(IllegalArgumentException::class.java)
         exception.expectMessage("latitude must not be NaN")
-        LatLng().setLatitude(Double.NaN)
+        LatLng().latitude = Double.NaN
     }
 
     @Test
     fun testLongitudeSetterChecksNaN() {
         exception.expect(IllegalArgumentException::class.java)
         exception.expectMessage("longitude must not be NaN")
-        LatLng().setLongitude(Double.NaN)
+        LatLng().longitude = Double.NaN
     }
 
     @Test
     fun testLatitudeSetterChecksGreaterThan90() {
         exception.expect(IllegalArgumentException::class.java)
         exception.expectMessage("latitude must be between -90 and 90")
-        LatLng().setLatitude(95.0)
+        LatLng().latitude = 95.0
     }
 
     @Test
     fun testLatitudeSetterChecksLessThanThanNegative90() {
         exception.expect(IllegalArgumentException::class.java)
         exception.expectMessage("latitude must be between -90 and 90")
-        LatLng().setLatitude(-95.0)
+        LatLng().latitude = -95.0
     }
 
     @Test
     fun testLongitudeSetterChecksInfinity() {
         exception.expect(IllegalArgumentException::class.java)
         exception.expectMessage("longitude must not be infinite")
-        LatLng().setLongitude(Double.NEGATIVE_INFINITY)
+        LatLng().longitude = Double.NEGATIVE_INFINITY
     }
 
     @Test
