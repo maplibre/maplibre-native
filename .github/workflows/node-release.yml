@@ -110,7 +110,6 @@ jobs:
             cmake \
             ninja-build \
             pkg-config \
-            xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
@@ -169,12 +168,9 @@ jobs:
       #    path: metrics/macos-xcode11-release-style.html
 
       #- name: Test
-      #  if: runner.os == 'Linux'
-      #  run: xvfb-run --auto-servernum npm test
-
-      #- name: Test
-      #  if: runner.os == 'macOS' && matrix.arch != 'arm64'
-      #  run: npm test
+      #  uses: GabrielBB/xvfb-action@v1
+      #  with:
+      #    run: npm test
 
       # On PRs make sure that the npm package can be packaged.
       #- name: Pack
