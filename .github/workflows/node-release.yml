@@ -118,10 +118,6 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
       - name: Prepare ccache
         run: ccache --clear --set-config cache_dir=~/.ccache
 
@@ -136,26 +132,22 @@ jobs:
             ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
             ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
-
       - name: Clear ccache statistics
         run: |
           ccache --zero-stats --set-config cache_dir=~/.ccache
           ccache --max-size=2G --set-config cache_dir=~/.ccache
           ccache --show-stats --set-config cache_dir=~/.ccache
 
-      - name: CMake
-        if: runner.os == 'MacOS'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
-
-      - name: CMake
+      - name: Linux cmake-js config
         if: runner.os == 'Linux'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+          npm config set cmake_CMAKE_C_COMPILER gcc-10
+          npm config set cmake_CMAKE_CXX_COMPILER g++-10
 
       - name: Build
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          npm config set cmake_CMAKE_CXX_COMPILER_LAUNCHER ccache
+          npm run build
 
       #- name: Run render tests on macOS
       #  if: runner.os == 'macOS'
@@ -212,6 +204,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          submodules: recursive
           fetch-depth: 0
 
       - name: Get Latest Version
