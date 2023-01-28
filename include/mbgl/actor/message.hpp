@@ -26,7 +26,7 @@ public:
     }
 
     void operator()() override {
-        invoke(std::make_index_sequence<std::tuple_size<ArgsTuple>::value>());
+        invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
     }
 
     template <std::size_t... I>
@@ -50,7 +50,7 @@ public:
     }
 
     void operator()() override {
-        promise.set_value(ask(std::make_index_sequence<std::tuple_size<ArgsTuple>::value>()));
+        promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()));
     }
 
     template <std::size_t... I>
@@ -75,7 +75,7 @@ public:
     }
 
     void operator()() override {
-        ask(std::make_index_sequence<std::tuple_size<ArgsTuple>::value>());
+        ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
         promise.set_value();
     }
 

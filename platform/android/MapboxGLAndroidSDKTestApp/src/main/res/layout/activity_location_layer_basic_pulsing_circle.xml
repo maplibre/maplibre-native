@@ -8,6 +8,6 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_uiAttribution="false"/>
+        app:maplibre_uiAttribution="false"/>
 
 </FrameLayout>

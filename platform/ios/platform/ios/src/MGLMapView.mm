@@ -74,6 +74,161 @@
 #include <cstdlib>
 #include <map>
 #include <unordered_set>
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+#include <sys/sysctl.h>
+
+// The m1 simulator's gesture's velocity is wrong and here is a workaround to fix it.
+// These custom gestures will calculate the correct velocity.
+// This may because the system time is incorrect.
+
+@interface MBGLPanGesture : UIPanGestureRecognizer
+@end
+
+@interface MBGLPinchGesture : UIPinchGestureRecognizer
+@end
+
+@interface MBGLRotationGesture : UIRotationGestureRecognizer
+@end
+
+@implementation MBGLPanGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGPoint _lastTouch;
+    CGPoint __velocity;
+}
+
+- (CGPoint)velocityInView:(nullable UIView *)view {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocityInView:view];
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+
+    UITouch *touch = [touches anyObject];
+    _lastTouch = [touch locationInView:self.view];
+    customVelocity = true;
+  
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        UITouch *touch = [touches anyObject];
+        CGPoint touchLoc = [touch locationInView:self.view];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity.x = ((touchLoc.x - _lastTouch.x) / delta) * 0.9 + __velocity.x * 0.1;
+            __velocity.y = ((touchLoc.y - _lastTouch.y) / delta) * 0.9 + __velocity.y * 0.1;
+        }
+        _lastTouch = touchLoc;
+        _lastTime = now;
+    }
+    [super touchesMoved:touches withEvent:event];
+
+}
+@end
+
+@implementation MBGLPinchGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGFloat _lastScale;
+    CGFloat __velocity;
+}
+
+- (CGFloat)velocity {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocity];
+}
+
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+    
+    _lastScale = 0;
+    customVelocity = true;
+
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
+
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        CGFloat scale = [super scale];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity = ((scale - _lastScale) / delta) * 0.9 + __velocity * 0.1;
+        }
+        _lastScale = scale;
+        _lastTime = now;
+    }
+}
+@end
+
+@implementation MBGLRotationGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGFloat _lastRotation;
+    CGFloat __velocity;
+}
+
+- (CGFloat)velocity {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocity];
+}
+
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+
+    _lastRotation = 0;
+    customVelocity = true;
+
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
+
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        CGFloat rotation = [super rotation];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity = ((rotation - _lastRotation) / delta) * 0.9 + __velocity * 0.1;
+        }
+        _lastRotation = rotation;
+        _lastTime = now;
+    }
+}
+@end
+
+int processIsTranslated() {
+    int ret = 0;
+    size_t size = sizeof(ret);
+
+    // Call the sysctl and if successful return the result
+    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) != -1)
+        return ret;
+    // If "sysctl.proc_translated" is not present then must be native
+    if (errno == ENOENT)
+        return 0;
+    return -1;
+}
+
+#endif
 
 class MGLAnnotationContext;
 
@@ -598,19 +753,44 @@ public:
     
     self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
     
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    bool isM1Simulator = processIsTranslated() > 0;
+    if (isM1Simulator) {
+        _pan = [[MBGLPanGesture alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+    } else {
+        _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+    }
+#else
     _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+#endif
     _pan.delegate = self;
     _pan.maximumNumberOfTouches = 1;
     [self addGestureRecognizer:_pan];
     _scrollEnabled = YES;
     _panScrollingMode = MGLPanScrollingModeDefault;
 
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    if (isM1Simulator) {
+        _pinch = [[MBGLPinchGesture alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    } else {
+        _pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    }
+#else
     _pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+#endif
     _pinch.delegate = self;
     [self addGestureRecognizer:_pinch];
     _zoomEnabled = YES;
 
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    if (isM1Simulator) {
+        _rotate = [[MBGLRotationGesture alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+    } else {
+        _rotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+    }
+#else
     _rotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+#endif
     _rotate.delegate = self;
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
@@ -1991,7 +2171,6 @@ public:
     else if (pan.state == UIGestureRecognizerStateChanged)
     {
         CGPoint delta = [pan translationInView:pan.view];
-
         MGLMapCamera *toCamera = [self cameraByPanningWithTranslation:delta panGesture:pan];
 
         if ([self _shouldChangeFromCamera:oldCamera toCamera:toCamera])

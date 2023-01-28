@@ -1,4 +1,8 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'org.jmailen.kotlinter'
+    id 'com.android.application'
+}
+
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 android {
@@ -41,6 +45,11 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
     namespace 'com.mapbox.mapboxsdk.testapp'
     testNamespace '${applicationId}'
     lint {
@@ -91,4 +100,3 @@ apply from: "${rootDir}/gradle/gradle-lint.gradle"
 
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'

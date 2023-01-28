@@ -31,7 +31,7 @@
     "esm": "~3.2.25",
     "express": "^4.11.1",
     "json-stringify-pretty-compact": "^2.0.0",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.16.4",
     "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",

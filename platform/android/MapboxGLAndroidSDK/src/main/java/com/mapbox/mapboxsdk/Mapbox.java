@@ -93,7 +93,7 @@ public final class Mapbox {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
-      Timber.plant(new Timber.DebugTree());
+      Timber.plant();
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new Mapbox(appContext, apiKey);

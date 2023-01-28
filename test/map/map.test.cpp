@@ -65,7 +65,7 @@ public:
             const std::string& assetPath,
             float pixelRatio = 1,
             MapMode mode = MapMode::Static,
-            typename std::enable_if<std::is_same<T, MainResourceLoader>::value>::type* = nullptr)
+            typename std::enable_if_t<std::is_same_v<T, MainResourceLoader>>* = nullptr)
         : fileSource(std::make_shared<T>(ResourceOptions().withCachePath(cachePath).withAssetPath(assetPath), ClientOptions())),
           frontend(pixelRatio),
           map(frontend,

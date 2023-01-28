@@ -223,12 +223,12 @@ class CameraPosition
          */
         constructor(typedArray: TypedArray?) : super() {
             if (typedArray != null) {
-                bearing = typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraBearing, 0.0f).toDouble()
-                val lat = typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraTargetLat, 0.0f).toDouble()
-                val lng = typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraTargetLng, 0.0f).toDouble()
+                bearing = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraBearing, 0.0f).toDouble()
+                val lat = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLat, 0.0f).toDouble()
+                val lng = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLng, 0.0f).toDouble()
                 target = LatLng(lat, lng)
-                tilt = typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraTilt, 0.0f).toDouble()
-                zoom = typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_cameraZoom, 0.0f).toDouble()
+                tilt = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f).toDouble()
+                zoom = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f).toDouble()
             }
         }
 

@@ -5,7 +5,7 @@
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mapbox_blue"
+    android:background="@color/maplibre_blue"
     android:orientation="vertical">
 
 
@@ -14,7 +14,7 @@
         android:layout_margin="50dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_renderTextureMode="true"/>
+        app:maplibre_renderTextureMode="true"/>
 
     <TextView
         android:id="@+id/fpsView"

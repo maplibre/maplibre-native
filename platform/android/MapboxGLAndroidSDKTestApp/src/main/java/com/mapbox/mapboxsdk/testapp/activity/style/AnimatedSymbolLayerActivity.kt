@@ -25,7 +25,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
-import com.mapbox.mapboxsdk.testapp.activity.style.AnimatedSymbolLayerActivity.Car
 import com.mapbox.turf.TurfMeasurement
 import java.util.*
 
@@ -35,7 +34,7 @@ import java.util.*
 class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private val random = Random()
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var style: Style? = null
     private val randomCars: MutableList<Car> = ArrayList()
     private var randomCarSource: GeoJsonSource? = null
@@ -294,10 +293,10 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
 
     private val latLngInBounds: LatLng
         get() {
-            val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
+            val bounds = mapboxMap.projection.visibleRegion.latLngBounds
             val generator = Random()
-            val randomLat = bounds.latSouth + generator.nextDouble() * bounds.latNorth - bounds.latSouth
-            val randomLon = bounds.lonWest + generator.nextDouble() * bounds.lonEast - bounds.lonWest
+            val randomLat = bounds.latitudeSouth + generator.nextDouble() * bounds.latitudeNorth - bounds.latitudeSouth
+            val randomLon = bounds.longitudeWest + generator.nextDouble() * bounds.longitudeEast - bounds.longitudeWest
             return LatLng(randomLat, randomLon)
         }
 
@@ -348,8 +347,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private class LatLngEvaluator : TypeEvaluator<LatLng> {
         private val latLng = LatLng()
         override fun evaluate(fraction: Float, startValue: LatLng, endValue: LatLng): LatLng {
-            latLng.setLatitude(startValue.latitude + (endValue.latitude - startValue.latitude) * fraction)
-            latLng.setLongitude(startValue.longitude + (endValue.longitude - startValue.longitude) * fraction)
+            latLng.latitude = startValue.latitude + (endValue.latitude - startValue.latitude) * fraction
+            latLng.longitude = startValue.longitude + (endValue.longitude - startValue.longitude) * fraction
             return latLng
         }
     }

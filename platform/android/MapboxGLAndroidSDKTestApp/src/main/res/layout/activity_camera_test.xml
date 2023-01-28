@@ -10,7 +10,7 @@
             android:id="@id/mapView"
             android:layout_width="512px"
             android:layout_height="512px"
-            app:mapbox_pixelRatio="1"
-            app:mapbox_cameraZoom="1"/>
+            app:maplibre_pixelRatio="1"
+            app:maplibre_cameraZoom="1"/>
 
 </FrameLayout>

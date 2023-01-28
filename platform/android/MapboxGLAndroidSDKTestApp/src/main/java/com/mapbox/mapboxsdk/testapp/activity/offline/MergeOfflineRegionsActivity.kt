@@ -9,11 +9,13 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.offline.OfflineManager
 import com.mapbox.mapboxsdk.offline.OfflineRegion
 import com.mapbox.mapboxsdk.storage.FileSource
-import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityMergeOfflineRegionsBinding
 import com.mapbox.mapboxsdk.testapp.utils.FileUtils
-import kotlinx.android.synthetic.main.activity_merge_offline_regions.*
 
 class MergeOfflineRegionsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMergeOfflineRegionsBinding
+
     companion object {
         private const val LOG_TAG = "Mbgl-MergeOfflineRegionsActivity"
         private const val TEST_DB_FILE_NAME = "offline_test.db"
@@ -40,13 +42,13 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
     }
 
     private val onRegionMergedListener = object : OfflineManager.MergeOfflineRegionsCallback {
-        override fun onMerge(offlineRegions: Array<OfflineRegion>) {
-            mapView.getMapAsync {
+        override fun onMerge(offlineRegions: Array<OfflineRegion>?) {
+            binding.mapView.getMapAsync {
                 it.setStyle(Style.Builder().fromUri(TEST_STYLE))
             }
             Toast.makeText(
                 this@MergeOfflineRegionsActivity,
-                String.format("Merged %d regions.", offlineRegions.size),
+                String.format("Merged %d regions.", offlineRegions?.size ?: 0),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -67,11 +69,11 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
      */
     private class MergeCallback(private var activityCallback: OfflineManager.MergeOfflineRegionsCallback?) : OfflineManager.MergeOfflineRegionsCallback {
 
-        override fun onMerge(offlineRegions: Array<out OfflineRegion>?) {
+        override fun onMerge(offlineRegions: Array<OfflineRegion>?) {
             activityCallback?.onMerge(offlineRegions)
         }
 
-        override fun onError(error: String?) {
+        override fun onError(error: String) {
             activityCallback?.onError(error)
         }
 
@@ -84,16 +86,17 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_merge_offline_regions)
+        binding = ActivityMergeOfflineRegionsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // forcing offline state
         Mapbox.setConnected(false)
 
-        mapView.onCreate(savedInstanceState)
-        load_region_btn.setOnClickListener {
+        binding.mapView.onCreate(savedInstanceState)
+        binding.loadRegionBtn.setOnClickListener {
             copyAsset()
         }
-        mapView.getMapAsync {
+        binding.mapView.getMapAsync {
             it.isDebugActive = true
             it.setStyle(Style.Builder().fromUri(TEST_STYLE))
         }
@@ -113,33 +116,33 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mergeCallback.onActivityDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
 
         // restoring connectivity state
         Mapbox.setConnected(null)
@@ -147,6 +150,6 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
     }
 }

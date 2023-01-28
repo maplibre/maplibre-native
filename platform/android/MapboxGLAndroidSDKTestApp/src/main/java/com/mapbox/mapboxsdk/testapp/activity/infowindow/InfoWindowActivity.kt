@@ -33,18 +33,18 @@ class InfoWindowActivity :
     OnInfoWindowCloseListener,
     OnInfoWindowClickListener,
     OnInfoWindowLongClickListener {
-    private var mapboxMap: MapboxMap? = null
-    private var mapView: MapView? = null
+    private lateinit var mapboxMap: MapboxMap
+    private lateinit var mapView: MapView
     private var customMarker: Marker? = null
     private val mapLongClickListener = OnMapLongClickListener { point ->
         if (customMarker != null) {
             // Remove previous added marker
-            mapboxMap!!.removeAnnotation(customMarker!!)
+            mapboxMap.removeAnnotation(customMarker!!)
             customMarker = null
         }
 
         // Add marker on long click location with default marker image
-        customMarker = mapboxMap!!.addMarker(
+        customMarker = mapboxMap.addMarker(
             MarkerOptions()
                 .title("Custom Marker")
                 .snippet(
@@ -60,8 +60,8 @@ class InfoWindowActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_infowindow)
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync(this)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -73,25 +73,25 @@ class InfoWindowActivity :
     }
 
     private fun addMarkers() {
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(
             MarkerOptions()
                 .title("Intersection")
                 .snippet("H St NW with 15th St NW")
                 .position(LatLng(38.9002073, -77.03364419))
         )
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(
             MarkerOptions().title("Intersection")
                 .snippet("E St NW with 17th St NW")
                 .position(LatLng(38.8954236, -77.0394623))
         )
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(
             MarkerOptions().title("The Ellipse").position(LatLng(38.89393, -77.03654))
         )
-        mapboxMap!!.addMarker(MarkerOptions().position(LatLng(38.89596, -77.03434)))
-        mapboxMap!!.addMarker(
+        mapboxMap.addMarker(MarkerOptions().position(LatLng(38.89596, -77.03434)))
+        mapboxMap.addMarker(
             MarkerOptions().snippet("Lafayette Square").position(LatLng(38.89949, -77.03656))
         )
-        val marker = mapboxMap!!.addMarker(
+        val marker = mapboxMap.addMarker(
             MarkerOptions()
                 .title("White House")
                 .snippet(
@@ -103,23 +103,23 @@ class InfoWindowActivity :
         )
 
         // open InfoWindow at startup
-        mapboxMap!!.selectMarker(marker)
+        mapboxMap.selectMarker(marker)
     }
 
     private fun addInfoWindowListeners() {
-        mapboxMap!!.onInfoWindowCloseListener = this
-        mapboxMap!!.addOnMapLongClickListener(mapLongClickListener)
-        mapboxMap!!.onInfoWindowClickListener = this
-        mapboxMap!!.onInfoWindowLongClickListener = this
+        mapboxMap.onInfoWindowCloseListener = this
+        mapboxMap.addOnMapLongClickListener(mapLongClickListener)
+        mapboxMap.onInfoWindowClickListener = this
+        mapboxMap.onInfoWindowLongClickListener = this
     }
 
     private fun toggleConcurrentInfoWindow(allowConcurrentInfoWindow: Boolean) {
-        mapboxMap!!.deselectMarkers()
-        mapboxMap!!.isAllowConcurrentMultipleOpenInfoWindows = allowConcurrentInfoWindow
+        mapboxMap.deselectMarkers()
+        mapboxMap.isAllowConcurrentMultipleOpenInfoWindows = allowConcurrentInfoWindow
     }
 
     private fun toggleDeselectMarkersOnTap(deselectMarkersOnTap: Boolean) {
-        mapboxMap!!.uiSettings.isDeselectMarkersOnTap = deselectMarkersOnTap
+        mapboxMap.uiSettings.isDeselectMarkersOnTap = deselectMarkersOnTap
     }
 
     override fun onInfoWindowClick(marker: Marker): Boolean {
@@ -138,40 +138,40 @@ class InfoWindowActivity :
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapLongClickListener(mapLongClickListener)
+            mapboxMap.removeOnMapLongClickListener(mapLongClickListener)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

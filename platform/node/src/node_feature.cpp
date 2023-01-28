@@ -62,7 +62,7 @@ public:
         Nan::EscapableHandleScope scope;
         v8::Local<v8::Array> result = Nan::New<v8::Array>(vector.size());
         for (std::size_t i = 0; i < vector.size(); ++i) {
-            Nan::Set(result, i, operator()(vector[i]));
+            Nan::Set(result, static_cast<uint32_t>(i), operator()(vector[i]));
         }
         return scope.Escape(result);
     }
@@ -113,7 +113,7 @@ struct ToValue {
         Nan::EscapableHandleScope scope;
         v8::Local<v8::Array> result = Nan::New<v8::Array>();
         for (std::size_t i = 0; i < array.size(); i++) {
-            Nan::Set(result, i, toJS(array[i]));
+            Nan::Set(result, static_cast<uint32_t>(i), toJS(array[i]));
         }
         return scope.Escape(result);
     }

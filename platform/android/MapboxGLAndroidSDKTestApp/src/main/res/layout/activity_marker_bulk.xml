@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        app:mapbox_cameraTargetLat="38.87031"
-        app:mapbox_cameraTargetLng="-77.00897"
-        app:mapbox_cameraZoom="10"/>
+        app:maplibre_cameraTargetLat="38.87031"
+        app:maplibre_cameraTargetLng="-77.00897"
+        app:maplibre_cameraZoom="10"/>
 
 </RelativeLayout>

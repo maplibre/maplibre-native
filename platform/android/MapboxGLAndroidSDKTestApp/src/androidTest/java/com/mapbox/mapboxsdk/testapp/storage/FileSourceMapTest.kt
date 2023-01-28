@@ -6,7 +6,6 @@ import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.storage.FileSource
 import com.mapbox.mapboxsdk.testapp.activity.espresso.EspressoTestActivity
-import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

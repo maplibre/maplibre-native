@@ -19,7 +19,7 @@ import com.mapbox.mapboxsdk.testapp.R
 
 class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var permissionsManager: PermissionsManager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,12 +68,12 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
 
     @SuppressLint("MissingPermission")
     private fun activateLocationComponent(style: Style) {
-        val locationComponent = mapboxMap!!.locationComponent
+        val locationComponent = mapboxMap.locationComponent
         val locationComponentOptions = LocationComponentOptions.builder(this)
             .elevation(5f)
             .accuracyAlpha(.6f)
             .accuracyColor(Color.GREEN)
-            .foregroundDrawable(R.drawable.mapbox_logo_helmet)
+            .foregroundDrawable(R.drawable.maplibre_logo_helmet)
             .build()
         val locationComponentActivationOptions = LocationComponentActivationOptions
             .builder(this, style)
@@ -88,36 +88,36 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

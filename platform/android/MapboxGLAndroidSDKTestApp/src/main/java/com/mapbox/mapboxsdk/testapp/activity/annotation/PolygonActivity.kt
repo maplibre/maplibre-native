@@ -22,8 +22,8 @@ import java.util.ArrayList
  *
  */
 class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var polygon: Polygon? = null
     private var fullAlpha = true
     private var polygonIsVisible = true
@@ -47,9 +47,9 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // create map
         mapView = MapView(this, options)
-        mapView!!.id = R.id.mapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync(this)
+        mapView.id = R.id.mapView
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
         setContentView(mapView)
     }
 
@@ -63,7 +63,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.LENGTH_SHORT
             ).show()
         }
-        polygon = mapboxMap!!.addPolygon(
+        polygon = mapboxMap.addPolygon(
             PolygonOptions()
                 .addAll(Config.STAR_SHAPE_POINTS)
                 .fillColor(Config.BLUE_COLOR)
@@ -72,37 +72,37 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

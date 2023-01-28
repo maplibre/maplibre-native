@@ -43,7 +43,7 @@ class LocationModesActivity :
     private var protectedGestureArea: View? = null
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var defaultStyle = false
 
     @CameraMode.Mode
@@ -204,7 +204,7 @@ class LocationModesActivity :
         defaultStyle = !defaultStyle
         var options = LocationComponentOptions.createFromAttributes(
             this,
-            if (defaultStyle) R.style.mapbox_LocationComponent else R.style.CustomLocationComponent
+            if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
             val padding: IntArray
@@ -225,7 +225,7 @@ class LocationModesActivity :
         if (locationComponent == null) {
             return
         }
-        mapboxMap!!.getStyle { style: Style ->
+        mapboxMap.getStyle { style: Style ->
             val styleUrl =
                 Style.getPredefinedStyle(
                     if (Style.getPredefinedStyle("Bright") == style.uri) {
@@ -235,7 +235,7 @@ class LocationModesActivity :
                     }
                 )
 
-            mapboxMap!!.setStyle(Style.Builder().fromUri(styleUrl))
+            mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
         }
     }
 

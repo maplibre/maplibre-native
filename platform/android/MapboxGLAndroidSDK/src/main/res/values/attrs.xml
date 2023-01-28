@@ -1,44 +1,44 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- these are public -->
-    <declare-styleable name="mapbox_MapView">
+    <declare-styleable name="maplibre_MapView" >
 
-        <!--DEPRECATED use mapbox_apiBaseUri instead -->
-        <attr name="mapbox_apiBaseUrl" format="string"/>
+        <!--DEPRECATED use maplibre_apiBaseUri instead -->
+        <attr name="maplibre_apiBaseUrl" format="string"/>
 
         <!--Configuration-->
-        <attr name="mapbox_apiBaseUri" format="string"/>
-        <attr name="mapbox_localIdeographEnabled" format="boolean"/>
-        <attr name="mapbox_localIdeographFontFamily" format="string"/>
-        <attr name="mapbox_localIdeographFontFamilies" format="reference"/>
-        <attr name="mapbox_cross_source_collisions" format="boolean"/>
+        <attr name="maplibre_apiBaseUri" format="string"/>
+        <attr name="maplibre_localIdeographEnabled" format="boolean"/>
+        <attr name="maplibre_localIdeographFontFamily" format="string"/>
+        <attr name="maplibre_localIdeographFontFamilies" format="reference"/>
+        <attr name="maplibre_cross_source_collisions" format="boolean"/>
 
         <!--Camera-->
-        <attr name="mapbox_cameraTargetLat" format="float"/>
-        <attr name="mapbox_cameraTargetLng" format="float"/>
-        <attr name="mapbox_cameraZoom" format="float"/>
-        <attr name="mapbox_cameraBearing" format="float"/>
-        <attr name="mapbox_cameraTilt" format="float"/>
+        <attr name="maplibre_cameraTargetLat" format="float"/>
+        <attr name="maplibre_cameraTargetLng" format="float"/>
+        <attr name="maplibre_cameraZoom" format="float"/>
+        <attr name="maplibre_cameraBearing" format="float"/>
+        <attr name="maplibre_cameraTilt" format="float"/>
 
         <!--Zoom-->
-        <attr name="mapbox_cameraZoomMax" format="float"/>
-        <attr name="mapbox_cameraZoomMin" format="float"/>
+        <attr name="maplibre_cameraZoomMax" format="float"/>
+        <attr name="maplibre_cameraZoomMin" format="float"/>
 
         <!--Pitch-->
-        <attr name="mapbox_cameraPitchMax" format="float"/>
-        <attr name="mapbox_cameraPitchMin" format="float"/>
+        <attr name="maplibre_cameraPitchMax" format="float"/>
+        <attr name="maplibre_cameraPitchMin" format="float"/>
 
         <!--Gestures-->
-        <attr name="mapbox_uiZoomGestures" format="boolean"/>
-        <attr name="mapbox_uiScrollGestures" format="boolean"/>
-        <attr name="mapbox_uiHorizontalScrollGestures" format="boolean"/>
-        <attr name="mapbox_uiRotateGestures" format="boolean"/>
-        <attr name="mapbox_uiTiltGestures" format="boolean"/>
-        <attr name="mapbox_uiDoubleTapGestures" format="boolean"/>
-        <attr name="mapbox_uiQuickZoomGestures" format="boolean"/>
+        <attr name="maplibre_uiZoomGestures" format="boolean"/>
+        <attr name="maplibre_uiScrollGestures" format="boolean"/>
+        <attr name="maplibre_uiHorizontalScrollGestures" format="boolean"/>
+        <attr name="maplibre_uiRotateGestures" format="boolean"/>
+        <attr name="maplibre_uiTiltGestures" format="boolean"/>
+        <attr name="maplibre_uiDoubleTapGestures" format="boolean"/>
+        <attr name="maplibre_uiQuickZoomGestures" format="boolean"/>
 
         <!--Compass-->
-        <attr name="mapbox_uiCompass" format="boolean"/>
-        <attr name="mapbox_uiCompassGravity">
+        <attr name="maplibre_uiCompass" format="boolean"/>
+        <attr name="maplibre_uiCompassGravity">
             <flag name="top" value="0x30"/>
             <flag name="bottom" value="0x50"/>
             <flag name="left" value="0x03"/>
@@ -54,16 +54,16 @@
             <flag name="start" value="0x00800003"/>
             <flag name="end" value="0x00800005"/>
         </attr>
-        <attr name="mapbox_uiCompassMarginLeft" format="dimension"/>
-        <attr name="mapbox_uiCompassMarginTop" format="dimension"/>
-        <attr name="mapbox_uiCompassMarginRight" format="dimension"/>
-        <attr name="mapbox_uiCompassMarginBottom" format="dimension"/>
-        <attr name="mapbox_uiCompassFadeFacingNorth" format="boolean"/>
-        <attr name="mapbox_uiCompassDrawable" format="reference"/>
+        <attr name="maplibre_uiCompassMarginLeft" format="dimension"/>
+        <attr name="maplibre_uiCompassMarginTop" format="dimension"/>
+        <attr name="maplibre_uiCompassMarginRight" format="dimension"/>
+        <attr name="maplibre_uiCompassMarginBottom" format="dimension"/>
+        <attr name="maplibre_uiCompassFadeFacingNorth" format="boolean"/>
+        <attr name="maplibre_uiCompassDrawable" format="reference"/>
 
         <!--Logo-->
-        <attr name="mapbox_uiLogo" format="boolean"/>
-        <attr name="mapbox_uiLogoGravity">
+        <attr name="maplibre_uiLogo" format="boolean"/>
+        <attr name="maplibre_uiLogoGravity">
             <flag name="top" value="0x30"/>
             <flag name="bottom" value="0x50"/>
             <flag name="left" value="0x03"/>
@@ -79,14 +79,14 @@
             <flag name="start" value="0x00800003"/>
             <flag name="end" value="0x00800005"/>
         </attr>
-        <attr name="mapbox_uiLogoMarginLeft" format="dimension"/>
-        <attr name="mapbox_uiLogoMarginTop" format="dimension"/>
-        <attr name="mapbox_uiLogoMarginRight" format="dimension"/>
-        <attr name="mapbox_uiLogoMarginBottom" format="dimension"/>
+        <attr name="maplibre_uiLogoMarginLeft" format="dimension"/>
+        <attr name="maplibre_uiLogoMarginTop" format="dimension"/>
+        <attr name="maplibre_uiLogoMarginRight" format="dimension"/>
+        <attr name="maplibre_uiLogoMarginBottom" format="dimension"/>
 
         <!--Attribution-->
-        <attr name="mapbox_uiAttribution" format="boolean"/>
-        <attr name="mapbox_uiAttributionGravity">
+        <attr name="maplibre_uiAttribution" format="boolean"/>
+        <attr name="maplibre_uiAttributionGravity">
             <flag name="top" value="0x30"/>
             <flag name="bottom" value="0x50"/>
             <flag name="left" value="0x03"/>
@@ -102,34 +102,34 @@
             <flag name="start" value="0x00800003"/>
             <flag name="end" value="0x00800005"/>
         </attr>
-        <attr name="mapbox_uiAttributionMarginLeft" format="dimension"/>
-        <attr name="mapbox_uiAttributionMarginTop" format="dimension"/>
-        <attr name="mapbox_uiAttributionMarginRight" format="dimension"/>
-        <attr name="mapbox_uiAttributionMarginBottom" format="dimension"/>
-        <attr name="mapbox_uiAttributionTintColor" format="color"/>
+        <attr name="maplibre_uiAttributionMarginLeft" format="dimension"/>
+        <attr name="maplibre_uiAttributionMarginTop" format="dimension"/>
+        <attr name="maplibre_uiAttributionMarginRight" format="dimension"/>
+        <attr name="maplibre_uiAttributionMarginBottom" format="dimension"/>
+        <attr name="maplibre_uiAttributionTintColor" format="color"/>
 
         <!-- Use TextureView-->
-        <attr name="mapbox_renderTextureMode" format="boolean"/>
-        <attr name="mapbox_renderTextureTranslucentSurface" format="boolean"/>
-        <attr name="mapbox_foregroundLoadColor" format="color"/>
+        <attr name="maplibre_renderTextureMode" format="boolean"/>
+        <attr name="maplibre_renderTextureTranslucentSurface" format="boolean"/>
+        <attr name="maplibre_foregroundLoadColor" format="color"/>
 
-        <attr name="mapbox_enableTilePrefetch" format="boolean"/>
-        <attr name="mapbox_prefetchZoomDelta" format="integer"/>
-        <attr name="mapbox_enableZMediaOverlay" format="boolean"/>
-        <attr name="mapbox_pixelRatio" format="float"/>
+        <attr name="maplibre_enableTilePrefetch" format="boolean"/>
+        <attr name="maplibre_prefetchZoomDelta" format="integer"/>
+        <attr name="maplibre_enableZMediaOverlay" format="boolean"/>
+        <attr name="maplibre_pixelRatio" format="float"/>
 
     </declare-styleable>
 
-    <declare-styleable name="mapbox_BubbleLayout">
-        <attr name="mapbox_bl_arrowWidth" format="dimension|reference"/>
-        <attr name="mapbox_bl_cornersRadius" format="dimension|reference"/>
-        <attr name="mapbox_bl_arrowHeight" format="dimension|reference"/>
-        <attr name="mapbox_bl_arrowPosition" format="dimension|reference"/>
-        <attr name="mapbox_bl_bubbleColor" format="color|reference"/>
-        <attr name="mapbox_bl_strokeWidth" format="dimension|reference"/>
-        <attr name="mapbox_bl_strokeColor" format="color|reference"/>
+    <declare-styleable name="maplibre_BubbleLayout">
+        <attr name="maplibre_bl_arrowWidth" format="dimension|reference"/>
+        <attr name="maplibre_bl_cornersRadius" format="dimension|reference"/>
+        <attr name="maplibre_bl_arrowHeight" format="dimension|reference"/>
+        <attr name="maplibre_bl_arrowPosition" format="dimension|reference"/>
+        <attr name="maplibre_bl_bubbleColor" format="color|reference"/>
+        <attr name="maplibre_bl_strokeWidth" format="dimension|reference"/>
+        <attr name="maplibre_bl_strokeColor" format="color|reference"/>
 
-        <attr name="mapbox_bl_arrowDirection" format="enum">
+        <attr name="maplibre_bl_arrowDirection" format="enum">
             <enum name="left" value="0"/>
             <enum name="right" value="1"/>
             <enum name="top" value="2"/>
@@ -137,65 +137,65 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="mapbox_LocationComponent">
-        <attr name="mapbox_foregroundDrawable" format="reference"/>
-        <attr name="mapbox_foregroundTintColor" format="color"/>
-        <attr name="mapbox_backgroundDrawable" format="reference"/>
-        <attr name="mapbox_backgroundTintColor" format="color"/>
-        <attr name="mapbox_bearingDrawable" format="reference"/>
-        <attr name="mapbox_bearingTintColor" format="color"/>
-        <attr name="mapbox_gpsDrawable" format="reference"/>
+    <declare-styleable name="maplibre_LocationComponent">
+        <attr name="maplibre_foregroundDrawable" format="reference"/>
+        <attr name="maplibre_foregroundTintColor" format="color"/>
+        <attr name="maplibre_backgroundDrawable" format="reference"/>
+        <attr name="maplibre_backgroundTintColor" format="color"/>
+        <attr name="maplibre_bearingDrawable" format="reference"/>
+        <attr name="maplibre_bearingTintColor" format="color"/>
+        <attr name="maplibre_gpsDrawable" format="reference"/>
 
-        <attr name="mapbox_foregroundDrawableStale" format="reference"/>
-        <attr name="mapbox_foregroundStaleTintColor" format="color"/>
-        <attr name="mapbox_backgroundDrawableStale" format="reference"/>
-        <attr name="mapbox_backgroundStaleTintColor" format="color"/>
+        <attr name="maplibre_foregroundDrawableStale" format="reference"/>
+        <attr name="maplibre_foregroundStaleTintColor" format="color"/>
+        <attr name="maplibre_backgroundDrawableStale" format="reference"/>
+        <attr name="maplibre_backgroundStaleTintColor" format="color"/>
 
-        <attr name="mapbox_accuracyAlpha" format="float"/>
-        <attr name="mapbox_accuracyColor" format="color"/>
+        <attr name="maplibre_accuracyAlpha" format="float"/>
+        <attr name="maplibre_accuracyColor" format="color"/>
 
-        <attr name="mapbox_elevation" format="dimension"/>
+        <attr name="maplibre_elevation" format="dimension"/>
 
         <!-- Stale state -->
-        <attr name="mapbox_enableStaleState" format="boolean"/>
-        <attr name="mapbox_staleStateTimeout" format="integer" min="0"/>
+        <attr name="maplibre_enableStaleState" format="boolean"/>
+        <attr name="maplibre_staleStateTimeout" format="integer" min="0"/>
 
         <!-- Location icon padding -->
-        <attr name="mapbox_iconPaddingLeft" format="integer"/>
-        <attr name="mapbox_iconPaddingTop" format="integer"/>
-        <attr name="mapbox_iconPaddingRight" format="integer"/>
-        <attr name="mapbox_iconPaddingBottom" format="integer"/>
+        <attr name="maplibre_iconPaddingLeft" format="integer"/>
+        <attr name="maplibre_iconPaddingTop" format="integer"/>
+        <attr name="maplibre_iconPaddingRight" format="integer"/>
+        <attr name="maplibre_iconPaddingBottom" format="integer"/>
 
         <!-- Map layer configuration -->
-        <attr name="mapbox_layer_above" format="string"/>
-        <attr name="mapbox_layer_below" format="string"/>
+        <attr name="maplibre_layer_above" format="string"/>
+        <attr name="maplibre_layer_below" format="string"/>
 
         <!-- Icon scale based on map zoom levels -->
-        <attr name="mapbox_maxZoomIconScale" format="float"/>
-        <attr name="mapbox_minZoomIconScale" format="float"/>
+        <attr name="maplibre_maxZoomIconScale" format="float"/>
+        <attr name="maplibre_minZoomIconScale" format="float"/>
 
         <!-- Camera tracking settings -->
-        <attr name="mapbox_trackingGesturesManagement" format="boolean"/>
-        <attr name="mapbox_trackingInitialMoveThreshold" format="dimension"/>
-        <attr name="mapbox_trackingMultiFingerMoveThreshold" format="dimension"/>
+        <attr name="maplibre_trackingGesturesManagement" format="boolean"/>
+        <attr name="maplibre_trackingInitialMoveThreshold" format="dimension"/>
+        <attr name="maplibre_trackingMultiFingerMoveThreshold" format="dimension"/>
 
         <!-- Animation duration multiplier -->
-        <attr name="mapbox_trackingAnimationDurationMultiplier" format="float" />
+        <attr name="maplibre_trackingAnimationDurationMultiplier" format="float" />
 
         <!-- Compass animation -->
-        <attr name="mapbox_compassAnimationEnabled" format="boolean" />
+        <attr name="maplibre_compassAnimationEnabled" format="boolean" />
 
         <!-- Accuracy animation-->
-        <attr name="mapbox_accuracyAnimationEnabled" format="boolean" />
+        <attr name="maplibre_accuracyAnimationEnabled" format="boolean" />
 
         <!-- Pulsing circle -->
-        <attr name="mapbox_pulsingLocationCircleEnabled" format="boolean" />
-        <attr name="mapbox_pulsingLocationCircleFadeEnabled" format="boolean" />
-        <attr name="mapbox_pulsingLocationCircleColor" format="color" />
-        <attr name="mapbox_pulsingLocationCircleDuration" format="float" />
-        <attr name="mapbox_pulsingLocationCircleRadius" format="float" />
-        <attr name="mapbox_pulsingLocationCircleAlpha" format="float" />
-        <attr name="mapbox_pulsingLocationCircleInterpolator" format="string" />
+        <attr name="maplibre_pulsingLocationCircleEnabled" format="boolean" />
+        <attr name="maplibre_pulsingLocationCircleFadeEnabled" format="boolean" />
+        <attr name="maplibre_pulsingLocationCircleColor" format="color" />
+        <attr name="maplibre_pulsingLocationCircleDuration" format="float" />
+        <attr name="maplibre_pulsingLocationCircleRadius" format="float" />
+        <attr name="maplibre_pulsingLocationCircleAlpha" format="float" />
+        <attr name="maplibre_pulsingLocationCircleInterpolator" format="string" />
 
     </declare-styleable>
 </resources>
