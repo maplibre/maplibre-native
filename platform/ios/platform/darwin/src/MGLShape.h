@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLShape : NSObject <MGLAnnotation, NSSecureCoding>
 
-#pragma mark Creating a Shape
+// MARK: Creating a Shape
 
 /**
  Returns an `MGLShape` object initialized with the given data interpreted as a
@@ -69,7 +69,7 @@ MGL_EXPORT
  */
 + (nullable MGLShape *)shapeWithData:(NSData *)data encoding:(NSStringEncoding)encoding error:(NSError * _Nullable *)outError;
 
-#pragma mark Accessing the Shape Attributes
+// MARK: Accessing the Shape Attributes
 
 /**
  The title of the shape annotation.
@@ -105,7 +105,7 @@ MGL_EXPORT
 
 #endif
 
-#pragma mark Creating GeoJSON Data
+// MARK: Creating GeoJSON Data
 
 /**
  Returns the GeoJSON string representation of the shape encapsulated in a data

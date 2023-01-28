@@ -250,7 +250,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
     return MGLFeaturesFromMBGLFeatures(features);
 }
 
-#pragma mark - MGLCluster management
+// MARK: - MGLCluster management
 
 - (mbgl::optional<mbgl::FeatureExtensionValue>)featureExtensionValueOfCluster:(MGLShape<MGLCluster> *)cluster extension:(std::string)extension options:(const std::map<std::string, mbgl::Value>)options {
     MGLAssertStyleSourceIsValid();

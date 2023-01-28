@@ -20,11 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLForegroundStyleLayer : MGLStyleLayer
 
-#pragma mark Initializing a Style Layer
+// MARK: Initializing a Style Layer
 
 - (instancetype)init __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
 
-#pragma mark Specifying a Style Layer’s Content
+// MARK: Specifying a Style Layer’s Content
 
 /**
  Identifier of the source from which the receiver obtains the data to style.

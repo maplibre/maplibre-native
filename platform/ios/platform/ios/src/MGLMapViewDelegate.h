@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-#pragma mark Responding to Map Position Changes
+// MARK: Responding to Map Position Changes
 
 /**
  Asks the delegate whether the map view should be allowed to change from the
@@ -173,7 +173,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MGLMapView *)mapView regionDidChangeWithReason:(MGLCameraChangeReason)reason animated:(BOOL)animated;
 
-#pragma mark Loading the Map
+// MARK: Loading the Map
 
 /**
  Tells the delegate that the map view will begin to load.
@@ -292,7 +292,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)mapView:(MGLMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
 
-#pragma mark Tracking User Location
+// MARK: Tracking User Location
 
 /**
  Tells the delegate that the map view will begin tracking the user’s location.
@@ -391,7 +391,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MGLMapView *)mapView didChangeLocationManagerAuthorization:(id<MGLLocationManager>)manager API_AVAILABLE(ios(14));
 
-#pragma mark Managing the Appearance of Annotations
+// MARK: Managing the Appearance of Annotations
 
 /**
  Returns an annotation image object to mark the given point annotation object on
@@ -496,7 +496,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGFloat)mapView:(MGLMapView *)mapView lineWidthForPolylineAnnotation:(MGLPolyline *)annotation;
 
-#pragma mark Managing Annotation Views
+// MARK: Managing Annotation Views
 
 /**
  Returns a view object to mark the given point annotation object on the map.
@@ -542,7 +542,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MGLMapView *)mapView didAddAnnotationViews:(NSArray<MGLAnnotationView *> *)annotationViews;
 
-#pragma mark Selecting Annotations
+// MARK: Selecting Annotations
 
 /**
  Returns a Boolean value indicating whether the shape annotation can be selected.
@@ -621,7 +621,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MGLMapView *)mapView didDeselectAnnotationView:(MGLAnnotationView *)annotationView;
 
-#pragma mark Managing Callout Views
+// MARK: Managing Callout Views
 
 /**
  Returns a Boolean value indicating whether the annotation is able to display

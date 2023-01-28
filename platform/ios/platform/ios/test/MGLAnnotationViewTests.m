@@ -240,7 +240,7 @@ static NSString * const MGLTestAnnotationReuseIdentifer = @"MGLTestAnnotationReu
     XCTAssert(self.mapView.selectedAnnotations.count == 0, @"There should be 0 selected annotations");
 }
 
-#pragma mark - MGLMapViewDelegate -
+// MARK: - MGLMapViewDelegate -
 
 - (MGLAnnotationView *)mapView:(MGLMapView *)mapView viewForAnnotation:(id<MGLAnnotation>)annotation
 {

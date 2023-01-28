@@ -313,7 +313,7 @@
 
 @end
 
-#pragma mark - MGLNetworkConfiguration delegate
+// MARK: - MGLNetworkConfiguration delegate
 
 @implementation MGLNetworkConfigurationTestDelegate
 - (NSURLSession *)sessionForNetworkConfiguration:(MGLNetworkConfiguration *)configuration {
@@ -325,7 +325,7 @@
 }
 @end
 
-#pragma mark - NSURLSession delegate
+// MARK: - NSURLSession delegate
 
 @implementation MGLNetworkConfigurationSessionDelegate
 - (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completionHandler {
@@ -338,7 +338,7 @@
 }
 @end
 
-#pragma mark - NSURLSession data delegate
+// MARK: - NSURLSession data delegate
 
 @implementation MGLNetworkConfigurationSessionDataDelegate
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {

@@ -1515,7 +1515,7 @@ NSArray *MGLSubexpressionsWithJSONObjects(NSArray *objects) {
     return expressionObject;
 }
 
-#pragma mark Localization
+// MARK: Localization
 
 /**
  Returns a localized copy of the given collection.

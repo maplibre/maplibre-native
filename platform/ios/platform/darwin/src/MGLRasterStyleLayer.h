@@ -84,7 +84,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 /**
  Increase or reduce the brightness of the image. The value is the maximum
@@ -327,7 +327,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLRasterStyleLayerAdditions)
 
-#pragma mark Working with Raster Style Layer Attribute Values
+// MARK: Working with Raster Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLRasterResamplingMode` enumeration.

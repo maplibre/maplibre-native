@@ -9,7 +9,7 @@
 
 @implementation MBGLIntegrationTests
 
-#pragma mark - Tests
+// MARK: - Tests
 
 - (void)waitForMapViewToBeRendered {
     [self waitForMapViewToBeRenderedWithTimeout:10];

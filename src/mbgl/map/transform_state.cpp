@@ -83,7 +83,7 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     }
 }
 
-#pragma mark - Matrix
+// MARK: - Matrix
 
 void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) const {
     const uint64_t tileScale = 1ull << tileID.canonical.z;
@@ -349,7 +349,7 @@ const mat4& TransformState::getInvertedMatrix() const {
     return invertedMatrix;
 }
 
-#pragma mark - Dimensions
+// MARK: - Dimensions
 
 Size TransformState::getSize() const {
     return size;
@@ -362,7 +362,7 @@ void TransformState::setSize(const Size& size_) {
     }
 }
 
-#pragma mark - North Orientation
+// MARK: - North Orientation
 
 NorthOrientation TransformState::getNorthOrientation() const {
     return orientation;
@@ -387,7 +387,7 @@ double TransformState::getNorthOrientationAngle() const {
     return angleOrientation;
 }
 
-#pragma mark - Constrain mode
+// MARK: - Constrain mode
 
 ConstrainMode TransformState::getConstrainMode() const {
     return constrainMode;
@@ -400,7 +400,7 @@ void TransformState::setConstrainMode(const ConstrainMode val) {
     }
 }
 
-#pragma mark - ViewportMode
+// MARK: - ViewportMode
 
 ViewportMode TransformState::getViewportMode() const {
     return viewportMode;
@@ -413,7 +413,7 @@ void TransformState::setViewportMode(ViewportMode val) {
     }
 }
 
-#pragma mark - Camera options
+// MARK: - Camera options
 
 CameraOptions TransformState::getCameraOptions(const optional<EdgeInsets>& padding) const {
     return CameraOptions()
@@ -424,7 +424,7 @@ CameraOptions TransformState::getCameraOptions(const optional<EdgeInsets>& paddi
         .withPitch(pitch * util::RAD2DEG_D);
 }
 
-#pragma mark - EdgeInsets
+// MARK: - EdgeInsets
 
 void TransformState::setEdgeInsets(const EdgeInsets& val) {
     if (edgeInsets != val) {
@@ -433,7 +433,7 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
     }
 }
 
-#pragma mark - Position
+// MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
     return {util::RAD2DEG_D * (2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
@@ -449,7 +449,7 @@ double TransformState::pixel_y() const {
     return center + y;
 }
 
-#pragma mark - Zoom
+// MARK: - Zoom
 
 double TransformState::getZoom() const {
     return scaleZoom(scale);
@@ -463,7 +463,7 @@ double TransformState::getZoomFraction() const {
     return getZoom() - getIntegerZoom();
 }
 
-#pragma mark - Bounds
+// MARK: - Bounds
 
 void TransformState::setLatLngBounds(LatLngBounds bounds_) {
     if (bounds_ != bounds) {
@@ -525,7 +525,7 @@ double TransformState::getMaxPitch() const {
     return maxPitch;
 }
 
-#pragma mark - Scale
+// MARK: - Scale
 double TransformState::getScale() const {
     return scale;
 }
@@ -537,7 +537,7 @@ void TransformState::setScale(double val) {
     }
 }
 
-#pragma mark - Positions
+// MARK: - Positions
 
 double TransformState::getX() const {
     return x;
@@ -561,7 +561,7 @@ void TransformState::setY(double val) {
     }
 }
 
-#pragma mark - Rotation
+// MARK: - Rotation
 
 double TransformState::getBearing() const {
     return bearing;
@@ -625,7 +625,7 @@ void TransformState::setAxonometric(bool val) {
     }
 }
 
-#pragma mark - State
+// MARK: - State
 
 bool TransformState::isChanging() const {
     return rotating || scaling || panning || gestureInProgress;
@@ -647,7 +647,7 @@ bool TransformState::isGestureInProgress() const {
     return gestureInProgress;
 }
 
-#pragma mark - Projection
+// MARK: - Projection
 
 double TransformState::zoomScale(double zoom) const {
     return roundForAccuracy(std::pow(2.0, zoom));
@@ -727,7 +727,7 @@ mat4 TransformState::getPixelMatrix() const {
     return m;
 }
 
-#pragma mark - (private helper functions)
+// MARK: - (private helper functions)
 
 bool TransformState::rotatedNorth() const {
     using NO = NorthOrientation;

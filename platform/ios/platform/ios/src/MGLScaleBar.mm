@@ -223,7 +223,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     [self addZeroLabel];
 }
 
-#pragma mark - Dimensions
+// MARK: - Dimensions
 
 - (void)setBorderWidth:(CGFloat)borderWidth {
     _borderWidth = borderWidth;
@@ -260,7 +260,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     return [self usesMetricSystem] ? self.metersPerPoint : self.metersPerPoint * MGLFeetPerMeter;
 }
 
-#pragma mark - Convenience methods
+// MARK: - Convenience methods
 
 - (BOOL)usesRightToLeftLayout {
     if (self.testingRightToLeftOverride) {
@@ -302,7 +302,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
 }
 
 
-#pragma mark - Dark Mode Changes
+// MARK: - Dark Mode Changes
 
 - (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
     
@@ -318,7 +318,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
 }
 
 
-#pragma mark - Setters
+// MARK: - Setters
 
 - (void)setUsesMetricSystem:(BOOL)usesMetricSystem {
     
@@ -454,7 +454,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     _row = row;
 }
 
-#pragma mark - Views
+// MARK: - Views
 
 - (NSArray<UIView *> *)bars {
     if (!_bars) {
@@ -469,7 +469,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     return _bars;
 }
 
-#pragma mark - Labels
+// MARK: - Labels
 
 - (void)addZeroLabel {
     NSDecimalNumber *zeroNumber = [NSDecimalNumber decimalNumberWithString:@"0"];
@@ -542,7 +542,7 @@ static const CGFloat MGLScaleBarMinimumBarWidth = 30.0; // Arbitrary
     }
 }
 
-#pragma mark - Layout
+// MARK: - Layout
 
 - (void)layoutSubviews {
     [super layoutSubviews];

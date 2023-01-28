@@ -211,7 +211,7 @@
     _lastAppliedRotationTransform = newRotationTransform;
 }
 
-#pragma mark - Draggable
+// MARK: - Draggable
 
 - (void)setDraggable:(BOOL)draggable
 {
@@ -345,7 +345,7 @@
     return otherGestureRecognizer == _longPressRecognizer || otherGestureRecognizer == _panGestureRecognizer;
 }
 
-#pragma mark UIAccessibility methods
+// MARK: UIAccessibility methods
 
 - (BOOL)isAccessibilityElement {
     return !self.hidden;

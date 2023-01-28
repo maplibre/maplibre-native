@@ -229,7 +229,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     UIEdgeInsets _originalContentInsets;
 }
 
-#pragma mark - Setup & Teardown
+// MARK: - Setup & Teardown
 
 - (void)viewDidLoad
 {
@@ -319,7 +319,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-#pragma mark - Debugging Interface
+// MARK: - Debugging Interface
 
 - (IBAction)showSettings:(__unused id)sender
 {
@@ -793,7 +793,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }];
 }
 
-#pragma mark - Debugging Actions
+// MARK: - Debugging Actions
 
 - (void)parseFeaturesAddingCount:(NSUInteger)featuresCount usingViews:(BOOL)useViews
 {
@@ -1714,7 +1714,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return backupImage;
 }
 
-#pragma mark - Random World Tour
+// MARK: - Random World Tour
 
 - (void)addAnnotations:(NSInteger)numAnnotations aroundCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius {
     NSMutableArray *annotations = [[NSMutableArray alloc] initWithCapacity:numAnnotations];
@@ -1860,7 +1860,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
-#pragma mark - User Actions
+// MARK: - User Actions
 
 - (void)handleSingleTap:(UITapGestureRecognizer *)singleTap {
     [self.navigationController setNavigationBarHidden:!self.navigationController.navigationBarHidden animated:YES];
@@ -1968,7 +1968,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [sender setAccessibilityValue:nextAccessibilityValue];
 }
 
-#pragma mark - UIViewDelegate
+// MARK: - UIViewDelegate
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
@@ -1985,7 +1985,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
-#pragma mark - MGLMapViewDelegate
+// MARK: - MGLMapViewDelegate
 
 - (MGLAnnotationView *)mapView:(MGLMapView *)mapView viewForAnnotation:(id<MGLAnnotation>)annotation
 {
@@ -2270,7 +2270,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.hudLabel setTitle:hudString forState:UIControlStateNormal];
 }
 
-#pragma mark - MGLComputedShapeSourceDataSource
+// MARK: - MGLComputedShapeSourceDataSource
 
 - (NSArray<id <MGLFeature>>*)featuresInCoordinateBounds:(MGLCoordinateBounds)bounds zoomLevel:(NSUInteger)zoom {
     double gridSpacing;

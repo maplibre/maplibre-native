@@ -91,7 +91,7 @@ namespace mbgl {
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 - (void)setCircleSortKey:(NSExpression *)circleSortKey {
     MGLAssertStyleLayerIsValid();
@@ -111,7 +111,7 @@ namespace mbgl {
     return MGLStyleValueTransformer<float, NSNumber *>().toExpression(propertyValue);
 }
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 - (void)setCircleBlur:(NSExpression *)circleBlur {
     MGLAssertStyleLayerIsValid();

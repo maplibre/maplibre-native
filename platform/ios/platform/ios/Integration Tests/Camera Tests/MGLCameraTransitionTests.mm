@@ -331,7 +331,7 @@
     XCTAssert(delegateCallCount == 2, @"Expecting 2 regionDidChange callbacks, got %ld", (long)delegateCallCount); // Once for the setDirection and once for the reset north
 }
 
-#pragma mark - Pending tests
+// MARK: - Pending tests
 
 - (void)testContinuallyResettingNorthInIsChanging🙁{
     // See https://github.com/mapbox/mapbox-gl-native/pull/11614

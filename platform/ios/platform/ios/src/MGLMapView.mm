@@ -351,7 +351,7 @@ public:
     NSString *viewReuseIdentifier;
 };
 
-#pragma mark - Private -
+// MARK: - Private -
 
 @interface MGLMapView () <UIGestureRecognizerDelegate,
                           MGLLocationManagerDelegate,
@@ -503,7 +503,7 @@ public:
     CFTimeInterval _frameDurations;
 }
 
-#pragma mark - Setup & Teardown -
+// MARK: - Setup & Teardown -
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -974,7 +974,7 @@ public:
     return _mbglView.get();
 }
 
-#pragma mark - Layout -
+// MARK: - Layout -
 
 + (BOOL)requiresConstraintBasedLayout
 {
@@ -1378,7 +1378,7 @@ public:
     return CGPointMake(CGRectGetMidX(contentFrame), CGRectGetMidY(contentFrame));
 }
 
-#pragma mark - Pending completion blocks
+// MARK: - Pending completion blocks
 
 - (void)processPendingBlocks
 {
@@ -1406,7 +1406,7 @@ public:
     return NO;
 }
 
-#pragma mark - Life Cycle -
+// MARK: - Life Cycle -
 
 - (void)updateFromDisplayLink:(CADisplayLink *)displayLink
 {
@@ -1846,7 +1846,7 @@ public:
     [self updateFromDisplayLink:self.displayLink];
 }
 
-#pragma mark - Application lifecycle
+// MARK: - Application lifecycle
 - (void)willResignActive:(NSNotification *)notification
 {
     MGLAssertIsMainThread();
@@ -1953,7 +1953,7 @@ public:
     [self resumeRenderingIfNecessary];
 }
 
-#pragma mark - GL / display link wake/sleep
+// MARK: - GL / display link wake/sleep
 
 - (EAGLContext *)context {
     return _mbglView->getEAGLContext();
@@ -2091,7 +2091,7 @@ public:
     return YES;
 }
 
-#pragma mark - Gestures -
+// MARK: - Gestures -
 
 - (void)touchesBegan:(__unused NSSet<UITouch *> *)touches withEvent:(__unused UIEvent *)event
 {
@@ -2914,7 +2914,7 @@ public:
     return angleInDegrees;
 }
 
-#pragma mark - Attribution -
+// MARK: - Attribution -
 
 - (void)showAttribution:(id)sender
 {
@@ -2961,7 +2961,7 @@ public:
     self.attributionController = attributionController;
 }
 
-#pragma mark - Properties -
+// MARK: - Properties -
 
 static void *windowScreenContext = &windowScreenContext;
 
@@ -3207,7 +3207,7 @@ static void *windowScreenContext = &windowScreenContext;
     return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
-#pragma mark - Accessibility -
+// MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
 {
@@ -3736,7 +3736,7 @@ static void *windowScreenContext = &windowScreenContext;
     _accessibilityValueAnnouncementIsPending = YES;
 }
 
-#pragma mark - Geography -
+// MARK: - Geography -
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingCenterCoordinate
 {
@@ -4544,14 +4544,14 @@ static void *windowScreenContext = &windowScreenContext;
     return [[MGLMapProjection alloc] initWithMapView:self];
 }
 
-#pragma mark - Camera Change Reason -
+// MARK: - Camera Change Reason -
 
 - (void)resetCameraChangeReason
 {
     self.cameraChangeReasonBitmask = MGLCameraChangeReasonNone;
 }
 
-#pragma mark - Annotations -
+// MARK: - Annotations -
 
 - (nullable NSArray<id <MGLAnnotation>> *)annotations
 {
@@ -5798,7 +5798,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 
-#pragma mark Annotation Image Delegate
+// MARK: Annotation Image Delegate
 
 - (void)annotationImageNeedsRedisplay:(MGLAnnotationImage *)annotationImage
 {
@@ -5846,7 +5846,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-#pragma mark - User Location -
+// MARK: - User Location -
 
 - (void)setLocationManager:(nullable id<MGLLocationManager>)locationManager
 {
@@ -6554,7 +6554,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-#pragma mark Data
+// MARK: Data
 
 - (NSArray<id <MGLFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
 {
@@ -6629,7 +6629,7 @@ static void *windowScreenContext = &windowScreenContext;
     return MGLFeaturesFromMBGLFeatures(features);
 }
 
-#pragma mark - Utility -
+// MARK: - Utility -
 
 - (void)animateWithDelay:(NSTimeInterval)delay animations:(void (^)(void))animations
 {
@@ -7383,7 +7383,7 @@ static void *windowScreenContext = &windowScreenContext;
     return _annotationViewReuseQueueByIdentifier[identifier];
 }
 
-#pragma mark - Snapshot image -
+// MARK: - Snapshot image -
 
 - (void)attemptBackgroundSnapshot {
     static NSTimeInterval lastSnapshotTime = 0.0;
@@ -7419,7 +7419,7 @@ static void *windowScreenContext = &windowScreenContext;
 
 @end
 
-#pragma mark - IBAdditions methods
+// MARK: - IBAdditions methods
 
 @implementation MGLMapView (IBAdditions)
 

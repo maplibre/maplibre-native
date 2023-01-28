@@ -64,7 +64,7 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     return sessionConfiguration;
 }
 
-#pragma mark - MGLNativeNetworkDelegate
+// MARK: - MGLNativeNetworkDelegate
 
 - (NSURLSession *)sessionForNetworkManager:(MGLNativeNetworkManager *)networkManager {
     // Note: this method is NOT called on the main thread.
@@ -129,7 +129,7 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
     MGLLogError(message);
 }
 
-#pragma mark - Event management
+// MARK: - Event management
 
 - (void)sendEventForURLResponse:(NSURLResponse *)response withAction:(NSString *)action
 {
@@ -184,7 +184,7 @@ NSString * const kMGLDownloadPerformanceEvent = @"mobile.performance_trace";
              };
 }
 
-#pragma mark - Events dictionary access
+// MARK: - Events dictionary access
 
 - (nullable NSDictionary*)eventDictionaryForKey:(nonnull NSString*)key {
     __block NSDictionary *dictionary;
