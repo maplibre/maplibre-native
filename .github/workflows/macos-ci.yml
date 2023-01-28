@@ -94,10 +94,10 @@ jobs:
       
       - name: npm install
         run: |
-          npm ci --ignore-scripts
-          cd ../../
           npm install express
           cd platform/ios
+          npm ci --ignore-scripts
+        working-directory: ./
 
       - name: Prepare ccache
         run: ccache --clear
