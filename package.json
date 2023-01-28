@@ -22,13 +22,13 @@
     "@mapbox/cmake-node-module": "^1.2.0",
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
-    "minimatch": "^5.1.0",
+    "minimatch": "^6.1.6",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
     "@mapbox/flow-remove-types": "^2.0.0",
     "@mapbox/mvt-fixtures": "3.10.0",
-    "@octokit/plugin-retry": "^3.0.9",
+    "@octokit/plugin-retry": "^4.0.4",
     "@octokit/rest": "^19.0.5",
     "aws-sdk": "^2.1277.0",
     "csscolorparser": "~1.0.2",
@@ -49,7 +49,7 @@
     "semver": "^7.3.8",
     "shuffle-seed": "1.1.6",
     "st": "3.0.0",
-    "tape": "^5.6.1",
+    "tape": "^5.6.3",
     "xcode": "^3.0.1"
   },
   "engines": {

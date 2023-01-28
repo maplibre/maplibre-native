@@ -9,6 +9,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.constants.GeometryConstants
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlin.math.abs
 
 /**
  * A geographical location which contains a single latitude, longitude pair, with
@@ -25,49 +26,58 @@ import com.mapbox.turf.TurfMeasurement
  *
  */
 class LatLng : Parcelable {
+
     /**
-     * Get the latitude, in degrees.
-     *
+     * The latitude, in degrees.
      *
      * This value is in the range of [-90, 90], see [GeometryConstants.MIN_LATITUDE] and
      * [GeometryConstants.MAX_LATITUDE]
      *
-     *
-     * @return the latitude value in degrees
      * @see GeometryConstants.MIN_LATITUDE
      *
      * @see GeometryConstants.MAX_LATITUDE
      */
     @Keep
     var latitude = 0.0
-        private set
+        set(
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude) {
+            require(!latitude.isNaN()) { "latitude must not be NaN" }
+            require(abs(latitude) <= GeometryConstants.MAX_LATITUDE) { "latitude must be between -90 and 90" }
+            field = latitude
+        }
 
     /**
-     * Get the longitude, in degrees.
-     *
+     * The longitude, in degrees.
      *
      * This value is in the range of [-180, 180], see [GeometryConstants.MIN_LONGITUDE] and
      * [GeometryConstants.MAX_LONGITUDE]
      *
-     *
-     * @return the longitude value in degrees
      * @see GeometryConstants.MIN_LONGITUDE
-     *
      * @see GeometryConstants.MAX_LONGITUDE
      */
     @Keep
     var longitude = 0.0
-        private set
+        /**
+         * Set the longitude, in degrees.
+         *
+         *
+         * This value is in the range of [-180, 180], see [GeometryConstants.MIN_LONGITUDE] and
+         * [GeometryConstants.MAX_LONGITUDE]
+         *
+         *
+         * @param longitude the longitude value in degrees
+         * @see GeometryConstants.MIN_LONGITUDE
+         *
+         * @see GeometryConstants.MAX_LONGITUDE
+         */
+        set(@FloatRange(from = GeometryConstants.MIN_LONGITUDE, to = GeometryConstants.MAX_LONGITUDE) longitude) {
+            require(!longitude.isNaN()) { "longitude must not be NaN" }
+            require(!longitude.isInfinite()) { "longitude must not be infinite" }
+            field = longitude
+        }
 
     /**
-     * Get the altitude, in meters.
-     *
-     * @return the altitude value in meters
-     */
-    /**
-     * Set the altitude, in meters.
-     *
-     * @var altitude the altitude in meters
+     * The altitude, in meters.
      */
     var altitude = 0.0
 
@@ -87,8 +97,8 @@ class LatLng : Parcelable {
      */
     @Keep
     constructor(latitude: Double, longitude: Double) {
-        setLatitude(latitude)
-        setLongitude(longitude)
+        this.latitude = latitude
+        this.longitude = longitude
     }
 
     /**
@@ -99,8 +109,8 @@ class LatLng : Parcelable {
      * @param altitude  Altitude in meters
      */
     constructor(latitude: Double, longitude: Double, altitude: Double) {
-        setLatitude(latitude)
-        setLongitude(longitude)
+        this.latitude = latitude
+        this.longitude = longitude
         this.altitude = altitude
     }
 
@@ -128,49 +138,9 @@ class LatLng : Parcelable {
      * @param in the parcel containing the latitude, longitude, altitude values
      */
     constructor(`in`: Parcel) {
-        setLatitude(`in`.readDouble())
-        setLongitude(`in`.readDouble())
+        latitude = (`in`.readDouble())
+        longitude = (`in`.readDouble())
         altitude = `in`.readDouble()
-    }
-
-    /**
-     * Set the latitude, in degrees.
-     *
-     *
-     * This value is in the range of [-90, 90], see [GeometryConstants.MIN_LATITUDE] and
-     * [GeometryConstants.MAX_LATITUDE]
-     *
-     *
-     * @param latitude the latitude value in degrees
-     * @see GeometryConstants.MIN_LATITUDE
-     *
-     * @see GeometryConstants.MAX_LATITUDE
-     */
-    fun setLatitude(
-        @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude: Double
-    ) {
-        require(!latitude.isNaN()) { "latitude must not be NaN" }
-        require(Math.abs(latitude) <= GeometryConstants.MAX_LATITUDE) { "latitude must be between -90 and 90" }
-        this.latitude = latitude
-    }
-
-    /**
-     * Set the longitude, in degrees.
-     *
-     *
-     * This value is in the range of [-180, 180], see [GeometryConstants.MIN_LONGITUDE] and
-     * [GeometryConstants.MAX_LONGITUDE]
-     *
-     *
-     * @param longitude the longitude value in degrees
-     * @see GeometryConstants.MIN_LONGITUDE
-     *
-     * @see GeometryConstants.MAX_LONGITUDE
-     */
-    fun setLongitude(@FloatRange(from = GeometryConstants.MIN_LONGITUDE, to = GeometryConstants.MAX_LONGITUDE) longitude: Double) {
-        require(!longitude.isNaN()) { "longitude must not be NaN" }
-        require(!longitude.isInfinite()) { "longitude must not be infinite" }
-        this.longitude = longitude
     }
 
     /**
