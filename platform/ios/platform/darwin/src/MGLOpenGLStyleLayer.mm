@@ -85,7 +85,7 @@ class MGLOpenGLLayerHost;
 }
 #endif
 
-#pragma mark - Adding to and removing from a map view
+// MARK: - Adding to and removing from a map view
 - (void)addToStyle:(MGLStyle *)style belowLayer:(MGLStyleLayer *)otherLayer {
     self.style = style;
     self.style.openGLLayers[self.identifier] = self;

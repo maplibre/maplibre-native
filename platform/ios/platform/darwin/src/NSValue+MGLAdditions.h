@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface NSValue (MGLAdditions)
 
-#pragma mark Working with Geographic Coordinate Values
+// MARK: Working with Geographic Coordinate Values
 
 /**
  Creates a new value object containing the specified Core Location geographic
@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (MGLCoordinateQuad)MGLCoordinateQuadValue;
 
-#pragma mark Working with Offline Map Values
+// MARK: Working with Offline Map Values
 
 /**
  Creates a new value object containing the given `MGLOfflinePackProgress`
@@ -99,7 +99,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (readonly) MGLOfflinePackProgress MGLOfflinePackProgressValue;
 
-#pragma mark Working with Transition Values
+// MARK: Working with Transition Values
 
 /**
  Creates a new value object containing the given `MGLTransition`

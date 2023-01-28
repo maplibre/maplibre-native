@@ -40,7 +40,7 @@
 
 @implementation MGLAnnotationViewIntegrationTests
 
-#pragma mark - Offscreen/panning selection tests
+// MARK: - Offscreen/panning selection tests
 
 typedef struct PanTestData {
     CGPoint relativeCoord;
@@ -413,7 +413,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     [self internalRunTests:tests];
 }
 
-#pragma mark - Selection with an offset
+// MARK: - Selection with an offset
 
 - (void)testSelectingAnnotationWithCenterOffset {
 
@@ -521,7 +521,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     XCTAssertEqual(originalFrame.origin.y + offset.y, offsetFrame.origin.y);
 }
 
-#pragma mark - Rotating/zooming
+// MARK: - Rotating/zooming
 
 - (void)testSelectingAnnotationWhenMapIsRotated {
     
@@ -782,7 +782,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     
 }
 
-#pragma mark - Utilities
+// MARK: - Utilities
 
 - (void)runRunLoop {
     [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];

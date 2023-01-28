@@ -135,7 +135,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 /**
  The display of line endings.
@@ -249,7 +249,7 @@ MGL_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *lineSortKey;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 /**
  Blur applied to the line, in points.
@@ -645,7 +645,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLLineStyleLayerAdditions)
 
-#pragma mark Working with Line Style Layer Attribute Values
+// MARK: Working with Line Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLLineCap` enumeration.

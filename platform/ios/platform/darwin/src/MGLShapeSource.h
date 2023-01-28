@@ -186,7 +186,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLShapeSourceOption MGLShapeSourceOptionLine
 MGL_EXPORT
 @interface MGLShapeSource : MGLSource
 
-#pragma mark Initializing a Source
+// MARK: Initializing a Source
 
 /**
  Returns a shape source with an identifier, URL, and dictionary of options for
@@ -302,7 +302,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier shapes:(NSArray<MGLShape *> *)shapes options:(nullable NSDictionary<MGLShapeSourceOption, id> *)options;
 
-#pragma mark Accessing a Source’s Content
+// MARK: Accessing a Source’s Content
 
 /**
  The contents of the source. A shape can represent a GeoJSON geometry, a

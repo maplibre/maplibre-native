@@ -122,7 +122,7 @@ namespace mbgl {
 
 <% }} -%>
 <% if (layoutProperties.length) { -%>
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 <% for (const property of layoutProperties) { -%>
 - (void)set<%- camelize(property.name) %>:(NSExpression *)<%- objCName(property) %> {
@@ -177,7 +177,7 @@ namespace mbgl {
 <% } -%>
 <% } -%>
 <% if (paintProperties.length) { -%>
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 <% for (const property of paintProperties) { -%>
 
 - (void)set<%- camelize(property.name) %>:(NSExpression *)<%- objCName(property) %> {

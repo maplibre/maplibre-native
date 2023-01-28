@@ -80,7 +80,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
 
 @implementation AppDelegate
 
-#pragma mark Lifecycle
+// MARK: Lifecycle
 
 + (void)load {
     [MGLSettings useWellKnownTileServer:MGLMapTiler];
@@ -155,7 +155,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     [self.offlinePacksArrayController unbind:@"content"];
 }
 
-#pragma mark Services
+// MARK: Services
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
     // geo:29.95,-90.066667,3000
@@ -215,7 +215,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
 }
 
-#pragma mark Offline pack management
+// MARK: Offline pack management
 
 - (IBAction)showOfflinePacksPanel:(id)sender {
     [self.offlinePacksPanel makeKeyAndOrderFront:sender];
@@ -288,7 +288,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     [[NSSound soundNamed:@"Basso"] play];
 }
 
-#pragma mark Help methods
+// MARK: Help methods
 
 - (IBAction)showShortcuts:(id)sender {
     NSAlert *alert = [[NSAlert alloc] init];
@@ -316,7 +316,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     }
 }
 
-#pragma mark User interface validation
+// MARK: User interface validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if (menuItem.action == @selector(showShortcuts:)) {
@@ -337,7 +337,7 @@ NSString * const MGLLastMapDebugMaskDefaultsKey = @"MGLLastMapDebugMask";
     return NO;
 }
 
-#pragma mark NSWindowDelegate methods
+// MARK: NSWindowDelegate methods
 
 - (void)windowWillClose:(NSNotification *)notification {
     NSWindow *window = notification.object;

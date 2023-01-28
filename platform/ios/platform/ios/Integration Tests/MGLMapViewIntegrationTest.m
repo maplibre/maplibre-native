@@ -41,7 +41,7 @@
     [super tearDown];
 }
 
-#pragma mark - MGLMapViewDelegate
+// MARK: - MGLMapViewDelegate
 
 - (MGLAnnotationView*)mapView:(MGLMapView *)mapView viewForAnnotation:(id<MGLAnnotation>)annotation {
     if (self.viewForAnnotation) {
@@ -102,7 +102,7 @@
     return nil;
 }
 
-#pragma mark - Utilities
+// MARK: - Utilities
 
 - (void)waitForMapViewToFinishLoadingStyleWithTimeout:(NSTimeInterval)timeout {
     XCTAssertNil(self.styleLoadingExpectation);
