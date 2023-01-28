@@ -23,37 +23,44 @@ Before building, follow these steps to install prerequisites:
 1. Install [Xcode](https://developer.apple.com/xcode/)
 1. Launch Xcode and install any updates
 1. Install [Homebrew](http://brew.sh)
-1. Install [Node.js](https://nodejs.org/), [CMake](https://cmake.org/), [ccache](https://ccache.samba.org), and [pkg-config](https://formulae.brew.sh/formula/pkg-config-wrapper#default), [glfw](https://formulae.brew.sh/formula/glfw):
-
+1. Install additional dependencies.
    ```bash
-   brew list node || brew install node
-   brew list cmake || brew install cmake
-   brew list ccache || brew install ccache
-   brew list pkg-config || brew install pkg-config
-   brew list glfw || brew install glfw
+   brew install node cmake ccache pkg-config glfw cmake-docs
+   ```
 
-   # To install the CMake documentation
-   brew list cmake-docs || brew install cmake-docs
+1. Install [xcpretty](https://github.com/supermarin/xcpretty) for prettifying command line builds. (optional):
    ```
-1. Install [xcpretty](https://github.com/supermarin/xcpretty) (optional, used for prettifying command line builds):
+   sudo gem install xcpretty
    ```
-   [sudo] gem install xcpretty
+1. Install [jazzy](https://github.com/realm/jazzy) for generating API documentation (optional):
    ```
-1. Install [jazzy](https://github.com/realm/jazzy) for generating API documentation:
+   sudo gem install jazzy
    ```
-   [sudo] gem install jazzy
-   ```
+
+### Build the iOS Demo App
+
+```
+git clone --recurse-submodules git@github.com:maplibre/maplibre-gl-native.git
+cd maplibre-gl-native/platform/ios 
+make iproj
+```
+
+Xcode should automatically open, and you can then build the Demo App (iosapp).
+
+![iosapp](https://user-images.githubusercontent.com/556367/214957991-7ddb56b1-937e-4a15-a03c-36f355677cf6.png)
+
+If you wish to deploy on attached hardware, you need to setup your Apple Developer account and select it in the *Signing and Capabilities* menu.
+
+![Team](https://user-images.githubusercontent.com/556367/214957613-2d565b1a-6590-495e-8979-2022096e02f1.png)
 
 ### Building the SDK
 
 1. Clone the git repository:
    ```bash
-   git clone https://github.com/maplibre/maplibre-gl-native.git
+   git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
    cd maplibre-gl-native
    ```
-   Note that this repository uses Git submodules. They'll be automatically checked out when you first run a `make` command,
-   but are not updated automatically. We recommended that you run `git submodule update` after pulling down new commits to
-   this repository.
+   Note that you must check out the project's git submodules to build. If you did not include `--recurse-submodules` in the clone, you can later run `git submdule update --init`.
 1. Run `make iframework BUILDTYPE=Release`. The packaging script will produce a `build/ios/pkg/` folder containing:
   - a `dynamic` folder containing a dynamically-linked fat framework with debug symbols for devices and the iOS Simulator
   - a `documentation` folder with HTML API documentation

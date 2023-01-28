@@ -347,8 +347,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private class LatLngEvaluator : TypeEvaluator<LatLng> {
         private val latLng = LatLng()
         override fun evaluate(fraction: Float, startValue: LatLng, endValue: LatLng): LatLng {
-            latLng.setLatitude(startValue.latitude + (endValue.latitude - startValue.latitude) * fraction)
-            latLng.setLongitude(startValue.longitude + (endValue.longitude - startValue.longitude) * fraction)
+            latLng.latitude = startValue.latitude + (endValue.latitude - startValue.latitude) * fraction
+            latLng.longitude = startValue.longitude + (endValue.longitude - startValue.longitude) * fraction
             return latLng
         }
     }
