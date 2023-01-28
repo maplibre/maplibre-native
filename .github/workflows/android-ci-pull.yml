@@ -28,14 +28,11 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
@@ -46,14 +43,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-          
-      - name: Setup Android SDK for accepting tool licenses
-        uses: android-actions/setup-android@v2
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -70,6 +59,9 @@ jobs:
       - name: npm install
         run: npm install --ignore-scripts
         working-directory: platform/android
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
 
       - name: Prepare ccache
         run: ccache --clear

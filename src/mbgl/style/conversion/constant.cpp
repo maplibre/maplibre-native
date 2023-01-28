@@ -33,7 +33,7 @@ optional<std::string> Converter<std::string>::operator()(const Convertible& valu
 }
 
 template <class T>
-optional<T> Converter<T, typename std::enable_if_t<std::is_enum<T>::value>>::operator()(const Convertible& value, Error& error) const {
+optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(const Convertible& value, Error& error) const {
     optional<std::string> string = toString(value);
     if (!string) {
         error.message = "value must be a string";
@@ -50,7 +50,7 @@ optional<T> Converter<T, typename std::enable_if_t<std::is_enum<T>::value>>::ope
 }
 
 template <class T>
-auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum<T>::value>>::operator()(const Convertible& value, Error& error) const -> optional<std::vector<T>> {
+auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(const Convertible& value, Error& error) const -> optional<std::vector<T>> {
     if (!isArray(value)) {
         error.message = "value must be an array";
         return nullopt;
