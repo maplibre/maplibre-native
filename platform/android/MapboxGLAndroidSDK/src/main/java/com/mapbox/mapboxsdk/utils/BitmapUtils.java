@@ -47,14 +47,15 @@ public class BitmapUtils {
   }
 
   /**
-   * Create a bitmap from a background and a foreground bitmap
+   * Create a bitmap from a background and a foreground bitmap. The foreground bitmap
+   * will be shifted 10px to the right and 10px to the bottom relative to the background.
    *
    * @param background The bitmap placed in the background
    * @param foreground The bitmap placed in the foreground
    * @return the merged bitmap
    */
   public static Bitmap mergeBitmap(@NonNull Bitmap background, @NonNull Bitmap foreground) {
-    return mergeBitmap(background, foreground, 0f, 0f);
+    return mergeBitmap(background, foreground, 10f, 10f);
   }
 
   /**
