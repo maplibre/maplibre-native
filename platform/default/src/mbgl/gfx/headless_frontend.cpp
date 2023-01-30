@@ -141,19 +141,22 @@ PremultipliedImage HeadlessFrontend::readStillImage() {
 }
 
 HeadlessFrontend::RenderResult HeadlessFrontend::render(Map& map,
-                                                        std::exception_ptr *error) {
+                                                        RenderErrorCallback errorFunction) {
     HeadlessFrontend::RenderResult result;
     gfx::BackendScope guard { *getBackend() };
 
-    map.renderStill([&](const std::exception_ptr& e) {
+    map.renderStill([&](const std::exception_ptr& e)->bool {
         if (e) {
-            if (error) {
-                *error = e;
+            if (errorFunction) {
+                return errorFunction(e);
             }
         } else {
             result.image = backend->readStillImage();
             result.stats = getBackend()->getContext().renderingStats();
         }
+        
+        // Headless front always try to finish the render process
+        return false;
     });
 
     while (!result.image.valid()) {

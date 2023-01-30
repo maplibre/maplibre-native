@@ -54,8 +54,8 @@ public:
     LatLng latLngForPixel(const ScreenCoordinate&);
 
     PremultipliedImage readStillImage();
-    RenderResult render(Map&,
-                        std::exception_ptr *error = nullptr);
+    using RenderErrorCallback = std::function<bool (std::exception_ptr)>;
+    RenderResult render(Map&, RenderErrorCallback errorFunction = nullptr);
     void renderOnce(Map&);
 
     optional<TransformState> getTransformState() const;

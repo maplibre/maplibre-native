@@ -1660,8 +1660,12 @@ R"(
   ]
 })");
     // should not crash
-    std::exception_ptr error;
-    test::checkImage("test/fixtures/map/resource_error", test.frontend.render(test.map, &error).image, 0.0015, 0.1);
+    std::exception_ptr error = nullptr;
+    test::checkImage("test/fixtures/map/resource_error", test.frontend.render(test.map, [&](const std::exception_ptr& error_)->bool {
+        assert(error == nullptr);
+        error = error_;
+        return false;
+    }).image, 0.0015, 0.1);
 
     EXPECT_TRUE(error != nullptr);
     EXPECT_EQ(util::toString(error), "Failed first");

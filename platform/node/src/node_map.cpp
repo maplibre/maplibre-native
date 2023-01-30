@@ -482,6 +482,9 @@ void NodeMap::startRender(const NodeMap::RenderOptions& options) {
             image = frontend->readStillImage();
             uv_async_send(async);
         }
+        
+        // abort render still process when encounter error
+        return true;
     });
 
     // Retain this object, otherwise it might get destructed before we are finished rendering the

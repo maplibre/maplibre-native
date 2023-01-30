@@ -41,8 +41,9 @@ public:
     ~Map();
 
     // Register a callback that will get called (on the render thread) when all resources have
-    // been loaded and a complete render occurs.
-    using StillImageCallback = std::function<void (std::exception_ptr)>;
+    // been loaded and a complete render occurs. When some error happened user could return true
+    // to abort the render still.
+    using StillImageCallback = std::function<bool (std::exception_ptr)>;
     void renderStill(StillImageCallback);
     void renderStill(const CameraOptions&, MapDebugOptions, StillImageCallback);
 

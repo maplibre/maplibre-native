@@ -117,8 +117,9 @@ void Map::Impl::onInvalidate() {
 
 void Map::Impl::onResourceError(std::exception_ptr error) {
     if (mode != MapMode::Continuous && stillImageRequest) {
-        // The resource maybe error but the snapshot could continue
-        stillImageRequest->callback(error);
+        if (stillImageRequest->callback(error)) {
+            stillImageRequest.reset();
+        }
     }
 }
 
