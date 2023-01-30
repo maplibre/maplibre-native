@@ -61,7 +61,7 @@ public class CompassViewTest extends EspressoTest {
     onView(withTagValue(is("compassView"))).check(matches(not(isDisplayed())));
     invoke(mapboxMap, (uiController, mapboxMap) -> {
       CameraPosition cameraPosition = mapboxMap.getCameraPosition();
-      assertEquals("Camera bearing should face north, ", 0, cameraPosition.getBearing(), TestConstants.BEARING_DELTA);
+      assertEquals("Camera bearing should face north, ", 0, cameraPosition.bearing, TestConstants.BEARING_DELTA);
     });
   }
 }
