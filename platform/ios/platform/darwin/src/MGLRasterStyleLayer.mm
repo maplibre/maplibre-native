@@ -50,7 +50,7 @@ namespace mbgl {
     return @(self.rawLayer->getSourceID().c_str());
 }
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 - (void)setMaximumRasterBrightness:(NSExpression *)maximumRasterBrightness {
     MGLAssertStyleLayerIsValid();

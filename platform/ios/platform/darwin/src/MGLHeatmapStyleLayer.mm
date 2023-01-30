@@ -72,7 +72,7 @@
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 - (void)setHeatmapColor:(NSExpression *)heatmapColor {
     MGLAssertStyleLayerIsValid();

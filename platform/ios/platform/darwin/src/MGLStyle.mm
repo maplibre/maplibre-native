@@ -86,7 +86,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
 
 @implementation MGLStyle
 
-#pragma mark Predefined style URLs
+// MARK: Predefined style URLs
 
 + (NSArray<MGLDefaultStyle*>*) predefinedStyles {
     return MGLSettings.tileServerOptions.defaultStyles;
@@ -115,7 +115,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     return nil;
 }
 
-#pragma mark -
+// MARK: -
 
 - (instancetype)initWithRawStyle:(mbgl::style::Style *)rawStyle stylable:(id <MGLStylable>)stylable {
     MGLLogInfo(@"Initializing %@ with stylable: %@", NSStringFromClass([self class]), stylable);
@@ -138,7 +138,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     return name.empty() ? nil : @(name.c_str());
 }
 
-#pragma mark Sources
+// MARK: Sources
 
 - (NSSet<__kindof MGLSource *> *)sources {
     auto rawSources = self.rawStyle->getSources();
@@ -263,7 +263,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     return infos;
 }
 
-#pragma mark Style layers
+// MARK: Style layers
 
 - (NSArray<__kindof MGLStyleLayer *> *)layers
 {
@@ -489,7 +489,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     [self didChangeValueForKey:@"layers"];
 }
 
-#pragma mark Style images
+// MARK: Style images
 
 - (void)setImage:(MGLImage *)image forName:(NSString *)name
 {
@@ -529,7 +529,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     return styleImage ? [[MGLImage alloc] initWithMGLStyleImage:*styleImage] : nil;
 }
 
-#pragma mark Style transitions
+// MARK: Style transitions
 
 - (void)setTransition:(MGLTransition)transition
 {
@@ -556,7 +556,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
     return transitionOptions.enablePlacementTransitions;
 }
 
-#pragma mark Style light
+// MARK: Style light
 
 - (void)setLight:(MGLLight *)light
 {
@@ -579,7 +579,7 @@ const MGLExceptionName MGLRedundantSourceIdentifierException = @"MGLRedundantSou
             self.URL ? [NSString stringWithFormat:@"\"%@\"", self.URL] : self.URL];
 }
 
-#pragma mark Mapbox Streets source introspection
+// MARK: Mapbox Streets source introspection
 
 - (void)localizeLabelsIntoLocale:(nullable NSLocale *)locale {
     NSSet<MGLVectorTileSource *> *streetsSources =

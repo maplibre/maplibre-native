@@ -32,7 +32,7 @@ Map::Impl::~Impl() {
     rendererFrontend.reset();
 };
 
-#pragma mark - Map::Impl StyleObserver
+// MARK: - Map::Impl StyleObserver
 
 void Map::Impl::onSourceChanged(style::Source& source) {
     observer.onSourceChanged(source);
@@ -109,7 +109,7 @@ void Map::Impl::onStyleError(std::exception_ptr error) {
     observer.onDidFailLoadingMap(type, description);
 }
 
-#pragma mark - Map::Impl RendererObserver
+// MARK: - Map::Impl RendererObserver
 
 void Map::Impl::onInvalidate() {
     onUpdate();

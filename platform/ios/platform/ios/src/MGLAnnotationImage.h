@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLAnnotationImage : NSObject <NSSecureCoding>
 
-#pragma mark Initializing and Preparing the Image Object
+// MARK: Initializing and Preparing the Image Object
 
 /**
  Initializes and returns a new annotation image object.
@@ -31,7 +31,7 @@ MGL_EXPORT
  */
 + (instancetype)annotationImageWithImage:(UIImage *)image reuseIdentifier:(NSString *)reuseIdentifier;
 
-#pragma mark Getting and Setting Attributes
+// MARK: Getting and Setting Attributes
 
 /** The image to be displayed for the annotation. */
 @property (nonatomic, strong, nullable) UIImage *image;

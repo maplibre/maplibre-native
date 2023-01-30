@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol MGLAnnotation <NSObject>
 
-#pragma mark Position Attributes
+// MARK: Position Attributes
 
 /**
  The center point (specified as a map coordinate) of the annotation. (required)
@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-#pragma mark Title Attributes
+// MARK: Title Attributes
 
 /**
  The string containing the annotation’s title.

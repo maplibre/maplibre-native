@@ -73,7 +73,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 /**
  The height with which to extrude the base of this layer. Must be less than or
@@ -368,7 +368,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLFillExtrusionStyleLayerAdditions)
 
-#pragma mark Working with Fill extrusion Style Layer Attribute Values
+// MARK: Working with Fill extrusion Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLFillExtrusionTranslationAnchor` enumeration.

@@ -27,11 +27,11 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLInvalidStyleLayerExceptio
 MGL_EXPORT
 @interface MGLStyleLayer : NSObject
 
-#pragma mark Initializing a Style Layer
+// MARK: Initializing a Style Layer
 
 - (instancetype)init __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
 
-#pragma mark Identifying a Style Layer
+// MARK: Identifying a Style Layer
 
 /**
  A string that uniquely identifies the style layer in the style to which it is
@@ -39,7 +39,7 @@ MGL_EXPORT
  */
 @property (nonatomic, copy, readonly) NSString *identifier;
 
-#pragma mark Configuring a Style Layer’s Visibility
+// MARK: Configuring a Style Layer’s Visibility
 
 /**
  Whether this layer is displayed. A value of `NO` hides the layer.

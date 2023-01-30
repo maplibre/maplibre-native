@@ -24,7 +24,7 @@ static MGLNativeNetworkManager *instance = nil;
     return sessionConfiguration;
 }
 
-#pragma mark - Required
+// MARK: - Required
 
 - (NSURLSessionConfiguration *)sessionConfiguration {
     NSURLSessionConfiguration *configuration = [_delegate sessionConfiguration];

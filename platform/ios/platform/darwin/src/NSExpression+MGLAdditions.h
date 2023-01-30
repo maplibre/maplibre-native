@@ -47,7 +47,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
  */
 @interface NSExpression (MGLAdditions)
 
-#pragma mark Creating Variable Expressions
+// MARK: Creating Variable Expressions
 
 /**
  `NSExpression` variable that corresponds to the
@@ -100,7 +100,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
 
 @property (class, nonatomic, readonly) NSExpression *featurePropertiesVariableExpression __attribute__((deprecated("", "featureAttributesVariableExpression")));
 
-#pragma mark Creating Conditional Expressions
+// MARK: Creating Conditional Expressions
 
 /**
  Returns a conditional function expression specifying the string predicate, and
@@ -112,7 +112,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
  */
 + (instancetype)mgl_expressionForConditional:(nonnull NSPredicate *)conditionPredicate trueExpression:(nonnull NSExpression *)trueExpression falseExpresssion:(nonnull NSExpression *)falseExpression NS_SWIFT_NAME(init(forMGLConditional:trueExpression:falseExpression:));
 
-#pragma mark Creating Ramp, Scale, and Curve Expressions
+// MARK: Creating Ramp, Scale, and Curve Expressions
 
 /**
  Returns a step function expression specifying the stepping, from expression
@@ -167,7 +167,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
  */
 + (instancetype)mgl_expressionForAttributedExpressions:(nonnull NSArray<NSExpression *> *)attributedExpressions NS_SWIFT_NAME(init(forAttributedExpressions:));
 
-#pragma mark Concatenating String Expressions
+// MARK: Concatenating String Expressions
 
 /**
  Returns a constant expression appending the passed expression.
@@ -179,7 +179,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
  */
 - (instancetype)mgl_expressionByAppendingExpression:(nonnull NSExpression *)expression NS_SWIFT_NAME(mgl_appending(_:));
 
-#pragma mark Converting JSON Expressions
+// MARK: Converting JSON Expressions
 
 /**
  Returns an expression equivalent to the given Foundation object deserialized
@@ -214,7 +214,7 @@ FOUNDATION_EXTERN MGL_EXPORT const MGLExpressionInterpolationMode MGLExpressionI
  */
 @property (nonatomic, readonly) id mgl_jsonExpressionObject;
 
-#pragma mark Localizing the Expression
+// MARK: Localizing the Expression
 
 /**
  Returns a copy of the receiver localized into the given locale.

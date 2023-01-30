@@ -119,7 +119,7 @@ which it is added.
 <% } -%>
 
 <% if (layoutProperties.length) { -%>
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 <% for (const property of layoutProperties) { -%>
 /**
@@ -139,7 +139,7 @@ which it is added.
 <% } -%>
 <% } -%>
 <% if (paintProperties.length) { -%>
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 <% for (const property of paintProperties) { -%>
 /**
@@ -176,7 +176,7 @@ which it is added.
  */
 @interface NSValue (MGL<%- camelize(type) %>StyleLayerAdditions)
 
-#pragma mark Working with <%- camelize(unhyphenate(type)) %> Style Layer Attribute Values
+// MARK: Working with <%- camelize(unhyphenate(type)) %> Style Layer Attribute Values
 
 <% for (let property of enumProperties) { -%>
 /**

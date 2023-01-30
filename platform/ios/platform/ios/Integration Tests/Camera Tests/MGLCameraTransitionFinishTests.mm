@@ -80,7 +80,7 @@
 }
 @end
 
-#pragma mark - camera transitions with NaN values
+// MARK: - camera transitions with NaN values
 
 @interface MGLMapView (MGLCameraTransitionFinishNaNTests)
 - (mbgl::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MGLMapCamera *)camera edgePadding:(UIEdgeInsets)insets;

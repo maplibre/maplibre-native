@@ -34,7 +34,7 @@
     return (mbgl::style::BackgroundLayer *)super.rawLayer;
 }
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 - (void)setBackgroundColor:(NSExpression *)backgroundColor {
     MGLAssertStyleLayerIsValid();

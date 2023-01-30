@@ -2,7 +2,7 @@
 
 @interface MGLMapView (Experimental)
 
-#pragma mark Rendering Performance Measurement
+// MARK: Rendering Performance Measurement
 
 /** Enable rendering performance measurement. */
 @property (nonatomic) BOOL experimental_enableFrameRateMeasurement;

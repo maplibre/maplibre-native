@@ -353,7 +353,7 @@
     XCTAssertEqualObjects(layers[startIndex++].identifier, layer4.identifier);
 }
 
-#pragma mark Localization tests
+// MARK: Localization tests
 
 - (void)testLanguageMatching {
     {
@@ -398,7 +398,7 @@
     }
 }
 
-#pragma mark Transition tests
+// MARK: Transition tests
 
 - (void)testTransition
 {

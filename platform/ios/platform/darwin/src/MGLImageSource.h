@@ -50,7 +50,7 @@ MGL_EXPORT
 MGL_EXPORT
 @interface MGLImageSource : MGLSource
 
-#pragma mark Initializing a Source
+// MARK: Initializing a Source
 
 /**
  Returns a georeferenced image source with an identifier, coordinates and a URL.
@@ -73,7 +73,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier coordinateQuad:(MGLCoordinateQuad)coordinateQuad image:(MGLImage *)image;
 
-#pragma mark Accessing a Source’s Content
+// MARK: Accessing a Source’s Content
 
 /**
  The URL to the source image.

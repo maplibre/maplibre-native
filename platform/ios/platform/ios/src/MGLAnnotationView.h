@@ -55,7 +55,7 @@ typedef NS_ENUM(NSUInteger, MGLAnnotationViewDragState) {
 MGL_EXPORT
 @interface MGLAnnotationView : UIView <NSSecureCoding>
 
-#pragma mark Initializing and Preparing the View
+// MARK: Initializing and Preparing the View
 
 /**
  Initializes and returns a new annotation view object.
@@ -137,7 +137,7 @@ MGL_EXPORT
  */
 @property (nonatomic, readonly, nullable) NSString *reuseIdentifier;
 
-#pragma mark Configuring the Appearance
+// MARK: Configuring the Appearance
 
 /**
  The offset, measured in points, at which to place the center of the view.
@@ -191,7 +191,7 @@ MGL_EXPORT
  */
 @property (nonatomic, assign) BOOL rotatesToMatchCamera;
 
-#pragma mark Managing the Selection State
+// MARK: Managing the Selection State
 
 /**
  A Boolean value indicating whether the annotation view is currently selected.
@@ -240,7 +240,7 @@ MGL_EXPORT
  */
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 
-#pragma mark Supporting Drag Operations
+// MARK: Supporting Drag Operations
 
 /**
  A Boolean value indicating whether the annotation view is draggable.

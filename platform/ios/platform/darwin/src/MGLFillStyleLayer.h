@@ -76,7 +76,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 /**
  Sorts features in ascending order based on this value. Features with a higher
@@ -93,7 +93,7 @@ MGL_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *fillSortKey;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 /**
  Whether or not the fill should be antialiased.
@@ -368,7 +368,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLFillStyleLayerAdditions)
 
-#pragma mark Working with Fill Style Layer Attribute Values
+// MARK: Working with Fill Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLFillTranslationAnchor` enumeration.
