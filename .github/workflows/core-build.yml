@@ -53,3 +53,4 @@ jobs:
         run: |
           cmake --version
           cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+          cmake --build build
