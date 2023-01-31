@@ -53,9 +53,23 @@ public class BitmapUtils {
    * @param background The bitmap placed in the background
    * @param foreground The bitmap placed in the foreground
    * @return the merged bitmap
+   * @deprecated {@link #mergeBitmaps(Bitmap, Bitmap)} should be used instead, as it does not
+   * shift the input by 10px to the right and bottom.
    */
+  @Deprecated
   public static Bitmap mergeBitmap(@NonNull Bitmap background, @NonNull Bitmap foreground) {
     return mergeBitmap(background, foreground, 10f, 10f);
+  }
+
+  /**
+   * Create a bitmap from a background and a foreground bitmap.
+   *
+   * @param background The bitmap placed in the background
+   * @param foreground The bitmap placed in the foreground
+   * @return the merged bitmap
+   */
+  public static Bitmap mergeBitmaps(@NonNull Bitmap background, @NonNull Bitmap foreground) {
+    return mergeBitmap(background, foreground, 0f, 0f);
   }
 
   /**
