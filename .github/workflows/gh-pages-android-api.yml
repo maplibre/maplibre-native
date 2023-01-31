@@ -20,5 +20,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           branch: gh-pages
-          folder: MapboxGLAndroidSDK/build/dokka/html
+          folder: platform/android/MapboxGLAndroidSDK/build/dokka/html
           target-folder: android/api/
