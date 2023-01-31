@@ -22,7 +22,7 @@ import timber.log.Timber.DebugTree
  * Initialises components as LeakCanary, Strictmode, Timber and Mapbox
  *
  */
-class MapLibreApplication : MultiDexApplication() {
+open class MapLibreApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         initializeLogger()
