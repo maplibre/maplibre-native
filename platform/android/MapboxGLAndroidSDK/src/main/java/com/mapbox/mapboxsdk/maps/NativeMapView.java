@@ -1161,7 +1161,9 @@ final class NativeMapView implements NativeMap {
         } else {
           Bitmap viewContent = viewCallback.getViewContent();
           if (viewContent != null) {
-            snapshotReadyCallback.onSnapshotReady(BitmapUtils.mergeBitmap(mapContent, viewContent));
+            snapshotReadyCallback.onSnapshotReady(
+                    BitmapUtils.mergeBitmaps(mapContent, viewContent)
+            );
           }
         }
       }
