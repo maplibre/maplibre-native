@@ -59,12 +59,12 @@ class OfflineManagerTest : AppCenter() {
             OfflineManager.getInstance(context).mergeOfflineRegions(
                 FileSource.getResourcesCachePath(rule.activity) + "/" + TEST_DB_FILE_NAME,
                 object : OfflineManager.MergeOfflineRegionsCallback {
-                    override fun onMerge(offlineRegions: Array<out OfflineRegion>?) {
+                    override fun onMerge(offlineRegions: Array<OfflineRegion>?) {
                         assert(offlineRegions?.size == 1)
                         latch.countDown()
                     }
 
-                    override fun onError(error: String?) {
+                    override fun onError(error: String) {
                         throw RuntimeException("Unable to merge external offline database. $error")
                     }
                 }
@@ -78,13 +78,13 @@ class OfflineManagerTest : AppCenter() {
         val latch = CountDownLatch(1)
         rule.activity.runOnUiThread {
             OfflineManager.getInstance(context).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
-                override fun onList(offlineRegions: Array<out OfflineRegion>?) {
+                override fun onList(offlineRegions: Array<OfflineRegion>?) {
                     assert(offlineRegions?.size == 1)
                     mergedRegion = offlineRegions!![0]
                     latch.countDown()
                 }
 
-                override fun onError(error: String?) {
+                override fun onError(error: String) {
                     throw RuntimeException("Unable to merge external offline database. $error")
                 }
             })
@@ -101,7 +101,7 @@ class OfflineManagerTest : AppCenter() {
                     latch.countDown()
                 }
 
-                override fun onError(error: String?) {
+                override fun onError(error: String) {
                     throw RuntimeException("Unable to delete region")
                 }
             })
@@ -118,7 +118,7 @@ class OfflineManagerTest : AppCenter() {
                     latch.countDown()
                 }
 
-                override fun onError(error: String?) {
+                override fun onError(error: String) {
                     throw RuntimeException("Unable to delete region")
                 }
             })
