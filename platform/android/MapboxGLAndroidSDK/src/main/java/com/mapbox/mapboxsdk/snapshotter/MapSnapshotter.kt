@@ -50,7 +50,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      *
      * @see MapSnapshotter.start
      */
-    interface SnapshotReadyCallback {
+    fun interface SnapshotReadyCallback {
         /**
          * Called when the snapshot is complete.
          *
@@ -65,7 +65,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      *
      * @see MapSnapshotter.start
      */
-    interface ErrorHandler {
+    fun interface ErrorHandler {
         /**
          * Called on error. Snapshotting will not
          * continue
