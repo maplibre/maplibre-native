@@ -51,7 +51,7 @@ android {
     }
 
     namespace 'com.mapbox.mapboxsdk.testapp'
-    testNamespace '${applicationId}'
+    testNamespace 'org.maplibre.testapp.test'
     lint {
         abortOnError false
         baseline file('lint-baseline-local.xml')
