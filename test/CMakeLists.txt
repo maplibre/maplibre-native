@@ -153,6 +153,7 @@ else()
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
+        -Wno-shadow
     )
     set_source_files_properties(
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
