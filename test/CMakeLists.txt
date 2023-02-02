@@ -1,8 +1,3 @@
-find_program(NodeJS_EXECUTABLE NAMES nodejs node)
-if (NOT NodeJS_EXECUTABLE)
-    message("Could not find Node.js test server may not work")
-endif()
-
 add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
