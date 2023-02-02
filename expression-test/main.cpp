@@ -3,32 +3,34 @@
 #include "expression_test_logger.hpp"
 
 #include <random>
+#include <iostream>
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+try {
     // Parse args
     std::vector<mbgl::filesystem::path> testPaths;
     mbgl::filesystem::path rootPath;
     bool shuffle;
     uint32_t seed;
     std::tie(rootPath, testPaths, shuffle, seed) = parseArguments(argc, argv);
-
+    
     // Parse ignores
     const auto ignores = parseExpressionIgnores();
-
+    
     if (shuffle) {
         printf(ANSI_COLOR_YELLOW "Shuffle seed: %d" ANSI_COLOR_RESET "\n", seed);
         std::seed_seq sequence { seed };
         std::mt19937 shuffler(sequence);
         std::shuffle(testPaths.begin(), testPaths.end(), shuffler);
     }
-
+    
     // Run tests, collect stats and output of each run.
     TestStats stats;
     for (const auto& path : testPaths) {
         const auto& expectation = path.parent_path().string();
         std::string id = expectation.substr(rootPath.string().length() + 1, expectation.length() - rootPath.string().length());
         stats.ids.emplace_back(id);
-
+        
         bool shouldIgnore = false;
         std::string ignoreReason;
         const std::string ignoreName = "expression-tests/" + id;
@@ -37,18 +39,18 @@ int main(int argc, char** argv) {
             shouldIgnore = true;
             ignoreReason = (*it).reason;
         }
-
+        
         optional<TestRunOutput> testRun;
         if (auto testData = parseTestData(path)) {
             testRun = runExpressionTest(*testData, rootPath.string(), id);
         }
-
+        
         if (!testRun) {
             stats.errored.emplace_back(id);
             printf(ANSI_COLOR_RED "* ERROR can't parse '%s' test" ANSI_COLOR_RESET "\n", id.c_str());
             continue;
         }
-
+        
         if (shouldIgnore) {
             if (testRun->passed) {
                 stats.ignorePassed.emplace_back(std::move(*testRun));
@@ -67,9 +69,13 @@ int main(int argc, char** argv) {
             }
         }
     }
-
+    
     printStats(stats);
     writeHTMLResults(stats, rootPath.string(), shuffle, seed);
-
+    
     return stats.errored.size() + stats.failed.size() == 0 ? 0 : 1;
+}
+catch (std::exception const& ex) {
+    std::cerr << "Caught an excception while running tests:\n" << ex.what() << '\n';
+    return 1;
 }

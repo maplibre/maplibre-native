@@ -93,11 +93,7 @@ jobs:
           node-version: 18
       
       - name: npm install
-        run: |
-          npm install express
-          cd platform/ios
-          npm ci --ignore-scripts
-        working-directory: ./
+        run: npm ci --ignore-scripts
 
       - name: Prepare ccache
         run: ccache --clear
@@ -120,13 +116,17 @@ jobs:
           ccache --max-size=2G
           ccache --show-stats
 
-      - name: Build macos test
+      - name: Run macOS Objective-C tests
         run: |
           make macos-test
 
-      - name: Build macos cpp test
+      - name: Run macOS C++ unit tests
         run: |
-          make macos-cpp-test
+          cmake -S . -B $BUILD_DIR 
+          cmake --build $BUILD_DIR --target mbgl-test-runner
+          ctest -VV --test-dir $BUILD_DIR -R mbgl-test-runner
+        env:
+          BUILD_DIR: ../../maplibre-gl-native-macostestbuild
 
       - name: Check public symbols
         run: make darwin-check-public-symbols

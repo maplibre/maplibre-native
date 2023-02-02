@@ -68,19 +68,6 @@ private:
     std::thread serverThread;
 };
 
-
-// The Node version of test http server, this sever depands on test/storage/server.js.
-// Cause the HttpServer can't handle 50 concurrent HTTP requests, So I bring this node
-// version back to pass all the unit test.
-class NodeHttpServer {
-public:
-    NodeHttpServer(const char* script);
-    ~NodeHttpServer();
-
-private:
-    int fd = -1;
-};
-
 void checkImage(const std::string& base,
                 const PremultipliedImage& actual,
                 double imageThreshold = 0,
