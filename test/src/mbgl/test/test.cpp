@@ -7,10 +7,6 @@
 namespace mbgl {
 
 int runTests(int argc, char *argv[]) {
-#if TEST_HAS_SERVER
-    auto server = std::make_unique<test::NodeHttpServer>("test/storage/server.js");
-#endif
-
     testing::InitGoogleTest(&argc, argv);
     
     // In order to run specific tests

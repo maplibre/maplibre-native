@@ -292,10 +292,6 @@ xproj: $(MACOS_PROJ_PATH)
 macos-test: $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
-.PHONY: macos-cpp-test
-macos-cpp-test: $(MACOS_PROJ_PATH)
-	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'mbgl-test-runner' && $(MACOS_OUTPUT_PATH)/Debug/mbgl-test-runner
-
 .PHONY: macos-lint
 macos-lint:
 	find platform/macos -type f -name '*.plist' | xargs plutil -lint
