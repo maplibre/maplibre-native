@@ -162,7 +162,7 @@ add_test(
     NAME mbgl-test-runner
     COMMAND
         node
-        ${PROJECT_SOURCE_DIR}/test/storage/with-storage.js
+        ${PROJECT_SOURCE_DIR}/test/storage/with-server.js
         ${PROJECT_SOURCE_DIR}/test/storage/server.js
         $<TARGET_FILE:mbgl-test-runner>
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
