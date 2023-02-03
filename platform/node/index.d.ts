@@ -1,5 +1,5 @@
 declare module '@maplibre/maplibre-gl-native' {
-  export enum Resource {
+  enum Resource {
     Unknown = 0,
     Style = 1,
     Source = 2,
@@ -9,14 +9,14 @@ declare module '@maplibre/maplibre-gl-native' {
     SpriteJSON = 6,
   }
 
-  export type RequestResponse = {
+  type RequestResponse = {
     data: ArrayBuffer;
     modified?: Date;
     expires?: Date;
     etag?: string;
   };
 
-  export type MapOptions = {
+  type MapOptions = {
     request: (
       request: { url: string; kind: number },
       callback: (error?: Error, response?: RequestResponse) => void,
@@ -24,7 +24,7 @@ declare module '@maplibre/maplibre-gl-native' {
     ration?: number;
   };
 
-  export type RenderOptions = {
+  type RenderOptions = {
     zoom?: number; // defaults to 0
     width?: number; // px, defaults to 512
     height?: number; // px, defaults to 512
@@ -34,7 +34,7 @@ declare module '@maplibre/maplibre-gl-native' {
     classes?: string[]; // array of strings
   };
 
-  export class Map {
+  class Map {
     constructor(mapOptions: MapOptions);
 
     load: (style: any) => void;
