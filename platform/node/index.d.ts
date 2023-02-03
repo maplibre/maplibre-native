@@ -1,4 +1,14 @@
 declare module '@maplibre/maplibre-gl-native' {
+  export enum Resource {
+    Unknown = 0,
+    Style = 1,
+    Source = 2,
+    Tile = 3,
+    Glyphs = 4,
+    SpriteImage = 5,
+    SpriteJSON = 6,
+  }
+
   export type RequestResponse = {
     data: ArrayBuffer;
     modified?: Date;
