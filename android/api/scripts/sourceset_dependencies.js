@@ -1,0 +1,1 @@
+sourceset_dependencies='{":MapboxGLAndroidSDK:dokkaHtml/androidTestRelease":[],":MapboxGLAndroidSDK:dokkaHtml/debug":[],":MapboxGLAndroidSDK:dokkaHtml/main":[],":MapboxGLAndroidSDK:dokkaHtml/release":[],":MapboxGLAndroidSDK:dokkaHtml/testFixtures":[],":MapboxGLAndroidSDK:dokkaHtml/testFixturesDebug":[],":MapboxGLAndroidSDK:dokkaHtml/testFixturesRelease":[]}'

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>LatLngBounds</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>MapboxGLAndroidSDK</span>
+            </a>
+    </div>
+    <div>
+9.6.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="MapboxGLAndroidSDK::com.mapbox.mapboxsdk.geometry/LatLngBounds///PointingToDeclaration//2110661137">
+  <div class="breadcrumbs"><a href="../../../index.html">MapboxGLAndroidSDK</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.mapboxsdk.geometry</a><span class="delimiter">/</span><span class="current">LatLngBounds</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Lat</span><wbr></wbr><span>Lng</span><wbr></wbr><span><span>Bounds</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">LatLngBounds</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><p class="paragraph">A geographical area representing a latitude/longitude aligned rectangle.</p><p class="paragraph">This class does not wrap values to the world bounds.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="-156640671%2FClasslikes%2F2110661137" anchor-label="Builder" id="-156640671%2FClasslikes%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-156640671%2FClasslikes%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a></div><div class="brief "><p class="paragraph">Builder for composing LatLngBounds objects.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="591841616%2FClasslikes%2F2110661137" anchor-label="Companion" id="591841616%2FClasslikes%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="591841616%2FClasslikes%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1955307063%2FFunctions%2F2110661137" anchor-label="contains" id="-1955307063%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="contains.html"><span><span>contains</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1955307063%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="contains.html"><span class="token function">contains</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latLng<span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Determines whether this LatLngBounds contains a point.</p></div><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="contains.html"><span class="token function">contains</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="index.html">LatLngBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Determines whether this LatLngBounds contains another bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1333700236%2FFunctions%2F2110661137" anchor-label="describeContents" id="1333700236%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="describe-contents.html"><span>describe</span><wbr></wbr><span><span>Contents</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1333700236%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="describe-contents.html"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1415705776%2FFunctions%2F2110661137" anchor-label="equals" id="1415705776%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1415705776%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Determines whether this LatLngBounds matches another one via LatLng.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1224209299%2FFunctions%2F2110661137" anchor-label="getLatNorth" id="-1224209299%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-lat-north.html"><span>get</span><wbr></wbr><span>Lat</span><wbr></wbr><span><span>North</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1224209299%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-lat-north.html"><span class="token function">getLatNorth</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get the north latitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1931838299%2FFunctions%2F2110661137" anchor-label="getLatSouth" id="-1931838299%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-lat-south.html"><span>get</span><wbr></wbr><span>Lat</span><wbr></wbr><span><span>South</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1931838299%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-lat-south.html"><span class="token function">getLatSouth</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get the south latitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1933399169%2FFunctions%2F2110661137" anchor-label="getLonEast" id="-1933399169%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-lon-east.html"><span>get</span><wbr></wbr><span>Lon</span><wbr></wbr><span><span>East</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1933399169%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-lon-east.html"><span class="token function">getLonEast</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get the east longitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="933550605%2FFunctions%2F2110661137" anchor-label="getLonWest" id="933550605%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-lon-west.html"><span>get</span><wbr></wbr><span>Lon</span><wbr></wbr><span><span>West</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="933550605%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-lon-west.html"><span class="token function">getLonWest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get the west longitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-134533578%2FFunctions%2F2110661137" anchor-label="hashCode" id="-134533578%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hash-code.html"><span>hash</span><wbr></wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-134533578%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Returns a hash code value for the object.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="541002516%2FFunctions%2F2110661137" anchor-label="include" id="541002516%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="include.html"><span><span>include</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="541002516%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="include.html"><span class="token function">include</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latLng<span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LatLngBounds</a></div><div class="brief "><p class="paragraph">Constructs a LatLngBounds from current bounds with an additional latitude-longitude pair.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1459540123%2FFunctions%2F2110661137" anchor-label="intersect" id="-1459540123%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="intersect.html"><span><span>intersect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1459540123%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="intersect.html"><span class="token function">intersect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">box<span class="token operator">: </span><a href="index.html">LatLngBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LatLngBounds</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns a new LatLngBounds that is the intersection of this with another LatLngBounds,</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="intersect.html"><span class="token function">intersect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">northLat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">eastLon<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">southLat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">westLon<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LatLngBounds</a></div><div class="brief "><p class="paragraph">Returns a new LatLngBounds that is the intersection of this with another box.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="675613463%2FFunctions%2F2110661137" anchor-label="toLatLngs" id="675613463%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-lat-lngs.html"><span>to</span><wbr></wbr><span>Lat</span><wbr></wbr><span><span>Lngs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="675613463%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-lat-lngs.html"><span class="token function">toLatLngs</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-lat-lng/index.html">LatLng</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Return an array of LatLng objects resembling this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-312699643%2FFunctions%2F2110661137" anchor-label="toString" id="-312699643%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-312699643%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns a string representaton of the object.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-861635739%2FFunctions%2F2110661137" anchor-label="union" id="-861635739%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="union.html"><span><span>union</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-861635739%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="union.html"><span class="token function">union</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="index.html">LatLngBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LatLngBounds</a></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="union.html"><span class="token function">union</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">northLat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">eastLon<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">southLat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">westLon<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LatLngBounds</a></div><div class="brief "><p class="paragraph">Returns a new LatLngBounds that stretches to contain both this and another LatLngBounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1980421931%2FFunctions%2F2110661137" anchor-label="writeToParcel" id="-1980421931%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="write-to-parcel.html"><span>write</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Parcel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1980421931%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="write-to-parcel.html"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">out<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">flags<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Flatten this object in to a Parcel.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1705648068%2FProperties%2F2110661137" anchor-label="center" id="-1705648068%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="center.html"><span><span>center</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1705648068%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1705648068%2FProperties%2F2110661137" anchor-label="center" id="-1705648068%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="center.html">center</a><span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></div><div class="brief "><a data-name="-1705648068%2FProperties%2F2110661137" anchor-label="center" id="-1705648068%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Calculates the centerpoint of this LatLngBounds by simple interpolation and returns it as a point. This is a non-geodesic calculation which is not the geographic center.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1159434884%2FProperties%2F2110661137" anchor-label="isEmptySpan" id="-1159434884%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-empty-span.html"><span>is</span><wbr></wbr><span>Empty</span><wbr></wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1159434884%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1159434884%2FProperties%2F2110661137" anchor-label="isEmptySpan" id="-1159434884%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="is-empty-span.html">isEmptySpan</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><a data-name="-1159434884%2FProperties%2F2110661137" anchor-label="isEmptySpan" id="-1159434884%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Validate if LatLngBounds is empty, determined if absolute distance is</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1883956176%2FProperties%2F2110661137" anchor-label="latitudeNorth" id="-1883956176%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="latitude-north.html"><span>latitude</span><wbr></wbr><span><span>North</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1883956176%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1883956176%2FProperties%2F2110661137" anchor-label="latitudeNorth" id="-1883956176%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-field/index.html"><span class="token annotation builtin">JvmField</span></a></div></div><span class="token keyword"></span><span class="token keyword">val </span><a href="latitude-north.html">latitudeNorth</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="-1883956176%2FProperties%2F2110661137" anchor-label="latitudeNorth" id="-1883956176%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the north latitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1703382120%2FProperties%2F2110661137" anchor-label="latitudeSouth" id="1703382120%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="latitude-south.html"><span>latitude</span><wbr></wbr><span><span>South</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1703382120%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1703382120%2FProperties%2F2110661137" anchor-label="latitudeSouth" id="1703382120%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-field/index.html"><span class="token annotation builtin">JvmField</span></a></div></div><span class="token keyword"></span><span class="token keyword">val </span><a href="latitude-south.html">latitudeSouth</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="1703382120%2FProperties%2F2110661137" anchor-label="latitudeSouth" id="1703382120%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the south latitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1262941915%2FProperties%2F2110661137" anchor-label="latitudeSpan" id="1262941915%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="latitude-span.html"><span>latitude</span><wbr></wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1262941915%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1262941915%2FProperties%2F2110661137" anchor-label="latitudeSpan" id="1262941915%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="latitude-span.html">latitudeSpan</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="1262941915%2FProperties%2F2110661137" anchor-label="latitudeSpan" id="1262941915%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the absolute distance, in degrees, between the north and south boundaries of this LatLngBounds</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="456224061%2FProperties%2F2110661137" anchor-label="longitudeEast" id="456224061%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="longitude-east.html"><span>longitude</span><wbr></wbr><span><span>East</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="456224061%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="456224061%2FProperties%2F2110661137" anchor-label="longitudeEast" id="456224061%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-field/index.html"><span class="token annotation builtin">JvmField</span></a></div></div><span class="token keyword"></span><span class="token keyword">val </span><a href="longitude-east.html">longitudeEast</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="456224061%2FProperties%2F2110661137" anchor-label="longitudeEast" id="456224061%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the east longitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1728330384%2FProperties%2F2110661137" anchor-label="longitudeSpan" id="1728330384%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="longitude-span.html"><span>longitude</span><wbr></wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1728330384%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1728330384%2FProperties%2F2110661137" anchor-label="longitudeSpan" id="1728330384%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="longitude-span.html">longitudeSpan</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="1728330384%2FProperties%2F2110661137" anchor-label="longitudeSpan" id="1728330384%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the absolute distance, in degrees, between the west and east boundaries of this LatLngBounds</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-971793461%2FProperties%2F2110661137" anchor-label="longitudeWest" id="-971793461%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="longitude-west.html"><span>longitude</span><wbr></wbr><span><span>West</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-971793461%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-971793461%2FProperties%2F2110661137" anchor-label="longitudeWest" id="-971793461%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-field/index.html"><span class="token annotation builtin">JvmField</span></a></div></div><span class="token keyword"></span><span class="token keyword">val </span><a href="longitude-west.html">longitudeWest</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><a data-name="-971793461%2FProperties%2F2110661137" anchor-label="longitudeWest" id="-971793461%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the west longitude value of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-877118553%2FProperties%2F2110661137" anchor-label="northEast" id="-877118553%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="north-east.html"><span>north</span><wbr></wbr><span><span>East</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-877118553%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-877118553%2FProperties%2F2110661137" anchor-label="northEast" id="-877118553%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="north-east.html">northEast</a><span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></div><div class="brief "><a data-name="-877118553%2FProperties%2F2110661137" anchor-label="northEast" id="-877118553%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the latitude-longitude pair if the north east corner of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1989831221%2FProperties%2F2110661137" anchor-label="northWest" id="1989831221%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="north-west.html"><span>north</span><wbr></wbr><span><span>West</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1989831221%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1989831221%2FProperties%2F2110661137" anchor-label="northWest" id="1989831221%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="north-west.html">northWest</a><span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></div><div class="brief "><a data-name="1989831221%2FProperties%2F2110661137" anchor-label="northWest" id="1989831221%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the latitude-longitude pair of the north west corner of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1779970081%2FProperties%2F2110661137" anchor-label="southEast" id="-1779970081%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="south-east.html"><span>south</span><wbr></wbr><span><span>East</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1779970081%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1779970081%2FProperties%2F2110661137" anchor-label="southEast" id="-1779970081%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="south-east.html">southEast</a><span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></div><div class="brief "><a data-name="-1779970081%2FProperties%2F2110661137" anchor-label="southEast" id="-1779970081%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the latitude-longitude pair of the south east corner of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1086979693%2FProperties%2F2110661137" anchor-label="southWest" id="1086979693%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="south-west.html"><span>south</span><wbr></wbr><span><span>West</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1086979693%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1086979693%2FProperties%2F2110661137" anchor-label="southWest" id="1086979693%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="south-west.html">southWest</a><span class="token operator">: </span><a href="../-lat-lng/index.html">LatLng</a></div><div class="brief "><a data-name="1086979693%2FProperties%2F2110661137" anchor-label="southWest" id="1086979693%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the latitude-longitude pair of the south west corner of this bounds.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-747847705%2FProperties%2F2110661137" anchor-label="span" id="-747847705%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="span.html"><span><span>span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-747847705%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-747847705%2FProperties%2F2110661137" anchor-label="span" id="-747847705%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="span.html">span</a><span class="token operator">: </span><a href="../-lat-lng-span/index.html">LatLngSpan</a></div><div class="brief "><a data-name="-747847705%2FProperties%2F2110661137" anchor-label="span" id="-747847705%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><p class="paragraph">Get the area spanned by this LatLngBounds</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

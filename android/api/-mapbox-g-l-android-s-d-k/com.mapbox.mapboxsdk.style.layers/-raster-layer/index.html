@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RasterLayer</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>MapboxGLAndroidSDK</span>
+            </a>
+    </div>
+    <div>
+9.6.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="MapboxGLAndroidSDK::com.mapbox.mapboxsdk.style.layers/RasterLayer///PointingToDeclaration//2110661137">
+  <div class="breadcrumbs"><a href="../../../index.html">MapboxGLAndroidSDK</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.mapboxsdk.style.layers</a><span class="delimiter">/</span><span class="current">RasterLayer</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Raster</span><wbr></wbr><span><span>Layer</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">RasterLayer</a> : <a href="../-layer/index.html">Layer</a></div><p class="paragraph">Raster map textures such as satellite imagery.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="See also">See also</button></div>
+    <div class="tabs-section-body">
+      <h4 class="">See also</h4>
+      <div data-togglable="See also">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="See also"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div data-togglable="See also"><div class="table" data-togglable="See also"><div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>&lt;a</span></span> <span>href=&quot;https://www.</span><wbr></wbr><span>mapbox.</span><wbr></wbr><span><span>com/mapbox-gl-style-spec/#layers-raster&quot;&gt;The</span></span> <span><span>online</span></span> <span><span>documentation&lt;/a&gt;</span></span></div></span></div><div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1362937216%2FConstructors%2F2110661137" anchor-label="RasterLayer" id="1362937216%2FConstructors%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-raster-layer.html"><span>Raster</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1362937216%2FConstructors%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-raster-layer.html"><span class="token function">RasterLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">sourceId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a RasterLayer.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-503389403%2FFunctions%2F2110661137" anchor-label="getId" id="-503389403%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/get-id.html"><span>get</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-503389403%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/get-id.html"><span class="token function">getId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-600437245%2FFunctions%2F2110661137" anchor-label="getMaxZoom" id="-600437245%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/get-max-zoom.html"><span>get</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-600437245%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/get-max-zoom.html"><span class="token function">getMaxZoom</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2092800981%2FFunctions%2F2110661137" anchor-label="getMinZoom" id="2092800981%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/get-min-zoom.html"><span>get</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2092800981%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/get-min-zoom.html"><span class="token function">getMinZoom</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1791846233%2FFunctions%2F2110661137" anchor-label="getRasterBrightnessMax" id="-1791846233%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-brightness-max.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span><span>Max</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1791846233%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-brightness-max.html"><span class="token function">getRasterBrightnessMax</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterBrightnessMax property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1179201454%2FFunctions%2F2110661137" anchor-label="getRasterBrightnessMaxTransition" id="-1179201454%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-brightness-max-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1179201454%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-brightness-max-transition.html"><span class="token function">getRasterBrightnessMaxTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterBrightnessMax property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1295900537%2FFunctions%2F2110661137" anchor-label="getRasterBrightnessMin" id="1295900537%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-brightness-min.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span><span>Min</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1295900537%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-brightness-min.html"><span class="token function">getRasterBrightnessMin</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterBrightnessMin property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-864208732%2FFunctions%2F2110661137" anchor-label="getRasterBrightnessMinTransition" id="-864208732%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-brightness-min-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-864208732%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-brightness-min-transition.html"><span class="token function">getRasterBrightnessMinTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterBrightnessMin property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1252897794%2FFunctions%2F2110661137" anchor-label="getRasterContrast" id="-1252897794%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-contrast.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span><span>Contrast</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1252897794%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-contrast.html"><span class="token function">getRasterContrast</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterContrast property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="30114537%2FFunctions%2F2110661137" anchor-label="getRasterContrastTransition" id="30114537%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-contrast-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Contrast</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="30114537%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-contrast-transition.html"><span class="token function">getRasterContrastTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterContrast property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-96474864%2FFunctions%2F2110661137" anchor-label="getRasterFadeDuration" id="-96474864%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-fade-duration.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Fade</span><wbr></wbr><span><span>Duration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-96474864%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-fade-duration.html"><span class="token function">getRasterFadeDuration</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterFadeDuration property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-323640825%2FFunctions%2F2110661137" anchor-label="getRasterHueRotate" id="-323640825%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-hue-rotate.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Hue</span><wbr></wbr><span><span>Rotate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-323640825%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-hue-rotate.html"><span class="token function">getRasterHueRotate</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterHueRotate property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1450860110%2FFunctions%2F2110661137" anchor-label="getRasterHueRotateTransition" id="-1450860110%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-hue-rotate-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Hue</span><wbr></wbr><span>Rotate</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1450860110%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-hue-rotate-transition.html"><span class="token function">getRasterHueRotateTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterHueRotate property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1188078417%2FFunctions%2F2110661137" anchor-label="getRasterOpacity" id="-1188078417%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-opacity.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span><span>Opacity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1188078417%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-opacity.html"><span class="token function">getRasterOpacity</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterOpacity property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-759944614%2FFunctions%2F2110661137" anchor-label="getRasterOpacityTransition" id="-759944614%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-opacity-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-759944614%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-opacity-transition.html"><span class="token function">getRasterOpacityTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterOpacity property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1158543910%2FFunctions%2F2110661137" anchor-label="getRasterResampling" id="1158543910%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-resampling.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span><span>Resampling</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158543910%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-resampling.html"><span class="token function">getRasterResampling</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterResampling property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-936134546%2FFunctions%2F2110661137" anchor-label="getRasterSaturation" id="-936134546%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-saturation.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span><span>Saturation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-936134546%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-saturation.html"><span class="token function">getRasterSaturation</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the RasterSaturation property</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1323574105%2FFunctions%2F2110661137" anchor-label="getRasterSaturationTransition" id="1323574105%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-raster-saturation-transition.html"><span>get</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Saturation</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1323574105%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-raster-saturation-transition.html"><span class="token function">getRasterSaturationTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the RasterSaturation property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1601914649%2FFunctions%2F2110661137" anchor-label="getSourceId" id="-1601914649%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-source-id.html"><span>get</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1601914649%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-source-id.html"><span class="token function">getSourceId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Get the source id.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="4492814%2FFunctions%2F2110661137" anchor-label="getVisibility" id="4492814%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/get-visibility.html"><span>get</span><wbr></wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="4492814%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/get-visibility.html"><span class="token function">getVisibility</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1002682056%2FFunctions%2F2110661137" anchor-label="isDetached" id="1002682056%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/is-detached.html"><span>is</span><wbr></wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1002682056%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/is-detached.html"><span class="token function">isDetached</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1952719586%2FFunctions%2F2110661137" anchor-label="setDetached" id="1952719586%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/set-detached.html"><span>set</span><wbr></wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1952719586%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/set-detached.html"><span class="token function">setDetached</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1661602295%2FFunctions%2F2110661137" anchor-label="setMaxZoom" id="1661602295%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/set-max-zoom.html"><span>set</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1661602295%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/set-max-zoom.html"><span class="token function">setMaxZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="9195365%2FFunctions%2F2110661137" anchor-label="setMinZoom" id="9195365%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/set-min-zoom.html"><span>set</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="9195365%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/set-min-zoom.html"><span class="token function">setMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1509463668%2FFunctions%2F2110661137" anchor-label="setProperties" id="-1509463668%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/set-properties.html"><span>set</span><wbr></wbr><span><span>Properties</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1509463668%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-layer/set-properties.html"><span class="token function">setProperties</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>properties<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="313663829%2FFunctions%2F2110661137" anchor-label="setRasterBrightnessMaxTransition" id="313663829%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-brightness-max-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="313663829%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-brightness-max-transition.html"><span class="token function">setRasterBrightnessMaxTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterBrightnessMax property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-733729853%2FFunctions%2F2110661137" anchor-label="setRasterBrightnessMinTransition" id="-733729853%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-brightness-min-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Brightness</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-733729853%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-brightness-min-transition.html"><span class="token function">setRasterBrightnessMinTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterBrightnessMin property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1789731830%2FFunctions%2F2110661137" anchor-label="setRasterContrastTransition" id="1789731830%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-contrast-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Contrast</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1789731830%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-contrast-transition.html"><span class="token function">setRasterContrastTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterContrast property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1243091467%2FFunctions%2F2110661137" anchor-label="setRasterHueRotateTransition" id="-1243091467%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-hue-rotate-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Hue</span><wbr></wbr><span>Rotate</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1243091467%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-hue-rotate-transition.html"><span class="token function">setRasterHueRotateTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterHueRotate property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1169277261%2FFunctions%2F2110661137" anchor-label="setRasterOpacityTransition" id="1169277261%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-opacity-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1169277261%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-opacity-transition.html"><span class="token function">setRasterOpacityTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterOpacity property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-412976506%2FFunctions%2F2110661137" anchor-label="setRasterSaturationTransition" id="-412976506%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-raster-saturation-transition.html"><span>set</span><wbr></wbr><span>Raster</span><wbr></wbr><span>Saturation</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-412976506%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-raster-saturation-transition.html"><span class="token function">setRasterSaturationTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the RasterSaturation property transition options</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-361516402%2FFunctions%2F2110661137" anchor-label="setSourceLayer" id="-361516402%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-source-layer.html"><span>set</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-361516402%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-source-layer.html"><span class="token function">setSourceLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceLayer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the source layer.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1790311841%2FFunctions%2F2110661137" anchor-label="withProperties" id="-1790311841%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="with-properties.html"><span>with</span><wbr></wbr><span><span>Properties</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1790311841%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="with-properties.html"><span class="token function">withProperties</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>properties<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RasterLayer</a></div><div class="brief ">Set a property or properties.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1462371614%2FFunctions%2F2110661137" anchor-label="withSourceLayer" id="1462371614%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="with-source-layer.html"><span>with</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1462371614%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="with-source-layer.html"><span class="token function">withSourceLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceLayer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RasterLayer</a></div><div class="brief ">Set the source Layer.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1424521953%2FProperties%2F2110661137" anchor-label="nativePtr" id="-1424521953%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-layer/native-ptr.html"><span>native</span><wbr></wbr><span><span>Ptr</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1424521953%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1424521953%2FProperties%2F2110661137" anchor-label="nativePtr" id="-1424521953%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-layer/native-ptr.html">nativePtr</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

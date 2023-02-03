@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Marker</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>MapboxGLAndroidSDK</span>
+            </a>
+    </div>
+    <div>
+9.6.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="MapboxGLAndroidSDK::com.mapbox.mapboxsdk.annotations/Marker///PointingToDeclaration//2110661137">
+  <div class="breadcrumbs"><a href="../../../index.html">MapboxGLAndroidSDK</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.mapboxsdk.annotations</a><span class="delimiter">/</span><span class="current">Marker</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Marker</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html"><strike>Marker</strike></a> : <a href="../-annotation/index.html">Annotation</a></div><div class="deprecation-content"><h3 class="">Deprecated</h3></div><p class="paragraph">Marker is an annotation that shows an icon image at a geographical location. The default marker uses a provided icon. This icon can be customized using <a href="../-icon-factory/index.html">IconFactory</a> to generate an <a href="../-icon/index.html">Icon</a> using a provided image. Markers are added to the map by first giving a <a href="../../com.mapbox.mapboxsdk.geometry/-lat-lng/index.html">LatLng</a> and using <a href="../../com.mapbox.mapboxsdk.maps/-mapbox-map/add-marker.html">addMarker</a>. The marker icon will be centered at this position so it is common to add padding to the icon image before usage. </p><p class="paragraph"> Markers are designed to be interactive. They receive click events by default, and are often used with event listeners to bring up info windows. An <a href="../-info-window/index.html">InfoWindow</a> is displayed by default when either a title or snippet is provided. </p><span class="kdoc-tag"><h4 class="">Deprecated</h4><p class="paragraph">As of 7.0.0, use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">Mapbox Annotation Plugin</a> instead</p></span></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-1592422534%2FConstructors%2F2110661137" anchor-label="Marker" id="-1592422534%2FConstructors%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-marker.html"><span><span>Marker</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1592422534%2FConstructors%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-marker.html"><span class="token function">Marker</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseMarkerOptions<span class="token operator">: </span><a href="../-base-marker-options/index.html">BaseMarkerOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a instance of <a href="index.html">Marker</a> using the builder of Marker.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="869622268%2FFunctions%2F2110661137" anchor-label="compareTo" id="869622268%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/compare-to.html"><span>compare</span><wbr></wbr><span><span>To</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="869622268%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/compare-to.html"><span class="token function">compareTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>annotation<span class="token operator">: </span><a href="../-annotation/index.html">Annotation</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">Compares this Annotation object with another Annotation.</div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-base-point-collection/index.html#-1554281679%2FFunctions%2F2110661137"><span class="token function">compareTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Comparable.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2038637323%2FFunctions%2F2110661137" anchor-label="equals" id="2038637323%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2038637323%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a> </span>object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief ">Checks if this Annotation object is equal to another Annotation.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1289414878%2FFunctions%2F2110661137" anchor-label="hashCode" id="-1289414878%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/hash-code.html"><span>hash</span><wbr></wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1289414878%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">Gives an integer which can be used as the bucket number for storing elements of the set/map.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-58414136%2FFunctions%2F2110661137" anchor-label="hideInfoWindow" id="-58414136%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-info-window.html"><span>hide</span><wbr></wbr><span>Info</span><wbr></wbr><span><span>Window</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-58414136%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-info-window.html"><span class="token function">hideInfoWindow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-240048151%2FFunctions%2F2110661137" anchor-label="isInfoWindowShown" id="-240048151%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-info-window-shown.html"><span>is</span><wbr></wbr><span>Info</span><wbr></wbr><span>Window</span><wbr></wbr><span><span>Shown</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-240048151%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="is-info-window-shown.html"><span class="token function">isInfoWindowShown</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-720065831%2FFunctions%2F2110661137" anchor-label="remove" id="-720065831%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/remove.html"><span><span>remove</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-720065831%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/remove.html"><span class="token function">remove</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1973468229%2FFunctions%2F2110661137" anchor-label="setMapboxMap" id="1973468229%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/set-mapbox-map.html"><span>set</span><wbr></wbr><span>Mapbox</span><wbr></wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1973468229%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/set-mapbox-map.html"><span class="token function">setMapboxMap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxMap<span class="token operator">: </span><a href="../../com.mapbox.mapboxsdk.maps/-mapbox-map/index.html">MapboxMap</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1982430075%2FFunctions%2F2110661137" anchor-label="setMapView" id="-1982430075%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/set-map-view.html"><span>set</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1982430075%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-annotation/set-map-view.html"><span class="token function">setMapView</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapView<span class="token operator">: </span><a href="../../com.mapbox.mapboxsdk.maps/-map-view/index.html">MapView</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-262107803%2FFunctions%2F2110661137" anchor-label="setRightOffsetPixels" id="-262107803%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-right-offset-pixels.html"><span>set</span><wbr></wbr><span>Right</span><wbr></wbr><span>Offset</span><wbr></wbr><span><span>Pixels</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-262107803%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-right-offset-pixels.html"><span class="token function">setRightOffsetPixels</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">rightOffsetPixels<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1283981218%2FFunctions%2F2110661137" anchor-label="setTopOffsetPixels" id="-1283981218%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-top-offset-pixels.html"><span>set</span><wbr></wbr><span>Top</span><wbr></wbr><span>Offset</span><wbr></wbr><span><span>Pixels</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1283981218%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-top-offset-pixels.html"><span class="token function">setTopOffsetPixels</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">topOffsetPixels<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1417462222%2FFunctions%2F2110661137" anchor-label="showInfoWindow" id="1417462222%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-info-window.html"><span>show</span><wbr></wbr><span>Info</span><wbr></wbr><span><span>Window</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1417462222%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-info-window.html"><span class="token function">showInfoWindow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>mapboxMap<span class="token operator">: </span><a href="../../com.mapbox.mapboxsdk.maps/-mapbox-map/index.html">MapboxMap</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>mapView<span class="token operator">: </span><a href="../../com.mapbox.mapboxsdk.maps/-map-view/index.html">MapView</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-info-window/index.html">InfoWindow</a></div><div class="brief ">Do not use this method, used internally by the SDK.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1359600580%2FFunctions%2F2110661137" anchor-label="toString" id="-1359600580%2FFunctions%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1359600580%2FFunctions%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Returns a String with the marker position.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1688788913%2FProperties%2F2110661137" anchor-label="icon" id="-1688788913%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="icon.html"><span><span>icon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1688788913%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1688788913%2FProperties%2F2110661137" anchor-label="icon" id="-1688788913%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="icon.html">icon</a><span class="token operator">: </span><a href="../-icon/index.html">Icon</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="947695138%2FProperties%2F2110661137" anchor-label="id" id="947695138%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-annotation/id.html"><span><span>id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="947695138%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="947695138%2FProperties%2F2110661137" anchor-label="id" id="947695138%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="../-annotation/id.html">id</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><a data-name="947695138%2FProperties%2F2110661137" anchor-label="id" id="947695138%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a> The annotation id  Internal C++ id is stored as unsigned int.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1775933974%2FProperties%2F2110661137" anchor-label="infoWindow" id="-1775933974%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="info-window.html"><span>info</span><wbr></wbr><span><span>Window</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1775933974%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-1775933974%2FProperties%2F2110661137" anchor-label="infoWindow" id="-1775933974%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="info-window.html">infoWindow</a><span class="token operator">: </span><a href="../-info-window/index.html">InfoWindow</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-433652705%2FProperties%2F2110661137" anchor-label="position" id="-433652705%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="position.html"><span><span>position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-433652705%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-433652705%2FProperties%2F2110661137" anchor-label="position" id="-433652705%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="position.html">position</a><span class="token operator">: </span><a href="../../com.mapbox.mapboxsdk.geometry/-lat-lng/index.html">LatLng</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-772251019%2FProperties%2F2110661137" anchor-label="snippet" id="-772251019%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="snippet.html"><span><span>snippet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772251019%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="-772251019%2FProperties%2F2110661137" anchor-label="snippet" id="-772251019%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="snippet.html">snippet</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1405305562%2FProperties%2F2110661137" anchor-label="title" id="1405305562%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MapboxGLAndroidSDK:dokkaHtml/release" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="title.html"><span><span>title</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1405305562%2FProperties%2F2110661137"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapboxGLAndroidSDK:dokkaHtml/release"><a data-name="1405305562%2FProperties%2F2110661137" anchor-label="title" id="1405305562%2FProperties%2F2110661137" data-filterable-set=":MapboxGLAndroidSDK:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="title.html">title</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
