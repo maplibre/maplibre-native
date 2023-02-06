@@ -21,7 +21,7 @@ declare module '@maplibre/maplibre-gl-native' {
       request: { url: string; kind: number },
       callback: (error?: Error, response?: RequestResponse) => void,
     ) => void;
-    ration?: number;
+    ratio?: number;
   };
 
   type RenderOptions = {
