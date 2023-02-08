@@ -120,6 +120,10 @@ jobs:
         run: |
           make macos-test
 
+      - name: npm install  # C++ tests are run with root as working directory
+        run: npm ci --ignore-scripts
+        working-directory: /
+
       - name: Run macOS C++ unit tests
         run: |
           cmake -S . -B $BUILD_DIR
