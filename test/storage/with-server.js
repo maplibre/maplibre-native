@@ -13,12 +13,12 @@ const prog = process.argv[3];
 const args = process.argv.slice(4);
 
 
-const sameStdio = {	stdio: [process.stdin, process.stdout, process.stderr]};
-
-const server = spawn('node', [serverScript], sameStdio);
+const server = spawn('node', [serverScript]);
 
 server.stdout.on('data', (data) => {
-	if (data.toString() === "OK") {
+	const dataAsStr = data.toString();
+
+	if (dataAsStr === "OK") {
 		const test = spawn(prog, args, sameStdio);
 
 		test.on('close', (code) => {
@@ -26,5 +26,8 @@ server.stdout.on('data', (data) => {
 			server.kill();
 			process.exit(code);
 		});
+		return;
 	}
+
+	console.error(`[server] ${dataAsStr}`);
 });
