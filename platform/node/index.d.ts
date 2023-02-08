@@ -18,7 +18,7 @@ declare module '@maplibre/maplibre-gl-native' {
 
   type MapOptions = {
     request: (
-      request: { url: string; kind: number },
+      request: { url: string; kind: Resource },
       callback: (error?: Error, response?: RequestResponse) => void,
     ) => void;
     ratio?: number;
