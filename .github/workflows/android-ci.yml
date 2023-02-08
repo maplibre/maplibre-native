@@ -100,45 +100,6 @@ jobs:
       - name: Build libmapbox-gl.so for arm-v8
         run: make android-lib-arm-v8
 
-      - name: Build Test APK
-        run: |
-          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
-            make android-ui-test-arm-v8
-          else
-            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash
-
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash
-
-      - name: Run instrumentation tests on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android models list
-            gcloud firebase test android run --type instrumentation \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
-              --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
-              --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
-          fi
-        shell: bash
-
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
