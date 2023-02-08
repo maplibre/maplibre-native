@@ -122,7 +122,7 @@ jobs:
 
       - name: npm install  # C++ tests are run with root as working directory
         run: npm ci --ignore-scripts
-        working-directory: /
+        working-directory: .
 
       - name: Run macOS C++ unit tests
         run: |
