@@ -3,8 +3,10 @@
 #include "expression_test_logger.hpp"
 
 #include <random>
+#include <iostream>
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+try {
     // Parse args
     std::vector<mbgl::filesystem::path> testPaths;
     mbgl::filesystem::path rootPath;
@@ -70,6 +72,10 @@ int main(int argc, char** argv) {
 
     printStats(stats);
     writeHTMLResults(stats, rootPath.string(), shuffle, seed);
-
+    
     return stats.errored.size() + stats.failed.size() == 0 ? 0 : 1;
+}
+catch (std::exception const& ex) {
+    std::cerr << "Caught an exception while running tests:\n" << ex.what() << '\n';
+    return 1;
 }
