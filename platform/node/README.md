@@ -1,18 +1,16 @@
 # @maplibre/maplibre-gl-native
 
-[![NPM](https://nodei.co/npm/@maplibre/maplibre-gl-native.png)](https://npmjs.org/package/@maplibre/maplibre-gl-native)
+[![Version](https://img.shields.io/npm/v/@maplibre/maplibre-gl-native?style=flat)](https://www.npmjs.com/package/@maplibre/maplibre-gl-native)
 [![node-ci](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/node-ci.yml)
 
 ## Installing
 
-#### :warn: This package isn't live yet.
+Binaries are available and downloaded during install for the following platforms:
 
-Requires a modern C++ runtime that supports C++14.
-
-By default, installs binaries. On these platforms no additional dependencies are needed.
-
-- 64 bit macOS or 64 bit Linux
-- Node.js v10.x
+- Operating systems:
+  - Ubuntu 20.04 (amd64/arm64)
+  - macOS 12 (amd64/arm64)
+- Node.js 14, 16, 18
 
 Run:
 
@@ -20,8 +18,7 @@ Run:
 npm install @maplibre/maplibre-gl-native
 ```
 
-Other platforms will fall back to a source compile with `make node`; see [DEVELOPING.md](DEVELOPING.md) for details on
-building from source.
+Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-gl-native/tree/main/platform/linux#prerequisites).
 
 ## Testing
 
