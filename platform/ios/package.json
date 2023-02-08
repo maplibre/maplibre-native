@@ -35,7 +35,7 @@
     "lodash": "^4.16.4",
     "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",
-    "pixelmatch": "^4.0.2",
+    "pixelmatch": "^5.3.0",
     "pngjs": "^6.0.0",
     "pretty-bytes": "^5.1.0",
     "request": "^2.88.0",
