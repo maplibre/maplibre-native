@@ -18,8 +18,7 @@ Run:
 npm install @maplibre/maplibre-gl-native
 ```
 
-Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-gl-native/tree/main/platform/linux#prerequisites). Otherwise, the package will fall back to a source compile with `make node`. See [DEVELOPING.md](DEVELOPING.md) for details on
-building from source.
+Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-gl-native/tree/main/platform/linux#prerequisites).
 
 ## Testing
 
