@@ -7,8 +7,10 @@
 
 Binaries are available and downloaded during install for the following platforms:
 
-- 64 bit macOS or 64 bit Linux
-- Node.js v14, v16, v18
+- Operating systems:
+  - Ubuntu 20.04 (amd64/arm64)
+  - macOS 12 (amd64/arm64)
+- Node.js 14, 16, 18
 
 Run:
 
@@ -16,7 +18,7 @@ Run:
 npm install @maplibre/maplibre-gl-native
 ```
 
-Other platforms will fall back to a source compile with `make node`. See [DEVELOPING.md](DEVELOPING.md) for details on
+Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-gl-native/tree/main/platform/linux#prerequisites). Otherwise, the package will fall back to a source compile with `make node`. See [DEVELOPING.md](DEVELOPING.md) for details on
 building from source.
 
 ## Testing
