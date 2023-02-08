@@ -306,12 +306,12 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             break;
         case GLFW_KEY_Q: {
             auto result = view->rendererFrontend->getRenderer()->queryPointAnnotations({ {}, { static_cast<double>(view->getSize().width), static_cast<double>(view->getSize().height) } });
-            printf("visible point annotations: %lu\n", result.size());
+            printf("visible point annotations: %zu\n", result.size());
             auto features = view->rendererFrontend->getRenderer()->queryRenderedFeatures(
                 mbgl::ScreenBox{{view->getSize().width * 0.5, view->getSize().height * 0.5},
                                 {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
                 {});
-            printf("Rendered features at the center of the screen: %lu\n", features.size());
+            printf("Rendered features at the center of the screen: %zu\n", features.size());
         } break;
         case GLFW_KEY_P:
             view->pauseResumeCallback();
@@ -588,12 +588,12 @@ mbgl::Point<double> GLFWView::makeRandomPoint() const {
 
 std::unique_ptr<mbgl::style::Image>
 GLFWView::makeImage(const std::string& id, int width, int height, float pixelRatio) {
-    const int r = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
-    const int g = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
-    const int b = 255 * (static_cast<double>(std::rand()) / RAND_MAX);
+    const int r = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
+    const int g = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
+    const int b = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
 
-    const int w = std::ceil(pixelRatio * width);
-    const int h = std::ceil(pixelRatio * height);
+    const int w = static_cast<int>(std::ceil(pixelRatio * width));
+    const int h = static_cast<int>(std::ceil(pixelRatio * height));
 
     mbgl::PremultipliedImage image({ static_cast<uint32_t>(w), static_cast<uint32_t>(h) });
     auto data = reinterpret_cast<uint32_t*>(image.data.get());
@@ -928,7 +928,7 @@ void GLFWView::run() {
                 updateFreeCameraDemo();
             }
 
-            report(1000 * (glfwGetTime() - started));
+            report(static_cast<float>(1000 * (glfwGetTime() - started)));
             if (benchmark) {
                 invalidate();
             }
@@ -1058,25 +1058,25 @@ void GLFWView::toggleLocationIndicatorLayer() {
         puckLayer->setLocation(toArray(puckLocation));
         puckLayer->setAccuracyRadius(50);
         puckLayer->setAccuracyRadiusColor(
-            premultiply(mbgl::Color{0.0, 1.0, 0.0, 0.2})); // Note: these must be fed premultiplied
+            premultiply(mbgl::Color{0.0f, 1.0f, 0.0f, 0.2f})); // Note: these must be fed premultiplied
 
         puckLayer->setBearingTransition(mbgl::style::TransitionOptions(mbgl::Duration::zero(), mbgl::Duration::zero()));
         puckLayer->setBearing(mbgl::style::Rotation(0.0));
-        puckLayer->setAccuracyRadiusBorderColor(premultiply(mbgl::Color{0.0, 1.0, 0.2, 0.4}));
-        puckLayer->setTopImageSize(0.18);
-        puckLayer->setBearingImageSize(0.26);
-        puckLayer->setShadowImageSize(0.2);
+        puckLayer->setAccuracyRadiusBorderColor(premultiply(mbgl::Color{0.0f, 1.0f, 0.2f, 0.4f}));
+        puckLayer->setTopImageSize(0.18f);
+        puckLayer->setBearingImageSize(0.26f);
+        puckLayer->setShadowImageSize(0.2f);
         puckLayer->setImageTiltDisplacement(7.0f); // set to 0 for a "flat" puck
-        puckLayer->setPerspectiveCompensation(0.9);
+        puckLayer->setPerspectiveCompensation(0.9f);
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0));
+            "puck.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0f));
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_shadow.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0));
+            "puck_shadow.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0f));
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_hat.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0));
+            "puck_hat.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0f));
 
         puckLayer->setBearingImage(mbgl::style::expression::Image("puck.png"));
         puckLayer->setShadowImage(mbgl::style::expression::Image("puck_shadow.png"));
