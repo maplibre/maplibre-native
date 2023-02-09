@@ -4,6 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 10.0.0 - February 10, 2023
+
 ### ✨ Features and improvements
 
 * Add your pull request...
