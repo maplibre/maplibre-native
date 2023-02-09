@@ -10,7 +10,8 @@
     "lib": "lib"
   },
   "files": [
-    "lib"
+    "lib",
+    "platform/node/index.d.ts"
   ],
   "main": "platform/node/index.js",
   "types": "platform/node/index.d.ts",
