@@ -1,5 +1,5 @@
 declare module '@maplibre/maplibre-gl-native' {
-  enum ResourceKind {
+  const enum ResourceKind {
     Unknown = 0,
     Style = 1,
     Source = 2,
@@ -19,6 +19,18 @@ declare module '@maplibre/maplibre-gl-native' {
     etag?: string;
   };
 
+  const enum MapMode {
+    /**
+     * Render all tiles in map view
+     */
+    Static = 'static',
+
+    /**
+     * Render and request only a single tile
+     */
+    Tile = 'tile',
+  }
+
   type MapOptions = {
     /**
      * Will be used during a `Map.render` call to request all necessary map resources (tiles, fonts...)
@@ -34,10 +46,17 @@ declare module '@maplibre/maplibre-gl-native' {
      * @default 1
      */
     ratio?: number;
+
+    /**
+     * Mode in which map view will be rendered
+     *
+     * @default MapMode.Static
+     */
+    mode?: MapMode;
   };
 
   /**
-   * Defines how to render the map view and the resulting image
+   * Defines the map view to render and the resulting image
    */
   type RenderOptions = {
     /**
