@@ -4,11 +4,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+* Add your pull request...
+
 ## 10.0.0 - February 10, 2023
 
 ### ✨ Features and improvements
 
-* Add your pull request...
 * Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` [647](https://github.com/maplibre/maplibre-gl-native/pull/647) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
 * GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 
