@@ -1261,7 +1261,7 @@ void Map::destroyRenderer()
 */
 void Map::startStaticRender()
 {
-    d_ptr->mapObj->renderStill([this](std::exception_ptr err) {
+    d_ptr->mapObj->renderStill([this](std::exception_ptr err)->bool {
         QString what;
 
         try {
@@ -1273,6 +1273,9 @@ void Map::startStaticRender()
         }
 
         emit staticRenderFinished(what);
+
+        // Remain abort when encounter errors
+        return true;
     });
 }
 

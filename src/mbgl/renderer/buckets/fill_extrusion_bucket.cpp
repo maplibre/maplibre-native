@@ -121,7 +121,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
                     const Point<double> perp = util::unit(util::perp(d1 - d2));
                     const auto dist = util::dist<int16_t>(d1, d2);
-                    if (edgeDistance + dist > std::numeric_limits<int16_t>::max()) {
+                    if (edgeDistance + dist > (std::size_t)std::numeric_limits<int16_t>::max()) {
                         edgeDistance = 0;
                     }
 

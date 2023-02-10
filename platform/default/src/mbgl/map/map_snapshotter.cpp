@@ -231,6 +231,9 @@ public:
                             std::move(attributions),
                             std::move(pointForFn),
                             std::move(latLngForFn));
+            
+            // Abort snapshot when encounter error
+            return true;
         });
     }
 
