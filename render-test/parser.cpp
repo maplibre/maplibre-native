@@ -6,6 +6,10 @@
 #include "metadata.hpp"
 #include "runner.hpp"
 
+#if defined(WIN32) && defined(GetObject)
+#undef GetObject
+#endif
+
 #include <mbgl/map/map.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/storage/resource.hpp>
