@@ -1,13 +1,12 @@
-name: Build documentation
+name: Build & Deploy mdBook documentation
 
 on:
   workflow_dispatch:
 
-
 jobs:
   build-docs:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: extractions/setup-just@v1
@@ -17,17 +16,18 @@ jobs:
         shell: bash
         run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
       - name: Build
-        working-directory: docs
+        working-directory: docs/mdbook
         shell: bash
         run: mdbook build
       - uses: actions/upload-artifact@v2
         with:
           name: book
-          path: docs/book/
+          path: docs/mdbook/book/
+
   deploy-docs:
     needs: build-docs
     name: Deploy
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - name: Download book
@@ -40,4 +40,4 @@ jobs:
         with:
           branch: gh-pages
           folder: artifacts
-          target-folder: docs
+          target-folder: docs/mdbook
