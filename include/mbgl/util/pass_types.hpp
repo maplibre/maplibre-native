@@ -4,7 +4,7 @@
 
 namespace mbgl {
 
-// Using this type as a return type enforces the client to retain the returned object.
+/// Using this type as a return type enforces the client to retain the returned object.
 template <typename T>
 class Pass {
 public:

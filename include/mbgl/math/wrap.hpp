@@ -5,8 +5,8 @@
 namespace mbgl {
 namespace util {
 
-// Constrains n to the given range (including min, excluding max) via modular
-// arithmetic.
+/// Constrains n to the given range (including min, excluding max) via modular
+/// arithmetic.
 template <typename T>
 T wrap(T value, T min, T max) {
     if (value >= min && value < max) {

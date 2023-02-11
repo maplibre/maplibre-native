@@ -9,7 +9,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-// Return the smallest range of stops that covers the interval [lower, upper]
+/// Return the smallest range of stops that covers the interval [lower, upper]
 Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>>& stops, double lower, double upper);
 
 } // namespace expression

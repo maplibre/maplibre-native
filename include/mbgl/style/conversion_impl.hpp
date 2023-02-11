@@ -21,11 +21,10 @@
 
 namespace mbgl {
 namespace style {
-namespace conversion {
 
-/*
+/**
    The `conversion` namespace defines conversions from JSON structures conforming to the schema defined by
-   the Mapbox Style Specification, to the various C++ types that form the C++ model of that domain:
+   the MapLibre %Style Specification, to the various C++ types that form the C++ model of that domain:
 
        * `std::unique_ptr<Source>`
        * `std::unique_ptr<Layer>`
@@ -89,6 +88,7 @@ namespace conversion {
    `Convertible` itself is movable, but not copyable. A moved-from `Convertible` is in an invalid state;
    you must not do anything with it except let it go out of scope.
 */
+namespace conversion {
 
 template <typename T>
 class ConversionTraits;

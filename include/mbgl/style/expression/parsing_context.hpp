@@ -53,7 +53,7 @@ public:
 
 } // namespace detail
 
-/*
+/**
     Controls the annotation behavior of the parser when encountering an expression
     whose type is not a subtype of the expected type. The default behavior, used
     when optional<TypeAnnotationOption> is a nullopt, is as follows:
@@ -90,20 +90,20 @@ public:
     const std::vector<ParsingError>& getErrors() const { return *errors; }
     std::string getCombinedErrors() const;
 
-    /*
+    /**
         Parse the given style-spec JSON value as an expression.
     */
     ParseResult parseExpression(const mbgl::style::conversion::Convertible& value,
                                 const optional<TypeAnnotationOption>& = {});
 
-    /*
+    /**
         Parse the given style-spec JSON value as an expression intended to be used
         in a layout or paint property.  This entails checking additional constraints
         that exist in that context but not, e.g., for filters.
     */
     ParseResult parseLayerPropertyExpression(const mbgl::style::conversion::Convertible& value);
 
-    /*
+    /**
         Parse a child expression. For use by individual Expression::parse() methods.
     */
     ParseResult parse(const mbgl::style::conversion::Convertible&,
@@ -111,7 +111,7 @@ public:
                       optional<type::Type> = {},
                       const optional<TypeAnnotationOption>& = {});
 
-    /*
+    /**
         Parse a child expression.  For use by individual Expression::parse() methods.
     */
     ParseResult parse(const mbgl::style::conversion::Convertible&,
@@ -119,7 +119,7 @@ public:
                       optional<type::Type>,
                       const std::map<std::string, std::shared_ptr<Expression>>&);
 
-    /*
+    /**
         Check whether `t` is a subtype of `expected`, collecting an error if not.
      */
     optional<std::string> checkType(const type::Type& t);
@@ -162,7 +162,7 @@ private:
     {}
     
     
-    /*
+    /**
         Parse the given style-spec JSON value into an Expression object.
         Specifically, this function is responsible for determining the expression
         type (either Literal, or the one named in value[0]) and dispatching to the

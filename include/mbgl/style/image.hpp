@@ -49,17 +49,18 @@ public:
 
     const PremultipliedImage& getImage() const;
 
-    // Pixel ratio of the sprite image.
+    /// Pixel ratio of the sprite image.
     float getPixelRatio() const;
 
-    // Whether this image should be interpreted as a signed distance field icon.
+    /// Whether this image should be interpreted as a signed distance field icon.
     bool isSdf() const;
 
-    // Stretch areas of this image.
+    /// Stretch area of this image
     const ImageStretches& getStretchX() const;
+    /// Stretch area of this image
     const ImageStretches& getStretchY() const;
 
-    // The space where text can be fit into this image.
+    /// The space where text can be fit into this image.
     const optional<ImageContent>& getContent() const;
 
     class Impl;

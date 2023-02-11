@@ -35,8 +35,8 @@ public:
     }
 };
 
-// Spherical Mercator projection
-// http://docs.openlayers.org/library/spherical_mercator.html
+/// Spherical Mercator projection
+/// https://github.com/openlayers/docs/blob/c7ab69156e17bedc1059d64d7a864b7868e354c1/library/spherical_mercator.rst
 class Projection {
 public:
     // Map pixel width at given scale.
@@ -78,7 +78,7 @@ public:
         return project_(latLng, worldSize(scale));
     }
 
-    //Returns point on tile
+    /// Returns point on tile
     static Point<double> project(const LatLng& latLng, int32_t zoom) {
         return project_(latLng, 1 << zoom);
     }

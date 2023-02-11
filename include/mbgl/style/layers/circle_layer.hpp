@@ -94,6 +94,7 @@ public:
     TransitionOptions getCircleTranslateAnchorTransition() const;
 
     // Private implementation
+    /// @cond FALSE
 
     class Impl;
     const Impl& impl() const;
