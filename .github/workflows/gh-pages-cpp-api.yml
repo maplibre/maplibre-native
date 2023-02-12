@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - name: Install Doxygen
         run: sudo apt-get install doxygen -y
