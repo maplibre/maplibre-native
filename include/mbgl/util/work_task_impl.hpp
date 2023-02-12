@@ -24,14 +24,14 @@ public:
         }
     }
 
-    // If the task has not yet begun, this will cancel it.
-    // If the task is in progress, this will block until it completed. (Currently
-    // necessary because of shared state, but should be removed.) It will also
-    // cancel the after callback.
-    // If the task has completed, but the after callback has not executed, this
-    // will cancel the after callback.
-    // If the task has completed and the after callback has executed, this will
-    // do nothing.
+    /// If the task has not yet begun, this will cancel it.
+    /// If the task is in progress, this will block until it completed. (Currently
+    /// necessary because of shared state, but should be removed.) It will also
+    /// cancel the after callback.
+    /// If the task has completed, but the after callback has not executed, this
+    /// will cancel the after callback.
+    /// If the task has completed and the after callback has executed, this will
+    /// do nothing.
     void cancel() override {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         *canceled = true;

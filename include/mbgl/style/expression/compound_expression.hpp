@@ -18,7 +18,7 @@ namespace detail {
 struct SignatureBase;
 } // namespace detail
 
-/*
+/**
     CompoundExpression provides a mechanism for implementing an expression
     simply by providing a list of pure functions of the form
     (const T0& arg0, const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are

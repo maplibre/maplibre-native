@@ -12,10 +12,9 @@
 namespace mbgl {
 namespace style {
 namespace expression {
+/// This convenience API does little to no expression validation or type-checking, and is intended for
+/// use only by test and other non-production code.
 namespace dsl {
-
-// This convenience API does little to no expression validation or type-checking, and is intended for
-// use only by test and other non-production code.
 
 template <class... Args>
 std::vector<std::unique_ptr<Expression>> vec(Args... args) {

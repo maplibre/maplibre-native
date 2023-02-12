@@ -97,6 +97,7 @@ public:
     TransitionOptions getTopImageSizeTransition() const;
 
     // Private implementation
+    /// @cond FALSE
 
     class Impl;
     const Impl& impl() const;

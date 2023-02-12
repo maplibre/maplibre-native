@@ -14,7 +14,7 @@ namespace mbgl {
 enum class ImageAlphaMode {
     Unassociated,
     Premultiplied,
-    Exclusive, // Alpha-channel only
+    Exclusive, ///< Alpha-channel only
 };
 
 template <ImageAlphaMode Mode>
@@ -81,7 +81,7 @@ public:
         operator=(std::move(newImage));
     }
 
-    // Clears the rect area specified by `pt` and `size` from `dstImage`.
+    /// Clears the rect area specified by `pt` and `size` from `dstImage`.
     static void clear(Image& dstImg, const Point<uint32_t>& pt, const Size& size) {
         if (size.isEmpty()) {
             return;
@@ -106,9 +106,9 @@ public:
         }
     }
 
-    // Copy image data within `rect` from `src` to the rectangle of the same size at `pt`
-    // in `dst`. If the specified bounds exceed the bounds of the source or destination,
-    // throw `std::out_of_range`. Must not be used to move data within a single Image.
+    /// Copy image data within `rect` from `src` to the rectangle of the same size at `pt`
+    /// in `dst`. If the specified bounds exceed the bounds of the source or destination,
+    /// throw `std::out_of_range`. Must not be used to move data within a single Image.
     static void copy(const Image& srcImg, Image& dstImg, const Point<uint32_t>& srcPt, const Point<uint32_t>& dstPt, const Size& size) {
         if (size.isEmpty()) {
             return;

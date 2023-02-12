@@ -81,14 +81,14 @@ public:
 };
 
 
-// In order to accept Array<Number, N> as an output value for Curve
-// expressions, we need to have an interpolatable std::vector type.
-// However, style properties like line-dasharray are represented using
-// std::vector<float>, and should NOT be considered interpolatable.
-// So, we use std::vector<Value> to represent expression array values,
-// asserting that (a) the vectors are the same size, and (b) they contain
-// only numeric values.  (These invariants should be relatively safe,
-// being enforced by the expression type system.)
+/// In order to accept Array<Number, N> as an output value for Curve
+/// expressions, we need to have an interpolatable std::vector type.
+/// However, style properties like line-dasharray are represented using
+/// std::vector<float>, and should NOT be considered interpolatable.
+/// So, we use std::vector<Value> to represent expression array values,
+/// asserting that (a) the vectors are the same size, and (b) they contain
+/// only numeric values.  (These invariants should be relatively safe,
+/// being enforced by the expression type system.)
 template<>
 struct Interpolator<std::vector<style::expression::Value>> {
     std::vector<style::expression::Value> operator()(const std::vector<style::expression::Value>& a,

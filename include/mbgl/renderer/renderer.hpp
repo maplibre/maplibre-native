@@ -22,21 +22,21 @@ class RendererBackend;
 } // namespace gfx
 
 struct PlacedSymbolData {
-    // Contents of the label
+    /// Contents of the label
     std::u16string key;
-    // If symbol contains text, text collision box in viewport coordinates
+    /// If symbol contains text, text collision box in viewport coordinates
     optional<mapbox::geometry::box<float>> textCollisionBox;
-    // If symbol contains icon, icon collision box in viewport coordinates
+    /// If symbol contains icon, icon collision box in viewport coordinates
     optional<mapbox::geometry::box<float>> iconCollisionBox;
-    // Symbol text was placed
+    /// Symbol text was placed
     bool textPlaced;
-    // Symbol icon was placed
+    /// Symbol icon was placed
     bool iconPlaced;
-    // Symbol text or icon collision box intersects tile borders
+    /// Symbol text or icon collision box intersects tile borders
     bool intersectsTileBorder;
-    // Viewport padding ({viewportPadding, viewportPadding} is a coordinate of the tile's top-left corner)
+    /// Viewport padding ({viewportPadding, viewportPadding} is a coordinate of the tile's top-left corner)
     float viewportPadding;
-    // Layer id (leader of the symbol layout group)
+    /// Layer id (leader of the symbol layout group)
     std::string layer;
 };
 
@@ -51,7 +51,7 @@ public:
 
     void render(const std::shared_ptr<UpdateParameters>&);
 
-    // Feature queries
+    /// Feature queries
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
@@ -60,7 +60,7 @@ public:
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;
 
-    // Feature extension query
+    /// Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,
                                                  const Feature& feature,
                                                  const std::string& extension,

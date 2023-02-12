@@ -17,7 +17,7 @@ class EstablishedActor;
 template <class Object>
 class Actor;
 
-/*
+/**
     An `AspiringActor<O>` is one half of the pair of types that comprise an actor (see `Actor<O>`),
     the other half being `EstablishedActor<O>`.  It is responsible for:
      - ownership of the actor's `Mailbox`

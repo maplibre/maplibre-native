@@ -16,8 +16,8 @@ public:
     public:
         virtual ~Observer() = default;
 
-        // When an observer is set, this function will be called for every log
-        // message. Returning true will consume the message.
+        /// When an observer is set, this function will be called for every log
+        /// message. Returning true will consume the message.
         virtual bool onRecord(EventSeverity severity, Event event, int64_t code, const std::string &msg) = 0;
     };
 

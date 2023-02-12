@@ -14,7 +14,7 @@
 
 namespace mbgl {
 
-/*
+/**
     An `Actor<O>` is an owning reference to an asynchronous object of type `O`: an "actor".
     Communication with an actor happens via message passing: you send a message to the object
     (using `invoke`), passing a pointer to the member function to call and arguments which
