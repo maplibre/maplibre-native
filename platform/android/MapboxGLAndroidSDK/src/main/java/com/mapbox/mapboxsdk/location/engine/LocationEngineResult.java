@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mapbox.mapboxsdk.location.engine.Utils.isOnClasspath;
-
 /**
  * A wrapper class representing location result from the location engine.
  * <p>

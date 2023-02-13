@@ -76,7 +76,8 @@ import static com.mapbox.mapboxsdk.location.modes.RenderMode.GPS;
  * {@code ACCESS_COARSE_LOCATION} or {@code ACCESS_FINE_LOCATION} permissions can be requested for
  * this component to work as expected.
  * <p>
- * This component offers a default, built-in {@link LocationEngine} called {@link com.mapbox.mapboxsdk.location.engine.MapboxFusedLocationEngineImpl}.
+ * This component offers a default, built-in {@link LocationEngine} called
+ * {@link com.mapbox.mapboxsdk.location.engine.MapboxFusedLocationEngineImpl}.
  * If you'd like to utilize the previously available Google Play Services for more precise location updates,
  * refer to the migration guide of 10.0.0 in the changelog.
  * After a custom engine is passed to the component, or the built-in is initialized,
