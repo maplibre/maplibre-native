@@ -1116,6 +1116,7 @@ public final class LocationComponent {
 
     onLocationLayerStart();
   }
+
   private void updateCompassListenerState(boolean canListen) {
     if (compassEngine != null) {
       if (!canListen) {
@@ -1466,6 +1467,7 @@ public final class LocationComponent {
         }
       }
     };
+
   private void checkActivationState() {
     if (!isComponentInitialized) {
       throw new LocationComponentNotInitializedException();
