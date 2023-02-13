@@ -11,7 +11,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ✨ Features and improvements
 
 * Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` ([#647](https://github.com/maplibre/maplibre-gl-native/pull/647)) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
-* GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([#620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 * Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead.
 * Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre GL Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-gl-native/issues/379)). To migrate:
   * Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-gl-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
