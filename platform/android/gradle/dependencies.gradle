@@ -37,7 +37,6 @@ ext {
             kotlin          : '1.7.20',
             licenses        : '0.8.80',
             lint            : '30.3.1',
-            gms             : '21.0.1',
             //        jacoco           : '0.8.5',
             appcenter       : '1.5',
             commonsIO       : '2.11.0',
