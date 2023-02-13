@@ -6,12 +6,17 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 * Add your pull request...
 
-## 10.0.0 - February 10, 2023
+## 10.0.0 - February 14, 2023
 
 ### ✨ Features and improvements
 
 * Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` [647](https://github.com/maplibre/maplibre-gl-native/pull/647) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
 * GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
+* Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead.
+* Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre GL Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-gl-native/issues/379)). To migrate:
+  * Include the source code of the removed `[GoogleLocationEngineImpl](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java)` in your source tree.
+  * Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine`. Refer to how this was done in the now-removed `[LocationEngineProvider](https://github.com/maplibre/maplibre-gl-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59)`.
+  * The static `LocationEngineResult.extractResult` can no longer extract a `LocationEngineResult` from a Google Play intent. To migrate, include and use the [previous implementation](https://github.com/maplibre/maplibre-gl-native/blob/ea234edf67bb3aec75f077e15c1c30c99756b926/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineResult.java#L97) in your source tree.
 
 ### 🐞 Bug fixes
 

@@ -7,8 +7,6 @@ import android.location.LocationManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.location.LocationResult;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +21,6 @@ import static com.mapbox.mapboxsdk.location.engine.Utils.isOnClasspath;
  * @since 1.0.0
  */
 public final class LocationEngineResult {
-  private static final String GOOGLE_PLAY_LOCATION_RESULT = "com.google.android.gms.location.LocationResult";
-
   private final List<Location> locations;
 
   private LocationEngineResult(List<Location> locations) {
@@ -95,16 +91,7 @@ public final class LocationEngineResult {
    */
   @Nullable
   public static LocationEngineResult extractResult(Intent intent) {
-    LocationEngineResult result = null;
-    if (isOnClasspath(GOOGLE_PLAY_LOCATION_RESULT)) {
-      result = extractGooglePlayResult(intent);
-    }
-    return result == null ? extractAndroidResult(intent) : result;
-  }
-
-  private static LocationEngineResult extractGooglePlayResult(Intent intent) {
-    LocationResult result = LocationResult.extractResult(intent);
-    return result != null ? LocationEngineResult.create(result.getLocations()) : null;
+    return extractAndroidResult(intent);
   }
 
   private static LocationEngineResult extractAndroidResult(Intent intent) {

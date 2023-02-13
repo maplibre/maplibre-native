@@ -75,7 +75,6 @@ ext {
 
             appCenter              : "com.microsoft.appcenter:espresso-test-extension:${versions.appcenter}",
             commonsIO              : "commons-io:commons-io:${versions.commonsIO}",
-            gmsLocation            : "com.google.android.gms:play-services-location:${versions.gms}",
             timber                 : "com.jakewharton.timber:timber:${versions.timber}",
             okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             leakCanary             : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
