@@ -239,6 +239,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
   publish_binary_linux_arm64:
+    #runs-on: ubuntu-latest
     runs-on: macos-12-arm
     needs: bump_version
     name: publish_binary (ubuntu-20.04, arm64)
@@ -251,6 +252,12 @@ jobs:
 
       - name: Get Latest Version
         run: git pull
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64'
 
       - name: Install dependencies macOS
         if: runner.os == 'macOS'
