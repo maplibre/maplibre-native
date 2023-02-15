@@ -242,9 +242,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Check disk space
-        run:  df -h
-
       - name: Create the docker build image
         uses: docker/build-push-action@v4
         with:
