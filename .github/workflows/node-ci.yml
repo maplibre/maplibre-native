@@ -199,6 +199,9 @@ jobs:
         run: |
           brew install docker docker-compose
 
+      - name: Docker Prune
+        run: docker system prune --force
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -208,9 +211,19 @@ jobs:
           context: .
           platforms: linux/arm64
           file: platform/node/scripts/Dockerfile_Build
-          tags: build
+          tags: node-test-${{ github.run_id }}-${{ github.run_attempt }}
           push: false
           load: true
 
       - name: Run the docker build image and create node libs
-        run:  docker run --rm -v $(pwd):/data build
+        run:  docker run --rm -v $(pwd):/data node-test-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Clean up the docker build image
+        if: always()
+        run:  docker rmi $(docker images | grep node-test-${{ github.run_id }}-${{ github.run_attempt }} | tr -s ' ' | cut -d ' ' -f 3) --force
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        if: github.ref != 'refs/heads/main'
+        run: |
+          npm pack --dry-run
