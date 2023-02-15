@@ -37,7 +37,6 @@ ext {
             kotlin          : '1.7.20',
             licenses        : '0.8.80',
             lint            : '30.3.1',
-            gms             : '21.0.1',
             //        jacoco           : '0.8.5',
             appcenter       : '1.5',
             commonsIO       : '2.11.0',
@@ -75,7 +74,6 @@ ext {
 
             appCenter              : "com.microsoft.appcenter:espresso-test-extension:${versions.appcenter}",
             commonsIO              : "commons-io:commons-io:${versions.commonsIO}",
-            gmsLocation            : "com.google.android.gms:play-services-location:${versions.gms}",
             timber                 : "com.jakewharton.timber:timber:${versions.timber}",
             okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             leakCanary             : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
