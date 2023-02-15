@@ -12,5 +12,5 @@ cmake . -B build -G Ninja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNC
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
 #Test
-xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/linux-gcc8-release-style.json
 xvfb-run --auto-servernum npm test
