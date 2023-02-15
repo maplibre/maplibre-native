@@ -27,7 +27,7 @@ CPP_FLAGS = WARNING_FLAGS + [
     "-fexceptions",
     "-frtti",
     "-ftemplate-depth=1024",
-    "-std=c++14",
+    "-std=c++17",
 ]
 
 """
