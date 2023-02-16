@@ -10,9 +10,11 @@
     "lib": "lib"
   },
   "files": [
-    "lib"
+    "lib",
+    "platform/node/index.d.ts"
   ],
   "main": "platform/node/index.js",
+  "types": "platform/node/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maplibre/maplibre-gl-native.git"
@@ -30,7 +32,7 @@
     "@mapbox/mvt-fixtures": "3.10.0",
     "@octokit/plugin-retry": "^4.1.1",
     "@octokit/rest": "^19.0.7",
-    "aws-sdk": "^2.1309.0",
+    "aws-sdk": "^2.1313.0",
     "csscolorparser": "~1.0.2",
     "d3-queue": "3.0.7",
     "diff": "5.1.0",
