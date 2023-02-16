@@ -146,7 +146,6 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          path: ~/.ccache
           key: ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -173,11 +172,10 @@ jobs:
 
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
         run: |
-          cmake . -B build ^
-            -G Ninja ^
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} ^
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
 
       - name: Build maplibre-gl-native (MacOS/Linux)
