@@ -6,23 +6,55 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 * Add your pull request...
 
-## 10.0.0 - February 10, 2023
+## 10.0.0 - February 15, 2023
 
 ### ✨ Features and improvements
 
-* Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` [647](https://github.com/maplibre/maplibre-gl-native/pull/647) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
-* GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
+* 💥 Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` ([#647](https://github.com/maplibre/maplibre-gl-native/pull/647)) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
+
+  > To migrate:  
+  > If you use any of the public Android resources, you will get an error that they can not be found. Replace the prefix of each, e.g. `R.style.mapbox_LocationComponent` -> `R.style.maplibre_LocationComponent`.
+
+* 💥 Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead. 
+
+  > To migrate, as an example:
+  > ```kotlin
+  >  locationComponent.activateLocationComponent(context, style, false, locationEngineRequest, locationComponentOptions)
+  >  ```
+  > becomes
+  >  ```kotlin
+  >  val options = LocationComponentActivationOptions.builder(context, style).useDefaultLocationEngine(false).locationEngineRequest(locationEngineRequest).locationComponentOptions(locationComponentOptions).build()
+  >  locationComponent.activateLocationComponent(options)
+  >  ```
+
+* 💥 Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre GL Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-gl-native/issues/379)).
+
+  > To migrate:  
+  > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-gl-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
+  >  
+  > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-gl-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):
+  >  ```kotlin
+  >  val locationEngine = LocationEngineProxy<Any>(GoogleLocationEngineImpl(context))
+  >  val options = LocationComponentActivationOptions.builder(context, style).locationEngine(locationEngine).build()
+  >  locationComponent.activateLocationComponent(options)
+  >  ```
+
+* 💥 Breaking: The static `LocationEngineResult.extractResult` can no longer extract a `LocationEngineResult` from a Google Play intent.
+
+  > To migrate, include and use the [previous implementation](https://github.com/maplibre/maplibre-gl-native/blob/ea234edf67bb3aec75f077e15c1c30c99756b926/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineResult.java#L97) in your source tree.
+ 
+* Improve Kotlinification of LatLng ([#742](https://github.com/maplibre/maplibre-gl-native/issues))
+* Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014 and lessens the backward compatibility burden ([#630](https://github.com/maplibre/maplibre-gl-native/pull/630))
 
 ### 🐞 Bug fixes
 
-* Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014
-*    and lessens the backward compatibility burden ([630](https://github.com/maplibre/maplibre-gl-native/pull/630))
 * Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
+*  `BitmapUtils.mergeBitmap` was deprecated, `BitmapUtils.mergeBitmaps` is a new method that does not offset views rendered on top of snapshots ([#733](https://github.com/maplibre/maplibre-gl-native/issues/733))
+* Fixed a crash when native code was accessing the LatLngBounds class [#655](https://github.com/maplibre/maplibre-gl-native/pull/)
 
 ### ⛵ Dependencies
 
 * Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
-
 
 ## 9.6.0 - December 18, 2022
 
