@@ -145,7 +145,12 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: ${{ matrix.runs-on }}
+          path: ~/.ccache
+          key: ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}
 
       - name: Configure maplibre-gl-native (MacOS)
         if: runner.os == 'MacOS'
