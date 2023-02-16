@@ -40,7 +40,8 @@ class LatLng : Parcelable {
     @Keep
     var latitude = 0.0
         set(
-            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude) {
+            @FloatRange(from = GeometryConstants.MIN_LATITUDE, to = GeometryConstants.MAX_LATITUDE) latitude
+        ) {
             require(!latitude.isNaN()) { "latitude must not be NaN" }
             require(abs(latitude) <= GeometryConstants.MAX_LATITUDE) { "latitude must be between -90 and 90" }
             field = latitude
