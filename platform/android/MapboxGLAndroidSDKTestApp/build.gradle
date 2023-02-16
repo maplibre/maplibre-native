@@ -74,7 +74,6 @@ dependencies {
 
     implementation dependenciesList.multidex
 
-    implementation dependenciesList.gmsLocation
     implementation dependenciesList.timber
 
     implementation dependenciesList.okhttp3
