@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.mapbox.mapboxsdk.location.engine.Utils.checkNotNull;
 
-class LocationEngineProxy<T> implements LocationEngine {
+public class LocationEngineProxy<T> implements LocationEngine {
   private final LocationEngineImpl<T> locationEngineImpl;
   private Map<LocationEngineCallback<LocationEngineResult>, T> listeners;
 
