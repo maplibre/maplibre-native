@@ -239,8 +239,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
   publish_binary_linux_arm64:
-    #runs-on: ubuntu-latest
-    runs-on: macos-12-arm
+    runs-on: ${{ (github.action_repository == 'maplibre/maplibre-gl-native' && 'macos-12-arm') || 'ubuntu-latest' }}
     needs: bump_version
     name: publish_binary (ubuntu-20.04, arm64)
     steps:

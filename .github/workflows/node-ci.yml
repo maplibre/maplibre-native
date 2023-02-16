@@ -182,8 +182,7 @@ jobs:
           npm pack --dry-run
           
   test_linux_arm:
-    #runs-on: ubuntu-latest
-    runs-on: macos-12-arm
+    runs-on: ${{ (github.action_repository == 'maplibre/maplibre-gl-native' && 'macos-12-arm') || 'ubuntu-latest' }}
     name: test (ubuntu-20.04, arm64)
     steps:
       - name: Checkout
