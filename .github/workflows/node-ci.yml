@@ -137,6 +137,7 @@ jobs:
 
       - name: Update ccache (Windows)
         if: runner.os == 'Windows'
+
         run: |
           choco.exe upgrade ccache
           ccache.exe --version
@@ -145,11 +146,11 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
-            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ matrix.runs-on }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Configure maplibre-gl-native (MacOS)
         if: runner.os == 'MacOS'
@@ -225,14 +226,22 @@ jobs:
           npm pack --dry-run
           
   test_linux_arm:
-    runs-on: macos-12-arm
+    runs-on: ubuntu-latest
     name: test (ubuntu-20.04, arm64)
+    env:
+      DOCKERTAG: node-test-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64'
 
       - name: Install dependencies macOS
         if: runner.os == 'macOS'
@@ -251,9 +260,19 @@ jobs:
           context: .
           platforms: linux/arm64
           file: platform/node/scripts/Dockerfile_Build
-          tags: build
+          tags: ${{ env.DOCKERTAG }}
           push: false
           load: true
 
       - name: Run the docker build image and create node libs
-        run:  docker run --rm -v $(pwd):/data build
+        run:  docker run --rm -v $(pwd):/data ${{ env.DOCKERTAG }}
+
+      - name: Clean up the docker build image
+        if: always()
+        run:  docker rmi $(docker images | grep ${{ env.DOCKERTAG }} | tr -s ' ' | cut -d ' ' -f 3) --force
+
+      # On PRs make sure that the npm package can be packaged.
+      - name: Pack
+        if: github.ref != 'refs/heads/main'
+        run: |
+          npm pack --dry-run
