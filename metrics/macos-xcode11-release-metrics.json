@@ -1,5 +1,5 @@
 {
-    "base_test_path": "tests",
+    "base_test_path": "tests/metrics",
     "cache_path": "cache-metrics.db",
     "expectation_paths": [
         "expectations/platform-all"
