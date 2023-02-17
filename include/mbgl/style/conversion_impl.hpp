@@ -21,11 +21,10 @@
 
 namespace mbgl {
 namespace style {
-namespace conversion {
 
-/*
+/**
    The `conversion` namespace defines conversions from JSON structures conforming to the schema defined by
-   the Mapbox Style Specification, to the various C++ types that form the C++ model of that domain:
+   the MapLibre %Style Specification, to the various C++ types that form the C++ model of that domain:
 
        * `std::unique_ptr<Source>`
        * `std::unique_ptr<Layer>`
@@ -89,6 +88,7 @@ namespace conversion {
    `Convertible` itself is movable, but not copyable. A moved-from `Convertible` is in an invalid state;
    you must not do anything with it except let it go out of scope.
 */
+namespace conversion {
 
 template <typename T>
 class ConversionTraits;
@@ -317,17 +317,17 @@ struct ValueFactory<Color> {
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<(!std::is_enum<T>::value && !is_linear_container<T>::value)>::type> {
+struct ValueFactory<T, typename std::enable_if_t<(!std::is_enum_v<T> && !is_linear_container<T>::value)>> {
     static Value make(const T& arg) { return {arg}; }
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+struct ValueFactory<T, typename std::enable_if_t<std::is_enum_v<T>>> {
     static Value make(T arg) { return {Enum<T>::toString(arg)}; }
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<is_linear_container<T>::value>::type> {
+struct ValueFactory<T, typename std::enable_if_t<is_linear_container<T>::value>> {
     static Value make(const T& arg) {
         mapbox::base::ValueArray result;
         result.reserve(arg.size());

@@ -18,11 +18,10 @@ struct TypeIndex<T, U, Ts...> : std::integral_constant<std::size_t, 1 + TypeInde
 
 template <class...> class IndexedTuple;
 
-// A tuple of Ts, where individual members can be accessed via `t.get<I>()` for I ∈ Is.
-//
-// See https://github.com/mapbox/cpp/blob/master/C%2B%2B%20Structural%20Metaprogramming.md
-// for motivation.
-//
+/// A tuple of Ts, where individual members can be accessed via `t.get<I>()` for I ∈ Is.
+///
+/// See https://github.com/mapbox/cpp/blob/1bb519ef25edd6169f1d6d8a65414044616590a9/docs/structural-metaprogramming.md
+/// for motivation.
 template <class... Is, class... Ts>
 class IndexedTuple<TypeList<Is...>, TypeList<Ts...>> : public std::tuple<Ts...> {
 public:

@@ -4,7 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSPredicate (MGLAdditions)
 
-#pragma mark Converting JSON Expressions
+// MARK: Converting JSON Expressions
 
 /**
  Returns a predicate equivalent to the given Foundation object deserialized

@@ -1,0 +1,27 @@
+name: gh-pages-cpp-api
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-and-deploy-gh-pages-cpp-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Install Doxygen
+        run: sudo apt-get install doxygen -y
+
+      - name: Generate documentation
+        working-directory: docs/doxygen
+        run: doxygen
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: docs/doxygen/html
+          target-folder: cpp/api/

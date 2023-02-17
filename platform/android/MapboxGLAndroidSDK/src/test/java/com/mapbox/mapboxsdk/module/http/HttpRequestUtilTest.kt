@@ -3,8 +3,8 @@ package com.mapbox.mapboxsdk.module.http
 import com.mapbox.mapboxsdk.MapboxInjector
 import com.mapbox.mapboxsdk.utils.ConfigUtils
 import io.mockk.mockk
-import junit.framework.Assert.assertEquals
 import okhttp3.OkHttpClient
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

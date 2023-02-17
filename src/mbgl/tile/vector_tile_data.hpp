@@ -1,3 +1,4 @@
+#pragma once
 #include <mbgl/tile/geometry_tile_data.hpp>
 
 #ifdef _MSC_VER

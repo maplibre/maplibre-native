@@ -14,7 +14,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMapOptions
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.maps.SupportMapFragment
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_recyclerview.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityRecyclerviewBinding
 
 /**
  * TestActivity showcasing how to integrate a MapView in a RecyclerView.
@@ -26,11 +26,14 @@ import kotlinx.android.synthetic.main.activity_recyclerview.*
 @SuppressLint("ClickableViewAccessibility")
 class NestedViewPagerActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityRecyclerviewBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recyclerview)
-        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        recyclerView.adapter = ItemAdapter(this, LayoutInflater.from(this), supportFragmentManager)
+        binding = ActivityRecyclerviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        binding.recyclerView.adapter = ItemAdapter(this, LayoutInflater.from(this), supportFragmentManager)
     }
 
     class ItemAdapter(private val context: Context, private val inflater: LayoutInflater, private val fragmentManager: androidx.fragment.app.FragmentManager) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
@@ -96,7 +99,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
         }
 
-        class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager?) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
+        class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
             override fun getItem(position: Int): androidx.fragment.app.Fragment {
                 val options = MapboxMapOptions.createFromAttributes(context)
@@ -151,9 +154,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
 
             override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-                val textView = TextView(inflater.context)
-                textView.text = "This is an empty Fragment"
-                return textView
+                return TextView(inflater.context)
             }
         }
     }

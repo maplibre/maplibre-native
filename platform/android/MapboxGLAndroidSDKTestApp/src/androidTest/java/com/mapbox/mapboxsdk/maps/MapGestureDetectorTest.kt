@@ -61,8 +61,8 @@ class MapGestureDetectorTest : BaseTest() {
         // move to expected target
         onView(withId(R.id.mapView)).perform(move(-maxWidth / 2f, -maxHeight / 2f, withVelocity = false))
         rule.runOnUiThread {
-            Assert.assertNotEquals(initialCameraPosition!!.target.latitude, mapboxMap.cameraPosition.target.latitude, 1.0)
-            Assert.assertNotEquals(initialCameraPosition!!.target.longitude, mapboxMap.cameraPosition.target.longitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.latitude, mapboxMap.cameraPosition.target!!.latitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.longitude, mapboxMap.cameraPosition.target!!.longitude, 1.0)
         }
     }
 
@@ -72,14 +72,14 @@ class MapGestureDetectorTest : BaseTest() {
         validateTestSetup()
         var initialTarget: LatLng? = null
         rule.runOnUiThread {
-            initialTarget = mapboxMap.cameraPosition.target
+            initialTarget = mapboxMap.cameraPosition.target!!
         }
 
         onView(withId(R.id.mapView)).perform(quickScale(maxHeight / 2f))
         rule.runOnUiThread {
             // camera did not move
-            Assert.assertEquals(initialTarget!!.latitude, mapboxMap.cameraPosition.target.latitude, 1.0)
-            Assert.assertEquals(initialTarget!!.longitude, mapboxMap.cameraPosition.target.longitude, 1.0)
+            Assert.assertEquals(initialTarget!!.latitude, mapboxMap.cameraPosition.target!!.latitude, 1.0)
+            Assert.assertEquals(initialTarget!!.longitude, mapboxMap.cameraPosition.target!!.longitude, 1.0)
         }
     }
 
@@ -100,8 +100,8 @@ class MapGestureDetectorTest : BaseTest() {
         // move to expected target
         onView(withId(R.id.mapView)).perform(move(-maxWidth / 2f, -maxHeight / 2f, withVelocity = false))
         rule.runOnUiThread {
-            Assert.assertNotEquals(initialCameraPosition!!.target.latitude, mapboxMap.cameraPosition.target.latitude, 1.0)
-            Assert.assertNotEquals(initialCameraPosition!!.target.longitude, mapboxMap.cameraPosition.target.longitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.latitude, mapboxMap.cameraPosition.target!!.latitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.longitude, mapboxMap.cameraPosition.target!!.longitude, 1.0)
         }
     }
 
@@ -172,8 +172,8 @@ class MapGestureDetectorTest : BaseTest() {
         // move to expected target
         onView(withId(R.id.mapView)).perform(move(-maxWidth / 2f, -maxHeight / 2f, withVelocity = false))
         rule.runOnUiThread {
-            Assert.assertNotEquals(initialCameraPosition!!.target.latitude, mapboxMap.cameraPosition.target.latitude, 1.0)
-            Assert.assertNotEquals(initialCameraPosition!!.target.longitude, mapboxMap.cameraPosition.target.longitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.latitude, mapboxMap.cameraPosition.target!!.latitude, 1.0)
+            Assert.assertNotEquals(initialCameraPosition!!.target!!.longitude, mapboxMap.cameraPosition.target!!.longitude, 1.0)
         }
     }
 

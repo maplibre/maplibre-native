@@ -1,4 +1,8 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'org.jmailen.kotlinter'
+    id 'com.android.application'
+}
+
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 android {
@@ -8,9 +12,10 @@ android {
         applicationId "com.mapbox.mapboxsdk.testapp"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
-        versionCode 13
-        versionName "6.0.0"
+        versionCode 14
+        versionName "6.0.1"
         testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        multiDexEnabled = true
     }
 
     compileOptions {
@@ -19,20 +24,12 @@ android {
     }
 
     nativeBuild(["example-custom-layer"])
-
     packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'LICENSE.txt'
+        resources {
+            excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'LICENSE.txt']
+        }
     }
 
-    lintOptions {
-        baseline file("lint-baseline-local.xml")
-        checkAllWarnings true
-        warningsAsErrors true
-        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
-        abortOnError false
-    }
 
     buildTypes {
         debug {
@@ -49,10 +46,18 @@ android {
         }
     }
 
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
+    buildFeatures {
+        viewBinding = true
+    }
+
+    namespace 'com.mapbox.mapboxsdk.testapp'
+    testNamespace 'org.maplibre.testapp.test'
+    lint {
+        abortOnError false
+        baseline file('lint-baseline-local.xml')
+        checkAllWarnings true
+        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
+        warningsAsErrors true
     }
 }
 
@@ -67,7 +72,8 @@ dependencies {
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
 
-    implementation dependenciesList.gmsLocation
+    implementation dependenciesList.multidex
+
     implementation dependenciesList.timber
 
     implementation dependenciesList.okhttp3
@@ -82,6 +88,7 @@ dependencies {
     androidTestImplementation dependenciesList.testEspressoContrib
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"
@@ -92,4 +99,3 @@ apply from: "${rootDir}/gradle/gradle-lint.gradle"
 
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'

@@ -432,7 +432,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 /**
  If true, the icon will be visible even if it collides with other previously
@@ -1714,7 +1714,7 @@ MGL_EXPORT
 
 @property (nonatomic, null_resettable) NSExpression *textWritingMode __attribute__((unavailable("Use textWritingModes instead.")));
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 #if TARGET_OS_IPHONE
 /**
@@ -2305,7 +2305,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLSymbolStyleLayerAdditions)
 
-#pragma mark Working with Symbol Style Layer Attribute Values
+// MARK: Working with Symbol Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLIconAnchor` enumeration.

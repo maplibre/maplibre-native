@@ -35,7 +35,7 @@ which it is added.
 */
 - (instancetype)initWithIdentifier:(NSString *)identifier;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 #if TARGET_OS_IPHONE
 /**

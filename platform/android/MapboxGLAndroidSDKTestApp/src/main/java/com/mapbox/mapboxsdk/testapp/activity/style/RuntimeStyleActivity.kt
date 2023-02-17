@@ -13,24 +13,39 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.CancelableCallback
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.*
-import com.mapbox.mapboxsdk.style.sources.*
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.FillLayer
+import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.LineLayer
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.RasterLayer
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.layers.TransitionOptions
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.style.sources.RasterSource
+import com.mapbox.mapboxsdk.style.sources.Source
+import com.mapbox.mapboxsdk.style.sources.TileSet
+import com.mapbox.mapboxsdk.style.sources.VectorSource
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.IOException
-import java.lang.StringBuilder
-import java.util.*
+import java.util.Arrays
+import java.util.Collections
 
 /**
  * Test activity showcasing the runtime style API.
  */
 class RuntimeStyleActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var styleLoaded = false
     var lngLats = listOf(
         Arrays.asList(
@@ -67,16 +82,18 @@ class RuntimeStyleActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
                 // Store for later
-                mapboxMap = map
+                if (map != null) {
+                    mapboxMap = map
+                }
 
                 // Center and Zoom (Amsterdam, zoomed to streets)
-                mapboxMap!!.animateCamera(
+                mapboxMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(52.379189, 4.899431),
                         1.0
                     )
                 )
-                mapboxMap!!.setStyle(
+                mapboxMap.setStyle(
                     Style.Builder()
                         .fromUri(Style.getPredefinedStyle("Streets")) // set custom transition
                         .withTransition(TransitionOptions(250, 50))
@@ -104,125 +121,146 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (!styleLoaded) {
             false
-        } else when (item.itemId) {
-            R.id.action_list_layers -> {
-                listLayers()
-                true
+        } else {
+            when (item.itemId) {
+                R.id.action_list_layers -> {
+                    listLayers()
+                    true
+                }
+
+                R.id.action_list_sources -> {
+                    listSources()
+                    true
+                }
+
+                R.id.action_water_color -> {
+                    setWaterColor()
+                    true
+                }
+
+                R.id.action_background_opacity -> {
+                    setBackgroundOpacity()
+                    true
+                }
+
+                R.id.action_road_avoid_edges -> {
+                    setRoadSymbolPlacement()
+                    true
+                }
+
+                R.id.action_layer_visibility -> {
+                    setLayerInvisible()
+                    true
+                }
+
+                R.id.action_remove_layer -> {
+                    removeBuildings()
+                    true
+                }
+
+                R.id.action_add_parks_layer -> {
+                    addParksLayer()
+                    true
+                }
+
+                R.id.action_add_dynamic_parks_layer -> {
+                    addDynamicParksLayer()
+                    true
+                }
+
+                R.id.action_add_terrain_layer -> {
+                    addTerrainLayer()
+                    true
+                }
+
+                R.id.action_add_satellite_layer -> {
+                    addSatelliteLayer()
+                    true
+                }
+
+                R.id.action_update_water_color_on_zoom -> {
+                    updateWaterColorOnZoom()
+                    true
+                }
+
+                R.id.action_add_custom_tiles -> {
+                    addCustomTileSource()
+                    true
+                }
+
+                R.id.action_fill_filter -> {
+                    styleFillFilterLayer()
+                    true
+                }
+
+                R.id.action_textsize_filter -> {
+                    styleTextSizeFilterLayer()
+                    true
+                }
+
+                R.id.action_line_filter -> {
+                    styleLineFilterLayer()
+                    true
+                }
+
+                R.id.action_numeric_filter -> {
+                    styleNumericFillLayer()
+                    true
+                }
+
+                R.id.action_bring_water_to_front -> {
+                    bringWaterToFront()
+                    true
+                }
+
+                R.id.action_fill_filter_color -> {
+                    styleFillColorLayer()
+                    true
+                }
+
+                else -> super.onOptionsItemSelected(item)
             }
-            R.id.action_list_sources -> {
-                listSources()
-                true
-            }
-            R.id.action_water_color -> {
-                setWaterColor()
-                true
-            }
-            R.id.action_background_opacity -> {
-                setBackgroundOpacity()
-                true
-            }
-            R.id.action_road_avoid_edges -> {
-                setRoadSymbolPlacement()
-                true
-            }
-            R.id.action_layer_visibility -> {
-                setLayerInvisible()
-                true
-            }
-            R.id.action_remove_layer -> {
-                removeBuildings()
-                true
-            }
-            R.id.action_add_parks_layer -> {
-                addParksLayer()
-                true
-            }
-            R.id.action_add_dynamic_parks_layer -> {
-                addDynamicParksLayer()
-                true
-            }
-            R.id.action_add_terrain_layer -> {
-                addTerrainLayer()
-                true
-            }
-            R.id.action_add_satellite_layer -> {
-                addSatelliteLayer()
-                true
-            }
-            R.id.action_update_water_color_on_zoom -> {
-                updateWaterColorOnZoom()
-                true
-            }
-            R.id.action_add_custom_tiles -> {
-                addCustomTileSource()
-                true
-            }
-            R.id.action_fill_filter -> {
-                styleFillFilterLayer()
-                true
-            }
-            R.id.action_textsize_filter -> {
-                styleTextSizeFilterLayer()
-                true
-            }
-            R.id.action_line_filter -> {
-                styleLineFilterLayer()
-                true
-            }
-            R.id.action_numeric_filter -> {
-                styleNumericFillLayer()
-                true
-            }
-            R.id.action_bring_water_to_front -> {
-                bringWaterToFront()
-                true
-            }
-            R.id.action_fill_filter_color -> {
-                styleFillColorLayer()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun listLayers() {
-        val layers = mapboxMap!!.style!!
+        val layers = mapboxMap.style!!
             .layers
         val builder = StringBuilder("Layers:")
         for (layer in layers) {
@@ -233,7 +271,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun listSources() {
-        val sources = mapboxMap!!.style!!
+        val sources = mapboxMap.style!!
             .sources
         val builder = StringBuilder("Sources:")
         for (source in sources) {
@@ -246,21 +284,21 @@ class RuntimeStyleActivity : AppCompatActivity() {
     private fun setLayerInvisible() {
         val roadLayers = arrayOf("water")
         for (roadLayer in roadLayers) {
-            val layer = mapboxMap!!.style!!.getLayer(roadLayer)
+            val layer = mapboxMap.style!!.getLayer(roadLayer)
             layer?.setProperties(PropertyFactory.visibility(Property.NONE))
         }
     }
 
     private fun setRoadSymbolPlacement() {
         // Zoom so that the labels are visible first
-        mapboxMap!!.animateCamera(
+        mapboxMap.animateCamera(
             CameraUpdateFactory.zoomTo(14.0),
             object : DefaultCallback() {
                 override fun onFinish() {
                     val roadLayers =
                         arrayOf("road-label-small", "road-label-medium", "road-label-large")
                     for (roadLayer in roadLayers) {
-                        val layer = mapboxMap!!.style!!
+                        val layer = mapboxMap.style!!
                             .getLayer(roadLayer)
                         layer?.setProperties(PropertyFactory.symbolPlacement(Property.SYMBOL_PLACEMENT_POINT))
                     }
@@ -270,12 +308,12 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun setBackgroundOpacity() {
-        val background = mapboxMap!!.style!!.getLayer("background")
+        val background = mapboxMap.style!!.getLayer("background")
         background?.setProperties(PropertyFactory.backgroundOpacity(0.2f))
     }
 
     private fun setWaterColor() {
-        val water = mapboxMap!!.style!!.getLayerAs<FillLayer>("water")
+        val water = mapboxMap.style!!.getLayerAs<FillLayer>("water")
         if (water != null) {
             water.fillColorTransition = TransitionOptions(7500, 1000)
             water.setProperties(
@@ -293,7 +331,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun removeBuildings() {
         // Zoom to see buildings first
-        mapboxMap!!.style!!.removeLayer("building")
+        mapboxMap.style!!.removeLayer("building")
     }
 
     private fun addParksLayer() {
@@ -309,7 +347,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
             ).show()
             return
         }
-        mapboxMap!!.style!!.addSource(source)
+        mapboxMap.style!!.addSource(source)
         var layer: FillLayer? = FillLayer("parksLayer", "amsterdam-spots")
         layer!!.setProperties(
             PropertyFactory.fillColor(Color.RED),
@@ -328,15 +366,15 @@ class RuntimeStyleActivity : AppCompatActivity() {
                 )
             )
         )
-        mapboxMap!!.style!!.addLayerBelow(layer, "building")
+        mapboxMap.style!!.addLayerBelow(layer, "building")
         // layer.setPaintProperty(fillColor(Color.RED)); // XXX But not after the object is attached
 
         // Or get the object later and set it. It's all good.
-        mapboxMap!!.style!!.getLayer("parksLayer")!!
+        mapboxMap.style!!.getLayer("parksLayer")!!
             .setProperties(PropertyFactory.fillColor(Color.RED))
 
         // You can get a typed layer, if you're sure it's of that type. Use with care
-        layer = mapboxMap!!.style!!.getLayerAs("parksLayer")
+        layer = mapboxMap.style!!.getLayerAs("parksLayer")
         // And get some properties
         val fillAntialias = layer!!.fillAntialias
         Timber.d("Fill anti alias: %s", fillAntialias.getValue())
@@ -347,7 +385,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         Timber.d("Visibility: %s", visibility.getValue())
 
         // Get a good look at it all
-        mapboxMap!!.animateCamera(CameraUpdateFactory.zoomTo(12.0))
+        mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(12.0))
     }
 
     private fun addDynamicParksLayer() {
@@ -366,7 +404,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         }
 
         // Add an empty source
-        mapboxMap!!.style!!.addSource(GeoJsonSource("dynamic-park-source"))
+        mapboxMap.style!!.addSource(GeoJsonSource("dynamic-park-source"))
         val layer = FillLayer("dynamic-parks-layer", "dynamic-park-source")
         layer.setProperties(
             PropertyFactory.fillColor(Color.GREEN),
@@ -384,10 +422,10 @@ class RuntimeStyleActivity : AppCompatActivity() {
                 )
             )
         )
-        mapboxMap!!.style!!.addLayer(layer)
+        mapboxMap.style!!.addLayer(layer)
 
         // Get a good look at it all
-        mapboxMap!!.animateCamera(CameraUpdateFactory.zoomTo(12.0))
+        mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(12.0))
 
         // Animate the parks source
         animateParksSource(parks, 0)
@@ -403,7 +441,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                 Timber.d("Updating parks source")
                 // change the source
                 val park = if (counter < parks.features()!!.size - 1) counter else 0
-                val source = mapboxMap!!.style!!.getSourceAs<GeoJsonSource>("dynamic-park-source")
+                val source = mapboxMap.style!!.getSourceAs<GeoJsonSource>("dynamic-park-source")
                 if (source == null) {
                     Timber.e("Source not found")
                     Toast.makeText(this@RuntimeStyleActivity, "Source not found", Toast.LENGTH_SHORT)
@@ -424,7 +462,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
     private fun addTerrainLayer() {
         // Add a source
         val source: Source = VectorSource("my-terrain-source", "maptiler://sources/hillshades")
-        mapboxMap!!.style!!.addSource(source)
+        mapboxMap.style!!.addSource(source)
         var layer: LineLayer? = LineLayer("terrainLayer", "my-terrain-source")
         layer!!.sourceLayer = "contour"
         layer.setProperties(
@@ -435,7 +473,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         )
 
         // adding layers below "road" layers
-        val layers = mapboxMap!!.style!!
+        val layers = mapboxMap.style!!
             .layers
         var latestLayer: Layer? = null
         Collections.reverse(layers)
@@ -451,16 +489,16 @@ class RuntimeStyleActivity : AppCompatActivity() {
             }
         }
         if (latestLayer != null) {
-            mapboxMap!!.style!!.addLayerBelow(layer, latestLayer.id)
+            mapboxMap.style!!.addLayerBelow(layer, latestLayer.id)
         }
 
         // Need to get a fresh handle
-        layer = mapboxMap!!.style!!.getLayerAs("terrainLayer")
+        layer = mapboxMap.style!!.getLayerAs("terrainLayer")
 
         // Make sure it's also applied after the fact
         layer!!.minZoom = 10f
         layer.maxZoom = 15f
-        layer = mapboxMap!!.style!!.getLayer("terrainLayer") as LineLayer?
+        layer = mapboxMap.style!!.getLayer("terrainLayer") as LineLayer?
         Toast.makeText(
             this,
             String.format(
@@ -475,14 +513,14 @@ class RuntimeStyleActivity : AppCompatActivity() {
     private fun addSatelliteLayer() {
         // Add a source
         val source: Source = RasterSource("my-raster-source", "maptiler://sources/satellite", 512)
-        mapboxMap!!.style!!.addSource(source)
+        mapboxMap.style!!.addSource(source)
 
         // Add a layer
-        mapboxMap!!.style!!.addLayer(RasterLayer("satellite-layer", "my-raster-source"))
+        mapboxMap.style!!.addLayer(RasterLayer("satellite-layer", "my-raster-source"))
     }
 
     private fun updateWaterColorOnZoom() {
-        val layer = mapboxMap!!.style!!.getLayerAs<FillLayer>("water") ?: return
+        val layer = mapboxMap.style!!.getLayerAs<FillLayer>("water") ?: return
 
         // Set a zoom function to update the color of the water
         layer.setProperties(
@@ -499,7 +537,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         )
 
         // do some animations to show it off properly
-        mapboxMap!!.animateCamera(CameraUpdateFactory.zoomTo(1.0), 1500)
+        mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(1.0), 1500)
     }
 
     private fun addCustomTileSource() {
@@ -509,7 +547,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         tileSet.minZoom = 0f
         tileSet.maxZoom = 14f
         val source: Source = VectorSource("custom-tile-source", tileSet)
-        mapboxMap!!.style!!.addSource(source)
+        mapboxMap.style!!.addSource(source)
 
         // Add a layer
         val lineLayer = LineLayer("custom-tile-layers", "custom-tile-source")
@@ -521,12 +559,12 @@ class RuntimeStyleActivity : AppCompatActivity() {
             PropertyFactory.lineWidth(2.0f),
             PropertyFactory.lineColor(Color.GREEN)
         )
-        mapboxMap!!.style!!.addLayer(lineLayer)
+        mapboxMap.style!!.addLayer(lineLayer)
     }
 
     private fun styleFillColorLayer() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri("asset://fill_color_style.json"))
-        mapboxMap!!.moveCamera(
+        mapboxMap.setStyle(Style.Builder().fromUri("asset://fill_color_style.json"))
+        mapboxMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 LatLng(31.0, (-100).toDouble()),
                 3.0
@@ -535,8 +573,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun styleFillFilterLayer() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri("asset://fill_filter_style.json"))
-        mapboxMap!!.moveCamera(
+        mapboxMap.setStyle(Style.Builder().fromUri("asset://fill_filter_style.json"))
+        mapboxMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 LatLng(31.0, (-100).toDouble()),
                 3.0
@@ -549,7 +587,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     return@postDelayed
                 }
                 Timber.d("Styling filtered fill layer")
-                val states = mapboxMap!!.style!!.getLayer("states") as FillLayer?
+                val states = mapboxMap.style!!.getLayer("states") as FillLayer?
                 if (states != null) {
                     states.setFilter(Expression.eq(Expression.get("name"), Expression.literal("Texas")))
                     states.fillOpacityTransition = TransitionOptions(2500, 0)
@@ -571,8 +609,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun styleTextSizeFilterLayer() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri("asset://fill_filter_style.json"))
-        mapboxMap!!.moveCamera(
+        mapboxMap.setStyle(Style.Builder().fromUri("asset://fill_filter_style.json"))
+        mapboxMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 LatLng(31.0, (-100).toDouble()),
                 3.0
@@ -585,7 +623,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     return@postDelayed
                 }
                 Timber.d("Styling text size fill layer")
-                val states = mapboxMap!!.style!!.getLayer("state-label-lg") as SymbolLayer?
+                val states = mapboxMap.style!!.getLayer("state-label-lg") as SymbolLayer?
                 if (states != null) {
                     states.setProperties(
                         PropertyFactory.textSize(
@@ -614,8 +652,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun styleLineFilterLayer() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri("asset://line_filter_style.json"))
-        mapboxMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
+        mapboxMap.setStyle(Style.Builder().fromUri("asset://line_filter_style.json"))
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
@@ -623,7 +661,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     return@postDelayed
                 }
                 Timber.d("Styling filtered line layer")
-                val counties = mapboxMap!!.style!!.getLayer("counties") as LineLayer?
+                val counties = mapboxMap.style!!.getLayer("counties") as LineLayer?
                 if (counties != null) {
                     counties.setFilter(Expression.eq(Expression.get("NAME10"), "Washington"))
                     counties.setProperties(
@@ -644,8 +682,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun styleNumericFillLayer() {
-        mapboxMap!!.setStyle(Style.Builder().fromUri("asset://numeric_filter_style.json"))
-        mapboxMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
+        mapboxMap.setStyle(Style.Builder().fromUri("asset://numeric_filter_style.json"))
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, (-97).toDouble()), 5.0))
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
@@ -653,7 +691,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     return@postDelayed
                 }
                 Timber.d("Styling numeric fill layer")
-                val regions = mapboxMap!!.style!!.getLayer("regions") as FillLayer?
+                val regions = mapboxMap.style!!.getLayer("regions") as FillLayer?
                 if (regions != null) {
                     regions.setFilter(
                         Expression.all(
@@ -684,10 +722,10 @@ class RuntimeStyleActivity : AppCompatActivity() {
     }
 
     private fun bringWaterToFront() {
-        val water = mapboxMap!!.style!!.getLayer("water")
+        val water = mapboxMap.style!!.getLayer("water")
         if (water != null) {
-            mapboxMap!!.style!!.removeLayer(water)
-            mapboxMap!!.style!!.addLayerAt(water, mapboxMap!!.style!!.layers.size - 1)
+            mapboxMap.style!!.removeLayer(water)
+            mapboxMap.style!!.addLayerAt(water, mapboxMap.style!!.layers.size - 1)
         } else {
             Toast.makeText(this, "No water layer in this style", Toast.LENGTH_SHORT).show()
         }

@@ -20,23 +20,22 @@
 namespace mbgl {
 namespace util {
 
-// Manages a thread with `Object`.
-
-// Upon creation of this object, it launches a thread and creates an object of type `Object`
-// in that thread. When the `Thread<>` object is destructed, the destructor waits
-// for thread termination. The `Thread<>` constructor blocks until the thread and
-// the `Object` are fully created, so after the object creation, it's safe to obtain the
-// `Object` stored in this thread. The thread created will always have low priority on
-// the platforms that support setting thread priority.
-//
-// The following properties make this class different from `ThreadPool`:
-//
-// - Only one thread is created.
-// - `Object` will live in a single thread, providing thread affinity.
-// - It is safe to use `ThreadLocal` in an `Object` managed by `Thread<>`
-// - A `RunLoop` is created for the `Object` thread.
-// - `Object` can use `Timer` and do asynchronous I/O, like wait for sockets events.
-//
+/// @brief Manages a thread with `Object`.
+///
+/// Upon creation of this object, it launches a thread and creates an object of type `Object`
+/// in that thread. When the `Thread<>` object is destructed, the destructor waits
+/// for thread termination. The `Thread<>` constructor blocks until the thread and
+/// the `Object` are fully created, so after the object creation, it's safe to obtain the
+/// `Object` stored in this thread. The thread created will always have low priority on
+/// the platforms that support setting thread priority.
+///
+/// The following properties make this class different from `ThreadPool`:
+///
+/// - Only one thread is created.
+/// - `Object` will live in a single thread, providing thread affinity.
+/// - It is safe to use `ThreadLocal` in an `Object` managed by `Thread<>`
+/// - A `RunLoop` is created for the `Object` thread.
+/// - `Object` can use `Timer` and do asynchronous I/O, like wait for sockets events.
 template <typename Object>
 class Thread {
 public:
@@ -101,18 +100,18 @@ public:
         thread.join();
     }
 
-    // Returns a non-owning reference to `Object` that
-    // can be used to send messages to `Object`. It is safe
-    // to the non-owning reference to outlive this object
-    // and be used after the `Thread<>` gets destroyed.
+    /// Returns a non-owning reference to `Object` that
+    /// can be used to send messages to `Object`. It is safe
+    /// to the non-owning reference to outlive this object
+    /// and be used after the `Thread<>` gets destroyed.
     ActorRef<std::decay_t<Object>> actor() {
         return object.self();
     }
 
-    // Pauses the `Object` thread. It will prevent the object to wake
-    // up from events such as timers and file descriptor I/O. Messages
-    // sent to a paused `Object` will be queued and only processed after
-    // `resume()` is called.
+    /// Pauses the `Object` thread. It will prevent the object to wake
+    /// up from events such as timers and file descriptor I/O. Messages
+    /// sent to a paused `Object` will be queued and only processed after
+    /// `resume()` is called.
     void pause() {
         MBGL_VERIFY_THREAD(tid);
 
@@ -161,9 +160,9 @@ private:
     util::RunLoop* loop = nullptr;
 };
 
-// Returns function, that once invoked, will set a thread priority for
-// a thread `threadType` based on a setting provided by corresponding
-// Settings' platform::EXPERIMENTAL_THREAD_PRIORITY_* value.
+/// Returns function, that once invoked, will set a thread priority for
+/// a thread `threadType` based on a setting provided by corresponding
+/// Settings' platform::EXPERIMENTAL_THREAD_PRIORITY_* value.
 std::function<void()> makeThreadPrioritySetter(std::string threadType);
 
 } // namespace util

@@ -23,8 +23,8 @@ import java.io.IOException
  * Test activity showcasing using the query rendered features API to count Symbols in a rectangle.
  */
 class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
-    var mapView: MapView? = null
-    var mapboxMap: MapboxMap? = null
+    lateinit var mapView: MapView
+    lateinit var mapboxMap: MapboxMap
         private set
     private lateinit var toast: Toast
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,16 +34,16 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
 
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             this@QueryRenderedFeaturesBoxSymbolCountActivity.mapboxMap = mapboxMap
             try {
                 val testPoints = ResourceUtils.readRawResource(
-                    mapView!!.context,
+                    mapView.context,
                     R.raw.test_points_utrecht
                 )
                 val markerImage =
-                    BitmapFactory.decodeResource(resources, R.drawable.mapbox_marker_icon_default)
+                    BitmapFactory.decodeResource(resources, R.drawable.maplibre_marker_icon_default)
                 mapboxMap.setStyle(
                     Style.Builder()
                         .withLayer(
@@ -68,8 +68,8 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
             }
             selectionBox.setOnClickListener { view: View? ->
                 // Query
-                val top = selectionBox.top - mapView!!.top
-                val left = selectionBox.left - mapView!!.left
+                val top = selectionBox.top - mapView.top
+                val left = selectionBox.left - mapView.left
                 val box = RectF(
                     left.toFloat(),
                     top.toFloat(),
@@ -95,36 +95,36 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

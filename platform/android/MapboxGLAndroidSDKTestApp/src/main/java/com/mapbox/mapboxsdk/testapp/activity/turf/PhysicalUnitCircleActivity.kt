@@ -13,9 +13,8 @@ import com.mapbox.mapboxsdk.style.expressions.Expression.*
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityPhysicalCircleBinding
 import com.mapbox.turf.TurfTransformation
-import kotlinx.android.synthetic.main.activity_physical_circle.*
 
 /**
  * An Activity that showcases how to create a Circle with radius expressed in physical units using a FillLayer.
@@ -30,15 +29,17 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
         const val ZOOM = 10.0
     }
 
+    private lateinit var binding: ActivityPhysicalCircleBinding
     private lateinit var source: GeoJsonSource
     private var steps: Int = 10
     private var radius: Double = 9000.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_physical_circle)
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap ->
+        binding = ActivityPhysicalCircleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync { mapboxMap ->
 
             mapboxMap.cameraPosition = CameraPosition.Builder()
                 .target(LatLng(LATITUDE, LONGITUDE))
@@ -55,8 +56,8 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
                 )
             )
 
-            stepsBar.setOnSeekBarChangeListener(this)
-            radiusBar.setOnSeekBarChangeListener(this)
+            binding.stepsBar.setOnSeekBarChangeListener(this)
+            binding.radiusBar.setOnSeekBarChangeListener(this)
 
             mapboxMap.setStyle(
                 Style.Builder()
@@ -81,7 +82,7 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         seekBar?.let {
-            if (it.id == stepsBar.id) {
+            if (it.id == binding.stepsBar.id) {
                 steps = progress
             } else {
                 radius = progress.toDouble()
@@ -108,38 +109,38 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
-            mapView.onSaveInstanceState(it)
+            binding.mapView.onSaveInstanceState(it)
         }
     }
 }

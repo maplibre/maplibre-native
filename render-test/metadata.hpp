@@ -76,11 +76,11 @@ struct MemoryProbe {
     float tolerance;
 
     static std::tuple<bool, float> checkPeak(const MemoryProbe& expected, const MemoryProbe& actual) {
-        return checkValue(expected.peak, actual.peak, actual.tolerance);
+        return checkValue(static_cast<float>(expected.peak), static_cast<float>(actual.peak), actual.tolerance);
     }
 
     static std::tuple<bool, float> checkAllocations(const MemoryProbe& expected, const MemoryProbe& actual) {
-        return checkValue(expected.allocations, actual.allocations, actual.tolerance);
+        return checkValue(static_cast<float>(expected.allocations), static_cast<float>(actual.allocations), actual.tolerance);
     }
 };
 

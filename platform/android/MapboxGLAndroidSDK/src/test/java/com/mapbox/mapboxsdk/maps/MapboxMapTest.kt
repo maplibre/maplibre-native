@@ -10,7 +10,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
 import com.mapbox.mapboxsdk.utils.ConfigUtils
 import io.mockk.*
-import junit.framework.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +33,7 @@ class MapboxMapTest {
 
     @Mock
     private lateinit var context: Context
+
     @Mock
     private lateinit var appContext: Context
 

@@ -214,7 +214,7 @@ MGLImage *MGLImageFromCurrentContext(void) {
     self.runtimeStylingActions = nil;
 }
 
-#pragma mark MGLMapSnapshotterDelegate methods
+// MARK: MGLMapSnapshotterDelegate methods
 
 - (void)mapSnapshotter:(MGLMapSnapshotter *)snapshotter didFinishLoadingStyle:(MGLStyle *)style {
     XCTAssertNotNil(snapshotter);
@@ -227,7 +227,7 @@ MGLImage *MGLImageFromCurrentContext(void) {
     [self.styleLoadingExpectation fulfill];
 }
 
-#pragma mark MGLOfflineStorageDelegate methods
+// MARK: MGLOfflineStorageDelegate methods
 
 - (NSURL *)offlineStorage:(MGLOfflineStorage *)storage URLForResourceOfKind:(MGLResourceKind)kind withURL:(NSURL *)url {
     if (kind == MGLResourceKindGlyphs && [url.scheme isEqualToString:@"local"]) {

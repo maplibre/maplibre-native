@@ -37,7 +37,7 @@ static CGFloat const tipWidth = 10.0;
     return self;
 }
 
-#pragma mark - API
+// MARK: - API
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(nonnull UIView *)view constrainedToRect:(__unused CGRect)constrainedRect animated:(BOOL)animated
 {
@@ -78,7 +78,7 @@ static CGFloat const tipWidth = 10.0;
         [self removeFromSuperview];
 }
 
-#pragma mark - internals
+// MARK: - internals
 
 - (void)drawRect:(CGRect)rect
 {

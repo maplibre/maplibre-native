@@ -5,17 +5,11 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ubuntu-20.04]
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
@@ -25,11 +19,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
 
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh        
@@ -51,6 +40,9 @@ jobs:
       - name: npm install
         run: npm install --ignore-scripts          
         working-directory: platform/android
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
 
       - name: Prepare ccache
         run: ccache --clear       
@@ -112,32 +104,7 @@ jobs:
         shell: bash
       
       - name: Generate javadoc
-        run: make android-javadoc
-
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash  
-
-      - name: Run robotest of release Test App on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android run --type robo \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/release/MapboxGLAndroidSDKTestApp-release.apk \
-              --device-ids walleye --os-version-ids "27" --locales en --orientations portrait --timeout 90s
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping tests..."
-          fi
-        shell: bash     
+        run: make android-javadoc  
 
       # create github release
       - name: Prepare release

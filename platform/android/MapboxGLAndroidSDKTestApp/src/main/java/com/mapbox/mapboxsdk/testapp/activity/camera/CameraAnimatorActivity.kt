@@ -32,9 +32,9 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_animator)
         mapView = findViewById<View>(R.id.mapView) as MapView
-        if (mapView != null) {
-            mapView!!.onCreate(savedInstanceState)
-            mapView!!.getMapAsync(this)
+        if (::mapView.isInitialized) {
+            mapView.onCreate(savedInstanceState)
+            mapView.getMapAsync(this)
         }
     }
 
@@ -54,8 +54,8 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
                     .zoom(14.5)
                     .bearing(135.0)
                     .build()
-            set = createExampleAnimator(mapboxMap!!.cameraPosition, animatedPosition)
-            set!!.start()
+            set = createExampleAnimator(mapboxMap.cameraPosition, animatedPosition)
+            set.start()
         }
     }
 
@@ -67,7 +67,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         targetPosition: CameraPosition
     ): Animator {
         val animatorSet = AnimatorSet()
-        animatorSet.play(createLatLngAnimator(currentPosition.target, targetPosition.target))
+        animatorSet.play(createLatLngAnimator(currentPosition.target!!, targetPosition.target!!))
         animatorSet.play(createZoomAnimator(currentPosition.zoom, targetPosition.zoom))
         animatorSet.play(createBearingAnimator(currentPosition.bearing, targetPosition.bearing))
         animatorSet.play(createTiltAnimator(currentPosition.tilt, targetPosition.tilt))
@@ -80,7 +80,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         latLngAnimator.duration = (1000 * ANIMATION_DELAY_FACTOR).toLong()
         latLngAnimator.interpolator = FastOutSlowInInterpolator()
         latLngAnimator.addUpdateListener { animation: ValueAnimator ->
-            mapboxMap!!.moveCamera(
+            mapboxMap.moveCamera(
                 CameraUpdateFactory.newLatLng((animation.animatedValue as LatLng))
             )
         }
@@ -93,7 +93,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         zoomAnimator.startDelay = (600 * ANIMATION_DELAY_FACTOR).toLong()
         zoomAnimator.interpolator = AnticipateOvershootInterpolator()
         zoomAnimator.addUpdateListener { animation: ValueAnimator ->
-            mapboxMap!!.moveCamera(
+            mapboxMap.moveCamera(
                 CameraUpdateFactory.zoomTo((animation.animatedValue as Float).toDouble())
             )
         }
@@ -107,7 +107,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         bearingAnimator.startDelay = (1000 * ANIMATION_DELAY_FACTOR).toLong()
         bearingAnimator.interpolator = FastOutLinearInInterpolator()
         bearingAnimator.addUpdateListener { animation: ValueAnimator ->
-            mapboxMap!!.moveCamera(
+            mapboxMap.moveCamera(
                 CameraUpdateFactory.bearingTo((animation.animatedValue as Float).toDouble())
             )
         }
@@ -119,7 +119,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         tiltAnimator.duration = (1000 * ANIMATION_DELAY_FACTOR).toLong()
         tiltAnimator.startDelay = (1500 * ANIMATION_DELAY_FACTOR).toLong()
         tiltAnimator.addUpdateListener { animation: ValueAnimator ->
-            mapboxMap!!.moveCamera(
+            mapboxMap.moveCamera(
                 CameraUpdateFactory.tiltTo((animation.animatedValue as Float).toDouble())
             )
         }
@@ -139,7 +139,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mapboxMap == null) {
+        if (!::mapboxMap.isInitialized) {
             return false
         }
         if (item.itemId != android.R.id.home) {
@@ -151,7 +151,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun resetCameraPosition() {
-        mapboxMap!!.moveCamera(
+        mapboxMap.moveCamera(
             CameraUpdateFactory.newCameraPosition(
                 CameraPosition.Builder()
                     .target(START_LAT_LNG)
@@ -176,7 +176,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         zoomAnimator.duration = (duration * ANIMATION_DELAY_FACTOR).toLong()
         zoomAnimator.interpolator = interpolator
         zoomAnimator.addUpdateListener { animation: ValueAnimator ->
-            mapboxMap!!.moveCamera(
+            mapboxMap.moveCamera(
                 CameraUpdateFactory.zoomTo((animation.animatedValue as Float).toDouble())
             )
         }
@@ -188,53 +188,55 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
     //
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
         for (i in 0 until animators.size()) {
             animators[animators.keyAt(i)]!!.cancel()
         }
         if (set != null) {
-            set!!.cancel()
+            set.cancel()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        if (::mapView.isInitialized) {
+            mapView.onDestroy()
+        }
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        if (::mapView.isInitialized) {
+            mapView.onLowMemory()
+        }
     }
 
     /** Helper class to evaluate LatLng objects with a ValueAnimator */
     private class LatLngEvaluator : TypeEvaluator<LatLng> {
         private val latLng = LatLng()
         override fun evaluate(fraction: Float, startValue: LatLng, endValue: LatLng): LatLng {
-            latLng.latitude =
-                (startValue.latitude + (endValue.latitude - startValue.latitude) * fraction)
-            latLng.longitude =
-                (startValue.longitude + (endValue.longitude - startValue.longitude) * fraction)
+            latLng.latitude = startValue.latitude + (endValue.latitude - startValue.latitude) * fraction
+            latLng.longitude = startValue.longitude + (endValue.longitude - startValue.longitude) * fraction
             return latLng
         }
     }

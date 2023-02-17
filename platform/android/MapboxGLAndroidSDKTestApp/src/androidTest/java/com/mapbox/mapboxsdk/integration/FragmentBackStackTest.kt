@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.integration
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import androidx.test.uiautomator.UiSelector
 import com.mapbox.mapboxsdk.testapp.activity.fragment.FragmentBackStackActivity
@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 /**
  * Regression test that validates MapFragment integration on the backstack
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class FragmentBackStackTest : BaseIntegrationTest() {
 
     @get:Rule

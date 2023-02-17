@@ -1,7 +1,11 @@
 package com.mapbox.mapboxsdk.maps;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import androidx.test.annotation.UiThreadTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.mapboxsdk.AppCenter;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -14,11 +18,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertTrue;
-
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class MapboxTest extends AppCenter {
 
   private static final String API_KEY = "pk.0000000001";

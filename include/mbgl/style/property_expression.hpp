@@ -21,9 +21,9 @@ public:
     Range<float> getCoveringStops(float, float) const noexcept;
     const expression::Expression& getExpression() const noexcept;
 
-    // Can be used for aggregating property expressions from multiple
-    // properties(layers) into single match / case expression. Method may
-    // be removed if a better way of aggregation is found.
+    /// Can be used for aggregating property expressions from multiple
+    /// properties(layers) into single match / case expression. Method may
+    /// be removed if a better way of aggregation is found.
     std::shared_ptr<const expression::Expression> getSharedExpression() const noexcept;
 
     bool useIntegerZoom = false;

@@ -8,8 +8,11 @@ import com.google.gson.JsonObject
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
@@ -23,20 +26,20 @@ import timber.log.Timber
  */
 class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var source: GeoJsonSource? = null
     private var layer: SymbolLayer? = null
     private var isInitialPosition = true
     private var isSelected = false
     private var isShowingSymbolLayer = true
     private val mapClickListener = OnMapClickListener { point ->
-        val screenPoint = mapboxMap!!.projection.toScreenLocation(point)
-        val featureList = mapboxMap!!.queryRenderedFeatures(screenPoint, LAYER_ID)
+        val screenPoint = mapboxMap.projection.toScreenLocation(point)
+        val featureList = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID)
         if (!featureList.isEmpty()) {
             val feature = featureList[0]
             val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
             isSelected = !selectedNow
-            updateSource(mapboxMap!!.style)
+            updateSource(mapboxMap.style)
         } else {
             Timber.e("No features found")
         }
@@ -78,10 +81,11 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     }
 
     private fun createFeatureCollection(): FeatureCollection {
-        val point = if (isInitialPosition) Point.fromLngLat(
-            -74.01618140,
-            40.701745
-        ) else Point.fromLngLat(-73.988097, 40.749864)
+        val point = if (isInitialPosition) {
+            Point.fromLngLat(-74.01618140, 40.701745)
+        } else {
+            Point.fromLngLat(-73.988097, 40.749864)
+        }
         val properties = JsonObject()
         properties.addProperty(KEY_PROPERTY_SELECTED, isSelected)
         val feature = Feature.fromGeometry(point, properties)
@@ -119,7 +123,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         if (mapboxMap != null) {
             if (item.itemId == R.id.menu_action_change_location) {
                 isInitialPosition = !isInitialPosition
-                updateSource(mapboxMap!!.style)
+                updateSource(mapboxMap.style)
             } else if (item.itemId == R.id.menu_action_toggle_source) {
                 toggleSymbolLayerVisibility()
             }
@@ -129,37 +133,37 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     companion object {

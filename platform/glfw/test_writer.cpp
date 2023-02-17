@@ -40,7 +40,7 @@ public:
         if (camera.pitch && *camera.pitch != 0.) {
             writer.StartArray();
             writer.String("setPitch");
-            writer.Int(std::round(*camera.pitch));
+            writer.Int(static_cast<int>(std::round(*camera.pitch)));
             writer.EndArray();
         }
 

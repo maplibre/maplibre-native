@@ -1,30 +1,22 @@
-# [Mapbox Maps SDK for macOS](https://mapbox.github.io/mapbox-gl-native/macos/)
+# MapLibre GL Native for macOS
 
-[![Circle CI build status](https://circleci.com/gh/mapbox/mapbox-gl-native-ios.svg?style=shield)](https://circleci.com/gh/mapbox/workflows/mapbox-gl-native-ios/tree/master)
+[![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-release.yml)
 
-Put interactive, scalable world maps into your native Cocoa application with the Mapbox Maps SDK for macOS.
+Put interactive, scalable world maps into your native Cocoa application with MapLibre GL Native for macOS.
 
-* Mapbox-curated [map styles](https://www.mapbox.com/maps/) and [OpenStreetMap-based](https://www.mapbox.com/vector-tiles/mapbox-streets-v7/) [vector tiles](https://www.mapbox.com/vector-tiles/) make it easy to get started.
-* Customize every aspect of the map’s appearance in code or visually using [Mapbox Studio](https://www.mapbox.com/mapbox-studio/).
 * High-performance OpenGL rendering and multitouch gestures keep your users happy.
 * A well-designed, fully documented API helps you stay productive.
 * Develop across [multiple platforms](../../README.md), including [iOS](../ios/README.md), using the same styles and similar APIs.
 
 ![](docs/img/screenshot.jpg)
 
-The Mapbox Maps SDK for macOS is compatible with macOS 10.10.0 and above for Cocoa applications developed in Objective-C, Swift, Interface Builder, or AppleScript. For hybrid applications, consider [Mapbox GL JS](https://github.com/mapbox/mapbox-gl-js/).
+MapLibre GL Native for macOS is compatible with macOS 10.10.0 and above for Cocoa applications developed in Objective-C, Swift, Interface Builder, or AppleScript. For hybrid applications, consider [MapLibre GL JS]([https://github.com/mapbox/mapbox-gl-js/](https://github.com/maplibre/maplibre-gl-js)).
 
-Information for Mac developers:
+## Contributing
 
-* [Integrate the Mapbox Maps SDK for macOS into your application](https://mapbox.github.io/mapbox-gl-native/macos/)
-* [Learn how to use the Mapbox Maps SDK for macOS](https://mapbox.github.io/mapbox-gl-native/macos/)
-* [Browse example styles designed in Mapbox Studio](https://www.mapbox.com/gallery/)
-
-Information for contributors:
-
-* [Build the Mapbox Maps SDK for macOS from source](INSTALL.md)
-* [Contribute to the Mapbox Maps SDK for macOS](DEVELOPING.md)
+* [Build the MapLibre GL Native for macOS from source](INSTALL.md)
+* [Contribute to MapLibre GL Native for macOS](CONTRIBUTING.md)
 * [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/)
 * [Mapbox Vector Tile Specification](https://www.mapbox.com/developers/vector-tiles/)
 
-Mapbox does not officially support the macOS SDK to the same extent as the iOS SDK; however, bug reports and pull requests are certainly welcome.
+The MapLibre Organization does not officially support the macOS to the same extent as iOS (see [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md)); however, bug reports and pull requests are certainly welcome.

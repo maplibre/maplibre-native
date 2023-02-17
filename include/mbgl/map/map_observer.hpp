@@ -54,8 +54,8 @@ public:
     virtual void onSourceChanged(style::Source&) {}
     virtual void onDidBecomeIdle() {}
     virtual void onStyleImageMissing(const std::string&) {}
-    // This method should return true if unused image can be removed,
-    // false otherwise. By default, unused image will be removed.
+    /// This method should return true if unused image can be removed,
+    /// false otherwise. By default, unused image will be removed.
     virtual bool onCanRemoveUnusedStyleImage(const std::string&) { return true; }
 };
 

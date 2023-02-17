@@ -67,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT IB_DESIGNABLE
 @interface MGLMapView : NSView <MGLStylable>
 
-#pragma mark Creating Instances
+// MARK: Creating Instances
 
 /**
  Initializes and returns a newly allocated map view with the specified frame and
@@ -90,7 +90,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (instancetype)initWithFrame:(NSRect)frame styleURL:(nullable NSURL *)styleURL;
 
-#pragma mark Accessing the Delegate
+// MARK: Accessing the Delegate
 
 /**
  The receiver’s delegate.
@@ -102,7 +102,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 @property (nonatomic, weak, nullable) IBOutlet id <MGLMapViewDelegate> delegate;
 
-#pragma mark Configuring the Map’s Appearance
+// MARK: Configuring the Map’s Appearance
 
 /**
  The style currently displayed in the receiver.
@@ -199,7 +199,7 @@ MGL_EXPORT IB_DESIGNABLE
 @property (nonatomic, assign) BOOL prefetchesTiles;
 
 
-#pragma mark Manipulating the Viewpoint
+// MARK: Manipulating the Viewpoint
 
 /**
  The geographic coordinate at the center of the map view.
@@ -691,7 +691,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (void)setContentInsets:(NSEdgeInsets)contentInsets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
 
-#pragma mark Configuring How the User Interacts with the Map
+// MARK: Configuring How the User Interacts with the Map
 
 /**
  A Boolean value that determines whether the user may zoom the map in and out,
@@ -751,7 +751,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 @property (nonatomic, getter=isPitchEnabled) BOOL pitchEnabled;
 
-#pragma mark Annotating the Map
+// MARK: Annotating the Map
 
 /**
  The complete list of annotations associated with the receiver. (read-only)
@@ -853,7 +853,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (nullable NSArray<id <MGLAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
 
-#pragma mark Managing Annotation Selections
+// MARK: Managing Annotation Selections
 
 /**
  The currently selected annotations.
@@ -906,7 +906,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 @property (nonatomic, strong, null_resettable) IBOutlet NSViewController *calloutViewController;
 
-#pragma mark Finding Annotations
+// MARK: Finding Annotations
 
 /**
  Returns a point annotation located at the given point.
@@ -918,7 +918,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (id <MGLAnnotation>)annotationAtPoint:(NSPoint)point;
 
-#pragma mark Overlaying the Map
+// MARK: Overlaying the Map
 
 /**
  The complete list of overlays associated with the receiver. (read-only)
@@ -969,7 +969,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (void)removeOverlays:(NSArray<id <MGLOverlay>> *)overlays;
 
-#pragma mark Accessing the Underlying Map Data
+// MARK: Accessing the Underlying Map Data
 
 /**
  Returns an array of rendered map features that intersect with a given point.
@@ -1164,7 +1164,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (NSArray<id <MGLFeature>> *)visibleFeaturesInRect:(NSRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
-#pragma mark Converting Geographic Coordinates
+// MARK: Converting Geographic Coordinates
 
 /**
  Converts a geographic coordinate to a point in the given view’s coordinate
@@ -1234,7 +1234,7 @@ MGL_EXPORT IB_DESIGNABLE
  */
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude;
 
-#pragma mark Debugging the Map
+// MARK: Debugging the Map
 
 /**
  The options that determine which debugging aids are shown on the map.

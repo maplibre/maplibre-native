@@ -105,7 +105,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     MGLMapSnapshotter *_snapshotter;
 }
 
-#pragma mark Lifecycle
+// MARK: Lifecycle
 
 - (NSString *)windowNibName {
     return @"MapDocument";
@@ -153,7 +153,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }
 }
 
-#pragma mark NSWindowDelegate methods
+// MARK: NSWindowDelegate methods
 
 - (void)window:(NSWindow *)window willEncodeRestorableState:(NSCoder *)state {
     [state encodeObject:self.mapView.styleURL forKey:@"MBXMapViewStyleURL"];
@@ -165,7 +165,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     _isLocalizingLabels = [state decodeBoolForKey:@"MBXLocalizeLabels"];
 }
 
-#pragma mark Services
+// MARK: Services
 
 - (IBAction)showShareMenu:(id)sender {
     NSSharingServicePicker *picker = [[NSSharingServicePicker alloc] initWithItems:@[self.shareURL]];
@@ -183,7 +183,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
              camera.heading, camera.pitch]];
 }
 
-#pragma mark File methods
+// MARK: File methods
 
 - (IBAction)import:(id)sender {
     NSOpenPanel *panel = [NSOpenPanel openPanel];
@@ -311,7 +311,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }];
 }
 
-#pragma mark View methods
+// MARK: View methods
 
 - (IBAction)showStyle:(id)sender {
     NSInteger tag = -1;
@@ -522,7 +522,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     self.displayName = [NSString stringWithFormat:@"%@ @ %f", coordinateString, _mapView.zoomLevel];
 }
 
-#pragma mark Debug methods
+// MARK: Debug methods
 
 - (IBAction)toggleTileBoundaries:(id)sender {
     self.mapView.debugMask ^= MGLMapDebugTileBoundariesMask;
@@ -903,7 +903,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [self.mapView.style insertLayer:hillshadeLayer atIndex:hillshadeIndex];
 }
 
-#pragma mark Offline packs
+// MARK: Offline packs
 
 - (IBAction)addOfflinePack:(id)sender {
     self.offlinePackNameField.stringValue = @"";
@@ -952,7 +952,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [self.window endSheet:self.addOfflinePackWindow returnCode:[sender tag] ? NSModalResponseOK : NSModalResponseCancel];
 }
 
-#pragma mark Mouse events
+// MARK: Mouse events
 
 - (void)handlePressGesture:(NSPressGestureRecognizer *)gestureRecognizer {
     if (gestureRecognizer.state == NSGestureRecognizerStateBegan) {
@@ -1123,7 +1123,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     [self.mapView addAnnotations:flattenedFeatures];
 }
 
-#pragma mark User interface validation
+// MARK: User interface validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if (menuItem.action == @selector(showStyle:)) {
@@ -1339,7 +1339,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     return NO;
 }
 
-#pragma mark NSSharingServicePickerDelegate methods
+// MARK: NSSharingServicePickerDelegate methods
 
 - (NSArray<NSSharingService *> *)sharingServicePicker:(NSSharingServicePicker *)sharingServicePicker sharingServicesForItems:(NSArray *)items proposedSharingServices:(NSArray<NSSharingService *> *)proposedServices {
     NSURL *shareURL = self.shareURL;
@@ -1360,7 +1360,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     return sharingServices;
 }
 
-#pragma mark NSMenuDelegate methods
+// MARK: NSMenuDelegate methods
 
 - (void)menuWillOpen:(NSMenu *)menu {
     if (menu == self.mapViewContextMenu) {
@@ -1369,7 +1369,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }
 }
 
-#pragma mark NSSplitViewDelegate methods
+// MARK: NSSplitViewDelegate methods
 
 - (BOOL)splitView:(NSSplitView *)splitView canCollapseSubview:(NSView *)subview {
     return subview != self.mapView;
@@ -1379,7 +1379,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     return YES;
 }
 
-#pragma mark MGLMapViewDelegate methods
+// MARK: MGLMapViewDelegate methods
 
 - (void)mapView:(MGLMapView *)mapView didFinishLoadingStyle:(MGLStyle *)style {
     [self updateLabels];
@@ -1439,7 +1439,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     return 0.8;
 }
 
-#pragma mark MGLMapSnapshotterDelegate methods
+// MARK: MGLMapSnapshotterDelegate methods
 
 - (void)mapSnapshotter:(MGLMapSnapshotter *)snapshotter didFinishLoadingStyle:(MGLStyle *)style {
     [style localizeLabelsIntoLocale:_isLocalizingLabels ? nil : [NSLocale localeWithLocaleIdentifier:@"mul"]];
@@ -1460,7 +1460,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     }
 }
 
-#pragma mark - MGLComputedShapeSourceDataSource
+// MARK: - MGLComputedShapeSourceDataSource
 - (NSArray<id <MGLFeature>>*)featuresInCoordinateBounds:(MGLCoordinateBounds)bounds zoomLevel:(NSUInteger)zoom {
     double gridSpacing;
     if(zoom >= 13) {

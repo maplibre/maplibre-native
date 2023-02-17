@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
@@ -14,8 +15,12 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener
+import com.mapbox.mapboxsdk.maps.MapboxMapOptions
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.expressions.Expression.FormatEntry
 import com.mapbox.mapboxsdk.style.expressions.Expression.FormatOption
@@ -28,7 +33,9 @@ import com.mapbox.mapboxsdk.style.sources.Source
 import com.mapbox.mapboxsdk.testapp.R
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import timber.log.Timber
-import java.util.*
+import java.util.Arrays
+import java.util.Objects
+import java.util.Random
 
 /**
  * Test activity showcasing runtime manipulation of symbol layers.
@@ -44,8 +51,8 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
     private var markerSymbolLayer: SymbolLayer? = null
     private var mapboxSignSymbolLayer: SymbolLayer? = null
     private var numberFormatSymbolLayer: SymbolLayer? = null
-    private var mapboxMap: MapboxMap? = null
-    private var mapView: MapView? = null
+    private lateinit var mapboxMap: MapboxMap
+    private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_symbollayer)
@@ -62,17 +69,17 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
         // Create map programmatically, add to view hierarchy
         mapView = MapView(this, mapboxMapOptions)
-        mapView!!.getMapAsync(this)
-        mapView!!.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+        mapView.onCreate(savedInstanceState)
         (findViewById<View>(R.id.container) as ViewGroup).addView(mapView)
 
         // Use OnStyleImageMissing API to lazily load an icon
-        mapView!!.addOnStyleImageMissingListener { id: String? ->
-            val style = mapboxMap!!.style
+        mapView.addOnStyleImageMissingListener { id: String? ->
+            val style = mapboxMap.style
             if (style != null) {
                 Timber.e("Adding image with id: %s", id)
                 val androidIcon =
-                    BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_android_2))
+                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
                 style.addImage(id!!, Objects.requireNonNull(androidIcon)!!)
             }
         }
@@ -81,7 +88,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         val carBitmap = BitmapUtils.getBitmapFromDrawable(
-            resources.getDrawable(R.drawable.ic_directions_car_black)
+            ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
         )
 
         // marker source
@@ -160,8 +167,8 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
     override fun onMapClick(point: LatLng): Boolean {
         // Query which features are clicked
-        val screenLoc = mapboxMap!!.projection.toScreenLocation(point)
-        val markerFeatures = mapboxMap!!.queryRenderedFeatures(screenLoc, MARKER_LAYER)
+        val screenLoc = mapboxMap.projection.toScreenLocation(point)
+        val markerFeatures = mapboxMap.queryRenderedFeatures(screenLoc, MARKER_LAYER)
         if (!markerFeatures.isEmpty()) {
             for (feature in Objects.requireNonNull(markerCollection!!.features())!!) {
                 if (feature.getStringProperty(ID_FEATURE_PROPERTY)
@@ -188,7 +195,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
             }
             markerSource!!.setGeoJson(markerCollection)
         } else {
-            val mapboxSignFeatures = mapboxMap!!.queryRenderedFeatures(screenLoc, MAPBOX_SIGN_LAYER)
+            val mapboxSignFeatures = mapboxMap.queryRenderedFeatures(screenLoc, MAPBOX_SIGN_LAYER)
             if (!mapboxSignFeatures.isEmpty()) {
                 shuffleMapboxSign()
             }
@@ -201,9 +208,11 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
             val size: Number? = markerSymbolLayer!!.textSize.getValue()
             if (size != null) {
                 markerSymbolLayer!!.setProperties(
-                    if (size as Float > 10) PropertyFactory.textSize(
-                        10f
-                    ) else PropertyFactory.textSize(20f)
+                    if (size as Float > 10) {
+                        PropertyFactory.textSize(10f)
+                    } else {
+                        PropertyFactory.textSize(20f)
+                    }
                 )
             }
         }
@@ -273,40 +282,40 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapClickListener(this)
+            mapboxMap.removeOnMapClickListener(this)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -320,14 +329,17 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                 toggleTextSize()
                 true
             }
+
             R.id.action_toggle_text_field -> {
                 toggleTextField()
                 true
             }
+
             R.id.action_toggle_text_font -> {
                 toggleTextFont()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

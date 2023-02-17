@@ -24,13 +24,13 @@ using namespace platform;
 static_assert(underlying_type(ShaderType::Vertex) == GL_VERTEX_SHADER, "OpenGL type mismatch");
 static_assert(underlying_type(ShaderType::Fragment) == GL_FRAGMENT_SHADER, "OpenGL type mismatch");
 
-static_assert(std::is_same<ProgramID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<ShaderID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<BufferID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<TextureID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<VertexArrayID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<FramebufferID, GLuint>::value, "OpenGL type mismatch");
-static_assert(std::is_same<RenderbufferID, GLuint>::value, "OpenGL type mismatch");
+static_assert(std::is_same_v<ProgramID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<ShaderID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<BufferID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<TextureID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<VertexArrayID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<FramebufferID, GLuint>, "OpenGL type mismatch");
+static_assert(std::is_same_v<RenderbufferID, GLuint>, "OpenGL type mismatch");
 
 static_assert(underlying_type(UniformDataType::Float) == GL_FLOAT, "OpenGL type mismatch");
 static_assert(underlying_type(UniformDataType::FloatVec2) == GL_FLOAT_VEC2, "OpenGL type mismatch");

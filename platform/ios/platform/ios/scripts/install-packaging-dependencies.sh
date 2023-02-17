@@ -21,25 +21,4 @@ else
     echo "Found awscli"
 fi
 
-
-##
-## jazzy
-##
-if [[ -z `which jazzy` || $(jazzy -v) != "jazzy version: ${JAZZY_VERSION}" ]]; then
-    step "Installing jazzy…"
-
-    if [[ "${CILAUNCH}" == true ]]; then
-        sudo gem install jazzy -v $JAZZY_VERSION --no-document
-    else
-        gem install jazzy -v $JAZZY_VERSION --no-document
-    fi
-
-    if [ -z `which jazzy` ]; then
-        echo "Unable to install jazzy ($JAZZY_VERSION). See https://github.com/mapbox/mapbox-gl-native-ios/blob/master/platform/ios/INSTALL.md"
-        exit 1
-    fi
-else
-    echo "Found jazzy (${JAZZY_VERSION})"
-fi
-
 step "Finished installing packaging dependencies"

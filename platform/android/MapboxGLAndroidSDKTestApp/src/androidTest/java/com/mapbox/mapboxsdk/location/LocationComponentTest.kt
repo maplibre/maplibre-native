@@ -11,7 +11,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.UiController
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -35,7 +35,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class LocationComponentTest : EspressoTest() {
 
     @Rule
@@ -1093,8 +1093,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(77.0, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(location.latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(location.longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(location.latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(location.longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
 
                 location.bearing = 92f
                 location.latitude = 30.0
@@ -1104,8 +1104,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS) // Waiting for the animation to finish
 
                 assertEquals(92.0, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(location.latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(location.longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(location.latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(location.longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
             }
         }
 
@@ -1130,8 +1130,8 @@ class LocationComponentTest : EspressoTest() {
                 )
                 component.isLocationComponentEnabled = true
                 component.cameraMode = CameraMode.NONE_GPS
-                val latitude = mapboxMap.cameraPosition.target.latitude
-                val longitude = mapboxMap.cameraPosition.target.longitude
+                val latitude = mapboxMap.cameraPosition.target!!.latitude
+                val longitude = mapboxMap.cameraPosition.target!!.longitude
 
                 location.bearing = 77f
                 component.forceLocationUpdate(location)
@@ -1139,8 +1139,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(77.0, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
 
                 location.bearing = 92f
                 location.latitude = 30.0
@@ -1150,8 +1150,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(92.0, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
             }
         }
 
@@ -1176,8 +1176,8 @@ class LocationComponentTest : EspressoTest() {
                 )
                 component.isLocationComponentEnabled = true
                 component.cameraMode = CameraMode.NONE
-                val latitude = mapboxMap.cameraPosition.target.latitude
-                val longitude = mapboxMap.cameraPosition.target.longitude
+                val latitude = mapboxMap.cameraPosition.target!!.latitude
+                val longitude = mapboxMap.cameraPosition.target!!.longitude
                 val bearing = mapboxMap.cameraPosition.bearing
 
                 location.bearing = 77f
@@ -1186,8 +1186,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(bearing, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
 
                 location.bearing = 92f
                 location.latitude = 30.0
@@ -1197,8 +1197,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(bearing, mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
             }
         }
 
@@ -1294,7 +1294,7 @@ class LocationComponentTest : EspressoTest() {
     }
 
     @Test
-    @Ignore
+    @Ignore("No explanation")
     fun animators_zoomWhileTrackingCanceledOnModeChange() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
@@ -1391,7 +1391,7 @@ class LocationComponentTest : EspressoTest() {
     }
 
     @Test
-    @Ignore
+    @Ignore("No explanation")
     fun animators_cancelZoomWhileTracking() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
@@ -1482,7 +1482,7 @@ class LocationComponentTest : EspressoTest() {
     }
 
     @Test
-    @Ignore
+    @Ignore("No explanation")
     fun animators_tiltWhileTrackingCanceledOnModeChange() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
@@ -1578,7 +1578,7 @@ class LocationComponentTest : EspressoTest() {
     }
 
     @Test
-    @Ignore
+    @Ignore("No explanation")
     fun animators_cancelTiltWhileTracking() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
@@ -1635,8 +1635,8 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(MAX_ANIMATION_DURATION_MS)
 
                 assertEquals(location.bearing.toDouble(), mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(location.latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(location.longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(location.latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(location.longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
             }
         }
 
@@ -1667,12 +1667,12 @@ class LocationComponentTest : EspressoTest() {
                 mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(target))
                 mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
                 mapboxMap.moveCamera(CameraUpdateFactory.bearingTo(90.0))
-                assertTrue(Utils.immediateAnimation(mapboxMap.projection, mapboxMap.cameraPosition.target, LatLng(location)))
+                assertTrue(Utils.immediateAnimation(mapboxMap.projection, mapboxMap.cameraPosition.target!!, LatLng(location)))
 
                 component.cameraMode = CameraMode.TRACKING_GPS
                 assertEquals(location.bearing.toDouble(), mapboxMap.cameraPosition.bearing, 0.1)
-                assertEquals(location.latitude, mapboxMap.cameraPosition.target.latitude, 0.1)
-                assertEquals(location.longitude, mapboxMap.cameraPosition.target.longitude, 0.1)
+                assertEquals(location.latitude, mapboxMap.cameraPosition.target!!.latitude, 0.1)
+                assertEquals(location.longitude, mapboxMap.cameraPosition.target!!.longitude, 0.1)
             }
         }
 

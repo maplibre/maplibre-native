@@ -129,7 +129,7 @@ public:
     }
 };
 
-/*
+/**
     Expression is an abstract class that serves as an interface and base class
     for particular expression implementations.
 

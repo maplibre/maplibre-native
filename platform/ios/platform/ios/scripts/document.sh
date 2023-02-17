@@ -2,12 +2,15 @@
 
 set -euo pipefail
 
+source ~/.bashrc
+
 function step { >&2 echo -e "\033[1m\033[36m* $@\033[0m"; }
 function finish { >&2 echo -en "\033[0m"; }
 trap finish EXIT
 
 if [ -z `which jazzy` ]; then
-    ./platform/ios/scripts/install-packaging-dependencies.sh
+	echo "jazzy not installed" >&2
+	exit 1
 fi
 
 DEFAULT_THEME="platform/darwin/docs/theme"
@@ -42,9 +45,9 @@ jazzy \
     --module-version ${SHORT_VERSION} \
     --readme ${README} \
     --documentation="platform/{darwin,ios}/docs/guides/*.md" \
-    --root-url https://docs.mapbox.com/ios/api/maps/${RELEASE_VERSION}/ \
+    --root-url https://maplibre.org/maplibre-gl-native/ios/api/ \
     --theme ${THEME} \
     --head "${CUSTOM_HEAD}" \
     --output ${OUTPUT} \
-    --title "Maps SDK for iOS" \
+    --title "MapLibre GL Native for iOS" \
     --module-version ${SHORT_VERSION}

@@ -1,13 +1,13 @@
 package com.mapbox.mapboxsdk.testapp.string;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Test verifying if String#toUpperCase and String#toLowerCase produces desired results
@@ -15,7 +15,7 @@ import static junit.framework.Assert.assertEquals;
  * See core test in https://github.com/mapbox/mapbox-gl-native/blob/master/test/util/text_conversions.test.cpp
  * </p>
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class UppperLowerCaseTest extends EspressoTest {
 
   @Test

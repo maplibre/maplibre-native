@@ -195,7 +195,7 @@
 }
 
 
-#pragma mark - test interrupting regular rendering
+// MARK: - test interrupting regular rendering
 
 - (void)testSetCenterCoordinateSetHidden {
     
@@ -302,7 +302,7 @@
                                           addToPendingCallback:addedToPending];
 }
 
-#pragma mark - Shared utility methods
+// MARK: - Shared utility methods
 
 - (void)internalTestCompletionBlockAddedToPendingForTestName:(NSString *)testName
                                                   transition:(void (^)(dispatch_block_t))transition

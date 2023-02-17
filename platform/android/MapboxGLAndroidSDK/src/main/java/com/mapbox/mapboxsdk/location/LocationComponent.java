@@ -20,7 +20,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.engine.LocationEngine;
 import com.mapbox.mapboxsdk.location.engine.LocationEngineCallback;
-import com.mapbox.mapboxsdk.location.engine.LocationEngineProvider;
+import com.mapbox.mapboxsdk.location.engine.LocationEngineDefault;
 import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest;
 import com.mapbox.mapboxsdk.location.engine.LocationEngineResult;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -66,7 +66,7 @@ import static com.mapbox.mapboxsdk.location.modes.RenderMode.GPS;
  * <p>
  * <strong>
  * To get the component object use {@link MapboxMap#getLocationComponent()} and activate it with
- * {@link #activateLocationComponent(Context, Style)} or one of the overloads.
+ * {@link #activateLocationComponent(LocationComponentActivationOptions)}.
  * Then, manage its visibility with {@link #setLocationComponentEnabled(boolean)}.
  * The component will not process location updates right after activation, but only after being enabled.
  * </strong>
@@ -76,19 +76,17 @@ import static com.mapbox.mapboxsdk.location.modes.RenderMode.GPS;
  * {@code ACCESS_COARSE_LOCATION} or {@code ACCESS_FINE_LOCATION} permissions can be requested for
  * this component to work as expected.
  * <p>
- * This component offers a default, built-in {@link LocationEngine} with some of the activation methods.
- * This engine will be obtained by {@link LocationEngineProvider#getBestLocationEngine(Context, boolean)} which defaults
- * to the {@link com.mapbox.mapboxsdk.location.engine.MapboxFusedLocationEngineImpl}. If you'd like to utilize Google
- * Play Services
- * for more precise location updates, simply add the Google Play Location Services dependency in your build script.
- * This will make the default engine the {@link com.mapbox.mapboxsdk.location.engine.GoogleLocationEngineImpl} instead.
+ * This component offers a default, built-in {@link LocationEngine} called
+ * {@link com.mapbox.mapboxsdk.location.engine.MapboxFusedLocationEngineImpl}.
+ * If you'd like to utilize the previously available Google Play Services for more precise location updates,
+ * refer to the migration guide of 10.0.0 in the changelog.
  * After a custom engine is passed to the component, or the built-in is initialized,
  * the location updates are going to be requested with the {@link LocationEngineRequest}, either a default one,
  * or the one passed during the activation.
  * When using any engine, requesting/removing the location updates is going to be managed internally.
  * <p>
  * You can also push location updates to the component without any internal engine management.
- * To achieve that, use {@link #activateLocationComponent(Context, Style, boolean)} with false.
+ * To achieve that, set `useDefaultLocationEngine` in {@link LocationComponentActivationOptions} to false.
  * No engine is going to be initialized and you can push location updates with {@link #forceLocationUpdate(Location)}.
  * <p>
  * For location puck animation purposes, like navigation,
@@ -105,8 +103,6 @@ public final class LocationComponent {
   private final Transform transform;
   private Style style;
   private LocationComponentOptions options;
-  @NonNull
-  private InternalLocationEngineProvider internalLocationEngineProvider = new InternalLocationEngineProvider();
   @Nullable
   private LocationEngine locationEngine;
   @NonNull
@@ -218,7 +214,6 @@ public final class LocationComponent {
                     @NonNull LocationAnimatorCoordinator locationAnimatorCoordinator,
                     @NonNull StaleStateManager staleStateManager,
                     @NonNull CompassEngine compassEngine,
-                    @NonNull InternalLocationEngineProvider internalLocationEngineProvider,
                     boolean useSpecializedLocationLayer) {
     this.mapboxMap = mapboxMap;
     this.transform = transform;
@@ -230,235 +225,8 @@ public final class LocationComponent {
     this.locationAnimatorCoordinator = locationAnimatorCoordinator;
     this.staleStateManager = staleStateManager;
     this.compassEngine = compassEngine;
-    this.internalLocationEngineProvider = internalLocationEngineProvider;
     this.useSpecializedLocationLayer = useSpecializedLocationLayer;
     isComponentInitialized = true;
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   * <p>
-   * <strong>Note</strong>: This method will initialize and use an internal {@link LocationEngine} when enabled.
-   *
-   * @param context the context
-   * @param style   the proxy object for current map style. More info at {@link Style}
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style) {
-    activateLocationComponent(context, style,
-      LocationComponentOptions.createFromAttributes(context, R.style.mapbox_LocationComponent));
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context                  the context
-   * @param style                    the proxy object for current map style. More info at {@link Style}
-   * @param useDefaultLocationEngine true if you want to initialize and use the built-in location engine or false if
-   *                                 there should be no location engine initialized
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        boolean useDefaultLocationEngine) {
-    if (useDefaultLocationEngine) {
-      activateLocationComponent(context, style, R.style.mapbox_LocationComponent);
-    } else {
-      activateLocationComponent(context, style, null, R.style.mapbox_LocationComponent);
-    }
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context                  the context
-   * @param style                    the proxy object for current map style. More info at {@link Style}
-   * @param useDefaultLocationEngine true if you want to initialize and use the built-in location engine or false if
-   *                                 there should be no location engine initialized
-   * @param locationEngineRequest    the location request
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        boolean useDefaultLocationEngine,
-                                        @NonNull LocationEngineRequest locationEngineRequest) {
-    setLocationEngineRequest(locationEngineRequest);
-    if (useDefaultLocationEngine) {
-      activateLocationComponent(context, style, R.style.mapbox_LocationComponent);
-    } else {
-      activateLocationComponent(context, style, null, R.style.mapbox_LocationComponent);
-    }
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context                  the context
-   * @param style                    the proxy object for current map style. More info at {@link Style}
-   * @param useDefaultLocationEngine true if you want to initialize and use the built-in location engine or false if
-   *                                 there should be no location engine initialized
-   * @param locationEngineRequest    the location request
-   * @param options                  the options
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        boolean useDefaultLocationEngine,
-                                        @NonNull LocationEngineRequest locationEngineRequest,
-                                        @NonNull LocationComponentOptions options) {
-    setLocationEngineRequest(locationEngineRequest);
-    if (useDefaultLocationEngine) {
-      activateLocationComponent(context, style, options);
-    } else {
-      activateLocationComponent(context, style, null, options);
-    }
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   * <p>
-   * <strong>Note</strong>: This method will initialize and use an internal {@link LocationEngine} when enabled.
-   *
-   * @param context  the context
-   * @param style    the proxy object for current map style. More info at {@link Style}
-   * @param styleRes the LocationComponent style res
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style, @StyleRes int styleRes) {
-    activateLocationComponent(context, style, LocationComponentOptions.createFromAttributes(context, styleRes));
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   * <p>
-   * <strong>Note</strong>: This method will initialize and use an internal {@link LocationEngine} when enabled.
-   * </p>
-   *
-   * @param context the context
-   * @param style   the proxy object for current map style. More info at {@link Style}
-   * @param options the options
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @NonNull LocationComponentOptions options) {
-    initialize(context, style, false, options);
-    initializeLocationEngine(context);
-    applyStyle(options);
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context        the context
-   * @param style          the proxy object for current map style. More info at {@link Style}
-   * @param locationEngine the engine, or null if you'd like to only force location updates
-   * @param styleRes       the LocationComponent style res
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine, @StyleRes int styleRes) {
-    activateLocationComponent(context, style, locationEngine,
-      LocationComponentOptions.createFromAttributes(context, styleRes));
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context               the context
-   * @param style                 the proxy object for current map style. More info at {@link Style}
-   * @param locationEngine        the engine, or null if you'd like to only force location updates
-   * @param locationEngineRequest the location request
-   * @param styleRes              the LocationComponent style res
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine,
-                                        @NonNull LocationEngineRequest locationEngineRequest, @StyleRes int styleRes) {
-    activateLocationComponent(context, style, locationEngine, locationEngineRequest,
-      LocationComponentOptions.createFromAttributes(context, styleRes));
-  }
-
-  /**
-   * This method will show the location icon and enable the camera tracking the location.
-   *
-   * @param context        the context
-   * @param style          the proxy object for current map style. More info at {@link Style}
-   * @param locationEngine the engine
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine) {
-    activateLocationComponent(context, style, locationEngine, R.style.mapbox_LocationComponent);
-  }
-
-  /**
-   * This method will show the location icon and enable the camera tracking the location.
-   *
-   * @param context               the context
-   * @param style                 the proxy object for current map style. More info at {@link Style}
-   * @param locationEngine        the engine
-   * @param locationEngineRequest the location request
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine,
-                                        @NonNull LocationEngineRequest locationEngineRequest) {
-    activateLocationComponent(context, style, locationEngine, locationEngineRequest, R.style.mapbox_LocationComponent);
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param locationEngine the engine, or null if you'd like to only force location updates
-   * @param style          the proxy object for current map style. More info at {@link Style}
-   * @param options        the options
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine,
-                                        @NonNull LocationComponentOptions options) {
-    initialize(context, style, false, options);
-    setLocationEngine(locationEngine);
-    applyStyle(options);
-  }
-
-  /**
-   * This method initializes the component and needs to be called before any other operations are performed.
-   * Afterwards, you can manage component's visibility by {@link #setLocationComponentEnabled(boolean)}.
-   *
-   * @param context               the context
-   * @param style                 the proxy object for current map style. More info at {@link Style}
-   * @param locationEngine        the engine, or null if you'd like to only force location updates
-   * @param locationEngineRequest the location request
-   * @param options               the options
-   * @deprecated use {@link LocationComponentActivationOptions.Builder} instead
-   */
-  @Deprecated
-  public void activateLocationComponent(@NonNull Context context, @NonNull Style style,
-                                        @Nullable LocationEngine locationEngine,
-                                        @NonNull LocationEngineRequest locationEngineRequest,
-                                        @NonNull LocationComponentOptions options) {
-    initialize(context, style, false, options);
-    setLocationEngineRequest(locationEngineRequest);
-    setLocationEngine(locationEngine);
-    applyStyle(options);
   }
 
   /**
@@ -472,7 +240,7 @@ public final class LocationComponent {
     if (options == null) {
       int styleRes = activationOptions.styleRes();
       if (styleRes == 0) {
-        styleRes = R.style.mapbox_LocationComponent;
+        styleRes = R.style.maplibre_LocationComponent;
       }
       options = LocationComponentOptions.createFromAttributes(activationOptions.context(), styleRes);
     }
@@ -498,7 +266,7 @@ public final class LocationComponent {
       setLocationEngine(locationEngine);
     } else {
       if (activationOptions.useDefaultLocationEngine()) {
-        initializeLocationEngine(activationOptions.context());
+        setLocationEngine(LocationEngineDefault.INSTANCE.getDefaultLocationEngine(activationOptions.context()));
       } else {
         setLocationEngine(null);
       }
@@ -1349,13 +1117,6 @@ public final class LocationComponent {
     onLocationLayerStart();
   }
 
-  private void initializeLocationEngine(@NonNull Context context) {
-    if (this.locationEngine != null) {
-      this.locationEngine.removeLocationUpdates(currentLocationEngineListener);
-    }
-    setLocationEngine(internalLocationEngineProvider.getBestLocationEngine(context, false));
-  }
-
   private void updateCompassListenerState(boolean canListen) {
     if (compassEngine != null) {
       if (!canListen) {
@@ -1706,12 +1467,6 @@ public final class LocationComponent {
         }
       }
     };
-
-  static class InternalLocationEngineProvider {
-    LocationEngine getBestLocationEngine(@NonNull Context context, boolean background) {
-      return LocationEngineProvider.getBestLocationEngine(context, background);
-    }
-  }
 
   private void checkActivationState() {
     if (!isComponentInitialized) {

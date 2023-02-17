@@ -8,58 +8,60 @@ import android.os.PersistableBundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_overlay.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityOverlayBinding
 
 /**
  * Test overlaying a Map with a View that uses a radial gradient shader.
  */
 class OverlayMapActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityOverlayBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_overlay)
-        mapView.onCreate(savedInstanceState)
-        parentView.addView(OverlayView(this))
-        mapView.getMapAsync {
+        binding = ActivityOverlayBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.mapView.onCreate(savedInstanceState)
+        binding.parentView.addView(OverlayView(this))
+        binding.mapView.getMapAsync {
             it.setStyle(Style.getPredefinedStyle("Streets"))
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
-            mapView.onSaveInstanceState(it)
+        outState.let {
+            binding.mapView.onSaveInstanceState(it)
         }
     }
 

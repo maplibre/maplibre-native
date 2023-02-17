@@ -10,9 +10,9 @@
         android:id="@id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_cameraTargetLat="51.50325"
-        app:mapbox_cameraTargetLng="-0.11968"
-        app:mapbox_cameraZoom="15"/>
+        app:maplibre_cameraTargetLat="51.50325"
+        app:maplibre_cameraTargetLng="-0.11968"
+        app:maplibre_cameraZoom="15"/>
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"

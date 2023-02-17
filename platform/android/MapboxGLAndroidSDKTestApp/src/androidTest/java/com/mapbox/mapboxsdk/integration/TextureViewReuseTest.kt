@@ -1,7 +1,7 @@
 package com.mapbox.mapboxsdk.integration
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.testapp.activity.maplayout.TextureRecyclerViewActivity
 import org.junit.Rule
@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 /**
  * Regression test that validates if a GLSurfaceView surface can be recreated without crashing.
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class TextureViewReuseTest : BaseIntegrationTest() {
 
     @get:Rule

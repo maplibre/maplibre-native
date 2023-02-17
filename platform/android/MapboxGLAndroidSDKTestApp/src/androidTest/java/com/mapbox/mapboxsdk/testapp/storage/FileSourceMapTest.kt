@@ -1,13 +1,13 @@
 package com.mapbox.mapboxsdk.testapp.storage
 
 import androidx.test.annotation.UiThreadTest
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.storage.FileSource
 import com.mapbox.mapboxsdk.testapp.activity.espresso.EspressoTestActivity
-import junit.framework.Assert
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -15,7 +15,7 @@ import org.junit.rules.TestName
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 open class FileSourceMapTest : AppCenter() {
 
     private lateinit var fileSourceTestUtils: FileSourceTestUtils

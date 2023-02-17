@@ -16,7 +16,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.*
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
@@ -24,14 +26,14 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.*
+import java.util.Objects
 
 /**
  * Test activity showcasing using a geojson source and visualise that source as a cluster by using filters.
  */
 class GeoJsonClusteringActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var clusterSource: GeoJsonSource? = null
     private var clickOptionCounter = 0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,8 +46,10 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map
-                mapboxMap!!.animateCamera(
+                if (map != null) {
+                    mapboxMap = map
+                }
+                mapboxMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(37.7749, 122.4194),
                         0.0
@@ -71,7 +75,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                     )
                 )
                 try {
-                    mapboxMap!!.setStyle(
+                    mapboxMap.setStyle(
                         Style.Builder()
                             .fromUri(Style.getPredefinedStyle("Bright"))
                             .withSource(createClusterSource().also { clusterSource = it })
@@ -83,7 +87,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                             .withImage(
                                 "icon-id",
                                 Objects.requireNonNull(
-                                    BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_hearing_black_24dp))
+                                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_hearing_black_24dp, null))
                                 )!!,
                                 true
                             )
@@ -91,10 +95,10 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 } catch (exception: URISyntaxException) {
                     Timber.e(exception)
                 }
-                mapboxMap!!.addOnMapClickListener { latLng: LatLng? ->
-                    val point = mapboxMap!!.projection.toScreenLocation(latLng!!)
+                mapboxMap.addOnMapClickListener { latLng: LatLng? ->
+                    val point = mapboxMap.projection.toScreenLocation(latLng!!)
                     val features =
-                        mapboxMap!!.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
+                        mapboxMap.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
                     if (!features.isEmpty()) {
                         onClusterClick(features[0], Point(point.x.toInt(), point.y.toInt()))
                     }
@@ -111,8 +115,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
     private fun onClusterClick(cluster: Feature, clickPoint: Point) {
         if (clickOptionCounter == 0) {
             val nextZoomLevel = clusterSource!!.getClusterExpansionZoom(cluster).toDouble()
-            val zoomDelta = nextZoomLevel - mapboxMap!!.cameraPosition.zoom
-            mapboxMap!!.animateCamera(
+            val zoomDelta = nextZoomLevel - mapboxMap.cameraPosition.zoom
+            mapboxMap.animateCamera(
                 CameraUpdateFactory.zoomBy(
                     zoomDelta + CAMERA_ZOOM_DELTA,
                     clickPoint
@@ -181,29 +185,27 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
         )
         val pointCount = Expression.toNumber(Expression.get("point_count"))
         circles.setFilter(
-            if (level == 0) Expression.all(
-                Expression.has("point_count"),
-                Expression.gte(
-                    pointCount,
-                    Expression.literal(
-                        layerColors[level][0]
+            if (level == 0) {
+                Expression.all(
+                    Expression.has("point_count"),
+                    Expression.gte(
+                        pointCount,
+                        Expression.literal(layerColors[level][0])
                     )
                 )
-            ) else Expression.all(
-                Expression.has("point_count"),
-                Expression.gt(
-                    pointCount,
-                    Expression.literal(
-                        layerColors[level][0]
-                    )
-                ),
-                Expression.lt(
-                    pointCount,
-                    Expression.literal(
-                        layerColors[level - 1][0]
+            } else {
+                Expression.all(
+                    Expression.has("point_count"),
+                    Expression.gt(
+                        pointCount,
+                        Expression.literal(layerColors[level][0])
+                    ),
+                    Expression.lt(
+                        pointCount,
+                        Expression.literal(layerColors[level - 1][0])
                     )
                 )
-            )
+            }
         )
         return circles
     }
@@ -227,37 +229,37 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -266,6 +268,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

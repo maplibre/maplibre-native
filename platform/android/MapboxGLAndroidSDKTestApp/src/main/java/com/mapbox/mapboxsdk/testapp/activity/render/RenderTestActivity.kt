@@ -20,12 +20,8 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.Exception
-import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset
-import java.util.ArrayList
-import java.util.HashMap
 
 /**
  * Activity that generates map snapshots based on the node render test suite.
@@ -86,13 +82,15 @@ class RenderTestActivity : AppCompatActivity() {
         protected override fun doInBackground(vararg p0: Void?): List<RenderTestDefinition>? {
             val definitions: MutableList<RenderTestDefinition> = ArrayList()
             val assetManager = renderTestActivityWeakReference.get()!!.assets
-            var categories = arrayOfNulls<String>(0)
-            try {
-                categories = assetManager.list(RENDER_TEST_BASE_PATH)
-            } catch (exception: IOException) {
-                Timber.e(exception)
-            }
-            for (counter in categories.indices.reversed()) {
+            val categories =
+                try {
+                    assetManager.list(RENDER_TEST_BASE_PATH)
+                } catch (exception: IOException) {
+                    Timber.e(exception)
+                    throw exception
+                }
+
+            for (counter in categories!!.indices.reversed()) {
                 try {
                     val tests = assetManager.list(
                         String.format(
@@ -101,7 +99,7 @@ class RenderTestActivity : AppCompatActivity() {
                             categories[counter]
                         )
                     )
-                    for (test in tests) {
+                    for (test in tests!!) {
                         val styleJson = loadStyleJson(assetManager, categories[counter], test)
                         val renderTestStyleDefinition = Gson()
                             .fromJson(styleJson, RenderTestStyleDefinition::class.java)
@@ -155,17 +153,22 @@ class RenderTestActivity : AppCompatActivity() {
         Timber.d("Render test %s,%s", renderTestDefinition.name, renderTestDefinition.category)
         mapSnapshotter = RenderTestSnapshotter(this, renderTestDefinition.toOptions())
         mapSnapshotter.start(
-            MapSnapshotter.SnapshotReadyCallback { result: MapSnapshot ->
-                val snapshot = result.bitmap
-                imageView!!.setImageBitmap(snapshot)
-                renderResultMap[renderTestDefinition] = snapshot
-                if (renderResultMap.size != testSize) {
-                    continueTesting(renderTestDefinition)
-                } else {
-                    finishTesting()
+            object : MapSnapshotter.SnapshotReadyCallback {
+                override fun onSnapshotReady(snapshot: MapSnapshot) {
+                    imageView!!.setImageBitmap(snapshot.bitmap)
+                    renderResultMap[renderTestDefinition] = snapshot.bitmap
+                    if (renderResultMap.size != testSize) {
+                        continueTesting(renderTestDefinition)
+                    } else {
+                        finishTesting()
+                    }
                 }
             },
-            MapSnapshotter.ErrorHandler { error: String? -> Timber.e(error) }
+            object : MapSnapshotter.ErrorHandler {
+                override fun onError(error: String) {
+                    Timber.e(error)
+                }
+            }
         )
     }
 

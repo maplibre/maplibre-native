@@ -94,8 +94,8 @@ TEST(TileCoordinate, ToGeometryCoordinate) {
     for (uint8_t zoom = 0; zoom <= 16; ++zoom) {
         auto maxTilesPerAxis = static_cast<uint32_t>(std::pow(2, zoom));
         for (const auto& edge : edges) {
-            uint32_t tileX = edge.x == 0 ? 0 : edge.x == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2) - 1;
-            uint32_t tileY = edge.y == 0 ? 0 : edge.y == 1 ? maxTilesPerAxis - 1 : (maxTilesPerAxis / 2) - 1;
+            uint32_t tileX = edge.x == 0 ? 0 : edge.x == 1 ? maxTilesPerAxis - 1 : static_cast<uint32_t>((maxTilesPerAxis / 2.0) - 1);
+            uint32_t tileY = edge.y == 0 ? 0 : edge.y == 1 ? maxTilesPerAxis - 1 : static_cast<uint32_t>((maxTilesPerAxis / 2.0) - 1);
             UnwrappedTileID unwrapped(0, CanonicalTileID { zoom, tileX, tileY });
 
             auto tilePointX = ((edge.x * maxTilesPerAxis) - tileX) * util::EXTENT;

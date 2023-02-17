@@ -16,7 +16,7 @@ using StorageType = QThreadStorage<std::array<void*, 1>>;
 ThreadLocalBase::ThreadLocalBase() {
     static_assert(sizeof(storage) >= sizeof(StorageType), "storage is too small");
     static_assert(alignof(decltype(storage)) % alignof(StorageType) == 0, "storage is incorrectly aligned");
-    new (&reinterpret_cast<StorageType&>(storage)) QThreadStorage<void*>();
+    new (&reinterpret_cast<StorageType&>(storage)) QThreadStorage<std::array<void*, 1>>();
 }
 
 ThreadLocalBase::~ThreadLocalBase() {

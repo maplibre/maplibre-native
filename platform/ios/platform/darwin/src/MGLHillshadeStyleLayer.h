@@ -73,7 +73,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 #if TARGET_OS_IPHONE
 /**
@@ -304,7 +304,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLHillshadeStyleLayerAdditions)
 
-#pragma mark Working with Hillshade Style Layer Attribute Values
+// MARK: Working with Hillshade Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLHillshadeIlluminationAnchor` enumeration.

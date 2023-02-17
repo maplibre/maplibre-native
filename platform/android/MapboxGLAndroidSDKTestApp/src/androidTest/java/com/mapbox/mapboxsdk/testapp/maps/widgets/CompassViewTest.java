@@ -29,7 +29,7 @@ public class CompassViewTest extends EspressoTest {
   }
 
   @Test
-  @Ignore
+  @Ignore("No explanation given")
   public void testVisible() {
     validateTestSetup();
     invoke(mapboxMap, (uiController, mapboxMap) -> {
@@ -38,7 +38,7 @@ public class CompassViewTest extends EspressoTest {
           .bearing(45)
           .zoom(1)
           .target(new LatLng())
-          .build()
+            .build()
       ));
       uiController.loopMainThreadForAtLeast(500);
     });
@@ -46,7 +46,7 @@ public class CompassViewTest extends EspressoTest {
   }
 
   @Test
-  @Ignore
+  @Ignore("No explanation given")
   public void testClick() {
     validateTestSetup();
     invoke(mapboxMap, (uiController, mapboxMap) -> mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(

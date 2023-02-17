@@ -125,7 +125,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier source:(MGLSource *)source;
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 /**
  Sorts features in ascending order based on this value. Features with a higher
@@ -142,7 +142,7 @@ MGL_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *circleSortKey;
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 /**
  Amount to blur the circle. 1 blurs the circle such that only the centerpoint is
@@ -516,7 +516,7 @@ MGL_EXPORT
  */
 @interface NSValue (MGLCircleStyleLayerAdditions)
 
-#pragma mark Working with Circle Style Layer Attribute Values
+// MARK: Working with Circle Style Layer Attribute Values
 
 /**
  Creates a new value object containing the given `MGLCirclePitchAlignment` enumeration.

@@ -25,10 +25,9 @@ enum FileSourceType : uint8_t {
     FileSystem,
     Network,
     Mbtiles,
-    // Resource loader acts as a proxy and has logic
-    // for request delegation to Asset, Cache, and other
-    // file sources.
-    ResourceLoader
+    ResourceLoader ///< %Resource loader acts as a proxy and has logic
+    /// for request delegation to Asset, Cache, and other
+    /// file sources.
 };
 
 // TODO: Rename to ResourceProvider to avoid confusion with
@@ -40,30 +39,30 @@ public:
 
     using Callback = std::function<void (Response)>;
 
-    // Request a resource. The callback will be called asynchronously, in the same
-    // thread as the request was made. This thread must have an active RunLoop. The
-    // request may be cancelled before completion by releasing the returned AsyncRequest.
-    // If the request is cancelled before the callback is executed, the callback will
-    // not be executed.
+    /// Request a resource. The callback will be called asynchronously, in the same
+    /// thread as the request was made. This thread must have an active RunLoop. The
+    /// request may be cancelled before completion by releasing the returned AsyncRequest.
+    /// If the request is cancelled before the callback is executed, the callback will
+    /// not be executed.
     virtual std::unique_ptr<AsyncRequest> request(const Resource&, Callback) = 0;
 
-    // Allows to forward response from one source to another.
-    // Optionally, callback can be provided to receive notification for forward
-    // operation.
+    /// Allows to forward response from one source to another.
+    /// Optionally, callback can be provided to receive notification for forward
+    /// operation.
     //
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     virtual void forward(const Resource&, const Response&, std::function<void()>) {}
 
-    // When a file source supports consulting a local cache only, it must return true.
-    // Cache-only requests are requests that aren't as urgent, but could be useful, e.g.
-    // to cover part of the map while loading. The FileSource should only do cheap actions to
-    // retrieve the data, e.g. load it from a cache, but not from the internet.
+    /// When a file source supports consulting a local cache only, it must return true.
+    /// Cache-only requests are requests that aren't as urgent, but could be useful, e.g.
+    /// to cover part of the map while loading. The FileSource should only do cheap actions to
+    /// retrieve the data, e.g. load it from a cache, but not from the internet.
     virtual bool supportsCacheOnlyRequests() const { return false; }
 
-    // Checks whether a resource could be requested from this file source.
+    /// Checks whether a resource could be requested from this file source.
     virtual bool canRequest(const Resource&) const = 0;
 
-    /*
+    /**
      * Pause file request activity.
      *
      * If pause is called then no revalidation or network request activity
@@ -71,7 +70,7 @@ public:
      */
     virtual void pause() {}
 
-    /*
+    /**
      * Resume file request activity.
      *
      * Calling resume will unpause the file source and process any tasks that
@@ -79,23 +78,18 @@ public:
      */
     virtual void resume() {}
 
-    /*
-     * Generic property setter / getter methods.
-     */
+    /// Generic setter method
     virtual void setProperty(const std::string&, const mapbox::base::Value&){};
+    /// Generic getter method
     virtual mapbox::base::Value getProperty(const std::string&) const { return {}; };
 
-    // When supported, sets the modifier of the requested resources.
+    /// When supported, sets the modifier of the requested resources.
     virtual void setResourceTransform(ResourceTransform) {} // NOLINT(performance-unnecessary-value-param)
 
-    // sets the resource options
     virtual void setResourceOptions(ResourceOptions) = 0;
-    // gets the resource options
     virtual ResourceOptions getResourceOptions() = 0;
 
-    // sets the client options
     virtual void setClientOptions(ClientOptions) = 0;
-    // gets the client options
     virtual ClientOptions getClientOptions() = 0;
 
 protected:
@@ -104,22 +98,22 @@ protected:
 
 // Properties that may be supported by online file sources:
 
-// Property name to set / get an access token.
-// type: std::string
+/// Property name to set / get an access token.
+/// type: std::string
 constexpr const char* API_KEY_KEY = "api-tkey";
 
-// Property name to set / get base url.
-// type: std::string
+/// Property name to set / get base url.
+/// type: std::string
 constexpr const char* API_BASE_URL_KEY = "api-base-url";
 
-// Property name to set / get maximum number of concurrent requests.
-// type: unsigned
+/// Property name to set / get maximum number of concurrent requests.
+/// type: unsigned
 constexpr const char* MAX_CONCURRENT_REQUESTS_KEY = "max-concurrent-requests";
 
 // Properties that may be supported by database file sources:
 
-// Property to set database mode. When set, database opens in read-only mode; database opens in read-write-create mode
-// otherwise. type: bool
+/// Property to set database mode. When set, database opens in read-only mode; database opens in read-write-create mode
+/// otherwise. type: bool
 constexpr const char* READ_ONLY_MODE_KEY = "read-only-mode";
 
 } // namespace mbgl

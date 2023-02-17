@@ -74,6 +74,161 @@
 #include <cstdlib>
 #include <map>
 #include <unordered_set>
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+#include <sys/sysctl.h>
+
+// The m1 simulator's gesture's velocity is wrong and here is a workaround to fix it.
+// These custom gestures will calculate the correct velocity.
+// This may because the system time is incorrect.
+
+@interface MBGLPanGesture : UIPanGestureRecognizer
+@end
+
+@interface MBGLPinchGesture : UIPinchGestureRecognizer
+@end
+
+@interface MBGLRotationGesture : UIRotationGestureRecognizer
+@end
+
+@implementation MBGLPanGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGPoint _lastTouch;
+    CGPoint __velocity;
+}
+
+- (CGPoint)velocityInView:(nullable UIView *)view {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocityInView:view];
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+
+    UITouch *touch = [touches anyObject];
+    _lastTouch = [touch locationInView:self.view];
+    customVelocity = true;
+  
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        UITouch *touch = [touches anyObject];
+        CGPoint touchLoc = [touch locationInView:self.view];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity.x = ((touchLoc.x - _lastTouch.x) / delta) * 0.9 + __velocity.x * 0.1;
+            __velocity.y = ((touchLoc.y - _lastTouch.y) / delta) * 0.9 + __velocity.y * 0.1;
+        }
+        _lastTouch = touchLoc;
+        _lastTime = now;
+    }
+    [super touchesMoved:touches withEvent:event];
+
+}
+@end
+
+@implementation MBGLPinchGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGFloat _lastScale;
+    CGFloat __velocity;
+}
+
+- (CGFloat)velocity {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocity];
+}
+
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+    
+    _lastScale = 0;
+    customVelocity = true;
+
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
+
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        CGFloat scale = [super scale];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity = ((scale - _lastScale) / delta) * 0.9 + __velocity * 0.1;
+        }
+        _lastScale = scale;
+        _lastTime = now;
+    }
+}
+@end
+
+@implementation MBGLRotationGesture {
+    bool customVelocity;
+    NSTimeInterval _lastTime;
+    CGFloat _lastRotation;
+    CGFloat __velocity;
+}
+
+- (CGFloat)velocity {
+    if (customVelocity) {
+        return __velocity;
+    }
+    
+    return [super velocity];
+}
+
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    _lastTime = NSProcessInfo.processInfo.systemUptime;
+
+    _lastRotation = 0;
+    customVelocity = true;
+
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
+
+    if (customVelocity && touches.count) {
+        CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        CGFloat rotation = [super rotation];
+        auto delta = now - _lastTime;
+        if (delta > 0) {
+            __velocity = ((rotation - _lastRotation) / delta) * 0.9 + __velocity * 0.1;
+        }
+        _lastRotation = rotation;
+        _lastTime = now;
+    }
+}
+@end
+
+int processIsTranslated() {
+    int ret = 0;
+    size_t size = sizeof(ret);
+
+    // Call the sysctl and if successful return the result
+    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) != -1)
+        return ret;
+    // If "sysctl.proc_translated" is not present then must be native
+    if (errno == ENOENT)
+        return 0;
+    return -1;
+}
+
+#endif
 
 class MGLAnnotationContext;
 
@@ -160,12 +315,6 @@ enum { MGLAnnotationTagNotFound = UINT32_MAX };
 /// The threshold used to consider when a tilt gesture should start.
 const CLLocationDegrees MGLHorizontalTiltToleranceDegrees = 45.0;
 
-/// The time between background snapshot attempts.
-const NSTimeInterval MGLBackgroundSnapshotImageInterval = 60.0;
-
-/// The delay after the map has idled before a background snapshot is attempted.
-const NSTimeInterval MGLBackgroundSnapshotImageIdleDelay = 3.0;
-
 /// Mapping from an annotation tag to metadata about that annotation, including
 /// the annotation itself.
 typedef std::unordered_map<MGLAnnotationTag, MGLAnnotationContext> MGLAnnotationTagContextMap;
@@ -196,7 +345,7 @@ public:
     NSString *viewReuseIdentifier;
 };
 
-#pragma mark - Private -
+// MARK: - Private -
 
 @interface MGLMapView () <UIGestureRecognizerDelegate,
                           MGLLocationManagerDelegate,
@@ -204,8 +353,6 @@ public:
                           MGLCalloutViewDelegate,
                           MGLMultiPointDelegate,
                           MGLAnnotationImageDelegate>
-
-@property (nonatomic) UIImageView *glSnapshotView;
 
 @property (nonatomic) NSMutableArray<NSLayoutConstraint *> *scaleBarConstraints;
 @property (nonatomic, readwrite) MGLScaleBar *scaleBar;
@@ -264,7 +411,6 @@ public:
 @property (nonatomic) MGLUserLocation *userLocation;
 @property (nonatomic) NSMutableDictionary<NSString *, NSMutableArray<MGLAnnotationView *> *> *annotationViewReuseQueueByIdentifier;
 @property (nonatomic, readonly) BOOL enablePresentsWithTransaction;
-@property (nonatomic) UIImage *lastSnapshotImage;
 @property (nonatomic) NSMutableArray *pendingCompletionBlocks;
 
 /// Experimental rendering performance measurement.
@@ -348,7 +494,7 @@ public:
     CFTimeInterval _frameDurations;
 }
 
-#pragma mark - Setup & Teardown -
+// MARK: - Setup & Teardown -
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -598,19 +744,44 @@ public:
     
     self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
     
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    bool isM1Simulator = processIsTranslated() > 0;
+    if (isM1Simulator) {
+        _pan = [[MBGLPanGesture alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+    } else {
+        _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+    }
+#else
     _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+#endif
     _pan.delegate = self;
     _pan.maximumNumberOfTouches = 1;
     [self addGestureRecognizer:_pan];
     _scrollEnabled = YES;
     _panScrollingMode = MGLPanScrollingModeDefault;
 
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    if (isM1Simulator) {
+        _pinch = [[MBGLPinchGesture alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    } else {
+        _pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    }
+#else
     _pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+#endif
     _pinch.delegate = self;
     [self addGestureRecognizer:_pinch];
     _zoomEnabled = YES;
 
+#if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
+    if (isM1Simulator) {
+        _rotate = [[MBGLRotationGesture alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+    } else {
+        _rotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+    }
+#else
     _rotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotateGesture:)];
+#endif
     _rotate.delegate = self;
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
@@ -785,8 +956,6 @@ public:
     {
         _rendererFrontend->reduceMemoryUse();
     }
-    
-    self.lastSnapshotImage = nil;
 }
 
 - (MGLMapViewImpl *)viewImpl
@@ -794,7 +963,7 @@ public:
     return _mbglView.get();
 }
 
-#pragma mark - Layout -
+// MARK: - Layout -
 
 + (BOOL)requiresConstraintBasedLayout
 {
@@ -1198,7 +1367,7 @@ public:
     return CGPointMake(CGRectGetMidX(contentFrame), CGRectGetMidY(contentFrame));
 }
 
-#pragma mark - Pending completion blocks
+// MARK: - Pending completion blocks
 
 - (void)processPendingBlocks
 {
@@ -1226,7 +1395,7 @@ public:
     return NO;
 }
 
-#pragma mark - Life Cycle -
+// MARK: - Life Cycle -
 
 - (void)updateFromDisplayLink:(CADisplayLink *)displayLink
 {
@@ -1666,7 +1835,7 @@ public:
     [self updateFromDisplayLink:self.displayLink];
 }
 
-#pragma mark - Application lifecycle
+// MARK: - Application lifecycle
 - (void)willResignActive:(NSNotification *)notification
 {
     MGLAssertIsMainThread();
@@ -1723,11 +1892,6 @@ public:
 
     self.dormant = YES;
 
-    // We want to add a snapshot image over the top of the map view, so that
-    // there are no glitches when the application comes back into the foreground
-
-    [self enableSnapshotView];
-
     // Handle non-rendering issues.
     [self validateLocationServices];
 }
@@ -1757,10 +1921,8 @@ public:
         }
     }
     self.dormant = NO;
-    // Note: We do not remove the snapshot view (if there is one) until we have become
-    // active.
-    [self validateLocationServices];
     
+    [self validateLocationServices];
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
@@ -1773,7 +1935,7 @@ public:
     [self resumeRenderingIfNecessary];
 }
 
-#pragma mark - GL / display link wake/sleep
+// MARK: - GL / display link wake/sleep
 
 - (EAGLContext *)context {
     return _mbglView->getEAGLContext();
@@ -1794,32 +1956,6 @@ public:
     BOOL supportsBackgroundRendering =  (screen && (screen != [UIScreen mainScreen]));
     MGLLogDebug(@"supportsBackgroundRendering=%d",supportsBackgroundRendering);
     return supportsBackgroundRendering;
-}
-
-- (void)enableSnapshotView {
-    if (self.lastSnapshotImage)
-    {
-        if ( ! self.glSnapshotView)
-        {
-            self.glSnapshotView = [[UIImageView alloc] initWithFrame: _mbglView->getView().frame];
-            self.glSnapshotView.autoresizingMask = _mbglView->getView().autoresizingMask;
-            self.glSnapshotView.contentMode = UIViewContentModeCenter;
-            [self insertSubview:self.glSnapshotView aboveSubview:_mbglView->getView()];
-        }
-
-        self.glSnapshotView.image = self.lastSnapshotImage;
-        self.glSnapshotView.hidden = NO;
-        self.glSnapshotView.opaque = NO;
-        self.glSnapshotView.alpha = 1;
-
-        if (self.debugMask && [self.glSnapshotView.subviews count] == 0)
-        {
-            UIView *snapshotTint = [[UIView alloc] initWithFrame:self.glSnapshotView.bounds];
-            snapshotTint.autoresizingMask = self.glSnapshotView.autoresizingMask;
-            snapshotTint.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.25];
-            [self.glSnapshotView addSubview:snapshotTint];
-        }
-    }
 }
 
 - (void)resumeRenderingIfNecessary {
@@ -1857,20 +1993,6 @@ public:
                 [self stopDisplayLink];
             }
         }
-    }
-
-    // Reveal the snapshot view
-
-    if (self.glSnapshotView && !self.glSnapshotView.isHidden) {
-        [UIView transitionWithView:self
-                          duration:0.25
-                           options:UIViewAnimationOptionTransitionCrossDissolve
-                        animations:^{
-            self.glSnapshotView.hidden = YES;
-        }
-                        completion:^(BOOL finished) {
-            [self.glSnapshotView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        }];
     }
 }
 
@@ -1911,7 +2033,7 @@ public:
     return YES;
 }
 
-#pragma mark - Gestures -
+// MARK: - Gestures -
 
 - (void)touchesBegan:(__unused NSSet<UITouch *> *)touches withEvent:(__unused UIEvent *)event
 {
@@ -1991,7 +2113,6 @@ public:
     else if (pan.state == UIGestureRecognizerStateChanged)
     {
         CGPoint delta = [pan translationInView:pan.view];
-
         MGLMapCamera *toCamera = [self cameraByPanningWithTranslation:delta panGesture:pan];
 
         if ([self _shouldChangeFromCamera:oldCamera toCamera:toCamera])
@@ -2735,7 +2856,7 @@ public:
     return angleInDegrees;
 }
 
-#pragma mark - Attribution -
+// MARK: - Attribution -
 
 - (void)showAttribution:(id)sender
 {
@@ -2782,7 +2903,7 @@ public:
     self.attributionController = attributionController;
 }
 
-#pragma mark - Properties -
+// MARK: - Properties -
 
 static void *windowScreenContext = &windowScreenContext;
 
@@ -3028,7 +3149,7 @@ static void *windowScreenContext = &windowScreenContext;
     return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
-#pragma mark - Accessibility -
+// MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
 {
@@ -3557,7 +3678,7 @@ static void *windowScreenContext = &windowScreenContext;
     _accessibilityValueAnnouncementIsPending = YES;
 }
 
-#pragma mark - Geography -
+// MARK: - Geography -
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingCenterCoordinate
 {
@@ -4365,14 +4486,14 @@ static void *windowScreenContext = &windowScreenContext;
     return [[MGLMapProjection alloc] initWithMapView:self];
 }
 
-#pragma mark - Camera Change Reason -
+// MARK: - Camera Change Reason -
 
 - (void)resetCameraChangeReason
 {
     self.cameraChangeReasonBitmask = MGLCameraChangeReasonNone;
 }
 
-#pragma mark - Annotations -
+// MARK: - Annotations -
 
 - (nullable NSArray<id <MGLAnnotation>> *)annotations
 {
@@ -5619,7 +5740,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 
-#pragma mark Annotation Image Delegate
+// MARK: Annotation Image Delegate
 
 - (void)annotationImageNeedsRedisplay:(MGLAnnotationImage *)annotationImage
 {
@@ -5667,7 +5788,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-#pragma mark - User Location -
+// MARK: - User Location -
 
 - (void)setLocationManager:(nullable id<MGLLocationManager>)locationManager
 {
@@ -6375,7 +6496,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-#pragma mark Data
+// MARK: Data
 
 - (NSArray<id <MGLFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
 {
@@ -6450,7 +6571,7 @@ static void *windowScreenContext = &windowScreenContext;
     return MGLFeaturesFromMBGLFeatures(features);
 }
 
-#pragma mark - Utility -
+// MARK: - Utility -
 
 - (void)animateWithDelay:(NSTimeInterval)delay animations:(void (^)(void))animations
 {
@@ -6660,8 +6781,6 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewWillStartRenderingFrame {
-    [self cancelBackgroundSnapshot];
-
     if (!_mbglMap)
     {
         return;
@@ -6721,10 +6840,6 @@ static void *windowScreenContext = &windowScreenContext;
     if (!_mbglMap) {
         return;
     }
-
-#ifdef MBGL_ENABLE_MAP_SNAPSHOTS
-    [self queueBackgroundSnapshot];
-#endif
 
     if ([self.delegate respondsToSelector:@selector(mapViewDidBecomeIdle:)]) {
         [self.delegate mapViewDidBecomeIdle:self];
@@ -7204,43 +7319,9 @@ static void *windowScreenContext = &windowScreenContext;
     return _annotationViewReuseQueueByIdentifier[identifier];
 }
 
-#pragma mark - Snapshot image -
-
-- (void)attemptBackgroundSnapshot {
-    static NSTimeInterval lastSnapshotTime = 0.0;
-
-    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
-        return;
-    }
-
-    NSTimeInterval now = CACurrentMediaTime();
-
-    if (lastSnapshotTime == 0.0 || (now - lastSnapshotTime > MGLBackgroundSnapshotImageInterval)) {
-        MGLLogDebug(@"Taking snapshot");
-        self.lastSnapshotImage = _mbglView->snapshot();
-        lastSnapshotTime = now;
-    }
-}
-
-- (void)cancelBackgroundSnapshot
-{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(attemptBackgroundSnapshot) object:nil];
-}
-
-- (void)queueBackgroundSnapshot {
-    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
-        return;
-    }
-
-    [self cancelBackgroundSnapshot];
-    [self performSelector:@selector(attemptBackgroundSnapshot)
-               withObject:nil
-               afterDelay:MGLBackgroundSnapshotImageIdleDelay];
-}
-
 @end
 
-#pragma mark - IBAdditions methods
+// MARK: - IBAdditions methods
 
 @implementation MGLMapView (IBAdditions)
 

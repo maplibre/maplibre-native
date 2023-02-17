@@ -39,8 +39,8 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
     /*
    * UI elements
    */
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var progressBar: ProgressBar? = null
     private var downloadRegion: Button? = null
     private var listRegions: Button? = null
@@ -63,8 +63,8 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
         // Set up map
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             Timber.d("Map is ready")
             this@OfflineActivity.mapboxMap = mapboxMap
             mapboxMap.setStyle(Style.Builder().fromUri(STYLE_URL))
@@ -96,37 +96,37 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     /*
@@ -145,9 +145,9 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
         // Query the DB asynchronously
         offlineManager!!.listOfflineRegions(object : ListOfflineRegionsCallback {
-            override fun onList(offlineRegions: Array<OfflineRegion>) {
+            override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 // Check result
-                if (offlineRegions == null || offlineRegions.size == 0) {
+                if (offlineRegions == null || offlineRegions.isEmpty()) {
                     Toast.makeText(
                         this@OfflineActivity,
                         "You have no regions yet.",
@@ -181,7 +181,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
     /*
    * Dialogs
    */
-    override fun onDownloadRegionDialogPositiveClick(regionName: String) {
+    override fun onDownloadRegionDialogPositiveClick(regionName: String?) {
         if (TextUtils.isEmpty(regionName)) {
             Toast.makeText(this@OfflineActivity, "Region name cannot be empty.", Toast.LENGTH_SHORT)
                 .show()
@@ -193,9 +193,9 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
         startProgress()
 
         // Definition
-        val bounds = mapboxMap!!.projection.visibleRegion.latLngBounds
-        val minZoom = mapboxMap!!.cameraPosition.zoom
-        val maxZoom = mapboxMap!!.maxZoomLevel
+        val bounds = mapboxMap.projection.visibleRegion.latLngBounds
+        val minZoom = mapboxMap.cameraPosition.zoom
+        val maxZoom = mapboxMap.maxZoomLevel
         val pixelRatio = this.resources.displayMetrics.density
         val definition = OfflineTilePyramidRegionDefinition(
             STYLE_URL,
@@ -209,21 +209,23 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
         val metadata = OfflineUtils.convertRegionName(regionName)
 
         // Create region
-        offlineManager!!.createOfflineRegion(
-            definition,
-            metadata,
-            object : CreateOfflineRegionCallback {
-                override fun onCreate(offlineRegion: OfflineRegion) {
-                    Timber.d("Offline region created: %s", regionName)
-                    this@OfflineActivity.offlineRegion = offlineRegion
-                    launchDownload()
-                }
+        if (metadata != null) {
+            offlineManager!!.createOfflineRegion(
+                definition,
+                metadata,
+                object : CreateOfflineRegionCallback {
+                    override fun onCreate(offlineRegion: OfflineRegion) {
+                        Timber.d("Offline region created: %s", regionName)
+                        this@OfflineActivity.offlineRegion = offlineRegion
+                        launchDownload()
+                    }
 
-                override fun onError(error: String) {
-                    Timber.e("Error: %s", error)
+                    override fun onError(error: String) {
+                        Timber.e("Error: %s", error)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun launchDownload() {
@@ -308,7 +310,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
 
     companion object {
         // JSON encoding/decoding
-        const val JSON_CHARSET = "UTF-8"
+        val JSON_CHARSET = Charsets.UTF_8
         const val JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME"
 
         // Style URL

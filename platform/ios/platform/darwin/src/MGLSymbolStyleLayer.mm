@@ -171,7 +171,7 @@ namespace mbgl {
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
-#pragma mark - Accessing the Layout Attributes
+// MARK: - Accessing the Layout Attributes
 
 - (void)setIconAllowsOverlap:(NSExpression *)iconAllowsOverlap {
     MGLAssertStyleLayerIsValid();
@@ -1053,7 +1053,7 @@ namespace mbgl {
     return self.textWritingModes;
 }
 
-#pragma mark - Accessing the Paint Attributes
+// MARK: - Accessing the Paint Attributes
 
 - (void)setIconColor:(NSExpression *)iconColor {
     MGLAssertStyleLayerIsValid();

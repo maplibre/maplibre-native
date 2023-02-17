@@ -1,6 +1,104 @@
-# Changelog for the Mapbox Maps SDK for Android
+# Changelog for the MapLibre Maps SDK for Android
 
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/main/CONTRIBUTING.md) to get started.
+
+## main
+
+* Add your pull request...
+
+## 10.0.0 - February 15, 2023
+
+### ✨ Features and improvements
+
+* 💥 Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` ([#647](https://github.com/maplibre/maplibre-gl-native/pull/647)) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
+
+  > To migrate:  
+  > If you use any of the public Android resources, you will get an error that they can not be found. Replace the prefix of each, e.g. `R.style.mapbox_LocationComponent` -> `R.style.maplibre_LocationComponent`.
+
+* 💥 Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead. 
+
+  > To migrate, as an example:
+  > ```kotlin
+  >  locationComponent.activateLocationComponent(context, style, false, locationEngineRequest, locationComponentOptions)
+  >  ```
+  > becomes
+  >  ```kotlin
+  >  val options = LocationComponentActivationOptions.builder(context, style).useDefaultLocationEngine(false).locationEngineRequest(locationEngineRequest).locationComponentOptions(locationComponentOptions).build()
+  >  locationComponent.activateLocationComponent(options)
+  >  ```
+
+* 💥 Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre GL Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-gl-native/issues/379)).
+
+  > To migrate:  
+  > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-gl-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
+  >  
+  > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-gl-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):
+  >  ```kotlin
+  >  val locationEngine = LocationEngineProxy<Any>(GoogleLocationEngineImpl(context))
+  >  val options = LocationComponentActivationOptions.builder(context, style).locationEngine(locationEngine).build()
+  >  locationComponent.activateLocationComponent(options)
+  >  ```
+
+* 💥 Breaking: The static `LocationEngineResult.extractResult` can no longer extract a `LocationEngineResult` from a Google Play intent.
+
+  > To migrate, include and use the [previous implementation](https://github.com/maplibre/maplibre-gl-native/blob/ea234edf67bb3aec75f077e15c1c30c99756b926/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineResult.java#L97) in your source tree.
+ 
+* Improve Kotlinification of LatLng ([#742](https://github.com/maplibre/maplibre-gl-native/issues))
+* Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014 and lessens the backward compatibility burden ([#630](https://github.com/maplibre/maplibre-gl-native/pull/630))
+
+### 🐞 Bug fixes
+
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
+*  `BitmapUtils.mergeBitmap` was deprecated, `BitmapUtils.mergeBitmaps` is a new method that does not offset views rendered on top of snapshots ([#733](https://github.com/maplibre/maplibre-gl-native/issues/733))
+* Fixed a crash when native code was accessing the LatLngBounds class [#655](https://github.com/maplibre/maplibre-gl-native/pull/)
+
+### ⛵ Dependencies
+
+* Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
+
+## 9.6.0 - December 18, 2022
+
+### ✨ Features and improvements
+
+* Add missing header guards ([#543](https://github.com/maplibre/maplibre-gl-native/pull/543))
+* Removing unused versions sdk ([#515](https://github.com/maplibre/maplibre-gl-native/pull/515))
+* (tag: node-v5.0.1-pre.0) Upgrade libs and remove Jetifier ([#218](https://github.com/maplibre/maplibre-gl-native/pull/218))
+* Migrate examples in android TestApp to Kotlin ([#416](https://github.com/maplibre/maplibre-gl-native/pull/416))
+* Add ClientOptions to be able to pass around client name and version ([#365](https://github.com/maplibre/maplibre-gl-native/pull/365))
+* Use maplibre docs for more links ([#354](https://github.com/maplibre/maplibre-gl-native/pull/354))
+* Use the MapLibre style spec docs website ([#353](https://github.com/maplibre/maplibre-gl-native/pull/353))
+* Refresh iOS & Android build docs ([5f679b55b](https://github.com/maplibre/maplibre-gl-native/commit/5f679b55b))
+* Qt build improvements and documentation ([#277](https://github.com/maplibre/maplibre-gl-native/pull/277))
+* Replace Mapbox with MapLibre in README titles ([#297](https://github.com/maplibre/maplibre-gl-native/pull/297))
+* Rename MaptilerFileSource to MBTilesFileSource ([#198](https://github.com/maplibre/maplibre-gl-native/pull/198))
+* Changed missed MapBox reference to MapLibre ([#253](https://github.com/maplibre/maplibre-gl-native/pull/253))
+* Implement map projection functionality ([#254](https://github.com/maplibre/maplibre-gl-native/pull/254))
+* chore: rename master -> main in CI and scripts ([#246](https://github.com/maplibre/maplibre-gl-native/pull/246))
+* Feature - Bring back node support ([#217](https://github.com/maplibre/maplibre-gl-native/pull/217))
+* Remove obsolete CI configurations ([#219](https://github.com/maplibre/maplibre-gl-native/pull/219))
+
+### 🐞 Bug fixes
+
+* Fixes potential NaN when calling `NativeMapView::nativeMoveBy` ([#501](https://github.com/maplibre/maplibre-gl-native/pull/501))
+* Fix android ci workflows ([#476](https://github.com/maplibre/maplibre-gl-native/pull/476))
+* Fix typo in geo.cpp ([#412](https://github.com/maplibre/maplibre-gl-native/pull/412))
+* Fix render tests ([#351](https://github.com/maplibre/maplibre-gl-native/pull/351))
+* fix shiftY calculation typo ([#285](https://github.com/maplibre/maplibre-gl-native/pull/285))
+* [msvc] Fix warnings, mainly casting to smaller types ([#270](https://github.com/maplibre/maplibre-gl-native/pull/270))
+* Fix street label appearance while animating near zoom level threshhold ([#267](https://github.com/maplibre/maplibre-gl-native/pull/267))
+
+### ⛵ Dependencies
+
+* Bump semver from 7.3.7 to 7.3.8 in /platform/android ([#530](https://github.com/maplibre/maplibre-gl-native/pull/530))
+* Bump to JDK 11 in android CI and generate Gradle Wrapper ([#474](https://github.com/maplibre/maplibre-gl-native/pull/474))
+* Bump ejs from 3.1.7 to 3.1.8 in /platform/android ([#470](https://github.com/maplibre/maplibre-gl-native/pull/470))
+* Upgrade Gradle from 3.6.3 to 3.6.4 ([#456](https://github.com/maplibre/maplibre-gl-native/pull/456))
+* Bump semver from 5.7.1 to 7.3.7 in /platform/android ([#461](https://github.com/maplibre/maplibre-gl-native/pull/461))
+* Bump pixelmatch from 4.0.2 to 5.3.0 in /platform/android ([#460](https://github.com/maplibre/maplibre-gl-native/pull/460))
+* Bump esm from 3.1.0 to 3.2.25 in /platform/android ([#463](https://github.com/maplibre/maplibre-gl-native/pull/463))
+* Bump ejs from 2.7.4 to 3.1.7 in /platform/android ([#299](https://github.com/maplibre/maplibre-gl-native/pull/299))
+* Bump lodash from 4.17.19 to 4.17.21 in /platform/android ([#195](https://github.com/maplibre/maplibre-gl-native/pull/195))
+
 
 ## 9.5.2 - December 02, 2021
 

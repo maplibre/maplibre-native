@@ -6,10 +6,10 @@
         android:id="@id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_cameraTargetLat="40.7135"
-        app:mapbox_cameraTargetLng="-74.0066"
-        app:mapbox_cameraTilt="45"
-        app:mapbox_cameraZoom="15"/>
+        app:maplibre_cameraTargetLat="40.7135"
+        app:maplibre_cameraTargetLng="-74.0066"
+        app:maplibre_cameraTilt="45"
+        app:maplibre_cameraZoom="15"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabLightPosition"

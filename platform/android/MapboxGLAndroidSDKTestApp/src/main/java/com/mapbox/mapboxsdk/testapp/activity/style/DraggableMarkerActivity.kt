@@ -21,8 +21,7 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_draggable_marker.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityDraggableMarkerBinding
 
 /**
  * An Activity that showcases how to make symbols draggable.
@@ -46,8 +45,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
         supportActionBar?.height ?: 0
     }
 
-    // View property is required for activity sanity tests
-    // we perform reflection on this requires using findViewById
+    private lateinit var binding: ActivityDraggableMarkerBinding
     private lateinit var mapView: MapView
     private lateinit var mapboxMap: MapboxMap
     private val featureCollection = FeatureCollection.fromFeatures(mutableListOf())
@@ -63,9 +61,10 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_draggable_marker)
+        binding = ActivityDraggableMarkerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        mapView = findViewById(R.id.mapView)
+        mapView = binding.mapView
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { mapboxMap ->
             this.mapboxMap = mapboxMap
@@ -122,7 +121,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
             // Adding symbol drag listeners
             draggableSymbolsManager?.addOnSymbolDragListener(object : DraggableSymbolsManager.OnSymbolDragListener {
                 override fun onSymbolDragStarted(id: String) {
-                    draggedMarkerPositionTv.visibility = View.VISIBLE
+                    binding.draggedMarkerPositionTv.visibility = View.VISIBLE
                     Snackbar.make(
                         mapView,
                         "Marker drag started (%s)".format(id),
@@ -135,11 +134,11 @@ class DraggableMarkerActivity : AppCompatActivity() {
                     val point = featureCollection.features()?.find {
                         it.id() == id
                     }?.geometry() as Point
-                    draggedMarkerPositionTv.text = "Dragged marker's position: %.4f, %.4f".format(point.latitude(), point.longitude())
+                    binding.draggedMarkerPositionTv.text = "Dragged marker's position: %.4f, %.4f".format(point.latitude(), point.longitude())
                 }
 
                 override fun onSymbolDragFinished(id: String) {
-                    draggedMarkerPositionTv.visibility = View.GONE
+                    binding.draggedMarkerPositionTv.visibility = View.GONE
                     Snackbar.make(
                         mapView,
                         "Marker drag finished (%s)".format(id),
@@ -334,7 +333,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
         mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
             mapView.onSaveInstanceState(it)

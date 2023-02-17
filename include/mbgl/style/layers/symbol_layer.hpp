@@ -275,6 +275,7 @@ public:
     TransitionOptions getTextTranslateAnchorTransition() const;
 
     // Private implementation
+    /// @cond FALSE
 
     class Impl;
     const Impl& impl() const;

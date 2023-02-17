@@ -20,21 +20,21 @@ import java.net.URISyntaxException
  *
  */
 class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
-    private var mapView: MapView? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapView: MapView
+    private lateinit var mapboxMap: MapboxMap
     private var handler: Handler? = null
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_default)
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync(this)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
     }
 
     override fun onMapReady(map: MapboxMap) {
         mapboxMap = map
-        mapboxMap!!.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
+        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
             try {
                 style.addSource(GeoJsonSource(ID_GEOJSON_SOURCE, URI(URL_GEOJSON_SOURCE)))
             } catch (malformedUriException: URISyntaxException) {
@@ -49,39 +49,43 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
             // loop refresh geojson
             handler = Handler()
             runnable = RefreshGeoJsonRunnable(mapboxMap!!, handler!!)
-            handler!!.postDelayed(runnable, 2000)
+            runnable?.let {
+                handler!!.postDelayed(it, 2000)
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     public override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     public override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
-        handler!!.removeCallbacks(runnable)
+        mapView.onStop()
+        runnable?.let {
+            handler!!.removeCallbacks(it)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private class RefreshGeoJsonRunnable internal constructor(
@@ -89,11 +93,8 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
         private val handler: Handler
     ) : Runnable {
         override fun run() {
-            (
-                mapboxMap.style!!
-                    .getSource(ID_GEOJSON_SOURCE) as GeoJsonSource?
-                )!!.url =
-                URL_GEOJSON_SOURCE
+            val geoJsonSource = mapboxMap.style!!.getSource(ID_GEOJSON_SOURCE) as GeoJsonSource
+            geoJsonSource.url = URL_GEOJSON_SOURCE
             handler.postDelayed(this, 2000)
         }
     }

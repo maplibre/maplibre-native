@@ -48,7 +48,7 @@ void stringify(Writer& writer, const std::string& v) {
     writer.String(v);
 }
 
-template <class Writer, class T, class Enable = std::enable_if_t<std::is_enum<T>::value>>
+template <class Writer, class T, class Enable = std::enable_if_t<std::is_enum_v<T>>>
 void stringify(Writer& writer, const T& v) {
     writer.String(Enum<T>::toString(v));
 }

@@ -35,7 +35,7 @@
     }
 }
 
-#pragma mark UIAccessibility methods
+// MARK: UIAccessibility methods
 
 - (UIAccessibilityTraits)accessibilityTraits {
     return UIAccessibilityTraitAdjustable;

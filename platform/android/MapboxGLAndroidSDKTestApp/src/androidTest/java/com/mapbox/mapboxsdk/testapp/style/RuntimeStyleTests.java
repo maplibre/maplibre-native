@@ -6,7 +6,7 @@ import android.view.View;
 
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import com.mapbox.mapboxsdk.style.layers.CannotAddLayerException;
 import com.mapbox.mapboxsdk.style.layers.CircleLayer;
@@ -23,9 +23,8 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.mapboxsdk.testapp.R;
 import com.mapbox.mapboxsdk.testapp.activity.EspressoTest;
 
-import junit.framework.Assert;
-
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,7 +46,7 @@ import static org.junit.Assert.fail;
 /**
  * Basic smoke tests for Layer and Source
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public class RuntimeStyleTests extends EspressoTest {
 
   @Test

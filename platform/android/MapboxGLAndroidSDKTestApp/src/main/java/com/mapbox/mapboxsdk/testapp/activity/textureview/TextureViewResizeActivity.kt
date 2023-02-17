@@ -44,46 +44,46 @@ class TextureViewResizeActivity : AppCompatActivity() {
         fabDebug.setOnClickListener { view: View? ->
             if (mapView != null) {
                 val parent = findViewById<View>(R.id.coordinator_layout)
-                val width = if (parent.width == mapView!!.width) parent.width / 2 else parent.width
+                val width = if (parent.width == mapView.width) parent.width / 2 else parent.width
                 val height =
-                    if (parent.height == mapView!!.height) parent.height / 2 else parent.height
-                mapView!!.layoutParams = CoordinatorLayout.LayoutParams(width, height)
+                    if (parent.height == mapView.height) parent.height / 2 else parent.height
+                mapView.layoutParams = CoordinatorLayout.LayoutParams(width, height)
             }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

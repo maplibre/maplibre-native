@@ -3,69 +3,47 @@ name: ios-ci
 on:
   workflow_dispatch:
   push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - ".gitignore"
-      - "**.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/macos/**"
-      - "platform/node/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/actions/**"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/android-release.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node-ci.yml"
-      - ".github/workflows/node-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
     branches:
       - main
+    tags:
+      - 'ios-*'
+    paths:
+      - 'platform/ios/**'
+      - 'platform/darwin/**'
+      - ".github/workflows/ios-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - maplibre-gl-js
+      - ".gitmodules"
+      - "!**/*.md"
   
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - ".gitignore"
-      - "**.md"
-      # ignore other platforms
-      - "platform/android/**"
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/node/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node-ci.yml"
-      - ".github/workflows/node-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
+    paths:
+      - 'platform/ios/**'
+      - 'platform/darwin/**'
+      - ".github/workflows/ios-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - ".gitmodules"
+      - "!**/*.md"
 
 jobs:
   build:

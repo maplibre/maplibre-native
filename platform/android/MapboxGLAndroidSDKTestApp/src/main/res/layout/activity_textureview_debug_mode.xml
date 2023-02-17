@@ -20,10 +20,10 @@
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:mapbox_renderTextureMode="true"
-            app:mapbox_uiAttribution="false"
-            app:mapbox_uiCompass="false"
-            app:mapbox_uiLogo="false"/>
+            app:maplibre_renderTextureMode="true"
+            app:maplibre_uiAttribution="false"
+            app:maplibre_uiCompass="false"
+            app:maplibre_uiLogo="false"/>
 
         <TextView
             android:id="@+id/textZoom"

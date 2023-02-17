@@ -19,8 +19,8 @@ import timber.log.Timber
  * Test activity showcasing using the query rendered features API to count features in a rectangle.
  */
 class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
-    var mapView: MapView? = null
-    var mapboxMap: MapboxMap? = null
+    lateinit var mapView: MapView
+    lateinit var mapboxMap: MapboxMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,14 +30,14 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
 
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap ->
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap ->
             this@QueryRenderedFeaturesBoxCountActivity.mapboxMap = mapboxMap
             mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
             selectionBox.setOnClickListener { view: View? ->
                 // Query
-                val top = selectionBox.top - mapView!!.top
-                val left = selectionBox.left - mapView!!.left
+                val top = selectionBox.top - mapView.top
+                val left = selectionBox.left - mapView.left
                 val box = RectF(
                     left.toFloat(),
                     top.toFloat(),
@@ -63,62 +63,66 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
     private fun debugOutput(features: List<Feature>) {
         Timber.i("Got %s features", features.size)
         for (feature in features) {
-            if (feature != null) {
-                Timber.i(
-                    "Got feature %s with %s properties and Geometry %s",
-                    feature.id(),
-                    if (feature.properties() != null) feature.properties()!!
-                        .entrySet().size else "<null>",
-                    if (feature.geometry() != null) feature.geometry()!!::class.java.simpleName else "<null>"
-                )
+            Timber.i(
+                "Got feature %s with %s properties and Geometry %s",
+                feature.id(),
                 if (feature.properties() != null) {
-                    for ((key, value) in feature.properties()!!.entrySet()) {
-                        Timber.i("Prop %s - %s", key, value)
-                    }
+                    feature.properties()!!
+                        .entrySet().size
+                } else {
+                    "<null>"
+                },
+                if (feature.geometry() != null) {
+                    feature.geometry()!!::class.java.simpleName
+                } else {
+                    "<null>"
                 }
-            } else {
-                Timber.i("Got 0 features")
+            )
+            if (feature.properties() != null) {
+                for ((key, value) in feature.properties()!!.entrySet()) {
+                    Timber.i("Prop %s - %s", key, value)
+                }
             }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
         if (mapboxMap != null) {
             // Regression test for #14394
-            mapboxMap!!.queryRenderedFeatures(PointF(0F, 0F))
+            mapboxMap.queryRenderedFeatures(PointF(0F, 0F))
         }
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

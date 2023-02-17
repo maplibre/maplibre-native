@@ -201,7 +201,7 @@ MGL_EXPORT
  */
 @property (class, nonatomic, readonly) MGLOfflineStorage *sharedOfflineStorage;
 
-#pragma mark - Accessing the Delegate
+// MARK: - Accessing the Delegate
 
 /**
  The receiver’s delegate.
@@ -213,7 +213,7 @@ MGL_EXPORT
  */
 @property(nonatomic, weak, nullable) IBOutlet id<MGLOfflineStorageDelegate> delegate;
 
-#pragma mark - Managing the Database of Offline Packs
+// MARK: - Managing the Database of Offline Packs
 
 /**
  The file path at which offline packs and the ambient cache are stored.
@@ -267,7 +267,7 @@ MGL_EXPORT
  */
 - (void)addContentsOfURL:(NSURL *)fileURL withCompletionHandler:(nullable MGLBatchedOfflinePackAdditionCompletionHandler)completion;
 
-#pragma mark - Managing Offline Packs
+// MARK: - Managing Offline Packs
 
 /**
  An array of all known offline packs, in the order in which they were created.
@@ -385,7 +385,7 @@ MGL_EXPORT
  */
 @property (nonatomic, readonly) unsigned long long countOfBytesCompleted;
 
-#pragma mark - Managing the Ambient Cache
+// MARK: - Managing the Ambient Cache
 
 /**
  Sets the maximum ambient cache size in bytes. The default maximum cache

@@ -1,6 +1,6 @@
 package com.mapbox.mapboxsdk.offline
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.log.Logger
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates downloading an offline region from a point geometry at zoomlevel 17
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
 
     @Rule

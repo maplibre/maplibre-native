@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLVectorTileSource : MGLTileSource
 
-#pragma mark Initializing a Source
+// MARK: Initializing a Source
 
 /**
  Returns a vector tile source initialized with an identifier and configuration
@@ -105,7 +105,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates options:(nullable NSDictionary<MGLTileSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
 
-#pragma mark Accessing a Source’s Content
+// MARK: Accessing a Source’s Content
 
 /**
  Returns an array of map features loaded by this source, restricted to the given
