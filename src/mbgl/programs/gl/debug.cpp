@@ -16,8 +16,8 @@ template <>
 struct ShaderSource<DebugProgram> {
     static constexpr const char* name = "debug";
     static constexpr const uint8_t hash[8] = {0x07, 0x98, 0x41, 0xa8, 0x6b, 0x73, 0xaf, 0x34};
-    static constexpr const auto vertexOffset = 12494;
-    static constexpr const auto fragmentOffset = 12672;
+    static constexpr const auto vertexOffset = 12763;
+    static constexpr const auto fragmentOffset = 12941;
 };
 
 constexpr const char* ShaderSource<DebugProgram>::name;
