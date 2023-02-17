@@ -9,7 +9,7 @@ const crypto = require('crypto');
 
 var shaders = require('../maplibre-gl-js/src/shaders');
 
-require('./style-code');
+require('../../../scripts/style-code');
 
 let concatenated = '';
 let offsets = {};

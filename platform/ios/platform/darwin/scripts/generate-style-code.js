@@ -7,7 +7,7 @@ const _ = require('lodash');
 const colorParser = require('csscolorparser');
 const assert = require('assert');
 
-require('../../../scripts/style-code');
+require('../../../../../scripts/style-code');
 
 const cocoaConventions = require('./style-spec-cocoa-conventions-v8.json');
 const prefix = 'MGL';

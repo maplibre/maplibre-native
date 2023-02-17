@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const xcode = require('xcode');
 
-require('./style-code');
+require('../../../scripts/style-code');
 
 const classifier = /^(?:(?:(?:platform|vendor)\/(?:(?!include|src).)*\/|(?:test|benchmark)\/)?(?:(include|src)\/)?)?(.+\.h(?:pp|xx)?)$/;
 

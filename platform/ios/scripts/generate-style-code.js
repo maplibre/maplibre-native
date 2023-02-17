@@ -6,7 +6,7 @@ const ejs = require('ejs');
 const spec = require('./style-spec');
 const colorParser = require('csscolorparser');
 
-require('./style-code');
+require('../../../scripts/style-code');
 
 function parseCSSColor(str) {
   const color = colorParser.parseCSSColor(str);
