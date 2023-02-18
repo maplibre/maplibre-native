@@ -89,7 +89,8 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        if (mapboxMap != null) {
+
+        if (::mapboxMap.isInitialized) {
             // Regression test for #14394
             mapboxMap.queryRenderedFeatures(PointF(0F, 0F))
         }
