@@ -27,6 +27,7 @@ The documentation of MapLibre GL Native is a work in progress. To get an archite
 - [macOS](platform/ios/platform/macos/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
+- [Windows](platform/windows/README.md)
 
 Platforms with a ⭐️ are **MapLibre Core Projects** and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
