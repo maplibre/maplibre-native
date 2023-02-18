@@ -9,7 +9,7 @@ endif()
 execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER})
 unset(_RENDERER)
 
-add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)
+add_compile_definitions(NOMINMAX _USE_MATH_DEFINES GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
 
 target_compile_options(
     mbgl-compiler-options
