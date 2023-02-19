@@ -166,7 +166,6 @@ function(add_node_module NAME)
 
         target_include_directories(${_TARGET} SYSTEM PRIVATE
             "${_CACHE_DIR}/node/${_NODE_VERSION}"
-            "${PROJECT_SOURCE_DIR}/platform/windows/include"
         )
 
         if(_NAN_VERSION)
@@ -180,6 +179,7 @@ function(add_node_module NAME)
         target_link_libraries(${_TARGET} PRIVATE ${NAME} mbgl-compiler-options)
 
         if(WIN32)
+            target_include_directories(${_TARGET} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/platform/windows/include")
             target_compile_definitions(${_TARGET} PRIVATE _USE_MATH_DEFINES NOMINMAX)
             target_link_libraries(${_TARGET} PRIVATE "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
         endif()
