@@ -160,7 +160,7 @@ function(add_node_module NAME)
             )
         endif()
 
-        target_link_libraries(${_TARGET} PRIVATE ${NAME})
+        target_link_libraries(${_TARGET} PRIVATE ${NAME} mbgl-compiler-options)
 
         if(APPLE)
             # Ensures that linked symbols are loaded when the module is loaded instead of causing
