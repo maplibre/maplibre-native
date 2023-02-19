@@ -120,22 +120,22 @@ function(add_node_module NAME)
             )
         endif()
 
-		if(WIN32)
-			if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-				set(_ARCH x64)
-			else()
-				set(_ARCH x86)
-			endif()
+        if(WIN32)
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(_ARCH x64)
+            else()
+                set(_ARCH x86)
+            endif()
 
-			# Download the win-${_ARCH} libraries if we are compiling on Windows and don't have them yet
-			if(NOT EXISTS "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
-				_node_module_download(
-					"win-${_ARCH} library for Node ${_NODE_VERSION}"
-					"https://nodejs.org/download/release/${_NODE_VERSION}/win-${_ARCH}/node.lib"
-					"${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib"
-				)
-			endif()
-		endif()
+            # Download the win-${_ARCH} libraries if we are compiling on Windows and don't have them yet
+            if(NOT EXISTS "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
+                _node_module_download(
+                    "win-${_ARCH} library for Node ${_NODE_VERSION}"
+                    "https://nodejs.org/download/release/${_NODE_VERSION}/win-${_ARCH}/node.lib"
+                    "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib"
+                )
+            endif()
+        endif()
 
         # Generate the library
         set(_TARGET "${NAME}.abi-${_ABI}")
