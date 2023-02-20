@@ -86,9 +86,9 @@ class TileSet(val tilejson: String, vararg tiles: String) {
     @JvmField
     var maxZoom: Float? = null
 
-    var bounds: FloatArray? = null
+    var bounds: Array<Float>? = null
         private set
-    var center: FloatArray? = null
+    var center: Array<Float>? = null
         private set
 
     /**
@@ -128,6 +128,7 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      *
      * @param grids the grids to set
      */
+    @Suppress("unused")
     fun setGrids(vararg grids: String) {
         this.grids = arrayOf(*grids)
     }
@@ -186,6 +187,10 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param bounds the Float array to set
      */
     fun setBounds(@Size(value = 4) vararg bounds: Float) {
+        setBounds(bounds.toTypedArray())
+    }
+
+    fun setBounds(@Size(value = 4) bounds: Array<Float>) {
         this.bounds = bounds
     }
 
@@ -200,12 +205,14 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      *
      * @param center the Float array to set
      */
+    @Suppress("unused")
     fun setCenter(@Size(value = 2) vararg center: Float) {
-        this.center = center
+        val latLng = LatLng(center[1].toDouble(), center[0].toDouble())
+        setCenter(latLng)
     }
 
     fun setCenter(center: LatLng) {
-        this.center = floatArrayOf(center.longitude.toFloat(), center.latitude.toFloat())
+        this.center = arrayOf(center.longitude.toFloat(), center.latitude.toFloat())
     }
 
     fun toValueObject(): Map<String, Any> {
