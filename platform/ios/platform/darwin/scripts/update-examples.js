@@ -5,7 +5,7 @@ const fs = require('fs');
 const execFileSync = require('child_process').execFileSync;
 const _ = require('lodash');
 
-require('../../../scripts/style-code');
+require('../../../../../scripts/style-code');
 
 const examplesSrc = fs.readFileSync('platform/darwin/test/MGLDocumentationExampleTests.swift', 'utf8');
 
