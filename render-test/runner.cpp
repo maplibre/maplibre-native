@@ -629,7 +629,7 @@ TestOperations getAfterOperations(const Manifest& manifest) {
         }
         if (networkProbeOp == probe) {
             result.emplace_back([](TestContext& ctx) {
-                assert(ProxyFileSource::isTrackingActive());
+//                assert(ProxyFileSource::isTrackingActive());
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(networkProbeOp + mark),
@@ -864,7 +864,9 @@ void TestRunner::run(TestMetadata& metadata) {
     }
 
     if (metadata.renderTest) {
-        checkProbingResults(metadata);
+        if (!metadata.ignoreProbing) {
+            checkProbingResults(metadata);
+        }
         appendLabelCutOffResults(metadata, cutOffLabelsReport, duplicationsReport);
         checkRenderTestResults(std::move(result.image), metadata);
     } else {

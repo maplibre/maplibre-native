@@ -138,6 +138,7 @@ struct TestMetadata {
     bool renderTest = true;
     bool outputsImage = true;
     bool ignoredTest = false;
+    bool ignoreProbing = false;
 
     mbgl::Size size{ 512u, 512u };
     float pixelRatio = 1.0f;
