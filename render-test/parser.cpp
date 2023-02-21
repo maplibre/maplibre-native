@@ -1003,7 +1003,6 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
         } else if (operationArray[0].GetString() == networkProbeStartOp) {
             // probeNetworkStart
             result.emplace_back([](TestContext&) {
-                //assert(!mbgl::ProxyFileSource::isTrackingActive());
                 mbgl::ProxyFileSource::setTrackingActive(true);
                 return true;
             });
@@ -1013,7 +1012,6 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsString());
             std::string mark = std::string(operationArray[1].GetString(), operationArray[1].GetStringLength());
             result.emplace_back([mark](TestContext& ctx) {
-//                assert(mbgl::ProxyFileSource::isTrackingActive());
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(std::move(mark)),
@@ -1024,7 +1022,6 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
         } else if (operationArray[0].GetString() == networkProbeEndOp) {
             // probeNetworkEnd
             result.emplace_back([](TestContext&) {
-//                assert(mbgl::ProxyFileSource::isTrackingActive());
                 mbgl::ProxyFileSource::setTrackingActive(false);
                 return true;
             });
@@ -1258,7 +1255,6 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
         } else if (operationArray[0].GetString() == gfxProbeStartOp) {
             // probeGFXStart
             result.emplace_back([](TestContext& ctx) {
-//                assert(!ctx.gfxProbeActive);
                 ctx.gfxProbeActive = true;
                 ctx.baselineGfxProbe = ctx.activeGfxProbe;
                 return true;

@@ -629,7 +629,6 @@ TestOperations getAfterOperations(const Manifest& manifest) {
         }
         if (networkProbeOp == probe) {
             result.emplace_back([](TestContext& ctx) {
-//                assert(ProxyFileSource::isTrackingActive());
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(networkProbeOp + mark),
