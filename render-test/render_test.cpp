@@ -232,6 +232,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                 status = "failed";
                 color = "red";
                 stats.failedTests++;
+                returnCode = 3;
                 printf(ANSI_COLOR_RED "* failed %s" ANSI_COLOR_RESET "\n", id.c_str());
             }
         }
