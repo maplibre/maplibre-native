@@ -138,6 +138,10 @@ struct TestMetadata {
     bool renderTest = true;
     bool outputsImage = true;
     bool ignoredTest = false;
+    // If unit test hasn't metric.json, the unit test will end with
+    // error message: "Failed to find expectations for..., to prevent
+    // unit test error by missing metric.json, can turn on 'ignoreProbing'
+    // to prevent the unit test fail, and just verify the render result.
     bool ignoreProbing = false;
 
     mbgl::Size size{ 512u, 512u };
