@@ -156,7 +156,7 @@ ios: $(IOS_PROJ_PATH)
 
 #  make iproj
 .PHONY: iproj
-iproj: $(IOS_PROJ_PATH)
+iproj: $(IOS_PROJ_PATH) style-code
 	@#   Check if Xcode should run in headless mode
 	@#     If CI=1, then just perform `make iproj`
 	@#       else, use `xed` to open the XCworkspace
