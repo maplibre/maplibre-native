@@ -296,7 +296,7 @@ xproj: $(MACOS_PROJ_PATH)
 
 #  make macos-test
 .PHONY: macos-test
-macos-test: $(MACOS_PROJ_PATH)
+macos-test: $(MACOS_PROJ_PATH) style-code
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: macos-lint
