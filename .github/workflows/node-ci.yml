@@ -158,7 +158,7 @@ jobs:
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+        run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts
         uses: actions/upload-artifact@v3
