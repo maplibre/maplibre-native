@@ -192,7 +192,7 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     info.This()->SetInternalField(1, options);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
             return std::make_unique<node_mbgl::NodeFileSource>(
                 reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
         });
