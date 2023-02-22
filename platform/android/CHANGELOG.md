@@ -8,10 +8,14 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
-*  Fixed regression with `RasterSource` native code throwing an exception expecting bound after switching to `FloatArray`. [#830](https://github.com/maplibre/maplibre-gl-native/pull/830)
-
 ### ⛵ Dependencies
 
+## 10.0.1 - February 22, 2023
+
+### 🐞 Bug fixes
+
+*  Fixed regression with `RasterSource` native code throwing an exception expecting bound after switching to `FloatArray` ([#830](https://github.com/maplibre/maplibre-gl-native/pull/830)).
+*   `LocationEngineProxy` was made public so that the migration path suggested in the 10.0.0 changelog for those wanting to use GMS Location Services can actually be implemented ([#832](https://github.com/maplibre/maplibre-gl-native/pull/830)).
 
 ## 10.0.0 - February 15, 2023
 
