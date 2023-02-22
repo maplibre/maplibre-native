@@ -182,7 +182,7 @@ ios-uitest: $(IOS_PROJ_PATH)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
-ios-test: $(IOS_PROJ_PATH)
+ios-test: $(IOS_PROJ_PATH) style-code
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: ios-integration-test
@@ -323,8 +323,8 @@ endif
 
 .PHONY: style-code
 style-code:
-	node scripts/generate-style-code.js
-	node scripts/generate-shaders.js
+	node ../../scripts/generate-style-code.js
+	# node ../../scripts/generate-shaders.js
 
 .PHONY: codestyle
 codestyle:
