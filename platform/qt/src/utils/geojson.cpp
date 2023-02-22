@@ -273,23 +273,23 @@ QVariant asQVariant(const mbgl::Value &value){
         return {};
     // Bool
     case 1:
-        return{value.get<bool>()};
+        return {value.get<bool>()};
     // uint64_t
     case 2:
-        return{value.get<uint64_t>()}; 
+        return {static_cast<qulonglong>(value.get<uint64_t>())}; 
     // int64_t 
     case 3:
-        return{value.get<int64_t>()};
+        return {static_cast<qlonglong>(value.get<int64_t>())};
     // double 
     case 4:
-        return{value.get<double>()};
+        return {value.get<double>()};
     // std::string
     case 5:
         return QString::fromStdString(value.get<std::string>());
-    //mapbox::util::recursive_wrapper<std::vector<value>>
+    // mapbox::util::recursive_wrapper<std::vector<value>>
     case 6:
         return valueList(value.get<mapbox::util::recursive_wrapper<std::vector<mbgl::Value>>>());
-    //mapbox::util::recursive_wrapper<std::unordered_map<std::string, value>>
+    // mapbox::util::recursive_wrapper<std::unordered_map<std::string, value>>
     case 7:
         return valueMap(value.get<mapbox::util::recursive_wrapper<std::unordered_map<std::string, mbgl::Value>>>());
     default:
@@ -305,13 +305,13 @@ QVariant asQVariant(const mbgl::FeatureIdentifier &id){
             return {};
         // uint64_t
         case 1:
-            return{id.get<uint64_t>()}; 
+            return {static_cast<qulonglong>(id.get<uint64_t>())}; 
         // int64_t
         case 2:
-            return{id.get<int64_t>()};
+            return {static_cast<qlonglong>(id.get<int64_t>())};
         // double
         case 3:
-            return{id.get<double>()};
+            return {id.get<double>()};
         // std::string
         case 4:
             return QString::fromStdString(id.get<std::string>());
