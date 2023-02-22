@@ -4,7 +4,14 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-* Add your pull request...
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
+*  Fixed regression with `RasterSource` native code throwing an exception expecting bound after switching to `FloatArray`. [#830](https://github.com/maplibre/maplibre-gl-native/pull/830)
+
+### ⛵ Dependencies
+
 
 ## 10.0.0 - February 15, 2023
 
