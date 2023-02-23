@@ -23,7 +23,7 @@ import static com.mapbox.mapboxsdk.location.engine.Utils.isBetterLocation;
 public class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
   private static final String TAG = "MapboxLocationEngine";
 
-  public MapboxFusedLocationEngineImpl(@NonNull Context context) {
+ public MapboxFusedLocationEngineImpl(@NonNull Context context) {
     super(context);
   }
 
