@@ -2,6 +2,8 @@ package com.mapbox.mapboxsdk.style.sources
 
 import androidx.annotation.Size
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+
 /**
  * Tile set, allows using TileJson specification as source.
  * Note that `encoding` is only relevant to `raster-dem` sources, and is not supported in the TileJson spec.
@@ -86,9 +88,9 @@ class TileSet(val tilejson: String, vararg tiles: String) {
     @JvmField
     var maxZoom: Float? = null
 
-    var bounds: FloatArray? = null
+    var bounds: Array<Float>? = null
         private set
-    var center: FloatArray? = null
+    var center: Array<Float>? = null
         private set
 
     /**
@@ -128,6 +130,7 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      *
      * @param grids the grids to set
      */
+    @Suppress("unused")
     fun setGrids(vararg grids: String) {
         this.grids = arrayOf(*grids)
     }
@@ -186,26 +189,74 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param bounds the Float array to set
      */
     fun setBounds(@Size(value = 4) vararg bounds: Float) {
+        this.bounds = bounds.toTypedArray()
+    }
+
+    /**
+     * Default: [-180, -90, 180, 90]. The maximum extent of available map tiles. Bounds MUST define an area
+     * covered by all zoom levels. The bounds are represented in WGS:84
+     * latitude and longitude values, in the order left, bottom, right, top.
+     * Values are floating point numbers.
+     *
+     * @param left the Float left bound
+     * @param bottom the Float bottom bound
+     * @param right the Float right bound
+     * @param top the Float top bound
+     */
+    fun setBounds(left: Float, bottom: Float, right: Float, top: Float) {
+        setBounds(left, bottom, right, top)
+    }
+
+    /**
+     * Default: [-180, -90, 180, 90]. The maximum extent of available map tiles. Bounds MUST define an area
+     * covered by all zoom levels. The bounds are represented in WGS:84
+     * latitude and longitude values, as a Float array of exactly four elements in the order
+     * left, bottom, right, top. They are all floating point numbers.
+     *
+     * @param bounds The Array of floats containing bounds in the order left, bottom, right, top
+     */
+    @Deprecated("Not strongly typed", ReplaceWith("setBounds(bounds: LatLngBounds"))
+    fun setBounds(@Size(value = 4) bounds: Array<Float>) {
         this.bounds = bounds
     }
 
     /**
+     * Default: [-180, -90, 180, 90]. The maximum extent of available map tiles. Bounds MUST define an area
+     * covered by all zoom levels. The bounds are represented in WGS:84
+     *
+     * @param bounds The LatLngBounds instance containing bounds
+     */
+    fun setBounds(bounds: LatLngBounds) {
+        setBounds(bounds.longitudeWest.toFloat(), bounds.latitudeSouth.toFloat(), bounds.longitudeEast.toFloat(), bounds.latitudeNorth.toFloat())
+    }
+
+    /**
      * The first value is the longitude, the second is latitude (both in
-     * WGS:84 values), the third value is the zoom level as an integer.
+     * WGS:84 values),
      * Longitude and latitude MUST be within the specified bounds.
-     * The zoom level MUST be between minzoom and maxzoom.
      * Implementations can use this value to set the default location. If the
      * value is null, implementations may use their own algorithm for
      * determining a default location.
      *
-     * @param center the Float array to set
+     * @param center the Float array to set as lattitude, longitude
      */
+    @Deprecated("This function is not type safe", ReplaceWith("setCenter(center:LatLng)"))
     fun setCenter(@Size(value = 2) vararg center: Float) {
-        this.center = center
+        val latLng = LatLng(center[1].toDouble(), center[0].toDouble())
+        setCenter(latLng)
     }
 
+    /**
+     * Set the center.
+     * Longitude and latitude MUST be within the specified bounds.
+     * Implementations can use this value to set the default location. If the
+     * value is null, implementations may use their own algorithm for
+     * determining a default location.
+     *
+     * @param center the LatLng value to use a the center
+     */
     fun setCenter(center: LatLng) {
-        this.center = floatArrayOf(center.longitude.toFloat(), center.latitude.toFloat())
+        this.center = arrayOf(center.longitude.toFloat(), center.latitude.toFloat())
     }
 
     fun toValueObject(): Map<String, Any> {

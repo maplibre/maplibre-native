@@ -225,12 +225,14 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                 status = "errored";
                 color = "red";
                 stats.erroredTests++;
+                returnCode = 2;
                 printf(ANSI_COLOR_RED "* errored %s" ANSI_COLOR_RESET "\n", id.c_str());
                 printf(ANSI_COLOR_RED "* error: %s" ANSI_COLOR_RESET "\n", metadata.errorMessage.c_str());
             } else {
                 status = "failed";
                 color = "red";
                 stats.failedTests++;
+                returnCode = 3;
                 printf(ANSI_COLOR_RED "* failed %s" ANSI_COLOR_RESET "\n", id.c_str());
             }
         }

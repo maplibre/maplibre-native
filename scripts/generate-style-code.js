@@ -204,10 +204,10 @@ global.defaultValue = function (property) {
   }
 };
 
-const layerHpp = ejs.compile(fs.readFileSync('include/mbgl/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync('src/mbgl/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
-const propertiesHpp = ejs.compile(fs.readFileSync('src/mbgl/style/layers/layer_properties.hpp.ejs', 'utf8'), {strict: true});
-const propertiesCpp = ejs.compile(fs.readFileSync('src/mbgl/style/layers/layer_properties.cpp.ejs', 'utf8'), {strict: true});
+const layerHpp = ejs.compile(fs.readFileSync(`${__dirname}/../include/mbgl/style/layers/layer.hpp.ejs`, 'utf8'), {strict: true});
+const layerCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer.cpp.ejs`, 'utf8'), {strict: true});
+const propertiesHpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer_properties.hpp.ejs`, 'utf8'), {strict: true});
+const propertiesCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer_properties.cpp.ejs`, 'utf8'), {strict: true});
 
 const collator = new Intl.Collator("en-US");
 
@@ -255,16 +255,16 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer));
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer));
+  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer));
+  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer));
 
   // Remove our fake property for the external interace.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }
 
-  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
+  writeIfModified(`${__dirname}/../include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
+  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
 }
 
 // Light
@@ -280,7 +280,7 @@ const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
 // to get a deterministic order.
 lightProperties.sort((a, b) => collator.compare(a.name, b.name));
 
-const lightHpp = ejs.compile(fs.readFileSync('include/mbgl/style/light.hpp.ejs', 'utf8'), {strict: true});
-const lightCpp = ejs.compile(fs.readFileSync('src/mbgl/style/light.cpp.ejs', 'utf8'), {strict: true});
-writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}));
-writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}));
+const lightHpp = ejs.compile(fs.readFileSync(`${__dirname}/../include/mbgl/style/light.hpp.ejs`, 'utf8'), {strict: true});
+const lightCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/light.cpp.ejs`, 'utf8'), {strict: true});
+writeIfModified(`${__dirname}/../include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}));
+writeIfModified(`${__dirname}/../src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}));

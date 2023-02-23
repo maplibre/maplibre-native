@@ -31,7 +31,8 @@
           "puck_hat.png",
           {"pixelRatio": 4.0}
         ]
-      ]
+      ],
+      "ignoreProbing": true
     }
   },
   "sources": {
