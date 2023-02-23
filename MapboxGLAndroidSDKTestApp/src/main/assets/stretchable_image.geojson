@@ -1,0 +1,49 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [40, -30]
+      },
+      "properties": {
+        "image-name": "popup-debug",
+        "name": "Line 1\nLine 2\nLine 3"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [40, 30]
+      },
+      "properties": {
+        "image-name": "popup",
+        "name": "Line 1\nLine 2\nLine 3"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-40, -30]
+      },
+      "properties": {
+        "image-name": "popup-debug",
+        "name": "One longer line"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-40, 30]
+      },
+      "properties": {
+        "image-name": "popup",
+        "name": "One longer line"
+      }
+    }
+  ]
+}
