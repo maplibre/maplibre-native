@@ -17,7 +17,11 @@ namespace node_mbgl {
 Nan::Persistent<v8::Function> NodeExpression::constructor;
 
 void NodeExpression::Init(v8::Local<v8::Object> target) {
+#if defined NODE_MODULE_VERSION && NODE_MODULE_VERSION < 93
     v8::Local<v8::Context> context = target->CreationContext();
+#else
+    v8::Local<v8::Context> context = target->GetCreationContext().ToLocalChecked();
+#endif
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("Expression").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1); // what is this doing?
@@ -50,7 +54,11 @@ type::Type parseType(v8::Local<v8::Object> type) {
     std::string kind(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), v8kind));
 
     if (kind == "array") {
+#if defined NODE_MODULE_VERSION && NODE_MODULE_VERSION < 93
         v8::Local<v8::Context> context = type->CreationContext();
+#else
+        v8::Local<v8::Context> context = type->GetCreationContext().ToLocalChecked();
+#endif
         type::Type itemType = parseType(Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
         mbgl::optional<std::size_t> N;
 
