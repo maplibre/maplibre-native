@@ -2,8 +2,8 @@
     "network": [
         [
             "probeNetwork - default - end",
-            13,
-            2413450
+            16,
+            2668276
         ],
         [
             "probeNetwork - default - start",
@@ -15,12 +15,12 @@
         [
             "probeGFX - default - end",
             8,
-            16,
+            24,
             36,
             4,
             [
-                143312,
-                143312
+                143344,
+                143344
             ],
             [
                 194056,
