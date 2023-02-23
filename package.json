@@ -29,7 +29,7 @@
   "devDependencies": {
     "@mapbox/flow-remove-types": "^2.0.0",
     "@mapbox/mvt-fixtures": "3.10.0",
-    "@octokit/plugin-retry": "^4.1.1",
+    "@octokit/plugin-retry": "^4.1.2",
     "@octokit/rest": "^19.0.7",
     "aws-sdk": "^2.1318.0",
     "csscolorparser": "~1.0.2",
