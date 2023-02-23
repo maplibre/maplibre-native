@@ -1,0 +1,94 @@
+apply plugin: 'com.android.application'
+apply from: "${rootDir}/gradle/native-build.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.mapbox.mapboxsdk.testapp"
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        versionCode 14
+        versionName "6.0.1"
+        testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        multiDexEnabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    nativeBuild(["example-custom-layer"])
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'LICENSE.txt']
+        }
+    }
+
+
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    namespace 'com.mapbox.mapboxsdk.testapp'
+    testNamespace '${applicationId}'
+    lint {
+        abortOnError false
+        baseline file('lint-baseline-local.xml')
+        checkAllWarnings true
+        disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
+        warningsAsErrors true
+    }
+}
+
+dependencies {
+    implementation dependenciesList.kotlinLib
+
+    implementation project(':MapboxGLAndroidSDK')
+    implementation dependenciesList.mapboxJavaTurf
+
+    implementation dependenciesList.supportAppcompatV7
+    implementation dependenciesList.supportRecyclerView
+    implementation dependenciesList.supportDesign
+    implementation dependenciesList.supportConstraintLayout
+
+    implementation dependenciesList.multidex
+
+    implementation dependenciesList.gmsLocation
+    implementation dependenciesList.timber
+
+    implementation dependenciesList.okhttp3
+
+    implementation dependenciesList.leakCanary
+
+    androidTestImplementation dependenciesList.supportAnnotations
+    androidTestImplementation dependenciesList.testRunner
+    androidTestImplementation dependenciesList.testRules
+    androidTestImplementation dependenciesList.testEspressoCore
+    androidTestImplementation dependenciesList.testEspressoIntents
+    androidTestImplementation dependenciesList.testEspressoContrib
+    androidTestImplementation dependenciesList.testUiAutomator
+    androidTestImplementation dependenciesList.appCenter
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+}
+
+apply from: "${rootDir}/gradle/gradle-make.gradle"
+apply from: "${rootDir}/gradle/gradle-config.gradle"
+apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
+apply from: "${rootDir}/gradle/gradle-lint.gradle"
+
+
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
