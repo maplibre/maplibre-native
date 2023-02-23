@@ -7,7 +7,7 @@
     }
   },
   "zoom": 3,
-  "center": [2.5, 2.5],
+  "center": [3, 3],
   "sources": {
     "points": {
       "type": "geojson",
