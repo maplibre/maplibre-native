@@ -10,6 +10,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
+## 10.0.1 - February 23, 2023
+### 🐞 Bug fixes
+* `MapboxFusedLocationEngineImpl` constructor made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-gl-native/pull/850))
+
 ## 10.0.1 - February 22, 2023
 
 ### 🐞 Bug fixes
