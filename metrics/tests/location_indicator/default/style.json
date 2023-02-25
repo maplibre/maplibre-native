@@ -20,7 +20,8 @@
           "puck_shadow",
           "puck_shadow.png"
         ]
-      ]
+      ],
+      "ignoreProbing": true
     }
   },
   "sources": {

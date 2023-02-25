@@ -20,7 +20,8 @@
           "puck_shadow",
           "puck_shadow.png"
         ]
-      ]
+      ],
+      "ignoreProbing": true
     }
   },
   "center": [ 139.768885, 35.693125 ],
