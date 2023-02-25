@@ -14,7 +14,7 @@ if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT MBGL_WITH_QT)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
