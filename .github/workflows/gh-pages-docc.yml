@@ -20,5 +20,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           branch: gh-pages
-          folder: platform/ios/build/ios/Debug-iphonesimulator/Mapbox.doccarchive
+          folder: platform/ios/build/ios/static-docs
           target-folder: docs/ios/docc/

@@ -264,7 +264,7 @@ ios-docs: $(IOS_PROJ_PATH) style-code
 ios-docs-static: ios-docs
 	$(xcrun --find docc) process-archive transform-for-static-hosting \
 		$(IOS_OUTPUT_PATH)/Debug-iphonesimulator/Mapbox.doccarchive \
-		$(IOS_OUTPUT_PATH)/static-docs
+		--output-path $(IOS_OUTPUT_PATH)/static-docs
 
 #### macOS targets ############################################################
 
