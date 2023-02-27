@@ -258,6 +258,9 @@ darwin-check-public-symbols:
 
 endif
 
+ios-docs: $(IOS_PROJ_PATH)
+	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
+
 #### macOS targets ############################################################
 
 ifeq ($(HOST_PLATFORM), macos)
