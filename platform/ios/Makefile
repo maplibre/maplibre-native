@@ -261,6 +261,11 @@ endif
 ios-docs: $(IOS_PROJ_PATH) style-code
 	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
 
+ios-docs-static: ios-docs
+	$(xcrun --find docc) process-archive transform-for-static-hosting \
+		$(IOS_OUTPUT_PATH)/Debug-iphonesimulator/Mapbox.doccarchive \
+		$(IOS_OUTPUT_PATH)/static-docs
+
 #### macOS targets ############################################################
 
 ifeq ($(HOST_PLATFORM), macos)
