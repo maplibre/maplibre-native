@@ -156,7 +156,7 @@ ios: $(IOS_PROJ_PATH)
 
 #  make iproj
 .PHONY: iproj
-iproj: $(IOS_PROJ_PATH)
+iproj: $(IOS_PROJ_PATH) style-code
 	@#   Check if Xcode should run in headless mode
 	@#     If CI=1, then just perform `make iproj`
 	@#       else, use `xed` to open the XCworkspace
@@ -258,7 +258,7 @@ darwin-check-public-symbols:
 
 endif
 
-ios-docs: $(IOS_PROJ_PATH)
+ios-docs: $(IOS_PROJ_PATH) style-code
 	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
 
 #### macOS targets ############################################################
@@ -294,7 +294,7 @@ macos: $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCPRETTY)
 
 .PHONY: xproj
-xproj: $(MACOS_PROJ_PATH)
+xproj: $(MACOS_PROJ_PATH) style-code
 	xed $(MACOS_WORK_PATH)
 
 #  make macos-test
