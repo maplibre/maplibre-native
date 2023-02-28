@@ -32,6 +32,22 @@ target_link_libraries(
     PRIVATE Mapbox::Base::Extras::args mbgl-compiler-options mbgl-core
 )
 
+if(WIN32)
+    find_package(libuv REQUIRED)
+
+    target_link_libraries(
+        mbgl-cache PRIVATE uv_a
+    )
+
+    target_link_libraries(
+        mbgl-offline PRIVATE uv_a
+    )
+
+    target_link_libraries(
+        mbgl-render PRIVATE uv_a
+    )
+endif()
+
 install(TARGETS mbgl-offline mbgl-render RUNTIME DESTINATION bin)
 
 # FIXME: CI must have a valid token

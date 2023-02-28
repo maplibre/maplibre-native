@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <random>
 
+#if defined(WIN32) && defined(GetObject)
+#undef GetObject
+#endif
+
 Manifest::Manifest() {
     const char* envApiKey = getenv("MGL_API_KEY");
     if (envApiKey != nullptr) {
