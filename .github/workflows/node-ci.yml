@@ -81,6 +81,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
+
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: uname -m
@@ -105,7 +112,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git \
             ccache \
             cmake \
             ninja-build \
@@ -118,13 +124,6 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
 
       - name: Setup node
         uses: actions/setup-node@v3
