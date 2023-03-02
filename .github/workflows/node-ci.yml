@@ -122,7 +122,9 @@ jobs:
             libuv1-dev \
             g++-10 \
             libc++-9-dev \
-            libc++abi-9-dev
+            libc++abi-9-dev \
+            libjpeg-dev \
+            libpng-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
