@@ -60,6 +60,8 @@ declare module '@maplibre/maplibre-gl-native' {
    */
   type RenderOptions = {
     /**
+     * Zoom level
+     *
      * @default 0
      */
     zoom?: number;
@@ -111,6 +113,9 @@ declare module '@maplibre/maplibre-gl-native' {
   class Map {
     constructor(mapOptions: MapOptions);
 
+    /**
+     * Load a style into a map
+     */
     load: (style: any) => void;
 
     /**
@@ -125,5 +130,90 @@ declare module '@maplibre/maplibre-gl-native' {
      * Call to permanently dispose the internal map resources, instance can't be used for further render calls
      */
     release: () => void;
+
+    /**
+     * Add source to map's style
+     */
+    addSource: (sourceId: string, source: {}) => void
+
+    /**
+     * Remove source from map's style
+     */
+    removeSource: (sourceId: string) => void
+
+    /**
+     * Add layer to map's style
+     */
+    addLayer: (layer: {}, beforeId?: string) => void
+
+    /**
+     * Remove layer from map's style
+     */
+    removeLayer: (layerId: string) => void
+
+    /**
+     * Add image to map's style
+     */
+    addImage: (imageId: string, image: any) => void
+
+    /**
+     * Remove image from map's style
+     */
+    removeImage: (imageId: string) => void
+
+    /**
+     * Set the extent of the zoom for a specified layer
+     */
+    setLayerZoomRange: (layerId: string, minzoom: number, maxzoom: number) => void;
+
+    /**
+     * Set the value for a layer's property
+     */
+    setLayoutProperty: (layerId: string, name: string, value: string) => void;
+
+    /**
+     * Set filter for specified style layer
+     */
+    setFilter: (layerId: string, filter: [] | null | undefined) => void;
+
+    /**
+     * Set the center of the map
+     */
+    setCenter: (center: any) => void;
+
+    /**
+     * Set zoom of the map
+     */
+    setZoom: (zoom: number) => void;
+
+    /**
+     * Set bearing (rotation) of map
+     */
+    setBearing: (bearing: number) => void;
+
+    /**
+     * Set pitch (tilt angle) of map
+     */
+    setPitch: (pitch: number) => void;
+
+    /**
+     * Set light value of map
+     */
+    setLight: (light: any) => void
+
+    /**
+     * Set axonometric view of map
+     */
+    setAxonometric: (state: boolean) => void
+
+    /**
+     * Set X skew of map
+     */
+    setXSkew: (x: number) => void
+
+    /**
+     * Set Y skew of map
+     */
+    setYSkew: (y: number) => void
   }
 }
