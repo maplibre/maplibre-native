@@ -66,7 +66,7 @@ jobs:
     needs: bump_version
     continue-on-error: true
     env:
-      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
+      BUILDTYPE: 'Release'
 
     defaults:
       run:
