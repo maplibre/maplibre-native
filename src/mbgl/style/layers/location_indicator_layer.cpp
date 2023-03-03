@@ -301,7 +301,7 @@ TransitionOptions LocationIndicatorLayer::getLocationTransition() const {
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultPerspectiveCompensation() {
-    return {0.85f};
+    return {0.85};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getPerspectiveCompensation() const {

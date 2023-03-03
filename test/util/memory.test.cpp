@@ -1,4 +1,6 @@
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/getrss.hpp>

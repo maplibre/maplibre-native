@@ -1,5 +1,9 @@
 #include "expression_test_parser.hpp"
 
+#if defined(WIN32) && defined(GetObject)
+#undef GetObject
+#endif
+
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>

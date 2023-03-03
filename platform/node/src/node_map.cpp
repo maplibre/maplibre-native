@@ -116,7 +116,11 @@ ParseError)JS").ToLocalChecked()).ToLocalChecked();
 
     Nan::SetPrototypeMethod(tpl, "dumpDebugLogs", DumpDebugLogs);
     Nan::SetPrototypeMethod(tpl, "queryRenderedFeatures", QueryRenderedFeatures);
+#if defined NODE_MODULE_VERSION && NODE_MODULE_VERSION < 93
     v8::Local<v8::Context> context = target->CreationContext();
+#else
+    v8::Local<v8::Context> context = target->GetCreationContext().ToLocalChecked();
+#endif
 
     constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
     Nan::Set(target, Nan::New("Map").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
