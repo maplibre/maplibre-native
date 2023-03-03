@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #define ANSI_COLOR_RED        "\x1b[31m"
