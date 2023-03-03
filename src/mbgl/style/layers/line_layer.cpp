@@ -142,7 +142,7 @@ void LineLayer::setLineSortKey(const PropertyValue<float>& value) {
 // Paint properties
 
 PropertyValue<float> LineLayer::getDefaultLineBlur() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& LineLayer::getLineBlur() const {
@@ -223,7 +223,7 @@ TransitionOptions LineLayer::getLineDasharrayTransition() const {
 }
 
 PropertyValue<float> LineLayer::getDefaultLineGapWidth() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& LineLayer::getLineGapWidth() const {
@@ -277,7 +277,7 @@ TransitionOptions LineLayer::getLineGradientTransition() const {
 }
 
 PropertyValue<float> LineLayer::getDefaultLineOffset() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& LineLayer::getLineOffset() const {
@@ -304,7 +304,7 @@ TransitionOptions LineLayer::getLineOffsetTransition() const {
 }
 
 PropertyValue<float> LineLayer::getDefaultLineOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& LineLayer::getLineOpacity() const {
@@ -358,7 +358,7 @@ TransitionOptions LineLayer::getLinePatternTransition() const {
 }
 
 PropertyValue<std::array<float, 2>> LineLayer::getDefaultLineTranslate() {
-    return {{{0, 0}}};
+    return {{{0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<float, 2>>& LineLayer::getLineTranslate() const {
@@ -412,7 +412,7 @@ TransitionOptions LineLayer::getLineTranslateAnchorTransition() const {
 }
 
 PropertyValue<float> LineLayer::getDefaultLineWidth() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& LineLayer::getLineWidth() const {

@@ -21,7 +21,7 @@ struct HillshadeAccentColor : PaintProperty<Color> {
 };
 
 struct HillshadeExaggeration : PaintProperty<float> {
-    static float defaultValue() { return 0.5; }
+    static float defaultValue() { return 0.5f; }
 };
 
 struct HillshadeHighlightColor : PaintProperty<Color> {
@@ -33,7 +33,7 @@ struct HillshadeIlluminationAnchor : PaintProperty<HillshadeIlluminationAnchorTy
 };
 
 struct HillshadeIlluminationDirection : PaintProperty<float> {
-    static float defaultValue() { return 335; }
+    static float defaultValue() { return 335.f; }
 };
 
 struct HillshadeShadowColor : PaintProperty<Color> {

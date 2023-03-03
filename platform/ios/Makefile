@@ -8,7 +8,7 @@ export CI ?= 0
 # Getting rid of the duplicate package.json file is an open issue
 # https://github.com/maplibre/maplibre-gl-native/issues/657
 
-export NODE_PATH = ./node_modules
+export NODE_PATH = ../../node_modules
 
 CMAKE ?= cmake
 
@@ -156,7 +156,7 @@ ios: $(IOS_PROJ_PATH)
 
 #  make iproj
 .PHONY: iproj
-iproj: $(IOS_PROJ_PATH)
+iproj: $(IOS_PROJ_PATH) style-code
 	@#   Check if Xcode should run in headless mode
 	@#     If CI=1, then just perform `make iproj`
 	@#       else, use `xed` to open the XCworkspace
@@ -331,7 +331,6 @@ endif
 .PHONY: style-code
 style-code:
 	node ../../scripts/generate-style-code.js
-	# node ../../scripts/generate-shaders.js
 
 .PHONY: codestyle
 codestyle:
