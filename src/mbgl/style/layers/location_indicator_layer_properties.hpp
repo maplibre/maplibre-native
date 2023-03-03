@@ -32,7 +32,7 @@ struct TopImage : LayoutProperty<expression::Image> {
 };
 
 struct AccuracyRadius : PaintProperty<float> {
-    static float defaultValue() { return 0.f; }
+    static float defaultValue() { return 0; }
 };
 
 struct AccuracyRadiusBorderColor : PaintProperty<Color> {
@@ -48,11 +48,11 @@ struct Bearing : PaintProperty<Rotation> {
 };
 
 struct BearingImageSize : PaintProperty<float> {
-    static float defaultValue() { return 1.f; }
+    static float defaultValue() { return 1; }
 };
 
 struct ImageTiltDisplacement : PaintProperty<float> {
-    static float defaultValue() { return 0.f; }
+    static float defaultValue() { return 0; }
 };
 
 struct Location : PaintProperty<std::array<double, 3>> {
@@ -60,15 +60,15 @@ struct Location : PaintProperty<std::array<double, 3>> {
 };
 
 struct PerspectiveCompensation : PaintProperty<float> {
-    static float defaultValue() { return 0.85f; }
+    static float defaultValue() { return 0.85; }
 };
 
 struct ShadowImageSize : PaintProperty<float> {
-    static float defaultValue() { return 1.f; }
+    static float defaultValue() { return 1; }
 };
 
 struct TopImageSize : PaintProperty<float> {
-    static float defaultValue() { return 1.f; }
+    static float defaultValue() { return 1; }
 };
 
 class LocationIndicatorLayoutProperties : public Properties<
