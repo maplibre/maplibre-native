@@ -258,6 +258,14 @@ darwin-check-public-symbols:
 
 endif
 
+ios-docs: $(IOS_PROJ_PATH) style-code
+	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
+
+ios-docs-static: ios-docs
+	$(xcrun --find docc) process-archive transform-for-static-hosting \
+		$(IOS_OUTPUT_PATH)/Debug-iphonesimulator/Mapbox.doccarchive \
+		--output-path $(IOS_OUTPUT_PATH)/static-docs
+
 #### macOS targets ############################################################
 
 ifeq ($(HOST_PLATFORM), macos)
@@ -291,7 +299,7 @@ macos: $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCPRETTY)
 
 .PHONY: xproj
-xproj: $(MACOS_PROJ_PATH)
+xproj: $(MACOS_PROJ_PATH) style-code
 	xed $(MACOS_WORK_PATH)
 
 #  make macos-test
