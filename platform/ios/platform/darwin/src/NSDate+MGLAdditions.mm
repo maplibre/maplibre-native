@@ -1,4 +1,5 @@
 #import "NSDate+MGLAdditions.h"
+#import <ratio>
 
 mbgl::Duration MGLDurationFromTimeInterval(NSTimeInterval duration)
 {
