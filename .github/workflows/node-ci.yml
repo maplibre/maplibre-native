@@ -197,12 +197,23 @@ jobs:
         if: runner.os == 'macOS'
         run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
+      - name: Run render tests on Linux
+        if: runner.os == 'Linux'
+        run: set -o pipefail && xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/linux-gcc8-release-style.json
+
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS'
         uses: actions/upload-artifact@v3
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
+
+      - name: Upload render test artifacts (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: render-query-test-results
+          path: metrics/linux-gcc8-release-style.html
 
       - name: Test (Linux)
         if: runner.os == 'Linux'
