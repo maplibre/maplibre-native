@@ -68,7 +68,7 @@ jobs:
             arch: x86_64
     continue-on-error: true
     env:
-      BUILDTYPE: 'Release'
+      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
     defaults:
       run:
