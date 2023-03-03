@@ -112,7 +112,7 @@ void LocationIndicatorLayer::setTopImage(const PropertyValue<expression::Image>&
 // Paint properties
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultAccuracyRadius() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getAccuracyRadius() const {
@@ -220,7 +220,7 @@ TransitionOptions LocationIndicatorLayer::getBearingTransition() const {
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultBearingImageSize() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getBearingImageSize() const {
@@ -247,7 +247,7 @@ TransitionOptions LocationIndicatorLayer::getBearingImageSizeTransition() const 
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultImageTiltDisplacement() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getImageTiltDisplacement() const {
@@ -274,7 +274,7 @@ TransitionOptions LocationIndicatorLayer::getImageTiltDisplacementTransition() c
 }
 
 PropertyValue<std::array<double, 3>> LocationIndicatorLayer::getDefaultLocation() {
-    return {{{0, 0, 0}}};
+    return {{{0.f, 0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<double, 3>>& LocationIndicatorLayer::getLocation() const {
@@ -301,7 +301,7 @@ TransitionOptions LocationIndicatorLayer::getLocationTransition() const {
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultPerspectiveCompensation() {
-    return {0.85};
+    return {0.85f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getPerspectiveCompensation() const {
@@ -328,7 +328,7 @@ TransitionOptions LocationIndicatorLayer::getPerspectiveCompensationTransition()
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultShadowImageSize() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getShadowImageSize() const {
@@ -355,7 +355,7 @@ TransitionOptions LocationIndicatorLayer::getShadowImageSizeTransition() const {
 }
 
 PropertyValue<float> LocationIndicatorLayer::getDefaultTopImageSize() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& LocationIndicatorLayer::getTopImageSize() const {

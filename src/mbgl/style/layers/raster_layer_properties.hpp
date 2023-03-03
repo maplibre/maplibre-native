@@ -17,27 +17,27 @@ namespace mbgl {
 namespace style {
 
 struct RasterBrightnessMax : PaintProperty<float> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct RasterBrightnessMin : PaintProperty<float> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct RasterContrast : PaintProperty<float> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct RasterFadeDuration : PaintProperty<float> {
-    static float defaultValue() { return 300; }
+    static float defaultValue() { return 300.f; }
 };
 
 struct RasterHueRotate : PaintProperty<float> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct RasterOpacity : PaintProperty<float> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct RasterResampling : PaintProperty<RasterResamplingType> {
@@ -45,7 +45,7 @@ struct RasterResampling : PaintProperty<RasterResamplingType> {
 };
 
 struct RasterSaturation : PaintProperty<float> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 class RasterPaintProperties : public Properties<
