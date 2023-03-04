@@ -60,7 +60,7 @@ If you wish to deploy on attached hardware, you need to setup your Apple Develop
    git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
    cd maplibre-gl-native
    ```
-   Note that you must check out the project's git submodules to build. If you did not include `--recurse-submodules` in the clone, you can later run `git submdule update --init`.
+   Note that you must check out the project's git submodules to build. If you did not include `--recurse-submodules` in the clone, you can later run `git submodule update --init`.
 1. Run `make iframework BUILDTYPE=Release`. The packaging script will produce a `build/ios/pkg/` folder containing:
   - a `dynamic` folder containing a dynamically-linked fat framework with debug symbols for devices and the iOS Simulator
   - a `documentation` folder with HTML API documentation
