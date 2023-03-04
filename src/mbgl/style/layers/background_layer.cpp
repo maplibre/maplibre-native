@@ -93,7 +93,7 @@ TransitionOptions BackgroundLayer::getBackgroundColorTransition() const {
 }
 
 PropertyValue<float> BackgroundLayer::getDefaultBackgroundOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& BackgroundLayer::getBackgroundOpacity() const {
