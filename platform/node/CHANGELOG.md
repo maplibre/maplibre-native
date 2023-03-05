@@ -4,6 +4,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+* Move node ci+release to self hosted Ubuntu arm64 by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/873
 * Add windows support by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/707
 * Add Typings for Node Platform by @KiwiKilian in https://github.com/maplibre/maplibre-gl-native/pull/766
 * Upgrade nan for node 19.x support by @mnutt in https://github.com/maplibre/maplibre-gl-native/pull/853
@@ -21,8 +22,12 @@
 
 #v5.1.0
 * First Stable Release
+* Node workflow - build linux arm64 in a container #520 https://github.com/maplibre/maplibre-gl-native/pull/590
 
 # 5.0.1
+* Exclude Node 19 (ABI 111) because it breaks the node build by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/542
+* Fix mode switch not working in node version by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/415
+* Node release workflow by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/378 https://github.com/maplibre/maplibre-gl-native/pull/459 https://github.com/maplibre/maplibre-gl-native/pull/505 https://github.com/maplibre/maplibre-gl-native/pull/512 https://github.com/maplibre/maplibre-gl-native/pull/514
 * Add support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image). ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877))
 * [Breaking] Remove node 10 support. v5.0.1-pre.0 of the node package can be used a compatibility version.
 
