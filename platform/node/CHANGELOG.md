@@ -2,8 +2,9 @@
 # main
 
 ### ✨ New features
-
 - *...Add new stuff here...*
+
+# 5.2.0
 * Move node ci+release to self hosted Ubuntu arm64 by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/873
 * Add windows support by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/707
 * Add Typings for Node Platform by @KiwiKilian in https://github.com/maplibre/maplibre-gl-native/pull/766
