@@ -17,10 +17,10 @@
 * Use `*_t` and `*_v` trait helpers from C++17 STL by @louwers in https://github.com/maplibre/maplibre-gl-native/pull/731
 * Avoid implicit casts and portable printf with size_t by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/722
 
-#v5.1.1
+# 5.1.1
 * Fix memory access violation exception in vector_tile_data.cpp by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/632
 
-#v5.1.0
+# 5.1.0
 * First Stable Release
 * Node workflow - build linux arm64 in a container #520 https://github.com/maplibre/maplibre-gl-native/pull/590
 
