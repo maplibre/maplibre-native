@@ -8,7 +8,7 @@ export CI ?= 0
 # Getting rid of the duplicate package.json file is an open issue
 # https://github.com/maplibre/maplibre-gl-native/issues/657
 
-export NODE_PATH = ./node_modules
+export NODE_PATH = ../../node_modules
 
 CMAKE ?= cmake
 
@@ -156,7 +156,7 @@ ios: $(IOS_PROJ_PATH)
 
 #  make iproj
 .PHONY: iproj
-iproj: $(IOS_PROJ_PATH)
+iproj: $(IOS_PROJ_PATH) style-code
 	@#   Check if Xcode should run in headless mode
 	@#     If CI=1, then just perform `make iproj`
 	@#       else, use `xed` to open the XCworkspace
@@ -258,6 +258,14 @@ darwin-check-public-symbols:
 
 endif
 
+ios-docs: $(IOS_PROJ_PATH) style-code
+	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
+
+ios-docs-static: ios-docs
+	$(xcrun --find docc) process-archive transform-for-static-hosting \
+		$(IOS_OUTPUT_PATH)/Debug-iphonesimulator/Mapbox.doccarchive \
+		--output-path $(IOS_OUTPUT_PATH)/static-docs
+
 #### macOS targets ############################################################
 
 ifeq ($(HOST_PLATFORM), macos)
@@ -291,7 +299,7 @@ macos: $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCPRETTY)
 
 .PHONY: xproj
-xproj: $(MACOS_PROJ_PATH)
+xproj: $(MACOS_PROJ_PATH) style-code
 	xed $(MACOS_WORK_PATH)
 
 #  make macos-test
@@ -331,7 +339,6 @@ endif
 .PHONY: style-code
 style-code:
 	node ../../scripts/generate-style-code.js
-	# node ../../scripts/generate-shaders.js
 
 .PHONY: codestyle
 codestyle:

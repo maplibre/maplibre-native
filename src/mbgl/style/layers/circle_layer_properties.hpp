@@ -18,11 +18,11 @@ namespace style {
 
 struct CircleSortKey : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "circle-sort-key"; }
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct CircleBlur : DataDrivenPaintProperty<float, attributes::blur, uniforms::blur> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct CircleColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
@@ -30,7 +30,7 @@ struct CircleColor : DataDrivenPaintProperty<Color, attributes::color, uniforms:
 };
 
 struct CircleOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct CirclePitchAlignment : PaintProperty<AlignmentType> {
@@ -42,7 +42,7 @@ struct CirclePitchScale : PaintProperty<CirclePitchScaleType> {
 };
 
 struct CircleRadius : DataDrivenPaintProperty<float, attributes::radius, uniforms::radius> {
-    static float defaultValue() { return 5; }
+    static float defaultValue() { return 5.f; }
 };
 
 struct CircleStrokeColor : DataDrivenPaintProperty<Color, attributes::stroke_color, uniforms::stroke_color> {
@@ -50,15 +50,15 @@ struct CircleStrokeColor : DataDrivenPaintProperty<Color, attributes::stroke_col
 };
 
 struct CircleStrokeOpacity : DataDrivenPaintProperty<float, attributes::stroke_opacity, uniforms::stroke_opacity> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct CircleStrokeWidth : DataDrivenPaintProperty<float, attributes::stroke_width, uniforms::stroke_width> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct CircleTranslate : PaintProperty<std::array<float, 2>> {
-    static std::array<float, 2> defaultValue() { return {{0, 0}}; }
+    static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
 };
 
 struct CircleTranslateAnchor : PaintProperty<TranslateAnchorType> {

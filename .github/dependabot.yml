@@ -5,24 +5,6 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    versioning-strategy: increase
-  - package-ecosystem: "npm"
-    directory: "/platform/android"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    versioning-strategy: increase
-  - package-ecosystem: "npm"
-    directory: "/platform/ios"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    versioning-strategy: increase
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:

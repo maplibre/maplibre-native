@@ -95,7 +95,7 @@ TransitionOptions HeatmapLayer::getHeatmapColorTransition() const {
 }
 
 PropertyValue<float> HeatmapLayer::getDefaultHeatmapIntensity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& HeatmapLayer::getHeatmapIntensity() const {
@@ -122,7 +122,7 @@ TransitionOptions HeatmapLayer::getHeatmapIntensityTransition() const {
 }
 
 PropertyValue<float> HeatmapLayer::getDefaultHeatmapOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& HeatmapLayer::getHeatmapOpacity() const {
@@ -149,7 +149,7 @@ TransitionOptions HeatmapLayer::getHeatmapOpacityTransition() const {
 }
 
 PropertyValue<float> HeatmapLayer::getDefaultHeatmapRadius() {
-    return {30};
+    return {30.f};
 }
 
 const PropertyValue<float>& HeatmapLayer::getHeatmapRadius() const {
@@ -176,7 +176,7 @@ TransitionOptions HeatmapLayer::getHeatmapRadiusTransition() const {
 }
 
 PropertyValue<float> HeatmapLayer::getDefaultHeatmapWeight() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& HeatmapLayer::getHeatmapWeight() const {

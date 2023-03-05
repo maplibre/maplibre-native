@@ -136,7 +136,7 @@ TransitionOptions FillLayer::getFillColorTransition() const {
 }
 
 PropertyValue<float> FillLayer::getDefaultFillOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& FillLayer::getFillOpacity() const {
@@ -217,7 +217,7 @@ TransitionOptions FillLayer::getFillPatternTransition() const {
 }
 
 PropertyValue<std::array<float, 2>> FillLayer::getDefaultFillTranslate() {
-    return {{{0, 0}}};
+    return {{{0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<float, 2>>& FillLayer::getFillTranslate() const {
