@@ -105,8 +105,7 @@ TEST(ActorRef, AskOnDestroyedActor) {
     // whose memory is managed by AspiringActor, which has been destroyed
     // mitigation would require getting rid of the raw pointer
     // See https://github.com/maplibre/maplibre-gl-native/issues/876
-    if constexpr (false) {
-        auto result = ref.ask(&TestActorRef::receive);
-        EXPECT_ANY_THROW(result.get());
-    }
+
+    // auto result = ref.ask(&TestActorRef::receive);
+    // EXPECT_ANY_THROW(result.get());
 }
