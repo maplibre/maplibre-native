@@ -134,7 +134,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Add source to map's style
      */
-    addSource: (sourceId: string, source: {}) => void
+    addSource: (sourceId: string, source: object) => void
 
     /**
      * Remove source from map's style
@@ -144,7 +144,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Add layer to map's style
      */
-    addLayer: (layer: {}, beforeId?: string) => void
+    addLayer: (layer: object, beforeId?: string) => void
 
     /**
      * Remove layer from map's style
@@ -164,7 +164,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Set the extent of the zoom for a specified layer
      */
-    setLayerZoomRange: (layerId: string, minzoom: number, maxzoom: number) => void;
+    setLayerZoomRange: (layerId: string, minZoom: number, maxZoom: number) => void;
 
     /**
      * Set the value for a layer's property
@@ -179,7 +179,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Set the center of the map
      */
-    setCenter: (center: any) => void;
+    setCenter: (center: [number, number]) => void;
 
     /**
      * Set zoom of the map
