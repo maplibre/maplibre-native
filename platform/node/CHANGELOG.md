@@ -22,7 +22,7 @@
 * Fix memory access violation exception in vector_tile_data.cpp by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/632
 
 # 5.1.0
-* First Stable Release
+* First Maplibre Native Node Stable Release
 * Node workflow - build linux arm64 in a container #520 https://github.com/maplibre/maplibre-gl-native/pull/590
 
 # 5.0.1
@@ -31,6 +31,7 @@
 * Node release workflow by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/378 https://github.com/maplibre/maplibre-gl-native/pull/459 https://github.com/maplibre/maplibre-gl-native/pull/505 https://github.com/maplibre/maplibre-gl-native/pull/512 https://github.com/maplibre/maplibre-gl-native/pull/514
 * Add support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image). ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877))
 * [Breaking] Remove node 10 support. v5.0.1-pre.0 of the node package can be used a compatibility version.
+* Bring back node support by @jutaz in https://github.com/maplibre/maplibre-gl-native/pull/217
 
 # 5.0.0
 * No longer supporting source-compile fallback ([#15748](https://github.com/mapbox/mapbox-gl-native/pull/15748))
