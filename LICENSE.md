@@ -1,6 +1,6 @@
 BSD 2-Clause License
 
-Copyright (c) 2023 MapLibre contributors
+Copyright (c) 2021 MapLibre contributors
 Copyright (c) 2018-2021 MapTiler.com
 Copyright (c) 2014-2020 Mapbox
 
