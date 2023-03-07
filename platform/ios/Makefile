@@ -259,6 +259,7 @@ darwin-check-public-symbols:
 endif
 
 ios-docs: $(IOS_PROJ_PATH) style-code
+	npm ci --prefix ../.. --ignore-scripts
 	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
 
 ios-docs-static: ios-docs
