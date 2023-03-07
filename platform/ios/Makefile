@@ -240,18 +240,6 @@ ideploy:
 idocument:
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
-#  make darwin-style-code
-.PHONY: darwin-style-code
-darwin-style-code:
-	node platform/darwin/scripts/generate-style-code.js
-	node platform/darwin/scripts/update-examples.js
-style-code: darwin-style-code
-
-# make darwin-update-examples
-.PHONY: darwin-update-examples
-darwin-update-examples:
-	node platform/darwin/scripts/update-examples.js
-
 .PHONY: darwin-check-public-symbols
 darwin-check-public-symbols:
 	node platform/darwin/scripts/check-public-symbols.js macOS iOS
@@ -336,9 +324,14 @@ endif
 
 #### Miscellaneous targets #####################################################
 
+.PHONY: node-modules
+node-modules:
+	npm ci --prefix ../.. --ignore-scripts
+
 .PHONY: style-code
-style-code:
+style-code: node-modules
 	node ../../scripts/generate-style-code.js
+	node platform/darwin/scripts/update-examples.js
 
 .PHONY: codestyle
 codestyle:
