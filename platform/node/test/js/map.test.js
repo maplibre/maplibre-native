@@ -118,6 +118,7 @@ test('Map', function(t) {
             'setLayoutProperty',
             'setPaintProperty',
             'setFilter',
+            'setSize',
             'setCenter',
             'setZoom',
             'setBearing',
