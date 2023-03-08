@@ -10,6 +10,7 @@ Binaries are available and downloaded during install for the following platforms
 - Operating systems:
   - Ubuntu 20.04 (amd64/arm64)
   - macOS 12 (amd64/arm64)
+  - Windows (amd64)
 - Node.js 14, 16, 18
 
 Run:

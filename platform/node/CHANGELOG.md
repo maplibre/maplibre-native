@@ -1,7 +1,37 @@
 
 # main
+
+### ✨ New features
+- *...Add new stuff here...*
+
+# 5.2.0
+* Move node ci+release to self hosted Ubuntu arm64 by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/873
+* Add windows support by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/707
+* Add Typings for Node Platform by @KiwiKilian in https://github.com/maplibre/maplibre-gl-native/pull/766
+* Upgrade nan for node 19.x support by @mnutt in https://github.com/maplibre/maplibre-gl-native/pull/853
+* Improve node docs with available platforms by @KiwiKilian in https://github.com/maplibre/maplibre-gl-native/pull/786
+* Avoid implicit casts by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/787
+* Update node (ubuntu-20.04, arm64) docker build workflow by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/804
+* Move module.cmake out of mapbox/cmake-node-module by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/821
+* Add mbgl-compiler-options to Node targets by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/826
+* Avoid implicit casts and make code more portable by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/716
+* Use `*_t` and `*_v` trait helpers from C++17 STL by @louwers in https://github.com/maplibre/maplibre-gl-native/pull/731
+* Avoid implicit casts and portable printf with size_t by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/722
+
+# 5.1.1
+* Fix memory access violation exception in vector_tile_data.cpp by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/632
+
+# 5.1.0
+* First Maplibre Native Node Stable Release
+* Node workflow - build linux arm64 in a container #520 https://github.com/maplibre/maplibre-gl-native/pull/590
+
+# 5.0.1
+* Exclude Node 19 (ABI 111) because it breaks the node build by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/542
+* Fix mode switch not working in node version by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/415
+* Node release workflow by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/378 https://github.com/maplibre/maplibre-gl-native/pull/459 https://github.com/maplibre/maplibre-gl-native/pull/505 https://github.com/maplibre/maplibre-gl-native/pull/512 https://github.com/maplibre/maplibre-gl-native/pull/514
 * Add support for [image expression](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-types-image). ([#15877](https://github.com/mapbox/mapbox-gl-native/pull/15877))
-* [Breaking] Remove node 10 support. v5.x of the node package can be used a compatibility version.
+* [Breaking] Remove node 10 support. v5.0.1-pre.0 of the node package can be used a compatibility version.
+* Bring back node support by @jutaz in https://github.com/maplibre/maplibre-gl-native/pull/217
 
 # 5.0.0
 * No longer supporting source-compile fallback ([#15748](https://github.com/mapbox/mapbox-gl-native/pull/15748))
