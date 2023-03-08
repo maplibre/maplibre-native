@@ -474,13 +474,12 @@ void NodeMap::startRender() {
         if (eptr) {
             error = eptr;
             uv_async_send(async);
-        }
-        else {
+        } else {
             assert(!image.data);
             image = frontend->readStillImage();
             uv_async_send(async);
         }
-        });
+    });
 
     // Retain this object, otherwise it might get destructed before we are finished rendering the
     // still image.
