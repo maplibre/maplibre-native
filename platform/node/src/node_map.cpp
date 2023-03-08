@@ -670,7 +670,7 @@ void NodeMap::cancel() {
         reinterpret_cast<NodeMap *>(h->data)->renderFinished();
     });
 
-    frontend = std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{ 256, 256 }, pixelRatio);
+    frontend = std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{ 512, 512 }, pixelRatio);
     map = std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)
