@@ -431,7 +431,7 @@ void NodeMap::Render(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return Nan::ThrowTypeError("First argument must be an options object or a callback function");
     }
 
-    if (info.Length() <= 1 && !info[0]->IsFunction()) {
+    if (info.Length() <= 1 && !info[0]->IsFunction() || info.Length() > 1 && !info[1].IsFunction()) {
         return Nan::ThrowTypeError("Second argument must be a callback function");
     }
 
