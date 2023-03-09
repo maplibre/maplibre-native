@@ -69,6 +69,8 @@ jobs:
     continue-on-error: true
     env:
       BUILDTYPE: 'Release'
+      VCPKG_ROOT: ${{ github.workspace }}/platform/windows/vendor/vcpkg
+      VCPKG_BINARY_CACHE: ${{ env.VCPKG_ROOT }}/bincache
 
     defaults:
       run:
@@ -141,7 +143,6 @@ jobs:
 
       - name: Update ccache (Windows)
         if: runner.os == 'Windows'
-
         run: |
           choco.exe upgrade ccache
           ccache.exe --version
@@ -150,6 +151,7 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
+          max-size: "1000M"
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -173,6 +175,24 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: "Create directory '${{ env.VCPKG_BINARY_CACHE }}'"
+        if: runner.os == 'Windows'
+        run: mkdir -p $VCPKG_BINARY_CACHE
+        shell: bash
+
+      - name: Restore vcpkg cache (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/packages
+            !${{ env.VCPKG_ROOT }}/downloads
+            !${{ env.VCPKG_ROOT }}/installed
+          key: |
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
