@@ -149,7 +149,7 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          max-size: "2G"
+          verbose: 2
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
