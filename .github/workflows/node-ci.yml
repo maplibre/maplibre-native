@@ -178,7 +178,7 @@ jobs:
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10
 
-      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache'"
+      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
         run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
         shell: bash
