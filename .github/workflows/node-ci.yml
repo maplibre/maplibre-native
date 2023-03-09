@@ -70,7 +70,7 @@ jobs:
     env:
       BUILDTYPE: 'Release'
       VCPKG_ROOT: ${{ github.workspace }}/platform/windows/vendor/vcpkg
-      VCPKG_BINARY_CACHE: ${{ env.VCPKG_ROOT }}/bincache
+      VCPKG_BINARY_CACHE: ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
 
     defaults:
       run:
