@@ -146,10 +146,22 @@ jobs:
 #          ccache.exe --version
 #          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
 
-      - name: Set up ccache
+      - name: Set up ccache (MacOS/Linux)
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1
         with:
-          verbose: 2
+          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+
+      - name: Set up ccache (Windows)
+        if: runner.os == 'Windows'
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          variant: 'sccache'
+          max-size: '2G'
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -198,7 +210,7 @@ jobs:
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
