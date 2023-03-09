@@ -173,6 +173,8 @@ var map = new mbgl.Map({
                 response.data = body;
 
                 callback(null, response);
+            } else if (res.statusCode == 204) {
+                callback();
             } else {
                 callback(new Error(JSON.parse(body).message));
             }
