@@ -119,12 +119,14 @@ declare module '@maplibre/maplibre-gl-native' {
     load: (style: any) => void;
 
     /**
-     * Render a specific map view to an image with previously loaded map styles
+     * Render a specific map view to an image with previously loaded map styles with render options.
      */
-    render: (
-      renderOptions: RenderOptions,
-      callback: (...args: [error: Error, buffer: undefined] | [error: undefined, buffer: Uint8Array]) => void,
-    ) => void;
+    render(renderOptions: RenderOptions, callback: (...args: [error: Error, buffer: undefined] | [error: undefined, buffer: Uint8Array]) => void): void;
+
+    /**
+     * Render a specific map view to an image with previously loaded map styles without render options.
+     */
+    render(callback: (...args: [error: Error, buffer: undefined] | [error: undefined, buffer: Uint8Array]) => void): void;
 
     /**
      * Call to permanently dispose the internal map resources, instance can't be used for further render calls
@@ -134,32 +136,32 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Add source to map's style
      */
-    addSource: (sourceId: string, source: object) => void
+    addSource: (sourceId: string, source: object) => void;
 
     /**
      * Remove source from map's style
      */
-    removeSource: (sourceId: string) => void
+    removeSource: (sourceId: string) => void;
 
     /**
      * Add layer to map's style
      */
-    addLayer: (layer: object, beforeId?: string) => void
+    addLayer: (layer: object, beforeId?: string) => void;
 
     /**
      * Remove layer from map's style
      */
-    removeLayer: (layerId: string) => void
+    removeLayer: (layerId: string) => void;
 
     /**
      * Add image to map's style
      */
-    addImage: (imageId: string, image: any) => void
+    addImage: (imageId: string, image: any) => void;
 
     /**
      * Remove image from map's style
      */
-    removeImage: (imageId: string) => void
+    removeImage: (imageId: string) => void;
 
     /**
      * Set the extent of the zoom for a specified layer
@@ -175,6 +177,11 @@ declare module '@maplibre/maplibre-gl-native' {
      * Set filter for specified style layer
      */
     setFilter: (layerId: string, filter: [] | null | undefined) => void;
+
+    /**
+     * Set size of the tile
+     */
+    setSize: (size: [number, number]) => void;
 
     /**
      * Set the center of the map
@@ -199,21 +206,21 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Set light value of map
      */
-    setLight: (light: any) => void
+    setLight: (light: any) => void;
 
     /**
      * Set axonometric view of map
      */
-    setAxonometric: (state: boolean) => void
+    setAxonometric: (state: boolean) => void;
 
     /**
      * Set X skew of map
      */
-    setXSkew: (x: number) => void
+    setXSkew: (x: number) => void;
 
     /**
      * Set Y skew of map
      */
-    setYSkew: (y: number) => void
+    setYSkew: (y: number) => void;
   }
 }
