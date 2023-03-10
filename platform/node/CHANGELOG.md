@@ -5,6 +5,7 @@
 - *...Add new stuff here...*
 
 # 5.2.0
+* Adjust Typings for Node Platform by @etnav in https://github.com/maplibre/maplibre-gl-native/pull/871
 * Node platform improvements (added setSize and a new render call without render options object) by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/891
 * Move node ci+release to self hosted Ubuntu arm64 by @acalcutt in https://github.com/maplibre/maplibre-gl-native/pull/873
 * Add windows support by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/707
