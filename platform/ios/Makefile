@@ -331,6 +331,7 @@ node-modules:
 .PHONY: style-code
 style-code: node-modules
 	node ../../scripts/generate-style-code.js
+	node platform/darwin/scripts/generate-style-code.js
 	node platform/darwin/scripts/update-examples.js
 
 .PHONY: codestyle
