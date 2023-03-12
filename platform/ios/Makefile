@@ -189,7 +189,7 @@ ios-uitest: $(IOS_PROJ_PATH)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
-ios-test: $(IOS_PROJ_PATH) style-code
+ios-test: style-code $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: ios-integration-test
@@ -292,7 +292,7 @@ xproj: $(MACOS_PROJ_PATH) style-code
 
 #  make macos-test
 .PHONY: macos-test
-macos-test: $(MACOS_PROJ_PATH) style-code
+macos-test: style-code $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: macos-lint
