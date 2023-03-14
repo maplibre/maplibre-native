@@ -242,7 +242,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         bitsPerComponent,
         bytesPerRow,
         *colorSpace,
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast)));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }

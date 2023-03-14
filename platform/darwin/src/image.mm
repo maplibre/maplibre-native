@@ -37,7 +37,7 @@ CGImageRef CGImageCreateWithMGLPremultipliedImage(mbgl::PremultipliedImage&& src
 
     return CGImageCreate(src.size.width, src.size.height, bitsPerComponent, bitsPerPixel,
                          bytesPerRow, *colorSpace,
-                         kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast, *provider,
+                         static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast), *provider,
                          NULL, false, kCGRenderingIntentDefault);
 }
 
@@ -58,7 +58,7 @@ mbgl::PremultipliedImage MGLPremultipliedImageFromCGImage(CGImageRef src) {
 
     CGContextHandle context(CGBitmapContextCreate(
         image.data.get(), width, height, bitsPerComponent, bytesPerRow, *colorSpace,
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast)));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }
