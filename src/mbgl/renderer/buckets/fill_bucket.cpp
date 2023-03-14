@@ -137,7 +137,7 @@ void FillBucket::upload(gfx::UploadPass& uploadPass) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         lineIndexBuffer = uploadPass.createIndexBuffer(std::move(lines));
         triangleIndexBuffer =
-            triangles.empty() ? optional<gfx::IndexBuffer>{} : uploadPass.createIndexBuffer(std::move(triangles));
+            triangles.empty() ? std::optional<gfx::IndexBuffer>{} : uploadPass.createIndexBuffer(std::move(triangles));
     }
 
     for (auto& pair : paintPropertyBinders) {

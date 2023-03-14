@@ -23,7 +23,7 @@ public:
 };
 
 // Class that holds position + lenth pairs for directory, extension, and filename of a path.
-// The extension will contain the preceding ., and optionally a preceding @2x specifier.
+// The extension will contain the preceding ., and std::optionally a preceding @2x specifier.
 // The filename will not contain the file extension.
 class Path {
 public:

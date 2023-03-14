@@ -5,7 +5,6 @@
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/util/rect.hpp>
 #include <mbgl/util/traits.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/util.hpp>
@@ -55,7 +54,7 @@ public:
     GlyphMetrics metrics;
 };
 
-using Glyphs = std::map<GlyphID, optional<Immutable<Glyph>>>;
+using Glyphs = std::map<GlyphID, std::optional<Immutable<Glyph>>>;
 using GlyphMap = std::map<FontStackHash, Glyphs>;
 
 class PositionedGlyph {
@@ -68,7 +67,7 @@ public:
                              float scale_,
                              Rect<uint16_t> rect_,
                              GlyphMetrics metrics_,
-                             optional<std::string> imageID_,
+                             std::optional<std::string> imageID_,
                              std::size_t sectionIndex_ = 0)
         : glyph(glyph_),
           x(x_),
@@ -89,7 +88,7 @@ public:
     float scale = 0.0;
     Rect<uint16_t> rect;
     GlyphMetrics metrics;
-    optional<std::string> imageID;
+    std::optional<std::string> imageID;
     // Maps positioned glyph to TaggedString section
     std::size_t sectionIndex;
 };

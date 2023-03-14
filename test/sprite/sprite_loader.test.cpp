@@ -166,7 +166,7 @@ TEST(SpriteLoader, LoadingCancel) {
     test.fileSource.spriteImageResponse =
     test.fileSource.spriteJSONResponse = [&] (const Resource&) {
         test.end();
-        return optional<Response>();
+        return std::optional<Response>();
     };
 
     test.observer.spriteLoaded = [&](std::vector<Immutable<style::Image::Impl>>) {

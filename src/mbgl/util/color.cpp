@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-optional<Color> Color::parse(const std::string& s) {
+std::optional<Color> Color::parse(const std::string& s) {
     auto css_color = CSSColorParser::parse(s);
 
     // Premultiply the color.

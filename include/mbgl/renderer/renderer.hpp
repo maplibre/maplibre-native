@@ -25,9 +25,9 @@ struct PlacedSymbolData {
     /// Contents of the label
     std::u16string key;
     /// If symbol contains text, text collision box in viewport coordinates
-    optional<mapbox::geometry::box<float>> textCollisionBox;
+    std::optional<mapbox::geometry::box<float>> textCollisionBox;
     /// If symbol contains icon, icon collision box in viewport coordinates
-    optional<mapbox::geometry::box<float>> iconCollisionBox;
+    std::optional<mapbox::geometry::box<float>> iconCollisionBox;
     /// Symbol text was placed
     bool textPlaced;
     /// Symbol icon was placed
@@ -42,7 +42,7 @@ struct PlacedSymbolData {
 
 class Renderer {
 public:
-    Renderer(gfx::RendererBackend&, float pixelRatio_, const optional<std::string>& localFontFamily = {});
+    Renderer(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily = {});
     ~Renderer();
 
     void markContextLost();
@@ -65,20 +65,20 @@ public:
                                                  const Feature& feature,
                                                  const std::string& extension,
                                                  const std::string& extensionField,
-                                                 const optional<std::map<std::string, Value>>& args = {}) const;
+                                                 const std::optional<std::map<std::string, Value>>& args = {}) const;
 
-    void setFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
+    void setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
                          const std::string& featureID, const FeatureState& state);
 
     void getFeatureState(FeatureState& state,
                          const std::string& sourceID,
-                         const optional<std::string>& sourceLayerID,
+                         const std::optional<std::string>& sourceLayerID,
                          const std::string& featureID) const;
 
     void removeFeatureState(const std::string& sourceID,
-                            const optional<std::string>& sourceLayerID,
-                            const optional<std::string>& featureID,
-                            const optional<std::string>& stateKey);
+                            const std::optional<std::string>& sourceLayerID,
+                            const std::optional<std::string>& featureID,
+                            const std::optional<std::string>& stateKey);
 
     // Debug
     void dumpDebugLogs();

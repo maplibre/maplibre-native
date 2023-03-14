@@ -33,7 +33,7 @@ public:
         return false;
     }
 
-    std::vector<optional<Value>> possibleOutputs() const override {
+    std::vector<std::optional<Value>> possibleOutputs() const override {
         return {{ value }};
     }
     

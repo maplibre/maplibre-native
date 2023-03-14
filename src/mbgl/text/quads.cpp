@@ -7,7 +7,6 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/math.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <cassert>
 
@@ -107,7 +106,7 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         fixedContentHeight = content.bottom - content.top - stretchContentHeight;
     }
 
-    optional<std::array<float, 4>> matrix{nullopt};
+    std::optional<std::array<float, 4>> matrix{std::nullopt};
     if (iconRotate) {
         const float angle = iconRotate * util::DEG2RAD_F;
         const float angle_sin = std::sin(angle);

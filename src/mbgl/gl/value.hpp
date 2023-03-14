@@ -264,7 +264,7 @@ struct BindVertexArray {
 };
 
 struct VertexAttribute {
-    using Type = optional<gfx::AttributeBinding>;
+    using Type = std::optional<gfx::AttributeBinding>;
     static const Type Default;
     static void Set(const Type&, Context&, AttributeLocation);
 };

@@ -2,9 +2,9 @@
 
 #include <mbgl/gfx/debug_group.hpp>
 #include <mbgl/util/color.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <cstdint>
+#include <optional>
 
 namespace mbgl {
 namespace gfx {
@@ -14,9 +14,9 @@ class Renderable;
 class RenderPassDescriptor {
 public:
     Renderable& renderable;
-    optional<Color> clearColor;
-    optional<float> clearDepth;
-    optional<int32_t> clearStencil;
+    std::optional<Color> clearColor;
+    std::optional<float> clearDepth;
+    std::optional<int32_t> clearStencil;
 };
 
 class RenderPass {

@@ -132,7 +132,7 @@ Path::Path(const std::string& str, const size_t pos, const size_t count)
 }
 
 std::string transformURL(const std::string& tpl, const std::string& str, const URL& url) {
-    auto result = util::replaceTokens(tpl, [&](const std::string& token) -> optional<std::string> {
+    auto result = util::replaceTokens(tpl, [&](const std::string& token) -> std::optional<std::string> {
         if (token == "path") {
             return str.substr(url.path.first, url.path.second);
         } else if (token == "domain") {

@@ -14,14 +14,14 @@ namespace mbgl {
 HeadlessFrontend::HeadlessFrontend(float pixelRatio_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
                                    const gfx::ContextMode contextMode,
-                                   const optional<std::string>& localFontFamily)
+                                   const std::optional<std::string>& localFontFamily)
     : HeadlessFrontend({256, 256}, pixelRatio_, swapBehavior, contextMode, localFontFamily) {}
 
 HeadlessFrontend::HeadlessFrontend(Size size_,
                                    float pixelRatio_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
                                    const gfx::ContextMode contextMode,
-                                   const optional<std::string>& localFontFamily)
+                                   const std::optional<std::string>& localFontFamily)
     : size(size_),
       pixelRatio(pixelRatio_),
       frameTime(0),
@@ -169,7 +169,7 @@ void HeadlessFrontend::renderOnce(Map&) {
     util::RunLoop::Get()->runOnce();
 }
 
-optional<TransformState> HeadlessFrontend::getTransformState() const {
+std::optional<TransformState> HeadlessFrontend::getTransformState() const {
     if (updateParameters) {
         return updateParameters->transformState;
     } else {

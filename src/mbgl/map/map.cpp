@@ -129,7 +129,7 @@ bool Map::isPanning() const {
 
 // MARK: -
 
-CameraOptions Map::getCameraOptions(const optional<EdgeInsets>& padding) const {
+CameraOptions Map::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return impl->transform.getCameraOptions(padding);
 }
 
@@ -159,7 +159,7 @@ void Map::pitchBy(double pitch, const AnimationOptions& animation) {
     easeTo(CameraOptions().withPitch((impl->transform.getPitch() * util::RAD2DEG_D) - pitch), animation);
 }
 
-void Map::scaleBy(double scale, const optional<ScreenCoordinate>& anchor, const AnimationOptions& animation) {
+void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation) {
     const double zoom = impl->transform.getZoom() + impl->transform.getState().scaleZoom(scale);
     easeTo(CameraOptions().withZoom(zoom).withAnchor(anchor), animation);
 }
@@ -172,8 +172,8 @@ void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second
 
 CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
                                          const EdgeInsets& padding,
-                                         const optional<double>& bearing,
-                                         const optional<double>& pitch) const {
+                                         const std::optional<double>& bearing,
+                                         const std::optional<double>& pitch) const {
     return cameraForLatLngs(
         {
             bounds.northwest(),
@@ -233,8 +233,8 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transfo
 
 CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
                                     const EdgeInsets& padding,
-                                    const optional<double>& bearing,
-                                    const optional<double>& pitch) const {
+                                    const std::optional<double>& bearing,
+                                    const std::optional<double>& pitch) const {
     if (!bearing && !pitch) {
         return mbgl::cameraForLatLngs(latLngs, impl->transform, padding);
     }
@@ -252,8 +252,8 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
 
 CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
                                      const EdgeInsets& padding,
-                                     const optional<double>& bearing,
-                                     const optional<double>& pitch) const {
+                                     const std::optional<double>& bearing,
+                                     const std::optional<double>& pitch) const {
     std::vector<LatLng> latLngs;
     forEachPoint(geometry, [&](const Point<double>& pt) {
         latLngs.emplace_back(pt.y, pt.x);

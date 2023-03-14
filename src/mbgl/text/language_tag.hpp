@@ -1,8 +1,7 @@
 #pragma once
 
-#include <mbgl/util/optional.hpp>
-
 #include <string>
+#include <optional>
 
 /*
     Use LanguageTag to go back and forth between BCP 47 language tags
@@ -31,14 +30,14 @@ namespace mbgl {
 
 struct LanguageTag {
     LanguageTag() = default;
-    LanguageTag(optional<std::string> language_, optional<std::string> script_, optional<std::string> region_);
+    LanguageTag(std::optional<std::string> language_, std::optional<std::string> script_, std::optional<std::string> region_);
 
     static LanguageTag fromBCP47(const std::string& bcp47Tag);
     std::string toBCP47() const;
 
-    optional<std::string> language; // ISO 639
-    optional<std::string> script;   // ISO 15924
-    optional<std::string> region;   // ISO 3316-1 || UN M.49
+    std::optional<std::string> language; // ISO 639
+    std::optional<std::string> script;   // ISO 15924
+    std::optional<std::string> region;   // ISO 3316-1 || UN M.49
 };
 
 } // end namespace mbgl

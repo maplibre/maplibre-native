@@ -147,7 +147,7 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) {
     }
 }
 
-std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, const optional<uint8_t>& overscaledZ) {
+std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, const std::optional<uint8_t>& overscaledZ) {
     struct Node {
         AABB aabb;
         uint8_t zoom;
@@ -355,7 +355,7 @@ TileCover::TileCover(const Geometry<double>& geom, uint8_t z, bool project/* = t
 
 TileCover::~TileCover() = default;
 
-optional<UnwrappedTileID> TileCover::next() {
+std::optional<UnwrappedTileID> TileCover::next() {
     return impl->next();
 }
 
