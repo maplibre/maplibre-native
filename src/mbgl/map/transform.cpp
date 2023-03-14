@@ -142,7 +142,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     startTransition(
         camera,
         animation,
-        [=](double t) {
+        [=, this](double t) {
             Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
             LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
             double frameZoom = util::interpolate(startZoom, zoom, t);
@@ -302,7 +302,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     startTransition(
         camera,
         animation,
-        [=](double k) {
+        [=, this](double k) {
             /// s: The distance traveled along the flight path, measured in
             /// ρ-screenfuls.
             double s = k * S;
