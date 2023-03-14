@@ -52,7 +52,7 @@ private:
 
 class SnapshotterRenderer final : public RendererObserver {
 public:
-    SnapshotterRenderer(Size size, float pixelRatio, const optional<std::string>& localFontFamily)
+    SnapshotterRenderer(Size size, float pixelRatio, const std::optional<std::string>& localFontFamily)
         : frontend(size,
                    pixelRatio,
                    gfx::HeadlessBackend::SwapBehaviour::NoFlush,
@@ -112,7 +112,7 @@ private:
 
 class SnapshotterRendererFrontend final : public RendererFrontend {
 public:
-    SnapshotterRendererFrontend(Size size, float pixelRatio, optional<std::string> localFontFamily)
+    SnapshotterRendererFrontend(Size size, float pixelRatio, std::optional<std::string> localFontFamily)
         : renderer(std::make_unique<util::Thread<SnapshotterRenderer>>(
               "Snapshotter", size, pixelRatio, std::move(localFontFamily))) {}
 
@@ -153,7 +153,7 @@ public:
          const ResourceOptions& resourceOptions,
          const ClientOptions& clientOptions,
          MapSnapshotterObserver& observer_,
-         optional<std::string> localFontFamily)
+         std::optional<std::string> localFontFamily)
         : observer(observer_),
           frontend(size, pixelRatio, std::move(localFontFamily)),
           map(frontend,
@@ -256,7 +256,7 @@ MapSnapshotter::MapSnapshotter(Size size,
                                const ResourceOptions& resourceOptions,
                                const ClientOptions& clientOptions,
                                MapSnapshotterObserver& observer,
-                               optional<std::string> localFontFamily)
+                               std::optional<std::string> localFontFamily)
     : impl(std::make_unique<MapSnapshotter::Impl>(
           size, pixelRatio, resourceOptions, clientOptions, observer, std::move(localFontFamily))) {}
 

@@ -9,7 +9,6 @@
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/geojson.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/traits.hpp>
 
 #include <mapbox/compatibility/value.hpp>
@@ -18,6 +17,7 @@
 #include <chrono>
 #include <string>
 #include <type_traits>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -34,7 +34,7 @@ namespace style {
    A single template function serves as the public interface:
 
        template <class T>
-       optional<T> convert(const Convertible& input, Error& error);
+       std::optional<T> convert(const Convertible& input, Error& error);
 
    Where `T` is one of the above types. If the conversion fails, the result is empty, and the
    error parameter includes diagnostic text suitable for presentation to a library user. Otherwise,
@@ -69,7 +69,7 @@ namespace style {
       * `objectMember(v, name)` -- called only if `isObject(v)`; `name` is `const char *`; return value:
          * is true when evaluated in a boolean context iff the named member exists
          * is convertable to a `V` or `V&` when dereferenced
-      * `eachMember(v, [] (const std::string&, const V&) -> optional<Error> {...})` -- called
+      * `eachMember(v, [] (const std::string&, const V&) -> std::optional<Error> {...})` -- called
          only if `isObject(v)`; calls the provided lambda once for each key and value of the object;
          short-circuits if any call returns an `Error`
 
@@ -150,42 +150,42 @@ public:
         return v.vtable->isObject(v.storage);
     }
 
-    friend inline optional<Convertible> objectMember(const Convertible& v, const char * name) {
+    friend inline std::optional<Convertible> objectMember(const Convertible& v, const char * name) {
         assert(v.vtable);
         return v.vtable->objectMember(v.storage, name);
     }
 
-    friend inline optional<Error> eachMember(const Convertible& v, const std::function<optional<Error> (const std::string&, const Convertible&)>& fn) {
+    friend inline std::optional<Error> eachMember(const Convertible& v, const std::function<std::optional<Error> (const std::string&, const Convertible&)>& fn) {
         assert(v.vtable);
         return v.vtable->eachMember(v.storage, fn);
     }
 
-    friend inline optional<bool> toBool(const Convertible& v) {
+    friend inline std::optional<bool> toBool(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toBool(v.storage);
     }
 
-    friend inline optional<float> toNumber(const Convertible& v) {
+    friend inline std::optional<float> toNumber(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toNumber(v.storage);
     }
 
-    friend inline optional<double> toDouble(const Convertible& v) {
+    friend inline std::optional<double> toDouble(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toDouble(v.storage);
     }
 
-    friend inline optional<std::string> toString(const Convertible& v) {
+    friend inline std::optional<std::string> toString(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toString(v.storage);
     }
 
-    friend inline optional<Value> toValue(const Convertible& v) {
+    friend inline std::optional<Value> toValue(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toValue(v.storage);
     }
 
-    friend inline optional<GeoJSON> toGeoJSON(const Convertible& v, Error& error) {
+    friend inline std::optional<GeoJSON> toGeoJSON(const Convertible& v, Error& error) {
         assert(v.vtable);
         return v.vtable->toGeoJSON(v.storage, error);
     }
@@ -214,23 +214,23 @@ private:
         Convertible (*arrayMember) (const Storage&, std::size_t);
 
         bool                  (*isObject)     (const Storage&);
-        optional<Convertible> (*objectMember) (const Storage&, const char *);
-        optional<Error>       (*eachMember)   (const Storage&, const std::function<optional<Error> (const std::string&, const Convertible&)>&);
+        std::optional<Convertible> (*objectMember) (const Storage&, const char *);
+        std::optional<Error>       (*eachMember)   (const Storage&, const std::function<std::optional<Error> (const std::string&, const Convertible&)>&);
 
-        optional<bool>        (*toBool)   (const Storage&);
-        optional<float>       (*toNumber) (const Storage&);
-        optional<double>      (*toDouble) (const Storage&);
-        optional<std::string> (*toString) (const Storage&);
-        optional<Value>       (*toValue)  (const Storage&);
+        std::optional<bool>        (*toBool)   (const Storage&);
+        std::optional<float>       (*toNumber) (const Storage&);
+        std::optional<double>      (*toDouble) (const Storage&);
+        std::optional<std::string> (*toString) (const Storage&);
+        std::optional<Value>       (*toValue)  (const Storage&);
 
         // https://github.com/mapbox/mapbox-gl-native/issues/5623
-        optional<GeoJSON> (*toGeoJSON) (const Storage&, Error&);
+        std::optional<GeoJSON> (*toGeoJSON) (const Storage&, Error&);
     };
 
     // Extracted this function from the table below to work around a GCC bug with differing
     // visibility settings for capturing lambdas: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80947
     template <typename T>
-    static auto vtableEachMember(const Storage& s, const std::function<optional<Error>(const std::string&, const Convertible&)>& fn) {
+    static auto vtableEachMember(const Storage& s, const std::function<std::optional<Error>(const std::string&, const Convertible&)>& fn) {
         return ConversionTraits<T>::eachMember(reinterpret_cast<const T&>(s), [&](const std::string& k, T&& v) {
             return fn(k, Convertible(std::move(v)));
         });
@@ -262,11 +262,11 @@ private:
                 return Traits::isObject(reinterpret_cast<const T&>(s));
             },
             [] (const Storage& s, const char * key) {
-                optional<T> member = Traits::objectMember(reinterpret_cast<const T&>(s), key);
+                std::optional<T> member = Traits::objectMember(reinterpret_cast<const T&>(s), key);
                 if (member) {
-                    return optional<Convertible>(Convertible(std::move(*member)));
+                    return std::optional<Convertible>(Convertible(std::move(*member)));
                 } else {
-                    return optional<Convertible>();
+                    return std::optional<Convertible>();
                 }
             },
             vtableEachMember<T>,
@@ -297,7 +297,7 @@ private:
 };
 
 template <class T, class...Args>
-optional<T> convert(const Convertible& value, Error& error, Args&&...args) {
+std::optional<T> convert(const Convertible& value, Error& error, Args&&...args) {
     return Converter<T>()(value, error, std::forward<Args>(args)...);
 }
 

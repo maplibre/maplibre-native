@@ -52,8 +52,8 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 }
 
-optional<Color> RenderLayer::getSolidBackground() const {
-    return nullopt;
+std::optional<Color> RenderLayer::getSolidBackground() const {
+    return {};
 }
 
 void RenderLayer::markContextDestroyed() {

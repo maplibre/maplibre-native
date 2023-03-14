@@ -6,10 +6,10 @@
 #include <cstring>
 #include <cstdio>
 #include <chrono>
+#include <optional>
 
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/optional.hpp>
 
 #define MBGL_CONSTRUCTOR(f) \
     static void f(void); \
@@ -308,7 +308,7 @@ void Query::bind(
     stmt.impl->check(sqlite3_bind_int64(stmt.impl->stmt, offset, std::chrono::system_clock::to_time_t(value)));
 }
 
-template <> void Query::bind(int offset, mbgl::optional<std::string> value) {
+template <> void Query::bind(int offset, std::optional<std::string> value) {
     if (!value) {
         bind(offset, nullptr);
     } else {
@@ -319,7 +319,7 @@ template <> void Query::bind(int offset, mbgl::optional<std::string> value) {
 template <>
 void Query::bind(
     int offset,
-    mbgl::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>> value) {
+    std::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>> value) {
     if (!value) {
         bind(offset, nullptr);
     } else {
@@ -386,39 +386,39 @@ Query::get(int offset) {
         std::chrono::system_clock::from_time_t(sqlite3_column_int64(stmt.impl->stmt, offset)));
 }
 
-template <> mbgl::optional<int64_t> Query::get(int offset) {
+template <> std::optional<int64_t> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return mbgl::nullopt;
+        return {};
     } else {
         return get<int64_t>(offset);
     }
 }
 
-template <> mbgl::optional<double> Query::get(int offset) {
+template <> std::optional<double> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return mbgl::nullopt;
+        return {};
     } else {
         return get<double>(offset);
     }
 }
 
-template <> mbgl::optional<std::string> Query::get(int offset) {
+template <> std::optional<std::string> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return mbgl::nullopt;
+        return {};
     } else {
         return get<std::string>(offset);
     }
 }
 
 template <>
-mbgl::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>>
+std::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>>
 Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return mbgl::nullopt;
+        return {};
     } else {
         return get<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>>(
             offset);

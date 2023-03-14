@@ -134,7 +134,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     }
 
     result->requiredResourceCount++;
-    optional<Response> styleResponse =
+    std::optional<Response> styleResponse =
             offlineDatabase.get(Resource::style(definition.match([](auto& reg){ return reg.styleURL; })));
     if (!styleResponse) {
         return *result;
@@ -156,10 +156,10 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
             } else {
                 result->requiredResourceCount += 1;
                 const auto& url = urlOrTileset.get<std::string>();
-                optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
+                std::optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
                 if (sourceResponse) {
                     style::conversion::Error error;
-                    optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
+                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
                     if (tileset) {
                         uint64_t tileSourceCount = tileCount(definition, type, tileSize, (*tileset).zoomRange);
                         result->requiredTileCount += tileSourceCount;
@@ -266,7 +266,7 @@ void OfflineDownload::activateDownload() {
 
                     ensureResource(std::move(sourceResource), [=](const Response& sourceResponse) {
                         style::conversion::Error error;
-                        optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
+                        std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
                         if (tileset) {
                             auto resourceOptions = onlineFileSource.getResourceOptions();
                             util::mapbox::canonicalizeTileset(resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
@@ -451,12 +451,12 @@ void OfflineDownload::ensureResource(Resource&& resource,
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=]() {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
-        auto getResourceSizeInDatabase = [&] () -> optional<int64_t> {
-            optional<int64_t> result;
+        auto getResourceSizeInDatabase = [&] () -> std::optional<int64_t> {
+            std::optional<int64_t> result;
             if (!callback) {
                 result = offlineDatabase.hasRegionResource(resource);
             } else {
-                optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
+                std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
                 if (response) {
                     callback(response->first);
                     result = response->second;
@@ -467,7 +467,7 @@ void OfflineDownload::ensureResource(Resource&& resource,
             return result;
         };
 
-        optional<int64_t> offlineResponse = getResourceSizeInDatabase();
+        std::optional<int64_t> offlineResponse = getResourceSizeInDatabase();
         if (offlineResponse) {
             assert(!resourcesToBeMarkedAsUsed.empty());
             status.completedResourceCount++;

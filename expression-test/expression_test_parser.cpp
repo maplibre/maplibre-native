@@ -75,7 +75,7 @@ std::string toString(const JSValue& value) {
     return { value.GetString(), value.GetStringLength() };
 }
 
-optional<Value> toValue(const JSValue& jsvalue) {
+std::optional<Value> toValue(const JSValue& jsvalue) {
     if (jsvalue.IsNull()) {
         return Value{};
     }
@@ -105,7 +105,7 @@ optional<Value> toValue(const JSValue& jsvalue) {
         return toValue(Convertible(&jsvalue));
     }
 
-    return nullopt;
+    return {};
 }
 
 style::expression::type::Type stringToType(const std::string& type) {
@@ -133,7 +133,7 @@ style::expression::type::Type stringToType(const std::string& type) {
     return type::Null;
 }
 
-optional<style::expression::type::Type> toExpressionType(const PropertySpec& spec) {
+std::optional<style::expression::type::Type> toExpressionType(const PropertySpec& spec) {
     using namespace style::expression;
     if (spec.type == "array") {
         type::Type itemType = spec.value.empty() ? type::Value : stringToType(spec.value);
@@ -147,7 +147,7 @@ optional<style::expression::type::Type> toExpressionType(const PropertySpec& spe
         return {type::String};
     }
 
-    return spec.type.empty() ? nullopt : optional<type::Type>{stringToType(spec.type)};
+    return spec.type.empty() ? {} : std::optional<type::Type>{stringToType(spec.type)};
 }
 
 void parseCompiled(const JSValue& compiledValue, TestData& data) {
@@ -246,7 +246,7 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
         assert(input[1].IsObject());
 
         // Parse evaluation context, zoom.
-        optional<float> zoom;
+        std::optional<float> zoom;
         const auto& evaluationContext = input[0].GetObject();
         if (evaluationContext.HasMember("zoom")) {
             assert(evaluationContext["zoom"].IsNumber());
@@ -254,14 +254,14 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
         }
 
         // Parse heatmap density
-        optional<double> heatmapDensity;
+        std::optional<double> heatmapDensity;
         if (evaluationContext.HasMember("heatmapDensity")) {
             assert(evaluationContext["heatmapDensity"].IsNumber());
             heatmapDensity = evaluationContext["heatmapDensity"].GetDouble();
         }
 
         // Parse canonicalID
-        optional<CanonicalTileID> canonical;
+        std::optional<CanonicalTileID> canonical;
         if (evaluationContext.HasMember("canonicalID")) {
             const auto& canonicalIDObject = evaluationContext["canonicalID"];
             assert(canonicalIDObject.IsObject());
@@ -404,12 +404,12 @@ Ignores parseExpressionIgnores() {
     return ignores;
 }
 
-optional<TestData> parseTestData(const filesystem::path& path) {
+std::optional<TestData> parseTestData(const filesystem::path& path) {
     TestData data;
     auto maybeJson = readJson(path.string());
     if (!maybeJson.is<JSDocument>()) { // NOLINT
         Log::Error(Event::General, "Cannot parse test '%s'.", path.string().c_str());
-        return nullopt;
+        return {};
     }
 
     data.document = std::move(maybeJson.get<JSDocument>());
@@ -417,7 +417,7 @@ optional<TestData> parseTestData(const filesystem::path& path) {
     // Check that mandatory test data members are present.
     if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
         Log::Error(Event::General, "Test fixture '%s' does not contain required data.", path.string().c_str());
-        return nullopt;
+        return {};
     }
 
     // Parse propertySpec
@@ -432,7 +432,7 @@ optional<TestData> parseTestData(const filesystem::path& path) {
     // Parse inputs
     if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
         Log::Error(Event::General,"Can't convert inputs value for '%s'", path.string().c_str());
-        return nullopt;
+        return {};
     }
 
     return {std::move(data)};
@@ -471,14 +471,14 @@ Value toValue(const Compiled& compiled) {
 // Serializes native expression types to JS format.
 // Color and Formatted are exceptions.
 // TODO: harmonize serialized format to remove this conversion.
-optional<Value> toValue(const expression::Value& exprValue) {
+std::optional<Value> toValue(const expression::Value& exprValue) {
     return exprValue.match(
-        [](const Color& c) -> optional<Value> {
+        [](const Color& c) -> std::optional<Value> {
             std::vector<Value> color { static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a) };
             return {Value{std::move(color)}};
         },
-        [](const expression::Formatted& formatted) -> optional<Value> { return {formatted.toObject()}; },
-        [](const std::vector<expression::Value>& values) -> optional<Value> {
+        [](const expression::Formatted& formatted) -> std::optional<Value> { return {formatted.toObject()}; },
+        [](const std::vector<expression::Value>& values) -> std::optional<Value> {
             std::vector<Value> mbglValues;
             for (const auto& value : values) {
                 if (auto converted = expression::fromExpressionValue<Value>(value)) {
@@ -487,7 +487,7 @@ optional<Value> toValue(const expression::Value& exprValue) {
             }
             return {Value{std::move(mbglValues)}};
         },
-        [](const std::unordered_map<std::string, expression::Value>& valueMap) -> optional<Value> {
+        [](const std::unordered_map<std::string, expression::Value>& valueMap) -> std::optional<Value> {
             std::unordered_map<std::string, Value> mbglValueMap;
             for (const auto& pair : valueMap) {
                 if (auto converted = expression::fromExpressionValue<Value>(pair.second)) {
@@ -500,9 +500,9 @@ optional<Value> toValue(const expression::Value& exprValue) {
 }
 
 std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& value,
-                                                               optional<PropertySpec>& spec,
+                                                               std::optional<PropertySpec>& spec,
                                                                TestResult& result) {
-    optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : nullopt;
+    std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : {};
     expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) :
                                                 expression::ParsingContext();
     Convertible convertible(&value);
@@ -538,8 +538,8 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& va
     return nullptr;
 }
 
-std::unique_ptr<style::expression::Expression> parseExpression(const optional<Value>& value,
-                                                               optional<PropertySpec>& spec,
+std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>& value,
+                                                               std::optional<PropertySpec>& spec,
                                                                TestResult& result) {
     assert(value);
     auto document = toDocument(*value);

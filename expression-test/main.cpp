@@ -40,7 +40,7 @@ try {
             ignoreReason = (*it).reason;
         }
 
-        optional<TestRunOutput> testRun;
+        std::optional<TestRunOutput> testRun;
         if (auto testData = parseTestData(path)) {
             testRun = runExpressionTest(*testData, rootPath.string(), id);
         }

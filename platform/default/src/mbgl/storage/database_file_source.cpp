@@ -25,8 +25,8 @@ public:
         ), onlineFileSource(std::move(onlineFileSource_)) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        optional<Response> offlineResponse =
-            (resource.storagePolicy != Resource::StoragePolicy::Volatile) ? db->get(resource) : nullopt;
+        std::optional<Response> offlineResponse =
+            (resource.storagePolicy != Resource::StoragePolicy::Volatile) ? db->get(resource) : std::nullopt;
         if (!offlineResponse) {
             offlineResponse.emplace();
             offlineResponse->noContent = true;

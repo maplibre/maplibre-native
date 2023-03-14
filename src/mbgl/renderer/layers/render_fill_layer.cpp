@@ -170,8 +170,8 @@ void RenderFillLayer::render(PaintParameters& parameters) {
             const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
 
             const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-            optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
-            optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+            std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
+            std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
 
             auto draw = [&] (auto& programInstance,
                              const auto& drawMode,

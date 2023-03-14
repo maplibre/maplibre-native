@@ -6,27 +6,28 @@
 
 namespace mbgl {
 
-VectorTile::VectorTile(const OverscaledTileID& id_,
-                       std::string sourceID_,
-                       const TileParameters& parameters,
-                       const Tileset& tileset)
-    : GeometryTile(id_, std::move(sourceID_), parameters), loader(*this, id_, parameters, tileset) {}
+VectorTile::VectorTile(const OverscaledTileID &id_, std::string sourceID_,
+                       const TileParameters &parameters, const Tileset &tileset)
+    : GeometryTile(id_, std::move(sourceID_), parameters),
+      loader(*this, id_, parameters, tileset) {}
 
 void VectorTile::setNecessity(TileNecessity necessity) {
-    loader.setNecessity(necessity);
+  loader.setNecessity(necessity);
 }
 
-void VectorTile::setUpdateParameters(const TileUpdateParameters& params) {
-    loader.setUpdateParameters(params);
+void VectorTile::setUpdateParameters(const TileUpdateParameters &params) {
+  loader.setUpdateParameters(params);
 }
 
-void VectorTile::setMetadata(optional<Timestamp> modified_, optional<Timestamp> expires_) {
-    modified = std::move(modified_);
-    expires = std::move(expires_);
+void VectorTile::setMetadata(std::optional<Timestamp> modified_,
+                             std::optional<Timestamp> expires_) {
+  modified = std::move(modified_);
+  expires = std::move(expires_);
 }
 
-void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
-    GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_) : nullptr);
+void VectorTile::setData(const std::shared_ptr<const std::string> &data_) {
+  GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_)
+                              : nullptr);
 }
 
 } // namespace mbgl

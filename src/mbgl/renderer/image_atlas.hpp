@@ -6,6 +6,7 @@
 #include <mapbox/shelf-pack.hpp>
 
 #include <array>
+#include <optional>
 
 namespace mbgl {
 
@@ -26,7 +27,7 @@ public:
     uint32_t version;
     style::ImageStretches stretchX;
     style::ImageStretches stretchY;
-    optional<style::ImageContent> content;
+    std::optional<style::ImageContent> content;
 
     std::array<uint16_t, 2> tl() const {
         return {{static_cast<uint16_t>(paddedRect.x + padding), static_cast<uint16_t>(paddedRect.y + padding)}};

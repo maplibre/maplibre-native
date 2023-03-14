@@ -206,7 +206,7 @@ void RenderHeatmapLayer::updateColorRamp() {
     }
 
     if (colorRampTexture) {
-        colorRampTexture = nullopt;
+        colorRampTexture = {};
     }
 }
 

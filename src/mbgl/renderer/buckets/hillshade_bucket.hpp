@@ -11,7 +11,6 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 
@@ -28,8 +27,8 @@ public:
     void clear();
     void setMask(TileMask&&);
 
-    optional<gfx::Texture> dem;
-    optional<gfx::Texture> texture;
+    std::optional<gfx::Texture> dem;
+    std::optional<gfx::Texture> texture;
 
     TileMask mask{ { 0, 0, 0 } };
 
@@ -49,8 +48,8 @@ public:
     gfx::IndexVector<gfx::Triangles> indices;
     SegmentVector<HillshadeAttributes> segments;
 
-    optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
-    optional<gfx::IndexBuffer> indexBuffer;
+    std::optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
+    std::optional<gfx::IndexBuffer> indexBuffer;
 private: 
     DEMData demdata;
     bool prepared = false;

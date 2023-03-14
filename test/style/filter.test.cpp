@@ -26,7 +26,7 @@ bool filter(const char * json,
             GeometryCollection featureGeometry = {},
             float zoom = 0.0f) {
     conversion::Error error;
-    optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
+    std::optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
     EXPECT_TRUE(bool(filter));
     EXPECT_EQ(error.message, "");
     
@@ -38,7 +38,7 @@ bool filter(const char * json,
 
 void invalidFilter(const char * json) {
     conversion::Error error;
-    optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
+    std::optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
     EXPECT_FALSE(bool(filter));
     EXPECT_NE(error.message, "");
 }
@@ -67,7 +67,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
 
 std::string stringifyFilter(const char * json) {
     conversion::Error error;
-    optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
+    std::optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
     EXPECT_TRUE(bool(filter));
     EXPECT_EQ(error.message, "");
 
@@ -238,7 +238,7 @@ TEST(Filter, Serialize) {
 
 TEST(Filter, ExpressionLegacyMix) {
     conversion::Error error;
-    optional<Filter> filter = conversion::convertJSON<Filter>(R"(["any", ["all", ["==", ["geometry-type"], "LineString"]], ["==", "x", 1]])", error);
+    std::optional<Filter> filter = conversion::convertJSON<Filter>(R"(["any", ["all", ["==", ["geometry-type"], "LineString"]], ["==", "x", 1]])", error);
     EXPECT_FALSE(bool(filter));
     EXPECT_TRUE(error.message.size() > 0);
 }
@@ -259,6 +259,6 @@ TEST(Filter, Short) {
 TEST(Filter, LegacyExpressionInvalidType) {
     const JSValue value("string");
     conversion::Error error;
-    optional<Filter> result = conversion::convert<Filter>(conversion::Convertible(&value), error);
+    std::optional<Filter> result = conversion::convert<Filter>(conversion::Convertible(&value), error);
     EXPECT_FALSE(result);
 }

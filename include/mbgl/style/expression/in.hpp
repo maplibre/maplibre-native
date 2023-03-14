@@ -10,22 +10,25 @@ namespace expression {
 
 class In final : public Expression {
 public:
-    In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_);
+  In(std::unique_ptr<Expression> needle_,
+     std::unique_ptr<Expression> haystack_);
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+  static ParseResult parse(const mbgl::style::conversion::Convertible &value,
+                           ParsingContext &ctx);
 
-    EvaluationResult evaluate(const EvaluationContext& params) const override;
-    void eachChild(const std::function<void(const Expression&)>&) const override;
+  EvaluationResult evaluate(const EvaluationContext &params) const override;
+  void
+  eachChild(const std::function<void(const Expression &)> &) const override;
 
-    bool operator==(const Expression& e) const override;
+  bool operator==(const Expression &e) const override;
 
-    std::vector<optional<Value>> possibleOutputs() const override;
+  std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::string getOperator() const override;
+  std::string getOperator() const override;
 
 private:
-    std::unique_ptr<Expression> needle;
-    std::unique_ptr<Expression> haystack;
+  std::unique_ptr<Expression> needle;
+  std::unique_ptr<Expression> haystack;
 };
 
 } // namespace expression

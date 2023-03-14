@@ -33,7 +33,7 @@ static void Parse_CompositeFunction(benchmark::State& state) {
         state.PauseTiming();
         auto doc = createFunctionJSON(stopCount);
         state.ResumeTiming();
-        optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
+        std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
         if (!result) {
             state.SkipWithError(error.message.c_str());
         }
@@ -45,7 +45,7 @@ static void Evaluate_CompositeFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
     auto doc = createFunctionJSON(stopCount);
     conversion::Error error;
-    optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
+    std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
     if (!function) {
         state.SkipWithError(error.message.c_str());
     }
