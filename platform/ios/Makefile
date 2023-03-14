@@ -189,7 +189,7 @@ ios-uitest: $(IOS_PROJ_PATH)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
-ios-test: $(IOS_PROJ_PATH) style-code
+ios-test: style-code $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: ios-integration-test
@@ -240,18 +240,6 @@ ideploy:
 idocument:
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
-#  make darwin-style-code
-.PHONY: darwin-style-code
-darwin-style-code:
-	node platform/darwin/scripts/generate-style-code.js
-	node platform/darwin/scripts/update-examples.js
-style-code: darwin-style-code
-
-# make darwin-update-examples
-.PHONY: darwin-update-examples
-darwin-update-examples:
-	node platform/darwin/scripts/update-examples.js
-
 .PHONY: darwin-check-public-symbols
 darwin-check-public-symbols:
 	node platform/darwin/scripts/check-public-symbols.js macOS iOS
@@ -259,6 +247,7 @@ darwin-check-public-symbols:
 endif
 
 ios-docs: $(IOS_PROJ_PATH) style-code
+	npm ci --prefix ../.. --ignore-scripts
 	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
 
 ios-docs-static: ios-docs
@@ -304,7 +293,7 @@ xproj: $(MACOS_PROJ_PATH) style-code
 
 #  make macos-test
 .PHONY: macos-test
-macos-test: $(MACOS_PROJ_PATH) style-code
+macos-test: style-code $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: macos-lint
@@ -336,9 +325,15 @@ endif
 
 #### Miscellaneous targets #####################################################
 
+.PHONY: node-modules
+node-modules:
+	npm ci --prefix ../.. --ignore-scripts
+
 .PHONY: style-code
-style-code:
+style-code: node-modules
 	node ../../scripts/generate-style-code.js
+	node platform/darwin/scripts/generate-style-code.js
+	node platform/darwin/scripts/update-examples.js
 
 .PHONY: codestyle
 codestyle:
