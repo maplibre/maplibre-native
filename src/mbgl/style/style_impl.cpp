@@ -28,7 +28,7 @@
 namespace mbgl {
 namespace style {
 
-static Observer nullObserver;
+[[maybe_unused]] static Observer nullObserver;
 
 Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio)
     : fileSource(std::move(fileSource_)),
