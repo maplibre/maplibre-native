@@ -40,6 +40,22 @@ public:
     }
 
     bool operator==(const Expression& e) const final {
+        return this->equals(e);
+    }
+
+    friend bool operator==(const FormatSectionOverride &lhs, const FormatSectionOverride &rhs) {
+        return lhs.equals(rhs);
+    }
+
+    std::vector<optional<Value>> possibleOutputs() const final {
+        return {nullopt};
+    }
+
+    std::string getOperator() const final { return "format-section-override"; }
+
+private:
+
+    bool equals(const Expression& e) const {
         if (e.getKind() == Kind::FormatSectionOverride) {
             const auto* other = static_cast<const FormatSectionOverride*>(&e);
 
@@ -70,13 +86,6 @@ public:
         return false;
     }
 
-    std::vector<optional<Value>> possibleOutputs() const final {
-        return {nullopt};
-    }
-
-    std::string getOperator() const final { return "format-section-override"; }
-
-private:
     PossiblyEvaluatedPropertyValue<T> defaultValue;
     std::string propertyName;
 };
