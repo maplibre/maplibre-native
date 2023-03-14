@@ -869,13 +869,13 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
 
         if (!result.empty()) {
             FeatureIdentifier id = result[0].id;
-            optional<std::string> idStr = featureIDtoString(id);
+            std::optional<std::string> idStr = featureIDtoString(id);
 
             if (idStr) {
                 if (view->featureID && (*view->featureID != *idStr)) {
                     newState["hover"] = false;
                     view->rendererFrontend->getRenderer()->setFeatureState("states", {}, *view->featureID, newState);
-                    view->featureID = nullopt;
+                    view->featureID = {};
                 }
 
                 if (!view->featureID) {
@@ -888,7 +888,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
             if (view->featureID) {
                 newState["hover"] = false;
                 view->rendererFrontend->getRenderer()->setFeatureState("states", {}, *view->featureID, newState);
-                view->featureID = nullopt;
+                view->featureID = {};
             }
         }
         view->invalidate();

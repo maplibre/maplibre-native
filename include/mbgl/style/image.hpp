@@ -2,11 +2,11 @@
 
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -34,13 +34,13 @@ public:
           bool sdf,
           ImageStretches stretchX = {},
           ImageStretches stretchY = {},
-          const optional<ImageContent>& content = nullopt);
+          const std::optional<ImageContent>& content = {});
     Image(std::string id,
           PremultipliedImage&& image,
           float pixelRatio,
           ImageStretches stretchX = {},
           ImageStretches stretchY = {},
-          const optional<ImageContent>& content = nullopt)
+          const std::optional<ImageContent>& content = {})
         : Image(std::move(id), std::move(image), pixelRatio, false, std::move(stretchX), std::move(stretchY), content) {
     }
     Image(const Image&);
@@ -61,7 +61,7 @@ public:
     const ImageStretches& getStretchY() const;
 
     /// The space where text can be fit into this image.
-    const optional<ImageContent>& getContent() const;
+    const std::optional<ImageContent>& getContent() const;
 
     class Impl;
     Immutable<Impl> baseImpl;

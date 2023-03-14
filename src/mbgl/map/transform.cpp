@@ -67,7 +67,7 @@ void Transform::resize(const Size size) {
 
 // MARK: - Camera
 
-CameraOptions Transform::getCameraOptions(const optional<EdgeInsets>& padding) const {
+CameraOptions Transform::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return state.getCameraOptions(padding);
 }
 
@@ -505,7 +505,7 @@ void Transform::startTransition(const CameraOptions& camera,
     // Associate the anchor, if given, with a coordinate.
     // Anchor and center points are mutually exclusive, with preference for the
     // center point when both are set.
-    optional<ScreenCoordinate> anchor = camera.center ? nullopt : camera.anchor;
+    std::optional<ScreenCoordinate> anchor = camera.center ? std::nullopt : camera.anchor;
     LatLng anchorLatLng;
     if (anchor) {
         anchor->y = state.getSize().height - anchor->y;

@@ -4,18 +4,18 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/util/literal.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <vector>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 namespace gl {
 
-using AttributeBindingArray = std::vector<optional<gfx::AttributeBinding>>;
+using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
 using NamedAttributeLocations = std::vector<std::pair<const std::string, AttributeLocation>>;
 
-optional<AttributeLocation> queryLocation(ProgramID id, const char* name);
+std::optional<AttributeLocation> queryLocation(ProgramID id, const char* name);
 
 template <class>
 class AttributeLocations;
@@ -24,7 +24,7 @@ template <class... As>
 class AttributeLocations<TypeList<As...>> final {
 private:
     using Locations =
-        IndexedTuple<TypeList<As...>, TypeList<ExpandToType<As, optional<AttributeLocation>>...>>;
+        IndexedTuple<TypeList<As...>, TypeList<ExpandToType<As, std::optional<AttributeLocation>>...>>;
 
     Locations locations;
 
@@ -35,7 +35,7 @@ public:
         locations = Locations{
             queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())... };
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        auto first = locations.template get<TypeOfFirst>();
+        [[maybe_unused]] auto first = locations.template get<TypeOfFirst>();
         assert(first && first.value() == 0);
     }
 
@@ -50,7 +50,7 @@ public:
     NamedAttributeLocations getNamedLocations() const {
         NamedAttributeLocations result;
 
-        auto maybeAddLocation = [&] (const std::string& name, const optional<AttributeLocation>& location) {
+        auto maybeAddLocation = [&] (const std::string& name, const std::optional<AttributeLocation>& location) {
             if (location) {
                 result.emplace_back(name, *location);
             }
@@ -67,8 +67,8 @@ public:
         AttributeBindingArray result;
         result.resize(sizeof...(As));
 
-        auto maybeAddBinding = [&] (const optional<AttributeLocation>& location,
-                                    const optional<gfx::AttributeBinding>& binding) {
+        auto maybeAddBinding = [&] (const std::optional<AttributeLocation>& location,
+                                    const std::optional<gfx::AttributeBinding>& binding) {
             if (location) {
                 result.at(*location) = binding;
             }

@@ -54,7 +54,7 @@ public:
 
     Bucket* getBucket(const style::Layer::Impl&) const;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
-    optional<ImagePosition> getPattern(const std::string& pattern) const;
+    std::optional<ImagePosition> getPattern(const std::string& pattern) const;
     const gfx::Texture& getGlyphAtlasTexture() const;
     const gfx::Texture& getIconAtlasTexture() const;
 

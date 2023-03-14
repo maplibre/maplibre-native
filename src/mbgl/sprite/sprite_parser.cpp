@@ -25,7 +25,7 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
                                                const bool sdf,
                                                style::ImageStretches&& stretchX,
                                                style::ImageStretches&& stretchY,
-                                               const optional<style::ImageContent>& content) {
+                                               const std::optional<style::ImageContent>& content) {
     // Disallow invalid parameter configurations.
     if (width <= 0 || height <= 0 || width > 1024 || height > 1024 || ratio <= 0 || ratio > 10 || srcX < 0 ||
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
@@ -129,7 +129,7 @@ style::ImageStretches getStretches(const JSValue& value, const char* property, c
     return stretches;
 }
 
-optional<style::ImageContent> getContent(const JSValue& value, const char* property, const char* name) {
+std::optional<style::ImageContent> getContent(const JSValue& value, const char* property, const char* name) {
     if (value.HasMember(property)) {
         auto& content = value[property];
         if (content.IsArray() && content.Size() == 4 && content[rapidjson::SizeType(0)].IsNumber() &&
@@ -147,7 +147,7 @@ optional<style::ImageContent> getContent(const JSValue& value, const char* prope
         }
     }
 
-    return nullopt;
+    return {};
 }
 
 } // namespace
@@ -181,7 +181,7 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encode
             const bool sdf = getBoolean(value, "sdf", name.c_str(), false);
             style::ImageStretches stretchX = getStretches(value, "stretchX", name.c_str());
             style::ImageStretches stretchY = getStretches(value, "stretchY", name.c_str());
-            optional<style::ImageContent> content = getContent(value, "content", name.c_str());
+            std::optional<style::ImageContent> content = getContent(value, "content", name.c_str());
 
             auto image = createStyleImage(
                 name, raster, x, y, width, height, pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content);

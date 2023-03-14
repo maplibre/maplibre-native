@@ -21,7 +21,7 @@ public:
     std::weak_ptr<GeoJSONData> getData() const;
     const Immutable<GeoJSONOptions>& getOptions() const { return options; }
 
-    optional<std::string> getAttribution() const final;
+    std::optional<std::string> getAttribution() const final;
 
 private:
     Immutable<GeoJSONOptions> options;

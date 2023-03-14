@@ -39,7 +39,7 @@ private:
     void updateColorRamp();
 
     PremultipliedImage colorRamp;
-    optional<gfx::Texture> colorRampTexture;
+    std::optional<gfx::Texture> colorRampTexture;
 };
 
 } // namespace mbgl

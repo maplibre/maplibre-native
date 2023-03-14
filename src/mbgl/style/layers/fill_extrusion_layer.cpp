@@ -388,7 +388,7 @@ Value FillExtrusionLayer::serialize() const {
     return result;
 }
 
-optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
@@ -403,12 +403,12 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
 
         if (property == Property::FillExtrusionBase) {
             setFillExtrusionBase(*typedValue);
-            return nullopt;
+            return {};
         }
 
         if (property == Property::FillExtrusionHeight) {
             setFillExtrusionHeight(*typedValue);
-            return nullopt;
+            return {};
         }
     }
     if (property == Property::FillExtrusionColor) {
@@ -419,7 +419,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionColor(*typedValue);
-        return nullopt;
+        return {};
     }
     if (property == Property::FillExtrusionOpacity) {
         Error error;
@@ -429,7 +429,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionOpacity(*typedValue);
-        return nullopt;
+        return {};
     }
     if (property == Property::FillExtrusionPattern) {
         Error error;
@@ -439,7 +439,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionPattern(*typedValue);
-        return nullopt;
+        return {};
     }
     if (property == Property::FillExtrusionTranslate) {
         Error error;
@@ -449,7 +449,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionTranslate(*typedValue);
-        return nullopt;
+        return {};
     }
     if (property == Property::FillExtrusionTranslateAnchor) {
         Error error;
@@ -459,7 +459,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionTranslateAnchor(*typedValue);
-        return nullopt;
+        return {};
     }
     if (property == Property::FillExtrusionVerticalGradient) {
         Error error;
@@ -469,53 +469,53 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
         }
 
         setFillExtrusionVerticalGradient(*typedValue);
-        return nullopt;
+        return {};
     }
 
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
 
     if (property == Property::FillExtrusionBaseTransition) {
         setFillExtrusionBaseTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionColorTransition) {
         setFillExtrusionColorTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionHeightTransition) {
         setFillExtrusionHeightTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionOpacityTransition) {
         setFillExtrusionOpacityTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionPatternTransition) {
         setFillExtrusionPatternTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionTranslateTransition) {
         setFillExtrusionTranslateTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionTranslateAnchorTransition) {
         setFillExtrusionTranslateAnchorTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     if (property == Property::FillExtrusionVerticalGradientTransition) {
         setFillExtrusionVerticalGradientTransition(*transition);
-        return nullopt;
+        return {};
     }
 
     return Error{"layer doesn't support this property"};

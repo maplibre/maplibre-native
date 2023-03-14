@@ -8,11 +8,11 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <cstdint>
 #include <cmath>
 #include <functional>
+#include <optional>
 
 namespace mbgl {
 
@@ -29,7 +29,7 @@ public:
 
     // Camera
     /** Returns the current camera options. */
-    CameraOptions getCameraOptions(const optional<EdgeInsets>&) const;
+    CameraOptions getCameraOptions(const std::optional<EdgeInsets>&) const;
 
     /** Instantaneously, synchronously applies the given camera options. */
     void jumpTo(const CameraOptions&);

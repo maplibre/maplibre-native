@@ -34,8 +34,8 @@ public:
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<CircleAttributes> segments;
 
-    optional<gfx::VertexBuffer<CircleLayoutVertex>> vertexBuffer;
-    optional<gfx::IndexBuffer> indexBuffer;
+    std::optional<gfx::VertexBuffer<CircleLayoutVertex>> vertexBuffer;
+    std::optional<gfx::IndexBuffer> indexBuffer;
 
     std::map<std::string, CircleProgram::Binders> paintPropertyBinders;
 

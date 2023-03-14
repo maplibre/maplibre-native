@@ -108,8 +108,8 @@ void RenderLineLayer::render(PaintParameters& parameters) {
 
         auto draw = [&](auto& programInstance,
                         auto&& uniformValues,
-                        const optional<ImagePosition>& patternPositionA,
-                        const optional<ImagePosition>& patternPositionB, auto&& textureBindings) {
+                        const std::optional<ImagePosition>& patternPositionA,
+                        const std::optional<ImagePosition>& patternPositionB, auto&& textureBindings) {
             const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
             paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade);
@@ -168,8 +168,8 @@ void RenderLineLayer::render(PaintParameters& parameters) {
             const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
             const Size& texsize = tile.getIconAtlasTexture().size;
 
-            optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
-            optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
+            std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
+            std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
 
             draw(parameters.programs.getLineLayerPrograms().linePattern,
                  LinePatternProgram::layoutUniformValues(
@@ -304,7 +304,7 @@ void RenderLineLayer::updateColorRamp() {
     }
 
     if (colorRampTexture) {
-        colorRampTexture = nullopt;
+        colorRampTexture = {};
     }
 }
 

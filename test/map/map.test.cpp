@@ -90,8 +90,8 @@ TEST(Map, RendererState) {
     MapTest<> test;
 
     // Map hasn't notified the frontend about an update yet.
-    CameraOptions nullOptions;
-    ASSERT_EQ(test.frontend.getCameraOptions(), nullOptions);
+    CameraOptions {}ions;
+    ASSERT_EQ(test.frontend.getCameraOptions(), {}ions);
 
     LatLng coordinate { 1, 1 };
     double zoom = 12.0;
@@ -758,7 +758,7 @@ TEST(Map, DisabledSources) {
     MapTest<> test;
 
     // Always load the same image tile for raster layers.
-    test.fileSource->response = [] (const Resource& res) -> optional<Response> {
+    test.fileSource->response = [] (const Resource& res) -> std::optional<Response> {
         if (res.url == "asset://tile.png") {
             Response response;
             response.data = std::make_shared<std::string>(
@@ -1245,8 +1245,8 @@ TEST(Map, PrefetchDeltaOverride) {
         }
     };
 
-    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta(nullopt);
-    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta(nullopt);
+    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta({});
+    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta({});
     test.runLoop.run();
 
     // Each source requests 4 additional parent tiles.

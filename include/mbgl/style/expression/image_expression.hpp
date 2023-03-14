@@ -10,22 +10,26 @@ class ParsingContext;
 
 class ImageExpression final : public Expression {
 public:
-    explicit ImageExpression(std::unique_ptr<Expression> imageID);
+  explicit ImageExpression(std::unique_ptr<Expression> imageID);
 
-    EvaluationResult evaluate(const EvaluationContext&) const override;
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+  EvaluationResult evaluate(const EvaluationContext &) const override;
+  static ParseResult parse(const mbgl::style::conversion::Convertible &,
+                           ParsingContext &);
 
-    void eachChild(const std::function<void(const Expression&)>&) const override;
+  void
+  eachChild(const std::function<void(const Expression &)> &) const override;
 
-    bool operator==(const Expression& e) const override;
+  bool operator==(const Expression &e) const override;
 
-    std::vector<optional<Value>> possibleOutputs() const override { return {nullopt}; }
+  std::vector<std::optional<Value>> possibleOutputs() const override {
+    return {{}};
+  }
 
-    mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "image"; }
+  mbgl::Value serialize() const override;
+  std::string getOperator() const override { return "image"; }
 
 private:
-    std::shared_ptr<Expression> imageID;
+  std::shared_ptr<Expression> imageID;
 };
 
 } // namespace expression

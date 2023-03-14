@@ -28,7 +28,7 @@ const variant<std::string, Tileset>& RasterSource::getURLOrTileset() const {
     return urlOrTileset;
 }
 
-optional<std::string> RasterSource::getURL() const {
+std::optional<std::string> RasterSource::getURL() const {
     if (urlOrTileset.is<Tileset>()) {
         return {};
     }
@@ -64,7 +64,7 @@ void RasterSource::loadDescription(FileSource& fileSource) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error("unexpectedly empty TileJSON")));
         } else {
             conversion::Error error;
-            optional<Tileset> tileset = conversion::convertJSON<Tileset>(*res.data, error);
+            std::optional<Tileset> tileset = conversion::convertJSON<Tileset>(*res.data, error);
             if (!tileset) {
                 observer->onSourceError(*this, std::make_exception_ptr(util::StyleParseException(error.message)));
                 return;

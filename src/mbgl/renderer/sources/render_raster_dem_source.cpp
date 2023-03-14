@@ -18,7 +18,7 @@ const style::RasterSource::Impl& RenderRasterDEMSource::impl() const {
     return static_cast<const style::RasterSource::Impl&>(*baseImpl);
 }
 
-const optional<Tileset>& RenderRasterDEMSource::getTileset() const {
+const std::optional<Tileset>& RenderRasterDEMSource::getTileset() const {
     return impl().tileset;
 }
 

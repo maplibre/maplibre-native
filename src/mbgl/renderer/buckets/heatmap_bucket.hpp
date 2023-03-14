@@ -34,8 +34,8 @@ public:
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<HeatmapAttributes> segments;
 
-    optional<gfx::VertexBuffer<HeatmapLayoutVertex>> vertexBuffer;
-    optional<gfx::IndexBuffer> indexBuffer;
+    std::optional<gfx::VertexBuffer<HeatmapLayoutVertex>> vertexBuffer;
+    std::optional<gfx::IndexBuffer> indexBuffer;
 
     std::map<std::string, HeatmapProgram::Binders> paintPropertyBinders;
 

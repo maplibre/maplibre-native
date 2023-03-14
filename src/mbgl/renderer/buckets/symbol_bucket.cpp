@@ -294,7 +294,7 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
     return result;
 }
 
-SymbolInstanceReferences SymbolBucket::getSymbols(const optional<SortKeyRange>& range) const {
+SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRange>& range) const {
     if (!range) return SymbolInstanceReferences(symbolInstances.begin(), symbolInstances.end());
     assert(range->start < range->end);
     assert(range->end <= symbolInstances.size());

@@ -143,7 +143,7 @@ public:
 
 private:
     bool hasFormatSectionOverrides() const;
-    mutable optional<bool> hasFormatSectionOverrides_;
+    mutable std::optional<bool> hasFormatSectionOverrides_;
 };
 
 } // namespace style

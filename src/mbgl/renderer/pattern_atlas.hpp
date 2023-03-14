@@ -4,10 +4,10 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/image_impl.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <unordered_map>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 
@@ -25,8 +25,8 @@ public:
     PatternAtlas& operator=(const PatternAtlas&) = delete;
     ~PatternAtlas();
 
-    optional<ImagePosition> getPattern(const std::string&) const;
-    optional<ImagePosition> addPattern(const style::Image::Impl&);
+    std::optional<ImagePosition> getPattern(const std::string&) const;
+    std::optional<ImagePosition> addPattern(const style::Image::Impl&);
     void removePattern(const std::string&);
 
     gfx::TextureBinding textureBinding() const;
@@ -48,7 +48,7 @@ private:
     mapbox::ShelfPack shelfPack;
     std::unordered_map<std::string, Pattern> patterns;
     PremultipliedImage atlasImage;
-    mbgl::optional<gfx::Texture> atlasTexture;
+    std::optional<gfx::Texture> atlasTexture;
     bool dirty = true;
 };
  

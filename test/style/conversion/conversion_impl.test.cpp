@@ -42,37 +42,37 @@ public:
         return {};
     }
 
-    static optional<MockConvertible> objectMember(const MockConvertible&, const char *) {
-        return nullopt;
+    static std::optional<MockConvertible> objectMember(const MockConvertible&, const char *) {
+        return {};
     }
 
     template <class Fn>
-    static optional<Error> eachMember(const MockConvertible&, Fn&&) {
-        return nullopt;
+    static std::optional<Error> eachMember(const MockConvertible&, Fn&&) {
+        return {};
     }
 
-    static optional<bool> toBool(const MockConvertible&) {
-        return nullopt;
+    static std::optional<bool> toBool(const MockConvertible&) {
+        return {};
     }
 
-    static optional<float> toNumber(const MockConvertible&) {
-        return nullopt;
+    static std::optional<float> toNumber(const MockConvertible&) {
+        return {};
     }
 
-    static optional<double> toDouble(const MockConvertible&) {
-        return nullopt;
+    static std::optional<double> toDouble(const MockConvertible&) {
+        return {};
     }
 
-    static optional<std::string> toString(const MockConvertible&) {
-        return nullopt;
+    static std::optional<std::string> toString(const MockConvertible&) {
+        return {};
     }
 
-    static optional<mbgl::Value> toValue(const MockConvertible&) {
-        return nullopt;
+    static std::optional<mbgl::Value> toValue(const MockConvertible&) {
+        return {};
     }
 
-    static optional<GeoJSON> toGeoJSON(const MockConvertible&, Error&) {
-        return nullopt;
+    static std::optional<GeoJSON> toGeoJSON(const MockConvertible&, Error&) {
+        return {};
     }
 };
 

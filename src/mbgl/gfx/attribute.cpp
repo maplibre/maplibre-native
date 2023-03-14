@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace gfx {
 
-optional<AttributeBinding> offsetAttributeBinding(const optional<AttributeBinding>& binding, std::size_t vertexOffset) {
+std::optional<AttributeBinding> offsetAttributeBinding(const std::optional<AttributeBinding>& binding, std::size_t vertexOffset) {
     assert(vertexOffset <= std::numeric_limits<uint32_t>::max());
     if (binding) {
         AttributeBinding result = *binding;

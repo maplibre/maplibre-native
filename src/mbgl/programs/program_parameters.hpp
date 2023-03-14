@@ -1,7 +1,5 @@
 #pragma once
 
-#include <mbgl/util/optional.hpp>
-
 #include <string>
 
 namespace mbgl {

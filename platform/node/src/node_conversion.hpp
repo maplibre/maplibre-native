@@ -6,7 +6,6 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion_impl.hpp>
@@ -47,7 +46,7 @@ public:
         return value->IsObject() && !value->IsArray();
     }
 
-    static optional<v8::Local<v8::Value>> objectMember(const v8::Local<v8::Value>& value, const char * name) {
+    static std::optional<v8::Local<v8::Value>> objectMember(const v8::Local<v8::Value>& value, const char * name) {
         Nan::EscapableHandleScope scope;
         if (!Nan::Has(Nan::To<v8::Object>(value).ToLocalChecked(), Nan::New(name).ToLocalChecked()).FromJust()) {
             return {};
@@ -60,13 +59,13 @@ public:
     }
 
     template <class Fn>
-    static optional<Error> eachMember(const v8::Local<v8::Value>& value, Fn&& fn) {
+    static std::optional<Error> eachMember(const v8::Local<v8::Value>& value, Fn&& fn) {
         Nan::HandleScope scope;
         v8::Local<v8::Array> names = Nan::GetOwnPropertyNames(Nan::To<v8::Object>(value).ToLocalChecked()).ToLocalChecked();
         for (uint32_t i = 0; i < names->Length(); ++i) {
             v8::Local<v8::Value> k = Nan::Get(names, i).ToLocalChecked();
             v8::Local<v8::Value> v = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(), k).ToLocalChecked();
-            optional<Error> result = fn(*Nan::Utf8String(k), std::move(v)); // NOLINT(performance-move-const-arg)
+            std::optional<Error> result = fn(*Nan::Utf8String(k), std::move(v)); // NOLINT(performance-move-const-arg)
             if (result) {
                 return result;
             }
@@ -74,7 +73,7 @@ public:
         return {};
     }
 
-    static optional<bool> toBool(const v8::Local<v8::Value>& value) {
+    static std::optional<bool> toBool(const v8::Local<v8::Value>& value) {
         Nan::HandleScope scope;
         if (!value->IsBoolean()) {
             return {};
@@ -82,7 +81,7 @@ public:
         return Nan::To<bool>(value).ToChecked();
     }
 
-    static optional<float> toNumber(const v8::Local<v8::Value>& value) {
+    static std::optional<float> toNumber(const v8::Local<v8::Value>& value) {
         Nan::HandleScope scope;
         if (!value->IsNumber()) {
             return {};
@@ -90,7 +89,7 @@ public:
         return static_cast<float>(Nan::To<double>(value).ToChecked());
     }
 
-    static optional<double> toDouble(const v8::Local<v8::Value>& value) {
+    static std::optional<double> toDouble(const v8::Local<v8::Value>& value) {
         Nan::HandleScope scope;
         if (!value->IsNumber()) {
             return {};
@@ -98,7 +97,7 @@ public:
         return Nan::To<double>(value).ToChecked();
     }
 
-    static optional<std::string> toString(const v8::Local<v8::Value>& value) {
+    static std::optional<std::string> toString(const v8::Local<v8::Value>& value) {
         Nan::HandleScope scope;
         if (!value->IsString()) {
             return {};
@@ -106,7 +105,7 @@ public:
         return std::string(*Nan::Utf8String(value));
     }
 
-    static optional<Value> toValue(const v8::Local<v8::Value>& value) {
+    static std::optional<Value> toValue(const v8::Local<v8::Value>& value) {
         if (value->IsFalse()) {
             return { false };
         } else if (value->IsTrue()) {
@@ -124,7 +123,7 @@ public:
         }
     }
 
-    static optional<GeoJSON> toGeoJSON(const v8::Local<v8::Value>& value, Error& error) {
+    static std::optional<GeoJSON> toGeoJSON(const v8::Local<v8::Value>& value, Error& error) {
         try {
             Nan::JSON NanJSON;
             v8::Local<v8::Object> obj = Nan::To<v8::Object>(value).ToLocalChecked();
@@ -137,11 +136,6 @@ public:
         }
     }
 };
-
-template <class T, class...Args>
-optional<T> convert(const v8::Local<v8::Value>& value, Error& error, Args&&...args) {
-    return convert<T>(Convertible(value), error, std::forward<Args>(args)...);
-}
 
 } // namespace conversion
 } // namespace style

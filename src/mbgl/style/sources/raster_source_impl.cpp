@@ -18,7 +18,7 @@ uint16_t RasterSource::Impl::getTileSize() const {
     return tileSize;
 }
 
-optional<std::string> RasterSource::Impl::getAttribution() const {
+std::optional<std::string> RasterSource::Impl::getAttribution() const {
     if (!tileset) {
         return {};
     }

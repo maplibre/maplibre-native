@@ -190,7 +190,7 @@ Layer* Style::Impl::getLayer(const std::string& id) const {
     return layers.get(id);
 }
 
-Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const optional<std::string>& before) {
+Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const std::optional<std::string>& before) {
     // TODO: verify source
     if (Source* source = sources.get(layer->getSourceID())) {
         if (!source->supportsLayerType(layer->baseImpl->getTypeInfo())) {
@@ -301,9 +301,9 @@ void Style::Impl::removeImage(const std::string& id) {
     images = std::move(newImages);
 }
 
-optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
+std::optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
     auto found = std::find_if(images->begin(), images->end(), [&id](const auto& image) { return image->id == id; });
-    if (found == images->end()) return nullopt;
+    if (found == images->end()) return {};
     return *found;
 }
 

@@ -106,9 +106,9 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
     if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        optional<ImagePosition> imagePosA =
+        std::optional<ImagePosition> imagePosA =
             parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().from.id());
-        optional<ImagePosition> imagePosB =
+        std::optional<ImagePosition> imagePosB =
             parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().to.id());
 
         if (!imagePosA || !imagePosB)
@@ -152,10 +152,10 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     }
 }
 
-optional<Color> RenderBackgroundLayer::getSolidBackground() const {
+std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
-        return nullopt;
+        return {};
     }
 
     return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
