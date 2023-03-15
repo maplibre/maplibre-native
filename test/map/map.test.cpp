@@ -90,8 +90,8 @@ TEST(Map, RendererState) {
     MapTest<> test;
 
     // Map hasn't notified the frontend about an update yet.
-    CameraOptions {}ions;
-    ASSERT_EQ(test.frontend.getCameraOptions(), {}ions);
+    CameraOptions nullOptions;
+    ASSERT_EQ(test.frontend.getCameraOptions(), nullOptions);
 
     LatLng coordinate { 1, 1 };
     double zoom = 12.0;

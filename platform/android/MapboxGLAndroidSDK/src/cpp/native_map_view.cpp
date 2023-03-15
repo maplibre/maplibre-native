@@ -1013,7 +1013,7 @@ jni::jboolean NativeMapView::removeLayerAt(JNIEnv& env, jni::jint index) {
     // Check index
     int numLayers = layers.size() - 1;
     if (index > numLayers || index < 0) {
-        Log::Warning(Event::JNI, "Index out of range: %i", index);
+        Log::Warning(Event::JNI, "Index out of range: " + std::to_string(index));
         return jni::jni_false;
     }
 

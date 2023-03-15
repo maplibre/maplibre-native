@@ -103,8 +103,7 @@ void GeoJSONSource::loadDescription(FileSource &fileSource) {
         } else {
           // Create an empty GeoJSON VT object to make sure we're not infinitely
           // waiting for tiles to load.
-          Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: %s",
-                     error.message.c_str());
+          Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: " + error.message);
         }
         return makeMutable<Impl>(current, std::move(geoJSONData));
       };

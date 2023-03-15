@@ -384,8 +384,8 @@ void Transform::setMinPitch(const double minPitch) {
     if (std::isnan(minPitch)) return;
     if (minPitch * util::DEG2RAD_D < util::PITCH_MIN) {
         Log::Warning(Event::General,
-                     "Trying to set minimum pitch below the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MIN * util::RAD2DEG_D);
+                     "Trying to set minimum pitch below the limit (" + std::to_string(util::PITCH_MIN * util::RAD2DEG_D) + 
+                     " degrees), the value will be clamped.");
     }
     state.setMinPitch(minPitch * util::DEG2RAD_D);
 }
@@ -394,8 +394,8 @@ void Transform::setMaxPitch(const double maxPitch) {
     if (std::isnan(maxPitch)) return;
     if (maxPitch * util::DEG2RAD_D > util::PITCH_MAX) {
         Log::Warning(Event::General,
-                     "Trying to set maximum pitch above the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MAX * util::RAD2DEG_D);
+                     "Trying to set maximum pitch above the limit (" + std::to_string(util::PITCH_MAX * util::RAD2DEG_D) +
+                     " degrees), the value will be clamped.");
     }
     state.setMaxPitch(maxPitch * util::DEG2RAD_D);
 }

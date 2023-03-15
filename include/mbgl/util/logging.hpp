@@ -75,6 +75,7 @@ private:
     static Log* get() noexcept;
 
     static void record(EventSeverity severity, Event event, const std::string &msg);
+    static void record(EventSeverity severity, Event event, int64_t code, const std::string &msg);
     static void record(EventSeverity severity,
                        Event event,
                        int64_t code,

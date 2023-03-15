@@ -64,6 +64,10 @@ void Log::record(EventSeverity severity, Event event, const std::string &msg) {
     get()->impl->record(severity, event, -1, msg);
 }
 
+void Log::record(EventSeverity severity, Event event, int64_t code, const std::string &msg) {
+    get()->impl->record(severity, event, code, msg);
+}
+
 void Log::record(EventSeverity severity,
                  Event event,
                  int64_t code,

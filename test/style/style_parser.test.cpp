@@ -44,7 +44,7 @@ TEST_P(StyleParserTest, ParseStyle) {
     auto error = parser.parse(util::read_file(base + ".style.json"));
 
     if (error) {
-        Log::Error(Event::ParseStyle, "Failed to parse style: %s", util::toString(error).c_str());
+        Log::Error(Event::ParseStyle, "Failed to parse style: " + util::toString(error));
     }
 
     ASSERT_TRUE(infoDoc.IsObject());
