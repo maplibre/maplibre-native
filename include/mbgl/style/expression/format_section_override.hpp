@@ -71,7 +71,7 @@ public:
     }
 
     std::vector<std::optional<Value>> possibleOutputs() const final {
-        return {{}};
+        return { std::nullopt };
     }
 
     std::string getOperator() const final { return "format-section-override"; }

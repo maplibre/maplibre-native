@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <optional>
 
 namespace mbgl {
 

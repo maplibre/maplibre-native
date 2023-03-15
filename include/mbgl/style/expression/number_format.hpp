@@ -9,32 +9,30 @@ namespace expression {
 
 class NumberFormat final : public Expression {
 public:
-  NumberFormat(std::unique_ptr<Expression> number_,
-               std::unique_ptr<Expression> locale_,
-               std::unique_ptr<Expression> currency_,
-               std::unique_ptr<Expression> minFractionDigits_,
-               std::unique_ptr<Expression> maxFractionDigits_);
+    NumberFormat(std::unique_ptr<Expression> number_,
+                 std::unique_ptr<Expression> locale_,
+                 std::unique_ptr<Expression> currency_,
+                 std::unique_ptr<Expression> minFractionDigits_,
+                 std::unique_ptr<Expression> maxFractionDigits_);
 
-  ~NumberFormat() override;
+    ~NumberFormat() override;
 
-  static ParseResult parse(const mbgl::style::conversion::Convertible &value,
-                           ParsingContext &ctx);
+    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
-  EvaluationResult evaluate(const EvaluationContext &params) const override;
-  void eachChild(
-      const std::function<void(const Expression &)> &visit) const override;
-  bool operator==(const Expression &e) const override;
-  std::vector<std::optional<Value>> possibleOutputs() const override;
+    EvaluationResult evaluate(const EvaluationContext& params) const override;
+    void eachChild(const std::function<void(const Expression&)>& visit) const override;
+    bool operator==(const Expression& e) const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override;
 
-  mbgl::Value serialize() const override;
-  std::string getOperator() const override { return "number-format"; }
+    mbgl::Value serialize() const override;
+    std::string getOperator() const override { return "number-format"; }
 
 private:
-  std::unique_ptr<Expression> number;
-  std::unique_ptr<Expression> locale;
-  std::unique_ptr<Expression> currency;
-  std::unique_ptr<Expression> minFractionDigits;
-  std::unique_ptr<Expression> maxFractionDigits;
+    std::unique_ptr<Expression> number;
+    std::unique_ptr<Expression> locale;
+    std::unique_ptr<Expression> currency;
+    std::unique_ptr<Expression> minFractionDigits;
+    std::unique_ptr<Expression> maxFractionDigits;
 };
 
 } // namespace expression
