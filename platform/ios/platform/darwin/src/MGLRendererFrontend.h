@@ -71,5 +71,5 @@ private:
     __weak MGLMapView *nativeView = nullptr;
     mbgl::gfx::RendererBackend& mbglBackend;
     std::shared_ptr<mbgl::UpdateParameters> updateParameters;
-    mbgl::optional<mbgl::util::AsyncTask> asyncInvalidate;
+    std::optional<mbgl::util::AsyncTask> asyncInvalidate;
 };
