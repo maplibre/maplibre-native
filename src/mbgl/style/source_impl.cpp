@@ -13,8 +13,7 @@ void WarnIfOverscaleFactorCapsPrefetchDelta(
       util::DEFAULT_PREFETCH_ZOOM_DELTA, prefetch.value_or(0u));
   if (overscale && *overscale < prefetchDelta) {
     Log::Warning(Event::Style,
-                 "Parent tile overscale factor will cap prefetch delta to %d",
-                 int(*overscale));
+                 std::string("Parent tile overscale factor will cap prefetch delta to " + std::to_string(int(*overscale))));
   }
 }
 } // namespace
