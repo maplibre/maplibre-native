@@ -16,7 +16,6 @@
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/traits.hpp>
 
@@ -79,9 +78,6 @@ public:
     int64_t lastInsertRowId = 0;
     int64_t changes = 0;
 };
-
-template <typename T>
-using optional = std::experimental::optional<T>;
 
 mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string &filename, int flags) {
     if (!QSqlDatabase::drivers().contains("QSQLITE")) {
@@ -274,7 +270,7 @@ void Query::bind(int offset, mbgl::Timestamp value) {
 }
 
 template <>
-void Query::bind(int offset, optional<std::string> value) {
+void Query::bind(int offset, std::optional<std::string> value) {
     if (value) {
         bind(offset, *value);
     } else {
@@ -283,7 +279,7 @@ void Query::bind(int offset, optional<std::string> value) {
 }
 
 template <>
-void Query::bind(int offset, optional<mbgl::Timestamp> value) {
+void Query::bind(int offset, std::optional<mbgl::Timestamp> value) {
     if (value) {
         bind(offset, *value);
     } else {
@@ -373,7 +369,7 @@ template <> mbgl::Timestamp Query::get(int offset) {
         std::chrono::system_clock::from_time_t(value.value<::time_t>()));
 }
 
-template <> optional<int64_t> Query::get(int offset) {
+template <> std::optional<int64_t> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
@@ -382,7 +378,7 @@ template <> optional<int64_t> Query::get(int offset) {
     return { value.value<int64_t>() };
 }
 
-template <> optional<double> Query::get(int offset) {
+template <> std::optional<double> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
@@ -398,7 +394,7 @@ template <> std::string Query::get(int offset) {
     return std::string(value.constData(), value.size());
 }
 
-template <> optional<std::string> Query::get(int offset) {
+template <> std::optional<std::string> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QByteArray value = stmt.impl->query.value(offset).toByteArray();
     checkQueryError(stmt.impl->query);
@@ -407,7 +403,7 @@ template <> optional<std::string> Query::get(int offset) {
     return { std::string(value.constData(), value.size()) };
 }
 
-template <> optional<mbgl::Timestamp> Query::get(int offset) {
+template <> std::optional<mbgl::Timestamp> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
