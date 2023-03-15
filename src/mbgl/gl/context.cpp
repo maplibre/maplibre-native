@@ -105,7 +105,7 @@ void Context::initializeExtensions(
     static const std::string renderer = []() {
       std::string r = reinterpret_cast<const char *>(
           MBGL_CHECK_ERROR(glGetString(GL_RENDERER)));
-      Log::Info(Event::General, "GPU Identifier: %s", r.c_str());
+      Log::Info(Event::General, std::string("GPU Identifier: ") + r);
       return r;
     }();
 
@@ -198,7 +198,7 @@ Context::createShader(ShaderType type,
     const auto log = std::make_unique<GLchar[]>(logLength);
     MBGL_CHECK_ERROR(
         glGetShaderInfoLog(result, logLength, &logLength, log.get()));
-    Log::Error(Event::Shader, "Shader failed to compile: %s", log.get());
+    Log::Error(Event::Shader, std::string("Shader failed to compile: ") + log.get());
   }
 
   throw std::runtime_error("shader failed to compile");
@@ -241,7 +241,7 @@ void Context::verifyProgramLinkage(ProgramID program_) {
   if (logLength > 0) {
     MBGL_CHECK_ERROR(
         glGetProgramInfoLog(program_, logLength, &logLength, log.get()));
-    Log::Error(Event::Shader, "Program failed to link: %s", log.get());
+    Log::Error(Event::Shader, std::string("Program failed to link: ") + log.get());
   }
 
   throw std::runtime_error("program failed to link");

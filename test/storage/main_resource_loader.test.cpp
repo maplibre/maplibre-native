@@ -278,11 +278,11 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(HTTPIssue1369)) {
     loop.run();
 }
 
-TEST(MainResourceLoader, std::optionalNonExpired) {
+TEST(MainResourceLoader, OptionalNonExpired) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    const Resource std::optionalResource{
+    const Resource optionalResource{
         Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
 
     using namespace std::chrono_literals;
@@ -312,11 +312,11 @@ TEST(MainResourceLoader, std::optionalNonExpired) {
     loop.run();
 }
 
-TEST(MainResourceLoader, std::optionalExpired) {
+TEST(MainResourceLoader, OptionalExpired) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    const Resource std::optionalResource{
+    const Resource optionalResource{
         Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
 
     using namespace std::chrono_literals;
@@ -345,11 +345,11 @@ TEST(MainResourceLoader, std::optionalExpired) {
     loop.run();
 }
 
-TEST(MainResourceLoader, std::optionalNotFound) {
+TEST(MainResourceLoader, OptionalNotFound) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    const Resource std::optionalResource{
+    const Resource optionalResource{
         Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
 
     using namespace std::chrono_literals;

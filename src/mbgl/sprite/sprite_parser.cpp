@@ -109,13 +109,11 @@ style::ImageStretches getStretches(const JSValue& value, const char* property, c
                                                                stretch[rapidjson::SizeType(1)].GetFloat()});
                 } else {
                     Log::Warning(Event::Sprite,
-                                 "Invalid sprite image '%s': members of '%s' must be an array of two numbers",
-                                 name,
-                                 property);
+                                 "Invalid sprite image '" + std::string(name) + "': members of '" + property + "' must be an array of two numbers");
                 }
             }
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be an array", name, property);
+            Log::Warning(Event::Sprite, "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array");
         }
     }
 
@@ -134,9 +132,7 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
                                        content[rapidjson::SizeType(3)].GetFloat()};
         } else {
             Log::Warning(Event::Sprite,
-                         "Invalid sprite image '%s': value of '%s' must be an array of four numbers",
-                         name,
-                         property);
+                         "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array of four numbers");
         }
     }
 

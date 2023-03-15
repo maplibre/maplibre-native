@@ -52,6 +52,7 @@
 #include <fstream>
 #include <iostream>
 #include <utility>
+#include <sstream>
 
 #if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
 #include <mbgl/style/layers/location_indicator_layer.hpp>
@@ -118,7 +119,8 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
 } // namespace
 
 void glfwError(int error, const char *description) {
-    mbgl::Log::Error(mbgl::Event::OpenGL, "GLFW error (%i): %s", error, description);
+    mbgl::Log::Error(mbgl::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
+
 }
 
 GLFWView::GLFWView(bool fullscreen_, bool benchmark_, const mbgl::ResourceOptions &resourceOptions, const mbgl::ClientOptions &clientOptions)
@@ -739,10 +741,9 @@ void GLFWView::makeSnapshot(bool withOverlay) {
                                  const mbgl::MapSnapshotter::PointForFn &,
                                  const mbgl::MapSnapshotter::LatLngForFn &) {
             if (!ptr) {
-                mbgl::Log::Info(mbgl::Event::General,
-                                "Made snapshot './snapshot.png' with size w:%dpx h:%dpx",
-                                image.size.width,
-                                image.size.height);
+                std::ostringstream oss;
+                oss << "Made snapshot './snapshot.png' with size w:" << image.size.width << "px h:" << image.size.height << "px";
+                mbgl::Log::Info(mbgl::Event::General, oss.str());
                 std::ofstream file("./snapshot.png");
                 file << mbgl::encodePNG(image);
             } else {
@@ -963,8 +964,12 @@ void GLFWView::report(float duration) {
     const double currentTime = glfwGetTime();
     if (currentTime - lastReported >= 1) {
         frameTime /= frames;
-        mbgl::Log::Info(mbgl::Event::OpenGL, "Frame time: %6.2fms (%6.2f fps)", frameTime,
-            1000 / frameTime);
+
+        std::ostringstream oss;
+        oss.precision(2);
+        oss << "Frame time: " << std::fixed << frameTime << "ms (" << 1000 / frameTime << "fps)";
+        mbgl::Log::Info(mbgl::Event::OpenGL, oss.str());
+
         frames = 0;
         frameTime = 0;
         lastReported = currentTime;

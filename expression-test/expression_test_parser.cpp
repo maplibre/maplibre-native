@@ -147,7 +147,7 @@ std::optional<style::expression::type::Type> toExpressionType(const PropertySpec
         return {type::String};
     }
 
-    return spec.type.empty() ? {} : std::optional<type::Type>{stringToType(spec.type)};
+    return spec.type.empty() ? std::nullopt : std::optional<type::Type>{stringToType(spec.type)};
 }
 
 void parseCompiled(const JSValue& compiledValue, TestData& data) {
@@ -344,7 +344,7 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
 
     filesystem::path rootPath {std::string(TEST_RUNNER_ROOT_PATH).append("/maplibre-gl-js/test/integration/expression-tests")};
     if (!filesystem::exists(rootPath)) {
-        Log::Error(Event::General, "Test path '%s' does not exist.", rootPath.string().c_str());
+        Log::Error(Event::General, "Test path '" + rootPath.string() + "' does not exist.");
         exit(3);
     }
 
@@ -363,7 +363,7 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
     testPaths.reserve(paths.size());
     for (const auto& path : paths) {
         if (!filesystem::exists(path)) {
-            Log::Warning(Event::General, "Provided test folder '%s' does not exist.", path.string().c_str());
+            Log::Warning(Event::General, "Provided test folder '" + path.string() + "' does not exist.");
             continue;
         }
 
@@ -408,7 +408,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
     TestData data;
     auto maybeJson = readJson(path.string());
     if (!maybeJson.is<JSDocument>()) { // NOLINT
-        Log::Error(Event::General, "Cannot parse test '%s'.", path.string().c_str());
+        mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
         return {};
     }
 
@@ -416,7 +416,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
 
     // Check that mandatory test data members are present.
     if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
-        Log::Error(Event::General, "Test fixture '%s' does not contain required data.", path.string().c_str());
+        Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
         return {};
     }
 
@@ -431,7 +431,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
 
     // Parse inputs
     if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
-        Log::Error(Event::General,"Can't convert inputs value for '%s'", path.string().c_str());
+        Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
         return {};
     }
 
@@ -502,7 +502,7 @@ std::optional<Value> toValue(const expression::Value& exprValue) {
 std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& value,
                                                                std::optional<PropertySpec>& spec,
                                                                TestResult& result) {
-    std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : {};
+    std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : std::nullopt;
     expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) :
                                                 expression::ParsingContext();
     Convertible convertible(&value);

@@ -189,7 +189,7 @@ void Parser::parseLayers(const JSValue& value) {
 
         const std::string layerID = { id.GetString(), id.GetStringLength() };
         if (layersMap.find(layerID) != layersMap.end()) {
-            Log::Warning(Event::ParseStyle, "duplicate layer id %s", layerID.c_str());
+            Log::Warning(Event::ParseStyle, "duplicate layer id " + layerID);
             continue;
         }
 
@@ -222,7 +222,7 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
 
     // Make sure we have not previously attempted to parse this layer.
     if (std::find(stack.begin(), stack.end(), id) != stack.end()) {
-        Log::Warning(Event::ParseStyle, "layer reference of '%s' is circular", id.c_str());
+        Log::Warning(Event::ParseStyle, "layer reference of '" + id + "' is circular");
         return;
     }
 
@@ -230,14 +230,14 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
         // This layer is referencing another layer. Recursively parse that layer.
         const JSValue& refVal = value["ref"];
         if (!refVal.IsString()) {
-            Log::Warning(Event::ParseStyle, "layer ref of '%s' must be a string", id.c_str());
+            Log::Warning(Event::ParseStyle, "layer ref of '" + id +  "' must be a string");
             return;
         }
 
         const std::string ref { refVal.GetString(), refVal.GetStringLength() };
         auto it = layersMap.find(ref);
         if (it == layersMap.end()) {
-            Log::Warning(Event::ParseStyle, "layer '%s' references unknown layer %s", id.c_str(), ref.c_str());
+            Log::Warning(Event::ParseStyle, "layer '" + id + "' references unknown layer " + ref);
             return;
         }
 

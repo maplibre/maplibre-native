@@ -609,8 +609,7 @@ void OnlineFileRequest::completed(Response response) {
 
   if (response.error) {
     if (response.error->reason == Response::Error::Reason::NotFound) {
-      Log::Error(Event::General, "The resource `%s` not found",
-                 sanitizeURL(resource.url).c_str());
+      Log::Error(Event::General, "The resource '" + sanitizeURL(resource.url) + "' not found");
     }
     failedRequests++;
     failedRequestReason = response.error->reason;

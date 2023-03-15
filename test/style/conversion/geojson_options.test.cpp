@@ -10,13 +10,13 @@ using namespace mbgl::style::conversion;
 
 TEST(GeoJSONOptions, Basic) {
     Error error;
-    mbgl::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>("{}", error);
+    std::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>("{}", error);
     ASSERT_TRUE((bool) converted);
 }
 
 TEST(GeoJSONOptions, ErrorHandling) {
     Error error;
-    mbgl::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>(R"JSON({
+    std::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>(R"JSON({
         "maxzoom": "should not be a string"
     })JSON", error);
     ASSERT_FALSE((bool) converted);

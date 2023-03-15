@@ -489,16 +489,16 @@ TestMetadata parseTestMetadata(const TestPaths &paths) {
 
   metadata.document = std::move(maybeJson.get<mbgl::JSDocument>());
   if (!metadata.document.HasMember("metadata")) {
-    mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': %s",
-                       paths.stylePath.c_str());
+    mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': " +
+                       std::string(paths.stylePath));
     return metadata;
   }
 
   const mbgl::JSValue &metadataValue = metadata.document["metadata"];
   if (!metadataValue.HasMember("test")) {
     mbgl::Log::Warning(mbgl::Event::ParseStyle,
-                       "Style has no 'metadata.test': %s",
-                       paths.stylePath.c_str());
+                       "Style has no 'metadata.test': " +
+                       std::string(paths.stylePath));
     return metadata;
   }
 
@@ -519,8 +519,7 @@ TestMetadata parseTestMetadata(const TestPaths &paths) {
       metadata.mapMode = mbgl::MapMode::Static;
     else {
       mbgl::Log::Warning(mbgl::Event::ParseStyle,
-                         "Unknown map mode: %s. Falling back to static mode",
-                         mapModeStr.c_str());
+                         "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
       metadata.mapMode = mbgl::MapMode::Static;
     }
   }
@@ -641,7 +640,7 @@ TestMetadata parseTestMetadata(const TestPaths &paths) {
       assert(testValue["queryOptions"]["filter"].IsArray());
       auto &filterVal = testValue["queryOptions"]["filter"];
       Error error;
-      mbgl::optional<Filter> converted = convert<Filter>(filterVal, error);
+      std::optional<Filter> converted = convert<Filter>(filterVal, error);
       assert(converted);
       metadata.queryOptions.filter = std::move(*converted);
     }
@@ -764,7 +763,7 @@ TestOperations parseTestOperations(TestMetadata &metadata) {
 
       result.emplace_back([imageName, imagePath, sdf,
                            pixelRatio](TestContext &ctx) {
-        mbgl::optional<std::string> maybeImage;
+        std::optional<std::string> maybeImage;
         bool requestCompleted = false;
 
         auto req = ctx.getFileSource().request(
@@ -1124,7 +1123,7 @@ TestOperations parseTestOperations(TestMetadata &metadata) {
       using namespace mbgl::style::conversion;
 
       std::string sourceID;
-      mbgl::optional<std::string> sourceLayer;
+      std::optional<std::string> sourceLayer;
       std::string featureID;
       std::string stateKey;
       Value stateValue;
@@ -1204,7 +1203,7 @@ TestOperations parseTestOperations(TestMetadata &metadata) {
       assert(operationArray[1].IsObject());
 
       std::string sourceID;
-      mbgl::optional<std::string> sourceLayer;
+      std::optional<std::string> sourceLayer;
       std::string featureID;
 
       const auto &featureOptions = operationArray[1].GetObject();
@@ -1239,9 +1238,9 @@ TestOperations parseTestOperations(TestMetadata &metadata) {
       assert(operationArray[1].IsObject());
 
       std::string sourceID;
-      mbgl::optional<std::string> sourceLayer;
+      std::optional<std::string> sourceLayer;
       std::string featureID;
-      mbgl::optional<std::string> stateKey;
+      std::optional<std::string> stateKey;
 
       const auto &featureOptions = operationArray[1].GetObject();
       if (featureOptions.HasMember("source")) {

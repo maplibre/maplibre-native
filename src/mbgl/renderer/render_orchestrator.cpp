@@ -719,14 +719,13 @@ void RenderOrchestrator::clearData() {
 }
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load glyph range %d-%d for font stack %s: %s",
-               glyphRange.first, glyphRange.second, fontStackToString(fontStack).c_str(), util::toString(error).c_str());
+    Log::Error(Event::Style, "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
+               " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error));
     observer->onResourceError(error);
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load tile %s for source %s: %s",
-               util::toString(tileID).c_str(), source.baseImpl->id.c_str(), util::toString(error).c_str());
+    Log::Error(Event::Style, "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " + util::toString(error));
     observer->onResourceError(error);
 }
 
