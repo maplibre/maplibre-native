@@ -78,8 +78,8 @@ Source::getMaxOverscaleFactorForParentTiles() const noexcept {
 }
 
 void Source::dumpDebugLogs() const {
-  Log::Info(Event::General, "Source::id: %s", getID().c_str());
-  Log::Info(Event::General, "Source::loaded: %d", loaded);
+  Log::Info(Event::General, std::string("Source::id:") + getID());
+  Log::Info(Event::General, std::string("Source::loaded: ") + std::to_string(loaded));
 }
 
 } // namespace style
