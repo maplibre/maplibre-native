@@ -369,14 +369,14 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
                             std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
                     } else if (responseCode == 429) {
                         // Get the standard header
-                        optional<std::string> retryAfter;
+                        std::optional<std::string> retryAfter;
                         NSString *retryAfterHeader = headers[@"Retry-After"];
                         if (retryAfterHeader) {
                             retryAfter = std::string([retryAfterHeader UTF8String]);
                         }
 
                         // Fallback mapbox specific header
-                        optional<std::string> xRateLimitReset;
+                        std::optional<std::string> xRateLimitReset;
                         NSString *xReset = headers[@"x-rate-limit-reset"];
                         if (xReset) {
                             xRateLimitReset = std::string([xReset UTF8String]);
