@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace mbgl {
 
@@ -31,15 +32,9 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
         srcX + width > static_cast<int32_t>(image.size.width) ||
         srcY + height > static_cast<int32_t>(image.size.height)) {
-        Log::Error(Event::Sprite,
-                   "Can't create image with invalid metrics: %dx%d@%d,%d in %ux%u@%sx sprite",
-                   width,
-                   height,
-                   srcX,
-                   srcY,
-                   image.size.width,
-                   image.size.height,
-                   util::toString(ratio).c_str());
+        std::ostringstream ss;  // TODO: replace with std::format
+        ss << "Can't create image with invalid metrics: " << std::to_string(width) << " " << height << " " << srcX << " " << srcY << " " <<  image.size.width << " " << image.size.height << " " << util::toString(ratio);
+        Log::Error(Event::Sprite, ss.str());
         return nullptr;
     }
 
@@ -53,7 +48,7 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
         return std::make_unique<style::Image>(
             id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content);
     } catch (const util::StyleImageException& ex) {
-        Log::Error(Event::Sprite, "Can't create image with invalid metadata: %s", ex.what());
+        Log::Error(Event::Sprite, std::string("Can't create image with invalid metadata: ") + ex.what());
         return nullptr;
     }
 }
@@ -67,9 +62,7 @@ uint16_t getUInt16(const JSValue& value, const char* property, const char* name,
             return v.GetUint();
         } else {
             Log::Warning(Event::Sprite,
-                         "Invalid sprite image '%s': value of '%s' must be an integer between 0 and 65535",
-                         name,
-                         property);
+                         std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be an integer between 0 and 65535");
         }
     }
 
@@ -82,7 +75,7 @@ double getDouble(const JSValue& value, const char* property, const char* name, c
         if (v.IsNumber()) {
             return v.GetDouble();
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be a number", name, property);
+            Log::Warning(Event::Sprite, std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a number");
         }
     }
 
@@ -95,7 +88,7 @@ bool getBoolean(const JSValue& value, const char* property, const char* name, co
         if (v.IsBool()) {
             return v.GetBool();
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be a boolean", name, property);
+            Log::Warning(Event::Sprite, std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a boolean");
         }
     }
 
