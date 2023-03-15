@@ -806,7 +806,7 @@ void NodeMap::AddSource(const Nan::FunctionCallbackInfo<v8::Value> &info) {
   }
 
   Error error;
-  mbgl::optional<std::unique_ptr<Source>> source =
+  std::optional<std::unique_ptr<Source>> source =
       convert<std::unique_ptr<Source>>(info[1], error,
                                        *Nan::Utf8String(info[0]));
   if (!source) {
@@ -849,7 +849,7 @@ void NodeMap::AddLayer(const Nan::FunctionCallbackInfo<v8::Value> &info) {
   }
 
   Error error;
-  mbgl::optional<std::unique_ptr<Layer>> layer =
+  std::optional<std::unique_ptr<Layer>> layer =
       convert<std::unique_ptr<Layer>>(info[0], error);
   if (!layer) {
     Nan::ThrowTypeError(error.message.c_str());
@@ -1052,7 +1052,7 @@ void NodeMap::SetLayerProperty(
     return Nan::ThrowTypeError("Second argument must be a string");
   }
 
-  mbgl::optional<Error> error =
+  std::optional<Error> error =
       layer->setProperty(*Nan::Utf8String(info[1]), Convertible(info[2]));
   if (error) {
     return Nan::ThrowTypeError(error->message.c_str());
@@ -1087,7 +1087,7 @@ void NodeMap::SetFilter(const Nan::FunctionCallbackInfo<v8::Value> &info) {
 
   if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
     Error error;
-    mbgl::optional<Filter> converted = convert<Filter>(info[1], error);
+    std::optional<Filter> converted = convert<Filter>(info[1], error);
     if (!converted) {
       Nan::ThrowTypeError(error.message.c_str());
       return;
@@ -1317,7 +1317,7 @@ void NodeMap::SetFeatureState(
 
   std::string sourceID;
   std::string featureID;
-  mbgl::optional<std::string> sourceLayerID;
+  std::optional<std::string> sourceLayerID;
   auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
   if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
     auto sourceOption =
@@ -1432,7 +1432,7 @@ void NodeMap::GetFeatureState(
 
   std::string sourceID;
   std::string featureID;
-  mbgl::optional<std::string> sourceLayerID;
+  std::optional<std::string> sourceLayerID;
   auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
   if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
     auto sourceOption =
@@ -1501,9 +1501,9 @@ void NodeMap::RemoveFeatureState(
   }
 
   std::string sourceID;
-  mbgl::optional<std::string> sourceLayerID;
-  mbgl::optional<std::string> featureID;
-  mbgl::optional<std::string> stateKey;
+  std::optional<std::string> sourceLayerID;
+  std::optional<std::string> featureID;
+  std::optional<std::string> stateKey;
   auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
   if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
     auto sourceOption =
@@ -1618,7 +1618,7 @@ void NodeMap::QueryRenderedFeatures(
       auto filterOption = Nan::Get(options, Nan::New("filter").ToLocalChecked())
                               .ToLocalChecked();
       Error error;
-      mbgl::optional<Filter> converted = convert<Filter>(filterOption, error);
+      std::optional<Filter> converted = convert<Filter>(filterOption, error);
       if (!converted) {
         return Nan::ThrowTypeError(error.message.c_str());
       }

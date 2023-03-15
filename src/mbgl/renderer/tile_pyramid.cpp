@@ -126,9 +126,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
-                               "Provided camera options returned %zu tiles, only %s is taken in Tile mode.",
-                               idealTiles.size(),
-                               util::toString(idealTiles[0]).c_str());
+                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
+                               " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
         }
     }

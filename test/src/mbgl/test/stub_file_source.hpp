@@ -55,7 +55,7 @@ private:
   friend class StubOnlineFileSource;
 
   // The default behavior is to throw if no per-kind callback has been set.
-  optional<Response> defaultResponse(const Resource &);
+  std::optional<Response> defaultResponse(const Resource &);
 
   std::unordered_map<AsyncRequest *,
                      std::tuple<Resource, ResponseFunction, Callback>>

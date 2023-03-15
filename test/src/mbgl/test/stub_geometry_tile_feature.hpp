@@ -32,8 +32,8 @@ public:
         return id;
     }
 
-    optional<Value> getValue(const std::string& key) const override {
-        return properties.count(key) ? properties.at(key) : optional<Value>();
+    std::optional<Value> getValue(const std::string& key) const override {
+        return properties.count(key) ? properties.at(key) : std::optional<Value>();
     }
 
     const GeometryCollection& getGeometries() const override {

@@ -108,7 +108,7 @@ void OfflineDatabase::handleError(const mapbox::sqlite::Exception& ex, const cha
          ex.extendedCode == mapbox::sqlite::ExtendedResultCode::ReadOnlyDBMoved)) {
         // The database was corruped, moved away, or deleted. We're going to start fresh with a
         // clean slate for the next operation.
-        Log::Error(Event::Database, static_cast<int>(ex.code), "Can't %s: %s", action, ex.what());
+        Log::Error(Event::Database, static_cast<int>(ex.code), std::string("Can't ") + action + ": " + ex.what());
         try {
             removeExisting();
         } catch (const util::IOException& ioEx) {
@@ -116,17 +116,17 @@ void OfflineDatabase::handleError(const mapbox::sqlite::Exception& ex, const cha
         }
     } else {
         // We treat the error as temporary, and pretend we have an inaccessible DB.
-        Log::Warning(Event::Database, static_cast<int>(ex.code), "Can't %s: %s", action, ex.what());
+        Log::Warning(Event::Database, static_cast<int>(ex.code), std::string("Can't ") + action + ": " + ex.what());
     }
 }
 
 void OfflineDatabase::handleError(const util::IOException& ex, const char* action) {
     // We failed to delete the database file.
-    Log::Error(Event::Database, ex.code, "Can't %s: %s", action, ex.what());
+    Log::Error(Event::Database, ex.code, std::string("Can't ") + action + ": " + ex.what());
 }
 
 void OfflineDatabase::handleError(const std::runtime_error& ex, const char* action) {
-    Log::Error(Event::Database, "Can't %s: %s", action, ex.what());
+    Log::Error(Event::Database, std::string("Can't ") + action + ": " + ex.what());
 }
 
 void OfflineDatabase::handleError(const char* action) {
@@ -143,7 +143,7 @@ void OfflineDatabase::handleError(const char* action) {
         handleError(ex, action);
     } catch (...) {
         assert(false);
-        Log::Error(Event::Database, "Can't %s", action);
+        Log::Error(Event::Database, std::string("Can't ") + action);
     }
 }
 
@@ -249,7 +249,7 @@ std::optional<Response> OfflineDatabase::get(const Resource& resource) try {
     return result ? std::optional<Response>{ result->first } : std::nullopt;
 } catch (...) {
     handleError("read resource");
-    return nullopt;
+    return {};
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resource& resource) {
@@ -350,7 +350,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
             }
 
             // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(Event::Database, static_cast<int>(ex.code), "Can't update timestamp: %s", ex.what());
+            Log::Warning(Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
     }
 
@@ -365,7 +365,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     query.bind(1, resource.url);
 
     if (!query.run()) {
-        return nullopt;
+        return {};
     }
 
     Response response;
@@ -376,7 +376,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     response.mustRevalidate = query.get<bool>(2);
     response.modified       = query.get<std::optional<Timestamp>>(3);
 
-    auto data = query.get<optional<std::string>>(4);
+    auto data = query.get<std::optional<std::string>>(4);
     if (!data) {
         response.noContent = true;
     } else if (query.get<bool>(5)) {
@@ -515,7 +515,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
             }
 
             // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(Event::Database, static_cast<int>(ex.code), "Can't update timestamp: %s", ex.what());
+            Log::Warning(Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
     }
 
@@ -538,7 +538,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     query.bind(5, tile.z);
 
     if (!query.run()) {
-        return nullopt;
+        return {};
     }
 
     Response response;
@@ -811,7 +811,7 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::listRegions() try 
         } catch (const std::exception& ex) {
             // Catch errors from malformed offline region definitions
             // and skip them.
-            Log::Error(Event::General, "%s", ex.what());
+            Log::Error(Event::General, ex.what());
         }
     }
     // Explicit move to avoid triggering the copy constructor.
@@ -853,7 +853,8 @@ OfflineDatabase::mergeDatabase(const std::string& sideDatabasePath) {
         query.bind(1, sideDatabasePath);
         query.run();
     } catch (const mapbox::sqlite::Exception& ex) {
-        Log::Error(Event::Database, static_cast<int>(ex.code), "Can't attach database (%s) for merge: %s", sideDatabasePath.c_str(), ex.what());
+        Log::Error(Event::Database, static_cast<int>(ex.code), std::string("Can't attach database (") + sideDatabasePath + ") for merge: " + ex.what());
+
         return unexpected<std::exception_ptr>(std::current_exception());
     }
     try {
@@ -913,7 +914,7 @@ OfflineDatabase::mergeDatabase(const std::string& sideDatabasePath) {
         return { std::move(result) };
     } catch (const std::runtime_error& ex) {
         db->exec("DETACH DATABASE side");
-        Log::Error(Event::Database, "%s", ex.what());
+        Log::Error(Event::Database, std::string(ex.what()));
 
         return unexpected<std::exception_ptr>(std::current_exception());
     }
@@ -955,25 +956,25 @@ std::exception_ptr OfflineDatabase::deleteRegion(OfflineRegion&& region) try {
     updateAmbientCacheSize(stats);
 
     // Ensure that the cached offlineTileCount value is recalculated.
-    offlineMapboxTileCount = nullopt;
+    offlineMapboxTileCount = std::nullopt;
     return nullptr;
 } catch (...) {
     handleError("delete region");
     return std::current_exception();
 }
 
-optional<std::pair<Response, uint64_t>> OfflineDatabase::getRegionResource(const Resource& resource) try {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getRegionResource(const Resource& resource) try {
     return getInternal(resource);
 } catch (...) {
     handleError("read region resource");
-    return nullopt;
+    return {};
 }
 
-optional<int64_t> OfflineDatabase::hasRegionResource(const Resource& resource) try {
+std::optional<int64_t> OfflineDatabase::hasRegionResource(const Resource& resource) try {
     return hasInternal(resource);
 } catch (...) {
     handleError("query region resource");
-    return nullopt;
+    return {};
 }
 
 uint64_t OfflineDatabase::putRegionResource(int64_t regionID,
