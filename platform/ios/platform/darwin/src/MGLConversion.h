@@ -49,7 +49,7 @@ public:
         return {[value objectAtIndex: i]};
     }
 
-    static optional<Holder> objectMember(const Holder& holder, const char *key) {
+    static std::optional<Holder> objectMember(const Holder& holder, const char *key) {
         const id value = holder.value;
         NSCAssert([value isKindOfClass:[NSDictionary class]], @"Value must be an NSDictionary for get(string).");
         NSObject *member = [value objectForKey: @(key)];
@@ -64,7 +64,7 @@ public:
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
     template <class Fn>
-    static optional<Error> eachMember(const Holder& holder, Fn&& visit) {
+    static std::optional<Error> eachMember(const Holder& holder, Fn&& visit) {
 #pragma clang diagnostic pop
         [holder.value enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
             auto result = visit(std::string(static_cast<const char *>([key UTF8String])), obj);
@@ -75,7 +75,7 @@ public:
         return {};
     }
 
-    static optional<bool> toBool(const Holder& holder) {
+    static std::optional<bool> toBool(const Holder& holder) {
         const id value = holder.value;
         if (_isBool(value)) {
             return ((NSNumber *)value).boolValue;
@@ -84,7 +84,7 @@ public:
         }
     }
 
-    static optional<float> toNumber(const Holder& holder) {
+    static std::optional<float> toNumber(const Holder& holder) {
         const id value = holder.value;
         if (_isNumber(value)) {
             return ((NSNumber *)value).floatValue;
@@ -93,7 +93,7 @@ public:
         }
     }
 
-    static optional<double> toDouble(const Holder& holder) {
+    static std::optional<double> toDouble(const Holder& holder) {
         const id value = holder.value;
         if (_isNumber(value)) {
             return ((NSNumber *)value).doubleValue;
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    static optional<std::string> toString(const Holder& holder) {
+    static std::optional<std::string> toString(const Holder& holder) {
         const id value = holder.value;
         if (_isString(value)) {
             return std::string(static_cast<const char *>([value UTF8String]));
@@ -111,7 +111,7 @@ public:
         }
     }
 
-    static optional<mbgl::Value> toValue(const Holder& holder) {
+    static std::optional<mbgl::Value> toValue(const Holder& holder) {
         const id value = holder.value;
         if (isUndefined(value)) {
             return {};
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    static optional<GeoJSON> toGeoJSON(const Holder& holder, Error& error) {
+    static std::optional<GeoJSON> toGeoJSON(const Holder& holder, Error& error) {
         id object = holder.value;
         if ([object isKindOfClass:[NSDictionary class]]) {
             NSError *serializationError;
