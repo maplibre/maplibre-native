@@ -60,7 +60,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto properties = mapbox::eternal::hash_map<mapbo
 
 } // namespace
 
-optional<Error> Light::setProperty(const std::string& name, const Convertible& value) {
+std::optional<Error> Light::setProperty(const std::string& name, const Convertible& value) {
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
         return Error { "light doesn't support this property" };
@@ -89,25 +89,25 @@ optional<Error> Light::setProperty(const std::string& name, const Convertible& v
         }
         <% if (properties.length == 1) { %>
         set<%- camelize(properties[0].name) %>(*typedValue);
-        return nullopt;
+        return {};
         <% } else for (const property of properties) { %>
         if (property == Property::<%- camelize(property.name) %>) {
             set<%- camelize(property.name) %>(*typedValue);
-            return nullopt;
+            return {};
         }
         <% } %>
     }
     <% } %>
 
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
     <% for (const property of properties) { %>
     if (property == Property::<%- camelize(property.name) %>Transition) {
         set<%- camelize(property.name) %>Transition(*transition);
-        return nullopt;
+        return {};
     }
     <% } %>
 
