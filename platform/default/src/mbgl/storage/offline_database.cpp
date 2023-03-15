@@ -240,19 +240,19 @@ mapbox::sqlite::Statement& OfflineDatabase::getStatement(const char* sql) {
     return *it->second;
 }
 
-optional<Response> OfflineDatabase::get(const Resource& resource) try {
+std::optional<Response> OfflineDatabase::get(const Resource& resource) try {
     if (disabled()) {
-        return nullopt;
+        return {};
     }
 
     auto result = getInternal(resource);
-    return result ? optional<Response>{ result->first } : nullopt;
+    return result ? std::optional<Response>{ result->first } : std::nullopt;
 } catch (...) {
     handleError("read resource");
     return nullopt;
 }
 
-optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resource& resource) {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resource& resource) {
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
         return getTile(*resource.tileData);
@@ -261,7 +261,7 @@ optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resou
     }
 }
 
-optional<int64_t> OfflineDatabase::hasInternal(const Resource& resource) {
+std::optional<int64_t> OfflineDatabase::hasInternal(const Resource& resource) {
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
         return hasTile(*resource.tileData);
@@ -307,7 +307,7 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
         size = compressed ? compressedData.size() : response.data->size();
     }
 
-    optional<DatabaseSizeChangeStats> stats;
+    std::optional<DatabaseSizeChangeStats> stats;
     if (evict_) {
         stats = DatabaseSizeChangeStats(this);
         if (!evict(size, *stats)) {
@@ -336,7 +336,7 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
     return { inserted, size };
 }
 
-optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resource& resource) {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resource& resource) {
     // Update accessed timestamp used for LRU eviction.
     if (!readOnly) {
         try {
@@ -371,10 +371,10 @@ optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resou
     Response response;
     uint64_t size = 0;
 
-    response.etag           = query.get<optional<std::string>>(0);
-    response.expires        = query.get<optional<Timestamp>>(1);
+    response.etag           = query.get<std::optional<std::string>>(0);
+    response.expires        = query.get<std::optional<Timestamp>>(1);
     response.mustRevalidate = query.get<bool>(2);
-    response.modified       = query.get<optional<Timestamp>>(3);
+    response.modified       = query.get<std::optional<Timestamp>>(3);
 
     auto data = query.get<optional<std::string>>(4);
     if (!data) {
@@ -390,14 +390,14 @@ optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resou
     return std::make_pair(response, size);
 }
 
-optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
+std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     mapbox::sqlite::Query query{ getStatement("SELECT length(data) FROM resources WHERE url = ?") };
     query.bind(1, resource.url);
     if (!query.run()) {
-        return nullopt;
+        return std::nullopt;
     }
 
-    return query.get<optional<int64_t>>(0);
+    return query.get<std::optional<int64_t>>(0);
 }
 
 bool OfflineDatabase::putResource(const Resource& resource,
@@ -487,7 +487,7 @@ bool OfflineDatabase::putResource(const Resource& resource,
     return true;
 }
 
-optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
     // Update accessed timestamp used for LRU eviction.
     if (!readOnly) {
         try {
@@ -544,12 +544,12 @@ optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource:
     Response response;
     uint64_t size = 0;
 
-    response.etag            = query.get<optional<std::string>>(0);
-    response.expires         = query.get<optional<Timestamp>>(1);
+    response.etag            = query.get<std::optional<std::string>>(0);
+    response.expires         = query.get<std::optional<Timestamp>>(1);
     response.mustRevalidate  = query.get<bool>(2);
-    response.modified        = query.get<optional<Timestamp>>(3);
+    response.modified        = query.get<std::optional<Timestamp>>(3);
 
-    optional<std::string> data = query.get<optional<std::string>>(4);
+    std::optional<std::string> data = query.get<std::optional<std::string>>(4);
     if (!data) {
         response.noContent = true;
     } else if (query.get<bool>(5)) {
@@ -563,7 +563,7 @@ optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource:
     return std::make_pair(response, size);
 }
 
-optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
+std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
     // clang-format off
     mapbox::sqlite::Query size{ getStatement(
         "SELECT length(data) "
@@ -582,10 +582,10 @@ optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
     size.bind(5, tile.z);
 
     if (!size.run()) {
-        return nullopt;
+        return {};
     }
 
-    return size.get<optional<int64_t>>(0);
+    return size.get<std::optional<int64_t>>(0);
 }
 
 bool OfflineDatabase::putTile(const Resource::TileData& tile,

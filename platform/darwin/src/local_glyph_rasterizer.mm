@@ -75,7 +75,7 @@ public:
         glyph rasterization globally. The system font is a good default value to
         pass into this constructor.
      */
-    Impl(const optional<std::string> fallbackFontNames_)
+    Impl(const std::optional<std::string> fallbackFontNames_)
     {
         fallbackFontNames = [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"MGLIdeographicFontFamilyName"];
         if (fallbackFontNames_) {
@@ -162,7 +162,7 @@ private:
     NSArray<NSString *> *fallbackFontNames;
 };
 
-LocalGlyphRasterizer::LocalGlyphRasterizer(const optional<std::string>& fontFamily)
+LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fontFamily)
     : impl(std::make_unique<Impl>(fontFamily))
 {}
 
