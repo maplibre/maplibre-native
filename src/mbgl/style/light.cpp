@@ -76,7 +76,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         
     if (property == Property::Anchor) {
         Error error;
-        optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(value, error, false, false);
+        std::optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
@@ -88,7 +88,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     
     if (property == Property::Color) {
         Error error;
-        optional<PropertyValue<Color>> typedValue = convert<PropertyValue<Color>>(value, error, false, false);
+        std::optional<PropertyValue<Color>> typedValue = convert<PropertyValue<Color>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
@@ -100,7 +100,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     
     if (property == Property::Intensity) {
         Error error;
-        optional<PropertyValue<float>> typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        std::optional<PropertyValue<float>> typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
@@ -112,7 +112,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     
     if (property == Property::Position) {
         Error error;
-        optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(value, error, false, false);
+        std::optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
