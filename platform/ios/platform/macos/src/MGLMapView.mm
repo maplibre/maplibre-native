@@ -2845,7 +2845,7 @@ public:
     // Cocoa origin is at the lower-left corner.
     mbgl::ScreenCoordinate screenCoordinate = { point.x, NSHeight(self.bounds) - point.y };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(styleLayerIdentifiers.count);
@@ -2855,7 +2855,7 @@ public:
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
@@ -2882,7 +2882,7 @@ public:
         { NSMaxX(rect), NSHeight(self.bounds) - NSMinY(rect) },
     };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(styleLayerIdentifiers.count);
@@ -2892,7 +2892,7 @@ public:
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }

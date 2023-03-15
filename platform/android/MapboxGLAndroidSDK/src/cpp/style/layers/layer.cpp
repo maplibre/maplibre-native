@@ -40,7 +40,7 @@ namespace android {
     Layer::~Layer() {
     }
 
-    void Layer::addToStyle(mbgl::style::Style& style, mbgl::optional<std::string> before) {
+    void Layer::addToStyle(mbgl::style::Style& style, std::optional<std::string> before) {
         // Check to see if we own the layer first
         if (!ownedLayer) {
             throw std::runtime_error("Cannot add layer twice");

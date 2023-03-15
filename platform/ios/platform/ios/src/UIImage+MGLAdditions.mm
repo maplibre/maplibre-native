@@ -73,7 +73,7 @@ BOOL MGLEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
         });
     }
     
-    mbgl::optional<mbgl::style::ImageContent> imageContent;
+    std::optional<mbgl::style::ImageContent> imageContent;
     if (!MGLEdgeInsetsIsZero(self.capInsets))
     {
         imageContent = (mbgl::style::ImageContent){

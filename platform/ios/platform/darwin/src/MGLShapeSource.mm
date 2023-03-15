@@ -237,7 +237,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
 
 - (NSArray<id <MGLFeature>> *)featuresMatchingPredicate:(nullable NSPredicate *)predicate {
     MGLAssertStyleSourceIsValid();
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
@@ -252,9 +252,9 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MGLGeoJSONOptionsFromDictionary(NSD
 
 // MARK: - MGLCluster management
 
-- (mbgl::optional<mbgl::FeatureExtensionValue>)featureExtensionValueOfCluster:(MGLShape<MGLCluster> *)cluster extension:(std::string)extension options:(const std::map<std::string, mbgl::Value>)options {
+- (std::optional<mbgl::FeatureExtensionValue>)featureExtensionValueOfCluster:(MGLShape<MGLCluster> *)cluster extension:(std::string)extension options:(const std::map<std::string, mbgl::Value>)options {
     MGLAssertStyleSourceIsValid();
-    mbgl::optional<mbgl::FeatureExtensionValue> extensionValue;
+    std::optional<mbgl::FeatureExtensionValue> extensionValue;
     
     // Check parameters
     if (!self.rawSource || !self.stylable || !cluster) {

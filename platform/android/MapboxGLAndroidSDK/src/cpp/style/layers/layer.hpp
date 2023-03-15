@@ -27,7 +27,7 @@ public:
      */
     void setLayer(std::unique_ptr<mbgl::style::Layer>);
 
-    void addToStyle(mbgl::style::Style&, mbgl::optional<std::string>);
+    void addToStyle(mbgl::style::Style&, std::optional<std::string>);
 
     // Release the owned view and return it
     std::unique_ptr<mbgl::style::Layer> releaseCoreLayer();
