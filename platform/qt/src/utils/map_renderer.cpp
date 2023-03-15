@@ -35,7 +35,7 @@ namespace QMapLibreGL {
 MapRenderer::MapRenderer(qreal pixelRatio, Settings::GLContextMode mode, const QString &localFontFamily)
     : m_backend(static_cast<mbgl::gfx::ContextMode>(mode)),
       m_renderer(std::make_unique<mbgl::Renderer>(m_backend, pixelRatio,
-                 localFontFamily.isEmpty() ? mbgl::nullopt : mbgl::optional<std::string> { localFontFamily.toStdString() }))
+                 localFontFamily.isEmpty() ? std::nullopt : std::optional<std::string> { localFontFamily.toStdString() }))
     , m_forceScheduler(needsToForceScheduler())
 {
     // If we don't have a Scheduler on this thread, which

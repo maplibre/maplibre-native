@@ -63,7 +63,7 @@ BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
         });
     }
     
-    mbgl::optional<mbgl::style::ImageContent> imageContent;
+    std::optional<mbgl::style::ImageContent> imageContent;
     if (!MGLEdgeInsetsIsZero(self.capInsets)) {
         imageContent = (mbgl::style::ImageContent){
             .left = static_cast<float>(self.capInsets.left * scale),

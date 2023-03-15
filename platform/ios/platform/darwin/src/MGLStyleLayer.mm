@@ -47,7 +47,7 @@ const MGLExceptionName MGLInvalidStyleLayerException = @"MGLInvalidStyleLayerExc
     }
 
     if (otherLayer) {
-        const mbgl::optional<std::string> belowLayerId{otherLayer.identifier.UTF8String};
+        const std::optional<std::string> belowLayerId{otherLayer.identifier.UTF8String};
         style.rawStyle->addLayer(std::move(_pendingLayer), belowLayerId);
     } else {
         style.rawStyle->addLayer(std::move(_pendingLayer));

@@ -250,7 +250,7 @@ void OfflineRegion::OfflineRegionStatusCallback::onError(jni::JNIEnv& env,
 
 void OfflineRegion::OfflineRegionStatusCallback::onStatus(jni::JNIEnv& env,
                                                         const jni::Object<OfflineRegion::OfflineRegionStatusCallback>& callback,
-                                                        mbgl::optional<mbgl::OfflineRegionStatus> status) {
+                                                        std::optional<mbgl::OfflineRegionStatus> status) {
     static auto& javaClass = jni::Class<OfflineRegion::OfflineRegionStatusCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<void (jni::Object<OfflineRegionStatus>)>(env, "onStatus");
 
@@ -289,7 +289,7 @@ void OfflineRegion::OfflineRegionUpdateMetadataCallback::onError(jni::JNIEnv& en
 
 void OfflineRegion::OfflineRegionUpdateMetadataCallback::onUpdate(jni::JNIEnv& env,
                                                         const jni::Object<OfflineRegion::OfflineRegionUpdateMetadataCallback>& callback,
-                                                        mbgl::optional<mbgl::OfflineRegionMetadata> metadata) {
+                                                        std::optional<mbgl::OfflineRegionMetadata> metadata) {
     static auto& javaClass = jni::Class<OfflineRegion::OfflineRegionUpdateMetadataCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<void (jni::Array<jni::jbyte>)>(env, "onUpdate");
 
