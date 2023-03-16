@@ -60,11 +60,11 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
         if (transformed.loadingMethod == Resource::LoadingMethod::CacheOnly && response.noContent) {
             if (transformed.kind == Resource::Kind::Tile && transformed.tileData) {
                 mbgl::Log::Info(mbgl::Event::Database,
-                                "Resource not found in cache: %s (%s)",
-                                transformed.url.c_str(),
-                                transformed.tileData->urlTemplate.c_str());
+                                "Resource not found in cache: " +
+                                transformed.url + "(" +
+                                transformed.tileData->urlTemplate + ")");
             } else {
-                mbgl::Log::Info(mbgl::Event::Database, "Resource not found in cache: %s", transformed.url.c_str());
+                mbgl::Log::Info(mbgl::Event::Database, "Resource not found in cache: " + transformed.url);
             }
         }
 

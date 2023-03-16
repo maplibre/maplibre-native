@@ -23,7 +23,7 @@ std::string Source::getID() const {
     return baseImpl->id;
 }
 
-optional<std::string> Source::getAttribution() const {
+std::optional<std::string> Source::getAttribution() const {
     return baseImpl->getAttribution();
 }
 
@@ -43,7 +43,7 @@ void Source::setObserver(SourceObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver;
 }
 
-void Source::setPrefetchZoomDelta(optional<uint8_t> delta) noexcept {
+void Source::setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept {
     if (getPrefetchZoomDelta() == delta) return;
     auto newImpl = createMutable();
     newImpl->setPrefetchZoomDelta(std::move(delta));
@@ -51,7 +51,7 @@ void Source::setPrefetchZoomDelta(optional<uint8_t> delta) noexcept {
     observer->onSourceChanged(*this);
 }
 
-optional<uint8_t> Source::getPrefetchZoomDelta() const noexcept {
+std::optional<uint8_t> Source::getPrefetchZoomDelta() const noexcept {
     return baseImpl->getPrefetchZoomDelta();
 }
 
@@ -67,7 +67,7 @@ Duration Source::getMinimumTileUpdateInterval() const noexcept {
     return baseImpl->getMinimumTileUpdateInterval();
 }
 
-void Source::setMaxOverscaleFactorForParentTiles(optional<uint8_t> overscaleFactor) noexcept {
+void Source::setMaxOverscaleFactorForParentTiles(std::optional<uint8_t> overscaleFactor) noexcept {
     if (getMaxOverscaleFactorForParentTiles() == overscaleFactor) return;
     auto newImpl = createMutable();
     newImpl->setMaxOverscaleFactorForParentTiles(std::move(overscaleFactor));
@@ -75,13 +75,13 @@ void Source::setMaxOverscaleFactorForParentTiles(optional<uint8_t> overscaleFact
     observer->onSourceChanged(*this);
 }
 
-optional<uint8_t> Source::getMaxOverscaleFactorForParentTiles() const noexcept {
+std::optional<uint8_t> Source::getMaxOverscaleFactorForParentTiles() const noexcept {
     return baseImpl->getMaxOverscaleFactorForParentTiles();
 }
 
 void Source::dumpDebugLogs() const {
-    Log::Info(Event::General, "Source::id: %s", getID().c_str());
-    Log::Info(Event::General, "Source::loaded: %d", loaded);
+    Log::Info(Event::General, "Source::id: " + getID());
+    Log::Info(Event::General, "Source::loaded: " + std::to_string(loaded));
 }
 
 } // namespace style

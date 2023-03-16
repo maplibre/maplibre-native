@@ -340,7 +340,7 @@ void testHasOverrides(LayoutType& layout) {
 
     // Constant, overridden text-color.
     auto formatted = Formatted("");
-    formatted.sections.emplace_back("section text"s, {}, {}, Color::green());
+    formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(formatted));
     EXPECT_TRUE(MockOverrides::hasOverrides(layout.template get<TextField>()));
 
@@ -399,7 +399,7 @@ TEST(Layer, SymbolLayerOverrides) {
 
         // Constant, overridden text-color.
         auto formatted = Formatted("");
-        formatted.sections.emplace_back("section text"s, {}, {}, Color::green());
+        formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
         layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
         paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         EXPECT_TRUE(paint.get<TextColor>().isConstant());

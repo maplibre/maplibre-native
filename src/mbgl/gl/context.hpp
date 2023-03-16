@@ -82,9 +82,9 @@ public:
     }
 #endif // MBGL_USE_GLES2
 
-    void clear(optional<mbgl::Color> color,
-               optional<float> depth,
-               optional<int32_t> stencil);
+    void clear(std::optional<mbgl::Color> color,
+               std::optional<float> depth,
+               std::optional<int32_t> stencil);
 
     void setDepthMode(const gfx::DepthMode&);
     void setStencilMode(const gfx::StencilMode&);

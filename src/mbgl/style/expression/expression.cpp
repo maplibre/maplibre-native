@@ -10,7 +10,7 @@ namespace expression {
 class GeoJSONFeature : public GeometryTileFeature {
 public:
     const Feature& feature;
-    mutable optional<GeometryCollection> geometry;
+    mutable std::optional<GeometryCollection> geometry;
 
     explicit GeoJSONFeature(const Feature& feature_) : feature(feature_) {}
     GeoJSONFeature(const Feature& feature_, const CanonicalTileID& canonical) : feature(feature_) {
@@ -25,12 +25,12 @@ public:
 
     const PropertyMap& getProperties() const override { return feature.properties; }
     FeatureIdentifier getID() const override { return feature.id; }
-    optional<mbgl::Value> getValue(const std::string& key) const override {
+    std::optional<mbgl::Value> getValue(const std::string& key) const override {
         auto it = feature.properties.find(key);
         if (it != feature.properties.end()) {
-            return optional<mbgl::Value>(it->second);
+            return std::optional<mbgl::Value>(it->second);
         }
-        return optional<mbgl::Value>();
+        return std::optional<mbgl::Value>();
     }
     const GeometryCollection& getGeometries() const override {
         if (geometry) return *geometry;
@@ -42,25 +42,25 @@ private:
     FeatureType getTypeImpl() const { return apply_visitor(ToFeatureType(), feature.geometry); }
 };
 
-EvaluationResult Expression::evaluate(optional<float> zoom,
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
                                       const Feature& feature,
-                                      optional<double> colorRampParameter) const {
+                                      std::optional<double> colorRampParameter) const {
     GeoJSONFeature f(feature);
     return this->evaluate(EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter)));
 }
 
-EvaluationResult Expression::evaluate(optional<float> zoom,
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
                                       const Feature& feature,
-                                      optional<double> colorRampParameter,
+                                      std::optional<double> colorRampParameter,
                                       const std::set<std::string>& availableImages) const {
     GeoJSONFeature f(feature);
     return this->evaluate(
         EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter)).withAvailableImages(&availableImages));
 }
 
-EvaluationResult Expression::evaluate(optional<float> zoom,
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
                                       const Feature& feature,
-                                      optional<double> colorRampParameter,
+                                      std::optional<double> colorRampParameter,
                                       const std::set<std::string>& availableImages,
                                       const CanonicalTileID& canonical) const {
     GeoJSONFeature f(feature, canonical);
@@ -69,7 +69,7 @@ EvaluationResult Expression::evaluate(optional<float> zoom,
                               .withCanonicalTileID(&canonical));
 }
 
-EvaluationResult Expression::evaluate(optional<mbgl::Value> accumulated, const Feature& feature) const {
+EvaluationResult Expression::evaluate(std::optional<mbgl::Value> accumulated, const Feature& feature) const {
     GeoJSONFeature f(feature);
     return this->evaluate(EvaluationContext(std::move(accumulated), &f));
 }

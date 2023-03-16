@@ -459,13 +459,13 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 
     metadata.document = std::move(maybeJson.get<mbgl::JSDocument>());
     if (!metadata.document.HasMember("metadata")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': %s", paths.stylePath.c_str());
+        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': " + paths.stylePath.string());
         return metadata;
     }
 
     const mbgl::JSValue& metadataValue = metadata.document["metadata"];
     if (!metadataValue.HasMember("test")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata.test': %s", paths.stylePath.c_str());
+        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata.test': " + paths.stylePath.string());
         return metadata;
     }
 
@@ -486,7 +486,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             metadata.mapMode = mbgl::MapMode::Static;
         else {
             mbgl::Log::Warning(
-                mbgl::Event::ParseStyle, "Unknown map mode: %s. Falling back to static mode", mapModeStr.c_str());
+                mbgl::Event::ParseStyle, "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
             metadata.mapMode = mbgl::MapMode::Static;
         }
     }
