@@ -32,8 +32,14 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
         srcX + width > static_cast<int32_t>(image.size.width) ||
         srcY + height > static_cast<int32_t>(image.size.height)) {
-        std::ostringstream ss;  // TODO: replace with std::format
-        ss << "Can't create image with invalid metrics: " << std::to_string(width) << " " << height << " " << srcX << " " << srcY << " " <<  image.size.width << " " << image.size.height << " " << util::toString(ratio);
+        std::ostringstream ss;
+        ss << "Can't create image with invalid metrics: "
+            << width << "x" << height << "@" << srcX << "," << srcY
+            << " in " << image.size.width << "x" << image.size.height
+            << "@" << util::toString(ratio)
+            << " sprite";
+        Log::Error(Event::Sprite, ss.str());
+
         Log::Error(Event::Sprite, ss.str());
         return nullptr;
     }
