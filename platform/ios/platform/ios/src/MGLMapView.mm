@@ -1031,7 +1031,10 @@ public:
         automaticallyAdjustContentInset = _automaticallyAdjustContentInsetHolder.boolValue;
     } else {
         UIViewController *viewController = [self rootViewController];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         automaticallyAdjustContentInset = viewController.automaticallyAdjustsScrollViewInsets;
+#pragma clang diagnostic pop
     }
     
     if (! automaticallyAdjustContentInset) {
@@ -1261,23 +1264,15 @@ public:
     UIEdgeInsets adjustedContentInsets = UIEdgeInsetsZero;
     UIViewController *viewController = [self rootViewController];
     BOOL automaticallyAdjustContentInset;
-    if (@available(iOS 11.0, *))
-    {
-        adjustedContentInsets = self.safeAreaInsets;
-        
-    } else {
-        adjustedContentInsets.top = viewController.topLayoutGuide.length;
-        CGFloat bottomPoint = CGRectGetMaxY(viewController.view.bounds) -
-                                (CGRectGetMaxY(viewController.view.bounds)
-                                - viewController.bottomLayoutGuide.length);
-        adjustedContentInsets.bottom = bottomPoint;
-
-    }
+    adjustedContentInsets = self.safeAreaInsets;
     
     if (_automaticallyAdjustContentInsetHolder) {
         automaticallyAdjustContentInset = _automaticallyAdjustContentInsetHolder.boolValue;
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         automaticallyAdjustContentInset = viewController.automaticallyAdjustsScrollViewInsets;
+#pragma clang diagnostic pop
     }
     
     self.safeMapViewContentInsets = adjustedContentInsets;
@@ -3216,9 +3211,12 @@ static void *windowScreenContext = &windowScreenContext;
     UIViewController *viewController = self.mgl_viewControllerForLayoutGuides;
     if (viewController)
     {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         CGFloat topInset = viewController.topLayoutGuide.length;
         frame.origin.y += topInset;
         frame.size.height -= topInset + viewController.bottomLayoutGuide.length;
+#pragma clang diagnostic pop
     }
     return frame;
 }
