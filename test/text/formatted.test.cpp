@@ -40,7 +40,7 @@ TEST(Formatted, ToString) {
     Formatted emptyFormatted{""};
     EXPECT_EQ(emptyFormatted.toString(), "");
 
-    auto text = FormattedSection{"Formatted", {}, {}, {}};
+    auto text = FormattedSection{"Formatted", std::nullopt, std::nullopt, std::nullopt};
     Formatted multipleSections{std::vector<FormattedSection>{text, text}};
     EXPECT_EQ(multipleSections.toString(), "FormattedFormatted");
 
