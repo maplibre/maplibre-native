@@ -267,7 +267,7 @@ private:
             }
         }
 
-            std::optional<OnlineFileRequest*> pop() {
+        std::optional<OnlineFileRequest*> pop() {
             if (queue.empty()) {
                 return {};
             }
