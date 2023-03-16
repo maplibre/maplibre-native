@@ -56,7 +56,7 @@ public:
 /**
     Controls the annotation behavior of the parser when encountering an expression
     whose type is not a subtype of the expected type. The default behavior, used
-    when optional<TypeAnnotationOption> is a {}, is as follows:
+    when optional<TypeAnnotationOption> is a nullopt, is as follows:
 
     When we expect a number, string, boolean, or array but have a value, wrap it in an assertion.
     When we expect a color or formatted string, but have a string or value, wrap it in a coercion.
