@@ -501,9 +501,9 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-void Context::clear(optional<mbgl::Color> color,
-                    optional<float> depth,
-                    optional<int32_t> stencil) {
+void Context::clear(std::optional<mbgl::Color> color,
+                    std::optional<float> depth,
+                    std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
 
     if (color) {
