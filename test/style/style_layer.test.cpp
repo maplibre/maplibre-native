@@ -352,7 +352,7 @@ void testHasOverrides(LayoutType& layout) {
 
     // Expression, overridden text-color.
     FormatExpressionSection section(literal(""));
-    section.setTextSectionOptions({}, {}, toColor(literal("red")));
+    section.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("red")));
     auto formatExprOverride = std::make_unique<FormatExpression>(std::vector<FormatExpressionSection>{section});
     PropertyExpression<Formatted> propExprOverride(std::move(formatExprOverride));
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(propExprOverride));
