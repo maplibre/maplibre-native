@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/style/filter.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <jni/jni.hpp>
 

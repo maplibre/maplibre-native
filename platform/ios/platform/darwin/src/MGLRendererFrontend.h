@@ -3,8 +3,6 @@
 #include <mbgl/renderer/renderer_frontend.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/util/async_task.hpp>
-#include <mbgl/util/optional.hpp>
-
 
 /**
  The RenderFrontend is passed to the Map to facilitate rendering in a platform
