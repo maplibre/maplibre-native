@@ -11,11 +11,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/optional.hpp>
 
-#define MBGL_CONSTRUCTOR(f) \
-    static void f(void); \
-    struct f##_t_ { f##_t_(void) { f(); } }; static f##_t_ f##_; \
-    static void f(void)
-
 namespace mapbox {
 namespace sqlite {
 
