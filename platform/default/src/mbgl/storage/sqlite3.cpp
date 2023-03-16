@@ -102,20 +102,6 @@ void logSqlMessage(void *, const int err, const char *msg) {
 }
 #endif
 
-MBGL_CONSTRUCTOR(initialize) {
-    if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
-        char message[96];
-        snprintf(message, 96,
-                 "sqlite3 libversion mismatch: headers report %d, but library reports %d",
-                 SQLITE_VERSION_NUMBER, sqlite3_libversion_number());
-        throw std::runtime_error(message);
-    }
-
-#ifndef NDEBUG
-    // Enable SQLite logging before initializing the database.
-    sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
-#endif
-}
 
 mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string &filename, int flags) {
     sqlite3* db = nullptr;
