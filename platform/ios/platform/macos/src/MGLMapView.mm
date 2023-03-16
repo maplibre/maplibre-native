@@ -1449,10 +1449,7 @@ public:
     }
 
     NSEdgeInsets contentInsets = self.contentInsets;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    if ((self.window.styleMask & NSFullSizeContentViewWindowMask)
-#pragma GCC diagnostic pop
+    if ((self.window.styleMask & NSWindowStyleMaskFullSizeContentView)
         && !self.window.titlebarAppearsTransparent) {
         NSRect contentLayoutRect = [self convertRect:self.window.contentLayoutRect fromView:nil];
         if (NSMaxX(contentLayoutRect) > 0 && NSMaxY(contentLayoutRect) > 0) {
@@ -1531,10 +1528,7 @@ public:
             CGDisplayShowCursor(kCGDirectMainDisplay);
         }
     }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    if (flags & NSShiftKeyMask) {
-#pragma GCC diagnostic pop
+    if (flags & NSEventModifierFlagShift) {
         // Shift-drag to zoom.
         if (!self.zoomEnabled) {
             return;
@@ -1548,11 +1542,7 @@ public:
             CGFloat newZoomLevel = _zoomAtBeginningOfGesture - delta.y / 75;
             [self setZoomLevel:newZoomLevel atPoint:startPoint animated:NO];
         }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    } else if (flags & NSAlternateKeyMask) {
-#pragma GCC diagnostic pop
-
+    } else if (flags & NSEventModifierFlagOption) {
         // Option-drag to rotate and/or tilt.
         _mbglMap->cancelTransitions();
 
@@ -1598,10 +1588,7 @@ public:
   NSGestureRecognizerState state = _panGestureRecognizer.state;
   NSEventModifierFlags flags = [NSApp currentEvent].modifierFlags;
   return ((state == NSGestureRecognizerStateBegan || state == NSGestureRecognizerStateChanged)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-          && !(flags & NSShiftKeyMask || flags & NSAlternateKeyMask));
-#pragma GCC diagnostic pop
+          && !(flags & NSEventModifierFlagShift || flags & NSEventModifierFlagOption));
 }
 
 /// Pinch to zoom.

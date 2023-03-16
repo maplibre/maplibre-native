@@ -192,10 +192,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     
     __weak __typeof__(self) weakSelf = self;
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-        if (result != NSFileHandlingPanelOKButton) {
-#pragma GCC diagnostic pop
+      if (result != NSModalResponseOK) {
             return;
         }
         
@@ -1315,10 +1312,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
     SEL action = toolbarItem.action;
     if (action == @selector(showShareMenu:)) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-        [(NSButton *)toolbarItem.view sendActionOn:NSLeftMouseDownMask];
-#pragma GCC diagnostic pop
+      [(NSButton *)toolbarItem.view sendActionOn:NSEventMaskLeftMouseDown];
         if (![MGLSettings apiKey]) {
             return NO;
         }
