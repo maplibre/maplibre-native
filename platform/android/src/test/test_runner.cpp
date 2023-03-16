@@ -23,7 +23,7 @@ void runner() {
 
     mbgl::Log::Info(mbgl::Event::General, "Start TestRunner");
     int status = mbgl::runTests(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '%d'", status);
+    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '" + std::to_string(status) +  "'");
     running = false;
     success = (status == 0);
     ALooper_wake(looper);
@@ -48,7 +48,7 @@ void android_main(struct android_app* app) {
             runnerThread = std::thread(runner);
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '%s' to external storage", zipFile.c_str());
+        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '" + zipFile + "' to external storage");
         changeState(env, app, success);
     }
 

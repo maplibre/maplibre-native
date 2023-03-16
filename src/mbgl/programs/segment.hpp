@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <vector>
 #include <map>
+#include <string>
 
 namespace mbgl {
 

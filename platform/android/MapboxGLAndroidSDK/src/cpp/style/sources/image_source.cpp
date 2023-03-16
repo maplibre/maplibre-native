@@ -34,7 +34,7 @@ namespace android {
     }
 
     jni::Local<jni::String> ImageSource::getURL(jni::JNIEnv& env) {
-        optional<std::string> url = source.as<mbgl::style::ImageSource>()->ImageSource::getURL();
+        std::optional<std::string> url = source.as<mbgl::style::ImageSource>()->ImageSource::getURL();
         return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
     }
 

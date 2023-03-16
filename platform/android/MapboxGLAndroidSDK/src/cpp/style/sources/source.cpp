@@ -108,7 +108,7 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
 
     void Source::setPrefetchZoomDelta(jni::JNIEnv& env, jni::Integer& delta) {
         if (!delta) {
-            source.setPrefetchZoomDelta(nullopt);
+            source.setPrefetchZoomDelta(std::nullopt);
         } else {
             source.setPrefetchZoomDelta(jni::Unbox(env, delta));
         }
@@ -124,7 +124,7 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
 
     void Source::setMaxOverscaleFactorForParentTiles(jni::JNIEnv& env, jni::Integer& maxOverscaleFactor) {
         if (!maxOverscaleFactor) {
-            source.setMaxOverscaleFactorForParentTiles(nullopt);
+            source.setMaxOverscaleFactorForParentTiles(std::nullopt);
         } else {
             source.setMaxOverscaleFactorForParentTiles(jni::Unbox(env, maxOverscaleFactor));
         }

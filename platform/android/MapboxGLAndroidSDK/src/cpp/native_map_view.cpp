@@ -989,7 +989,7 @@ void NativeMapView::addLayerAt(JNIEnv& env, jlong nativeLayerPtr, jni::jint inde
     // Check index
     int numLayers = layers.size() - 1;
     if (index > numLayers || index < 0) {
-        Log::Error(Event::JNI, "Index out of range: %i", index);
+        Log::Error(Event::JNI, "Index out of range: " + std::to_string(index));
         jni::ThrowNew(env, jni::FindClass(env, "com/mapbox/mapboxsdk/style/layers/CannotAddLayerException"),
             std::string("Invalid index").c_str());
         return;
