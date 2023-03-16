@@ -87,90 +87,90 @@ std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& so
 }
 
 template <class T>
-std::optional<PropertyExpression<T>> convertFunctionToExpression(const Convertible& value, Error& error, bool convertTokens) {
+optional<PropertyExpression<T>> convertFunctionToExpression(const Convertible& value, Error& error, bool convertTokens) {
     auto expression = convertFunctionToExpression(expression::valueTypeToExpressionType<T>(), value, error, convertTokens);
     if (!expression) {
-        return {};
+        return nullopt;
     }
 
-    std::optional<T> defaultValue{};
+    optional<T> defaultValue{};
 
     auto defaultValueValue = objectMember(value, "default");
     if (defaultValueValue) {
         defaultValue = convert<T>(*defaultValueValue, error);
         if (!defaultValue) {
             error.message = R"(wrong type for "default": )" + error.message;
-            return {};
+            return nullopt;
         }
     }
 
     return PropertyExpression<T>(std::move(*expression), defaultValue);
 }
 
-template std::optional<PropertyExpression<AlignmentType>>
+template optional<PropertyExpression<AlignmentType>>
     convertFunctionToExpression<AlignmentType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<bool>>
+template optional<PropertyExpression<bool>>
     convertFunctionToExpression<bool>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<CirclePitchScaleType>>
+template optional<PropertyExpression<CirclePitchScaleType>>
     convertFunctionToExpression<CirclePitchScaleType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<float>>
+template optional<PropertyExpression<float>>
     convertFunctionToExpression<float>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<HillshadeIlluminationAnchorType>>
+template optional<PropertyExpression<HillshadeIlluminationAnchorType>>
     convertFunctionToExpression<HillshadeIlluminationAnchorType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<IconTextFitType>>
+template optional<PropertyExpression<IconTextFitType>>
     convertFunctionToExpression<IconTextFitType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<LightAnchorType>>
+template optional<PropertyExpression<LightAnchorType>>
     convertFunctionToExpression<LightAnchorType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<LineCapType>>
+template optional<PropertyExpression<LineCapType>>
     convertFunctionToExpression<LineCapType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<LineJoinType>>
+template optional<PropertyExpression<LineJoinType>>
     convertFunctionToExpression<LineJoinType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Color>>
+template optional<PropertyExpression<Color>>
     convertFunctionToExpression<Color>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Position>>
+template optional<PropertyExpression<Position>>
     convertFunctionToExpression<Position>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<RasterResamplingType>>
+template optional<PropertyExpression<RasterResamplingType>>
     convertFunctionToExpression<RasterResamplingType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::array<float, 2>>>
+template optional<PropertyExpression<std::array<float, 2>>>
     convertFunctionToExpression<std::array<float, 2>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::array<float, 4>>>
+template optional<PropertyExpression<std::array<float, 4>>>
     convertFunctionToExpression<std::array<float, 4>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::string>>
+template optional<PropertyExpression<std::string>>
     convertFunctionToExpression<std::string>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::vector<float>>>
+template optional<PropertyExpression<std::vector<float>>>
     convertFunctionToExpression<std::vector<float>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::vector<std::string>>>
+template optional<PropertyExpression<std::vector<std::string>>>
     convertFunctionToExpression<std::vector<std::string>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<SymbolAnchorType>>
+template optional<PropertyExpression<SymbolAnchorType>>
     convertFunctionToExpression<SymbolAnchorType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::vector<TextVariableAnchorType>>>
+template optional<PropertyExpression<std::vector<TextVariableAnchorType>>>
     convertFunctionToExpression<std::vector<TextVariableAnchorType>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<SymbolPlacementType>>
+template optional<PropertyExpression<SymbolPlacementType>>
     convertFunctionToExpression<SymbolPlacementType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<SymbolZOrderType>>
+template optional<PropertyExpression<SymbolZOrderType>>
     convertFunctionToExpression<SymbolZOrderType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<TextJustifyType>>
+template optional<PropertyExpression<TextJustifyType>>
     convertFunctionToExpression<TextJustifyType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<TextTransformType>>
+template optional<PropertyExpression<TextTransformType>>
     convertFunctionToExpression<TextTransformType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<TranslateAnchorType>>
+template optional<PropertyExpression<TranslateAnchorType>>
     convertFunctionToExpression<TranslateAnchorType>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Formatted>>
+template optional<PropertyExpression<Formatted>>
     convertFunctionToExpression<Formatted>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<std::vector<TextWritingModeType>>>
+template optional<PropertyExpression<std::vector<TextWritingModeType>>>
     convertFunctionToExpression<std::vector<TextWritingModeType>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Image>> convertFunctionToExpression<Image>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Rotation>> convertFunctionToExpression<Rotation>(const Convertible&, Error&, bool);
+template optional<PropertyExpression<Image>> convertFunctionToExpression<Image>(const Convertible&, Error&, bool);
+template optional<PropertyExpression<Rotation>> convertFunctionToExpression<Rotation>(const Convertible&, Error&, bool);
 
 // Ad-hoc Converters for double and int64_t. We should replace float with double wholesale,
 // and promote the int64_t Converter to general use (and it should check that the input is
 // an integer).
 template <>
 struct Converter<double> {
-    std::optional<double> operator()(const Convertible& value, Error& error) const {
+    optional<double> operator()(const Convertible& value, Error& error) const {
         auto converted = convert<float>(value, error);
         if (!converted) {
-            return {};
+            return nullopt;
         }
         return *converted;
     }
@@ -178,10 +178,10 @@ struct Converter<double> {
 
 template <>
 struct Converter<int64_t> {
-    std::optional<int64_t> operator()(const Convertible& value, Error& error) const {
+    optional<int64_t> operator()(const Convertible& value, Error& error) const {
         auto converted = convert<float>(value, error);
         if (!converted) {
-            return {};
+            return nullopt;
         }
         return static_cast<int64_t>(*converted);
     }
@@ -212,135 +212,135 @@ static bool interpolatable(type::Type type) {
     );
 }
 
-static std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type, const Convertible& value, Error& error, bool convertTokens = false) {
+static optional<std::unique_ptr<Expression>> convertLiteral(type::Type type, const Convertible& value, Error& error, bool convertTokens = false) {
     return type.match(
-        [&](const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::NumberType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<float>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return literal(static_cast<double>(*result));
         },
-        [&](const type::BooleanType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::BooleanType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<bool>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return literal(*result);
         },
-        [&](const type::StringType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::StringType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<std::string>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return convertTokens ? convertTokenStringToExpression(*result) : literal(*result);
         },
-        [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::ColorType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<Color>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return literal(*result);
         },
-        [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::Array& array) -> optional<std::unique_ptr<Expression>> {
             if (!isArray(value)) {
                 error.message = "value must be an array";
-                return {};
+                return nullopt;
             }
             if (array.N && arrayLength(value) != *array.N) {
                 error.message = "value must be an array of length " + util::toString(*array.N);
-                return {};
+                return nullopt;
             }
             return array.itemType.match(
-                [&] (const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
+                [&] (const type::NumberType&) -> optional<std::unique_ptr<Expression>> {
                     std::vector<expression::Value> result;
                     result.reserve(arrayLength(value));
                     for (std::size_t i = 0; i < arrayLength(value); ++i) {
-                        std::optional<float> number = toNumber(arrayMember(value, i));
+                        optional<float> number = toNumber(arrayMember(value, i));
                         if (!number) {
                             error.message = "value must be an array of numbers";
-                            return {};
+                            return nullopt;
                         }
                         result.emplace_back(static_cast<double>(*number));
                     }
                     return literal(result);
                 },
-                [&] (const type::StringType&) -> std::optional<std::unique_ptr<Expression>> {
+                [&] (const type::StringType&) -> optional<std::unique_ptr<Expression>> {
                     std::vector<expression::Value> result;
                     result.reserve(arrayLength(value));
                     for (std::size_t i = 0; i < arrayLength(value); ++i) {
-                        std::optional<std::string> string = toString(arrayMember(value, i));
+                        optional<std::string> string = toString(arrayMember(value, i));
                         if (!string) {
                             error.message = "value must be an array of strings";
-                            return {};
+                            return nullopt;
                         }
                         result.emplace_back(*string);
                     }
                     return literal(result);
                 },
-                [&] (const auto&) -> std::optional<std::unique_ptr<Expression>> {
+                [&] (const auto&) -> optional<std::unique_ptr<Expression>> {
                     assert(false); // No properties use this type.
-                    return {};
+                    return nullopt;
                 }
             );
         },
-        [&](const type::NullType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::NullType&) -> optional<std::unique_ptr<Expression>> {
             assert(false); // No properties use this type.
-            return {};
+            return nullopt;
         },
-        [&](const type::ObjectType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::ObjectType&) -> optional<std::unique_ptr<Expression>> {
             assert(false); // No properties use this type.
-            return {};
+            return nullopt;
         },
-        [&](const type::ErrorType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::ErrorType&) -> optional<std::unique_ptr<Expression>> {
             assert(false); // No properties use this type.
-            return {};
+            return nullopt;
         },
-        [&](const type::ValueType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::ValueType&) -> optional<std::unique_ptr<Expression>> {
             assert(false); // No properties use this type.
-            return {};
+            return nullopt;
         },
-        [&](const type::CollatorType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::CollatorType&) -> optional<std::unique_ptr<Expression>> {
             assert(false); // No properties use this type.
-            return {};
+            return nullopt;
         },
-        [&](const type::FormattedType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::FormattedType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<std::string>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return convertTokens ?
                 convertTokenStringToFormatExpression(*result) :
                 literal(Formatted(result->c_str()));
         },
-        [&](const type::ImageType&) -> std::optional<std::unique_ptr<Expression>> {
+        [&](const type::ImageType&) -> optional<std::unique_ptr<Expression>> {
             auto result = convert<std::string>(value, error);
             if (!result) {
-                return {};
+                return nullopt;
             }
             return convertTokens ? std::make_unique<ImageExpression>(convertTokenStringToImageExpression(*result))
                                  : literal(Image(result->c_str()));
         });
 }
 
-static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
+static optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
                                                                             const Convertible& value,
                                                                             Error& error,
                                                                             bool convertTokens) {
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         error.message = "function value must specify stops";
-        return {};
+        return nullopt;
     }
 
     if (!isArray(*stopsValue)) {
         error.message = "function stops must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(*stopsValue) == 0) {
         error.message = "function must have at least one stop";
-        return {};
+        return nullopt;
     }
 
     std::map<double, std::unique_ptr<Expression>> stops;
@@ -349,22 +349,22 @@ static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops
 
         if (!isArray(stopValue)) {
             error.message = "function stop must be an array";
-            return {};
+            return nullopt;
         }
 
         if (arrayLength(stopValue) != 2) {
             error.message = "function stop must have two elements";
-            return {};
+            return nullopt;
         }
 
-        std::optional<float> t = convert<float>(arrayMember(stopValue, 0), error);
+        optional<float> t = convert<float>(arrayMember(stopValue, 0), error);
         if (!t) {
-            return {};
+            return nullopt;
         }
 
-        std::optional<std::unique_ptr<Expression>> e = convertLiteral(type, arrayMember(stopValue, 1), error, convertTokens);
+        optional<std::unique_ptr<Expression>> e = convertLiteral(type, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
-            return {};
+            return nullopt;
         }
 
         stops.emplace(*t, std::move(*e));
@@ -385,23 +385,23 @@ static void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) 
 }
 
 template <class T>
-std::optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const type::Type& type,
+optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const type::Type& type,
                                                                    const Convertible& value,
                                                                    Error& error) {
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         error.message = "function value must specify stops";
-        return {};
+        return nullopt;
     }
 
     if (!isArray(*stopsValue)) {
         error.message = "function stops must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(*stopsValue) == 0) {
         error.message = "function must have at least one stop";
-        return {};
+        return nullopt;
     }
 
     std::map<T, std::unique_ptr<Expression>> stops;
@@ -410,22 +410,22 @@ std::optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const ty
 
         if (!isArray(stopValue)) {
             error.message = "function stop must be an array";
-            return {};
+            return nullopt;
         }
 
         if (arrayLength(stopValue) != 2) {
             error.message = "function stop must have two elements";
-            return {};
+            return nullopt;
         }
 
-        std::optional<T> t = convert<T>(arrayMember(stopValue, 0), error);
+        optional<T> t = convert<T>(arrayMember(stopValue, 0), error);
         if (!t) {
-            return {};
+            return nullopt;
         }
 
-        std::optional<std::unique_ptr<Expression>> e = convertLiteral(type, arrayMember(stopValue, 1), error);
+        optional<std::unique_ptr<Expression>> e = convertLiteral(type, arrayMember(stopValue, 1), error);
         if (!e) {
-            return {};
+            return nullopt;
         }
 
         stops.emplace(*t, std::move(*e));
@@ -434,7 +434,7 @@ std::optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const ty
     return { std::move(stops) };
 }
 
-static std::optional<double> convertBase(const Convertible& value, Error& error) {
+static optional<double> convertBase(const Convertible& value, Error& error) {
     auto baseValue = objectMember(value, "base");
 
     if (!baseValue) {
@@ -444,7 +444,7 @@ static std::optional<double> convertBase(const Convertible& value, Error& error)
     auto base = toNumber(*baseValue);
     if (!base) {
         error.message = "function base must be a number";
-        return {};
+        return nullopt;
     }
 
     return *base;
@@ -518,7 +518,7 @@ static std::unique_ptr<Expression> numberOrDefault(const type::Type& type,
     return std::make_unique<Case>(type, std::move(branches), std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
+static optional<std::unique_ptr<Expression>> convertIntervalFunction(
     const type::Type& type,
     const Convertible& value,
     Error& error,
@@ -527,7 +527,7 @@ static std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     bool convertTokens = false) {
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
-        return {};
+        return nullopt;
     }
     omitFirstStop(*stops);
 
@@ -537,7 +537,7 @@ static std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
                            std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
+static optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const type::Type& type,
     const Convertible& value,
     Error& error,
@@ -546,11 +546,11 @@ static std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     bool convertTokens = false) {
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
-        return {};
+        return nullopt;
     }
     auto base = convertBase(value, error);
     if (!base) {
-        return {};
+        return nullopt;
     }
 
     return numberOrDefault(type,
@@ -559,7 +559,7 @@ static std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
                            std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(const type::Type& type,
+static optional<std::unique_ptr<Expression>> convertCategoricalFunction(const type::Type& type,
                                                                         const Convertible& value,
                                                                         Error& err,
                                                                         const std::string& property,
@@ -567,35 +567,35 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         err.message = "function value must specify stops";
-        return {};
+        return nullopt;
     }
 
     if (!isArray(*stopsValue)) {
         err.message = "function stops must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(*stopsValue) == 0) {
         err.message = "function must have at least one stop";
-        return {};
+        return nullopt;
     }
 
     const auto& first = arrayMember(*stopsValue, 0);
 
     if (!isArray(first)) {
         err.message = "function stop must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(first) != 2) {
         err.message = "function stop must have two elements";
-        return {};
+        return nullopt;
     }
 
     if (toBool(arrayMember(first, 0))) {
         auto branches = convertBranches<bool>(type, value, err);
         if (!branches) {
-            return {};
+            return nullopt;
         }
         return categorical(type, property, std::move(*branches), std::move(def));
     }
@@ -603,7 +603,7 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
     if (toNumber(arrayMember(first, 0))) {
         auto branches = convertBranches<int64_t>(type, value, err);
         if (!branches) {
-            return {};
+            return nullopt;
         }
         return categorical(type, property, std::move(*branches), std::move(def));
     }
@@ -611,23 +611,23 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
     if (toString(arrayMember(first, 0))) {
         auto branches = convertBranches<std::string>(type, value, err);
         if (!branches) {
-            return {};
+            return nullopt;
         }
         return categorical(type, property, std::move(*branches), std::move(def));
     }
 
     err.message = "stop domain value must be a number, string, or boolean";
-    return {};
+    return nullopt;
 }
 
 template <class T, class Fn>
-std::optional<std::unique_ptr<Expression>> composite(type::Type type,
+optional<std::unique_ptr<Expression>> composite(type::Type type,
                                                 const Convertible& value,
                                                 Error& error,
                                                 const Fn& makeInnerExpression) {
     auto base = convertBase(value, error);
     if (!base) {
-        return {};
+        return nullopt;
     }
 
     auto stopsValue = objectMember(value, "stops");
@@ -643,46 +643,46 @@ std::optional<std::unique_ptr<Expression>> composite(type::Type type,
 
         if (!isArray(stopValue)) {
             error.message = "function stop must be an array";
-            return {};
+            return nullopt;
         }
 
         if (arrayLength(stopValue) != 2) {
             error.message = "function stop must have two elements";
-            return {};
+            return nullopt;
         }
 
         const auto& stopInput = arrayMember(stopValue, 0);
 
         if (!isObject(stopInput)) {
             error.message = "stop input must be an object";
-            return {};
+            return nullopt;
         }
 
         auto zoomValue = objectMember(stopInput, "zoom");
         if (!zoomValue) {
             error.message = "stop input must specify zoom";
-            return {};
+            return nullopt;
         }
 
         auto sourceValue = objectMember(stopInput, "value");
         if (!sourceValue) {
             error.message = "stop input must specify value";
-            return {};
+            return nullopt;
         }
 
-        std::optional<float> z = convert<float>(*zoomValue, error);
+        optional<float> z = convert<float>(*zoomValue, error);
         if (!z) {
-            return {};
+            return nullopt;
         }
 
-        std::optional<T> d = convert<T>(*sourceValue, error);
+        optional<T> d = convert<T>(*sourceValue, error);
         if (!d) {
-            return {};
+            return nullopt;
         }
 
-        std::optional<std::unique_ptr<Expression>> r = convertLiteral(type, arrayMember(stopValue, 1), error);
+        optional<std::unique_ptr<Expression>> r = convertLiteral(type, arrayMember(stopValue, 1), error);
         if (!r) {
-            return {};
+            return nullopt;
         }
 
         map[*z].emplace(*d, std::move(*r));
@@ -701,13 +701,13 @@ std::optional<std::unique_ptr<Expression>> composite(type::Type type,
     }
 }
 
-std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Type type,
+optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Type type,
                                                                   const Convertible& value,
                                                                   Error& err,
                                                                   bool convertTokens) {
     if (!isObject(value)) {
         err.message = "function must be an object";
-        return {};
+        return nullopt;
     }
 
     FunctionType functionType = FunctionType::Invalid;
@@ -716,7 +716,7 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
     if (!typeValue) {
         functionType = interpolatable(type) ? FunctionType::Exponential : FunctionType::Interval;
     } else {
-        const std::optional<std::string> string = toString(*typeValue);
+        optional<std::string> string = toString(*typeValue);
         if (string) {
             if (*string == "interval")
                 functionType = FunctionType::Interval;
@@ -749,77 +749,77 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             return convertExponentialFunction(type, value, err, [](bool) { return zoom(); }, defaultExpr(), convertTokens);
         default:
             err.message = "unsupported function type";
-            return {};
+            return nullopt;
         }
     }
 
     auto propertyValue = objectMember(value, "property");
     if (!propertyValue) {
         err.message = "function must specify property";
-        return {};
+        return nullopt;
     }
 
     auto property = toString(*propertyValue);
     if (!property) {
         err.message = "function property must be a string";
-        return {};
+        return nullopt;
     }
 
     if (functionType == FunctionType::Identity) {
         return type.match(
-            [&](const type::StringType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::StringType&) -> optional<std::unique_ptr<Expression>> {
                 return string(get(literal(*property)), defaultExpr());
             },
-            [&](const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::NumberType&) -> optional<std::unique_ptr<Expression>> {
                 return number(get(literal(*property)), defaultExpr());
             },
-            [&](const type::BooleanType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::BooleanType&) -> optional<std::unique_ptr<Expression>> {
                 return boolean(get(literal(*property)), defaultExpr());
             },
-            [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::ColorType&) -> optional<std::unique_ptr<Expression>> {
                 return toColor(get(literal(*property)), defaultExpr());
             },
-            [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::Array& array) -> optional<std::unique_ptr<Expression>> {
                 return assertion(array, get(literal(*property)), defaultExpr());
             },
-            [&](const type::FormattedType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::FormattedType&) -> optional<std::unique_ptr<Expression>> {
                 return toFormatted(get(literal(*property)), defaultExpr());
             },
-            [&](const type::ImageType&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const type::ImageType&) -> optional<std::unique_ptr<Expression>> {
                 return toImage(get(literal(*property)), defaultExpr());
             },
-            [&](const auto&) -> std::optional<std::unique_ptr<Expression>> {
+            [&](const auto&) -> optional<std::unique_ptr<Expression>> {
                 assert(false); // No properties use this type.
-                return {};
+                return nullopt;
             });
     }
 
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         err.message = "function value must specify stops";
-        return {};
+        return nullopt;
     }
 
     if (!isArray(*stopsValue)) {
         err.message = "function stops must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(*stopsValue) == 0) {
         err.message = "function must have at least one stop";
-        return {};
+        return nullopt;
     }
 
     const auto& first = arrayMember(*stopsValue, 0);
 
     if (!isArray(first)) {
         err.message = "function stop must be an array";
-        return {};
+        return nullopt;
     }
 
     if (arrayLength(first) != 2) {
         err.message = "function stop must have two elements";
-        return {};
+        return nullopt;
     }
 
     const auto& stop = arrayMember(first, 0);
@@ -843,14 +843,14 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             return convertCategoricalFunction(type, value, err, *property, defaultExpr());
         default:
             err.message = "unsupported function type";
-            return {};
+            return nullopt;
         }
     } else {
         // Composite function.
         auto sourceValue = objectMember(stop, "value");
         if (!sourceValue) {
             err.message = "stop must specify value";
-            return {};
+            return nullopt;
         }
 
         if (toBool(*sourceValue)) {
@@ -865,7 +865,7 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
                     });
             default:
                 err.message = "unsupported function type";
-                return {};
+                return nullopt;
             }
         }
 
@@ -903,7 +903,7 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
                     });
             default:
                 err.message = "unsupported function type";
-                return {};
+                return nullopt;
             }
         }
 
@@ -919,12 +919,12 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
                     });
             default:
                 err.message = "unsupported function type";
-                return {};
+                return nullopt;
             }
         }
 
         err.message = "stop domain value must be a number, string, or boolean";
-        return {};
+        return nullopt;
     }
 }
 
