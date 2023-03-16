@@ -34,9 +34,9 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
 
     std::string name = *toString(arrayMember(value, 0));
     if (name == "array") {
-        optional<type::Type> itemType;
+        std::optional<type::Type> itemType;
         if (length > 2) {
-            optional<std::string> itemTypeName = toString(arrayMember(value, 1));
+            std::optional<std::string> itemTypeName = toString(arrayMember(value, 1));
             auto it = itemTypeName ? types.find(*itemTypeName) : types.end();
             if (it == types.end() || it->second == type::Object) {
                 ctx.error(
@@ -51,10 +51,10 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
             itemType = {type::Value};
         }
 
-        optional<std::size_t> N;
+        std::optional<std::size_t> N;
         if (length > 3) {
             auto m = arrayMember(value, 2);
-            optional<float> n = toNumber(m);
+            std::optional<float> n = toNumber(m);
             if (!isUndefined(m) &&
                 (!n || *n < 0 || *n != std::floor(*n))) {
                 ctx.error(
@@ -121,8 +121,8 @@ bool Assertion::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Assertion::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Assertion::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& input : inputs) {
         for (auto& output : input->possibleOutputs()) {
             result.push_back(std::move(output));

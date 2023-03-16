@@ -1218,11 +1218,11 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
         }
         if (!valueParsed) {
             Nan::ThrowTypeError("Could not get feature state value");
-            return nullopt;
+            return std::nullopt;
         }
         stateKey = k;
         newState[stateKey] = stateValue;
-        return nullopt;
+        return std::nullopt;
     };
 
     eachMember(state, convertFn);

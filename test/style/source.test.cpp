@@ -957,7 +957,7 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     tileset.tiles = {"tiles"};
 
     RasterSource source("source", tileset, 512);
-    ASSERT_EQ({}, source.getMaxOverscaleFactorForParentTiles());
+    ASSERT_EQ(std::nullopt, source.getMaxOverscaleFactorForParentTiles());
     source.setMaxOverscaleFactorForParentTiles(3);
     ASSERT_EQ(3, *source.getMaxOverscaleFactorForParentTiles());
     source.loadDescription(*test.fileSource);

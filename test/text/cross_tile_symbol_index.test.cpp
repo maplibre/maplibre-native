@@ -19,8 +19,8 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
 
     auto sharedData = std::make_shared<SymbolInstanceSharedData>(std::move(line),
                                                                  shaping,
-                                                                 {},
-                                                                 {},
+                                                                 std::nullopt,
+                                                                 std::nullopt,
                                                                  layout_,
                                                                  placementType,
                                                                  textOffset,
