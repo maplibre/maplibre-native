@@ -568,7 +568,7 @@ NSArray<MGLAttributionInfo *> *MGLAttributionInfosFromAttributions(mbgl::MapSnap
     CGFloat fontSize = [UIFont smallSystemFontSize];
     UIColor *attributeFontColor = [UIColor blackColor];
 #else
-    CGFloat fontSize = [NSFont systemFontSizeForControlSize:NSMiniControlSize];
+    CGFloat fontSize = [NSFont systemFontSizeForControlSize:NSControlSizeMini];
     NSColor *attributeFontColor = [NSColor blackColor];
 #endif
     for (auto attribution : attributions) {

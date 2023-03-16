@@ -372,7 +372,7 @@ public:
     [(NSSegmentedCell *)_zoomControls.cell setToolTip:NSLocalizedStringWithDefaultValue(@"ZOOM_IN_TOOLTIP", nil, nil, @"Zoom In", @"Tooltip of Zoom In button") forSegment:1];
     _zoomControls.target = self;
     _zoomControls.action = @selector(zoomInOrOut:);
-    _zoomControls.controlSize = NSRegularControlSize;
+    _zoomControls.controlSize = NSControlSizeRegular;
     [_zoomControls sizeToFit];
     _zoomControls.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_zoomControls];
@@ -480,7 +480,7 @@ public:
 
     // Make the whole string mini by default.
     // Force links to be black, because the default blue is distracting.
-    CGFloat miniSize = [NSFont systemFontSizeForControlSize:NSMiniControlSize];
+    CGFloat miniSize = [NSFont systemFontSizeForControlSize:NSControlSizeMini];
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:miniSize linkColor:[NSColor blackColor]];
     for (MGLAttributionInfo *info in attributionInfos) {
         // Feedback links are added to the Help menu.
@@ -491,7 +491,7 @@ public:
         // For each attribution, add a borderless button that responds to clicks
         // and feels like a hyperlink.
         NSButton *button = [[MGLAttributionButton alloc] initWithAttributionInfo:info];
-        button.controlSize = NSMiniControlSize;
+        button.controlSize = NSControlSizeMini;
         button.translatesAutoresizingMaskIntoConstraints = NO;
 
         // Set the new button flush with the buttom of the container and to the
@@ -1449,7 +1449,10 @@ public:
     }
 
     NSEdgeInsets contentInsets = self.contentInsets;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if ((self.window.styleMask & NSFullSizeContentViewWindowMask)
+#pragma GCC diagnostic pop
         && !self.window.titlebarAppearsTransparent) {
         NSRect contentLayoutRect = [self convertRect:self.window.contentLayoutRect fromView:nil];
         if (NSMaxX(contentLayoutRect) > 0 && NSMaxY(contentLayoutRect) > 0) {
@@ -1528,8 +1531,10 @@ public:
             CGDisplayShowCursor(kCGDirectMainDisplay);
         }
     }
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (flags & NSShiftKeyMask) {
+#pragma GCC diagnostic pop
         // Shift-drag to zoom.
         if (!self.zoomEnabled) {
             return;
@@ -1543,7 +1548,11 @@ public:
             CGFloat newZoomLevel = _zoomAtBeginningOfGesture - delta.y / 75;
             [self setZoomLevel:newZoomLevel atPoint:startPoint animated:NO];
         }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     } else if (flags & NSAlternateKeyMask) {
+#pragma GCC diagnostic pop
+
         // Option-drag to rotate and/or tilt.
         _mbglMap->cancelTransitions();
 
@@ -1586,10 +1595,13 @@ public:
 
 /// Returns whether the user is panning using a gesture.
 - (BOOL)isPanningWithGesture {
-    NSGestureRecognizerState state = _panGestureRecognizer.state;
-    NSEventModifierFlags flags = [NSApp currentEvent].modifierFlags;
-    return ((state == NSGestureRecognizerStateBegan || state == NSGestureRecognizerStateChanged)
-            && !(flags & NSShiftKeyMask || flags & NSAlternateKeyMask));
+  NSGestureRecognizerState state = _panGestureRecognizer.state;
+  NSEventModifierFlags flags = [NSApp currentEvent].modifierFlags;
+  return ((state == NSGestureRecognizerStateBegan || state == NSGestureRecognizerStateChanged)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+          && !(flags & NSShiftKeyMask || flags & NSAlternateKeyMask));
+#pragma GCC diagnostic pop
 }
 
 /// Pinch to zoom.

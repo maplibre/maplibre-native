@@ -34,11 +34,11 @@
     if (fontSize) {
         NSString *sizeRule = [NSString stringWithFormat:@"font-size: %.1fpx;", fontSize];
 #if !TARGET_OS_IPHONE
-        if (fontSize == [NSFont systemFontSizeForControlSize:NSMiniControlSize]) {
+        if (fontSize == [NSFont systemFontSizeForControlSize:NSControlSizeMini]) {
             sizeRule = @"font: -webkit-mini-control";
-        } else if (fontSize == [NSFont systemFontSizeForControlSize:NSSmallControlSize]) {
+        } else if (fontSize == [NSFont systemFontSizeForControlSize:NSControlSizeSmall]) {
             sizeRule = @"font: -webkit-small-control";
-        } else if (fontSize == [NSFont systemFontSizeForControlSize:NSRegularControlSize]) {
+        } else if (fontSize == [NSFont systemFontSizeForControlSize:NSControlSizeRegular]) {
             sizeRule = @"font: -webkit-control";
         }
 #endif

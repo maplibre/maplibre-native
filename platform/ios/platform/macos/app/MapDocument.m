@@ -192,7 +192,10 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     
     __weak __typeof__(self) weakSelf = self;
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         if (result != NSFileHandlingPanelOKButton) {
+#pragma GCC diagnostic pop
             return;
         }
         
@@ -270,7 +273,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
             panel.allowedFileTypes = [@[(NSString *)kUTTypePNG] arrayByAddingObjectsFromArray:[NSBitmapImageRep imageUnfilteredTypes]];
             
             [panel beginSheetModalForWindow:strongSelf.window completionHandler:^(NSInteger result) {
-                if (result == NSFileHandlingPanelOKButton) {
+              if (result == NSModalResponseOK) {
                     // Write the contents in the new format.
                     NSURL *fileURL = panel.URL;
                     
@@ -1312,7 +1315,10 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
     SEL action = toolbarItem.action;
     if (action == @selector(showShareMenu:)) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         [(NSButton *)toolbarItem.view sendActionOn:NSLeftMouseDownMask];
+#pragma GCC diagnostic pop
         if (![MGLSettings apiKey]) {
             return NO;
         }
