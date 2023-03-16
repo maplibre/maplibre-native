@@ -17,10 +17,11 @@ test('Map', function(t) {
         t.end();
     });
 
-    t.test('must be constructed with options object', function(t) {
-        t.throws(function() {
-            new mbgl.Map();
-        }, /Requires an options object as first argument/);
+    t.test('must be constructed with no options or with options object', function(t) {
+        t.doesNotThrow(function() {
+            var map = new mbgl.Map();
+            map.release();
+        });
 
         t.throws(function() {
             new mbgl.Map('options');
@@ -29,17 +30,18 @@ test('Map', function(t) {
         t.end();
     });
 
-    t.test('requires request property', function(t) {
+    t.test('requires request property to be a function', function(t) {
         var options = {};
 
-        t.throws(function() {
-            new mbgl.Map(options);
-        }, /Options object must have a 'request' method/);
+        t.doesNotThrow(function() {
+            var map = new mbgl.Map(options);
+            map.release();
+        });
 
         options.request = 'test';
         t.throws(function() {
             new mbgl.Map(options);
-        }, /Options object must have a 'request' method/);
+        }, /Options object 'request' property must be a function/);
 
         options.request = function() {};
         t.doesNotThrow(function() {
@@ -51,9 +53,7 @@ test('Map', function(t) {
     });
 
     t.test('optional cancel property must be a function', function(t) {
-        var options = {
-            request: function() {}
-        };
+        var options = {};
 
         options.cancel = 'test';
         t.throws(function() {
@@ -71,9 +71,7 @@ test('Map', function(t) {
 
 
     t.test('optional ratio property must be a number', function(t) {
-        var options = {
-            request: function() {}
-        };
+        var options = {};
 
         options.ratio = 'test';
         t.throws(function() {
