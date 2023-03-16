@@ -16,7 +16,7 @@ public:
   std::string resolvedLocale() const { return ""; }
 };
 
-Collator::Collator(bool, bool, const optional<std::string> &locale_)
+Collator::Collator(bool, bool, const std::optional<std::string> &locale_)
     : impl(std::make_shared<Impl>(locale_)) {}
 
 int Collator::compare(const std::string &lhs, const std::string &rhs) const {
