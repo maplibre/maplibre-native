@@ -21,7 +21,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
     : javaPeer(_env, obj),
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
-                                                         : optional<std::string>{}),
+                                                         : std::optional<std::string>{}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_) : scheduler(scheduler_) {

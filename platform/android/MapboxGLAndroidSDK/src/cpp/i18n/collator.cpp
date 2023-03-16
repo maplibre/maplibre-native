@@ -97,7 +97,7 @@ namespace platform {
 
 class Collator::Impl {
 public:
-    Impl(bool caseSensitive_, bool diacriticSensitive_, optional<std::string> locale_)
+    Impl(bool caseSensitive_, bool diacriticSensitive_, std::optional<std::string> locale_)
         : caseSensitive(caseSensitive_)
         , diacriticSensitive(diacriticSensitive_)
         , env(android::AttachEnv())
@@ -156,9 +156,9 @@ public:
         std::string language = jni::Make<std::string>(*env, android::Locale::getLanguage(*env, locale));
         std::string region = jni::Make<std::string>(*env, android::Locale::getCountry(*env, locale));
 
-        optional<std::string> resultLanguage;
+        std::optional<std::string> resultLanguage;
         if (!language.empty()) resultLanguage = language;
-        optional<std::string> resultRegion;
+        std::optional<std::string> resultRegion;
         if (!region.empty()) resultRegion = region;
 
         return LanguageTag(resultLanguage, {}, resultRegion).toBCP47();
@@ -173,7 +173,7 @@ private:
     jni::Global<jni::Object<android::Locale>> locale;
 };
 
-Collator::Collator(bool caseSensitive, bool diacriticSensitive, const optional<std::string>& locale_)
+Collator::Collator(bool caseSensitive, bool diacriticSensitive, const std::optional<std::string>& locale_)
     : impl(std::make_shared<Impl>(caseSensitive, diacriticSensitive, locale_)) {}
 
 bool Collator::operator==(const Collator& other) const {

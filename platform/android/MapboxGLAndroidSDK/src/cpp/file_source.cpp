@@ -21,7 +21,7 @@ namespace android {
 // FileSource //
 
 FileSource::FileSource(jni::JNIEnv& _env, const jni::String& apiKey, const jni::String& _cachePath, const jni::Object<TileServerOptions>& _options)
-:activationCounter( optional<int>(1)) {
+:activationCounter( std::optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
 

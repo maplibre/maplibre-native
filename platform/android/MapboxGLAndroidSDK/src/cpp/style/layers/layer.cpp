@@ -69,7 +69,7 @@ namespace android {
 
     void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::Object<>& jvalue) {
         // Convert and set property
-        optional<mbgl::style::conversion::Error> error =
+        std::optional<mbgl::style::conversion::Error> error =
             layer.setProperty(jni::Make<std::string>(env, jname), Value(env, jvalue));
         if (error) {
             mbgl::Log::Error(mbgl::Event::JNI, "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
@@ -82,7 +82,7 @@ namespace android {
         using namespace mbgl::style::conversion;
 
         Error error;
-        optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
+        std::optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
         if (!converted) {
             mbgl::Log::Error(mbgl::Event::JNI, "Error setting filter: " + error.message);
             return;

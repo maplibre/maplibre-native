@@ -78,7 +78,7 @@ public:
 
 private:
     const std::string DATABASE_FILE = "/mbgl-offline.db";
-    optional<int> activationCounter;
+    std::optional<int> activationCounter;
     mbgl::ResourceOptions resourceOptions;
     mbgl::ClientOptions clientOptions;
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;

@@ -48,7 +48,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
         mbgl::android::FileSource::getSharedResourceOptions(_env, _jFileSource),
         mbgl::android::FileSource::getSharedClientOptions(_env, _jFileSource),
         *this,
-        _localIdeographFontFamily ? jni::Make<std::string>(_env, _localIdeographFontFamily) : optional<std::string>{});
+        _localIdeographFontFamily ? jni::Make<std::string>(_env, _localIdeographFontFamily) : std::optional<std::string>{});
 
     if (position) {
         snapshotter->setCameraOptions(CameraPosition::getCameraOptions(_env, position, pixelRatio));

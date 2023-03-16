@@ -52,7 +52,7 @@ public:
                            const Feature& feature,
                            const std::string& extension,
                            const std::string& extensionField,
-                           const optional<std::map<std::string, mbgl::Value>>& args) const;
+                           const std::optional<std::map<std::string, mbgl::Value>>& args) const;
 
     // Memory
     void reduceMemoryUse();
