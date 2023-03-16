@@ -272,7 +272,7 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
 }
 
 void ImageManager::dumpDebugLogs() const {
-    std::ostringstream ss;  // TODO: replace with std::format
+    std::ostringstream ss;
     ss << "ImageManager::loaded: " << loaded;
     Log::Info(Event::General, ss.str());
 }

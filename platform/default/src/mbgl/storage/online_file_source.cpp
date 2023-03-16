@@ -70,7 +70,7 @@ struct OnlineFileRequest {
     // backoff when retrying requests.
     uint32_t failedRequests = 0;
     Response::Error::Reason failedRequestReason = Response::Error::Reason::Success;
-		std::optional<Timestamp> retryAfter;
+    std::optional<Timestamp> retryAfter;
 };
 
 class OnlineFileSourceThread {
@@ -267,7 +267,7 @@ private:
             }
         }
 
-            std::optional<OnlineFileRequest*> pop() {
+        std::optional<OnlineFileRequest*> pop() {
             if (queue.empty()) {
                 return {};
             }

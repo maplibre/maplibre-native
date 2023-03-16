@@ -100,7 +100,7 @@ public:
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
     SymbolInstanceReferences getSortedSymbols(float angle) const;
     // Returns references to the `symbolInstances` items, which belong to the `sortKeyRange` range;
-    // returns references to all the symbols if |sortKeyRange| is `{}`.
+    // returns references to all the symbols if |sortKeyRange| is `std::nullopt`.
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = {}) const;
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
