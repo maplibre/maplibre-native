@@ -18,7 +18,7 @@ TEST(Formatted, Empty) {
     Formatted emptyFormatted{""};
     EXPECT_TRUE(emptyFormatted.empty());
 
-    auto emptyText = FormattedSection{"", {}, {}, {}};
+    auto emptyText = FormattedSection{"", std::nullopt, std::nullopt, std::nullopt};
     auto emptyImage = FormattedSection{style::expression::Image()};
     Formatted multipleEmptySections{std::vector<FormattedSection>{emptyText, emptyText, emptyText}};
     EXPECT_TRUE(multipleEmptySections.empty());
