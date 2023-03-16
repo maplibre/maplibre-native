@@ -26,7 +26,7 @@ TEST(Formatted, Empty) {
     Formatted multipleEmptySectionsWithImage{std::vector<FormattedSection>{emptyText, emptyImage, emptyText}};
     EXPECT_TRUE(multipleEmptySectionsWithImage.empty());
 
-    auto text = FormattedSection{"Formatted", {}, {}, {}};
+    auto text = FormattedSection{"Formatted", std::nullopt, std::nullopt, std::nullopt};
     auto image = FormattedSection{style::expression::Image("Image")};
 
     Formatted multipleSections{std::vector<FormattedSection>{emptyText, text, emptyText}};
