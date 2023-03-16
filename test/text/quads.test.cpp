@@ -50,7 +50,7 @@ TEST(getIconQuads, style) {
     // shapedText.positionedGlyphs.emplace_back(PositionedGlyph(32, 0.0f, 0.0f, false, 0, 1.0));
     shapedText.positionedLines.emplace_back();
     shapedText.positionedLines.back().positionedGlyphs.emplace_back(
-        PositionedGlyph(32, 0.0f, 0.0f, false, 0, 1.0, /*texRect*/ {}, /*metrics*/ {}, /*imageID*/ {}));
+        PositionedGlyph(32, 0.0f, 0.0f, false, 0, 1.0, /*texRect*/ {}, /*metrics*/ {}, /*imageID*/ std::nullopt));
 
     // none
     {
