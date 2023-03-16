@@ -361,7 +361,7 @@ void testHasOverrides(LayoutType& layout) {
     // Nested expressions, overridden text-color.
     auto formattedExpr1 = format("first paragraph");
     FormatExpressionSection secondParagraph(literal("second paragraph"));
-    secondParagraph.setTextSectionOptions({}, {}, toColor(literal("blue")));
+    secondParagraph.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("blue")));
     std::vector<FormatExpressionSection> sections{{std::move(secondParagraph)}};
     auto formattedExpr2 = std::make_unique<FormatExpression>(std::move(sections));
     std::unordered_map<std::string, std::shared_ptr<Expression>> branches{ { "1st", std::move(formattedExpr1) },
