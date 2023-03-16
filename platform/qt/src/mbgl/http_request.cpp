@@ -3,7 +3,6 @@
 
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/chrono.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/http_header.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/version.hpp>
@@ -83,8 +82,8 @@ void HTTPRequest::handleNetworkReply(QNetworkReply *reply, const QByteArray& dat
     }
 
     QPair<QByteArray, QByteArray> line;
-    optional<std::string> retryAfter;
-    optional<std::string> xRateLimitReset;
+    std::optional<std::string> retryAfter;
+    std::optional<std::string> xRateLimitReset;
     foreach(line, reply->rawHeaderPairs()) {
         QString header = QString(line.first).toLower();
 

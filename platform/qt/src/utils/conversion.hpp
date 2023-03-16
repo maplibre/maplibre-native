@@ -6,10 +6,11 @@
 
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <QColor>
 #include <QVariant>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -54,7 +55,7 @@ public:
             || value.userType() == qMetaTypeId<std::list<QMapLibreGL::Feature>>();
     }
 
-    static optional<QVariant> objectMember(const QVariant& value, const char* key) {
+    static std::optional<QVariant> objectMember(const QVariant& value, const char* key) {
         auto map = value.toMap();
         auto iter = map.constFind(key);
 
@@ -66,12 +67,12 @@ public:
     }
 
     template <class Fn>
-    static optional<Error> eachMember(const QVariant& value, Fn&& fn) {
+    static std::optional<Error> eachMember(const QVariant& value, Fn&& fn) {
         auto map = value.toMap();
         auto iter = map.constBegin();
 
         while (iter != map.constEnd()) {
-            optional<Error> result = fn(iter.key().toStdString(), QVariant(iter.value()));
+            std::optional<Error> result = fn(iter.key().toStdString(), QVariant(iter.value()));
             if (result) {
                 return result;
             }
@@ -82,7 +83,7 @@ public:
         return {};
     }
 
-    static optional<bool> toBool(const QVariant& value) {
+    static std::optional<bool> toBool(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::Bool) {
 #else
@@ -94,7 +95,7 @@ public:
         }
     }
 
-    static optional<float> toNumber(const QVariant& value) {
+    static std::optional<float> toNumber(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::Double) {
 #else
@@ -106,7 +107,7 @@ public:
         }
     }
 
-    static optional<double> toDouble(const QVariant& value) {
+    static std::optional<double> toDouble(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::Double) {
 #else
@@ -118,7 +119,7 @@ public:
         }
     }
 
-    static optional<std::string> toString(const QVariant& value) {
+    static std::optional<std::string> toString(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::QString) {
             return value.toString().toStdString();
@@ -138,7 +139,7 @@ public:
 #endif
     }
 
-    static optional<Value> toValue(const QVariant& value) {
+    static std::optional<Value> toValue(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::Bool) {
             return { value.toBool() };
@@ -170,7 +171,7 @@ public:
 #endif
     }
 
-    static optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
+    static std::optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
         if (value.typeName() == QStringLiteral("QMapLibreGL::Feature")) {
             return GeoJSON { QMapLibreGL::GeoJSON::asFeature(value.value<QMapLibreGL::Feature>()) };
         } else if (value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()) {
@@ -205,7 +206,7 @@ private:
 };
 
 template <class T, class...Args>
-optional<T> convert(const QVariant& value, Error& error, Args&&...args) {
+std::optional<T> convert(const QVariant& value, Error& error, Args&&...args) {
     return convert<T>(Convertible(value), error, std::forward<Args>(args)...);
 }
 
