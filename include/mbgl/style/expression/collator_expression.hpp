@@ -29,7 +29,7 @@ public:
         // by all possibleOutputs of locale/caseSensitive/diacriticSensitive
         // But for the primary use of Collators in comparison operators, we ignore the Collator's
         // possibleOutputs anyway, so we can get away with leaving this undefined for now.
-        return { nullopt };
+        return { std::nullopt };
     }
 
     mbgl::Value serialize() const override;
