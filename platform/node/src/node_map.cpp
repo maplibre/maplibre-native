@@ -1193,7 +1193,7 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 
     const std::function<std::optional<Error>(const std::string&, const Convertible&)> convertFn =
         [&](const std::string& k, const Convertible& v) -> std::optional<Error> {
-					std::optional<Value> value = toValue(v);
+        std::optional<Value> value = toValue(v);
         if (value) {
             stateValue = std::move(*value);
             valueParsed = true;
@@ -1202,7 +1202,7 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
             std::size_t length = arrayLength(v);
             array.reserve(length);
             for (size_t i = 0; i < length; ++i) {
-								std::optional<Value> arrayVal = toValue(arrayMember(v, i));
+                std::optional<Value> arrayVal = toValue(arrayMember(v, i));
                 if (arrayVal) {
                     array.emplace_back(*arrayVal);
                 }

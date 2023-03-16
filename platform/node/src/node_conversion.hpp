@@ -137,6 +137,11 @@ public:
     }
 };
 
+template <class T, class...Args>
+std::optional<T> convert(const v8::Local<v8::Value>& value, Error& error, Args&&...args) {
+    return convert<T>(Convertible(value), error, std::forward<Args>(args)...);
+}
+
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
