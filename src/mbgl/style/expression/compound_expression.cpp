@@ -222,58 +222,58 @@ Value featureIdAsExpressionValue(const EvaluationContext& params) {
     });
 };
 
-optional<Value> featurePropertyAsExpressionValue(const EvaluationContext& params, const std::string& key) {
+std::optional<Value> featurePropertyAsExpressionValue(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
-    return property ? optional<Value>(toExpressionValue(*property)) : optional<Value>();
+    return property ? std::optional<Value>(toExpressionValue(*property)) : std::optional<Value>();
 };
 
-optional<std::string> featureTypeAsString(FeatureType type) {
+std::optional<std::string> featureTypeAsString(FeatureType type) {
     switch(type) {
     case FeatureType::Point:
-        return optional<std::string>("Point");
+        return std::optional<std::string>("Point");
     case FeatureType::LineString:
-        return optional<std::string>("LineString");
+        return std::optional<std::string>("LineString");
     case FeatureType::Polygon:
-        return optional<std::string>("Polygon");
+        return std::optional<std::string>("Polygon");
     case FeatureType::Unknown:
-        return optional<std::string>("Unknown");
+        return std::optional<std::string>("Unknown");
     default:
         return {};
     }
 };
 
-optional<double> featurePropertyAsDouble(const EvaluationContext& params, const std::string& key) {
+std::optional<double> featurePropertyAsDouble(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
     if (!property) return {};
     return property->match([](double value) { return value; },
-                           [](uint64_t value) -> optional<double> { return {static_cast<double>(value)}; },
-                           [](int64_t value) -> optional<double> { return {static_cast<double>(value)}; },
-                           [](const auto&) -> optional<double> { return {}; });
+                           [](uint64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
+                           [](int64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
+                           [](const auto&) -> std::optional<double> { return {}; });
 };
 
-optional<std::string> featurePropertyAsString(const EvaluationContext& params, const std::string& key) {
+std::optional<std::string> featurePropertyAsString(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
     if (!property) return {};
     return property->match([](std::string value) { return value; },
-                           [](const auto&) { return optional<std::string>(); });
+                           [](const auto&) { return std::optional<std::string>(); });
 };
 
-optional<double> featureIdAsDouble(const EvaluationContext& params) {
+std::optional<double> featureIdAsDouble(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
     return id.match([](double value) { return value; },
-                    [](uint64_t value) -> optional<double> { return {static_cast<double>(value)}; },
-                    [](int64_t value) -> optional<double> { return {static_cast<double>(value)}; },
-                    [](const auto&) -> optional<double> { return {}; });
+                    [](uint64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
+                    [](int64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
+                    [](const auto&) -> std::optional<double> { return {}; });
 };
 
-optional<std::string> featureIdAsString(const EvaluationContext& params) {
+std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
-    return id.match([](std::string value) { return value; }, [](const auto&) { return optional<std::string>(); });
+    return id.match([](std::string value) { return value; }, [](const auto&) { return std::optional<std::string>(); });
 };
 
 const auto& eCompoundExpression() {
@@ -862,7 +862,7 @@ const auto& filterHasIdCompoundExpression() {
 const auto& filterTypeInCompoundExpression() {
     static auto signature = detail::makeSignature("filter-type-in", [](const EvaluationContext& params, const Varargs<std::string>& types) -> Result<bool> {
         assert(params.feature);
-        optional<std::string> type = featureTypeAsString(params.feature->getType());
+        std::optional<std::string> type = featureTypeAsString(params.feature->getType());
         return std::find(types.begin(), types.end(), type) != types.end();
     });
     return signature;
@@ -1036,7 +1036,7 @@ static ParseResult createCompoundExpression(const Definitions& definitions,
 
             for (std::size_t i = 0; i < args.size(); i++) {
                 const std::unique_ptr<Expression>& arg = args[i];
-                optional<std::string> err = type::checkSubtype(params.at(i), arg->getType());
+                std::optional<std::string> err = type::checkSubtype(params.at(i), arg->getType());
                 if (err) {
                     signatureContext.error(*err, i + 1);
                 }
@@ -1045,7 +1045,7 @@ static ParseResult createCompoundExpression(const Definitions& definitions,
             const type::Type& paramType = signature->params.get<VarargsType>().type;
             for (std::size_t i = 0; i < args.size(); i++) {
                 const std::unique_ptr<Expression>& arg = args[i];
-                optional<std::string> err = type::checkSubtype(paramType, arg->getType());
+                std::optional<std::string> err = type::checkSubtype(paramType, arg->getType());
                 if (err) {
                     signatureContext.error(*err, i + 1);
                 }
@@ -1095,7 +1095,7 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
             args.reserve(length - 1);
 
             for (std::size_t i = 1; i < length; i++) {
-                optional<type::Type> expected = signature->params.match(
+                std::optional<type::Type> expected = signature->params.match(
                     [](const VarargsType& varargs) { return varargs.type; },
                     [&](const std::vector<type::Type>& params_) { return params_[i - 1]; }
                 );
@@ -1159,13 +1159,13 @@ EvaluationResult CompoundExpression::evaluate(const EvaluationContext& evaluatio
     return signature.apply(evaluationParams, args);
 }
 
-optional<std::size_t> CompoundExpression::getParameterCount() const {
-    return signature.params.match([&](const VarargsType&) -> optional<std::size_t> { return {}; },
-                                  [&](const std::vector<type::Type>& p) -> optional<std::size_t> { return p.size(); });
+std::optional<std::size_t> CompoundExpression::getParameterCount() const {
+    return signature.params.match([&](const VarargsType&) -> std::optional<std::size_t> { return {}; },
+                                  [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); });
 }
 
-std::vector<optional<Value>> CompoundExpression::possibleOutputs() const {
-    return { nullopt };
+std::vector<std::optional<Value>> CompoundExpression::possibleOutputs() const {
+    return { std::nullopt };
 }
 
 void CompoundExpression::eachChild(const std::function<void(const Expression&)>& visit) const {

@@ -61,7 +61,7 @@ void GeoJSONSource::setGeoJSONData(std::shared_ptr<GeoJSONData> geoJSONData) {
     observer->onSourceChanged(*this);
 }
 
-optional<std::string> GeoJSONSource::getURL() const {
+std::optional<std::string> GeoJSONSource::getURL() const {
     return url;
 }
 
@@ -94,7 +94,7 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                 auto& current = static_cast<const Impl&>(*currentImpl);
                 conversion::Error error;
                 std::shared_ptr<GeoJSONData> geoJSONData;
-                if (optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
+                if (std::optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
                     geoJSONData = createGeoJSONData(*geoJSON, current);
                 } else {
                     // Create an empty GeoJSON VT object to make sure we're not infinitely waiting for tiles to load.
