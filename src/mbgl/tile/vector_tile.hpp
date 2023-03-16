@@ -10,17 +10,18 @@ class TileParameters;
 
 class VectorTile : public GeometryTile {
 public:
-  VectorTile(const OverscaledTileID &, std::string sourceID,
-             const TileParameters &, const Tileset &);
+    VectorTile(const OverscaledTileID&,
+               std::string sourceID,
+               const TileParameters&,
+               const Tileset&);
 
-  void setNecessity(TileNecessity) final;
-  void setUpdateParameters(const TileUpdateParameters &) final;
-  void setMetadata(std::optional<Timestamp> modified,
-                   std::optional<Timestamp> expires);
-  void setData(const std::shared_ptr<const std::string> &data);
+    void setNecessity(TileNecessity) final;
+    void setUpdateParameters(const TileUpdateParameters&) final;
+    void setMetadata(optional<Timestamp> modified, optional<Timestamp> expires);
+    void setData(const std::shared_ptr<const std::string>& data);
 
 private:
-  TileLoader<VectorTile> loader;
+    TileLoader<VectorTile> loader;
 };
 
 } // namespace mbgl
