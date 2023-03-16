@@ -129,7 +129,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         } else if (!backend.contextIsShared()) {
             color = renderTreeParameters.backgroundColor;
         }
-        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1, 0 });
+        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
     }
 
     // Actually render the layers
