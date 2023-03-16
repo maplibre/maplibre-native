@@ -32,7 +32,7 @@ public:
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
             mbgl::Log::Error(mbgl::Event::OpenGL, "eglBindAPI(EGL_OPENGL_ES_API) returned error " +
-                             std::string(eglGetError()));
+                             std::to_string(eglGetError()));
             throw std::runtime_error("eglBindAPI() failed");
         }
 
