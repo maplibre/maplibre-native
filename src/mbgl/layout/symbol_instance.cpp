@@ -197,6 +197,6 @@ std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() cons
     if (placedRightTextIndex) return placedRightTextIndex;
     if (placedCenterTextIndex) return placedCenterTextIndex;
     if (placedLeftTextIndex) return placedLeftTextIndex;
-    return {};
+    return std::nullopt;
 }
 } // namespace mbgl

@@ -389,7 +389,7 @@ Query::get(int offset) {
 template <> std::optional<int64_t> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return {};
+        return std::nullopt;
     } else {
         return get<int64_t>(offset);
     }
@@ -398,7 +398,7 @@ template <> std::optional<int64_t> Query::get(int offset) {
 template <> std::optional<double> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return {};
+        return std::nullopt;
     } else {
         return get<double>(offset);
     }
@@ -407,7 +407,7 @@ template <> std::optional<double> Query::get(int offset) {
 template <> std::optional<std::string> Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return {};
+        return std::nullopt;
     } else {
         return get<std::string>(offset);
     }
@@ -418,7 +418,7 @@ std::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::se
 Query::get(int offset) {
     assert(stmt.impl);
     if (sqlite3_column_type(stmt.impl->stmt, offset) == SQLITE_NULL) {
-        return {};
+        return std::nullopt;
     } else {
         return get<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>>(
             offset);

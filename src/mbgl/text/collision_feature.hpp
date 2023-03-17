@@ -86,7 +86,7 @@ public:
                            shapedText.bottom,
                            shapedText.left,
                            shapedText.right,
-                           {},
+                           std::nullopt,
                            boxScale,
                            padding,
                            placement,

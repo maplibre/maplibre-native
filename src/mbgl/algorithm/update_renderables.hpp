@@ -21,7 +21,7 @@ void updateRenderables(GetTileFn getTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
                        const Range<uint8_t>& zoomRange,
-                       const std::optional<uint8_t>& maxParentOverscaleFactor = {}) {
+                       const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
     bool covered;
     int32_t overscaledZ;

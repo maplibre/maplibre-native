@@ -24,7 +24,7 @@ const gfx::Texture& TileRenderData::getIconAtlasTexture() const {
 
 std::optional<ImagePosition> TileRenderData::getPattern(const std::string&) const {
     assert(false);
-    return {};
+    return std::nullopt;
 }
 
 const LayerRenderData* TileRenderData::getLayerRenderData(const style::Layer::Impl&) const {

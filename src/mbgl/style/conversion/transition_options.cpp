@@ -8,7 +8,7 @@ namespace conversion {
 std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const Convertible& value, Error& error) const {
     if (!isObject(value)) {
         error.message = "transition must be an object";
-        return {};
+        return std::nullopt;
     }
 
     std::optional<TransitionOptions> result = TransitionOptions{};
@@ -18,7 +18,7 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
         auto number = toNumber(*duration);
         if (!number) {
             error.message = "duration must be a number";
-            return {};
+            return std::nullopt;
         }
         result->duration = { std::chrono::milliseconds(int64_t(*number)) };
     }
@@ -28,7 +28,7 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
         auto number = toNumber(*delay);
         if (!number) {
             error.message = "delay must be a number";
-            return {};
+            return std::nullopt;
         }
         result->delay = { std::chrono::milliseconds(int64_t(*number)) };
     }

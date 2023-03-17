@@ -66,7 +66,7 @@ public:
     std::optional<Timestamp> retryAfter;
 
 public:
-    Error(Reason, std::string = "", std::optional<Timestamp> = {});
+    Error(Reason, std::string = "", std::optional<Timestamp> = std::nullopt);
 };
 
 } // namespace mbgl

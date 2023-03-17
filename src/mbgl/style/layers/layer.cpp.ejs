@@ -312,11 +312,11 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
         }
 <% if (properties.length == 1) { %>
         set<%- camelize(properties[0].name) %>(*typedValue);
-        return {};
+        return std::nullopt;
 <% } else for (const property of properties) { %>
         if (property == Property::<%- camelize(property.name) %>) {
             set<%- camelize(property.name) %>(*typedValue);
-            return {};
+            return std::nullopt;
         }
 <% } -%>
     }
@@ -329,7 +329,7 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
 <% for (const property of paintProperties) { %>
     if (property == Property::<%- camelize(property.name) %>Transition) {
         set<%- camelize(property.name) %>Transition(*transition);
-        return {};
+        return std::nullopt;
     }
 <% } %>
     return Error{"layer doesn't support this property"};

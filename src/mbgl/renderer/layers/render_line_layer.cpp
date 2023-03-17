@@ -304,7 +304,7 @@ void RenderLineLayer::updateColorRamp() {
     }
 
     if (colorRampTexture) {
-        colorRampTexture = {};
+        colorRampTexture = std::nullopt;
     }
 }
 

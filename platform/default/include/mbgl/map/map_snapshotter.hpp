@@ -39,7 +39,7 @@ public:
                    const ResourceOptions&,
                    const ClientOptions&,
                    MapSnapshotterObserver&,
-                   std::optional<std::string> localFontFamily = {});
+                   std::optional<std::string> localFontFamily = std::nullopt);
 
     MapSnapshotter(Size size, float pixelRatio, const ResourceOptions&, const ClientOptions& = ClientOptions());
 

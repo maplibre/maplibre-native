@@ -533,32 +533,32 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 
         if (property == Property::AccuracyRadius) {
             setAccuracyRadius(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::BearingImageSize) {
             setBearingImageSize(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::ImageTiltDisplacement) {
             setImageTiltDisplacement(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::PerspectiveCompensation) {
             setPerspectiveCompensation(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::ShadowImageSize) {
             setShadowImageSize(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::TopImageSize) {
             setTopImageSize(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::AccuracyRadiusBorderColor || property == Property::AccuracyRadiusColor) {
@@ -570,12 +570,12 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 
         if (property == Property::AccuracyRadiusBorderColor) {
             setAccuracyRadiusBorderColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::AccuracyRadiusColor) {
             setAccuracyRadiusColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::Bearing) {
@@ -586,7 +586,7 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
         }
 
         setBearing(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::Location) {
         Error error;
@@ -596,7 +596,7 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
         }
 
         setLocation(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::BearingImage || property == Property::ShadowImage || property == Property::TopImage) {
         Error error;
@@ -607,17 +607,17 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 
         if (property == Property::BearingImage) {
             setBearingImage(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::ShadowImage) {
             setShadowImage(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::TopImage) {
             setTopImage(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -629,52 +629,52 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 
     if (property == Property::AccuracyRadiusTransition) {
         setAccuracyRadiusTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::AccuracyRadiusBorderColorTransition) {
         setAccuracyRadiusBorderColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::AccuracyRadiusColorTransition) {
         setAccuracyRadiusColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::BearingTransition) {
         setBearingTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::BearingImageSizeTransition) {
         setBearingImageSizeTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::ImageTiltDisplacementTransition) {
         setImageTiltDisplacementTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::LocationTransition) {
         setLocationTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::PerspectiveCompensationTransition) {
         setPerspectiveCompensationTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::ShadowImageSizeTransition) {
         setShadowImageSizeTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::TopImageSizeTransition) {
         setTopImageSizeTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

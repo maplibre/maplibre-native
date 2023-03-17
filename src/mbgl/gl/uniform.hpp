@@ -50,7 +50,7 @@ public:
     }
 
     UniformLocation location;
-    std::optional<Value> current = {};
+    std::optional<Value> current = std::nullopt;
 };
 
 UniformLocation uniformLocation(ProgramID, const char* name);

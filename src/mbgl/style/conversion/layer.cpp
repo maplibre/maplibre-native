@@ -24,7 +24,7 @@ bool setObjectMember(std::unique_ptr<Layer>& layer, const Convertible& value, co
 std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value) {
     auto paintValue = objectMember(value, "paint");
     if (!paintValue) {
-        return {};
+        return std::nullopt;
     }
     if (!isObject(*paintValue)) {
         return { { "paint must be an object" } };
@@ -35,61 +35,61 @@ std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value) 
 std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operator()(const Convertible& value, Error& error) const {
     if (!isObject(value)) {
         error.message = "layer must be an object";
-        return {};
+        return std::nullopt;
     }
 
     auto idValue = objectMember(value, "id");
     if (!idValue) {
         error.message = "layer must have an id";
-        return {};
+        return std::nullopt;
     }
 
     std::optional<std::string> id = toString(*idValue);
     if (!id) {
         error.message = "layer id must be a string";
-        return {};
+        return std::nullopt;
     }
 
     auto typeValue = objectMember(value, "type");
     if (!typeValue) {
         error.message = "layer must have a type";
-        return {};
+        return std::nullopt;
     }
 
     auto type = toString(*typeValue);
     if (!type) {
         error.message = "layer type must be a string";
-        return {};
+        return std::nullopt;
     }
 
     std::unique_ptr<Layer> layer = LayerManager::get()->createLayer(*type, *id, value, error);
-    if (!layer) return {};
+    if (!layer) return std::nullopt;
 
-    if (!setObjectMember(layer, value, "minzoom", error)) return {};
-    if (!setObjectMember(layer, value, "maxzoom", error)) return {};
-    if (!setObjectMember(layer, value, "filter", error)) return {};
+    if (!setObjectMember(layer, value, "minzoom", error)) return std::nullopt;
+    if (!setObjectMember(layer, value, "maxzoom", error)) return std::nullopt;
+    if (!setObjectMember(layer, value, "filter", error)) return std::nullopt;
     if (layer->getTypeInfo()->source == LayerTypeInfo::Source::Required) {
-        if (!setObjectMember(layer, value, "source-layer", error)) return {};
+        if (!setObjectMember(layer, value, "source-layer", error)) return std::nullopt;
     }
 
     auto layoutValue = objectMember(value, "layout");
     if (layoutValue) {
         if (!isObject(*layoutValue)) {
             error.message = "layout must be an object";
-            return {};
+            return std::nullopt;
         }
         auto error_ = eachMember(
             *layoutValue, [&](const std::string& k, const Convertible& v) { return layer->setProperty(k, v); });
         if (error_) {
             error = *error_;
-            return {};
+            return std::nullopt;
         }
     }
 
     auto error_ = setPaintProperties(*layer, value);
     if (error_) {
         error = *error_;
-        return {};
+        return std::nullopt;
     }
 
     return layer;

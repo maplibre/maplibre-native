@@ -30,19 +30,19 @@ std::optional<ImagePosition> PatternAtlas::getPattern(const std::string& id) con
     if (it != patterns.end()) {
         return it->second.position;
     }
-    return {};
+    return std::nullopt;
 }
 
 std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& image) {
     if (patterns.find(image.id) != patterns.end()) {
-        return {};
+        return std::nullopt;
     }
     const uint16_t width = image.image.size.width + padding * 2;
     const uint16_t height = image.image.size.height + padding * 2;
 
     mapbox::Bin* bin = shelfPack.packOne(-1, width, height);
     if (!bin) {
-        return {};
+        return std::nullopt;
     }
 
     atlasImage.resize(getPixelSize());

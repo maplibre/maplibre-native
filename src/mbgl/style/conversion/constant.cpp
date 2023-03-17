@@ -9,7 +9,7 @@ std::optional<bool> Converter<bool>::operator()(const Convertible& value, Error&
     std::optional<bool> converted = toBool(value);
     if (!converted) {
         error.message = "value must be a boolean";
-        return {};
+        return std::nullopt;
     }
     return *converted;
 }
@@ -18,7 +18,7 @@ std::optional<float> Converter<float>::operator()(const Convertible& value, Erro
     std::optional<float> converted = toNumber(value);
     if (!converted) {
         error.message = "value must be a number";
-        return {};
+        return std::nullopt;
     }
     return *converted;
 }
@@ -27,7 +27,7 @@ std::optional<std::string> Converter<std::string>::operator()(const Convertible&
     std::optional<std::string> converted = toString(value);
     if (!converted) {
         error.message = "value must be a string";
-        return {};
+        return std::nullopt;
     }
     return *converted;
 }
@@ -37,13 +37,13 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
     std::optional<std::string> string = toString(value);
     if (!string) {
         error.message = "value must be a string";
-        return {};
+        return std::nullopt;
     }
 
     const auto result = Enum<T>::toEnum(*string);
     if (!result) {
         error.message = "value must be a valid enumeration value";
-        return {};
+        return std::nullopt;
     }
 
     return *result;
@@ -53,7 +53,7 @@ template <class T>
 auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(const Convertible& value, Error& error) const -> std::optional<std::vector<T>> {
     if (!isArray(value)) {
         error.message = "value must be an array";
-        return {};
+        return std::nullopt;
     }
 
     std::vector<T> result;
@@ -62,7 +62,7 @@ auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::op
     for (std::size_t i = 0; i < arrayLength(value); ++i) {
         std::optional<T> enumItem = Converter<T>{}(arrayMember(value, i), error);
         if (!enumItem) {
-            return {};
+            return std::nullopt;
         }
         result.push_back(*enumItem);
     }
@@ -92,13 +92,13 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     std::optional<std::string> string = toString(value);
     if (!string) {
         error.message = "value must be a string";
-        return {};
+        return std::nullopt;
     }
 
     std::optional<Color> color = Color::parse(*string);
     if (!color) {
         error.message = "value must be a valid color";
-        return {};
+        return std::nullopt;
     }
 
     return *color;
@@ -108,7 +108,7 @@ template <size_t N>
 std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(const Convertible& value, Error& error) const {
     if (!isArray(value) || arrayLength(value) != N) {
         error.message = "value must be an array of " + util::toString(N) + " numbers";
-        return {};
+        return std::nullopt;
     }
 
     std::array<float, N> result;
@@ -116,7 +116,7 @@ std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(
         std::optional<float> n = toNumber(arrayMember(value, i));
         if (!n) {
             error.message = "value must be an array of " + util::toString(N) + " numbers";
-            return {};
+            return std::nullopt;
         }
         result[i] = *n;
     }
@@ -132,7 +132,7 @@ std::optional<std::array<double, N>> Converter<std::array<double, N>>::operator(
                                                                              Error& error) const {
     if (!isArray(value) || arrayLength(value) != N) {
         error.message = "value must be an array of " + util::toString(N) + " numbers";
-        return {};
+        return std::nullopt;
     }
 
     std::array<double, N> result;
@@ -140,7 +140,7 @@ std::optional<std::array<double, N>> Converter<std::array<double, N>>::operator(
         std::optional<double> n = toDouble(arrayMember(value, i));
         if (!n) {
             error.message = "value must be an array of " + util::toString(N) + " numbers";
-            return {};
+            return std::nullopt;
         }
         result[i] = *n;
     }
@@ -152,7 +152,7 @@ template std::optional<std::array<double, 3>> Converter<std::array<double, 3>>::
 std::optional<std::vector<float>> Converter<std::vector<float>>::operator()(const Convertible& value, Error& error) const {
     if (!isArray(value)) {
         error.message = "value must be an array";
-        return {};
+        return std::nullopt;
     }
 
     std::vector<float> result;
@@ -162,7 +162,7 @@ std::optional<std::vector<float>> Converter<std::vector<float>>::operator()(cons
         std::optional<float> number = toNumber(arrayMember(value, i));
         if (!number) {
             error.message = "value must be an array of numbers";
-            return {};
+            return std::nullopt;
         }
         result.push_back(*number);
     }
@@ -173,7 +173,7 @@ std::optional<std::vector<float>> Converter<std::vector<float>>::operator()(cons
 std::optional<std::vector<std::string>> Converter<std::vector<std::string>>::operator()(const Convertible& value, Error& error) const {
     if (!isArray(value)) {
         error.message = "value must be an array";
-        return {};
+        return std::nullopt;
     }
 
     std::vector<std::string> result;
@@ -183,7 +183,7 @@ std::optional<std::vector<std::string>> Converter<std::vector<std::string>>::ope
         std::optional<std::string> string = toString(arrayMember(value, i));
         if (!string) {
             error.message = "value must be an array of strings";
-            return {};
+            return std::nullopt;
         }
         result.push_back(*string);
     }

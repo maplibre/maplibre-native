@@ -10,7 +10,7 @@ std::optional<style::Rotation> Converter<style::Rotation>::operator()(const Conv
     std::optional<double> converted = toDouble(value);
     if (!converted) {
         error.message = "value must be a number";
-        return {};
+        return std::nullopt;
     }
     return {*converted};
 }

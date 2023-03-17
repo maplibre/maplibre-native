@@ -103,7 +103,7 @@ private:
                                     std::optional<size_t>& placedIndex,
                                     const SymbolQuads&,
                                     const CanonicalTileID& canonical,
-                                    std::optional<std::size_t> lastAddedSection = {});
+                                    std::optional<std::size_t> lastAddedSection = std::nullopt);
 
     void updatePaintPropertiesForSection(SymbolBucket&,
                                          const SymbolFeature&,

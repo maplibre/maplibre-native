@@ -76,7 +76,7 @@ class SuperclusterData final : public GeoJSONData {
 template <class T>
 T evaluateFeature(const mapbox::feature::feature<double>& f,
                   const std::shared_ptr<expression::Expression>& expression,
-                  std::optional<T> accumulated = {}) {
+                  std::optional<T> accumulated = std::nullopt) {
     const expression::EvaluationResult result = expression->evaluate(accumulated, f);
     if (result) {
         std::optional<T> typed = expression::fromExpressionValue<T>(*result);

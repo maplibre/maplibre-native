@@ -296,7 +296,7 @@ public:
                 height = image->size.height;
                 pixelRatio = img->get()->pixelRatio;
             } else {
-                sharedImage = {};
+                sharedImage = std::nullopt;
             }
         }
 
@@ -327,7 +327,7 @@ public:
                     MBGL_CHECK_ERROR(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16));
             }
             detach();
-            sharedImage = {};
+            sharedImage = std::nullopt;
         }
         void initialize() {
             if (texId != 0) return;

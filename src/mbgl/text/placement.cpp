@@ -54,7 +54,7 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
         }
         return collisionGroups[sourceID];
     } else {
-        static CollisionGroup nullGroup{0, {}};
+        static CollisionGroup nullGroup{0, std::nullopt};
         return nullGroup;
     }
 }
@@ -73,7 +73,7 @@ public:
                      const TransformState& state_,
                      float placementZoom,
                      CollisionGroups::CollisionGroup collisionGroup_,
-                     std::optional<CollisionBoundaries> avoidEdges_ = {})
+                     std::optional<CollisionBoundaries> avoidEdges_ = std::nullopt)
         : bucket(bucket_),
           renderTile(renderTile_),
           state(state_),
@@ -184,7 +184,7 @@ Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
       prevPlacement(std::move(prevPlacement_)),
       showCollisionBoxes(updateParameters->debugOptions & MapDebugOptions::Collision) {
     if (prevPlacement) {
-        prevPlacement->get()->prevPlacement = {}; // Only hold on to one placement back
+        prevPlacement->get()->prevPlacement = std::nullopt; // Only hold on to one placement back
     }
 }
 
@@ -1095,7 +1095,7 @@ std::optional<size_t> justificationToIndex(style::TextJustifyType justify, const
         case style::TextJustifyType::Auto: break;
     }
     assert(false);
-    return {};
+    return std::nullopt;
 }
 
 const style::TextJustifyType justifyTypes[] = {
@@ -1225,7 +1225,7 @@ const RetainedQueryData& Placement::getQueryData(uint32_t bucketInstanceId) cons
 class StaticPlacement : public Placement {
 public:
     explicit StaticPlacement(std::shared_ptr<const UpdateParameters> updateParameters_)
-        : Placement(std::move(updateParameters_), {}) {}
+        : Placement(std::move(updateParameters_), std::nullopt) {}
 
 protected:
     void commit() override;
@@ -1348,7 +1348,7 @@ std::optional<CollisionBoundaries> TilePlacement::getAvoidEdges(const SymbolBuck
         layout.get<style::SymbolPlacement>() == style::SymbolPlacementType::Line) {
         return tileBorders;
     }
-    return {};
+    return std::nullopt;
 }
 
 void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::set<uint32_t>& seen) {

@@ -530,32 +530,32 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
 
         if (property == Property::CircleBlur) {
             setCircleBlur(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleOpacity) {
             setCircleOpacity(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleRadius) {
             setCircleRadius(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleStrokeOpacity) {
             setCircleStrokeOpacity(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleStrokeWidth) {
             setCircleStrokeWidth(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleSortKey) {
             setCircleSortKey(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::CircleColor || property == Property::CircleStrokeColor) {
@@ -567,12 +567,12 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
 
         if (property == Property::CircleColor) {
             setCircleColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::CircleStrokeColor) {
             setCircleStrokeColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::CirclePitchAlignment) {
@@ -583,7 +583,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         }
 
         setCirclePitchAlignment(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::CirclePitchScale) {
         Error error;
@@ -593,7 +593,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         }
 
         setCirclePitchScale(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::CircleTranslate) {
         Error error;
@@ -603,7 +603,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         }
 
         setCircleTranslate(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::CircleTranslateAnchor) {
         Error error;
@@ -613,7 +613,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         }
 
         setCircleTranslateAnchor(*typedValue);
-        return {};
+        return std::nullopt;
     }
 
     Error error;
@@ -624,57 +624,57 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
 
     if (property == Property::CircleBlurTransition) {
         setCircleBlurTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleColorTransition) {
         setCircleColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleOpacityTransition) {
         setCircleOpacityTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CirclePitchAlignmentTransition) {
         setCirclePitchAlignmentTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CirclePitchScaleTransition) {
         setCirclePitchScaleTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleRadiusTransition) {
         setCircleRadiusTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleStrokeColorTransition) {
         setCircleStrokeColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleStrokeOpacityTransition) {
         setCircleStrokeOpacityTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleStrokeWidthTransition) {
         setCircleStrokeWidthTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleTranslateTransition) {
         setCircleTranslateTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::CircleTranslateAnchorTransition) {
         setCircleTranslateAnchorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

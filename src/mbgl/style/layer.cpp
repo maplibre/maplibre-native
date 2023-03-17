@@ -163,17 +163,17 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     if (name == "minzoom") {
         if (auto zoom = convert<float>(value, *error)) {
             setMinZoom(*zoom);
-            return {};
+            return std::nullopt;
         }
     } else if (name == "maxzoom") {
         if (auto zoom = convert<float>(value, *error)) {
             setMaxZoom(*zoom);
-            return {};
+            return std::nullopt;
         }
     } else if (name == "filter") {
         if (auto filter = convert<Filter>(value, *error)) {
             setFilter(*filter);
-            return {};
+            return std::nullopt;
         }
     } else if (name == "source-layer") {
         if (auto sourceLayer = convert<std::string>(value, *error)) {
@@ -181,10 +181,10 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
                 Log::Warning(mbgl::Event::General,
                              "'source-layer' property cannot be set to"
                              "the layer " + baseImpl->id);
-                return {};
+                return std::nullopt;
             }
             setSourceLayer(*sourceLayer);
-            return {};
+            return std::nullopt;
         }
     } else if (name == "source") {
         if (auto sourceID = convert<std::string>(value, *error)) {
@@ -192,10 +192,10 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
                 Log::Warning(mbgl::Event::General,
                              "'source' property cannot be set to"
                              "the layer " + baseImpl->id);
-                return {};
+                return std::nullopt;
             }
             setSourceID(*sourceID);
-            return {};
+            return std::nullopt;
         }
     }
     return error;
@@ -206,7 +206,7 @@ std::optional<conversion::Error> Layer::setVisibility(const conversion::Converti
 
     if (isUndefined(value)) {
         setVisibility(VisibilityType::Visible);
-        return {};
+        return std::nullopt;
     }
 
     Error error;
@@ -216,7 +216,7 @@ std::optional<conversion::Error> Layer::setVisibility(const conversion::Converti
     }
 
     setVisibility(*visibility);
-    return {};
+    return std::nullopt;
 }
 
 const LayerTypeInfo* Layer::getTypeInfo() const noexcept {

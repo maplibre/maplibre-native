@@ -8,7 +8,7 @@ namespace mbgl {
 template <class T>
 class PaintPropertyStatistics {
 public:
-    std::optional<T> max() const { return {}; }
+    std::optional<T> max() const { return std::nullopt; }
     void add(const T&) {}
 };
 

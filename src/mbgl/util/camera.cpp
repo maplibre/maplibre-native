@@ -203,7 +203,7 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
     const vec3 right = vec3Cross(upVector, forward);
 
     if (vec3Length(right) < epsilon) {
-        return {};
+        return std::nullopt;
     }
 
     const double bearing = std::atan2(-right[1], right[0]);
@@ -219,12 +219,12 @@ void FreeCameraOptions::setLocation(const LatLngAltitude& location) {
 
 std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
     if (!position) {
-        return {};
+        return std::nullopt;
     }
 
     const vec3 positionValue = position.value();
     if (positionValue[1] < 0.0 || positionValue[1] > 1.0) {
-        return {};
+        return std::nullopt;
     }
 
     const LatLng location = {util::latFromMercatorY(positionValue[1]), util::lngFromMercatorX(positionValue[0])};
@@ -237,7 +237,7 @@ std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
 }
 
 void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector) {
-    orientation = {};
+    orientation = std::nullopt;
     if (!position) {
         return;
     }

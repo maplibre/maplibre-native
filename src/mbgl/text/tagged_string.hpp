@@ -9,7 +9,7 @@
 namespace mbgl {
 
 struct SectionOptions {
-    SectionOptions(double scale_, FontStack fontStack_, std::optional<Color> textColor_ = {})
+    SectionOptions(double scale_, FontStack fontStack_, std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
           fontStackHash(FontStackHasher()(fontStack_)),
           fontStack(std::move(fontStack_)),
@@ -85,7 +85,7 @@ struct TaggedString {
     void addTextSection(const std::u16string& text,
                         double scale,
                         const FontStack& fontStack,
-                        std::optional<Color> textColor_ = {});
+                        std::optional<Color> textColor_ = std::nullopt);
 
     void addImageSection(const std::string& imageID);
 

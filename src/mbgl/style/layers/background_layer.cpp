@@ -227,7 +227,7 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
         }
 
         setBackgroundColor(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::BackgroundOpacity) {
         Error error;
@@ -237,7 +237,7 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
         }
 
         setBackgroundOpacity(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::BackgroundPattern) {
         Error error;
@@ -247,7 +247,7 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
         }
 
         setBackgroundPattern(*typedValue);
-        return {};
+        return std::nullopt;
     }
 
     Error error;
@@ -258,17 +258,17 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
 
     if (property == Property::BackgroundColorTransition) {
         setBackgroundColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::BackgroundOpacityTransition) {
         setBackgroundOpacityTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::BackgroundPatternTransition) {
         setBackgroundPatternTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

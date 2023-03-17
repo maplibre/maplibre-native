@@ -8,7 +8,7 @@ namespace conversion {
 std::optional<LatLng> Converter<LatLng>::operator() (const Convertible& value, Error& error) const {
     if (!isArray(value) || arrayLength(value) < 2 ) {
         error.message = "coordinate array must contain numeric longitude and latitude values";
-        return {};
+        return std::nullopt;
     }
     //Style spec uses GeoJSON convention for specifying coordinates
     std::optional<double> latitude = toDouble(arrayMember(value, 1));
@@ -16,11 +16,11 @@ std::optional<LatLng> Converter<LatLng>::operator() (const Convertible& value, E
 
     if (!latitude || !longitude) {
         error.message = "coordinate array must contain numeric longitude and latitude values";
-        return {};
+        return std::nullopt;
     }
     if (*latitude < -90 || *latitude > 90 ){
         error.message = "coordinate latitude must be between -90 and 90";
-        return {};
+        return std::nullopt;
     }
     return LatLng(*latitude, *longitude);
 }

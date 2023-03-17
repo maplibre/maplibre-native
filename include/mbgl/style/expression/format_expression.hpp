@@ -37,7 +37,7 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the combinatoric set of all children
         // Usually, this.text will be undefined anyway
-        return { {} };
+        return { std::nullopt };
     }
     
     const std::vector<FormatExpressionSection>& getSections() const { return sections; }

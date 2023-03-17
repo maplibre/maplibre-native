@@ -42,7 +42,7 @@ struct PlacedSymbolData {
 
 class Renderer {
 public:
-    Renderer(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily = {});
+    Renderer(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily = std::nullopt);
     ~Renderer();
 
     void markContextLost();
@@ -65,7 +65,7 @@ public:
                                                  const Feature& feature,
                                                  const std::string& extension,
                                                  const std::string& extensionField,
-                                                 const std::optional<std::map<std::string, Value>>& args = {}) const;
+                                                 const std::optional<std::map<std::string, Value>>& args = std::nullopt) const;
 
     void setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
                          const std::string& featureID, const FeatureState& state);

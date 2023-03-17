@@ -21,7 +21,7 @@ private:
 public:
     Filter() = default;
 
-    Filter(expression::ParseResult _expression, std::optional<mbgl::Value> _filter = {})
+    Filter(expression::ParseResult _expression, std::optional<mbgl::Value> _filter = std::nullopt)
     : expression(std::move(*_expression)),
      legacyFilter(std::move(_filter)){
         assert(!expression || *expression != nullptr);

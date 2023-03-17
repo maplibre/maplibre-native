@@ -1245,8 +1245,8 @@ TEST(Map, PrefetchDeltaOverride) {
         }
     };
 
-    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta({});
-    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta({});
+    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta(std::nullopt);
+    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta(std::nullopt);
     test.runLoop.run();
 
     // Each source requests 4 additional parent tiles.

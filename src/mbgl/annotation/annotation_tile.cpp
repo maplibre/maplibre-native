@@ -57,7 +57,7 @@ std::optional<Value> AnnotationTileFeature::getValue(const std::string& key) con
     if (it != data->properties.end()) {
         return std::optional<Value>(it->second);
     }
-    return {};
+    return std::nullopt;
 }
 
 FeatureIdentifier AnnotationTileFeature::getID() const {

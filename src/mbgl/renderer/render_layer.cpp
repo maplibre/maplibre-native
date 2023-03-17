@@ -53,7 +53,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {
-    return {};
+    return std::nullopt;
 }
 
 void RenderLayer::markContextDestroyed() {

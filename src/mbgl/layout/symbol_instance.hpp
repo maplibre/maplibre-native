@@ -100,8 +100,8 @@ public:
 
     CollisionFeature textCollisionFeature;
     CollisionFeature iconCollisionFeature;
-    std::optional<CollisionFeature> verticalTextCollisionFeature = {};
-    std::optional<CollisionFeature> verticalIconCollisionFeature = {};
+    std::optional<CollisionFeature> verticalTextCollisionFeature = std::nullopt;
+    std::optional<CollisionFeature> verticalIconCollisionFeature = std::nullopt;
     WritingModeType writingModes;
     std::size_t layoutFeatureIndex; // Index into the set of features included at layout time
     std::size_t dataFeatureIndex;   // Index into the underlying tile data feature set

@@ -18,7 +18,7 @@ public:
          bool sdf = false,
          ImageStretches stretchX = {},
          ImageStretches stretchY = {},
-         std::optional<ImageContent> content = {});
+         std::optional<ImageContent> content = std::nullopt);
 
     const std::string id;
 

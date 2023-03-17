@@ -98,7 +98,7 @@ public:
     void setPlacement(Immutable<Placement>);
     const Immutable<Placement>& getPlacement() const { return placement; }
     void setPlacementStale() { stale = true; }
-    bool placementIsRecent(TimePoint now, float zoom, std::optional<Duration> periodOverride = {}) const;
+    bool placementIsRecent(TimePoint now, float zoom, std::optional<Duration> periodOverride = std::nullopt) const;
     bool hasTransitions(TimePoint now) const;
 
 private:
@@ -115,7 +115,7 @@ public:
      * In Continuous map mode, `prevPlacement` must be provided.
      */
     static Mutable<Placement> create(std::shared_ptr<const UpdateParameters> updateParameters,
-                                     std::optional<Immutable<Placement>> prevPlacement = {});
+                                     std::optional<Immutable<Placement>> prevPlacement = std::nullopt);
 
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
@@ -153,7 +153,7 @@ protected:
                                  const std::vector<ProjectedCollisionBox>& /*iconBoxes*/) {}
     // Implentation specific hooks, which get called during a symbol bucket placement.
     virtual std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4& /*posMatrix*/) {
-        return {};
+        return std::nullopt;
     }
     SymbolInstanceReferences getSortedSymbols(const BucketPlacementData&, float pixelRatio);
     virtual bool canPlaceAtVariableAnchor(const CollisionBox&,

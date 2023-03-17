@@ -155,7 +155,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
 std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
-        return {};
+        return std::nullopt;
     }
 
     return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };

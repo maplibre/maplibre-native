@@ -108,7 +108,7 @@ struct FreeCameraOptions {
         - Z coordinate is conformal and must respect minimum and maximum zoom values.
         - Zoom is automatically computed from the altitude (z)
     */
-    std::optional<vec3> position = {};
+    std::optional<vec3> position = std::nullopt;
 
     /** Orientation of the camera represented as a unit quaternion [x, y, z, w].
         The default pose of the camera is such that the forward vector is looking up the -Z axis and
@@ -120,7 +120,7 @@ struct FreeCameraOptions {
         Orientation can be set freely but certain constraints still apply
          - Orientation must be representable with only pitch and bearing.
          - Pitch has an upper limit */
-    std::optional<vec4> orientation = {};
+    std::optional<vec4> orientation = std::nullopt;
 
     /** Helper function for setting the mercator position as Lat&Lng and altitude in meters */
     void setLocation(const LatLngAltitude& location);
@@ -132,7 +132,7 @@ struct FreeCameraOptions {
     /** Helper function for setting orientation of the camera by defining a focus point
         on the map. Up vector is required in certain scenarios where bearing can't be deduced
         from the viewing direction */
-    void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = {});
+    void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt);
 
     /** Helper function for setting the orientation of the camera as a pitch and a bearing.
         Both values are in degrees */

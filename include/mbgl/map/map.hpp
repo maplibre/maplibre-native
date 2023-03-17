@@ -63,7 +63,7 @@ public:
     bool isPanning() const;
 
     // Camera
-    CameraOptions getCameraOptions(const std::optional<EdgeInsets>& = {}) const;
+    CameraOptions getCameraOptions(const std::optional<EdgeInsets>& = std::nullopt) const;
     void jumpTo(const CameraOptions&);
     void easeTo(const CameraOptions&, const AnimationOptions&);
     void flyTo(const CameraOptions&, const AnimationOptions&);
@@ -73,16 +73,16 @@ public:
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
     CameraOptions cameraForLatLngBounds(const LatLngBounds&,
                                         const EdgeInsets&,
-                                        const std::optional<double>& bearing = {},
-                                        const std::optional<double>& pitch = {}) const;
+                                        const std::optional<double>& bearing = std::nullopt,
+                                        const std::optional<double>& pitch = std::nullopt) const;
     CameraOptions cameraForLatLngs(const std::vector<LatLng>&,
                                    const EdgeInsets&,
-                                   const std::optional<double>& bearing = {},
-                                   const std::optional<double>& pitch = {}) const;
+                                   const std::optional<double>& bearing = std::nullopt,
+                                   const std::optional<double>& pitch = std::nullopt) const;
     CameraOptions cameraForGeometry(const Geometry<double>&,
                                     const EdgeInsets&,
-                                    const std::optional<double>& bearing = {},
-                                    const std::optional<double>& pitch = {}) const;
+                                    const std::optional<double>& bearing = std::nullopt,
+                                    const std::optional<double>& pitch = std::nullopt) const;
     LatLngBounds latLngBoundsForCamera(const CameraOptions&) const;
     LatLngBounds latLngBoundsForCameraUnwrapped(const CameraOptions&) const;
 

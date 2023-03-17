@@ -24,7 +24,7 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
         ParseResult parseResult = parsingContext.parseExpression(value);
         if (!parseResult) {
             error.message = parsingContext.getCombinedErrors();
-            return {};
+            return std::nullopt;
         } else {
             return { Filter(std::move(parseResult)) };
         }
@@ -32,7 +32,7 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
         ParseResult expression = convertLegacyFilter(value, error);
         if (!expression) {
             assert(error.message.size() > 0);
-            return {};
+            return std::nullopt;
         }
         return Filter(std::optional<std::unique_ptr<Expression>>(std::move(*expression)), serializeLegacyFilter(value));
     }
@@ -130,7 +130,7 @@ std::optional<std::vector<std::unique_ptr<Expression>>> convertLiteralArray(cons
     for (std::size_t i = startIndex; i < arrayLength(input); ++i) {
         ParseResult literal = convertLiteral(arrayMember(input, i), error);
         if (!literal) {
-            return {};
+            return std::nullopt;
         }
         output.push_back(std::move(*literal));
     }
@@ -139,7 +139,7 @@ std::optional<std::vector<std::unique_ptr<Expression>>> convertLiteralArray(cons
 
 ParseResult convertLegacyComparisonFilter(const Convertible& values,
                                           Error& error,
-                                          const std::optional<std::string>& opOverride = {}) {
+                                          const std::optional<std::string>& opOverride = std::nullopt) {
     auto op = opOverride ? opOverride : toString(arrayMember(values, 0));
     auto property = toString(arrayMember(values, 1));
 
@@ -193,7 +193,7 @@ std::optional<std::vector<std::unique_ptr<Expression>>> convertLegacyFilterArray
     for (std::size_t i = startIndex; i < arrayLength(input); ++i) {
         auto child = convertLegacyFilter(arrayMember(input, i), error);
         if (!child) {
-            return {};
+            return std::nullopt;
         }
         output.push_back(std::move(*child));
     }
@@ -207,14 +207,14 @@ ParseResult convertLegacyFilter(const Convertible& values, Error& error) {
 
     if (!isArray(values) || arrayLength(values) == 0) {
        error.message = "filter value must be a non empty array";
-       return {};
+       return std::nullopt;
     }
 
     std::optional<std::string> op = toString(arrayMember(values, 0));
 
     if (!op) {
         error.message = "filter operator must be a string";
-        return {};
+        return std::nullopt;
     } else if (arrayLength(values) <= 1) {
         return {std::make_unique<Literal>(*op != "any")};
     } else if (*op == "within") {
@@ -242,7 +242,7 @@ ParseResult convertLegacyFilter(const Convertible& values, Error& error) {
 
 std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values) {
     if (isUndefined(values)) {
-        return {};
+        return std::nullopt;
     } else if (isArray(values)) {
         std::vector<mbgl::Value> result;
         result.reserve(arrayLength(values));

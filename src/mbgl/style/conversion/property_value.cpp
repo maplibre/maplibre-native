@@ -22,7 +22,7 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
         ParseResult parsed = ctx.parseLayerPropertyExpression(value);
         if (!parsed) {
             error.message = ctx.getCombinedErrors();
-            return {};
+            return std::nullopt;
         }
         expression = PropertyExpression<T>(std::move(*parsed));
     } else if (isObject(value)) {
@@ -30,16 +30,16 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
     } else {
         std::optional<T> constant = convert<T>(value, error);
         if (!constant) {
-            return {};
+            return std::nullopt;
         }
         return convertTokens ? maybeConvertTokens(*constant) : PropertyValue<T>(*constant);
     }
 
     if (!expression) {
-        return {};
+        return std::nullopt;
     } else if (!allowDataExpressions && !(*expression).isFeatureConstant()) {
         error.message = "data expressions not supported";
-        return {};
+        return std::nullopt;
     } else if (!(*expression).isFeatureConstant() || !(*expression).isZoomConstant() ||
                !(*expression).isRuntimeConstant()) {
         return { std::move(*expression) };
@@ -47,13 +47,13 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
         std::optional<T> constant = fromExpressionValue<T>(
             static_cast<const Literal&>((*expression).getExpression()).getValue());
         if (!constant) {
-            return {};
+            return std::nullopt;
         }
         return PropertyValue<T>(*constant);
     } else {
         assert(false);
         error.message = "expected a literal expression";
-        return {};
+        return std::nullopt;
     }
 }
 
@@ -97,7 +97,7 @@ mbgl::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::
     std::optional<std::array<double, 3>> a = convert<std::array<double, 3>>(value, error);
 
     if (!a) {
-        return {};
+        return std::nullopt;
     }
     std::array<double, 3> res;
     res[0] = (*a)[0];

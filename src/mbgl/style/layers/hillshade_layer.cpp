@@ -334,17 +334,17 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 
         if (property == Property::HillshadeAccentColor) {
             setHillshadeAccentColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeHighlightColor) {
             setHillshadeHighlightColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeShadowColor) {
             setHillshadeShadowColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::HillshadeExaggeration || property == Property::HillshadeIlluminationDirection) {
@@ -356,12 +356,12 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 
         if (property == Property::HillshadeExaggeration) {
             setHillshadeExaggeration(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeIlluminationDirection) {
             setHillshadeIlluminationDirection(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::HillshadeIlluminationAnchor) {
@@ -372,7 +372,7 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
         }
 
         setHillshadeIlluminationAnchor(*typedValue);
-        return {};
+        return std::nullopt;
     }
 
     Error error;
@@ -383,32 +383,32 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 
     if (property == Property::HillshadeAccentColorTransition) {
         setHillshadeAccentColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeExaggerationTransition) {
         setHillshadeExaggerationTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeHighlightColorTransition) {
         setHillshadeHighlightColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeIlluminationAnchorTransition) {
         setHillshadeIlluminationAnchorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeIlluminationDirectionTransition) {
         setHillshadeIlluminationDirectionTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeShadowColorTransition) {
         setHillshadeShadowColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

@@ -84,7 +84,7 @@ EvaluationResult Var::evaluate(const EvaluationContext& params) const {
 void Var::eachChild(const std::function<void(const Expression&)>&) const {}
 
 std::vector<std::optional<Value>> Var::possibleOutputs() const {
-    return { {} };
+    return { std::nullopt };
 }
 
 ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {

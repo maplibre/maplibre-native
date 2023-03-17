@@ -250,7 +250,7 @@ std::optional<double> featurePropertyAsDouble(const EvaluationContext& params, c
     return property->match([](double value) { return value; },
                            [](uint64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
                            [](int64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
-                           [](const auto&) -> std::optional<double> { return {}; });
+                           [](const auto&) -> std::optional<double> { return std::nullopt; });
 };
 
 std::optional<std::string> featurePropertyAsString(const EvaluationContext& params, const std::string& key) {
@@ -267,7 +267,7 @@ std::optional<double> featureIdAsDouble(const EvaluationContext& params) {
     return id.match([](double value) { return value; },
                     [](uint64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
                     [](int64_t value) -> std::optional<double> { return {static_cast<double>(value)}; },
-                    [](const auto&) -> std::optional<double> { return {}; });
+                    [](const auto&) -> std::optional<double> { return std::nullopt; });
 };
 
 std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
@@ -1160,7 +1160,7 @@ EvaluationResult CompoundExpression::evaluate(const EvaluationContext& evaluatio
 }
 
 std::optional<std::size_t> CompoundExpression::getParameterCount() const {
-    return signature.params.match([&](const VarargsType&) -> std::optional<std::size_t> { return {}; },
+    return signature.params.match([&](const VarargsType&) -> std::optional<std::size_t> { return std::nullopt; },
                                   [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); });
 }
 

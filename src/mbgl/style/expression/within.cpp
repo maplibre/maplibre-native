@@ -181,7 +181,7 @@ std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertib
     }
 
     ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
-    return {};
+    return std::nullopt;
 }
 
 std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
@@ -191,7 +191,7 @@ std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
         return polyFeature.geometry;
     }
     ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
-    return {};
+    return std::nullopt;
 }
 } // namespace
 

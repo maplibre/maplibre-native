@@ -94,7 +94,7 @@ public:
         Parse the given style-spec JSON value as an expression.
     */
     ParseResult parseExpression(const mbgl::style::conversion::Convertible& value,
-                                const std::optional<TypeAnnotationOption>& = {});
+                                const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
         Parse the given style-spec JSON value as an expression intended to be used
@@ -108,8 +108,8 @@ public:
     */
     ParseResult parse(const mbgl::style::conversion::Convertible&,
                       std::size_t,
-                      std::optional<type::Type> = {},
-                      const std::optional<TypeAnnotationOption>& = {});
+                      std::optional<type::Type> = std::nullopt,
+                      const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
         Parse a child expression.  For use by individual Expression::parse() methods.
@@ -168,7 +168,7 @@ private:
         type (either Literal, or the one named in value[0]) and dispatching to the
         appropriate ParseXxxx::parse(const V&, ParsingContext) method.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = {});
+    ParseResult parse(const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     std::string key;
     std::optional<type::Type> expected;

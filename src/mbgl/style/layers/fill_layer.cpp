@@ -387,7 +387,7 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
         }
 
         setFillAntialias(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::FillColor || property == Property::FillOutlineColor) {
         Error error;
@@ -398,12 +398,12 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 
         if (property == Property::FillColor) {
             setFillColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::FillOutlineColor) {
             setFillOutlineColor(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::FillOpacity || property == Property::FillSortKey) {
@@ -415,12 +415,12 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 
         if (property == Property::FillOpacity) {
             setFillOpacity(*typedValue);
-            return {};
+            return std::nullopt;
         }
 
         if (property == Property::FillSortKey) {
             setFillSortKey(*typedValue);
-            return {};
+            return std::nullopt;
         }
     }
     if (property == Property::FillPattern) {
@@ -431,7 +431,7 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
         }
 
         setFillPattern(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::FillTranslate) {
         Error error;
@@ -441,7 +441,7 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
         }
 
         setFillTranslate(*typedValue);
-        return {};
+        return std::nullopt;
     }
     if (property == Property::FillTranslateAnchor) {
         Error error;
@@ -451,7 +451,7 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
         }
 
         setFillTranslateAnchor(*typedValue);
-        return {};
+        return std::nullopt;
     }
 
     Error error;
@@ -462,37 +462,37 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 
     if (property == Property::FillAntialiasTransition) {
         setFillAntialiasTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillColorTransition) {
         setFillColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillOpacityTransition) {
         setFillOpacityTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillOutlineColorTransition) {
         setFillOutlineColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillPatternTransition) {
         setFillPatternTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillTranslateTransition) {
         setFillTranslateTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     if (property == Property::FillTranslateAnchorTransition) {
         setFillTranslateAnchorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

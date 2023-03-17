@@ -725,7 +725,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
         if (length != 2) {
             ctx.error("'distance' expression requires one argument, but found " +
                       util::toString(arrayLength(value) - 1) + " instead.");
-            return {};
+            return std::nullopt;
         }
 
         // Parse geometry info
@@ -740,7 +740,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
         }
     }
     ctx.error("'distance' expression needs to be an array with format [\"distance\", GeoJSONObj].");
-    return {};
+    return std::nullopt;
 }
 
 std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
@@ -750,7 +750,7 @@ std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::
     }
     ctx.error(
         "'distance' expression requires valid geojson object with valid geometry type: Point, LineString or Polygon.");
-    return {};
+    return std::nullopt;
 }
 } // namespace
 

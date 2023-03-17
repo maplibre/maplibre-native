@@ -35,7 +35,7 @@ public:
     util::RunLoop loop;
 };
 
-void prepare(Map& map, std::optional<std::string> json = {}) {
+void prepare(Map& map, std::optional<std::string> json = std::nullopt) {
     map.getStyle().loadJSON(json ? *json : util::read_file("benchmark/fixtures/api/style.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng { 40.726989, -73.992857 }).withZoom(15.0)); // Manhattan
 
@@ -43,7 +43,7 @@ void prepare(Map& map, std::optional<std::string> json = {}) {
     map.getStyle().addImage(std::make_unique<style::Image>("test-icon", std::move(image), 1.0f));
 }
 
-void prepare_map2(Map& map, std::optional<std::string> json = {}) {
+void prepare_map2(Map& map, std::optional<std::string> json = std::nullopt) {
     map.getStyle().loadJSON(json ? *json : util::read_file("benchmark/fixtures/api/style.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{41.379800, 2.176810}).withZoom(15.0)); // Barcelona
 

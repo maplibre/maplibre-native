@@ -14,7 +14,7 @@ public:
     float angle = 0.0f;
     std::optional<std::size_t> segment;
 
-    Anchor(float x_, float y_, float angle_, std::optional<std::size_t> segment_ = {})
+    Anchor(float x_, float y_, float angle_, std::optional<std::size_t> segment_ = std::nullopt)
         : point(x_, y_), angle(angle_), segment(std::move(segment_)) {}
 };
 

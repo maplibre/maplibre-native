@@ -17,7 +17,7 @@ void TaggedString::addTextSection(const std::u16string& sectionText,
     styledText.first += sectionText;
     sections.emplace_back(scale, fontStack, std::move(textColor));
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
-    supportsVerticalWritingMode = {};
+    supportsVerticalWritingMode = std::nullopt;
 }
 
 void TaggedString::addImageSection(const std::string& imageID) {
@@ -39,7 +39,7 @@ std::optional<char16_t> TaggedString::getNextImageSectionCharCode() {
     }
 
     if (++imageSectionID > PUAend) {
-        return {};
+        return std::nullopt;
     }
 
     return imageSectionID;

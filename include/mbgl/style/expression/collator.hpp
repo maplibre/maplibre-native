@@ -11,7 +11,7 @@ namespace expression {
 
 class Collator {
 public:
-    Collator(bool caseSensitive, bool diacriticSensitive, const std::optional<std::string>& locale = {});
+    Collator(bool caseSensitive, bool diacriticSensitive, const std::optional<std::string>& locale = std::nullopt);
 
     bool operator==(const Collator& other) const;
 

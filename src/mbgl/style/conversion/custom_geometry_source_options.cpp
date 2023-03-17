@@ -14,7 +14,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.zoomRange.min = static_cast<uint8_t>(*toNumber(*minzoomValue));
         } else {
             error.message = "GeoJSON source minzoom value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -24,7 +24,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.zoomRange.max = static_cast<uint8_t>(*toNumber(*maxzoomValue));
         } else {
             error.message = "GeoJSON source maxzoom value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -34,7 +34,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.tileOptions.buffer = static_cast<uint16_t>(*toNumber(*bufferValue));
         } else {
             error.message = "GeoJSON source buffer value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -44,7 +44,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.tileOptions.tolerance = static_cast<double>(*toNumber(*toleranceValue));
         } else {
             error.message = "GeoJSON source tolerance value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -54,7 +54,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.tileOptions.wrap = static_cast<bool>(*toBool(*wrapValue));
         } else {
             error.message = "CustomGeometrySource TileOptions wrap value must be a boolean";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -64,7 +64,7 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
             options.tileOptions.clip = static_cast<double>(*toBool(*clipValue));
         } else {
             error.message = "CustomGeometrySource TileOptiosn clip value must be a boolean";
-            return {};
+            return std::nullopt;
         }
     }
 

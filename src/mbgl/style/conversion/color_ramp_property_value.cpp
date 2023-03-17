@@ -19,21 +19,21 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
         ParseResult expression = ctx.parseLayerPropertyExpression(value);
         if (!expression) {
             error.message = ctx.getCombinedErrors();
-            return {};
+            return std::nullopt;
         }
         assert(*expression);
         if (!isFeatureConstant(**expression)) {
             error.message = "data expressions not supported";
-            return {};
+            return std::nullopt;
         }
         if (!isZoomConstant(**expression)) {
             error.message = "zoom expressions not supported";
-            return {};
+            return std::nullopt;
         }
         return ColorRampPropertyValue(std::move(*expression));
     } else {
         error.message = "color ramp must be an expression";
-        return {};
+        return std::nullopt;
     }
 }
 

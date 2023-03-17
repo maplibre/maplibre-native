@@ -167,7 +167,7 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
                 return anchor;
             }
 
-            return {};
+            return std::nullopt;
         }
         
         prevDistance += segmentDistance;

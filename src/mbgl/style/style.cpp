@@ -62,7 +62,7 @@ const Light* Style::getLight() const {
 
 std::optional<Image> Style::getImage(const std::string& name) const {
     auto image = impl->getImage(name);
-    if (!image) return {};
+    if (!image) return std::nullopt;
     return style::Image(std::move(*image));
 }
 

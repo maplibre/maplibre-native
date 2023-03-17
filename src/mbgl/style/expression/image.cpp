@@ -44,13 +44,13 @@ std::optional<Image> Converter<Image>::operator()(const Convertible& value, Erro
         std::size_t imageParametersLength = arrayLength(imageParameters);
         if (imageParametersLength < 1) {
             error.message = "Image has to contain an ID.";
-            return {};
+            return std::nullopt;
         }
 
         std::optional<std::string> imageID = toString(arrayMember(imageParameters, 0));
         if (!imageID) {
             error.message = "Image has to contain an ID.";
-            return {};
+            return std::nullopt;
         }
 
         return Image(*imageID, false);
@@ -58,7 +58,7 @@ std::optional<Image> Converter<Image>::operator()(const Convertible& value, Erro
         return Image(*result, false);
     } else {
         error.message = "Image must be plain string or array type.";
-        return {};
+        return std::nullopt;
     }
 }
 

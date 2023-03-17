@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
     std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
     std::cout << " Style: " << style << std::endl;
     
-    std::optional<std::string> mergePath = {};
+    std::optional<std::string> mergePath = std::nullopt;
     if (mergePathValue) mergePath = args::get(mergePathValue);
-    std::optional<std::string> inputDb = {};
+    std::optional<std::string> inputDb = std::nullopt;
     if (inputValue) inputDb = args::get(inputValue);
 
     const double minZoom = minZoomValue ? args::get(minZoomValue) : 0.0;

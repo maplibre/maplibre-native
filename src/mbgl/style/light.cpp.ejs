@@ -89,11 +89,11 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         }
         <% if (properties.length == 1) { %>
         set<%- camelize(properties[0].name) %>(*typedValue);
-        return {};
+        return std::nullopt;
         <% } else for (const property of properties) { %>
         if (property == Property::<%- camelize(property.name) %>) {
             set<%- camelize(property.name) %>(*typedValue);
-            return {};
+            return std::nullopt;
         }
         <% } %>
     }
@@ -107,7 +107,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     <% for (const property of properties) { %>
     if (property == Property::<%- camelize(property.name) %>Transition) {
         set<%- camelize(property.name) %>Transition(*transition);
-        return {};
+        return std::nullopt;
     }
     <% } %>
 

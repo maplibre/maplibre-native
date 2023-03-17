@@ -90,26 +90,26 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
             std::size_t sectionLength = arrayLength(section);
             if (sectionLength < 1) {
                 error.message = "Section has to contain a text and std::optional parameters or an image.";
-                return {};
+                return std::nullopt;
             }
 
             const Convertible& firstElement = arrayMember(section, 0);
             if (isArray(firstElement)) {
                 if (arrayLength(firstElement) < 2) {
                     error.message = "Image section has to contain image name.";
-                    return {};
+                    return std::nullopt;
                 }
 
                 std::optional<std::string> imageOp = toString(arrayMember(firstElement, 0));
                 if (!imageOp || *imageOp != "image") {
                     error.message = "Serialized image section has to contain 'image' operator.";
-                    return {};
+                    return std::nullopt;
                 }
 
                 std::optional<std::string> imageArg = toString(arrayMember(firstElement, 1));
                 if (!imageArg) {
                     error.message = "Serialized image section agument has to be of a String type.";
-                    return {};
+                    return std::nullopt;
                 }
 
                 sections.emplace_back(Image(*imageArg));
@@ -119,7 +119,7 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
             std::optional<std::string> sectionText = toString(firstElement);
             if (!sectionText) {
                 error.message = "Section has to contain a text.";
-                return {};
+                return std::nullopt;
             }
 
             std::optional<double> fontScale;
@@ -129,7 +129,7 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
                 const Convertible& sectionParams = arrayMember(section, 1);
                 if (!isObject(sectionParams)) {
                     error.message = "Parameters have to be enclosed in an object.";
-                    return {};
+                    return std::nullopt;
                 }
 
                 std::optional<Convertible> fontScaleMember = objectMember(sectionParams, kFormattedSectionFontScale);
@@ -147,13 +147,13 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
                                 fontsVector.push_back(*font);
                             } else {
                                 error.message = "Font has to be a string.";
-                                return {};
+                                return std::nullopt;
                             }
                         }
                         textFont = fontsVector;
                     } else {
                         error.message = "Font stack has to be an array.";
-                        return {};
+                        return std::nullopt;
                     }
                 }
 
@@ -161,7 +161,7 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
                 if (textColorMember) {
                     textColor = convert<Color>(*textColorMember, error);
                     if (!textColor) {
-                        return {};
+                        return std::nullopt;
                     }
                 }
             }
@@ -173,7 +173,7 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
         return Formatted(result->c_str());
     } else {
         error.message = "Formatted must be plain string or array type.";
-        return {};
+        return std::nullopt;
     }
 }
 

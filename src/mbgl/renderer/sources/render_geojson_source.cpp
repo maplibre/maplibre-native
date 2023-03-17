@@ -16,7 +16,7 @@ template<typename T, typename C>
 std::optional<T> getProperty(const C& cont, const typename C::key_type& name) {
     const auto it = cont.find(name);
     if (it == cont.end() || !(it->second.template is<T>())) {
-        return {};
+        return std::nullopt;
     }
     return it->second.template get<T>();
 }

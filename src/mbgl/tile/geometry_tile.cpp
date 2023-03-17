@@ -70,7 +70,7 @@ std::optional<ImagePosition> GeometryTileRenderData::getPattern(const std::strin
             return it->second;
         }
     }
-    return {};
+    return std::nullopt;
 }
 
 void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {

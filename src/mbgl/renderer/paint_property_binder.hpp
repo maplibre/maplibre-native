@@ -507,7 +507,7 @@ public:
                 };
             }
 
-            return std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>>{{}, {}};
+            return std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>>{std::nullopt, std::nullopt};
         }
     }
 

@@ -169,8 +169,8 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
 }
 
 void GeometryTileWorker::reset(uint64_t correlationID_) {
-    layers = {};
-    data = {};
+    layers = std::nullopt;
+    data = std::nullopt;
     correlationID = correlationID_;
 
     switch (state) {

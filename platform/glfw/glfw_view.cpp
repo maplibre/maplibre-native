@@ -876,7 +876,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
                 if (view->featureID && (*view->featureID != *idStr)) {
                     newState["hover"] = false;
                     view->rendererFrontend->getRenderer()->setFeatureState("states", {}, *view->featureID, newState);
-                    view->featureID = {};
+                    view->featureID = std::nullopt;
                 }
 
                 if (!view->featureID) {
@@ -889,7 +889,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
             if (view->featureID) {
                 newState["hover"] = false;
                 view->rendererFrontend->getRenderer()->setFeatureState("states", {}, *view->featureID, newState);
-                view->featureID = {};
+                view->featureID = std::nullopt;
             }
         }
         view->invalidate();

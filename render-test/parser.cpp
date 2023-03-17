@@ -1082,7 +1082,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     values[k] = std::move(array);
                     stateValue = std::move(values);
                     valueParsed = true;
-                    return {};
+                    return std::nullopt;
 
                 } else if (isObject(v)) {
                     eachMember(v, convertFn);
@@ -1090,11 +1090,11 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
                 if (!valueParsed) {
                     metadata.errorMessage = std::string("Could not get feature state value, state key: ") + k;
-                    return {};
+                    return std::nullopt;
                 }
                 stateKey = k;
                 parsedState[stateKey] = stateValue;
-                return {};
+                return std::nullopt;
             };
 
             eachMember(state, convertFn);

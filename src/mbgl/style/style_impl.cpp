@@ -303,7 +303,7 @@ void Style::Impl::removeImage(const std::string& id) {
 
 std::optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
     auto found = std::find_if(images->begin(), images->end(), [&id](const auto& image) { return image->id == id; });
-    if (found == images->end()) return {};
+    if (found == images->end()) return std::nullopt;
     return *found;
 }
 

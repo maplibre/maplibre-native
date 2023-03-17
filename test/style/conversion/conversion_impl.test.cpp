@@ -43,36 +43,36 @@ public:
     }
 
     static std::optional<MockConvertible> objectMember(const MockConvertible&, const char *) {
-        return {};
+        return std::nullopt;
     }
 
     template <class Fn>
     static std::optional<Error> eachMember(const MockConvertible&, Fn&&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<bool> toBool(const MockConvertible&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<float> toNumber(const MockConvertible&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<double> toDouble(const MockConvertible&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<std::string> toString(const MockConvertible&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<mbgl::Value> toValue(const MockConvertible&) {
-        return {};
+        return std::nullopt;
     }
 
     static std::optional<GeoJSON> toGeoJSON(const MockConvertible&, Error&) {
-        return {};
+        return std::nullopt;
     }
 };
 

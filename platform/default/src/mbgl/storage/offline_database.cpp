@@ -242,14 +242,14 @@ mapbox::sqlite::Statement& OfflineDatabase::getStatement(const char* sql) {
 
 std::optional<Response> OfflineDatabase::get(const Resource& resource) try {
     if (disabled()) {
-        return {};
+        return std::nullopt;
     }
 
     auto result = getInternal(resource);
     return result ? std::optional<Response>{ result->first } : std::nullopt;
 } catch (...) {
     handleError("read resource");
-    return {};
+    return std::nullopt;
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resource& resource) {
@@ -365,7 +365,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     query.bind(1, resource.url);
 
     if (!query.run()) {
-        return {};
+        return std::nullopt;
     }
 
     Response response;
@@ -538,7 +538,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     query.bind(5, tile.z);
 
     if (!query.run()) {
-        return {};
+        return std::nullopt;
     }
 
     Response response;
@@ -582,7 +582,7 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
     size.bind(5, tile.z);
 
     if (!size.run()) {
-        return {};
+        return std::nullopt;
     }
 
     return size.get<std::optional<int64_t>>(0);
@@ -967,14 +967,14 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getRegionResource(
     return getInternal(resource);
 } catch (...) {
     handleError("read region resource");
-    return {};
+    return std::nullopt;
 }
 
 std::optional<int64_t> OfflineDatabase::hasRegionResource(const Resource& resource) try {
     return hasInternal(resource);
 } catch (...) {
     handleError("query region resource");
-    return {};
+    return std::nullopt;
 }
 
 uint64_t OfflineDatabase::putRegionResource(int64_t regionID,

@@ -29,7 +29,7 @@ public:
                  WritingModeType writingModes_,
                  GeometryCoordinates line_,
                  std::vector<float> tileDistances_,
-                 std::optional<size_t> placedIconIndex_ = {})
+                 std::optional<size_t> placedIconIndex_ = std::nullopt)
         : anchorPoint(anchorPoint_),
           segment(segment_),
           lowerSize(lowerSize_),
@@ -101,7 +101,7 @@ public:
     SymbolInstanceReferences getSortedSymbols(float angle) const;
     // Returns references to the `symbolInstances` items, which belong to the `sortKeyRange` range;
     // returns references to all the symbols if |sortKeyRange| is `std::nullopt`.
-    SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = {}) const;
+    SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;

@@ -18,7 +18,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.minzoom = static_cast<uint8_t>(*toNumber(*minzoomValue));
         } else {
             error.message = "GeoJSON source minzoom value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -28,7 +28,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.maxzoom = static_cast<uint8_t>(*toNumber(*maxzoomValue));
         } else {
             error.message = "GeoJSON source maxzoom value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -38,7 +38,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.buffer = static_cast<uint16_t>(*toNumber(*bufferValue));
         } else {
             error.message = "GeoJSON source buffer value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -48,7 +48,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.tolerance = static_cast<double>(*toNumber(*toleranceValue));
         } else {
             error.message = "GeoJSON source tolerance value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -58,7 +58,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.cluster = *toBool(*clusterValue);
         } else {
             error.message = "GeoJSON source cluster value must be a boolean";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -68,7 +68,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.clusterMaxZoom = static_cast<uint8_t>(*toNumber(*clusterMaxZoomValue));
         } else {
             error.message = "GeoJSON source clusterMaxZoom value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -78,7 +78,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.clusterRadius = static_cast<uint16_t>(*toNumber(*clusterRadiusValue));
         } else {
             error.message = "GeoJSON source clusterRadius value must be a number";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -88,7 +88,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
             options.lineMetrics = *toBool(*lineMetricsValue);
         } else {
             error.message = "GeoJSON source lineMetrics value must be a boolean";
-            return {};
+            return std::nullopt;
         }
     }
 
@@ -96,7 +96,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
     if (clusterProperties) {
         if (!isObject(*clusterProperties)) {
             error.message = "GeoJSON source clusterProperties value must be an object";
-            return {};
+            return std::nullopt;
         }
         GeoJSONOptions::ClusterProperties result;
         assert(error.message.empty());
@@ -109,13 +109,13 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
                 if (!isArray(v) || arrayLength(v) != 2) {
                     error.message =
                         "GeoJSON source clusterProperties member must be an array with length of 2";
-                    return {};
+                    return std::nullopt;
                 }
                 auto map = expression::dsl::createExpression(arrayMember(v, 1));
                 if (!map) {
                     error.message =
                         "Failed to convert GeoJSON source clusterProperties map expression";
-                    return {};
+                    return std::nullopt;
                 }
                 std::unique_ptr<expression::Expression> reduce;
                 if (isArray(arrayMember(v, 0))) {
@@ -125,7 +125,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
                     if (!reduceOp) {
                         error.message =
                             "GeoJSON source clusterProperties member must contain a valid operator";
-                        return {};
+                        return std::nullopt;
                     }
                     std::stringstream ss;
                     // Reformulate reduce expression to [operator, ['accumulated'], ['get', key]]
@@ -140,13 +140,13 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
                 if (!reduce) {
                     error.message =
                         "Failed to convert GeoJSON source clusterProperties reduce expression";
-                    return {};
+                    return std::nullopt;
                 }
                 result.emplace(k, std::make_pair(std::move(map), std::move(reduce)));
-                return {};
+                return std::nullopt;
             });
         if (!error.message.empty()) {
-            return {};
+            return std::nullopt;
         }
         options.clusterProperties = std::move(result);
     }

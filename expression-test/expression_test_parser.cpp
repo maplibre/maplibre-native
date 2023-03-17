@@ -105,7 +105,7 @@ std::optional<Value> toValue(const JSValue& jsvalue) {
         return toValue(Convertible(&jsvalue));
     }
 
-    return {};
+    return std::nullopt;
 }
 
 style::expression::type::Type stringToType(const std::string& type) {
@@ -409,7 +409,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
     auto maybeJson = readJson(path.string());
     if (!maybeJson.is<JSDocument>()) { // NOLINT
         mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
-        return {};
+        return std::nullopt;
     }
 
     data.document = std::move(maybeJson.get<JSDocument>());
@@ -417,7 +417,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
     // Check that mandatory test data members are present.
     if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
         Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
-        return {};
+        return std::nullopt;
     }
 
     // Parse propertySpec
@@ -432,7 +432,7 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
     // Parse inputs
     if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
         Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
-        return {};
+        return std::nullopt;
     }
 
     return {std::move(data)};

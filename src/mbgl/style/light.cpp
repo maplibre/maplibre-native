@@ -82,7 +82,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         }
         
         setAnchor(*typedValue);
-        return {};
+        return std::nullopt;
         
     }
     
@@ -94,7 +94,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         }
         
         setColor(*typedValue);
-        return {};
+        return std::nullopt;
         
     }
     
@@ -106,7 +106,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         }
         
         setIntensity(*typedValue);
-        return {};
+        return std::nullopt;
         
     }
     
@@ -118,7 +118,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
         }
         
         setPosition(*typedValue);
-        return {};
+        return std::nullopt;
         
     }
     
@@ -131,22 +131,22 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     
     if (property == Property::AnchorTransition) {
         setAnchorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
     
     if (property == Property::ColorTransition) {
         setColorTransition(*transition);
-        return {};
+        return std::nullopt;
     }
     
     if (property == Property::IntensityTransition) {
         setIntensityTransition(*transition);
-        return {};
+        return std::nullopt;
     }
     
     if (property == Property::PositionTransition) {
         setPositionTransition(*transition);
-        return {};
+        return std::nullopt;
     }
     
 

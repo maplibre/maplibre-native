@@ -140,7 +140,7 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
         }
     }
 
-    return {};
+    return std::nullopt;
 }
 
 } // namespace

@@ -55,7 +55,7 @@ public:
 
     Resource(Kind kind_,
              std::string url_,
-             std::optional<TileData> tileData_ = {},
+             std::optional<TileData> tileData_ = std::nullopt,
              LoadingMethod loadingMethod_ = LoadingMethod::All)
         : kind(kind_),
           loadingMethod(loadingMethod_),
@@ -93,9 +93,9 @@ public:
     // Includes auxiliary data if this is a tile request.
     std::optional<TileData> tileData;
 
-    std::optional<Timestamp> priorModified = {};
-    std::optional<Timestamp> priorExpires = {};
-    std::optional<std::string> priorEtag = {};
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
     std::shared_ptr<const std::string> priorData;
     Duration minimumUpdateInterval{Duration::zero()};
     StoragePolicy storagePolicy{StoragePolicy::Permanent};

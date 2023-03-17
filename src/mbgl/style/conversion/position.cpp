@@ -12,7 +12,7 @@ std::optional<Position> Converter<Position>::operator()(const Convertible& value
     std::optional<std::array<float, 3>> spherical = convert<std::array<float, 3>>(value, error);
 
     if (!spherical) {
-        return {};
+        return std::nullopt;
     }
 
     return Position(*spherical);

@@ -156,7 +156,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // The min and max zoom for TileRange are based on the updateRenderables algorithm.
     // Tiles are created at the ideal tile zoom or at lower zoom levels. Child
     // tiles are used from the cache, but not created.
-    std::optional<util::TileRange> tileRange = {};
+    std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
         tileRange = util::TileRange::fromLatLngBounds(
             *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));

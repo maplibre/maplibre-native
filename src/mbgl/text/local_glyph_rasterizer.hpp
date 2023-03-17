@@ -33,7 +33,7 @@ namespace mbgl {
 class LocalGlyphRasterizer {
 public:
     virtual ~LocalGlyphRasterizer();
-    LocalGlyphRasterizer(const std::optional<std::string>& fontFamily = {});
+    LocalGlyphRasterizer(const std::optional<std::string>& fontFamily = std::nullopt);
 
     // virtual so that test harness can override platform-specific behavior
     virtual bool canRasterizeGlyph(const FontStack&, GlyphID);
