@@ -36,10 +36,8 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
         ss << "Can't create image with invalid metrics: "
             << width << "x" << height << "@" << srcX << "," << srcY
             << " in " << image.size.width << "x" << image.size.height
-            << "@" << util::toString(ratio)
+            << "@" << util::toString(ratio) << "x"
             << " sprite";
-        Log::Error(Event::Sprite, ss.str());
-
         Log::Error(Event::Sprite, ss.str());
         return nullptr;
     }
