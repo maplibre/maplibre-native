@@ -2128,6 +2128,7 @@
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = "-fvisibility=hidden";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.MapboxGL;
 				PRODUCT_NAME = "Mapbox GL";
@@ -2150,6 +2151,7 @@
 				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				INFOPLIST_FILE = app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = "-fvisibility=hidden";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.MapboxGL;
 				PRODUCT_NAME = "Mapbox GL";
@@ -2196,7 +2198,11 @@
 				INFOPLIST_FILE = sdk/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				OTHER_CFLAGS = "-fvisibility=hidden";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_CFLAGS = (
+					"-fvisibility=hidden",
+					"-Wno-ambiguous-macro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;
@@ -2220,8 +2226,12 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				LLVM_LTO = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CFLAGS = "-fvisibility=hidden";
+				OTHER_CFLAGS = (
+					"-fvisibility=hidden",
+					"-Wno-ambiguous-macro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapbox.Mapbox;
 				PRODUCT_NAME = Mapbox;
 				SKIP_INSTALL = YES;

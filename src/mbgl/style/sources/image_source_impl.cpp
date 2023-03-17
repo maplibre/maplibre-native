@@ -25,7 +25,7 @@ std::array<LatLng, 4> ImageSource::Impl::getCoordinates() const {
     return coords;
 }
 
-optional<std::string> ImageSource::Impl::getAttribution() const {
+std::optional<std::string> ImageSource::Impl::getAttribution() const {
     return {};
 }
 

@@ -22,9 +22,9 @@ FeatureType VectorTileFeature::getType() const {
     }
 }
 
-optional<Value> VectorTileFeature::getValue(const std::string& key) const {
-    const optional<Value> value(feature.getValue(key));
-    return value->is<NullValue>() ? nullopt : value;
+std::optional<Value> VectorTileFeature::getValue(const std::string& key) const {
+    const std::optional<Value> value(feature.getValue(key));
+    return value->is<NullValue>() ? std::nullopt : value;
 }
 
 const PropertyMap& VectorTileFeature::getProperties() const {
@@ -46,7 +46,7 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
             lines = feature.getGeometries<GeometryCollection>(scale);
         }
         catch(const std::runtime_error& ex) {
-            Log::Error(Event::ParseTile, "Could not get geometries: %s", ex.what());
+            Log::Error(Event::ParseTile, "Could not get geometries: " + std::string(ex.what()));
             lines = GeometryCollection();
         }
 

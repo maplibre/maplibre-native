@@ -23,8 +23,8 @@ public:
                       FeatureType type_,
                       GeometryCollection geometry_,
                       PropertyMap properties_,
-                      optional<std::u16string> text_,
-                      optional<style::expression::Image> icon_,
+                      std::optional<std::u16string> text_,
+                      std::optional<style::expression::Image> icon_,
                       std::size_t index_)
         : SymbolFeature(std::make_unique<StubGeometryTileFeature>(
               std::move(id_), type_, std::move(geometry_), std::move(properties_))) {

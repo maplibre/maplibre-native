@@ -134,27 +134,27 @@
     opts.withSourceTemplate(
             std::string([options.sourceTemplate UTF8String]),
             std::string([options.sourceDomainName UTF8String]),
-            options.sourceVersionPrefix ? std::string([options.sourceVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
+            options.sourceVersionPrefix ? std::string([options.sourceVersionPrefix UTF8String]) : std::optional<std::string>{});
 
     opts.withStyleTemplate(
             std::string([options.styleTemplate UTF8String]),
             std::string([options.styleDomainName UTF8String]),
-            options.styleVersionPrefix ? std::string([options.styleVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
+            options.styleVersionPrefix ? std::string([options.styleVersionPrefix UTF8String]) : std::optional<std::string>{});
 
     opts.withSpritesTemplate(
             std::string([options.spritesTemplate UTF8String]),
             std::string([options.spritesDomainName UTF8String]),
-            options.spritesVersionPrefix ? std::string([options.spritesVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
+            options.spritesVersionPrefix ? std::string([options.spritesVersionPrefix UTF8String]) : std::optional<std::string>{});
 
     opts.withGlyphsTemplate(
             std::string([options.glyphsTemplate UTF8String]),
             std::string([options.glyphsDomainName UTF8String]),
-            options.glyphsVersionPrefix ? std::string([options.glyphsVersionPrefix UTF8String])  : mbgl::optional<std::string>{});
+            options.glyphsVersionPrefix ? std::string([options.glyphsVersionPrefix UTF8String])  : std::optional<std::string>{});
 
     opts.withTileTemplate(
             std::string([options.tileTemplate UTF8String]),
             std::string([options.tileDomainName UTF8String]),
-            options.tileVersionPrefix ? std::string([options.tileVersionPrefix UTF8String]) : mbgl::optional<std::string>{});
+            options.tileVersionPrefix ? std::string([options.tileVersionPrefix UTF8String]) : std::optional<std::string>{});
 
     std::vector<mbgl::util::DefaultStyle> defaultStyles;
     if (options.defaultStyles) {

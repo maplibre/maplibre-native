@@ -2,7 +2,6 @@
 
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/util/geometry.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <vector>
 #include <map>
@@ -81,7 +80,7 @@ public:
     Impl(int32_t z, const Geometry<double>& geom, bool project = true);
     ~Impl() = default;
 
-    optional<UnwrappedTileID> next();
+    std::optional<UnwrappedTileID> next();
     bool hasNext() const;
 
 private:

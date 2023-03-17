@@ -33,7 +33,7 @@ public:
         return value->IsObject();
     }
 
-    static optional<const JSValue*> objectMember(const JSValue* value, const char * name) {
+    static std::optional<const JSValue*> objectMember(const JSValue* value, const char * name) {
         if (!value->HasMember(name)) {
             return {};
         }
@@ -42,10 +42,10 @@ public:
     }
 
     template <class Fn>
-    static optional<Error> eachMember(const JSValue* value, Fn&& fn) {
+    static std::optional<Error> eachMember(const JSValue* value, Fn&& fn) {
         assert(value->IsObject());
         for (const auto& property : value->GetObject()) {
-            optional<Error> result =
+            std::optional<Error> result =
                 fn({ property.name.GetString(), property.name.GetStringLength() }, &property.value);
             if (result) {
                 return result;
@@ -54,35 +54,35 @@ public:
         return {};
     }
 
-    static optional<bool> toBool(const JSValue* value) {
+    static std::optional<bool> toBool(const JSValue* value) {
         if (!value->IsBool()) {
             return {};
         }
         return value->GetBool();
     }
 
-    static optional<float> toNumber(const JSValue* value) {
+    static std::optional<float> toNumber(const JSValue* value) {
         if (!value->IsNumber()) {
             return {};
         }
         return static_cast<float>(value->GetDouble());
     }
 
-    static optional<double> toDouble(const JSValue* value) {
+    static std::optional<double> toDouble(const JSValue* value) {
         if (!value->IsNumber()) {
             return {};
         }
         return value->GetDouble();
     }
 
-    static optional<std::string> toString(const JSValue* value) {
+    static std::optional<std::string> toString(const JSValue* value) {
         if (!value->IsString()) {
             return {};
         }
         return {{ value->GetString(), value->GetStringLength() }};
     }
 
-    static optional<Value> toValue(const JSValue* value) {
+    static std::optional<Value> toValue(const JSValue* value) {
         switch (value->GetType()) {
             case rapidjson::kNullType:
             case rapidjson::kFalseType:
@@ -104,7 +104,7 @@ public:
         }
     }
 
-    static optional<GeoJSON> toGeoJSON(const JSValue* value, Error& error) {
+    static std::optional<GeoJSON> toGeoJSON(const JSValue* value, Error& error) {
         try {
             return mapbox::geojson::convert(*value);
         } catch (const std::exception& ex) {
@@ -115,7 +115,7 @@ public:
 };
 
 template <class T, class...Args>
-optional<T> convert(const JSValue& value, Error& error, Args&&...args) {
+std::optional<T> convert(const JSValue& value, Error& error, Args&&...args) {
     return convert<T>(Convertible(&value), error, std::forward<Args>(args)...);
 }
 

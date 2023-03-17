@@ -209,7 +209,7 @@ LanguageTag LanguageTag::fromBCP47(const std::string& bcp47Tag) {
     }
 }
 
-LanguageTag::LanguageTag(optional<std::string> language_, optional<std::string> script_, optional<std::string> region_)
+LanguageTag::LanguageTag(std::optional<std::string> language_, std::optional<std::string> script_, std::optional<std::string> region_)
     : language(std::move(language_))
     , script(std::move(script_))
     , region(std::move(region_))

@@ -24,7 +24,7 @@ static RendererObserver& nullObserver() {
     return observer;
 }
 
-Renderer::Impl::Impl(gfx::RendererBackend& backend_, float pixelRatio_, const optional<std::string>& localFontFamily_)
+Renderer::Impl::Impl(gfx::RendererBackend& backend_, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
     : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
@@ -123,13 +123,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Renders the backdrop of the OpenGL view. This also paints in areas where we don't have any
     // tiles whatsoever.
     {
-        optional<Color> color;
+        std::optional<Color> color;
         if (parameters.debugOptions & MapDebugOptions::Overdraw) {
             color = Color::black();
         } else if (!backend.contextIsShared()) {
             color = renderTreeParameters.backgroundColor;
         }
-        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1, 0 });
+        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
     }
 
     // Actually render the layers

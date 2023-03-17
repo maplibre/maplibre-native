@@ -10,13 +10,15 @@
 #include <mbgl/style/expression/parsing_context.hpp>
 #include <mbgl/style/expression/literal.hpp>
 
+#include <optional>
+
 namespace mbgl {
 namespace style {
 namespace conversion {
 
 template <class T>
 struct Converter<PropertyValue<T>> {
-    optional<PropertyValue<T>> operator()(const Convertible& value, Error& error, bool allowDataExpressions, bool convertTokens) const;
+    std::optional<PropertyValue<T>> operator()(const Convertible& value, Error& error, bool allowDataExpressions, bool convertTokens) const;
 
     template <class S>
     PropertyValue<T> maybeConvertTokens(const S& t) const {
@@ -49,7 +51,7 @@ struct Converter<PropertyValue<T>> {
 
 template <>
 struct Converter<PropertyValue<std::array<double, 3>>, void> {
-    optional<PropertyValue<std::array<double, 3>>> operator()(const Convertible& value, Error& error, bool, bool) const;
+    std::optional<PropertyValue<std::array<double, 3>>> operator()(const Convertible& value, Error& error, bool, bool) const;
 };
 } // namespace conversion
 } // namespace style

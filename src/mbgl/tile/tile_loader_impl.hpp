@@ -37,11 +37,11 @@ TileLoader<T>::TileLoader(T& tile_,
     }
 
     if (fileSource->supportsCacheOnlyRequests()) {
-        // When supported, the first request is always optional, even if the TileLoader
-        // is marked as required. That way, we can let the first optional request continue
-        // to load when the TileLoader is later changed from required to optional. If we
+        // When supported, the first request is always std::optional, even if the TileLoader
+        // is marked as required. That way, we can let the first std::optional request continue
+        // to load when the TileLoader is later changed from required to std::optional. If we
         // started out with a required request, we'd have to cancel everything, including the
-        // initial optional part of the request.
+        // initial std::optional part of the request.
         loadFromCache();
     } else if (necessity == TileNecessity::Required) {
         // When the file source doesn't support cache-only requests, and we definiitely need this

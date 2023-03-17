@@ -51,7 +51,7 @@ namespace platform {
 
 class Collator::Impl {
 public:
-    Impl(bool caseSensitive_, bool diacriticSensitive_, const optional<std::string>&)
+    Impl(bool caseSensitive_, bool diacriticSensitive_, const std::optional<std::string>&)
         : caseSensitive(caseSensitive_), diacriticSensitive(diacriticSensitive_) {}
 
     bool operator==(const Impl& other) const {
@@ -93,7 +93,7 @@ std::string Collator::resolvedLocale() const {
     return impl->resolvedLocale();
 }
 
-Collator::Collator(bool caseSensitive, bool diacriticSensitive, const optional<std::string>& locale)
+Collator::Collator(bool caseSensitive, bool diacriticSensitive, const std::optional<std::string>& locale)
     : impl(std::make_shared<Impl>(caseSensitive, diacriticSensitive, locale)) {}
 
 } // namespace platform

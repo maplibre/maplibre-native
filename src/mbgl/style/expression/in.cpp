@@ -118,7 +118,7 @@ bool In::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> In::possibleOutputs() const {
+std::vector<std::optional<Value>> In::possibleOutputs() const {
     return {{true}, {false}};
 }
 

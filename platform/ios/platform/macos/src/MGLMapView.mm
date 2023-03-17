@@ -372,7 +372,7 @@ public:
     [(NSSegmentedCell *)_zoomControls.cell setToolTip:NSLocalizedStringWithDefaultValue(@"ZOOM_IN_TOOLTIP", nil, nil, @"Zoom In", @"Tooltip of Zoom In button") forSegment:1];
     _zoomControls.target = self;
     _zoomControls.action = @selector(zoomInOrOut:);
-    _zoomControls.controlSize = NSRegularControlSize;
+    _zoomControls.controlSize = NSControlSizeRegular;
     [_zoomControls sizeToFit];
     _zoomControls.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_zoomControls];
@@ -480,7 +480,7 @@ public:
 
     // Make the whole string mini by default.
     // Force links to be black, because the default blue is distracting.
-    CGFloat miniSize = [NSFont systemFontSizeForControlSize:NSMiniControlSize];
+    CGFloat miniSize = [NSFont systemFontSizeForControlSize:NSControlSizeMini];
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:miniSize linkColor:[NSColor blackColor]];
     for (MGLAttributionInfo *info in attributionInfos) {
         // Feedback links are added to the Help menu.
@@ -491,7 +491,7 @@ public:
         // For each attribution, add a borderless button that responds to clicks
         // and feels like a hyperlink.
         NSButton *button = [[MGLAttributionButton alloc] initWithAttributionInfo:info];
-        button.controlSize = NSMiniControlSize;
+        button.controlSize = NSControlSizeMini;
         button.translatesAutoresizingMaskIntoConstraints = NO;
 
         // Set the new button flush with the buttom of the container and to the
@@ -1449,7 +1449,7 @@ public:
     }
 
     NSEdgeInsets contentInsets = self.contentInsets;
-    if ((self.window.styleMask & NSFullSizeContentViewWindowMask)
+    if ((self.window.styleMask & NSWindowStyleMaskFullSizeContentView)
         && !self.window.titlebarAppearsTransparent) {
         NSRect contentLayoutRect = [self convertRect:self.window.contentLayoutRect fromView:nil];
         if (NSMaxX(contentLayoutRect) > 0 && NSMaxY(contentLayoutRect) > 0) {
@@ -1528,8 +1528,7 @@ public:
             CGDisplayShowCursor(kCGDirectMainDisplay);
         }
     }
-
-    if (flags & NSShiftKeyMask) {
+    if (flags & NSEventModifierFlagShift) {
         // Shift-drag to zoom.
         if (!self.zoomEnabled) {
             return;
@@ -1543,7 +1542,7 @@ public:
             CGFloat newZoomLevel = _zoomAtBeginningOfGesture - delta.y / 75;
             [self setZoomLevel:newZoomLevel atPoint:startPoint animated:NO];
         }
-    } else if (flags & NSAlternateKeyMask) {
+    } else if (flags & NSEventModifierFlagOption) {
         // Option-drag to rotate and/or tilt.
         _mbglMap->cancelTransitions();
 
@@ -1586,10 +1585,10 @@ public:
 
 /// Returns whether the user is panning using a gesture.
 - (BOOL)isPanningWithGesture {
-    NSGestureRecognizerState state = _panGestureRecognizer.state;
-    NSEventModifierFlags flags = [NSApp currentEvent].modifierFlags;
-    return ((state == NSGestureRecognizerStateBegan || state == NSGestureRecognizerStateChanged)
-            && !(flags & NSShiftKeyMask || flags & NSAlternateKeyMask));
+  NSGestureRecognizerState state = _panGestureRecognizer.state;
+  NSEventModifierFlags flags = [NSApp currentEvent].modifierFlags;
+  return ((state == NSGestureRecognizerStateBegan || state == NSGestureRecognizerStateChanged)
+          && !(flags & NSEventModifierFlagShift || flags & NSEventModifierFlagOption));
 }
 
 /// Pinch to zoom.
@@ -2845,7 +2844,7 @@ public:
     // Cocoa origin is at the lower-left corner.
     mbgl::ScreenCoordinate screenCoordinate = { point.x, NSHeight(self.bounds) - point.y };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(styleLayerIdentifiers.count);
@@ -2855,7 +2854,7 @@ public:
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
@@ -2882,7 +2881,7 @@ public:
         { NSMaxX(rect), NSHeight(self.bounds) - NSMinY(rect) },
     };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(styleLayerIdentifiers.count);
@@ -2892,7 +2891,7 @@ public:
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }

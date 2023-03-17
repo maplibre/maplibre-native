@@ -16,7 +16,7 @@ inline const style::RasterSource::Impl& RenderRasterSource::impl() const {
     return static_cast<const style::RasterSource::Impl&>(*baseImpl);
 }
 
-const optional<Tileset>& RenderRasterSource::getTileset() const {
+const std::optional<Tileset>& RenderRasterSource::getTileset() const {
     return impl().tileset;
 }
 

@@ -86,8 +86,8 @@ using namespace mbgl::style::conversion;
 
 ParseResult ParsingContext::parse(const Convertible& value,
                                   std::size_t index_,
-                                  optional<type::Type> expected_,
-                                  const optional<TypeAnnotationOption>& typeAnnotationOption) {
+                                  std::optional<type::Type> expected_,
+                                  const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     ParsingContext child(key + "[" + util::toString(index_) + "]",
                          errors,
                          std::move(expected_),
@@ -95,7 +95,7 @@ ParseResult ParsingContext::parse(const Convertible& value,
     return child.parse(value, typeAnnotationOption);
 }
 
-ParseResult ParsingContext::parse(const Convertible& value, std::size_t index_, optional<type::Type> expected_,
+ParseResult ParsingContext::parse(const Convertible& value, std::size_t index_, std::optional<type::Type> expected_,
                                   const std::map<std::string, std::shared_ptr<Expression>>& bindings) {
     ParsingContext child(key + "[" + util::toString(index_) + "]",
                          errors,
@@ -148,7 +148,7 @@ bool isExpression(const std::string& name) {
 }
 
 ParseResult ParsingContext::parse(const Convertible& value,
-                                  const optional<TypeAnnotationOption>& typeAnnotationOption) {
+                                  const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     ParseResult parsed;
     
     if (isArray(value)) {
@@ -158,7 +158,7 @@ ParseResult ParsingContext::parse(const Convertible& value,
             return ParseResult();
         }
         
-        const optional<std::string> op = toString(arrayMember(value, 0));
+        const std::optional<std::string> op = toString(arrayMember(value, 0));
         if (!op) {
             error(
                 "Expression name must be a string, but found " + getJSONType(arrayMember(value, 0)) +
@@ -244,18 +244,18 @@ ParseResult ParsingContext::parse(const Convertible& value,
 }
 
 ParseResult ParsingContext::parseExpression(const Convertible& value,
-                                            const optional<TypeAnnotationOption>& typeAnnotationOption) {
+                                            const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     return parse(value, typeAnnotationOption);
 }
 
 ParseResult ParsingContext::parseLayerPropertyExpression(const Convertible& value) {
-    optional<TypeAnnotationOption> typeAnnotationOption;
+    std::optional<TypeAnnotationOption> typeAnnotationOption;
     if (expected && *expected == type::String) {
         typeAnnotationOption = TypeAnnotationOption::coerce;
     }
     ParseResult parsed = parse(value, typeAnnotationOption);
     if (parsed && !isZoomConstant(**parsed)) {
-        optional<variant<const Interpolate*, const Step*, ParsingError>> zoomCurve = findZoomCurve(parsed->get());
+        std::optional<variant<const Interpolate*, const Step*, ParsingError>> zoomCurve = findZoomCurve(parsed->get());
         if (!zoomCurve) {
             error(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)");
             return ParseResult();
@@ -281,9 +281,9 @@ std::string ParsingContext::getCombinedErrors() const {
     return combinedError;
 }
 
-optional<std::string> ParsingContext::checkType(const type::Type& t) {
+std::optional<std::string> ParsingContext::checkType(const type::Type& t) {
     assert(expected);
-    optional<std::string> err = type::checkSubtype(*expected, t);
+    std::optional<std::string> err = type::checkSubtype(*expected, t);
     if (err) {
         error(*err);
     }

@@ -3,7 +3,6 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/expected.hpp>
-#include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 

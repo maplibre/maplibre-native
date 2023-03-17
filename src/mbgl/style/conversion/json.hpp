@@ -10,7 +10,7 @@ namespace style {
 namespace conversion {
 
 template <class T, class...Args>
-optional<T> convertJSON(const std::string& json, Error& error, Args&&...args) {
+std::optional<T> convertJSON(const std::string& json, Error& error, Args&&...args) {
     JSDocument document;
     document.Parse<0>(json.c_str());
 

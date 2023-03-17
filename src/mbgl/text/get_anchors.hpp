@@ -17,7 +17,7 @@ Anchors getAnchors(const GeometryCoordinates& line,
                    float boxScale,
                    float overscaling);
 
-optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
+std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
                                  float maxAngle,
                                  float textLeft,
                                  float textRight,

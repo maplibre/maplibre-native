@@ -4,7 +4,6 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 #include <mbgl/util/exception.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/expected.hpp>
@@ -13,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <optional>
 
 namespace mapbox {
 namespace sqlite {
@@ -44,7 +44,7 @@ public:
     void changePath(const std::string&);
     std::exception_ptr resetDatabase();
 
-    optional<Response> get(const Resource&);
+    std::optional<Response> get(const Resource&);
 
     // Return value is (inserted, stored size)
     std::pair<bool, uint64_t> put(const Resource&, const Response&);
@@ -75,8 +75,8 @@ public:
     std::exception_ptr invalidateRegion(int64_t regionID);
 
     // Return value is (response, stored size)
-    optional<std::pair<Response, uint64_t>> getRegionResource(const Resource&);
-    optional<int64_t> hasRegionResource(const Resource&);
+    std::optional<std::pair<Response, uint64_t>> getRegionResource(const Resource&);
+    std::optional<int64_t> hasRegionResource(const Resource&);
     uint64_t putRegionResource(int64_t regionID, const Resource&, const Response&);
     void putRegionResources(int64_t regionID, const std::list<std::tuple<Resource, Response>>&, OfflineRegionStatus&);
 
@@ -117,20 +117,20 @@ private:
 
     mapbox::sqlite::Statement& getStatement(const char *);
 
-    optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
-    optional<int64_t> hasTile(const Resource::TileData&);
+    std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
+    std::optional<int64_t> hasTile(const Resource::TileData&);
     bool putTile(const Resource::TileData&, const Response&,
                  const std::string&, bool compressed);
 
-    optional<std::pair<Response, uint64_t>> getResource(const Resource&);
-    optional<int64_t> hasResource(const Resource&);
+    std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
+    std::optional<int64_t> hasResource(const Resource&);
     bool putResource(const Resource&, const Response&,
                      const std::string&, bool compressed);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
 
-    optional<std::pair<Response, uint64_t>> getInternal(const Resource&);
-    optional<int64_t> hasInternal(const Resource&);
+    std::optional<std::pair<Response, uint64_t>> getInternal(const Resource&);
+    std::optional<int64_t> hasInternal(const Resource&);
     std::pair<bool, uint64_t> putInternal(const Resource&, const Response&, bool evict);
 
     // Return value is true iff the resource was previously unused by any other regions.
@@ -149,7 +149,7 @@ private:
     uint64_t maximumAmbientCacheSize = util::DEFAULT_MAX_CACHE_SIZE;
     uint64_t offlineMapboxTileCountLimit = util::mapbox::DEFAULT_OFFLINE_TILE_COUNT_LIMIT;
 
-    optional<uint64_t> offlineMapboxTileCount;
+    std::optional<uint64_t> offlineMapboxTileCount;
 
     bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats);
 
@@ -181,7 +181,7 @@ private:
 
     // Lazily initializes currentAmbientCacheSize.
     std::exception_ptr initAmbientCacheSize();
-    optional<uint64_t> currentAmbientCacheSize;
+    std::optional<uint64_t> currentAmbientCacheSize;
     void updateAmbientCacheSize(DatabaseSizeChangeStats&);
 
     bool autopack = true;

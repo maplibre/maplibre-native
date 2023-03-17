@@ -192,7 +192,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
     
     __weak __typeof__(self) weakSelf = self;
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
-        if (result != NSFileHandlingPanelOKButton) {
+      if (result != NSModalResponseOK) {
             return;
         }
         
@@ -270,7 +270,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
             panel.allowedFileTypes = [@[(NSString *)kUTTypePNG] arrayByAddingObjectsFromArray:[NSBitmapImageRep imageUnfilteredTypes]];
             
             [panel beginSheetModalForWindow:strongSelf.window completionHandler:^(NSInteger result) {
-                if (result == NSFileHandlingPanelOKButton) {
+              if (result == NSModalResponseOK) {
                     // Write the contents in the new format.
                     NSURL *fileURL = panel.URL;
                     
@@ -1312,7 +1312,7 @@ NSArray<id <MGLAnnotation>> *MBXFlattenedShapes(NSArray<id <MGLAnnotation>> *sha
 
     SEL action = toolbarItem.action;
     if (action == @selector(showShareMenu:)) {
-        [(NSButton *)toolbarItem.view sendActionOn:NSLeftMouseDownMask];
+      [(NSButton *)toolbarItem.view sendActionOn:NSEventMaskLeftMouseDown];
         if (![MGLSettings apiKey]) {
             return NO;
         }

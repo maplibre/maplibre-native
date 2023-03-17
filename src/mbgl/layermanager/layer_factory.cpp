@@ -11,15 +11,15 @@
 
 namespace mbgl {
 
-optional<std::string> LayerFactory::getSource(const style::conversion::Convertible& value) const noexcept {
+std::optional<std::string> LayerFactory::getSource(const style::conversion::Convertible& value) const noexcept {
     auto sourceValue = objectMember(value, "source");
     if (!sourceValue) {
-        return nullopt;
+        return std::nullopt;
     }
 
-    optional<std::string> source = toString(*sourceValue);
+    auto const source = toString(*sourceValue);
     if (!source) {
-        return nullopt;
+        return std::nullopt;
     }
 
     return source;

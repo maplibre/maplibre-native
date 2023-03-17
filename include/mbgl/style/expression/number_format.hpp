@@ -22,7 +22,7 @@ public:
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression& e) const override;
-    std::vector<optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "number-format"; }

@@ -76,7 +76,7 @@ std::string simpleDiff(const Value& result, const Value& expected) {
             break;
         }
 
-        if (!deepEqual(resultTokens[i], expectedTokens[i])) {
+        if (resultTokens[i] != expectedTokens[i]) {
             diff << "<b>"
                  << "-" << expectedTokens[i] << "</b>" << std::endl;
             diff << "<b>"
@@ -246,7 +246,7 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         }
 
         for (const auto& entry : expectedImagesPaths) {
-            mbgl::optional<std::string> maybeExpectedImage = mbgl::util::readFile(entry);
+            std::optional<std::string> maybeExpectedImage = mbgl::util::readFile(entry);
             if (!maybeExpectedImage) {
                 metadata.errorMessage = "Failed to load expected image " + entry;
                 metadata.renderErrored++;

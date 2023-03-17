@@ -12,7 +12,7 @@ VectorSource::Impl::Impl(const Impl& other, Tileset tileset_)
       tileset(std::move(tileset_)) {
 }
 
-optional<std::string> VectorSource::Impl::getAttribution() const {
+std::optional<std::string> VectorSource::Impl::getAttribution() const {
     if (!tileset) {
         return {};
     }

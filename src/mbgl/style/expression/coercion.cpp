@@ -18,17 +18,17 @@ EvaluationResult toBoolean(const Value& v) {
 }
 
 EvaluationResult toNumber(const Value& v) {
-    optional<double> result = v.match(
-        [](NullValue) -> optional<double> { return 0.0; },
-        [](const double f) -> optional<double> { return f; },
-        [](const std::string& s) -> optional<double> {
+    std::optional<double> result = v.match(
+        [](NullValue) -> std::optional<double> { return 0.0; },
+        [](const double f) -> std::optional<double> { return f; },
+        [](const std::string& s) -> std::optional<double> {
             try {
                 return util::stof(s);
             } catch (...) {
                 return {};
             }
         },
-        [](const auto&) { return optional<double>(); }
+        [](const auto&) { return std::optional<double>(); }
     );
     if (!result) {
         return EvaluationError {
@@ -44,7 +44,7 @@ EvaluationResult toColor(const Value& colorValue) {
             return color;
         },
         [&](const std::string& colorString) -> EvaluationResult {
-            const optional<Color> result = Color::parse(colorString);
+            const std::optional<Color> result = Color::parse(colorString);
             if (result) {
                 return *result;
             } else {
@@ -207,8 +207,8 @@ bool Coercion::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Coercion::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Coercion::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& input : inputs) {
         for (auto& output : input->possibleOutputs()) {
             result.push_back(std::move(output));

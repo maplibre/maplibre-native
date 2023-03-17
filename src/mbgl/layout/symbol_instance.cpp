@@ -20,8 +20,8 @@ const Shaping& getAnyShaping(const ShapedTextOrientations& shapedTextOrientation
 
 SymbolInstanceSharedData::SymbolInstanceSharedData(GeometryCoordinates line_,
                                                    const ShapedTextOrientations& shapedTextOrientations,
-                                                   const optional<PositionedIcon>& shapedIcon,
-                                                   const optional<PositionedIcon>& verticallyShapedIcon,
+                                                   const std::optional<PositionedIcon>& shapedIcon,
+                                                   const std::optional<PositionedIcon>& verticallyShapedIcon,
                                                    const style::SymbolLayoutProperties::Evaluated& layout,
                                                    const style::SymbolPlacementType textPlacement,
                                                    const std::array<float, 2>& textOffset,
@@ -77,8 +77,8 @@ bool SymbolInstanceSharedData::empty() const {
 SymbolInstance::SymbolInstance(Anchor& anchor_,
                                std::shared_ptr<SymbolInstanceSharedData> sharedData_,
                                const ShapedTextOrientations& shapedTextOrientations,
-                               const optional<PositionedIcon>& shapedIcon,
-                               const optional<PositionedIcon>& verticallyShapedIcon,
+                               const std::optional<PositionedIcon>& shapedIcon,
+                               const std::optional<PositionedIcon>& verticallyShapedIcon,
                                const float textBoxScale_,
                                const float textPadding,
                                const SymbolPlacementType textPlacement,
@@ -167,7 +167,7 @@ const SymbolQuads& SymbolInstance::verticalGlyphQuads() const {
     return sharedData->verticalGlyphQuads;
 }
 
-const optional<SymbolQuads>& SymbolInstance::iconQuads() const {
+const std::optional<SymbolQuads>& SymbolInstance::iconQuads() const {
     assert(sharedData);
     return sharedData->iconQuads;
 }
@@ -184,7 +184,7 @@ bool SymbolInstance::hasSdfIcon() const {
     return static_cast<bool>(symbolContent & SymbolContent::IconSDF);
 }
 
-const optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {
+const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {
     assert(sharedData);
     return sharedData->verticalIconQuads;
 }
@@ -193,10 +193,10 @@ void SymbolInstance::releaseSharedData() {
     sharedData.reset();
 }
 
-optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
+std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
     if (placedRightTextIndex) return placedRightTextIndex;
     if (placedCenterTextIndex) return placedCenterTextIndex;
     if (placedLeftTextIndex) return placedLeftTextIndex;
-    return nullopt;
+    return std::nullopt;
 }
 } // namespace mbgl

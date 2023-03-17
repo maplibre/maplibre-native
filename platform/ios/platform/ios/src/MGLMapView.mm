@@ -627,7 +627,7 @@ public:
     // setup mbgl map
     MGLRendererConfiguration *config = [MGLRendererConfiguration currentConfiguration];
 
-    mbgl::optional<std::string> localFontFamilyName = config.localFontFamilyName ? mbgl::optional<std::string>(std::string(config.localFontFamilyName.UTF8String)) : mbgl::nullopt;
+    std::optional<std::string> localFontFamilyName = config.localFontFamilyName ? std::optional<std::string>(std::string(config.localFontFamilyName.UTF8String)) : std::nullopt;
     auto renderer = std::make_unique<mbgl::Renderer>(_mbglView->getRendererBackend(), config.scaleFactor, localFontFamilyName);
     BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
     _rendererFrontend = std::make_unique<MGLRenderFrontend>(std::move(renderer), self, _mbglView->getRendererBackend());
@@ -1031,7 +1031,10 @@ public:
         automaticallyAdjustContentInset = _automaticallyAdjustContentInsetHolder.boolValue;
     } else {
         UIViewController *viewController = [self rootViewController];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         automaticallyAdjustContentInset = viewController.automaticallyAdjustsScrollViewInsets;
+#pragma clang diagnostic pop
     }
     
     if (! automaticallyAdjustContentInset) {
@@ -1261,23 +1264,15 @@ public:
     UIEdgeInsets adjustedContentInsets = UIEdgeInsetsZero;
     UIViewController *viewController = [self rootViewController];
     BOOL automaticallyAdjustContentInset;
-    if (@available(iOS 11.0, *))
-    {
-        adjustedContentInsets = self.safeAreaInsets;
-        
-    } else {
-        adjustedContentInsets.top = viewController.topLayoutGuide.length;
-        CGFloat bottomPoint = CGRectGetMaxY(viewController.view.bounds) -
-                                (CGRectGetMaxY(viewController.view.bounds)
-                                - viewController.bottomLayoutGuide.length);
-        adjustedContentInsets.bottom = bottomPoint;
-
-    }
+    adjustedContentInsets = self.safeAreaInsets;
     
     if (_automaticallyAdjustContentInsetHolder) {
         automaticallyAdjustContentInset = _automaticallyAdjustContentInsetHolder.boolValue;
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         automaticallyAdjustContentInset = viewController.automaticallyAdjustsScrollViewInsets;
+#pragma clang diagnostic pop
     }
     
     self.safeMapViewContentInsets = adjustedContentInsets;
@@ -3216,9 +3211,12 @@ static void *windowScreenContext = &windowScreenContext;
     UIViewController *viewController = self.mgl_viewControllerForLayoutGuides;
     if (viewController)
     {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         CGFloat topInset = viewController.topLayoutGuide.length;
         frame.origin.y += topInset;
         frame.size.height -= topInset + viewController.bottomLayoutGuide.length;
+#pragma clang diagnostic pop
     }
     return frame;
 }
@@ -6514,7 +6512,7 @@ static void *windowScreenContext = &windowScreenContext;
     MGLLogDebug(@"Querying visibleFeaturesAtPoint: %@ inStyleLayersWithIdentifiers: %@ predicate: %@", NSStringFromCGPoint(point), styleLayerIdentifiers, predicate);
     mbgl::ScreenCoordinate screenCoordinate = { point.x, point.y };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers)
     {
         __block std::vector<std::string> layerIDs;
@@ -6526,7 +6524,7 @@ static void *windowScreenContext = &windowScreenContext;
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
@@ -6552,7 +6550,7 @@ static void *windowScreenContext = &windowScreenContext;
         { CGRectGetMaxX(rect), CGRectGetMaxY(rect) },
     };
 
-    mbgl::optional<std::vector<std::string>> optionalLayerIDs;
+    std::optional<std::vector<std::string>> optionalLayerIDs;
     if (styleLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(styleLayerIdentifiers.count);
@@ -6562,7 +6560,7 @@ static void *windowScreenContext = &windowScreenContext;
         optionalLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }

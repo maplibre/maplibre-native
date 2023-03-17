@@ -8,7 +8,7 @@
 
 namespace mbgl {
 
-Renderer::Renderer(gfx::RendererBackend& backend, float pixelRatio_, const optional<std::string>& localFontFamily_)
+Renderer::Renderer(gfx::RendererBackend& backend, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
     : impl(std::make_unique<Impl>(backend, pixelRatio_, localFontFamily_)) {}
 
 Renderer::~Renderer() {
@@ -102,22 +102,22 @@ FeatureExtensionValue Renderer::queryFeatureExtensions(const std::string& source
                                                        const Feature& feature,
                                                        const std::string& extension,
                                                        const std::string& extensionField,
-                                                       const optional<std::map<std::string, Value>>& args) const {
+                                                       const std::optional<std::map<std::string, Value>>& args) const {
     return impl->orchestrator.queryFeatureExtensions(sourceID, feature, extension, extensionField, args);
 }
 
-void Renderer::setFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
+void Renderer::setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
                                const std::string& featureID, const FeatureState& state) {
     impl->orchestrator.setFeatureState(sourceID, sourceLayerID, featureID, state);
 }
 
 void Renderer::getFeatureState(FeatureState& state, const std::string& sourceID,
-                               const optional<std::string>& sourceLayerID, const std::string& featureID) const {
+                               const std::optional<std::string>& sourceLayerID, const std::string& featureID) const {
     impl->orchestrator.getFeatureState(state, sourceID, sourceLayerID, featureID);
 }
 
-void Renderer::removeFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
-                                  const optional<std::string>& featureID, const optional<std::string>& stateKey) {
+void Renderer::removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
+                                  const std::optional<std::string>& featureID, const std::optional<std::string>& stateKey) {
     impl->orchestrator.removeFeatureState(sourceID, sourceLayerID, featureID, stateKey);
 }
 

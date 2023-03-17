@@ -54,7 +54,7 @@ EvaluationResult ImageExpression::evaluate(const EvaluationContext& ctx) const {
         return imageIDResult.error();
     }
 
-    optional<std::string> evaluatedImageID = toString(*imageIDResult);
+    std::optional<std::string> evaluatedImageID = toString(*imageIDResult);
     if (!evaluatedImageID) {
         return EvaluationError({"Could not evaluate ID for 'image' expression."});
     }

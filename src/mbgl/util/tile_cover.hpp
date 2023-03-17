@@ -3,10 +3,10 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/geometry.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <vector>
 #include <memory>
+#include <optional>
 
 namespace mbgl {
 
@@ -23,7 +23,7 @@ public:
     TileCover(const Geometry<double>&, uint8_t z, bool project = true);
     ~TileCover();
 
-    optional<UnwrappedTileID> next();
+    std::optional<UnwrappedTileID> next();
     bool hasNext();
 
 private:
@@ -35,7 +35,7 @@ int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize);
 
 std::vector<OverscaledTileID> tileCover(const TransformState&,
                                         uint8_t z,
-                                        const optional<uint8_t>& overscaledZ = nullopt);
+                                        const std::optional<uint8_t>& overscaledZ = std::nullopt);
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds&, uint8_t z);
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>&, uint8_t z);
 

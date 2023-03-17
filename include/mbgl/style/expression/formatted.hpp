@@ -4,10 +4,10 @@
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <vector>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -19,9 +19,9 @@ extern const char* const kFormattedSectionTextColor;
 
 struct FormattedSection {
     explicit FormattedSection(std::string text_,
-                              optional<double> fontScale_,
-                              optional<FontStack> fontStack_,
-                              optional<Color> textColor_)
+                              std::optional<double> fontScale_,
+                              std::optional<FontStack> fontStack_,
+                              std::optional<Color> textColor_)
         : text(std::move(text_)),
           fontScale(std::move(fontScale_)),
           fontStack(std::move(fontStack_)),
@@ -30,10 +30,10 @@ struct FormattedSection {
     explicit FormattedSection(Image image_) : image(std::move(image_)) {}
 
     std::string text;
-    optional<Image> image;
-    optional<double> fontScale;
-    optional<FontStack> fontStack;
-    optional<Color> textColor;
+    std::optional<Image> image;
+    std::optional<double> fontScale;
+    std::optional<FontStack> fontStack;
+    std::optional<Color> textColor;
 };
 
 class Formatted {
@@ -41,7 +41,7 @@ public:
     Formatted() = default;
 
     Formatted(const char* plainU8String) {
-        sections.emplace_back(std::string(plainU8String), nullopt, nullopt, nullopt);
+        sections.emplace_back(std::string(plainU8String), std::nullopt, std::nullopt, std::nullopt);
     }
     
     Formatted(std::vector<FormattedSection> sections_)
@@ -65,7 +65,7 @@ namespace conversion {
 template <>
 struct Converter<expression::Formatted> {
 public:
-    optional<expression::Formatted> operator()(const Convertible& value, Error& error) const;
+    std::optional<expression::Formatted> operator()(const Convertible& value, Error& error) const;
 };
 
 template <>

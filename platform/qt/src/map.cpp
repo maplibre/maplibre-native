@@ -136,7 +136,7 @@ mbgl::ClientOptions clientOptionsFromSettings(const QMapLibreGL::Settings &setti
 }
 
 
-mbgl::optional<mbgl::Annotation> asAnnotation(const QMapLibreGL::Annotation & annotation) {
+std::optional<mbgl::Annotation> asAnnotation(const QMapLibreGL::Annotation & annotation) {
     auto asGeometry = [](const QMapLibreGL::ShapeAnnotationGeometry &geometry) {
         mbgl::ShapeAnnotationGeometry result;
         switch (geometry.type) {
@@ -607,7 +607,7 @@ void Map::setGestureInProgress(bool progress)
     values transition to new values with animation when they are updated.
 */
 void Map::setTransitionOptions(qint64 duration, qint64 delay) {
-    static auto convert = [](qint64 value) -> mbgl::optional<mbgl::Duration> {
+    static auto convert = [](qint64 value) -> std::optional<mbgl::Duration> {
         return std::chrono::duration_cast<mbgl::Duration>(mbgl::Milliseconds(value));
     };
 
@@ -927,7 +927,7 @@ void Map::addSource(const QString &id, const QVariantMap &params)
     using namespace mbgl::style::conversion;
 
     Error error;
-    mbgl::optional<std::unique_ptr<Source>> source = convert<std::unique_ptr<Source>>(QVariant(params), error, id.toStdString());
+    std::optional<std::unique_ptr<Source>> source = convert<std::unique_ptr<Source>>(QVariant(params), error, id.toStdString());
     if (!source) {
         qWarning() << "Unable to add source:" << error.message.c_str();
         return;
@@ -1039,7 +1039,7 @@ void Map::addCustomLayer(const QString &id,
     d_ptr->mapObj->getStyle().addLayer(std::make_unique<mbgl::style::CustomLayer>(
             id.toStdString(),
             std::make_unique<HostWrapper>(std::move(host))),
-            before.isEmpty() ? mbgl::optional<std::string>() : mbgl::optional<std::string>(before.toStdString()));
+            before.isEmpty() ? std::optional<std::string>() : std::optional<std::string>(before.toStdString()));
 }
 
 /*!
@@ -1068,14 +1068,14 @@ void Map::addLayer(const QVariantMap &params, const QString& before)
     using namespace mbgl::style::conversion;
 
     Error error;
-    mbgl::optional<std::unique_ptr<Layer>> layer = convert<std::unique_ptr<Layer>>(QVariant(params), error);
+    std::optional<std::unique_ptr<Layer>> layer = convert<std::unique_ptr<Layer>>(QVariant(params), error);
     if (!layer) {
         qWarning() << "Unable to add layer:" << error.message.c_str();
         return;
     }
 
     d_ptr->mapObj->getStyle().addLayer(std::move(*layer),
-        before.isEmpty() ? mbgl::optional<std::string>() : mbgl::optional<std::string>(before.toStdString()));
+        before.isEmpty() ? std::optional<std::string>() : std::optional<std::string>(before.toStdString()));
 }
 
 /*!
@@ -1168,7 +1168,7 @@ void Map::setFilter(const QString& layer, const QVariant& filter)
     }
 
     Error error;
-    mbgl::optional<Filter> converted = convert<Filter>(filter, error);
+    std::optional<Filter> converted = convert<Filter>(filter, error);
     if (!converted) {
         qWarning() << "Error parsing filter:" << error.message.c_str();
         return;
@@ -1521,7 +1521,7 @@ bool MapPrivate::setProperty(const PropertySetter& setter, const QString& layer,
 
     const std::string& propertyString = name.toStdString();
 
-    mbgl::optional<conversion::Error> result;
+    std::optional<conversion::Error> result;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (value.typeId() == QMetaType::QString) {

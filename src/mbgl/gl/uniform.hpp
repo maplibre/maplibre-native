@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/literal.hpp>
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
@@ -11,6 +10,8 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <optional>
+#include <string>
 
 namespace mbgl {
 namespace gl {
@@ -49,7 +50,7 @@ public:
     }
 
     UniformLocation location;
-    optional<Value> current = {};
+    std::optional<Value> current = std::nullopt;
 };
 
 UniformLocation uniformLocation(ProgramID, const char* name);

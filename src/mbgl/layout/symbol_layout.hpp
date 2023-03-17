@@ -68,7 +68,7 @@ private:
     void addFeature(size_t,
                     const SymbolFeature&,
                     const ShapedTextOrientations& shapedTextOrientations,
-                    optional<PositionedIcon> shapedIcon,
+                    std::optional<PositionedIcon> shapedIcon,
                     const ImageMap&,
                     std::array<float, 2> textOffset,
                     float layoutTextSize,
@@ -100,10 +100,10 @@ private:
                                     SymbolInstance&,
                                     const SymbolFeature&,
                                     WritingModeType,
-                                    optional<size_t>& placedIndex,
+                                    std::optional<size_t>& placedIndex,
                                     const SymbolQuads&,
                                     const CanonicalTileID& canonical,
-                                    optional<std::size_t> lastAddedSection = nullopt);
+                                    std::optional<std::size_t> lastAddedSection = std::nullopt);
 
     void updatePaintPropertiesForSection(SymbolBucket&,
                                          const SymbolFeature&,

@@ -38,7 +38,7 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
         // Zoom level 16 is typically sufficient for annotations.
         // See https://github.com/mapbox/mapbox-gl-native/issues/10197
         {0, 16},
-        optional<LatLngBounds>{},
+        std::nullopt,
         [&](const OverscaledTileID& tileID) { return std::make_unique<AnnotationTile>(tileID, parameters); });
 }
 

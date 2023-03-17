@@ -29,8 +29,8 @@ public:
         return false;
     }
 
-    std::vector<optional<Value>> possibleOutputs() const override {
-        return { nullopt };
+    std::vector<std::optional<Value>> possibleOutputs() const override {
+        return { std::nullopt };
     }
     
     std::string getOperator() const override { return "at"; }

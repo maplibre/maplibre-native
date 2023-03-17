@@ -50,7 +50,7 @@ void ImageSource::setImage(PremultipliedImage&& image_) {
     observer->onSourceChanged(*this);
 }
 
-optional<std::string> ImageSource::getURL() const {
+std::optional<std::string> ImageSource::getURL() const {
     return url;
 }
 
