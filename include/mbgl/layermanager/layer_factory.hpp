@@ -36,7 +36,7 @@ public:
     virtual std::unique_ptr<Layout> createLayout(const LayoutParameters&, std::unique_ptr<GeometryTileLayer>, const std::vector<Immutable<style::LayerProperties>>&) noexcept;
 
 protected:
-    optional<std::string> getSource(const style::conversion::Convertible& value) const noexcept;
+    std::optional<std::string> getSource(const style::conversion::Convertible& value) const noexcept;
 };
 
 } // namespace mbgl

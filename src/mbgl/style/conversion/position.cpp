@@ -8,11 +8,11 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-optional<Position> Converter<Position>::operator()(const Convertible& value, Error& error) const {
-    optional<std::array<float, 3>> spherical = convert<std::array<float, 3>>(value, error);
+std::optional<Position> Converter<Position>::operator()(const Convertible& value, Error& error) const {
+    std::optional<std::array<float, 3>> spherical = convert<std::array<float, 3>>(value, error);
 
     if (!spherical) {
-        return nullopt;
+        return std::nullopt;
     }
 
     return Position(*spherical);

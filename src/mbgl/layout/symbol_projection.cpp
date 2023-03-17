@@ -3,7 +3,6 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/math.hpp>
 
 namespace mbgl {
@@ -155,7 +154,7 @@ namespace mbgl {
         return previousProjectedPoint + (projectedUnitSegment * (minimumLength / util::mag<float>(projectedUnitSegment)));
     }
 
-	optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX, const float lineOffsetX, const float lineOffsetY, const bool flip,
+    std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX, const float lineOffsetX, const float lineOffsetY, const bool flip,
             const Point<float>& projectedAnchorPoint, const Point<float>& tileAnchorPoint, const uint16_t anchorSegment, const GeometryCoordinates& line, const std::vector<float>& tileDistances, const mat4& labelPlaneMatrix, const bool returnTileDistance) {
 
         const float combinedOffsetX = flip ?
@@ -227,11 +226,11 @@ namespace mbgl {
                     (currentIndex - dir) == initialIndex ? 0 : tileDistances[currentIndex - dir],
                     absOffsetX - distanceToPrev
                 ) :
-                optional<TileDistance>()
+                std::optional<TileDistance>()
         }};
     }
     
-    optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const float fontScale,
+    std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const float fontScale,
                                                             const float lineOffsetX,
                                                             const float lineOffsetY,
                                                             const bool flip,
@@ -248,16 +247,16 @@ namespace mbgl {
         const float firstGlyphOffset = symbol.glyphOffsets.front();
         const float lastGlyphOffset = symbol.glyphOffsets.back();;
 
-        optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
+        std::optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
         if (!firstPlacedGlyph) return {};
 
-        optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
+        std::optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset, lineOffsetX, lineOffsetY, flip, anchorPoint, tileAnchorPoint, static_cast<uint16_t>(symbol.segment), symbol.line, symbol.tileDistances, labelPlaneMatrix, returnTileDistance);
         if (!lastPlacedGlyph) return {};
 
         return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
     }
     
-    optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes, const Point<float>& firstPoint,  const Point<float>& lastPoint, const float aspectRatio) {
+    std::optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes, const Point<float>& firstPoint,  const Point<float>& lastPoint, const float aspectRatio) {
         if (writingModes == (WritingModeType::Horizontal | WritingModeType::Vertical)) {
             // On top of choosing whether to flip, choose whether to render this version of the glyphs or the alternate
             // vertical glyphs. We can't just filter out vertical glyphs in the horizontal range because the horizontal
@@ -296,7 +295,7 @@ namespace mbgl {
         std::vector<PlacedGlyph> placedGlyphs;
         if (symbol.glyphOffsets.size() > 1) {
 
-            const optional<std::pair<PlacedGlyph, PlacedGlyph>> firstAndLastGlyph =
+            const std::optional<std::pair<PlacedGlyph, PlacedGlyph>> firstAndLastGlyph =
                 placeFirstAndLastGlyph(fontScale, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, symbol, labelPlaneMatrix, false);
             if (!firstAndLastGlyph) {
                 return PlacementResult::NotEnoughRoom;
@@ -320,7 +319,7 @@ namespace mbgl {
                 if (placedGlyph) {
                     placedGlyphs.push_back(*placedGlyph);
                 } else {
-                    placedGlyphs.emplace_back(Point<float>{-INFINITY, -INFINITY}, 0.0f, nullopt);
+                    placedGlyphs.emplace_back(Point<float>{-INFINITY, -INFINITY}, 0.0f, std::nullopt);
                 }
             }
             placedGlyphs.push_back(firstAndLastGlyph->second);
@@ -344,7 +343,7 @@ namespace mbgl {
                 }
             }
             const float glyphOffsetX = symbol.glyphOffsets.front();
-            optional<PlacedGlyph> singleGlyph = placeGlyphAlongLine(fontScale * glyphOffsetX, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, static_cast<uint16_t>(symbol.segment),
+            std::optional<PlacedGlyph> singleGlyph = placeGlyphAlongLine(fontScale * glyphOffsetX, lineOffsetX, lineOffsetY, flip, projectedAnchorPoint, symbol.anchorPoint, static_cast<uint16_t>(symbol.segment),
                 symbol.line, symbol.tileDistances, labelPlaneMatrix, false);
             if (!singleGlyph)
                 return PlacementResult::NotEnoughRoom;

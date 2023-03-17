@@ -45,9 +45,9 @@ public:
 private:
     gl::Context& context;
     const Size size;
-    optional<gfx::Texture> texture;
+    std::optional<gfx::Texture> texture;
     const gfx::TextureChannelDataType type;
-    optional<gl::Framebuffer> framebuffer;
+    std::optional<gl::Framebuffer> framebuffer;
 };
 
 OffscreenTexture::OffscreenTexture(gl::Context& context,

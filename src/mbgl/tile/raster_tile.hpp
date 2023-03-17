@@ -27,7 +27,7 @@ public:
     void setUpdateParameters(const TileUpdateParameters&) override;
 
     void setError(std::exception_ptr);
-    void setMetadata(optional<Timestamp> modified, optional<Timestamp> expires);
+    void setMetadata(std::optional<Timestamp> modified, std::optional<Timestamp> expires);
     void setData(const std::shared_ptr<const std::string>& data);
 
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) override;

@@ -3,10 +3,10 @@
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/text/tagged_string.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <array>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 
@@ -18,7 +18,7 @@ public:
     {}
 
     FeatureType getType() const override { return feature->getType(); }
-    optional<Value> getValue(const std::string& key) const override { return feature->getValue(key); }
+    std::optional<Value> getValue(const std::string& key) const override { return feature->getValue(key); }
     const PropertyMap& getProperties() const override { return feature->getProperties(); }
     FeatureIdentifier getID() const override { return feature->getID(); };
     const GeometryCollection& getGeometries() const override { return feature->getGeometries(); }
@@ -29,8 +29,8 @@ public:
 
     std::unique_ptr<GeometryTileFeature> feature;
     GeometryCollection geometry;
-    optional<TaggedString> formattedText;
-    optional<style::expression::Image> icon;
+    std::optional<TaggedString> formattedText;
+    std::optional<style::expression::Image> icon;
     float sortKey = 0.0f;
     std::size_t index;
     bool allowsVerticalWritingMode = false;

@@ -56,7 +56,7 @@
 
 - (NSArray<id <MGLFeature>> *)featuresInSourceLayersWithIdentifiers:(NSSet<NSString *> *)sourceLayerIdentifiers predicate:(nullable NSPredicate *)predicate {
     MGLAssertStyleSourceIsValid();
-    mbgl::optional<std::vector<std::string>> optionalSourceLayerIDs;
+    std::optional<std::vector<std::string>> optionalSourceLayerIDs;
     if (sourceLayerIdentifiers) {
         __block std::vector<std::string> layerIDs;
         layerIDs.reserve(sourceLayerIdentifiers.count);
@@ -66,7 +66,7 @@
         optionalSourceLayerIDs = layerIDs;
     }
     
-    mbgl::optional<mbgl::style::Filter> optionalFilter;
+    std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }

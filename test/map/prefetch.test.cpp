@@ -40,7 +40,7 @@ TEST(Map, PrefetchTiles) {
 
     std::vector<int> tiles;
 
-    fileSource->response = [&] (const Resource& res) -> optional<Response> {
+    fileSource->response = [&] (const Resource& res) -> std::optional<Response> {
         static std::string tile = util::read_file("test/fixtures/map/prefetch/tile.png");
 
         auto zoom = std::stoi(res.url);

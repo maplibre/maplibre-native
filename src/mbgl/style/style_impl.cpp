@@ -163,7 +163,7 @@ std::unique_ptr<Source> Style::Impl::removeSource(const std::string& id) {
     // Check if source is in use
     for (const auto& layer: layers) {
         if (layer->getSourceID() == id) {
-            Log::Warning(Event::General, "Source '%s' is in use, cannot remove", id.c_str());
+            Log::Warning(Event::General, "Source '" + id + "' is in use, cannot remove");
             return nullptr;
         }
     }
@@ -190,7 +190,7 @@ Layer* Style::Impl::getLayer(const std::string& id) const {
     return layers.get(id);
 }
 
-Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const optional<std::string>& before) {
+Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const std::optional<std::string>& before) {
     // TODO: verify source
     if (Source* source = sources.get(layer->getSourceID())) {
         if (!source->supportsLayerType(layer->baseImpl->getTypeInfo())) {
@@ -294,16 +294,16 @@ void Style::Impl::removeImage(const std::string& id) {
     auto found =
         std::find_if(newImages->begin(), newImages->end(), [&id](const auto& image) { return image->id == id; });
     if (found == newImages->end()) {
-        Log::Warning(Event::General, "Image '%s' is not present in style, cannot remove", id.c_str());
+        Log::Warning(Event::General, "Image '" + id + "' is not present in style, cannot remove");
         return;
     }
     newImages->erase(found);
     images = std::move(newImages);
 }
 
-optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
+std::optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
     auto found = std::find_if(images->begin(), images->end(), [&id](const auto& image) { return image->id == id; });
-    if (found == images->end()) return nullopt;
+    if (found == images->end()) return std::nullopt;
     return *found;
 }
 
@@ -325,8 +325,7 @@ void Style::Impl::onSourceChanged(Source& source) {
 
 void Style::Impl::onSourceError(Source& source, std::exception_ptr error) {
     lastError = error;
-    Log::Error(Event::Style, "Failed to load source %s: %s",
-               source.getID().c_str(), util::toString(error).c_str());
+    Log::Error(Event::Style, std::string("Failed to load source ") + source.getID() + ": " + util::toString(error));
     observer->onSourceError(source, error);
     observer->onResourceError(error);
 }
@@ -365,7 +364,7 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
 
 void Style::Impl::onSpriteError(std::exception_ptr error) {
     lastError = error;
-    Log::Error(Event::Style, "Failed to load sprite: %s", util::toString(error).c_str());
+    Log::Error(Event::Style, "Failed to load sprite: " + util::toString(error));
     observer->onResourceError(error);
     // Unblock rendering tiles (even though sprite request has failed).
     spriteLoaded = true;
@@ -382,7 +381,7 @@ void Style::Impl::onLightChanged(const Light&) {
 }
 
 void Style::Impl::dumpDebugLogs() const {
-    Log::Info(Event::General, "styleURL: %s", url.c_str());
+    Log::Info(Event::General, "styleURL: " + url);
     for (const auto& source : sources) {
         source->dumpDebugLogs();
     }

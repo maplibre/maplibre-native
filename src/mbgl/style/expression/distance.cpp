@@ -41,12 +41,12 @@ bool isRangeSafe(const IndexRange& range, const std::size_t threshold) {
     return ret;
 }
 
-std::pair<mbgl::optional<IndexRange>, mbgl::optional<IndexRange>> splitRange(const IndexRange& range, bool isLine) {
-    if (range.first > range.second) return std::make_pair(nullopt, nullopt);
+std::pair<std::optional<IndexRange>, std::optional<IndexRange>> splitRange(const IndexRange& range, bool isLine) {
+    if (range.first > range.second) return std::make_pair(std::nullopt, std::nullopt);
     auto size = getRangeSize(range);
     if (isLine) {
         if (size == 2) {
-            return std::make_pair(range, nullopt);
+            return std::make_pair(range, std::nullopt);
         }
         auto size1 = size / 2;
         IndexRange range1(range.first, range.first + size1);
@@ -54,7 +54,7 @@ std::pair<mbgl::optional<IndexRange>, mbgl::optional<IndexRange>> splitRange(con
         return std::make_pair(std::move(range1), std::move(range2));
     } else {
         if (size == 1) {
-            return std::make_pair(range, nullopt);
+            return std::make_pair(range, std::nullopt);
         }
         auto size1 = size / 2 - 1;
         IndexRange range1(range.first, range.first + size1);
@@ -340,7 +340,7 @@ double pointsToPolygonDistance(const mapbox::geometry::multi_point<double>& poin
         } else {
             auto newRangesA = splitRange(range, false /*isLine*/);
             const auto updateQueue =
-                [&distQueue, &miniDist, &ruler, &points, &polyBBox](mbgl::optional<IndexRange>& rangeA) {
+                [&distQueue, &miniDist, &ruler, &points, &polyBBox](std::optional<IndexRange>& rangeA) {
                     if (!rangeA) return;
                     auto tempDist = bboxToBBoxDistance(getBBox(points, *rangeA), polyBBox, ruler);
                     // Insert new pair to the queue if the bbox distance is less than miniDist,
@@ -380,7 +380,7 @@ double lineToPolygonDistance(const mapbox::geometry::line_string<double>& line,
         } else {
             auto newRangesA = splitRange(range, true /*isLine*/);
             const auto updateQueue =
-                [&distQueue, &miniDist, &ruler, &line, &polyBBox](mbgl::optional<IndexRange>& rangeA) {
+                [&distQueue, &miniDist, &ruler, &line, &polyBBox](std::optional<IndexRange>& rangeA) {
                     if (!rangeA) return;
                     auto tempDist = bboxToBBoxDistance(getBBox(line, *rangeA), polyBBox, ruler);
                     // Insert new pair to the queue if the bbox distance is less than miniDist,
@@ -421,7 +421,7 @@ double lineToLineDistance(const mapbox::geometry::line_string<double>& line1,
             auto newRangesA = splitRange(rangeA, true /*isLine*/);
             auto newRangesB = splitRange(rangeB, true /*isLine*/);
             const auto updateQueue = [&distQueue, &miniDist, &ruler, &line1, &line2](
-                                         mbgl::optional<IndexRange>& range1, mbgl::optional<IndexRange>& range2) {
+                                         std::optional<IndexRange>& range1, std::optional<IndexRange>& range2) {
                 if (!range1 || !range2) return;
                 auto tempDist = bboxToBBoxDistance(getBBox(line1, *range1), getBBox(line2, *range2), ruler);
                 // Insert new pair to the queue if the bbox distance is less than miniDist,
@@ -465,7 +465,7 @@ double pointsToPointsDistance(const mapbox::geometry::multi_point<double>& point
             auto newRangesA = splitRange(rangeA, false /*isLine*/);
             auto newRangesB = splitRange(rangeB, false /*isLine*/);
             const auto updateQueue = [&distQueue, &miniDist, &ruler, &pointSet1, &pointSet2](
-                                         mbgl::optional<IndexRange>& range1, mbgl::optional<IndexRange>& range2) {
+                                         std::optional<IndexRange>& range1, std::optional<IndexRange>& range2) {
                 if (!range1 || !range2) return;
                 auto tempDist = bboxToBBoxDistance(getBBox(pointSet1, *range1), getBBox(pointSet2, *range2), ruler);
                 // Insert new pair to the queue if the bbox distance is less than miniDist,
@@ -515,7 +515,7 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
             auto newRangesA = splitRange(rangeA, false /*isLine*/);
             auto newRangesB = splitRange(rangeB, true /*isLine*/);
             const auto updateQueue = [&distQueue, &miniDist, &ruler, &points, &line](
-                                         mbgl::optional<IndexRange>& range1, mbgl::optional<IndexRange>& range2) {
+                                         std::optional<IndexRange>& range1, std::optional<IndexRange>& range2) {
                 if (!range1 || !range2) return;
                 auto tempDist = bboxToBBoxDistance(getBBox(points, *range1), getBBox(line, *range2), ruler);
                 // Insert new pair to the queue if the bbox distance is less than miniDist,
@@ -718,14 +718,14 @@ double calculateDistance(const GeometryTileFeature& feature,
             [](const auto&) -> double { return InvalidDistance; });
 }
 
-optional<GeoJSON> parseValue(const style::conversion::Convertible& value, style::expression::ParsingContext& ctx) {
+std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, style::expression::ParsingContext& ctx) {
     if (isArray(value)) {
         // object value, quoted with ["distance", GeoJSONObj]
         auto length = arrayLength(value);
         if (length != 2) {
             ctx.error("'distance' expression requires one argument, but found " +
                       util::toString(arrayLength(value) - 1) + " instead.");
-            return nullopt;
+            return std::nullopt;
         }
 
         // Parse geometry info
@@ -740,17 +740,17 @@ optional<GeoJSON> parseValue(const style::conversion::Convertible& value, style:
         }
     }
     ctx.error("'distance' expression needs to be an array with format [\"distance\", GeoJSONObj].");
-    return nullopt;
+    return std::nullopt;
 }
 
-optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
+std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
     }
     ctx.error(
         "'distance' expression requires valid geojson object with valid geometry type: Point, LineString or Polygon.");
-    return nullopt;
+    return std::nullopt;
 }
 } // namespace
 
@@ -870,8 +870,8 @@ bool Distance::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Distance::possibleOutputs() const {
-    return {nullopt};
+std::vector<std::optional<Value>> Distance::possibleOutputs() const {
+    return { std::nullopt };
 }
 
 std::string Distance::getOperator() const {

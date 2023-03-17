@@ -21,7 +21,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
     : javaPeer(_env, obj),
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
-                                                         : optional<std::string>{}),
+                                                         : std::optional<std::string>{}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_) : scheduler(scheduler_) {
@@ -51,7 +51,7 @@ void MapRenderer::reset() {
         std::lock_guard<std::mutex> lock(initialisationMutex);
         rendererObserver.reset();
     } catch (const std::exception& exception) {
-        Log::Error(Event::Android, "MapRenderer::reset failed: %s", exception.what());
+        Log::Error(Event::Android, std::string("MapRenderer::reset failed: ") + exception.what());
     }
 }
 
@@ -80,7 +80,7 @@ void MapRenderer::schedule(std::function<void()> scheduled) {
         // Release the c++ peer as it will be destroyed on GC of the Java Peer
         runnable.release();
     } catch (const std::exception& exception) {
-        Log::Error(Event::Android, "MapRenderer::schedule failed: %s", exception.what());
+        Log::Error(Event::Android, std::string("MapRenderer::schedule failed: ") + exception.what());
     }
 }
 
@@ -94,7 +94,7 @@ void MapRenderer::requestRender() {
             weakReference.Call(*_env, onInvalidate);
         }
     } catch (const std::exception& exception) {
-        Log::Error(Event::Android, "MapRenderer::requestRender failed: %s", exception.what());
+        Log::Error(Event::Android, std::string("MapRenderer::requestRender failed: ") + exception.what());
     }
 }
 
@@ -104,7 +104,7 @@ void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
         std::lock_guard<std::mutex> lock(updateMutex);
         updateParameters = std::move(params);
     } catch (const std::exception& exception) {
-        Log::Error(Event::Android, "MapRenderer::update failed: %s", exception.what());
+        Log::Error(Event::Android, std::string("MapRenderer::update failed: ") + exception.what());
     }
 }
 
@@ -120,7 +120,7 @@ void MapRenderer::setObserver(std::shared_ptr<RendererObserver> _rendererObserve
             renderer->setObserver(rendererObserver.get());
         }
     } catch (const std::exception& exception) {
-        Log::Error(Event::Android, "MapRenderer::setObserver failed: %s", exception.what());
+        Log::Error(Event::Android, std::string("MapRenderer::setObserver failed: ") + exception.what());
     }
 }
 

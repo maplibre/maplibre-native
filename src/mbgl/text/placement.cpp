@@ -47,14 +47,14 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
             uint16_t nextGroupID = ++maxGroupID;
             collisionGroups.emplace(sourceID, CollisionGroup(
                 nextGroupID,
-                optional<Predicate>([nextGroupID](const IndexedSubfeature& feature) -> bool {
+                std::optional<Predicate>([nextGroupID](const IndexedSubfeature& feature) -> bool {
                     return feature.collisionGroupId == nextGroupID;
                 })
             ));
         }
         return collisionGroups[sourceID];
     } else {
-        static CollisionGroup nullGroup{0, nullopt};
+        static CollisionGroup nullGroup{0, std::nullopt};
         return nullGroup;
     }
 }
@@ -73,7 +73,7 @@ public:
                      const TransformState& state_,
                      float placementZoom,
                      CollisionGroups::CollisionGroup collisionGroup_,
-                     optional<CollisionBoundaries> avoidEdges_ = nullopt)
+                     std::optional<CollisionBoundaries> avoidEdges_ = std::nullopt)
         : bucket(bucket_),
           renderTile(renderTile_),
           state(state_),
@@ -143,7 +143,7 @@ public:
 
     bool hasIconTextFit = getLayout().get<IconTextFit>() != IconTextFitType::None;
 
-    optional<CollisionBoundaries> avoidEdges;
+    std::optional<CollisionBoundaries> avoidEdges;
 };
 
 // PlacementController implemenation
@@ -155,7 +155,7 @@ void PlacementController::setPlacement(Immutable<Placement> placement_) {
     stale = false;
 }
 
-bool PlacementController::placementIsRecent(TimePoint now, const float zoom, optional<Duration> periodOverride) const {
+bool PlacementController::placementIsRecent(TimePoint now, const float zoom, std::optional<Duration> periodOverride) const {
     if (!placement->transitionsEnabled()) return false;
 
     auto updatePeriod = periodOverride ? *periodOverride : placement->getUpdatePeriod(zoom);
@@ -174,7 +174,7 @@ bool PlacementController::hasTransitions(TimePoint now) const {
 // Placement implementation
 
 Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
-                     optional<Immutable<Placement>> prevPlacement_)
+                     std::optional<Immutable<Placement>> prevPlacement_)
     : updateParameters(std::move(updateParameters_)),
       collisionIndex(updateParameters->transformState, updateParameters->mode),
       transitionOptions(updateParameters->transitionOptions),
@@ -184,7 +184,7 @@ Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
       prevPlacement(std::move(prevPlacement_)),
       showCollisionBoxes(updateParameters->debugOptions & MapDebugOptions::Collision) {
     if (prevPlacement) {
-        prevPlacement->get()->prevPlacement = nullopt; // Only hold on to one placement back
+        prevPlacement->get()->prevPlacement = std::nullopt; // Only hold on to one placement back
     }
 }
 
@@ -282,7 +282,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     std::pair<bool, bool> placedVerticalText{false, false};
     std::pair<bool, bool> placedVerticalIcon{false, false};
     Point<float> shift{0.0f, 0.0f};
-    optional<size_t> horizontalTextIndex = symbolInstance.getDefaultHorizontalPlacedTextIndex();
+    std::optional<size_t> horizontalTextIndex = symbolInstance.getDefaultHorizontalPlacedTextIndex();
     if (horizontalTextIndex) {
         const PlacedSymbol& placedSymbol = bucket.text.placedSymbols.at(*horizontalTextIndex);
         const float fontSize = evaluateSizeForFeature(ctx.partiallyEvaluatedTextSize, placedSymbol);
@@ -447,7 +447,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
                     if (placedFeature.first) {
                         assert(symbolInstance.crossTileID != 0u);
-                        optional<style::TextVariableAnchorType> prevAnchor;
+                        std::optional<style::TextVariableAnchorType> prevAnchor;
 
                         // If this label was placed in the previous placement, record the anchor position
                         // to allow us to animate the transition
@@ -618,7 +618,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 namespace {
 
 SymbolInstanceReferences getBucketSymbols(const SymbolBucket& bucket,
-                                          const optional<SortKeyRange>& sortKeyRange,
+                                          const std::optional<SortKeyRange>& sortKeyRange,
                                           double bearing) {
     if (bucket.layout->get<style::SymbolZOrder>() == style::SymbolZOrderType::ViewportY) {
         auto sortedSymbols = bucket.getSortedSymbols(static_cast<float>(bearing));
@@ -778,7 +778,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket, const Transfor
 
         for (std::size_t i = 0; i < bucket.text.placedSymbols.size(); ++i) {
             const PlacedSymbol& symbol = bucket.text.placedSymbols[i];
-            optional<VariableOffset> variableOffset;
+            std::optional<VariableOffset> variableOffset;
             const bool skipOrientation = bucket.allowVerticalPlacement && !symbol.placedOrientation;
             if (!symbol.hidden && symbol.crossTileID != 0u && !skipOrientation) {
                 auto it = variableOffsets.find(symbol.crossTileID);
@@ -1082,7 +1082,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
 }
 
 namespace {
-optional<size_t> justificationToIndex(style::TextJustifyType justify, const SymbolInstance& symbolInstance, style::TextWritingModeType orientation) {
+std::optional<size_t> justificationToIndex(style::TextJustifyType justify, const SymbolInstance& symbolInstance, style::TextWritingModeType orientation) {
     // Vertical symbol has just one justification, style::TextJustifyType::Left.
     if (orientation == style::TextWritingModeType::Vertical) {
         return symbolInstance.placedVerticalTextIndex;
@@ -1095,7 +1095,7 @@ optional<size_t> justificationToIndex(style::TextJustifyType justify, const Symb
         case style::TextJustifyType::Auto: break;
     }
     assert(false);
-    return nullopt;
+    return std::nullopt;
 }
 
 const style::TextJustifyType justifyTypes[] = {
@@ -1109,10 +1109,10 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
                                       style::TextWritingModeType orientation) const {
     style::TextJustifyType anchorJustify = getAnchorJustification(placedAnchor);
     assert(anchorJustify != style::TextJustifyType::Auto);
-    const optional<size_t>& autoIndex = justificationToIndex(anchorJustify, symbolInstance, orientation);
+    const std::optional<size_t>& autoIndex = justificationToIndex(anchorJustify, symbolInstance, orientation);
 
     for (auto& justify : justifyTypes) {
-        const optional<size_t> index = justificationToIndex(justify, symbolInstance, orientation);
+        const std::optional<size_t> index = justificationToIndex(justify, symbolInstance, orientation);
         if (index) {
             assert(bucket.text.placedSymbols.size() > *index);
             if (autoIndex && *index != *autoIndex) {
@@ -1130,9 +1130,9 @@ void Placement::markUsedOrientation(SymbolBucket& bucket,
                                     style::TextWritingModeType orientation,
                                     const SymbolInstance& symbolInstance) const {
     auto horizontal = orientation == style::TextWritingModeType::Horizontal ?
-                                     optional<style::TextWritingModeType>(orientation) : nullopt;
+                                     std::optional<style::TextWritingModeType>(orientation) : std::nullopt;
     auto vertical = orientation == style::TextWritingModeType::Vertical ?
-                                     optional<style::TextWritingModeType>(orientation) : nullopt;
+                                     std::optional<style::TextWritingModeType>(orientation) : std::nullopt;
 
     if (symbolInstance.placedRightTextIndex) {
         bucket.text.placedSymbols.at(*symbolInstance.placedRightTextIndex).placedOrientation = horizontal;
@@ -1225,7 +1225,7 @@ const RetainedQueryData& Placement::getQueryData(uint32_t bucketInstanceId) cons
 class StaticPlacement : public Placement {
 public:
     explicit StaticPlacement(std::shared_ptr<const UpdateParameters> updateParameters_)
-        : Placement(std::move(updateParameters_), nullopt) {}
+        : Placement(std::move(updateParameters_), std::nullopt) {}
 
 protected:
     void commit() override;
@@ -1265,7 +1265,7 @@ private:
     void collectPlacedSymbolData(bool enable) override { collectData = enable; }
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const override { return placedSymbolsData; }
 
-    optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4&) override;
+    std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4&) override;
     bool canPlaceAtVariableAnchor(const CollisionBox& box,
                                   TextVariableAnchorType anchor,
                                   Point<float> shift,
@@ -1282,7 +1282,7 @@ private:
     bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&);
 
     std::unordered_map<uint32_t, bool> locationCache;
-    optional<CollisionBoundaries> tileBorders;
+    std::optional<CollisionBoundaries> tileBorders;
     std::set<uint32_t> seenCrossTileIDs;
     std::vector<PlacedSymbolData> placedSymbolsData;
     std::vector<Intersection> intersections;
@@ -1341,14 +1341,14 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
     commit();
 }
 
-optional<CollisionBoundaries> TilePlacement::getAvoidEdges(const SymbolBucket& bucket, const mat4& posMatrix) {
+std::optional<CollisionBoundaries> TilePlacement::getAvoidEdges(const SymbolBucket& bucket, const mat4& posMatrix) {
     tileBorders = collisionIndex.projectTileBoundaries(posMatrix);
     const auto& layout = *bucket.layout;
     if (layout.get<style::SymbolAvoidEdges>() ||
         layout.get<style::SymbolPlacement>() == style::SymbolPlacementType::Line) {
         return tileBorders;
     }
-    return nullopt;
+    return std::nullopt;
 }
 
 void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::set<uint32_t>& seen) {
@@ -1376,7 +1376,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     // those symbols will remain even if each tile is handled independently.
     SymbolInstanceReferences symbolInstances =
         getBucketSymbols(bucket, params.sortKeyRange, collisionIndex.getTransformState().getBearing());
-    optional<style::TextVariableAnchorType> variableAnchor;
+    std::optional<style::TextVariableAnchorType> variableAnchor;
     if (!variableTextAnchors.empty()) variableAnchor = variableTextAnchors.front();
 
     // Keeps the data necessary to find a feature location according to a tile.
@@ -1511,14 +1511,14 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
     if (!collectData || placementType != style::SymbolPlacementType::Point || shouldRetryPlacement(placement, ctx))
         return;
 
-    optional<mapbox::geometry::box<float>> textCollisionBox;
+    std::optional<mapbox::geometry::box<float>> textCollisionBox;
     if (!textCollisionBoxes.empty()) {
         assert(textCollisionBoxes.size() == 1u);
         auto& box = textCollisionBoxes.front();
         assert(box.isBox());
         textCollisionBox = box.box();
     }
-    optional<mapbox::geometry::box<float>> iconCollisionBox;
+    std::optional<mapbox::geometry::box<float>> iconCollisionBox;
     if (!iconCollisionBoxes.empty()) {
         assert(iconCollisionBoxes.size() == 1u);
         auto& box = iconCollisionBoxes.front();
@@ -1543,7 +1543,7 @@ bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const 
 
 // static
 Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> updateParameters_,
-                                     optional<Immutable<Placement>> prevPlacement) {
+                                     std::optional<Immutable<Placement>> prevPlacement) {
     assert(updateParameters_);
     switch (updateParameters_->mode) {
         case MapMode::Continuous:

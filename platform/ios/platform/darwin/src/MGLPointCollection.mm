@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation MGLPointCollection
 {
-    mbgl::optional<mbgl::LatLngBounds> _bounds;
+    std::optional<mbgl::LatLngBounds> _bounds;
     std::vector<CLLocationCoordinate2D> _coordinates;
 }
 

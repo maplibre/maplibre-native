@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
     std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
     std::cout << " Style: " << style << std::endl;
     
-    mbgl::optional<std::string> mergePath = {};
+    std::optional<std::string> mergePath = std::nullopt;
     if (mergePathValue) mergePath = args::get(mergePathValue);
-    mbgl::optional<std::string> inputDb = {};
+    std::optional<std::string> inputDb = std::nullopt;
     if (inputValue) inputDb = args::get(inputValue);
 
     const double minZoom = minZoomValue ? args::get(minZoomValue) : 0.0;
@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
         Observer(OfflineRegion& region_,
                  std::shared_ptr<DatabaseFileSource> fileSource_,
                  util::RunLoop& loop_,
-                 mbgl::optional<std::string> mergePath_)
+                 std::optional<std::string> mergePath_)
             : region(region_),
               fileSource(std::move(fileSource_)),
               loop(loop_),
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
         OfflineRegion& region;
         std::shared_ptr<DatabaseFileSource> fileSource;
         util::RunLoop& loop;
-        mbgl::optional<std::string> mergePath;
+        std::optional<std::string> mergePath;
         Timestamp start;
     };
 

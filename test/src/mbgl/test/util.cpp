@@ -34,8 +34,7 @@ void checkImage(const std::string& base,
     try {
         expected_image = util::read_file(base + "/expected.png");
     } catch (std::exception& ex) {
-        Log::Error(Event::Setup, "Failed to load expected image %s: %s",
-                   (base + "/expected.png").c_str(), ex.what());
+        Log::Error(Event::Setup, "Failed to load expected image " + base + "/expected.png" + ": " + ex.what());
         throw;
     }
 

@@ -22,7 +22,7 @@ void AnnotationSource::loadDescription(FileSource&) {
     loaded = true;
 }
 
-optional<std::string> AnnotationSource::Impl::getAttribution() const {
+std::optional<std::string> AnnotationSource::Impl::getAttribution() const {
     return {};
 }
 

@@ -3,11 +3,11 @@
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/image.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <memory>
 #include <mutex>
 #include <utility>
+#include <optional>
 
 #include <jni/jni.hpp>
 
@@ -112,7 +112,7 @@ private:
     jni::WeakReference<jni::Object<MapRenderer>, jni::EnvAttachingDeleter> javaPeer;
 
     float pixelRatio;
-    optional<std::string> localIdeographFontFamily;
+    std::optional<std::string> localIdeographFontFamily;
 
     std::shared_ptr<ThreadPool> threadPool;
     const MailboxData mailboxData;

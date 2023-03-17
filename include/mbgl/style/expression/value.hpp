@@ -14,6 +14,7 @@
 
 #include <array>
 #include <vector>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -77,8 +78,8 @@ struct ValueConverter {
         return Value(value);
     }
 
-    static optional<T> fromExpressionValue(const Value& value) {
-        return value.template is<T>() ? value.template get<T>() : optional<T>();
+    static std::optional<T> fromExpressionValue(const Value& value) {
+        return value.template is<T>() ? value.template get<T>() : std::optional<T>();
     }
 };
 
@@ -86,7 +87,7 @@ template <>
 struct ValueConverter<Value> {
     static type::Type expressionType() { return type::Value; }
     static Value toExpressionValue(const Value& value) { return value; }
-    static optional<Value> fromExpressionValue(const Value& value) { return value; }
+    static std::optional<Value> fromExpressionValue(const Value& value) { return value; }
 };
 
 template <>
@@ -99,7 +100,7 @@ template <>
 struct ValueConverter<float> {
     static type::Type expressionType() { return type::Number; }
     static Value toExpressionValue(float value);
-    static optional<float> fromExpressionValue(const Value& value);
+    static std::optional<float> fromExpressionValue(const Value& value);
 };
 
 template <typename T, std::size_t N>
@@ -108,7 +109,7 @@ struct ValueConverter<std::array<T, N>> {
         return type::Array(valueTypeToExpressionType<T>(), N);
     }
     static Value toExpressionValue(const std::array<T, N>& value);
-    static optional<std::array<T, N>> fromExpressionValue(const Value& value);
+    static std::optional<std::array<T, N>> fromExpressionValue(const Value& value);
 };
 
 template <typename T>
@@ -117,21 +118,21 @@ struct ValueConverter<std::vector<T>> {
         return type::Array(valueTypeToExpressionType<T>());
     }
     static Value toExpressionValue(const std::vector<T>& value);
-    static optional<std::vector<T>> fromExpressionValue(const Value& value);
+    static std::optional<std::vector<T>> fromExpressionValue(const Value& value);
 };
 
 template <>
 struct ValueConverter<Position> {
     static type::Type expressionType() { return type::Array(type::Number, 3); }
     static Value toExpressionValue(const mbgl::style::Position& value);
-    static optional<Position> fromExpressionValue(const Value& v);
+    static std::optional<Position> fromExpressionValue(const Value& v);
 };
 
 template <typename T>
 struct ValueConverter<T, std::enable_if_t< std::is_enum_v<T> >> {
     static type::Type expressionType() { return type::String; }
     static Value toExpressionValue(const T& value);
-    static optional<T> fromExpressionValue(const Value& value);
+    static std::optional<T> fromExpressionValue(const Value& value);
 };
 
 template <typename T>
@@ -140,16 +141,16 @@ Value toExpressionValue(const T& value) {
 }
 
 template <typename T>
-optional<T> fromExpressionValue(const Value& value) {
+std::optional<T> fromExpressionValue(const Value& value) {
     return ValueConverter<T>::fromExpressionValue(value);
 }
 
 template <typename T>
-std::vector<optional<T>> fromExpressionValues(const std::vector<optional<Value>>& values) {
-    std::vector<optional<T>> result;
+std::vector<std::optional<T>> fromExpressionValues(const std::vector<std::optional<Value>>& values) {
+    std::vector<std::optional<T>> result;
     result.reserve(values.size());
     for (const auto& value : values) {
-        result.push_back(value ? fromExpressionValue<T>(*value) : nullopt);
+        result.push_back(value ? fromExpressionValue<T>(*value) : std::nullopt);
     }
     return result;
 }
@@ -158,7 +159,7 @@ template <>
 struct ValueConverter<Rotation> {
     static type::Type expressionType() { return type::Number; }
     static Value toExpressionValue(const mbgl::style::Rotation& value);
-    static optional<Rotation> fromExpressionValue(const Value& v);
+    static std::optional<Rotation> fromExpressionValue(const Value& v);
 };
 
 } // namespace expression

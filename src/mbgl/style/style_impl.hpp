@@ -15,7 +15,6 @@
 #include <mbgl/map/camera.hpp>
 
 #include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/geo.hpp>
 
 #include <memory>
@@ -65,7 +64,7 @@ public:
     std::vector<const Layer*> getLayers() const;
     Layer* getLayer(const std::string& id) const;
 
-    Layer* addLayer(std::unique_ptr<Layer>, const optional<std::string>& beforeLayerID = {});
+    Layer* addLayer(std::unique_ptr<Layer>, const std::optional<std::string>& beforeLayerID = std::nullopt);
     std::unique_ptr<Layer> removeLayer(const std::string& layerID);
 
     std::string getName() const;
@@ -77,7 +76,7 @@ public:
     void setLight(std::unique_ptr<Light>);
     Light* getLight() const;
 
-    optional<Immutable<style::Image::Impl>> getImage(const std::string&) const;
+    std::optional<Immutable<style::Image::Impl>> getImage(const std::string&) const;
     void addImage(std::unique_ptr<style::Image>);
     void removeImage(const std::string&);
 

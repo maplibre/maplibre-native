@@ -43,7 +43,7 @@ public:
     std::reference_wrapper<const RenderTile> tile;
     std::shared_ptr<FeatureIndex> featureIndex;
     std::string sourceId;
-    optional<SortKeyRange> sortKeyRange;
+    std::optional<SortKeyRange> sortKeyRange;
 };
 
 using LayerPlacementData = std::list<BucketPlacementData>;
@@ -121,7 +121,7 @@ public:
     virtual void markContextDestroyed();
 
     // TODO: Only for background layers.
-    virtual optional<Color> getSolidBackground() const;
+    virtual std::optional<Color> getSolidBackground() const;
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't, we'll show a warning

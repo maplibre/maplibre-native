@@ -3,7 +3,6 @@
 #include <mbgl/map/mode.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/geometry.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
@@ -19,16 +18,16 @@ public:
     DebugBucket(const OverscaledTileID& id,
                 bool renderable,
                 bool complete,
-                optional<Timestamp> modified,
-                optional<Timestamp> expires,
+                std::optional<Timestamp> modified,
+                std::optional<Timestamp> expires,
                 MapDebugOptions);
 
     void upload(gfx::UploadPass&);
 
     const bool renderable;
     const bool complete;
-    const optional<Timestamp> modified;
-    const optional<Timestamp> expires;
+    const std::optional<Timestamp> modified;
+    const std::optional<Timestamp> expires;
     const MapDebugOptions debugMode;
 
 
@@ -37,9 +36,9 @@ public:
 
     SegmentVector<DebugAttributes> segments;
     SegmentVector<DebugAttributes> tileBorderSegments;
-    optional<gfx::VertexBuffer<DebugLayoutVertex>> vertexBuffer;
-    optional<gfx::IndexBuffer> indexBuffer;
-    optional<gfx::Texture> texture;
+    std::optional<gfx::VertexBuffer<DebugLayoutVertex>> vertexBuffer;
+    std::optional<gfx::IndexBuffer> indexBuffer;
+    std::optional<gfx::Texture> texture;
 };
 
 } // namespace mbgl

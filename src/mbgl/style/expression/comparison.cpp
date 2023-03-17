@@ -156,7 +156,7 @@ bool BasicComparison::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> BasicComparison::possibleOutputs() const {
+std::vector<std::optional<Value>> BasicComparison::possibleOutputs() const {
     return {{ true }, { false }};
 }
 
@@ -217,7 +217,7 @@ bool CollatorComparison::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> CollatorComparison::possibleOutputs() const {
+std::vector<std::optional<Value>> CollatorComparison::possibleOutputs() const {
     return {{ true }, { false }};
 }
 

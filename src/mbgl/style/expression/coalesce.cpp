@@ -9,7 +9,7 @@ namespace expression {
 EvaluationResult Coalesce::evaluate(const EvaluationContext& params) const {
     EvaluationResult result = Null;
     std::size_t argsCount = args.size();
-    optional<Image> requestedImage;
+    std::optional<Image> requestedImage;
     for (const auto& arg : args) {
         --argsCount;
         result = arg->evaluate(params);
@@ -43,8 +43,8 @@ bool Coalesce::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Coalesce::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Coalesce::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& arg : args) {
         for (auto& output : arg->possibleOutputs()) {
             result.push_back(std::move(output));
@@ -62,8 +62,8 @@ ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
         return ParseResult();
     }
  
-    optional<type::Type> outputType;
-    optional<type::Type> expectedType = ctx.getExpected();
+    std::optional<type::Type> outputType;
+    std::optional<type::Type> expectedType = ctx.getExpected();
     if (expectedType && *expectedType != type::Value) {
         outputType = expectedType;
     }

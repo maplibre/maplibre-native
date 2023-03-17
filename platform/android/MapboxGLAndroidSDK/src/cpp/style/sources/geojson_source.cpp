@@ -36,7 +36,7 @@ static Immutable<style::GeoJSONOptions> convertGeoJSONOptions(jni::JNIEnv& env, 
         return style::GeoJSONOptions::defaultOptions();
     }
     Error error;
-    optional<style::GeoJSONOptions> result = convert<style::GeoJSONOptions>(mbgl::android::Value(env, options), error);
+    std::optional<style::GeoJSONOptions> result = convert<style::GeoJSONOptions>(mbgl::android::Value(env, options), error);
     if (!result) {
         throw std::logic_error(error.message);
     }
@@ -85,7 +85,7 @@ void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jStrin
     }
 
     jni::Local<jni::String> GeoJSONSource::getURL(jni::JNIEnv& env) {
-        optional<std::string> url = source.as<style::GeoJSONSource>()->getURL();
+        std::optional<std::string> url = source.as<style::GeoJSONSource>()->getURL();
         return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
     }
 
@@ -231,7 +231,7 @@ void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jStrin
         android::UniqueEnv _env = android::AttachEnv();
         // Convert the jni object
         Error error;
-        optional<GeoJSON> converted = parseGeoJSON(*json, error);
+        std::optional<GeoJSON> converted = parseGeoJSON(*json, error);
         if(!converted) {
             mbgl::Log::Error(mbgl::Event::JNI, "Error setting geo json: " + error.message);
             return;

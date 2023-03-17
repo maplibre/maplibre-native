@@ -154,8 +154,8 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     const bool allowOverlap,
     const bool pitchWithMap,
     const bool collisionDebug,
-    const optional<CollisionBoundaries>& avoidEdges,
-    const optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+    const std::optional<CollisionBoundaries>& avoidEdges,
+    const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
     std::vector<ProjectedCollisionBox>& projectedBoxes) {
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
@@ -185,8 +185,8 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     const bool allowOverlap,
     const bool pitchWithMap,
     const bool collisionDebug,
-    const optional<CollisionBoundaries>& avoidEdges,
-    const optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+    const std::optional<CollisionBoundaries>& avoidEdges,
+    const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
     std::vector<ProjectedCollisionBox>& projectedBoxes) {
     assert(feature.alongLine);
     assert(projectedBoxes.empty());

@@ -4,10 +4,12 @@
 #include <mbgl/style/expression/formatted.hpp>
 #include <mbgl/util/font_stack.hpp>
 
+#include <optional>
+
 namespace mbgl {
 
 struct SectionOptions {
-    SectionOptions(double scale_, FontStack fontStack_, optional<Color> textColor_ = nullopt)
+    SectionOptions(double scale_, FontStack fontStack_, std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
           fontStackHash(FontStackHasher()(fontStack_)),
           fontStack(std::move(fontStack_)),
@@ -19,8 +21,8 @@ struct SectionOptions {
     double scale;
     FontStackHash fontStackHash;
     FontStack fontStack;
-    optional<Color> textColor;
-    optional<std::string> imageID;
+    std::optional<Color> textColor;
+    std::optional<std::string> imageID;
 };
 
 /**
@@ -83,7 +85,7 @@ struct TaggedString {
     void addTextSection(const std::u16string& text,
                         double scale,
                         const FontStack& fontStack,
-                        optional<Color> textColor_ = nullopt);
+                        std::optional<Color> textColor_ = std::nullopt);
 
     void addImageSection(const std::string& imageID);
 
@@ -106,12 +108,12 @@ struct TaggedString {
     bool allowsVerticalWritingMode();
 
 private:
-    optional<char16_t> getNextImageSectionCharCode();
+    std::optional<char16_t> getNextImageSectionCharCode();
 
 private:
     StyledText styledText;
     std::vector<SectionOptions> sections;
-    optional<bool> supportsVerticalWritingMode;
+    std::optional<bool> supportsVerticalWritingMode;
     // Max number of images within a text is 6400 U+E000–U+F8FF
     // that covers Basic Multilingual Plane Unicode Private Use Area (PUA).
     char16_t imageSectionID = 0u;

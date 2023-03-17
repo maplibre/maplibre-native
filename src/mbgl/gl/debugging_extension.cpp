@@ -46,8 +46,13 @@ void Debugging::DebugCallback(GLenum source,
         case GL_DEBUG_SEVERITY_NOTIFICATION: strSeverity = "DEBUG_SEVERITY_NOTIFICATION"; evtSeverity = mbgl::EventSeverity::Debug; break;
         default: strSource = "(unknown)"; evtSeverity = mbgl::EventSeverity::Debug; break;
     }
+    const std::string logMsg = "GL_" + strSource +
+                         " GL_" + strType +
+                         " " + std::to_string(id) +
+                         " GL_" + strSeverity +
+                         " - " + message;
+    mbgl::Log::Record(evtSeverity, mbgl::Event::OpenGL, logMsg);
 
-    mbgl::Log::Record(evtSeverity, mbgl::Event::OpenGL, "GL_%s GL_%s %u GL_%s - %s", strSource.c_str(), strType.c_str(), id, strSeverity.c_str(), message);
 }
 
 } // namespace extension

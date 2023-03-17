@@ -10,11 +10,11 @@ std::string errorMessage(const Type& expected, const Type& t) {
     return {"Expected " + toString(expected) + " but found " + toString(t) + " instead."};
 }
 
-optional<std::string> checkSubtype(const Type& expected, const Type& t) {
+std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
     if (t.is<ErrorType>()) return {};
     
-    optional<std::string> result = expected.match(
-        [&] (const Array& expectedArray) -> optional<std::string> {
+    std::optional<std::string> result = expected.match(
+        [&] (const Array& expectedArray) -> std::optional<std::string> {
             if (!t.is<Array>()) {
                 return {errorMessage(expected, t)};
             }
@@ -30,7 +30,7 @@ optional<std::string> checkSubtype(const Type& expected, const Type& t) {
             }
             return {};
         },
-        [&] (const ValueType&) -> optional<std::string> {
+        [&] (const ValueType&) -> std::optional<std::string> {
             if (t.is<ValueType>()) return {};
 
             const Type members[] = {Null, Boolean, Number, String, Object, Color, Formatted, Image, Array(Value)};
@@ -43,7 +43,7 @@ optional<std::string> checkSubtype(const Type& expected, const Type& t) {
             }
             return { errorMessage(expected, t) };
         },
-        [&] (const auto&) -> optional<std::string> {
+        [&] (const auto&) -> std::optional<std::string> {
             if (expected != t) {
                 return { errorMessage(expected, t) };
             }

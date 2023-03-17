@@ -24,7 +24,7 @@ public:
     queryFeatureExtensions(const Feature& feature,
                            const std::string& extension,
                            const std::string& extensionField,
-                           const optional<std::map<std::string, Value>>& args) const override;
+                           const std::optional<std::map<std::string, Value>>& args) const override;
 
 private:
     const style::GeoJSONSource::Impl& impl() const;

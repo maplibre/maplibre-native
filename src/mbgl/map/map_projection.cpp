@@ -26,7 +26,7 @@ void MapProjection::setCamera(const CameraOptions& camera) {
 }
 
 CameraOptions MapProjection::getCamera() const {
-    return transform->getCameraOptions(nullopt);
+    return transform->getCameraOptions(std::nullopt);
 }
 
 void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs,

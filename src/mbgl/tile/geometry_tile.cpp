@@ -50,7 +50,7 @@ public:
 
 private:
     // TileRenderData overrides.
-    optional<ImagePosition> getPattern(const std::string&) const override;
+    std::optional<ImagePosition> getPattern(const std::string&) const override;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const override;
     Bucket* getBucket(const style::Layer::Impl&) const override;
     void upload(gfx::UploadPass&) override;
@@ -62,7 +62,7 @@ private:
 
 using namespace style;
 
-optional<ImagePosition> GeometryTileRenderData::getPattern(const std::string& pattern) const {
+std::optional<ImagePosition> GeometryTileRenderData::getPattern(const std::string& pattern) const {
     if (layoutResult) {
         const auto& iconAtlas = layoutResult->iconAtlas;
         auto it = iconAtlas.patternPositions.find(pattern);
@@ -70,7 +70,7 @@ optional<ImagePosition> GeometryTileRenderData::getPattern(const std::string& pa
             return it->second;
         }
     }
-    return nullopt;
+    return std::nullopt;
 }
 
 void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {

@@ -2,11 +2,11 @@
 
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/util/tileset.hpp>
 
 #include <string>
+#include <optional>
 
 namespace mbgl {
 
@@ -55,7 +55,7 @@ public:
 
     Resource(Kind kind_,
              std::string url_,
-             optional<TileData> tileData_ = {},
+             std::optional<TileData> tileData_ = std::nullopt,
              LoadingMethod loadingMethod_ = LoadingMethod::All)
         : kind(kind_),
           loadingMethod(loadingMethod_),
@@ -91,11 +91,11 @@ public:
     std::string url;
 
     // Includes auxiliary data if this is a tile request.
-    optional<TileData> tileData;
+    std::optional<TileData> tileData;
 
-    optional<Timestamp> priorModified = {};
-    optional<Timestamp> priorExpires = {};
-    optional<std::string> priorEtag = {};
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
     std::shared_ptr<const std::string> priorData;
     Duration minimumUpdateInterval{Duration::zero()};
     StoragePolicy storagePolicy{StoragePolicy::Permanent};

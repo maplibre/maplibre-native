@@ -4,7 +4,10 @@
 
 - (instancetype)init {
     if (self = [super init]) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         self.sliderType = NSCircularSlider;
+#pragma GCC diagnostic pop
         // A tick mark for each cardinal direction.
         self.numberOfTickMarks = 4;
         // This slider goes backwards!

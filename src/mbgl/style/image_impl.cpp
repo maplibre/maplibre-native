@@ -38,7 +38,7 @@ Image::Impl::Impl(std::string id_,
                   bool sdf_,
                   ImageStretches stretchX_,
                   ImageStretches stretchY_,
-                  optional<ImageContent> content_)
+                  std::optional<ImageContent> content_)
     : id(std::move(id_)),
       image(std::move(image_)),
       pixelRatio(pixelRatio_),

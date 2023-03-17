@@ -296,7 +296,7 @@ public:
                 height = image->size.height;
                 pixelRatio = img->get()->pixelRatio;
             } else {
-                sharedImage = nullopt;
+                sharedImage = std::nullopt;
             }
         }
 
@@ -327,7 +327,7 @@ public:
                     MBGL_CHECK_ERROR(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16));
             }
             detach();
-            sharedImage = nullopt;
+            sharedImage = std::nullopt;
         }
         void initialize() {
             if (texId != 0) return;
@@ -345,7 +345,7 @@ public:
         bool isValid() { return imageDirty || image; }
         GLuint texId = 0;
         const mbgl::PremultipliedImage* image = nullptr;
-        optional<Immutable<style::Image::Impl>> sharedImage;
+        std::optional<Immutable<style::Image::Impl>> sharedImage;
         bool imageDirty = false;
         size_t width = 0;
         size_t height = 0;

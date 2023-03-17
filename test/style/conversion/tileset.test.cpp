@@ -10,13 +10,13 @@ using namespace mbgl::style::conversion;
 
 TEST(Tileset, Empty) {
     Error error;
-    mbgl::optional<Tileset> converted = convertJSON<Tileset>("{}", error);
+    std::optional<Tileset> converted = convertJSON<Tileset>("{}", error);
     EXPECT_FALSE((bool) converted);
 }
 
 TEST(Tileset, ErrorHandling) {
     Error error;
-    mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+    std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
         "tiles": "should not be a string"
     })JSON", error);
     EXPECT_FALSE((bool) converted);
@@ -25,7 +25,7 @@ TEST(Tileset, ErrorHandling) {
 TEST(Tileset, InvalidBounds) {
     {
         Error error;
-        mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+        std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
             "tiles": ["http://mytiles"],
             "bounds": [73, -180, -73, -120]
         })JSON", error);
@@ -34,7 +34,7 @@ TEST(Tileset, InvalidBounds) {
     }
     {
         Error error;
-        mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+        std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
             "tiles": ["http://mytiles"],
             "bounds": [-120]
         })JSON", error);
@@ -43,7 +43,7 @@ TEST(Tileset, InvalidBounds) {
     }
     {
         Error error;
-        mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+        std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
             "tiles": ["http://mytiles"],
             "bounds": "should not be a string"
         })JSON", error);
@@ -54,7 +54,7 @@ TEST(Tileset, InvalidBounds) {
 
 TEST(Tileset, ValidWorldBounds) {
     Error error;
-    mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+    std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
         "tiles": ["http://mytiles"],
         "bounds": [-180, -90, 180, 90]
     })JSON", error);
@@ -64,7 +64,7 @@ TEST(Tileset, ValidWorldBounds) {
 
 TEST(Tileset, PointBounds) {
     Error error;
-    mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+    std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
         "tiles": ["http://mytiles"],
         "bounds": [0, 0, 0, 0]
     })JSON", error);
@@ -74,7 +74,7 @@ TEST(Tileset, PointBounds) {
 
 TEST(Tileset, BoundsAreClamped) {
     Error error;
-    mbgl::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
+    std::optional<Tileset> converted = convertJSON<Tileset>(R"JSON({
         "tiles": ["http://mytiles"],
         "bounds": [-181.0000005,-90.000000006,180.00000000000006,91]
     })JSON", error);

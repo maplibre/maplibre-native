@@ -277,7 +277,7 @@ Value <%- camelize(type) %>Layer::serialize() const {
     return result;
 }
 
-optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
@@ -312,24 +312,24 @@ optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::strin
         }
 <% if (properties.length == 1) { %>
         set<%- camelize(properties[0].name) %>(*typedValue);
-        return nullopt;
+        return std::nullopt;
 <% } else for (const property of properties) { %>
         if (property == Property::<%- camelize(property.name) %>) {
             set<%- camelize(property.name) %>(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 <% } -%>
     }
 <% } %>
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
 <% for (const property of paintProperties) { %>
     if (property == Property::<%- camelize(property.name) %>Transition) {
         set<%- camelize(property.name) %>Transition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 <% } %>
     return Error{"layer doesn't support this property"};

@@ -51,7 +51,7 @@ struct OnlineFileRequest {
     ActorRef<OnlineFileRequest> actor();
     void onCancel(std::function<void()>);
 
-    Duration getUpdateInterval(optional<Timestamp> expires) const;
+    Duration getUpdateInterval(std::optional<Timestamp> expires) const;
     OnlineFileSourceThread& impl;
     Resource resource;
     std::unique_ptr<AsyncRequest> request;
@@ -70,7 +70,7 @@ struct OnlineFileRequest {
     // backoff when retrying requests.
     uint32_t failedRequests = 0;
     Response::Error::Reason failedRequestReason = Response::Error::Reason::Success;
-    optional<Timestamp> retryAfter;
+    std::optional<Timestamp> retryAfter;
 };
 
 class OnlineFileSourceThread {
@@ -267,7 +267,7 @@ private:
             }
         }
 
-        optional<OnlineFileRequest*> pop() {
+        std::optional<OnlineFileRequest*> pop() {
             if (queue.empty()) {
                 return {};
             }
@@ -443,7 +443,7 @@ OnlineFileRequest::~OnlineFileRequest() {
     }
 }
 
-Timestamp interpolateExpiration(const Timestamp& current, optional<Timestamp> prior, bool& expired) {
+Timestamp interpolateExpiration(const Timestamp& current, std::optional<Timestamp> prior, bool& expired) {
     auto now = util::now();
     if (current > now) {
         return current;
@@ -509,7 +509,7 @@ void OnlineFileRequest::schedule(Duration timeout) {
     });
 }
 
-Duration OnlineFileRequest::getUpdateInterval(optional<Timestamp> expires) const {
+Duration OnlineFileRequest::getUpdateInterval(std::optional<Timestamp> expires) const {
     // Calculate a timeout that depends on how many
     // consecutive errors we've encountered, and on the expiration time, if present.
     Duration errorRetryTimeout = http::errorRetryTimeout(failedRequestReason, failedRequests, retryAfter);
@@ -567,7 +567,7 @@ void OnlineFileRequest::completed(Response response) {
 
     if (response.error) {
         if (response.error->reason == Response::Error::Reason::NotFound) {
-            Log::Error(Event::General, "The resource `%s` not found", sanitizeURL(resource.url).c_str());
+            Log::Error(Event::General, "The resource `" + sanitizeURL(resource.url) + "` not found");
         }
         failedRequests++;
         failedRequestReason = response.error->reason;

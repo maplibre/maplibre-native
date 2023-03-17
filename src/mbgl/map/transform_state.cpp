@@ -282,7 +282,7 @@ bool TransformState::setCameraOrientation(const Quaternion& orientation_) {
         return false;
     }
 
-    const optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
+    const std::optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
     if (!updatedOrientation) return false;
 
     camera.setOrientation(updatedOrientation.value());
@@ -415,7 +415,7 @@ void TransformState::setViewportMode(ViewportMode val) {
 
 // MARK: - Camera options
 
-CameraOptions TransformState::getCameraOptions(const optional<EdgeInsets>& padding) const {
+CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return CameraOptions()
         .withCenter(getLatLng())
         .withPadding(padding ? padding : edgeInsets)

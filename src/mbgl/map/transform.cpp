@@ -67,7 +67,7 @@ void Transform::resize(const Size size) {
 
 // MARK: - Camera
 
-CameraOptions Transform::getCameraOptions(const optional<EdgeInsets>& padding) const {
+CameraOptions Transform::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return state.getCameraOptions(padding);
 }
 
@@ -384,8 +384,8 @@ void Transform::setMinPitch(const double minPitch) {
     if (std::isnan(minPitch)) return;
     if (minPitch * util::DEG2RAD_D < util::PITCH_MIN) {
         Log::Warning(Event::General,
-                     "Trying to set minimum pitch below the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MIN * util::RAD2DEG_D);
+                     "Trying to set minimum pitch below the limit (" + std::to_string(util::PITCH_MIN * util::RAD2DEG_D) + 
+                     " degrees), the value will be clamped.");
     }
     state.setMinPitch(minPitch * util::DEG2RAD_D);
 }
@@ -394,8 +394,8 @@ void Transform::setMaxPitch(const double maxPitch) {
     if (std::isnan(maxPitch)) return;
     if (maxPitch * util::DEG2RAD_D > util::PITCH_MAX) {
         Log::Warning(Event::General,
-                     "Trying to set maximum pitch above the limit (%.0f degrees), the value will be clamped.",
-                     util::PITCH_MAX * util::RAD2DEG_D);
+                     "Trying to set maximum pitch above the limit (" + std::to_string(util::PITCH_MAX * util::RAD2DEG_D) +
+                     " degrees), the value will be clamped.");
     }
     state.setMaxPitch(maxPitch * util::DEG2RAD_D);
 }
@@ -505,7 +505,7 @@ void Transform::startTransition(const CameraOptions& camera,
     // Associate the anchor, if given, with a coordinate.
     // Anchor and center points are mutually exclusive, with preference for the
     // center point when both are set.
-    optional<ScreenCoordinate> anchor = camera.center ? nullopt : camera.anchor;
+    std::optional<ScreenCoordinate> anchor = camera.center ? std::nullopt : camera.anchor;
     LatLng anchorLatLng;
     if (anchor) {
         anchor->y = state.getSize().height - anchor->y;

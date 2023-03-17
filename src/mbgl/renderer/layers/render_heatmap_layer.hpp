@@ -6,7 +6,8 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
-#include <mbgl/util/optional.hpp>
+
+#include <optional>
 
 namespace mbgl {
 
@@ -36,7 +37,7 @@ private:
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     PremultipliedImage colorRamp;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
-    optional<gfx::Texture> colorRampTexture;
+    std::optional<gfx::Texture> colorRampTexture;
     SegmentVector<HeatmapTextureAttributes> segments;
 };
 
