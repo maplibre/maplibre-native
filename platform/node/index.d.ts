@@ -111,7 +111,7 @@ declare module '@maplibre/maplibre-gl-native' {
    * A `Map` instance is used to render images from map views
    */
   class Map {
-    constructor(mapOptions: MapOptions);
+    constructor(mapOptions?: MapOptions);
 
     /**
      * Load a style into a map
