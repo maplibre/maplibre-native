@@ -50,6 +50,9 @@ To contribute to MapLibre GL Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) an
 
 Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
 
+### Bounties 💰
+
+Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
 
 ## Sponsors
 
