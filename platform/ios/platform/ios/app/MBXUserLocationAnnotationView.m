@@ -22,7 +22,7 @@ const CGFloat MBXUserLocationDotSize = 10;
 - (CGSize)intrinsicContentSize
 {
     CGSize carSize = CGSizeMake(30, 60);
-    return (self.mapView.userTrackingMode == MGLUserTrackingModeFollowWithCourse) ? carSize : [self dotSize];
+    return (self.mapView.userTrackingMode == MLNUserTrackingModeFollowWithCourse) ? carSize : [self dotSize];
 }
 
 - (CGSize)dotSize
@@ -52,7 +52,7 @@ const CGFloat MBXUserLocationDotSize = 10;
 
 - (void)drawRect:(CGRect)rect
 {
-    (self.mapView.userTrackingMode == MGLUserTrackingModeFollowWithCourse) ? [self drawCar] : [self drawDot];
+    (self.mapView.userTrackingMode == MLNUserTrackingModeFollowWithCourse) ? [self drawCar] : [self drawDot];
 }
 
 - (void)drawDot

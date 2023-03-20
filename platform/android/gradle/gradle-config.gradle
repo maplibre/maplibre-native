@@ -5,9 +5,9 @@
 task apiKey {
     def tokenFile = new File("${projectDir}/src/main/res/values/developer-config.xml")
     if (!tokenFile.exists()) {
-        String apiKey = "$System.env.MGL_API_KEY"
+        String apiKey = "$System.env.MLN_API_KEY"
         if (apiKey == "null") {
-            System.out.println("You should set the MGL_API_KEY environment variable.")
+            System.out.println("You should set the MLN_API_KEY environment variable.")
             apiKey = "YOUR_API_KEY_GOES_HERE"
         }
         String tokenFileContents = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
