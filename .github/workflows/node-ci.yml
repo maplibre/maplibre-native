@@ -9,6 +9,7 @@ on:
       - 'node-*'
     paths:
       - 'platform/node/**'
+      - 'platform/windows/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -29,6 +30,7 @@ on:
       - main
     paths:
       - 'platform/node/**'
+      - 'platform/windows/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
