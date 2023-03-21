@@ -18,13 +18,13 @@ ProgramParameters::ProgramParameters(const float pixelRatio,
       }())
 {}
 
-ProgramParameters ProgramParameters::withShaderSource(std::string_view vertexSource_,
-    std::string_view fragmentSource_) const noexcept
+ProgramParameters ProgramParameters::withShaderSource(std::string_view vertexSource,
+    std::string_view fragmentSource) const noexcept
 {
     ProgramParameters params = *this;
-    params.vertexSource_ = vertexSource_;
-    params.fragmentSource_ = fragmentSource_;
-    return std::move(params);
+    params.vertexSource_ = vertexSource;
+    params.fragmentSource_ = fragmentSource;
+    return params;
 }
 
 const std::string& ProgramParameters::getDefines() const {

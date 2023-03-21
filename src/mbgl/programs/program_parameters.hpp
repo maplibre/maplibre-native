@@ -8,8 +8,8 @@ class ProgramParameters {
 public:
     ProgramParameters(float pixelRatio, bool overdraw);
 
-    ProgramParameters withShaderSource(std::string_view vertexSource_,
-        std::string_view fragmentSource_) const noexcept;
+    ProgramParameters withShaderSource(std::string_view vertexSource,
+        std::string_view fragmentSource) const noexcept;
 
     const std::string& getDefines() const;
 

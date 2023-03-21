@@ -25,14 +25,14 @@ class ShaderRegistry {
         /// @brief Checks if a shader exists in the registry for the given name.
         /// @param shaderName Name of shader
         /// @return If a shader is found, true
-        virtual [[nodiscard]] bool isShader(const std::string& shaderName)
+        [[nodiscard]] virtual bool isShader(const std::string& shaderName)
             const noexcept;
         
         /// @brief Get a shader from the registry by name.
         /// @param shaderName Name of shader
         /// @return A `gfx::Shader` or `nullptr` if no shader is found with the
         /// given name
-        virtual [[nodiscard]] const std::shared_ptr<gfx::Shader> getShader(
+        [[nodiscard]] virtual const std::shared_ptr<gfx::Shader> getShader(
             const std::string& shaderName) const noexcept;
 
         /// @brief Replace a matching shader in the registry with the provided
@@ -40,7 +40,7 @@ class ShaderRegistry {
         /// @param shader A `gfx::Shader`. The ShaderRegistry will take ownership.
         /// @return True if a match was found and the shader was replaced, false
         /// otherwise.
-        virtual [[nodiscard]] bool replaceShader(
+        [[nodiscard]] virtual bool replaceShader(
             std::shared_ptr<Shader>&& shader) noexcept;
 
         /// @brief Register a new shader with the registry. If a shader is present
@@ -49,7 +49,7 @@ class ShaderRegistry {
         /// take ownership.
         /// @return True if the shader was registered, false if another shader is
         /// already present with a conflicting name.
-        virtual [[nodiscard]] bool registerShader(
+        [[nodiscard]] virtual bool registerShader(
             std::shared_ptr<Shader>&& shader) noexcept;
 
         /// @brief Shorthand helper to quickly get a derived type from the registry.

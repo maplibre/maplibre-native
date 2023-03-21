@@ -20,7 +20,7 @@ Programs::Programs(gfx::Context& context_, const ProgramParameters& programParam
 
 Programs::~Programs() = default;
 
-void Programs::registerWith(gfx::ShaderRegistry& registry) noexcept {}
+void Programs::registerWith([[maybe_unused]] gfx::ShaderRegistry& registry) noexcept {}
 
 BackgroundLayerPrograms& Programs::getBackgroundLayerPrograms() noexcept {
     if (!backgroundPrograms) {
