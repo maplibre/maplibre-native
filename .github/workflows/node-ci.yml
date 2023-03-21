@@ -8,7 +8,12 @@ on:
     tags:
       - 'node-*'
     paths:
-      - 'platform/**'
+      - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -27,7 +32,12 @@ on:
     branches:
       - main
     paths:
-      - 'platform/**'
+      - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
