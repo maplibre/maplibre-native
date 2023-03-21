@@ -6,6 +6,8 @@
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 namespace mbgl {
 namespace gl {
@@ -30,7 +32,9 @@ public:
         }
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-            mbgl::Log::Error(mbgl::Event::OpenGL, "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
+            std::ostringstream logMsg;
+            logMsg << "eglBindAPI(EGL_OPENGL_ES_API) returned error " << eglGetError();
+            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
             throw std::runtime_error("eglBindAPI() failed");
         }
 
@@ -81,7 +85,9 @@ public:
 
         eglContext = eglCreateContext(eglDisplay->display, eglDisplay->config, EGL_NO_CONTEXT, attribs);
         if (eglContext == EGL_NO_CONTEXT) {
-            mbgl::Log::Error(mbgl::Event::OpenGL, "eglCreateContext() returned error 0x%04x" + std::to_string(eglGetError()));
+            std::ostringstream logMsg;
+            logMsg << "eglCreateContext() returned error 0x" << std::setw(4) << std::setfill('0') << std::hex << eglGetError();
+            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
 
