@@ -8,6 +8,7 @@ on:
     tags:
       - 'node-*'
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
       - 'platform/windows/**'
       - 'platform/darwin/**'
@@ -32,6 +33,7 @@ on:
     branches:
       - main
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
       - 'platform/windows/**'
       - 'platform/darwin/**'
