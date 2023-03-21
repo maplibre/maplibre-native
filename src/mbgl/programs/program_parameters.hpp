@@ -13,8 +13,8 @@ public:
 
     const std::string& getDefines() const;
 
-    std::string_view vertexSource() const noexcept;
-    std::string_view fragmentSource() const noexcept;
+    const std::string& vertexSource() const noexcept;
+    const std::string& fragmentSource() const noexcept;
 
 private:
     std::string defines;

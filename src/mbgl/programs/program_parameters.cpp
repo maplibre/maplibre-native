@@ -1,5 +1,6 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/util/string.hpp>
+#include <string_view>
 
 namespace mbgl {
 
@@ -31,11 +32,11 @@ const std::string& ProgramParameters::getDefines() const {
     return defines;
 }
 
-std::string_view ProgramParameters::vertexSource() const noexcept {
+const std::string& ProgramParameters::vertexSource() const noexcept {
     return vertexSource_;
 }
 
-std::string_view ProgramParameters::fragmentSource() const noexcept {
+const std::string& ProgramParameters::fragmentSource() const noexcept {
     return fragmentSource_;
 }
 

@@ -60,24 +60,22 @@ public:
                        const ProgramParameters& programParameters,
                        const std::string& additionalDefines) {
             // Compile the shader
-            std::initializer_list<const char*> vertexSource;
-            vertexSource = {
+            std::initializer_list<const char*> vertexSource = {
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 (programs::gl::shaderSource() + programs::gl::vertexPreludeOffset),
                 programParameters.vertexSource().length() == 0 ?
                     (programs::gl::shaderSource() + vertexOffset) :
-                    programParameters.vertexSource().data()
+                    programParameters.vertexSource().c_str()
             };
 
-            std::initializer_list<const char*> fragmentSource;
-            fragmentSource = {
+            std::initializer_list<const char*> fragmentSource = {
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 (programs::gl::shaderSource() + programs::gl::fragmentPreludeOffset),
                 programParameters.fragmentSource().length() == 0 ?
                     (programs::gl::shaderSource() + fragmentOffset) :
-                    programParameters.fragmentSource().data()
+                    programParameters.fragmentSource().c_str()
             };
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);
