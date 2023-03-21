@@ -8,6 +8,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderable.hpp>
+#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -47,7 +48,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& renderTreeParameters = renderTree.getParameters();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(backend.getContext(), pixelRatio);
+        staticData = std::make_unique<RenderStaticData>(backend.getContext(), pixelRatio,
+            std::make_unique<gfx::ShaderRegistry>());
+        staticData->programs.registerWith(*staticData->shaders);
+        observer->onRegisterShaders(*staticData->shaders);
     }
     staticData->has3D = renderTreeParameters.has3D;
 

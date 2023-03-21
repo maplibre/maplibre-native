@@ -51,10 +51,11 @@ PaintParameters::PaintParameters(gfx::Context& context_,
     timePoint(timePoint_),
     pixelRatio(pixelRatio_),
 #ifndef NDEBUG
-    programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs)
+    programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
 #else
-    programs(staticData_.programs)
+    programs(staticData_.programs),
 #endif
+    shaders(*staticData_.shaders)
 {
     pixelsToGLUnits = {{ 2.0f  / state.getSize().width, -2.0f / state.getSize().height }};
 

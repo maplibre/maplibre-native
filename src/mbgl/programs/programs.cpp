@@ -20,6 +20,8 @@ Programs::Programs(gfx::Context& context_, const ProgramParameters& programParam
 
 Programs::~Programs() = default;
 
+void Programs::registerWith(gfx::ShaderRegistry& registry) noexcept {}
+
 BackgroundLayerPrograms& Programs::getBackgroundLayerPrograms() noexcept {
     if (!backgroundPrograms) {
         backgroundPrograms = std::make_unique<BackgroundLayerPrograms>(context, programParameters);
