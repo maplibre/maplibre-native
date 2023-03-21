@@ -8,14 +8,12 @@ on:
     tags:
       - 'node-*'
     paths:
-      - 'platform/node/**'
-      - 'platform/windows/**'
+      - 'platform/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
@@ -29,14 +27,12 @@ on:
     branches:
       - main
     paths:
-      - 'platform/node/**'
-      - 'platform/windows/**'
+      - 'platform/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
