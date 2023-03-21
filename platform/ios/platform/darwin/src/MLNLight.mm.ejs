@@ -1,0 +1,120 @@
+<%
+  const properties = locals.properties;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
+// test
+
+#import "MLNLight.h"
+
+#import "MLNTypes.h"
+#import "MLNStyleValue_Private.h"
+#import "NSValue+MLNAdditions.h"
+#import "MLNLoggingConfiguration_Private.h"
+
+#import <mbgl/style/light.hpp>
+#import <mbgl/style/types.hpp>
+
+namespace mbgl {
+
+    MBGL_DEFINE_ENUM(MLNLightAnchor, {
+<% for (const property of properties) { -%>
+<% if (property.type == "enum") { -%>
+<% for (const value in property.values) { -%>
+        { MLNLightAnchor<%- camelize(value) %>, "<%- value %>" },
+<% } -%>
+<% } -%>
+<% } -%>
+    });
+
+}
+
+@interface MLNLight()
+
+@end
+
+@implementation MLNLight
+
+- (instancetype)initWithMBGLLight:(const mbgl::style::Light *)mbglLight
+{
+    if (self = [super init]) {
+        MLNLogInfo(@"Initializing %@.", NSStringFromClass([self class]));
+<% if (properties.length) { -%>
+<% for (const property of properties) { -%>
+<% if (property.type == "enum") { -%>
+        auto <%- camelizeWithLeadingLowercase(property.name) -%> = mbglLight->get<%- camelize(property.name) -%>();
+        NSExpression *<%- camelizeWithLeadingLowercase(property.name) -%>Expression;
+        if (<%- camelizeWithLeadingLowercase(property.name) -%>.isUndefined()) {
+            mbgl::style::PropertyValue<mbgl::style::Light<%- camelize(property.name) -%>Type> default<%- camelize(property.name) -%> = mbglLight->getDefault<%- camelize(property.name) -%>();
+            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mbgl::style::LightAnchorType, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(default<%- camelize(property.name) -%>);
+        } else {
+            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mbgl::style::Light<%- camelize(property.name) -%>Type, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(<%- camelizeWithLeadingLowercase(property.name) -%>);
+        }
+
+        _<%- camelizeWithLeadingLowercase(property.name) -%> = <%- camelizeWithLeadingLowercase(property.name) -%>Expression;
+
+<% if (property.transition) { -%>
+        _<%- camelizeWithLeadingLowercase(property.name) -%>Transition = MLNTransitionFromOptions(mbglLight->get<%- camelize(property.name) -%>Transition());
+
+<% } -%>
+<% } else {-%>
+        auto <%- camelizeWithLeadingLowercase(property.name) -%>Value = mbglLight->get<%- camelize(property.name) -%>();
+        if (<%- camelizeWithLeadingLowercase(property.name) -%>Value.isUndefined()) {
+            _<%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(mbglLight->getDefault<%- camelize(property.name) -%>());
+        } else {
+            _<%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(<%- camelizeWithLeadingLowercase(property.name) -%>Value);
+        }
+<% if (property.transition) { -%>
+        _<%- camelizeWithLeadingLowercase(property.name) -%>Transition = MLNTransitionFromOptions(mbglLight->get<%- camelize(property.name) -%>Transition());
+<% } -%>
+<% } -%>
+<% } -%>
+<% } -%>
+    }
+
+    return self;
+}
+
+- (mbgl::style::Light)mbglLight
+{
+    mbgl::style::Light mbglLight;
+<% if (properties.length) { -%>
+<% for (const property of properties) { -%>
+<% if (property.type == "enum") { -%>
+    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<mbgl::style::Light<%- camelize(property.name) -%>Type, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
+    mbglLight.set<%- camelize(property.name) -%>(<%- camelizeWithLeadingLowercase(property.name) -%>);
+
+<% } else {-%>
+    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
+    mbglLight.set<%- camelize(property.name) -%>(<%- camelizeWithLeadingLowercase(property.name) -%>);
+
+<% } -%>
+<% if (property.transition) { -%>
+    mbglLight.set<%- camelize(property.name) -%>Transition(MLNOptionsFromTransition(self.<%- camelizeWithLeadingLowercase(property.name) -%>Transition));
+
+<% } -%>
+<% } -%>
+<% } -%>
+
+    return mbglLight;
+}
+
+<% if (properties.length) { -%>
+
+<% for (const property of properties) { -%>
+
+- (void)set<%- camelize(property.name) %>:(NSExpression *)<%- objCName(property) %> {
+    MLNLogDebug(@"Setting <%- objCName(property) %>: %@", <%- objCName(property) %>);
+    _<%- objCName(property) %> = <%- objCName(property) %>;
+}
+<% if (property["transition"]) { -%>
+
+- (void)set<%- camelize(property.name) %>Transition:(MLNTransition)transition {
+    MLNLogDebug(@"Setting <%- objCName(property) %>Transition: %@", MLNStringFromMLNTransition(transition));
+    _<%- objCName(property) %>Transition = transition;
+}
+<% } -%>
+<% } -%>
+<% } -%>
+
+@end

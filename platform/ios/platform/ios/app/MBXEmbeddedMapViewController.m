@@ -12,7 +12,7 @@ typedef NS_ENUM(NSInteger, MBXEmbeddedControl) {
 @interface MBXEmbeddedMapViewController () <UIScrollViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
-@property (weak, nonatomic) IBOutlet MGLMapView *mapView;
+@property (weak, nonatomic) IBOutlet MLNMapView *mapView;
 
 @end
 

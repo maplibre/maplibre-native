@@ -76,13 +76,13 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "MGLMapSnapshotterTests/testLocalGlyphRendering">
+                  Identifier = "MLNMapSnapshotterTests/testLocalGlyphRendering">
                </Test>
                <Test
-                  Identifier = "MGLMapViewContentInsetTests">
+                  Identifier = "MLNMapViewContentInsetTests">
                </Test>
                <Test
-                  Identifier = "MGLOfflineStorageTests">
+                  Identifier = "MLNOfflineStorageTests">
                </Test>
             </SkippedTests>
          </TestableReference>

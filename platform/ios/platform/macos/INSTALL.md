@@ -54,15 +54,15 @@ To build the SDK from source:
 
 1. Open the project editor, select your application target, then go to the General tab. Drag Mapbox.framework into the “Embedded Binaries” section. (Don’t drag it into the “Linked Frameworks and Libraries” section; Xcode will add it there automatically.) In the sheet that appears, make sure “Copy items if needed” is checked, then click Finish.
 
-1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom macOS Application Target Properties”” section, set `MGLApiKey` to your api key.
+1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom macOS Application Target Properties”” section, set `MLNApiKey` to your api key.
 
 ## Usage
 
 In a storyboard or XIB:
 
 1. Add a view to your view controller or window. (Drag Custom View from the Object library to the View Controller scene on the Interface Builder canvas. In a XIB, drag it instead to the window on the canvas.)
-2. In the Identity inspector, set the view’s custom class to `MGLMapView`.
-3. MGLMapView needs to be layer-backed:
+2. In the Identity inspector, set the view’s custom class to `MLNMapView`.
+3. MLNMapView needs to be layer-backed:
   * You can make the window layer-backed by selecting the window and checking Full Size Content View in the Attributes inspector. This allows the map view to underlap the title bar and toolbar.
   * Alternatively, if you don’t want the entire window to be layer-backed, you can make just the map view layer-backed by selecting it and checking its entry under the View Effects inspector’s Core Animation Layer section.
 4. Add a map feedback item to your Help menu. (Drag Menu Item from the Object library into Main Menu ‣ Help ‣ Menu.) Title it “Improve This Map” or similar, and connect it to the `giveFeedback:` action of First Responder.
@@ -79,7 +79,7 @@ If you need to manipulate the map view programmatically:
 
 @interface ViewController : NSViewController
 
-@property (strong) IBOutlet MGLMapView *mapView;
+@property (strong) IBOutlet MLNMapView *mapView;
 
 @end
 ```
@@ -89,7 +89,7 @@ If you need to manipulate the map view programmatically:
 import Mapbox
 
 class ViewController: NSViewController {
-    @IBOutlet var mapView: MGLMapView!
+    @IBOutlet var mapView: MLNMapView!
 }
 ```
 

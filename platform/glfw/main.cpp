@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Set access token if present
-    const char* apikeyEnv = getenv("MGL_API_KEY");
+    const char* apikeyEnv = getenv("MLN_API_KEY");
     const std::string apikey = apikeyValue ? args::get(apikeyValue) : (apikeyEnv ? apikeyEnv : std::string());
 
     auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();

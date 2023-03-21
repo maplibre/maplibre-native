@@ -32,7 +32,7 @@
 	<string>The map will display your location. The map may also use your location when it isn’t visible in order to improve OpenStreetMap.</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
 	<dict>
-		<key>MGLAccuracyAuthorizationDescription</key>
+		<key>MLNAccuracyAuthorizationDescription</key>
 		<string>MapLibre requires your precise location to help you navigate the map.</string>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>

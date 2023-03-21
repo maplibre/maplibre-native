@@ -1,10 +1,10 @@
-#import "MGLMapViewIntegrationTest.h"
-#import "MGLMapView_Private.h"
-#import "MGLMapView+Impl.h"
+#import "MLNMapViewIntegrationTest.h"
+#import "MLNMapView_Private.h"
+#import "MLNMapView+Impl.h"
 
 #include <mbgl/gfx/renderable.hpp>
 
-@interface MBGLIntegrationTests : MGLMapViewIntegrationTest
+@interface MBGLIntegrationTests : MLNMapViewIntegrationTest
 @end
 
 @implementation MBGLIntegrationTests
@@ -17,7 +17,7 @@
 
 // This test does not strictly need to be in this test file/target. Including here for convenience.
 - (void)testOpenGLLayerDoesNotLeakWhenCreatedAndDestroyedWithoutAddingToStyle {
-    MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+    MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
     __weak id weakLayer = layer;
     layer = nil;
 
@@ -31,7 +31,7 @@
         __weak id weakLayer = nil;
 
         @autoreleasepool {
-            MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             [self.style insertLayer:layer atIndex:0];
             weakLayer = layer;
 
@@ -49,15 +49,15 @@
 }
 
 - (void)testReusingOpenGLLayerIdentifier {
-    __weak MGLOpenGLStyleLayer *weakLayer2;
+    __weak MLNOpenGLStyleLayer *weakLayer2;
 
     @autoreleasepool {
-        MGLOpenGLStyleLayer *layer1 = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNOpenGLStyleLayer *layer1 = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         [self.style insertLayer:layer1 atIndex:0];
         [self waitForMapViewToBeRendered];
         [self.style removeLayer:layer1];
 
-        MGLOpenGLStyleLayer *layer2 = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNOpenGLStyleLayer *layer2 = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer2 = layer2;
 
         XCTAssertNotNil(layer2);
@@ -88,7 +88,7 @@
         __weak id retrievedLayer = nil;
         
         @autoreleasepool {
-            MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             [self.style insertLayer:layer atIndex:0];
             layer = nil;
             
@@ -110,7 +110,7 @@
 }
 
 - (void)testReusingOpenGLLayer {
-    MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+    MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
     [self.style insertLayer:layer atIndex:0];
     [self waitForMapViewToBeRendered];
     
@@ -127,7 +127,7 @@
 - (void)testOpenGLLayerDoesNotLeakWhenRemovedFromStyle {
     __weak id weakLayer;
     @autoreleasepool {
-        MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer = layer;
         [self.style insertLayer:layer atIndex:0];
         layer = nil;
@@ -136,7 +136,7 @@
         [self.style removeLayer:[self.style layerWithIdentifier:@"gl-layer"]];
     }
 
-    MGLStyleLayer *layer2 = weakLayer;
+    MLNStyleLayer *layer2 = weakLayer;
 
     XCTAssertNotNil(weakLayer);
     [self waitForMapViewToBeRendered];
@@ -146,11 +146,11 @@
 }
 
 - (void)testOpenGLLayerDoesNotLeakWhenStyleChanged {
-    __weak MGLOpenGLStyleLayer *weakLayer;
+    __weak MLNOpenGLStyleLayer *weakLayer;
 
     @autoreleasepool {
         {
-            MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             weakLayer = layer;
             [self.style insertLayer:layer atIndex:0];
             layer = nil;
@@ -161,7 +161,7 @@
 
     [self waitForMapViewToBeRendered];
 
-    MGLStyleLayer *layer2 = [self.mapView.style layerWithIdentifier:@"gl-layer"];
+    MLNStyleLayer *layer2 = [self.mapView.style layerWithIdentifier:@"gl-layer"];
 
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     self.styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
@@ -173,7 +173,7 @@
     XCTAssertNotNil(weakLayer);
 
     // Asking the style for the layer should return nil
-    MGLStyleLayer *layer3 = [self.mapView.style layerWithIdentifier:@"gl-layer"];
+    MLNStyleLayer *layer3 = [self.mapView.style layerWithIdentifier:@"gl-layer"];
     XCTAssertNil(layer3);
 }
 
@@ -184,7 +184,7 @@
     @autoreleasepool {
 
         NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
-        MGLMapView *mapView2 = [[MGLMapView alloc] initWithFrame:UIScreen.mainScreen.bounds styleURL:styleURL];
+        MLNMapView *mapView2 = [[MLNMapView alloc] initWithFrame:UIScreen.mainScreen.bounds styleURL:styleURL];
         mapView2.delegate = self;
 
         XCTAssertNil(mapView2.style);
@@ -192,7 +192,7 @@
         self.styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
         [self waitForExpectationsWithTimeout:10 handler:nil];
 
-        MGLOpenGLStyleLayer *layer = [[MGLOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer = layer;
         [mapView2.style insertLayer:layer atIndex:0];
         layer = nil;
@@ -202,14 +202,14 @@
     XCTAssertNil(weakLayer);
 }
 
-- (void)testMGLMapViewImplHasCorrectSize {
+- (void)testMLNMapViewImplHasCorrectSize {
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     self.styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
     [self.mapView setStyleURL:styleURL];
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(9.6315313, 52.4133574) animated:NO];
     [self waitForExpectations:@[self.styleLoadingExpectation] timeout:1];
 
-    MGLMapViewImpl *mapViewImpl = [self.mapView viewImpl];
+    MLNMapViewImpl *mapViewImpl = [self.mapView viewImpl];
     CGFloat scaleFactor = [UIScreen mainScreen].scale;
     mbgl::Size renderableSize = mapViewImpl->getRendererBackend().getDefaultRenderable().getSize();
     mbgl::Size viewSize = {
@@ -224,11 +224,11 @@
         CLLocationCoordinate2DMake(9.6315313, 52.4133574),
         CLLocationCoordinate2DMake(24.9410248, 60.1733244)};
 
-    MGLPointCollectionFeature *points = [MGLPointCollectionFeature pointCollectionWithCoordinates:coordinates count:sizeof(coordinates)/sizeof(coordinates[0])];
-    MGLShapeSource *source = [[MGLShapeSource alloc] initWithIdentifier:@"heatmap" shape:points options:nil];
+    MLNPointCollectionFeature *points = [MLNPointCollectionFeature pointCollectionWithCoordinates:coordinates count:sizeof(coordinates)/sizeof(coordinates[0])];
+    MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"heatmap" shape:points options:nil];
     [self.style addSource:source];
 
-    MGLHeatmapStyleLayer *heatmapLayer = [[MGLHeatmapStyleLayer alloc] initWithIdentifier:@"lineLayer" source:source];
+    MLNHeatmapStyleLayer *heatmapLayer = [[MLNHeatmapStyleLayer alloc] initWithIdentifier:@"lineLayer" source:source];
     [self.style addLayer:heatmapLayer];
 
     // Test that heatmap layer can create a texture and be successfully rendered.

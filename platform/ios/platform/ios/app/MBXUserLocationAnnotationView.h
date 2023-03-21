@@ -1,5 +1,5 @@
 @import Mapbox;
 
-@interface MBXUserLocationAnnotationView : MGLUserLocationAnnotationView
+@interface MBXUserLocationAnnotationView : MLNUserLocationAnnotationView
 
 @end

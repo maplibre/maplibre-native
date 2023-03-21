@@ -34,11 +34,11 @@ Style function syntax:
 
 ```swift
 let stops = [
-    0: MGLStyleValue<UIColor>(rawValue: .yellow),
-    2.5: MGLStyleValue(rawValue: .orange),
-    5: MGLStyleValue(rawValue: .red),
-    7.5: MGLStyleValue(rawValue: .blue),
-    10: MGLStyleValue(rawValue: .white),
+    0: MLNStyleValue<UIColor>(rawValue: .yellow),
+    2.5: MLNStyleValue(rawValue: .orange),
+    5: MLNStyleValue(rawValue: .red),
+    7.5: MLNStyleValue(rawValue: .blue),
+    10: MLNStyleValue(rawValue: .white),
 ]
 ```
 
@@ -52,7 +52,7 @@ Style functions supported four interpolation modes: exponential/linear, interval
 
 ### Linear
 
-`+[NSExpression(MGLAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]` takes the interpolation type as a parameter. If you previously used the default interpolation base, use the curve type `MGLExpressionInterpolationMode.linear`. See the [`mgl_interpolate:withCurveType:parameters:stops:`](predicates-and-expressions.html#code-mgl_interpolate-withcurvetype-parameters-stops-code) documentation for more details.
+`+[NSExpression(MLNAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]` takes the interpolation type as a parameter. If you previously used the default interpolation base, use the curve type `MLNExpressionInterpolationMode.linear`. See the [`mgl_interpolate:withCurveType:parameters:stops:`](predicates-and-expressions.html#code-mgl_interpolate-withcurvetype-parameters-stops-code) documentation for more details.
 
 The stops dictionary below, shows colors that continuously shift from yellow to orange to red to blue to white based on the attribute value.
 
@@ -60,26 +60,26 @@ Style function syntax:
 
 ```swift
 let url = URL(string: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson")!
-let symbolSource = MGLSource(identifier: "source")
-let symbolLayer = MGLSymbolStyleLayer(identifier: "place-city-sm", source: symbolSource)
+let symbolSource = MLNSource(identifier: "source")
+let symbolLayer = MLNSymbolStyleLayer(identifier: "place-city-sm", source: symbolSource)
 
-let source = MGLShapeSource(identifier: "earthquakes", url: url, options: nil)
+let source = MLNShapeSource(identifier: "earthquakes", url: url, options: nil)
 mapView.style?.addSource(source)
 
 let stops = [
-    0: MGLStyleValue<UIColor>(rawValue: .yellow),
-    2.5: MGLStyleValue(rawValue: .orange),
-    5: MGLStyleValue(rawValue: .red),
-    7.5: MGLStyleValue(rawValue: .blue),
-    10: MGLStyleValue(rawValue: .white),
+    0: MLNStyleValue<UIColor>(rawValue: .yellow),
+    2.5: MLNStyleValue(rawValue: .orange),
+    5: MLNStyleValue(rawValue: .red),
+    7.5: MLNStyleValue(rawValue: .blue),
+    10: MLNStyleValue(rawValue: .white),
 ]
 
-let layer = MGLCircleStyleLayer(identifier: "circles", source: source)
-layer.circleColor = MGLStyleValue(interpolationMode: .exponential,
+let layer = MLNCircleStyleLayer(identifier: "circles", source: source)
+layer.circleColor = MLNStyleValue(interpolationMode: .exponential,
                                   sourceStops: stops,
                                   attributeName: "mag",
-                                  options: [.defaultValue: MGLStyleValue<UIColor>(rawValue: .green)])
-layer.circleRadius = MGLStyleValue(rawValue: 10)
+                                  options: [.defaultValue: MLNStyleValue<UIColor>(rawValue: .green)])
+layer.circleRadius = MLNStyleValue(rawValue: 10)
 mapView.style?.insertLayer(layer, below: symbolLayer)
 ```
 
@@ -89,9 +89,9 @@ Current syntax:
 
 ### Exponential
 
-If you previously used an interpolation base greater than `0` (other than `1`), you can use `MGLExpressionInterpolationMode.exponential` as the curve type for `+[NSExpression(MGLAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]` or `'exponential'` as the curve type for [`mgl_interpolate:withCurveType:parameters:stops:`](predicates-and-expressions.html#code-mgl_interpolate-withcurvetype-parameters-stops-code). The `parameters` argument takes that interpolation base. This interpolates between values exponentially, creating an accelerated ramp effect.
+If you previously used an interpolation base greater than `0` (other than `1`), you can use `MLNExpressionInterpolationMode.exponential` as the curve type for `+[NSExpression(MLNAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]` or `'exponential'` as the curve type for [`mgl_interpolate:withCurveType:parameters:stops:`](predicates-and-expressions.html#code-mgl_interpolate-withcurvetype-parameters-stops-code). The `parameters` argument takes that interpolation base. This interpolates between values exponentially, creating an accelerated ramp effect.
 
-Here’s a visualization from Mapbox Studio (see [Mapbox Studio and iOS](https://www.mapbox.com/ios-sdk/maps/overview/mapbox-studio/)) comparing interpolation base values of `1.5` and `0.5` based on zoom. In order to convert camera style functions, use `$zoomLevel` or `MGL_FUNCTION('zoomLevel')` as the attribute key.
+Here’s a visualization from Mapbox Studio (see [Mapbox Studio and iOS](https://www.mapbox.com/ios-sdk/maps/overview/mapbox-studio/)) comparing interpolation base values of `1.5` and `0.5` based on zoom. In order to convert camera style functions, use `$zoomLevel` or `MLN_FUNCTION('zoomLevel')` as the attribute key.
 
 <img src="img/data-driven-styling/exponential-function.png" height=344/>
 <img src="img/data-driven-styling/exponential-function-1.png" height=344/>
@@ -102,12 +102,12 @@ Style function syntax:
 
 ```swift
 let stops = [
-    12: MGLStyleValue<NSNumber>(rawValue: 0.5),
-    14: MGLStyleValue(rawValue: 2),
-    18: MGLStyleValue(rawValue: 18),
+    12: MLNStyleValue<NSNumber>(rawValue: 0.5),
+    14: MLNStyleValue(rawValue: 2),
+    18: MLNStyleValue(rawValue: 18),
 ]
 
-layer.circleRadius = MGLStyleValue(interpolationMode: .exponential,
+layer.circleRadius = MLNStyleValue(interpolationMode: .exponential,
                                    cameraStops: stops,
                                    options: [.interpolationBase: 1.5])
 ```
@@ -118,7 +118,7 @@ Current syntax:
 
 ### Interval
 
-Steps, or intervals, create a range using the keys from the stops dictionary. The range is from the given key to just less than the next key. The attribute values that fall into that range are then styled using the layout or paint value assigned to that key. You can use the `+[NSExpression(MGLAdditions) mgl_expressionForSteppingExpression:fromExpression:stops:]` method or the custom function [`mgl_step:from:stops:`](predicates-and-expressions.html#code-mgl_step-from-stops-code) for cases where you previously used interval interpolation mode. The first parameter takes the feature attribute name and the second parameter (`from:`) optionally takes the default or fallback value for that function. The final parameter takes a stops dictionary as an argument.
+Steps, or intervals, create a range using the keys from the stops dictionary. The range is from the given key to just less than the next key. The attribute values that fall into that range are then styled using the layout or paint value assigned to that key. You can use the `+[NSExpression(MLNAdditions) mgl_expressionForSteppingExpression:fromExpression:stops:]` method or the custom function [`mgl_step:from:stops:`](predicates-and-expressions.html#code-mgl_step-from-stops-code) for cases where you previously used interval interpolation mode. The first parameter takes the feature attribute name and the second parameter (`from:`) optionally takes the default or fallback value for that function. The final parameter takes a stops dictionary as an argument.
 
 When we use the stops dictionary given above with an `'mgl_step:from:stops:'`, we create ranges where earthquakes with a magnitude of 0 to just less than 2.5 would be yellow, 2.5 to just less than 5 would be orange, and so on.
 
@@ -126,17 +126,17 @@ Style function syntax:
 
 ```swift
 let stops = [
-    0: MGLStyleValue<UIColor>(rawValue: .yellow),
-    2.5: MGLStyleValue(rawValue: .orange),
-    5: MGLStyleValue(rawValue: .red),
-    7.5: MGLStyleValue(rawValue: .blue),
-    10: MGLStyleValue(rawValue: .white),
+    0: MLNStyleValue<UIColor>(rawValue: .yellow),
+    2.5: MLNStyleValue(rawValue: .orange),
+    5: MLNStyleValue(rawValue: .red),
+    7.5: MLNStyleValue(rawValue: .blue),
+    10: MLNStyleValue(rawValue: .white),
 ]
 
-layer.circleColor = MGLStyleValue(interpolationMode: .interval,
+layer.circleColor = MLNStyleValue(interpolationMode: .interval,
                                   sourceStops: stops,
                                   attributeName: "mag",
-                                  options: [.defaultValue: MGLStyleValue<UIColor>(rawValue: .green)])
+                                  options: [.defaultValue: MLNStyleValue<UIColor>(rawValue: .green)])
 ````
 
 Current syntax:
@@ -145,9 +145,9 @@ Current syntax:
 
 ### Categorical
 
-Categorical interpolation mode took a stops dictionary. If the value for a specified feature attribute name matched one in that stops dictionary, the style value for that attribute value would be used. Categorical style functions can now be replaced with `MGL_MATCH`.
+Categorical interpolation mode took a stops dictionary. If the value for a specified feature attribute name matched one in that stops dictionary, the style value for that attribute value would be used. Categorical style functions can now be replaced with `MLN_MATCH`.
 
-`MGL_MATCH` takes an initial condition, which in this case is an attribute key. This is followed by possible matches for that key and the value to assign to the layer property if there is a match. The final argument can be a default style value that is to be used if none of the specified values match.
+`MLN_MATCH` takes an initial condition, which in this case is an attribute key. This is followed by possible matches for that key and the value to assign to the layer property if there is a match. The final argument can be a default style value that is to be used if none of the specified values match.
 
 There are three main types of events in the USGS dataset: earthquakes, explosions, and quarry blasts. In this case, the color of the circle layer will be determined by the type of event, with a default value of blue to catch any events that do not fall into any of those categories.
 
@@ -155,15 +155,15 @@ Style function syntax:
 
 ```swift
 let categoricalStops = [
-    "earthquake": MGLStyleValue<UIColor>(rawValue: .orange),
-    "explosion": MGLStyleValue(rawValue: .red),
-    "quarry blast": MGLStyleValue(rawValue: .yellow),
+    "earthquake": MLNStyleValue<UIColor>(rawValue: .orange),
+    "explosion": MLNStyleValue(rawValue: .red),
+    "quarry blast": MLNStyleValue(rawValue: .yellow),
 ]
 
-layer.circleColor = MGLStyleValue(interpolationMode: .categorical,
+layer.circleColor = MLNStyleValue(interpolationMode: .categorical,
                                   sourceStops: categoricalStops,
                                   attributeName: "type",
-                                  options: [.defaultValue: MGLStyleValue<UIColor>(rawValue: .blue)])
+                                  options: [.defaultValue: MLNStyleValue<UIColor>(rawValue: .blue)])
 ```
 
 Current syntax:
@@ -178,10 +178,10 @@ Identity interpolation mode used the attribute’s value as the style layer prop
 Style function syntax:
 
 ```swift
-layer.circleRadius = MGLStyleValue(interpolationMode: .identity,
+layer.circleRadius = MLNStyleValue(interpolationMode: .identity,
                                    sourceStops: nil,
                                    attributeName: "mag",
-                                   options: [.defaultValue: MGLStyleValue<NSNumber>(rawValue: 0)])
+                                   options: [.defaultValue: MLNStyleValue<NSNumber>(rawValue: 0)])
 ```
 
 Current syntax:
@@ -203,7 +203,7 @@ You can also cast attribute values in order to use them. One example is to cast 
 
 ### Constant Values
 
-For constant values that do not necessarily change based on camera or attribute values, use `[NSExpression expressionForConstantValue:]` (previously `[MGLStyleValue valueWithRawValue:]`).
+For constant values that do not necessarily change based on camera or attribute values, use `[NSExpression expressionForConstantValue:]` (previously `[MLNStyleValue valueWithRawValue:]`).
 
 ## Resources
 
