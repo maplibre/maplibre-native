@@ -149,6 +149,7 @@ jobs:
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
+        working-directory: .
         run: |
           echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
           echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
