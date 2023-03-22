@@ -119,7 +119,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.AWS_DEVICE_FARM_ROLE_TO_ASSUME }}
           role-duration-seconds: 1200
           role-session-name: MySessionName
 
@@ -128,7 +128,7 @@ jobs:
         uses: realm/aws-devicefarm/create-upload@master
         id: upload-android-app
         with:
-          project_arn: arn:aws:devicefarm:us-west-2:373521797162:project:20687d72-0e46-403e-8f03-0941850665bc
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           name: platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk
           type: ANDROID_APP
 
@@ -137,7 +137,7 @@ jobs:
         uses: realm/aws-devicefarm/create-upload@master
         id: upload-android-test
         with:
-          project_arn: arn:aws:devicefarm:us-west-2:373521797162:project:20687d72-0e46-403e-8f03-0941850665bc
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           name: platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk
           type: INSTRUMENTATION_TEST_PACKAGE
 
@@ -190,7 +190,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.AWS_DEVICE_FARM_ROLE_TO_ASSUME }}
           role-duration-seconds: 1200
           role-session-name: MySessionName
 
@@ -198,8 +198,8 @@ jobs:
         uses: realm/aws-devicefarm/test-application@master
         with:
           name: MapLibre Native Android Instrumentation Test
-          project_arn: arn:aws:devicefarm:us-west-2:373521797162:project:20687d72-0e46-403e-8f03-0941850665bc
-          device_pool_arn: arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
           app_arn: ${{ env.ANDROID_APP_ARN }}
           app_type: ANDROID_APP
           test_type: INSTRUMENTATION
