@@ -7,11 +7,11 @@ const _ = require('lodash');
 
 require('../../../../../scripts/style-code');
 
-const examplesSrc = fs.readFileSync('platform/darwin/test/MGLDocumentationExampleTests.swift', 'utf8');
+const examplesSrc = fs.readFileSync('platform/darwin/test/MLNDocumentationExampleTests.swift', 'utf8');
 
 // Regex extracts the following block
 // /** Front matter to describe the example. **/
-// func testMGLClass$member() {
+// func testMLNClass$member() {
 //     ...
 //     // #-example-code
 //     let sampleCode: String?
@@ -20,7 +20,7 @@ const examplesSrc = fs.readFileSync('platform/darwin/test/MGLDocumentationExampl
 // }
 //
 // into the following regex groups:
-// 1 (test method name): "MGLClass" or "MGLClass$member" or "MGLClass$initWithArg_anotherArg_"
+// 1 (test method name): "MLNClass" or "MLNClass$member" or "MLNClass$initWithArg_anotherArg_"
 // 2 (indentation): "    "
 // 3 (sample code): "let sampleCode: String?"
 const exampleRegex = /func test([\w$]+)\s*\(\)\s*\{[^]*?\n([ \t]+)\/\/#-example-code\n([^]+?)\n\2\/\/#-end-example-code\n/gm;
@@ -106,7 +106,7 @@ function completeExamples(os) {
         let testMethodName = symbolPath.join('$').replace(/\$[+-]/, '$').replace(/:/g, '_');
         let example = examples[testMethodName];
         if (!example) {
-          console.error(`MGLDocumentationExampleTests.test${testMethodName}() not found.`);
+          console.error(`MLNDocumentationExampleTests.test${testMethodName}() not found.`);
           process.exit(1);
         }
 

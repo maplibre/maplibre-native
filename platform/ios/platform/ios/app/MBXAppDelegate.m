@@ -11,10 +11,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-#ifndef MGL_DISABLE_LOGGING
-    [MGLLoggingConfiguration sharedConfiguration].loggingLevel = MGLLoggingLevelFault;
+#ifndef MLN_DISABLE_LOGGING
+    [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
 #endif
-    [MGLSettings useWellKnownTileServer:MGLMapTiler];
+    [MLNSettings useWellKnownTileServer:MLNMapTiler];
 
     return YES;
 }

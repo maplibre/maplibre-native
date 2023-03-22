@@ -28,6 +28,6 @@ for i in ${LIST[@]} ; do
     if [ ! -f "${OUTPUT}" ] ; then
         mkdir -p "`dirname "${OUTPUT}"`"
         echo "Downloading glyph '${OUTPUT}'"
-        curl -H "Accept-Encoding: gzip" -# "https://api.maptiler.com/fonts/${i}?key=${MGL_API_KEY}" | gunzip > "${OUTPUT}"
+        curl -H "Accept-Encoding: gzip" -# "https://api.maptiler.com/fonts/${i}?key=${MLN_API_KEY}" | gunzip > "${OUTPUT}"
     fi
 done

@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
         }
     }();
 
-    const char* apiEnv = getenv("MGL_API_KEY");
+    const char* apiEnv = getenv("MLN_API_KEY");
     const std::string apiKey = tokenValue ? args::get(tokenValue) : (apiEnv ? apiEnv : std::string());
     
     if (apiBaseValue) {

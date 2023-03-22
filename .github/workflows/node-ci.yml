@@ -8,13 +8,18 @@ on:
     tags:
       - 'node-*'
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
@@ -28,13 +33,18 @@ on:
     branches:
       - main
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"

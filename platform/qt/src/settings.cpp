@@ -132,7 +132,7 @@ Settings::Settings()
     , m_cacheMaximumSize(mbgl::util::DEFAULT_MAX_CACHE_SIZE)
     , m_cacheDatabasePath(":memory:")
     , m_assetPath(QCoreApplication::applicationDirPath())
-    , m_apiKey(qgetenv("MGL_API_KEY"))
+    , m_apiKey(qgetenv("MLN_API_KEY"))
     , m_tileServerOptionsInternal(new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration()))
 {
 }
@@ -289,7 +289,7 @@ void Settings::setAssetPath(const QString &path)
 /*!
     Returns the API key.
 
-    By default, it is taken from the environment variable \c MGL_API_KEY
+    By default, it is taken from the environment variable \c MLN_API_KEY
     or empty if the variable is not set.
 */
 QString Settings::apiKey() const {

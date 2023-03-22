@@ -206,11 +206,11 @@ If you require a build with debug symbols pre-stripped, use [this feed URL](http
 
 ### Configuration
 
-1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MGLApiKey` to your api key..
+1. Some vector tiles servers require a API key. In the project editor, select the application target, then go to the Info tab. Under the “Custom iOS Target Properties” section, set `MLNApiKey` to your api key..
 
 ### Usage
 
-In a storyboard or XIB, add a view to your view controller. (Drag View from the Object library to the View Controller scene on the Interface Builder canvas.) In the Identity inspector, set the view’s custom class to `MGLMapView`. If you need to manipulate the map view programmatically:
+In a storyboard or XIB, add a view to your view controller. (Drag View from the Object library to the View Controller scene on the Interface Builder canvas.) In the Identity inspector, set the view’s custom class to `MLNMapView`. If you need to manipulate the map view programmatically:
 
 1. Switch to the Assistant Editor.
 1. Import the `Mapbox` module.
@@ -222,7 +222,7 @@ In a storyboard or XIB, add a view to your view controller. (Drag View from the 
 
 @interface ViewController : UIViewController
 
-@property (strong) IBOutlet MGLMapView *mapView;
+@property (strong) IBOutlet MLNMapView *mapView;
 
 @end
 ```
@@ -232,6 +232,6 @@ In a storyboard or XIB, add a view to your view controller. (Drag View from the 
 import Mapbox
 
 class ViewController: UIViewController {
-    @IBOutlet var mapView: MGLMapView!
+    @IBOutlet var mapView: MLNMapView!
 }
 ```
