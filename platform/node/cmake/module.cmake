@@ -169,7 +169,6 @@ function(add_node_module NAME)
         )
 
         if(_NAN_VERSION)
-            # Nan requires C++11. Use a compile option to allow interfaces to override this with a later version.
             target_include_directories(${_TARGET} SYSTEM PRIVATE
                 "${_CACHE_DIR}/nan/${_NAN_VERSION}"
             )
