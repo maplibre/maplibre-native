@@ -25,7 +25,7 @@ using namespace mbgl::style;
 
 TEST(Expression, IsExpression) {
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> spec;
-    spec.Parse<0>(util::read_file("maplibre-gl-js/src/style-spec/reference/v8.json").c_str());
+    spec.Parse<0>(util::read_file("scripts/style-spec-reference/v8.json").c_str());
     ASSERT_FALSE(spec.HasParseError());
     ASSERT_TRUE(spec.IsObject() &&
                 spec.HasMember("expression_name") &&

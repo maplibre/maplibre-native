@@ -7,7 +7,7 @@ const outputPath = 'src/mbgl/programs';
 const zlib = require('zlib');
 const crypto = require('crypto');
 
-var shaders = require('../maplibre-gl-js/src/shaders');
+var shaders = require('../shaders');
 
 require('./style-code');
 

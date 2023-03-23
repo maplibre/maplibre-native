@@ -1,4 +1,4 @@
-const referenceSpec = require('../maplibre-gl-js/src/style-spec/reference/v8');
+const referenceSpec = require('../scripts/style-spec-reference/v8');
 
 referenceSpec.layer.type.values["location-indicator"] = {};
 referenceSpec["layout_location-indicator"] = {

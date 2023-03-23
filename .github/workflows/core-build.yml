@@ -10,7 +10,6 @@ on:
       - "include/**"
       - "workflows/core-build.yml"
       - "vendor/**"
-      - maplibre-gl-js
       - "CMakeLists.txt"
 
 concurrency:

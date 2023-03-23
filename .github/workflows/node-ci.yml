@@ -25,7 +25,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
@@ -50,7 +49,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
