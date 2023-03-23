@@ -129,7 +129,7 @@ jobs:
         id: upload-android-app
         with:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk
+          name: MapboxGLAndroidSDKTestApp-debug.apk
           type: ANDROID_APP
 
       - name: Create upload
@@ -138,17 +138,18 @@ jobs:
         id: upload-android-test
         with:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk
+          name: MapboxGLAndroidSDKTestApp-debug-androidTest.apk
           type: INSTRUMENTATION_TEST_PACKAGE
 
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
+        working-directory: .
         run: |
           echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
           echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
@@ -174,6 +175,10 @@ jobs:
 
   instrumentation-test:
     needs: build
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
+
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -191,7 +196,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 21600
           role-session-name: MySessionName
 
       - name: Schedule test run

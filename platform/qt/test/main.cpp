@@ -5,7 +5,7 @@
 #include <cerrno>
 #include <cstdio>
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(WIN32) && !defined(__clang__)
 #include <direct.h>
 #else
 #include <unistd.h>
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
 #ifdef WORK_DIRECTORY
-#ifdef _MSC_VER
+#ifdef WIN32
     const int result = _chdir(xstr(WORK_DIRECTORY));
 #else
     const int result = chdir(xstr(WORK_DIRECTORY));
