@@ -24,9 +24,10 @@ The documentation of MapLibre GL Native is a work in progress. To get an archite
 - [⭐️ iOS](platform/ios/platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
-- [macOS](platform/ios/platform/macos/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
+- [Windows](platform/windows/README.md)
+- [macOS](platform/ios/platform/macos/README.md)
 
 Platforms with a ⭐️ are **MapLibre Core Projects** and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
@@ -49,6 +50,9 @@ To contribute to MapLibre GL Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) an
 
 Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
 
+### Bounties 💰
+
+Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
 
 ## Sponsors
 

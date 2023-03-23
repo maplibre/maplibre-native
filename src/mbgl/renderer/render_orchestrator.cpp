@@ -103,7 +103,7 @@ public:
 
 }  // namespace
 
-RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const optional<std::string>& localFontFamily_)
+RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(std::make_unique<ImageManager>()),
@@ -395,7 +395,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (isMapModeContinuous) {
-        optional<Duration> placementUpdatePeriodOverride;
+        std::optional<Duration> placementUpdatePeriodOverride;
         if (symbolBucketsAdded && !tiltedView) {
             // If the view is not tilted, we want *the new* symbols to show up faster, however simple setting
             // `placementChanged` to `true` would initiate placement too often as new buckets usually come from several
@@ -403,7 +403,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             // coalesce buckets updates from several tiles. On contrary, with the tilted view it's more important to
             // make placement rarely for performance reasons and as the new symbols are normally "far away" and the user
             // is not that interested to see them ASAP.
-            placementUpdatePeriodOverride = optional<Duration>(Milliseconds(30));
+            placementUpdatePeriodOverride = std::optional<Duration>(Milliseconds(30));
         }
 
         renderTreeParameters->placementChanged = !placementController.placementIsRecent(
@@ -597,14 +597,14 @@ FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(const std::stri
                                                              const Feature& feature,
                                                              const std::string& extension,
                                                              const std::string& extensionField,
-                                                             const optional<std::map<std::string, Value>>& args) const {
+                                                             const std::optional<std::map<std::string, Value>>& args) const {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         return renderSource->queryFeatureExtensions(feature, extension, extensionField, args);
     }
     return {};
 }
 
-void RenderOrchestrator::setFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
+void RenderOrchestrator::setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID, const FeatureState& state) {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->setFeatureState(sourceLayerID, featureID, state);
@@ -612,16 +612,16 @@ void RenderOrchestrator::setFeatureState(const std::string& sourceID, const opti
 }
 
 void RenderOrchestrator::getFeatureState(FeatureState& state, const std::string& sourceID,
-                                         const optional<std::string>& sourceLayerID,
+                                         const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID) const {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->getFeatureState(state, sourceLayerID, featureID);
     }
 }
 
-void RenderOrchestrator::removeFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
-                                            const optional<std::string>& featureID,
-                                            const optional<std::string>& stateKey) {
+void RenderOrchestrator::removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
+                                            const std::optional<std::string>& featureID,
+                                            const std::optional<std::string>& stateKey) {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->removeFeatureState(sourceLayerID, featureID, stateKey);
     }
@@ -719,14 +719,13 @@ void RenderOrchestrator::clearData() {
 }
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load glyph range %d-%d for font stack %s: %s",
-               glyphRange.first, glyphRange.second, fontStackToString(fontStack).c_str(), util::toString(error).c_str());
+    Log::Error(Event::Style, "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
+               " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error));
     observer->onResourceError(error);
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load tile %s for source %s: %s",
-               util::toString(tileID).c_str(), source.baseImpl->id.c_str(), util::toString(error).c_str());
+    Log::Error(Event::Style, "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " + util::toString(error));
     observer->onResourceError(error);
 }
 

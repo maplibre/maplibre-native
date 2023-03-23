@@ -102,6 +102,7 @@ ParseError)JS").ToLocalChecked()).ToLocalChecked();
     Nan::SetPrototypeMethod(tpl, "setLayoutProperty", SetLayerProperty);
     Nan::SetPrototypeMethod(tpl, "setPaintProperty", SetLayerProperty);
     Nan::SetPrototypeMethod(tpl, "setFilter", SetFilter);
+    Nan::SetPrototypeMethod(tpl, "setSize", SetSize);
     Nan::SetPrototypeMethod(tpl, "setCenter", SetCenter);
     Nan::SetPrototypeMethod(tpl, "setZoom", SetZoom);
     Nan::SetPrototypeMethod(tpl, "setBearing", SetBearing);
@@ -170,17 +171,23 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return Nan::ThrowTypeError("Use the new operator to create new Map objects");
     }
 
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() > 0 && !info[0]->IsObject()) {
         return Nan::ThrowTypeError("Requires an options object as first argument");
     }
 
-    auto options = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+    v8::Local<v8::Object> options;
 
-    // Check that 'request' is set. If 'cancel' is set it must be a
+    if(info.Length() > 0) {
+        options = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+    } else {
+        options = Nan::New<v8::Object>();
+    }
+
+    // Check that if 'request' is set it must be a function, if 'cancel' is set it must be a
     // function and if 'ratio' is set it must be a number.
-    if (!Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
-     || !Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
-        return Nan::ThrowError("Options object must have a 'request' method");
+    if (Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
+     && !Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
+        return Nan::ThrowError("Options object 'request' property must be a function");
     }
 
     if (Nan::Has(options, Nan::New("cancel").ToLocalChecked()).FromJust()
@@ -195,11 +202,14 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     info.This()->SetInternalField(1, options);
 
-    mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
-            return std::make_unique<node_mbgl::NodeFileSource>(
-                reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
-        });
+    if(Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
+     && Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
+        mbgl::FileSourceManager::get()->registerFileSourceFactory(
+            mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
+                return std::make_unique<node_mbgl::NodeFileSource>(
+                    reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
+            });
+    }
 
     try {
         auto nodeMap = new NodeMap(options);
@@ -426,11 +436,11 @@ void NodeMap::Render(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
 
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return Nan::ThrowTypeError("First argument must be an options object");
+    if (info.Length() <= 0 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
+        return Nan::ThrowTypeError("First argument must be an options object or a callback function");
     }
 
-    if (info.Length() <= 1 || !info[1]->IsFunction()) {
+    if ((info.Length() <= 1 && !info[0]->IsFunction()) || (info.Length() > 1 && !info[1]->IsFunction())) {
         return Nan::ThrowTypeError("Second argument must be a callback function");
     }
 
@@ -443,12 +453,20 @@ void NodeMap::Render(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        auto options = ParseOptions(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-        assert(!nodeMap->req);
-        assert(!nodeMap->image.data);
-        nodeMap->req = std::make_unique<RenderRequest>(Nan::To<v8::Function>(info[1]).ToLocalChecked());
+        if (info[0]->IsFunction()) {
+            assert(!nodeMap->req);
+            assert(!nodeMap->image.data);
+            nodeMap->req = std::make_unique<RenderRequest>(Nan::To<v8::Function>(info[0]).ToLocalChecked());
 
-        nodeMap->startRender(options);
+            nodeMap->startRender();
+        } else {
+            auto options = ParseOptions(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+            assert(!nodeMap->req);
+            assert(!nodeMap->image.data);
+            nodeMap->req = std::make_unique<RenderRequest>(Nan::To<v8::Function>(info[1]).ToLocalChecked());
+
+            nodeMap->startRender(options);
+        }
     } catch (const mbgl::style::conversion::Error& err) {
         return Nan::ThrowTypeError(err.message.c_str());
     } catch (const mbgl::util::StyleParseException& ex) {
@@ -458,6 +476,27 @@ void NodeMap::Render(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     info.GetReturnValue().SetUndefined();
+}
+
+void NodeMap::startRender() {
+    map->renderStill([this](const std::exception_ptr& eptr) {
+        if (eptr) {
+            error = eptr;
+            uv_async_send(async);
+        } else {
+            assert(!image.data);
+            image = frontend->readStillImage();
+            uv_async_send(async);
+        }
+    });
+
+    // Retain this object, otherwise it might get destructed before we are finished rendering the
+    // still image.
+    Ref();
+
+    // Similarly, we're now waiting for the async to be called, so we need to make sure that it
+    // keeps the loop alive.
+    uv_ref(reinterpret_cast<uv_handle_t*>(async));
 }
 
 void NodeMap::startRender(const NodeMap::RenderOptions& options) {
@@ -640,7 +679,7 @@ void NodeMap::cancel() {
         reinterpret_cast<NodeMap *>(h->data)->renderFinished();
     });
 
-    frontend = std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{ 256, 256 }, pixelRatio);
+    frontend = std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{ 512, 512 }, pixelRatio);
     map = std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)
@@ -678,7 +717,7 @@ void NodeMap::AddSource(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     Error error;
-    mbgl::optional<std::unique_ptr<Source>> source = convert<std::unique_ptr<Source>>(info[1], error, *Nan::Utf8String(info[0]));
+    std::optional<std::unique_ptr<Source>> source = convert<std::unique_ptr<Source>>(info[1], error, *Nan::Utf8String(info[0]));
     if (!source) {
         Nan::ThrowTypeError(error.message.c_str());
         return;
@@ -717,7 +756,7 @@ void NodeMap::AddLayer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     Error error;
-    mbgl::optional<std::unique_ptr<Layer>> layer = convert<std::unique_ptr<Layer>>(info[0], error);
+    std::optional<std::unique_ptr<Layer>> layer = convert<std::unique_ptr<Layer>>(info[0], error);
     if (!layer) {
         Nan::ThrowTypeError(error.message.c_str());
         return;
@@ -882,7 +921,7 @@ void NodeMap::SetLayerProperty(const Nan::FunctionCallbackInfo<v8::Value>& info)
         return Nan::ThrowTypeError("Second argument must be a string");
     }
 
-    mbgl::optional<Error> error = layer->setProperty(*Nan::Utf8String(info[1]), Convertible(info[2]));
+    std::optional<Error> error = layer->setProperty(*Nan::Utf8String(info[1]), Convertible(info[2]));
     if (error) {
         return Nan::ThrowTypeError(error->message.c_str());
     }
@@ -914,7 +953,7 @@ void NodeMap::SetFilter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
         Error error;
-        mbgl::optional<Filter> converted = convert<Filter>(info[1], error);
+        std::optional<Filter> converted = convert<Filter>(info[1], error);
         if (!converted) {
             Nan::ThrowTypeError(error.message.c_str());
             return;
@@ -923,6 +962,30 @@ void NodeMap::SetFilter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     layer->setFilter(filter);
+}
+
+void NodeMap::SetSize(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+    auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
+    if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
+
+    if (info.Length() <= 0 || !info[0]->IsArray()) {
+        return Nan::ThrowTypeError("First argument must be an array");
+    }
+
+    auto size = info[0].As<v8::Array>();
+    uint32_t width= 0;
+    uint32_t height = 0;
+    if (size->Length() > 0) { width = Nan::To<uint32_t>(Nan::Get(size, 0).ToLocalChecked()).ToChecked(); }
+    if (size->Length() > 1) { height = Nan::To<uint32_t>(Nan::Get(size, 1).ToLocalChecked()).ToChecked(); }
+
+    try {
+        nodeMap->frontend->setSize({ width, height });
+        nodeMap->map->setSize({ width, height });
+    } catch (const std::exception &ex) {
+        return Nan::ThrowError(ex.what());
+    }
+
+    info.GetReturnValue().SetUndefined();
 }
 
 void NodeMap::SetCenter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
@@ -1095,7 +1158,7 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 
     std::string sourceID;
     std::string featureID;
-    mbgl::optional<std::string> sourceLayerID;
+    std::optional<std::string> sourceLayerID;
     auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
     if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
         auto sourceOption = Nan::Get(feature, Nan::New("source").ToLocalChecked()).ToLocalChecked();
@@ -1137,9 +1200,9 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
     bool valueParsed = false;
     FeatureState newState;
 
-    const std::function<optional<Error>(const std::string&, const Convertible&)> convertFn =
-        [&](const std::string& k, const Convertible& v) -> optional<Error> {
-        optional<Value> value = toValue(v);
+    const std::function<std::optional<Error>(const std::string&, const Convertible&)> convertFn =
+        [&](const std::string& k, const Convertible& v) -> std::optional<Error> {
+        std::optional<Value> value = toValue(v);
         if (value) {
             stateValue = std::move(*value);
             valueParsed = true;
@@ -1148,7 +1211,7 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
             std::size_t length = arrayLength(v);
             array.reserve(length);
             for (size_t i = 0; i < length; ++i) {
-                optional<Value> arrayVal = toValue(arrayMember(v, i));
+                std::optional<Value> arrayVal = toValue(arrayMember(v, i));
                 if (arrayVal) {
                     array.emplace_back(*arrayVal);
                 }
@@ -1164,11 +1227,11 @@ void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
         }
         if (!valueParsed) {
             Nan::ThrowTypeError("Could not get feature state value");
-            return nullopt;
+            return std::nullopt;
         }
         stateKey = k;
         newState[stateKey] = stateValue;
-        return nullopt;
+        return std::nullopt;
     };
 
     eachMember(state, convertFn);
@@ -1196,7 +1259,7 @@ void NodeMap::GetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 
     std::string sourceID;
     std::string featureID;
-    mbgl::optional<std::string> sourceLayerID;
+    std::optional<std::string> sourceLayerID;
     auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
     if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
         auto sourceOption = Nan::Get(feature, Nan::New("source").ToLocalChecked()).ToLocalChecked();
@@ -1253,9 +1316,9 @@ void NodeMap::RemoveFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& inf
     }
 
     std::string sourceID;
-    mbgl::optional<std::string> sourceLayerID;
-    mbgl::optional<std::string> featureID;
-    mbgl::optional<std::string> stateKey;
+    std::optional<std::string> sourceLayerID;
+    std::optional<std::string> featureID;
+    std::optional<std::string> stateKey;
     auto feature = Nan::To<v8::Object>(info[0]).ToLocalChecked();
     if (Nan::Has(feature, Nan::New("source").ToLocalChecked()).FromJust()) {
         auto sourceOption = Nan::Get(feature, Nan::New("source").ToLocalChecked()).ToLocalChecked();
@@ -1352,7 +1415,7 @@ void NodeMap::QueryRenderedFeatures(const Nan::FunctionCallbackInfo<v8::Value>& 
         if (Nan::Has(options, Nan::New("filter").ToLocalChecked()).FromJust()) {
             auto filterOption = Nan::Get(options, Nan::New("filter").ToLocalChecked()).ToLocalChecked();
             Error error;
-            mbgl::optional<Filter> converted = convert<Filter>(filterOption, error);
+            std::optional<Filter> converted = convert<Filter>(filterOption, error);
             if (!converted) {
                 return Nan::ThrowTypeError(error.message.c_str());
             }
@@ -1419,7 +1482,7 @@ NodeMap::NodeMap(v8::Local<v8::Object> options)
             : true;
     }())
     , mapObserver(NodeMapObserver())
-    , frontend(std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size { 256, 256 }, pixelRatio))
+    , frontend(std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size { 512, 512 }, pixelRatio))
     , map(std::make_unique<mbgl::Map>(*frontend, mapObserver,
                                       mbgl::MapOptions().withSize(frontend->getSize())
                                       .withPixelRatio(pixelRatio)

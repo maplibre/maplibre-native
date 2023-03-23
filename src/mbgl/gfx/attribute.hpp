@@ -5,11 +5,11 @@
 #include <mbgl/util/type_list.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <array>
 #include <type_traits>
 #include <cstddef>
+#include <optional>
 
 #define MBGL_DEFINE_ATTRIBUTE(type_, n_, name_)                                                    \
     struct name_ {                                                                                 \
@@ -94,6 +94,10 @@ public:
                lhs.vertexStride == rhs.vertexStride &&
                lhs.vertexBufferResource == rhs.vertexBufferResource &&
                lhs.vertexOffset == rhs.vertexOffset;
+    }
+
+    bool operator!=(const AttributeBinding& rhs) const {
+        return !(*this == rhs);
     }
 };
 
@@ -255,7 +259,7 @@ AttributeBinding attributeBinding(const VertexBuffer<detail::VertexType<As...>>&
     };
 }
 
-optional<gfx::AttributeBinding> offsetAttributeBinding(const optional<gfx::AttributeBinding>& binding, std::size_t vertexOffset);
+std::optional<gfx::AttributeBinding> offsetAttributeBinding(const std::optional<gfx::AttributeBinding>& binding, std::size_t vertexOffset);
 
 template <class>
 class AttributeBindings;
@@ -263,9 +267,9 @@ class AttributeBindings;
 template <class... As>
 class AttributeBindings<TypeList<As...>> final
     : public IndexedTuple<TypeList<As...>,
-                          TypeList<ExpandToType<As, optional<AttributeBinding>>...>> {
+                          TypeList<ExpandToType<As, std::optional<AttributeBinding>>...>> {
     using Base = IndexedTuple<TypeList<As...>,
-                          TypeList<ExpandToType<As, optional<AttributeBinding>>...>>;
+                          TypeList<ExpandToType<As, std::optional<AttributeBinding>>...>>;
 
 public:
     AttributeBindings(const VertexBuffer<Vertex<TypeList<As...>>>& buffer)

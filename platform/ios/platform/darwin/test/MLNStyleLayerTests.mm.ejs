@@ -1,0 +1,233 @@
+<%
+  const type = locals.type;
+  const properties = locals.properties;
+  const enumProperties = locals.enumProperties;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
+
+#import "MLNStyleLayerTests.h"
+#import "../../darwin/src/NSDate+MLNAdditions.h"
+<% if (type === 'symbol') { -%>
+#include "../../darwin/src/MLNAttributedExpression.h"
+<% } -%>
+
+#import "MLNStyleLayer_Private.h"
+
+#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+#include <mbgl/style/transition_options.hpp>
+#include <mbgl/style/expression/dsl.hpp>
+
+@interface MLN<%- camelize(type) %>LayerTests : MLNStyleLayerTests
+@end
+
+@implementation MLN<%- camelize(type) %>LayerTests
+
++ (NSString *)layerType {
+    return @"<%- type %>";
+}
+
+<% if (type !== 'background' && type !== 'raster' && type !== 'hillshade') { -%>
+- (void)testPredicates {
+    MLNPointFeature *feature = [[MLNPointFeature alloc] init];
+    MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"sourceID" shape:feature options:nil];
+    MLN<%- camelize(type) %>StyleLayer *layer = [[MLN<%- camelize(type) %>StyleLayer alloc] initWithIdentifier:@"layerID" source:source];
+
+    XCTAssertNil(layer.sourceLayerIdentifier);
+    layer.sourceLayerIdentifier = @"layerID";
+    XCTAssertEqualObjects(layer.sourceLayerIdentifier, @"layerID");
+    layer.sourceLayerIdentifier = nil;
+    XCTAssertNil(layer.sourceLayerIdentifier);
+
+    XCTAssertNil(layer.predicate);
+    layer.predicate = [NSPredicate predicateWithFormat:@"$featureIdentifier = 1"];
+    XCTAssertEqualObjects(layer.predicate,  [NSPredicate predicateWithFormat:@"$featureIdentifier = 1"]);
+    layer.predicate = nil;
+    XCTAssertNil(layer.predicate);
+}
+
+<% } -%>
+- (void)testProperties {
+<% if (type === 'background') { -%>
+    MLN<%- camelize(type) %>StyleLayer *layer = [[MLN<%- camelize(type) %>StyleLayer alloc] initWithIdentifier:@"layerID"];
+<% } else { -%>
+    MLNPointFeature *feature = [[MLNPointFeature alloc] init];
+    MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"sourceID" shape:feature options:nil];
+
+    MLN<%- camelize(type) %>StyleLayer *layer = [[MLN<%- camelize(type) %>StyleLayer alloc] initWithIdentifier:@"layerID" source:source];
+<% } -%>
+    XCTAssertNotEqual(layer.rawLayer, nullptr);
+    XCTAssertEqualObjects(@(layer.rawLayer->getTypeInfo()->type), @"<%- type %>");
+    auto rawLayer = static_cast<mbgl::style::<%- camelize(type) %>Layer*>(layer.rawLayer);
+
+    MLNTransition transitionTest = MLNTransitionMake(5, 4);
+
+<% for (const property of properties) { -%>
+<%   if (property['property-type'] === 'color-ramp') continue; -%>
+
+    // <%- originalPropertyName(property) %>
+    {
+        XCTAssertTrue(rawLayer->get<%- camelize(originalPropertyName(property)) %>().isUndefined(),
+                      @"<%- originalPropertyName(property) %> should be unset initially.");
+        NSExpression *defaultExpression = layer.<%- objCName(property) %>;
+
+<% if (property.type === 'formatted') { -%>
+        NSExpression *constantExpression = [NSExpression expressionWithFormat:<%- objCTestValue(property, 'string', true, 3) %>];
+<% } else if (property.type === 'resolvedImage'){ -%>
+        NSExpression *constantExpression = [NSExpression expressionForConstantValue:<%- objCTestValue(property, 'string', true, 3) %>];
+<% } else { -%>
+        NSExpression *constantExpression = [NSExpression expressionWithFormat:<%- objCTestValue(property, type, true, 3) %>];
+<% } -%>
+        layer.<%- objCName(property) %> = constantExpression;
+        mbgl::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, type) %> };
+        XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
+                       @"Setting <%- objCName(property) %> to a constant value expression should update <%- originalPropertyName(property) %>.");
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, constantExpression,
+                              @"<%- objCName(property) %> should round-trip constant value expressions.");
+
+<% if (property.type !== 'formatted') { -%>
+        constantExpression = [NSExpression expressionWithFormat:<%- objCTestValue(property, type, false, 3) %>];
+<% } else { -%>
+        MLNAttributedExpression *attributedConstantExpression = [[MLNAttributedExpression alloc] initWithExpression:[NSExpression expressionWithFormat:<%- objCTestValue(property, 'string', true, 3) %>]
+                                                                                                 attributes:@{}];
+        constantExpression = [NSExpression mgl_expressionForAttributedExpressions:@[[NSExpression expressionForConstantValue:attributedConstantExpression]]];
+<% } -%>
+        XCTExpectFailure(@"Awaiting unit test refactoring https://github.com/maplibre/maplibre-gl-native/issues/421");
+        NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)", constantExpression, @{@18: constantExpression}];
+        layer.<%- objCName(property) %> = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+<% if (property.type === 'formatted') { -%>
+                step(zoom(), format(<%- mbglExpressionTestValue(property, type) %>), 18.0, format(<%- mbglExpressionTestValue(property, type) %>))
+<% } else if (property.type === 'resolvedImage') { -%>
+                step(zoom(), image(literal(<%- mbglExpressionTestValue(property, type) %>)), 18.0, image(literal(<%- mbglExpressionTestValue(property, type) %>)))
+<% } else { -%>
+                step(zoom(), literal(<%- mbglExpressionTestValue(property, type) %>), 18.0, literal(<%- mbglExpressionTestValue(property, type) %>))
+<% } -%>
+            );
+        }
+
+        XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
+                       @"Setting <%- objCName(property) %> to a camera expression should update <%- originalPropertyName(property) %>.");
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, functionExpression,
+                              @"<%- objCName(property) %> should round-trip camera expressions.");
+
+<% if (isDataDriven(property) && isInterpolatable(property)) { -%>
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(keyName, 'linear', nil, %@)", @{@18: constantExpression}];
+        layer.<%- objCName(property) %> = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+                interpolate(linear(), number(get("keyName")), 18.0, literal(<%- mbglExpressionTestValue(property, type) %>))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
+                       @"Setting <%- objCName(property) %> to a data expression should update <%- originalPropertyName(property) %>.");
+        NSExpression *pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:(CAST(keyName, 'NSNumber'), 'linear', nil, %@)", @{@18: constantExpression}];
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, pedanticFunctionExpression,
+                              @"<%- objCName(property) %> should round-trip data expressions.");
+
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        layer.<%- objCName(property) %> = functionExpression;
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+                interpolate(linear(), zoom(), 10.0, interpolate(linear(), number(get("keyName")), 18.0, literal(<%- mbglExpressionTestValue(property, type) %>)))
+            );
+        }
+
+        XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
+                       @"Setting <%- objCName(property) %> to a camera-data expression should update <%- originalPropertyName(property) %>.");
+        pedanticFunctionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: pedanticFunctionExpression}];
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, pedanticFunctionExpression,
+                              @"<%- objCName(property) %> should round-trip camera-data expressions.");
+<% } -%>
+<% if (!property.required) { -%>
+
+        layer.<%- objCName(property) %> = nil;
+        XCTAssertTrue(rawLayer->get<%- camelize(originalPropertyName(property)) %>().isUndefined(),
+                      @"Unsetting <%- objCName(property) %> should return <%- originalPropertyName(property) %> to the default value.");
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, defaultExpression,
+                              @"<%- objCName(property) %> should return the default value after being unset.");
+<% } -%>
+<% if (!isDataDriven(property)) { -%>
+
+        functionExpression = [NSExpression expressionForKeyPath:@"bogus"];
+        XCTAssertThrowsSpecificNamed(layer.<%- objCName(property) %> = functionExpression, NSException, NSInvalidArgumentException, @"MLN<%- camelize(type) %>Layer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:(bogus, %@, %@)", constantExpression, @{@18: constantExpression}];
+        functionExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", @{@10: functionExpression}];
+        XCTAssertThrowsSpecificNamed(layer.<%- objCName(property) %> = functionExpression, NSException, NSInvalidArgumentException, @"MLN<%- camelize(type) %>Layer should raise an exception if a camera-data expression is applied to a property that does not support key paths to feature attributes.");
+<% } -%>
+<% if (property["transition"] && !property.original) { -%>
+        // Transition property test
+        layer.<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>Transition = transitionTest;
+        auto toptions = rawLayer->get<%- camelize(originalPropertyName(property)) %>Transition();
+        XCTAssert(toptions.delay && MLNTimeIntervalFromDuration(*toptions.delay) == transitionTest.delay);
+        XCTAssert(toptions.duration && MLNTimeIntervalFromDuration(*toptions.duration) == transitionTest.duration);
+
+        MLNTransition <%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>Transition = layer.<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>Transition;
+        XCTAssertEqual(<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>Transition.delay, transitionTest.delay);
+        XCTAssertEqual(<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>Transition.duration, transitionTest.duration);
+<% } -%>
+<% if (property.tokens) { -%>
+
+        // Tokens test
+        layer.<%- objCName(property) %> = [NSExpression expressionForConstantValue:@"{token}"];
+
+        {
+            using namespace mbgl::style::expression::dsl;
+            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+<% if (property.type === 'formatted') { -%>
+                format(toString(get(literal("token"))))
+<% } else if (property.type === 'resolvedImage') { -%>
+                image(toString(get(literal("token"))))
+<% } else { -%>
+                toString(get(literal("token")))
+<% } -%>
+            );
+        }
+
+        XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
+                       @"Setting <%- objCName(property) %> to a constant string with tokens should convert to an expression.");
+
+<% if (property.type === 'formatted') { -%>
+        MLNAttributedExpression *tokenAttibutedExpression = [[MLNAttributedExpression alloc] initWithExpression:[NSExpression expressionWithFormat:@"CAST(token, 'NSString')"]
+                                                                                                     attributes:@{}];
+        NSExpression* tokenExpression = [NSExpression mgl_expressionForAttributedExpressions:@[[NSExpression expressionForConstantValue:tokenAttibutedExpression]]];
+<% } else if (property.type === 'resolvedImage') { -%>
+        NSExpression* tokenExpression = [NSExpression expressionWithFormat:@"MLN_FUNCTION('image', CAST(token, \"NSString\"))"];
+<% } else { -%>
+        NSExpression* tokenExpression = [NSExpression expressionWithFormat:@"CAST(token, \"NSString\")"];
+<% } -%>
+        XCTAssertEqualObjects(layer.<%- objCName(property) %>, tokenExpression,
+                              @"Setting <%- objCName(property) %> to a constant string with tokens should convert to an expression.");
+<% } -%>
+    }
+<% } -%>
+}
+
+- (void)testPropertyNames {
+<% for (const property of properties) { -%>
+<%   if (property['property-type'] === 'color-ramp') continue; -%>
+    [self testPropertyName:@"<%- property.getter || property.name %>" isBoolean:<%- property.type === 'boolean' ? 'YES' : 'NO' %>];
+<% } -%>
+}
+
+<% if (enumProperties) { -%>
+- (void)testValueAdditions {
+<% for (let property of enumProperties) { -%>
+<% for (let value in property.values) { -%>
+<% if (property.values.hasOwnProperty(value)) { -%>
+    XCTAssertEqual([NSValue valueWithMLN<%- camelize(enumName(property)) %>:MLN<%- camelize(enumName(property)) %><%- camelize(value) %>].MLN<%- camelize(enumName(property)) %>Value, MLN<%- camelize(enumName(property)) %><%- camelize(value) %>);
+<% } -%>
+<% } -%>
+<% } -%>
+}
+
+<% } -%>
+@end

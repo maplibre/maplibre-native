@@ -26,8 +26,8 @@ enum class SymbolContent : uint8_t { None = 0, Text = 1 << 0, IconRGBA = 1 << 1,
 struct SymbolInstanceSharedData {
     SymbolInstanceSharedData(GeometryCoordinates line,
                              const ShapedTextOrientations& shapedTextOrientations,
-                             const optional<PositionedIcon>& shapedIcon,
-                             const optional<PositionedIcon>& verticallyShapedIcon,
+                             const std::optional<PositionedIcon>& shapedIcon,
+                             const std::optional<PositionedIcon>& verticallyShapedIcon,
                              const style::SymbolLayoutProperties::Evaluated& layout,
                              style::SymbolPlacementType textPlacement,
                              const std::array<float, 2>& textOffset,
@@ -43,8 +43,8 @@ struct SymbolInstanceSharedData {
     SymbolQuads centerJustifiedGlyphQuads;
     SymbolQuads leftJustifiedGlyphQuads;
     SymbolQuads verticalGlyphQuads;
-    optional<SymbolQuads> iconQuads;
-    optional<SymbolQuads> verticalIconQuads;
+    std::optional<SymbolQuads> iconQuads;
+    std::optional<SymbolQuads> verticalIconQuads;
 };
 
 class SymbolInstance {
@@ -52,8 +52,8 @@ public:
     SymbolInstance(Anchor& anchor_,
                    std::shared_ptr<SymbolInstanceSharedData> sharedData,
                    const ShapedTextOrientations& shapedTextOrientations,
-                   const optional<PositionedIcon>& shapedIcon,
-                   const optional<PositionedIcon>& verticallyShapedIcon,
+                   const std::optional<PositionedIcon>& shapedIcon,
+                   const std::optional<PositionedIcon>& verticallyShapedIcon,
                    float textBoxScale,
                    float textPadding,
                    style::SymbolPlacementType textPlacement,
@@ -72,7 +72,7 @@ public:
                    bool allowVerticalPlacement,
                    SymbolContent iconType = SymbolContent::None);
 
-    optional<size_t> getDefaultHorizontalPlacedTextIndex() const;
+    std::optional<size_t> getDefaultHorizontalPlacedTextIndex() const;
     const GeometryCoordinates& line() const;
     const SymbolQuads& rightJustifiedGlyphQuads() const;
     const SymbolQuads& leftJustifiedGlyphQuads() const;
@@ -81,8 +81,8 @@ public:
     bool hasText() const;
     bool hasIcon() const;
     bool hasSdfIcon() const;
-    const optional<SymbolQuads>& iconQuads() const;
-    const optional<SymbolQuads>& verticalIconQuads() const;
+    const std::optional<SymbolQuads>& iconQuads() const;
+    const std::optional<SymbolQuads>& verticalIconQuads() const;
     void releaseSharedData();
 
 private:
@@ -100,8 +100,8 @@ public:
 
     CollisionFeature textCollisionFeature;
     CollisionFeature iconCollisionFeature;
-    optional<CollisionFeature> verticalTextCollisionFeature = nullopt;
-    optional<CollisionFeature> verticalIconCollisionFeature = nullopt;
+    std::optional<CollisionFeature> verticalTextCollisionFeature = std::nullopt;
+    std::optional<CollisionFeature> verticalIconCollisionFeature = std::nullopt;
     WritingModeType writingModes;
     std::size_t layoutFeatureIndex; // Index into the set of features included at layout time
     std::size_t dataFeatureIndex;   // Index into the underlying tile data feature set
@@ -109,12 +109,12 @@ public:
     std::array<float, 2> iconOffset;
     std::u16string key;
     bool isDuplicate;
-    optional<size_t> placedRightTextIndex;
-    optional<size_t> placedCenterTextIndex;
-    optional<size_t> placedLeftTextIndex;
-    optional<size_t> placedVerticalTextIndex;
-    optional<size_t> placedIconIndex;
-    optional<size_t> placedVerticalIconIndex;
+    std::optional<size_t> placedRightTextIndex;
+    std::optional<size_t> placedCenterTextIndex;
+    std::optional<size_t> placedLeftTextIndex;
+    std::optional<size_t> placedVerticalTextIndex;
+    std::optional<size_t> placedIconIndex;
+    std::optional<size_t> placedVerticalIconIndex;
     float textBoxScale;
     std::array<float, 2> variableTextOffset;
     bool singleLine;

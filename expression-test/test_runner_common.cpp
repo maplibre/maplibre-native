@@ -118,7 +118,7 @@ bool deepEqual(const Value& a, const Value& b) {
     return false;
 }
 
-bool deepEqual(const optional<Value>& a, const optional<Value>& b) {
+bool deepEqual(const std::optional<Value>& a, const std::optional<Value>& b) {
     if ((a && !b) || (!a && b)) {
         return false;
     }

@@ -3,13 +3,13 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
 
 #include <memory>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 
@@ -64,7 +64,7 @@ public:
 
     SourceType getType() const;
     std::string getID() const;
-    optional<std::string> getAttribution() const;
+    std::optional<std::string> getAttribution() const;
 
     // The data from the volatile sources are not stored in a persistent storage.
     bool isVolatile() const noexcept;
@@ -80,8 +80,8 @@ public:
     SourceObserver* observer = nullptr;
 
     virtual void loadDescription(FileSource&) = 0;
-    void setPrefetchZoomDelta(optional<uint8_t> delta) noexcept;
-    optional<uint8_t> getPrefetchZoomDelta() const noexcept;
+    void setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept;
+    std::optional<uint8_t> getPrefetchZoomDelta() const noexcept;
 
     // If the given source supports loading tiles from a server,
     // sets the minimum tile update interval.
@@ -103,8 +103,8 @@ public:
     // minimum zoom level of a parent tile that could be used in place of an ideal
     // tile during rendering would be zoom 0. By default, no limit is set, so any
     // parent tile may be used.
-    void setMaxOverscaleFactorForParentTiles(optional<uint8_t> overscaleFactor) noexcept;
-    optional<uint8_t> getMaxOverscaleFactorForParentTiles() const noexcept;
+    void setMaxOverscaleFactorForParentTiles(std::optional<uint8_t> overscaleFactor) noexcept;
+    std::optional<uint8_t> getMaxOverscaleFactorForParentTiles() const noexcept;
     void dumpDebugLogs() const;
 
     virtual bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const = 0;

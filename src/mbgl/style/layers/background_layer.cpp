@@ -93,7 +93,7 @@ TransitionOptions BackgroundLayer::getBackgroundColorTransition() const {
 }
 
 PropertyValue<float> BackgroundLayer::getDefaultBackgroundOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& BackgroundLayer::getBackgroundOpacity() const {
@@ -213,7 +213,7 @@ Value BackgroundLayer::serialize() const {
     return result;
 }
 
-optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
@@ -227,7 +227,7 @@ optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, co
         }
 
         setBackgroundColor(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
     if (property == Property::BackgroundOpacity) {
         Error error;
@@ -237,7 +237,7 @@ optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, co
         }
 
         setBackgroundOpacity(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
     if (property == Property::BackgroundPattern) {
         Error error;
@@ -247,28 +247,28 @@ optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, co
         }
 
         setBackgroundPattern(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
 
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
 
     if (property == Property::BackgroundColorTransition) {
         setBackgroundColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::BackgroundOpacityTransition) {
         setBackgroundOpacityTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::BackgroundPatternTransition) {
         setBackgroundPatternTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

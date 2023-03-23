@@ -15,7 +15,7 @@ private:
                         bool needsRendering,
                         bool needsRelayout,
                         const TileParameters&) override;
-    const optional<Tileset>& getTileset() const override;
+    const std::optional<Tileset>& getTileset() const override;
 };
 
 } // namespace mbgl

@@ -139,6 +139,3 @@ jobs:
 
       - name: Lint plist files
         run: make macos-lint
-
-      - name: Darwin Style Code check
-        run: make darwin-style-code

@@ -103,5 +103,5 @@ TEST(VectorTileData, ParseResults) {
     ASSERT_EQ(properties.size(), 3u);
     ASSERT_EQ(properties.at("disputed"), *feature->getValue("disputed"));
 
-    ASSERT_EQ(feature->getValue("invalid"), nullopt);
+    ASSERT_EQ(feature->getValue("invalid"), std::nullopt);
 }

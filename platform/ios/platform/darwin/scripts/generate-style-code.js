@@ -10,7 +10,7 @@ const assert = require('assert');
 require('../../../../../scripts/style-code');
 
 const cocoaConventions = require('./style-spec-cocoa-conventions-v8.json');
-const prefix = 'MGL';
+const prefix = 'MLN';
 const suffix = 'StyleLayer';
 
 let spec = _.merge(require('../../../scripts/style-spec'), require('./style-spec-overrides-v8.json'));
@@ -140,7 +140,7 @@ global.arrayType = function (property) {
 
 global.testImplementation = function (property, layerType, isFunction) {
     let helperMsg = testHelperMessage(property, layerType, isFunction);
-    return `layer.${objCName(property)} = [MGLRuntimeStylingHelper ${helperMsg}];`;
+    return `layer.${objCName(property)} = [MLNRuntimeStylingHelper ${helperMsg}];`;
 };
 
 global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
@@ -159,13 +159,13 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
         case 'resolvedImage':
             return layerType === 'string' ?
                 `@"${_.startCase(propertyName)}"` :
-                `@"MGL_FUNCTION('image', '${_.startCase(propertyName)}')"`;
+                `@"MLN_FUNCTION('image', '${_.startCase(propertyName)}')"`;
         case 'string':
             return `@"'${_.startCase(propertyName)}'"`;
         case 'enum':
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
-            return '@"%@", [MGLColor redColor]';
+            return '@"%@", [MLNColor redColor]';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -184,7 +184,7 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
                 case 'translate': {
                     if (arraysAsStructs) {
                         let iosValue = '[NSValue valueWithCGVector:CGVectorMake(1, 1)]'.indent(indent * 4);
-                        let macosValue = '[NSValue valueWithMGLVector:CGVectorMake(1, -1)]'.indent(indent * 4);
+                        let macosValue = '[NSValue valueWithMLNVector:CGVectorMake(1, -1)]'.indent(indent * 4);
                         return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
                     }
                     return '@"{1, 1}"';
@@ -277,12 +277,12 @@ global.mbglExpressionTestValue = function (property, layerType) {
 
 global.testGetterImplementation = function (property, layerType, isFunction) {
     let helperMsg = testHelperMessage(property, layerType, isFunction);
-    let value = `[MGLRuntimeStylingHelper ${helperMsg}]`;
+    let value = `[MLNRuntimeStylingHelper ${helperMsg}]`;
     if (property.type === 'enum') {
         if (isFunction) {
             return `XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
         }
-        return `XCTAssert([gLayer.${objCName(property)} isKindOfClass:[MGLConstantStyleValue class]]);
+        return `XCTAssert([gLayer.${objCName(property)} isKindOfClass:[MLNConstantStyleValue class]]);
     XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
     }
     return `XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
@@ -358,7 +358,7 @@ global.propertyDoc = function (propertyName, property, layerType, kind) {
             let layoutProperties = spec[`layout_${layerType}`] || [];
             let paintProperties = spec[`paint_${layerType}`] || [];
             if (symbol in layoutProperties || symbol in paintProperties) {
-                return '`MGL' + camelize(layerType) + 'StyleLayer.' + camelizeWithLeadingLowercase(symbol) + '`';
+                return '`MLN' + camelize(layerType) + 'StyleLayer.' + camelizeWithLeadingLowercase(symbol) + '`';
             }
         }
         if ('values' in property && Object.keys(property.values).indexOf(symbol) !== -1) {
@@ -484,7 +484,7 @@ global.describeType = function (property) {
         case 'resolvedImage':
             return 'string';
         case 'enum':
-            return '`MGL' + camelize(property.name) + '`';
+            return '`MLN' + camelize(property.name) + '`';
         case 'color':
             return '`UIColor`';
         case 'array':
@@ -495,11 +495,11 @@ global.describeType = function (property) {
                 case 'translate':
                     return '`CGVector`';
                 case 'position':
-                    return '`MGLSphericalPosition`';
+                    return '`MLNSphericalPosition`';
                 case 'anchor':
-                    return '`MGLTextAnchor` array';
+                    return '`MLNTextAnchor` array';
                 case 'mode':
-                    return '`MGLTextWritingMode` array';
+                    return '`MLNTextWritingMode` array';
                 default:
                     return 'array';
             }
@@ -580,7 +580,7 @@ global.describeValue = function (value, property, layerType) {
                 case 'translate':
                     return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
                 case 'position':
-                    return 'an `MGLSphericalPosition` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
+                    return 'an `MLNSphericalPosition` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
                 default:
                     return 'the array `' + value.join('`, `') + '`';
             }
@@ -622,7 +622,7 @@ global.propertyType = function (property) {
         case 'enum':
             return 'NSValue *';
         case 'color':
-            return 'MGLColor *';
+            return 'MLNColor *';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -668,7 +668,7 @@ global.valueTransformerArguments = function (property) {
         case 'string':
             return ['std::string', objCType];
         case 'enum':
-            return [mbglType(property), 'NSValue *', mbglType(property), `MGL${camelize(property.name)}`];
+            return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
         case 'array':
@@ -685,9 +685,9 @@ global.valueTransformerArguments = function (property) {
                 case 'translate':
                     return ['std::array<float, 2>', objCType];
                 case 'anchor':
-                    return ['std::vector<mbgl::style::SymbolAnchorType>', objCType, 'mbgl::style::SymbolAnchorType', 'MGLTextAnchor'];
+                    return ['std::vector<mbgl::style::SymbolAnchorType>', objCType, 'mbgl::style::SymbolAnchorType', 'MLNTextAnchor'];
                 case 'mode':
-                    return ['std::vector<mbgl::style::TextWritingModeType>', objCType, 'mbgl::style::TextWritingModeType', 'MGLTextWritingMode'];
+                    return ['std::vector<mbgl::style::TextWritingModeType>', objCType, 'mbgl::style::TextWritingModeType', 'MLNTextWritingMode'];
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -774,20 +774,20 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const layerH = ejs.compile(fs.readFileSync('platform/darwin/src/MGLStyleLayer.h.ejs', 'utf8'), { strict: true });
-const layerPrivateH = ejs.compile(fs.readFileSync('platform/darwin/src/MGLStyleLayer_Private.h.ejs', 'utf8'), { strict: true });
-const layerM = ejs.compile(fs.readFileSync('platform/darwin/src/MGLStyleLayer.mm.ejs', 'utf8'), { strict: true});
-const testLayers = ejs.compile(fs.readFileSync('platform/darwin/test/MGLStyleLayerTests.mm.ejs', 'utf8'), { strict: true});
+const layerH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer.h.ejs', 'utf8'), { strict: true });
+const layerPrivateH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer_Private.h.ejs', 'utf8'), { strict: true });
+const layerM = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer.mm.ejs', 'utf8'), { strict: true});
+const testLayers = ejs.compile(fs.readFileSync('platform/darwin/test/MLNStyleLayerTests.mm.ejs', 'utf8'), { strict: true});
 const forStyleAuthorsMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/For Style Authors.md.ejs', 'utf8'), { strict: true });
 const ddsGuideMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/Migrating to Expressions.md.ejs', 'utf8'), { strict: true });
 const templatesMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/Tile URL Templates.md.ejs', 'utf8'), { strict: true });
 
-const lightH = ejs.compile(fs.readFileSync('platform/darwin/src/MGLLight.h.ejs', 'utf8'), {strict: true});
-const lightM = ejs.compile(fs.readFileSync('platform/darwin/src/MGLLight.mm.ejs', 'utf8'), {strict: true});
-const testLight = ejs.compile(fs.readFileSync('platform/darwin/test/MGLLightTest.mm.ejs', 'utf8'), { strict: true});
-writeIfModified(`platform/darwin/src/MGLLight.h`, duplicatePlatformDecls(lightH({ properties: lightProperties, doc: lightDoc, type: lightType })));
-writeIfModified(`platform/darwin/src/MGLLight.mm`, lightM({ properties: lightProperties, doc: lightDoc, type: lightType }));
-writeIfModified(`platform/darwin/test/MGLLightTest.mm`, testLight({ properties: lightProperties, doc: lightDoc, type: lightType }));
+const lightH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNLight.h.ejs', 'utf8'), {strict: true});
+const lightM = ejs.compile(fs.readFileSync('platform/darwin/src/MLNLight.mm.ejs', 'utf8'), {strict: true});
+const testLight = ejs.compile(fs.readFileSync('platform/darwin/test/MLNLightTest.mm.ejs', 'utf8'), { strict: true});
+writeIfModified(`platform/darwin/src/MLNLight.h`, duplicatePlatformDecls(lightH({ properties: lightProperties, doc: lightDoc, type: lightType })));
+writeIfModified(`platform/darwin/src/MLNLight.mm`, lightM({ properties: lightProperties, doc: lightDoc, type: lightType }));
+writeIfModified(`platform/darwin/test/MLNLightTest.mm`, testLight({ properties: lightProperties, doc: lightDoc, type: lightType }));
 
 
 const layers = _(spec.layer.type.values).map((value, layerType) => {
@@ -815,16 +815,16 @@ const layers = _(spec.layer.type.values).map((value, layerType) => {
 }).sortBy(['type']).value();
 
 function duplicatePlatformDecls(src) {
-    // Look for a documentation comment that contains “MGLColor” or “UIColor”
+    // Look for a documentation comment that contains “MLNColor” or “UIColor”
     // and the subsequent function, method, or property declaration. Try not to
     // match greedily.
-    return src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:MGL|NS|UI)Color\b[\s\S]*?\*\/)(\s*.+?;)/g,
+    return src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:MLN|NS|UI)Color\b[\s\S]*?\*\/)(\s*.+?;)/g,
                        (match, comment, decl) => {
-        let macosComment = comment.replace(/\b(?:MGL|UI)Color\b/g, 'NSColor')
+        let macosComment = comment.replace(/\b(?:MLN|UI)Color\b/g, 'NSColor')
             // Use the correct indefinite article.
             .replace(/\ba(\s+`?NSColor)\b/gi, 'an$1');
-        let iosDecl = decl.replace(/\bMGLColor\b/g, 'UIColor');
-        let macosDecl = decl.replace(/\b(?:MGL|UI)Color\b/g, 'NSColor');
+        let iosDecl = decl.replace(/\bMLNColor\b/g, 'UIColor');
+        let macosDecl = decl.replace(/\b(?:MLN|UI)Color\b/g, 'NSColor');
         return `\
 #if TARGET_OS_IPHONE
 ${comment}${iosDecl}
@@ -868,7 +868,7 @@ for (var layer of layers) {
 }
 
 // Extract examples for guides from unit tests.
-let examplesSrc = fs.readFileSync('platform/darwin/test/MGLDocumentationGuideTests.swift', 'utf8');
+let examplesSrc = fs.readFileSync('platform/darwin/test/MLNDocumentationGuideTests.swift', 'utf8');
 const exampleRegex = /func test([\w$]+)\s*\(\)\s*\{[^]*?\n([ \t]+)\/\/#-example-code\n([^]+?)\n\2\/\/#-end-example-code\n/gm;
 
 let examples = {};
@@ -889,7 +889,7 @@ global.guideExample = function (guide, exampleId, os) {
     let testMethodName = `${guide}$${exampleId}`;
     let example = examples[testMethodName];
     if (!example) {
-        console.error(`MGLDocumentationExampleTests.test${testMethodName}() not found.`);
+        console.error(`MLNDocumentationExampleTests.test${testMethodName}() not found.`);
         process.exit(1);
     }
 

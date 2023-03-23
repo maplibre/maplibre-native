@@ -97,8 +97,7 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
     mbgl::filesystem::path manifestPath = args::get(testPathValue);
     if (!mbgl::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
         mbgl::Log::Error(mbgl::Event::General,
-                         "Provided test manifest file path '%s' does not exist",
-                         manifestPath.string().c_str());
+                         "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
         exit(3);
     }
 

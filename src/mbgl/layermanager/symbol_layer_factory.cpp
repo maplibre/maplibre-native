@@ -12,7 +12,7 @@ const style::LayerTypeInfo* SymbolLayerFactory::getTypeInfo() const noexcept {
 }
 
 std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
-    optional<std::string> source = getSource(value);
+    std::optional<std::string> source = getSource(value);
     if (!source) {
         return nullptr;
     }

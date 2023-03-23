@@ -28,7 +28,7 @@ class AnnotationSource::Impl : public style::Source::Impl {
 public:
     Impl();
 
-    optional<std::string> getAttribution() const final;
+    std::optional<std::string> getAttribution() const final;
 };
 
 } // namespace mbgl

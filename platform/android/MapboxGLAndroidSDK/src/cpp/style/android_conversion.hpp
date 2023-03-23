@@ -4,11 +4,11 @@
 
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
 #include <jni/jni.hpp>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -37,7 +37,7 @@ public:
         return value.get(i);
     }
 
-    static optional<mbgl::android::Value> objectMember(const mbgl::android::Value& value, const char* key) {
+    static std::optional<mbgl::android::Value> objectMember(const mbgl::android::Value& value, const char* key) {
         mbgl::android::Value member = value.get(key);
         if (!member.isNull()) {
             return member;
@@ -47,14 +47,14 @@ public:
     }
 
     template <class Fn>
-    static optional<Error> eachMember(const mbgl::android::Value& value, Fn&& fn) {
+    static std::optional<Error> eachMember(const mbgl::android::Value& value, Fn&& fn) {
         assert(value.isObject());
         mbgl::android::Value keys = value.keyArray();
         std::size_t length = arrayLength(keys);
         for(std::size_t i = 0; i < length; ++i){
             const auto k = keys.get(i).toString();
             auto v = value.get(k.c_str());
-            optional<Error> result = fn(k, std::move(v));
+            std::optional<Error> result = fn(k, std::move(v));
             if (result) {
                 return result;
             }
@@ -62,7 +62,7 @@ public:
         return {};
     }
 
-    static optional<bool> toBool(const mbgl::android::Value& value) {
+    static std::optional<bool> toBool(const mbgl::android::Value& value) {
         if (value.isBool()) {
             return value.toBool();
         } else {
@@ -70,7 +70,7 @@ public:
         }
     }
 
-    static optional<float> toNumber(const mbgl::android::Value& value) {
+    static std::optional<float> toNumber(const mbgl::android::Value& value) {
         if (value.isNumber()) {
             auto num = value.toFloat();
             return num;
@@ -79,7 +79,7 @@ public:
         }
     }
 
-    static optional<double> toDouble(const mbgl::android::Value& value) {
+    static std::optional<double> toDouble(const mbgl::android::Value& value) {
         if (value.isNumber()) {
             return value.toDouble();
         } else {
@@ -87,7 +87,7 @@ public:
         }
     }
 
-    static optional<std::string> toString(const mbgl::android::Value& value) {
+    static std::optional<std::string> toString(const mbgl::android::Value& value) {
         if (value.isString()) {
             return value.toString();
         } else {
@@ -95,7 +95,7 @@ public:
         }
     }
 
-    static optional<Value> toValue(const mbgl::android::Value& value) {
+    static std::optional<Value> toValue(const mbgl::android::Value& value) {
         if (value.isNull()) {
             return {};
         } else if (value.isBool()) {
@@ -109,7 +109,7 @@ public:
         }
     }
 
-    static optional<GeoJSON> toGeoJSON(const mbgl::android::Value &value, Error &error) {
+    static std::optional<GeoJSON> toGeoJSON(const mbgl::android::Value &value, Error &error) {
         if (value.isNull()) {
             error = { "no json data found" };
             return {};
@@ -139,7 +139,7 @@ public:
 };
 
 template <class T, class...Args>
-optional<T> convert(mbgl::android::Value&& value, Error& error, Args&&...args) {
+std::optional<T> convert(mbgl::android::Value&& value, Error& error, Args&&...args) {
     return convert<T>(Convertible(std::move(value)), error, std::forward<Args>(args)...);
 }
 

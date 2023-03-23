@@ -13,7 +13,7 @@
 #include <fstream>
 #include <set>
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(WIN32) && !defined(__clang__)
 #include <Windows.h>
 #ifdef GetObject
 #undef GetObject
@@ -44,7 +44,7 @@ TEST_P(StyleParserTest, ParseStyle) {
     auto error = parser.parse(util::read_file(base + ".style.json"));
 
     if (error) {
-        Log::Error(Event::ParseStyle, "Failed to parse style: %s", util::toString(error).c_str());
+        Log::Error(Event::ParseStyle, "Failed to parse style: " + util::toString(error));
     }
 
     ASSERT_TRUE(infoDoc.IsObject());
@@ -97,7 +97,7 @@ static void populateNames(std::vector<std::string>& names) {
         }
     };
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(WIN32) && !defined(__clang__)
     style_directory += "/*";
     WIN32_FIND_DATAA ffd;
     HANDLE hFind = FindFirstFileA(style_directory.c_str(), &ffd);

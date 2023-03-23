@@ -17,7 +17,7 @@ namespace mbgl {
 namespace style {
 
 struct FillExtrusionBase : DataDrivenPaintProperty<float, attributes::base, uniforms::base> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct FillExtrusionColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
@@ -25,11 +25,11 @@ struct FillExtrusionColor : DataDrivenPaintProperty<Color, attributes::color, un
 };
 
 struct FillExtrusionHeight : DataDrivenPaintProperty<float, attributes::height, uniforms::height> {
-    static float defaultValue() { return 0; }
+    static float defaultValue() { return 0.f; }
 };
 
 struct FillExtrusionOpacity : PaintProperty<float> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct FillExtrusionPattern : CrossFadedDataDrivenPaintProperty<expression::Image, attributes::pattern_to, uniforms::pattern_to, attributes::pattern_from, uniforms::pattern_from> {
@@ -37,7 +37,7 @@ struct FillExtrusionPattern : CrossFadedDataDrivenPaintProperty<expression::Imag
 };
 
 struct FillExtrusionTranslate : PaintProperty<std::array<float, 2>> {
-    static std::array<float, 2> defaultValue() { return {{0, 0}}; }
+    static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
 };
 
 struct FillExtrusionTranslateAnchor : PaintProperty<TranslateAnchorType> {

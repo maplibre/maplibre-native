@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -23,7 +23,7 @@
   "dependencies": {
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
-    "minimatch": "^7.0.0",
+    "minimatch": "^7.2.0",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {

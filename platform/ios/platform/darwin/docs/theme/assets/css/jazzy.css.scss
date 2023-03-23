@@ -384,14 +384,14 @@ pre code {
   content: "(Protocol)";
 }
 
-.nav-group-task[data-name="MGLForegroundStyleLayer"],
-.nav-group-task[data-name="MGLMultiPoint"],
-.nav-group-task[data-name="MGLShape"],
-.nav-group-task[data-name="MGLSource"],
-.nav-group-task[data-name="MGLStyleFunction"],
-.nav-group-task[data-name="MGLStyleLayer"],
-.nav-group-task[data-name="MGLTileSource"],
-.nav-group-task[data-name="MGLVectorStyleLayer"] {
+.nav-group-task[data-name="MLNForegroundStyleLayer"],
+.nav-group-task[data-name="MLNMultiPoint"],
+.nav-group-task[data-name="MLNShape"],
+.nav-group-task[data-name="MLNSource"],
+.nav-group-task[data-name="MLNStyleFunction"],
+.nav-group-task[data-name="MLNStyleLayer"],
+.nav-group-task[data-name="MLNTileSource"],
+.nav-group-task[data-name="MLNVectorStyleLayer"] {
   .nav-group-task-link::after {
     @extend %nav-group-task-gloss;
     content: "(Abstract Class)";

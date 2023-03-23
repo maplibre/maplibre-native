@@ -26,7 +26,7 @@ public:
     
     bool operator==(const Expression& e) const override;
 
-    std::vector<optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "case"; }
 private:

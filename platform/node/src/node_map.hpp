@@ -55,6 +55,7 @@ public:
     static void SetLayerZoomRange(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void SetLayerProperty(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void SetFilter(const Nan::FunctionCallbackInfo<v8::Value>&);
+    static void SetSize(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void SetCenter(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void SetZoom(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void SetBearing(const Nan::FunctionCallbackInfo<v8::Value>&);
@@ -72,6 +73,7 @@ public:
 
     static v8::Local<v8::Value> ParseError(const char* msg);
 
+    void startRender();
     void startRender(const RenderOptions& options);
     void renderFinished();
 

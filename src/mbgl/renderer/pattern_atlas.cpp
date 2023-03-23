@@ -25,24 +25,24 @@ PatternAtlas::PatternAtlas()
 
 PatternAtlas::~PatternAtlas() = default;
 
-optional<ImagePosition> PatternAtlas::getPattern(const std::string& id) const {
+std::optional<ImagePosition> PatternAtlas::getPattern(const std::string& id) const {
     auto it = patterns.find(id);
     if (it != patterns.end()) {
         return it->second.position;
     }
-    return nullopt;
+    return std::nullopt;
 }
 
-optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& image) {
+std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& image) {
     if (patterns.find(image.id) != patterns.end()) {
-        return nullopt;
+        return std::nullopt;
     }
     const uint16_t width = image.image.size.width + padding * 2;
     const uint16_t height = image.image.size.height + padding * 2;
 
     mapbox::Bin* bin = shelfPack.packOne(-1, width, height);
     if (!bin) {
-        return nullopt;
+        return std::nullopt;
     }
 
     atlasImage.resize(getPixelSize());

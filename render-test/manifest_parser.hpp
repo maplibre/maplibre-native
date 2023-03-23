@@ -2,7 +2,6 @@
 
 #include "metadata.hpp"
 
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/rapidjson.hpp>
 
 #include <cstdlib>
@@ -10,6 +9,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
 
 class Manifest {
 public:
@@ -39,6 +39,6 @@ private:
 
 class ManifestParser {
 public:
-    static mbgl::optional<Manifest> parseManifest(const std::string& manifestPath,
+    static std::optional<Manifest> parseManifest(const std::string& manifestPath,
                                                   std::string testFilter);
 };

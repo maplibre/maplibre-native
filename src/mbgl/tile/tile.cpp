@@ -32,11 +32,11 @@ void Tile::dumpDebugLogs() const {
       case Kind::RasterDEM: kindString = "RasterDEM"; break;
       default: kindString = "Unknown"; break;
     }
-    Log::Info(Event::General, "Tile::Kind: %s", kindString.c_str());
-    Log::Info(Event::General, "Tile::id: %s", util::toString(id).c_str());
-    Log::Info(Event::General, "Tile::renderable: %s", isRenderable() ? "yes" : "no");
-    Log::Info(Event::General, "Tile::complete: %s", isComplete() ? "yes" : "no");
-    Log::Info(Event::General, "Tile::loaded: %s", isLoaded() ? "yes" : "no");
+    Log::Info(Event::General, "Tile::Kind: " + kindString);
+    Log::Info(Event::General, "Tile::id: " + util::toString(id));
+    Log::Info(Event::General, "Tile::renderable: " + std::string(isRenderable() ? "yes" : "no"));
+    Log::Info(Event::General, "Tile::complete: " + std::string(isComplete() ? "yes" : "no"));
+    Log::Info(Event::General, "Tile::loaded: " + std::string(isLoaded() ? "yes" : "no"));
 }
 
 void Tile::queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>&, const GeometryCoordinates&,

@@ -16,6 +16,7 @@
 /platform/android/build
 /platform/android/MapboxGLAndroidSDK/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
 /platform/ios/platform/ios/Mapbox.playground/build/
+/platform/windows/vendor/mesa3d/
 *.code-workspace
 
 .DS_Store

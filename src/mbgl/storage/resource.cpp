@@ -79,7 +79,7 @@ Resource Resource::spriteJSON(const std::string& base, float pixelRatio) {
 Resource Resource::glyphs(const std::string& urlTemplate, const FontStack& fontStack, const std::pair<uint16_t, uint16_t>& glyphRange) {
     return Resource {
         Resource::Kind::Glyphs,
-        util::replaceTokens(urlTemplate, [&](const std::string& token) -> optional<std::string> {
+        util::replaceTokens(urlTemplate, [&](const std::string& token) -> std::optional<std::string> {
             if (token == "fontstack") {
                 return util::percentEncode(fontStackToString(fontStack));
             } else if (token == "range") {
@@ -104,7 +104,7 @@ Resource Resource::tile(const std::string& urlTemplate,
     }
     return Resource {
         Resource::Kind::Tile,
-        util::replaceTokens(urlTemplate, [&](const std::string& token) -> optional<std::string> {
+        util::replaceTokens(urlTemplate, [&](const std::string& token) -> std::optional<std::string> {
             if (token == "z") {
                 return util::toString(z);
             } else if (token == "x") {

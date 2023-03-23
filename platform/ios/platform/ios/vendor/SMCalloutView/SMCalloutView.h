@@ -11,30 +11,30 @@ Version 2.1.5
 */
 
 /// options for which directions the callout is allowed to "point" in.
-typedef NS_OPTIONS(NSUInteger, MGLSMCalloutArrowDirection) {
-    MGLSMCalloutArrowDirectionUp = 1 << 0,
-    MGLSMCalloutArrowDirectionDown = 1 << 1,
-    MGLSMCalloutArrowDirectionAny = MGLSMCalloutArrowDirectionUp | MGLSMCalloutArrowDirectionDown
+typedef NS_OPTIONS(NSUInteger, MLNSMCalloutArrowDirection) {
+    MLNSMCalloutArrowDirectionUp = 1 << 0,
+    MLNSMCalloutArrowDirectionDown = 1 << 1,
+    MLNSMCalloutArrowDirectionAny = MLNSMCalloutArrowDirectionUp | MLNSMCalloutArrowDirectionDown
 };
 
 /// options for the callout present/dismiss animation
-typedef NS_ENUM(NSInteger, MGLSMCalloutAnimation) {
+typedef NS_ENUM(NSInteger, MLNSMCalloutAnimation) {
     /// the "bounce" animation we all know and love from @c UIAlertView
-    MGLSMCalloutAnimationBounce,
+    MLNSMCalloutAnimationBounce,
     /// a simple fade in or out
-    MGLSMCalloutAnimationFade,
+    MLNSMCalloutAnimationFade,
     /// grow or shrink linearly, like in the iPad Calendar app
-    MGLSMCalloutAnimationStretch
+    MLNSMCalloutAnimationStretch
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// when delaying our popup in order to scroll content into view, you can use this amount to match the
 /// animation duration of UIScrollView when using @c -setContentOffset:animated.
-extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
+extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 
-@protocol MGLSMCalloutViewDelegate;
-@class MGLSMCalloutBackgroundView;
+@protocol MLNSMCalloutViewDelegate;
+@class MLNSMCalloutBackgroundView;
 
 //
 // Callout view.
@@ -42,12 +42,12 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 
 // iOS 10+ expects CAAnimationDelegate to be set explicitly.
 #if __IPHONE_OS_VERSION_MAX_ALLOWED < 100000
-@interface MGLSMCalloutView : UIView
+@interface MLNSMCalloutView : UIView
 #else
-@interface MGLSMCalloutView : UIView <CAAnimationDelegate>
+@interface MLNSMCalloutView : UIView <CAAnimationDelegate>
 #endif
 
-@property (nonatomic, weak, nullable) id<MGLSMCalloutViewDelegate> delegate;
+@property (nonatomic, weak, nullable) id<MLNSMCalloutViewDelegate> delegate;
 /// title/titleView relationship mimics UINavigationBar.
 @property (nonatomic, copy, nullable) NSString *title;
 @property (nonatomic, copy, nullable) NSString *subtitle;
@@ -57,13 +57,13 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 /// Right accessoty view for the call out
 @property (nonatomic, strong, nullable) UIView *rightAccessoryView;
 /// Default @c SMCalloutArrowDirectionDown
-@property (nonatomic, assign) MGLSMCalloutArrowDirection permittedArrowDirection;
+@property (nonatomic, assign) MLNSMCalloutArrowDirection permittedArrowDirection;
 /// The current arrow direction
-@property (nonatomic, readonly) MGLSMCalloutArrowDirection currentArrowDirection;
+@property (nonatomic, readonly) MLNSMCalloutArrowDirection currentArrowDirection;
 /// if the @c UIView you're constraining to has portions that are overlapped by nav bar, tab bar, etc. you'll need to tell us those insets.
 @property (nonatomic, assign) UIEdgeInsets constrainedInsets;
 /// default is @c SMCalloutMaskedBackgroundView, or @c SMCalloutDrawnBackgroundView when using @c SMClassicCalloutView
-@property (nonatomic, strong) MGLSMCalloutBackgroundView *backgroundView;
+@property (nonatomic, strong) MLNSMCalloutBackgroundView *backgroundView;
 
 /**
  @brief Custom title view.
@@ -95,10 +95,10 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, assign) CGPoint calloutOffset;
 
 /// default SMCalloutAnimationBounce, SMCalloutAnimationFade respectively
-@property (nonatomic, assign) MGLSMCalloutAnimation presentAnimation, dismissAnimation;
+@property (nonatomic, assign) MLNSMCalloutAnimation presentAnimation, dismissAnimation;
 
 /// Returns a new instance of SMCalloutView if running on iOS 7 or better, otherwise a new instance of SMClassicCalloutView if available.
-+ (MGLSMCalloutView *)platformCalloutView;
++ (MLNSMCalloutView *)platformCalloutView;
 
 /**
  @brief Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
@@ -146,7 +146,7 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
 /// For subclassers. You can override this method to provide your own custom animation for presenting/dismissing the callout.
-- (CAAnimation *)animationWithType:(MGLSMCalloutAnimation)type presenting:(BOOL)presenting;
+- (CAAnimation *)animationWithType:(MLNSMCalloutAnimation)type presenting:(BOOL)presenting;
 
 @end
 
@@ -155,7 +155,7 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 //
 
 /// Abstract base class
-@interface MGLSMCalloutBackgroundView : UIView
+@interface MLNSMCalloutBackgroundView : UIView
 /// indicates where the tip of the arrow should be drawn, as a pixel offset
 @property (nonatomic, assign) CGPoint arrowPoint;
 /// will be set by the callout when the callout is in a highlighted state
@@ -170,22 +170,22 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
 
 /// Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.
 /// Accessories are masked by the shape of the callout (including the arrow itself).
-@interface MGLSMCalloutMaskedBackgroundView : MGLSMCalloutBackgroundView
+@interface MLNSMCalloutMaskedBackgroundView : MLNSMCalloutBackgroundView
 @end
 
 //
 // Delegate methods
 //
 
-@protocol MGLSMCalloutViewDelegate <NSObject>
+@protocol MLNSMCalloutViewDelegate <NSObject>
 @optional
 
 /// Controls whether the callout "highlights" when pressed. default YES. You must also respond to @c -calloutViewClicked below.
 /// Not honored by @c SMClassicCalloutView.
-- (BOOL)calloutViewShouldHighlight:(MGLSMCalloutView *)calloutView;
+- (BOOL)calloutViewShouldHighlight:(MLNSMCalloutView *)calloutView;
 
 /// Called when the callout view is clicked. Not honored by @c SMClassicCalloutView.
-- (void)calloutViewClicked:(MGLSMCalloutView *)calloutView;
+- (void)calloutViewClicked:(MLNSMCalloutView *)calloutView;
 
 /**
  Called when the callout view detects that it will be outside the constrained view when it appears, 
@@ -199,19 +199,19 @@ extern NSTimeInterval const kMGLSMCalloutViewRepositionDelayForUIScrollView;
  @param offset caluclated offset necessary to make everything visible
  @returns @c NSTimeInterval to delay the repositioning
  */
-- (NSTimeInterval)calloutView:(MGLSMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
+- (NSTimeInterval)calloutView:(MLNSMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
 /// Called before the callout view appears on screen, or before the appearance animation will start.
-- (void)calloutViewWillAppear:(MGLSMCalloutView *)calloutView;
+- (void)calloutViewWillAppear:(MLNSMCalloutView *)calloutView;
 
 /// Called after the callout view appears on screen, or after the appearance animation is complete.
-- (void)calloutViewDidAppear:(MGLSMCalloutView *)calloutView;
+- (void)calloutViewDidAppear:(MLNSMCalloutView *)calloutView;
 
 /// Called before the callout view is removed from the screen, or before the disappearance animation is complete.
-- (void)calloutViewWillDisappear:(MGLSMCalloutView *)calloutView;
+- (void)calloutViewWillDisappear:(MLNSMCalloutView *)calloutView;
 
 /// Called after the callout view is removed from the screen, or after the disappearance animation is complete.
-- (void)calloutViewDidDisappear:(MGLSMCalloutView *)calloutView;
+- (void)calloutViewDidDisappear:(MLNSMCalloutView *)calloutView;
 
 NS_ASSUME_NONNULL_END
 @end

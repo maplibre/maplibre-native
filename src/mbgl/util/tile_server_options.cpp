@@ -1,34 +1,32 @@
-
 #include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/util/optional.hpp>
 
 namespace mbgl {
 
     class TileServerOptions::Impl {
     public:
         std::string baseURL;
-        optional<std::string> versionPrefix;
+        std::optional<std::string> versionPrefix;
         std::string uriSchemeAlias;
         
         std::string sourceTemplate;
         std::string sourceDomainName;
-        optional<std::string> sourceVersionPrefix;
+        std::optional<std::string> sourceVersionPrefix;
         
         std::string styleTemplate;
         std::string styleDomainName;
-        optional<std::string> styleVersionPrefix;
+        std::optional<std::string> styleVersionPrefix;
         
         std::string spritesTemplate;
         std::string spritesDomainName;
-        optional<std::string> spritesVersionPrefix;
+        std::optional<std::string> spritesVersionPrefix;
         
         std::string glyphsTemplate;
         std::string glyphsDomainName;
-        optional<std::string> glyphsVersionPrefix;
+        std::optional<std::string> glyphsVersionPrefix;
         
         std::string tileTemplate;
         std::string tileDomainName;
-        optional<std::string> tileVersionPrefix;
+        std::optional<std::string> tileVersionPrefix;
         
         std::string apiKeyParameterName;
         bool apiKeyRequired;
@@ -71,7 +69,7 @@ namespace mbgl {
         return impl_->uriSchemeAlias;
     }
 
-    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate, std::string domainName, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate, std::string domainName, std::optional<std::string> versionPrefix) {
         impl_->sourceTemplate = std::move(sourceTemplate);
         impl_->sourceVersionPrefix = std::move(versionPrefix);
         impl_->sourceDomainName = std::move(domainName);
@@ -86,11 +84,11 @@ namespace mbgl {
         return impl_->sourceDomainName;
     }
 
-    const optional<std::string>& TileServerOptions::sourceVersionPrefix() const {
+    const std::optional<std::string>& TileServerOptions::sourceVersionPrefix() const {
         return impl_->sourceVersionPrefix;
     }
 
-    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate, std::string domainName, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate, std::string domainName, std::optional<std::string> versionPrefix) {
         impl_->styleTemplate = std::move(styleTemplate);
         impl_->styleDomainName = std::move(domainName);
         impl_->styleVersionPrefix = std::move(versionPrefix);
@@ -105,11 +103,11 @@ namespace mbgl {
         return impl_->styleDomainName;
     }
 
-    const optional<std::string>& TileServerOptions::styleVersionPrefix() const {
+    const std::optional<std::string>& TileServerOptions::styleVersionPrefix() const {
         return impl_->styleVersionPrefix;
     }
 
-    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate, std::string domainName, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate, std::string domainName, std::optional<std::string> versionPrefix) {
         impl_->spritesTemplate = std::move(spritesTemplate);
         impl_->spritesDomainName = std::move(domainName);
         impl_->spritesVersionPrefix = std::move(versionPrefix);
@@ -124,11 +122,11 @@ namespace mbgl {
         return impl_->spritesDomainName;
     }
 
-    const optional<std::string>& TileServerOptions::spritesVersionPrefix() const {
+    const std::optional<std::string>& TileServerOptions::spritesVersionPrefix() const {
         return impl_->spritesVersionPrefix;
     }
 
-    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate, std::string domainName, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate, std::string domainName, std::optional<std::string> versionPrefix) {
         impl_->glyphsTemplate = std::move(glyphsTemplate);
         impl_->glyphsDomainName = std::move(domainName);
         impl_->glyphsVersionPrefix = std::move(versionPrefix);
@@ -143,11 +141,11 @@ namespace mbgl {
         return impl_->glyphsDomainName;
     }
 
-    const optional<std::string>& TileServerOptions::glyphsVersionPrefix() const {
+    const std::optional<std::string>& TileServerOptions::glyphsVersionPrefix() const {
         return impl_->glyphsVersionPrefix;
     }
 
-    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate, std::string domainName, optional<std::string> versionPrefix) {
+    TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate, std::string domainName, std::optional<std::string> versionPrefix) {
         impl_->tileTemplate = std::move(tileTemplate);
         impl_->tileDomainName = std::move(domainName);
         impl_->tileVersionPrefix = std::move(versionPrefix);
@@ -162,7 +160,7 @@ namespace mbgl {
         return impl_->tileDomainName;
     }
 
-    const optional<std::string>& TileServerOptions::tileVersionPrefix() const {
+    const std::optional<std::string>& TileServerOptions::tileVersionPrefix() const {
         return impl_->tileVersionPrefix;
     }
 

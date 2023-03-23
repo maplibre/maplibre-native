@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/util/chrono.hpp>
-#include <mbgl/util/optional.hpp>
 
+#include <optional>
 #include <string>
 #include <memory>
 
@@ -33,9 +33,9 @@ public:
     // The actual data of the response. Present only for non-error, non-notModified responses.
     std::shared_ptr<const std::string> data;
 
-    optional<Timestamp> modified;
-    optional<Timestamp> expires;
-    optional<std::string> etag;
+    std::optional<Timestamp> modified;
+    std::optional<Timestamp> expires;
+    std::optional<std::string> etag;
 
     bool isFresh() const {
         return expires ? *expires > util::now() : !error;
@@ -63,10 +63,10 @@ public:
     // informing the user about the reason for the failure.
     std::string message;
 
-    optional<Timestamp> retryAfter;
+    std::optional<Timestamp> retryAfter;
 
 public:
-    Error(Reason, std::string = "", optional<Timestamp> = {});
+    Error(Reason, std::string = "", std::optional<Timestamp> = std::nullopt);
 };
 
 } // namespace mbgl

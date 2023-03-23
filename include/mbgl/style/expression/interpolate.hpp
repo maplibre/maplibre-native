@@ -9,6 +9,7 @@
 #include <memory>
 #include <map>
 #include <cmath>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -65,7 +66,7 @@ public:
         return false;
     }
 
-    std::vector<optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override;
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "interpolate"; }
 

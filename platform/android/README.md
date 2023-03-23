@@ -17,10 +17,6 @@ MapLibre GL Native for Android is a library for embedding interactive map views 
         }
     ```
 
-    > **Note**
-    > 
-    > [Bintray was turn off May 1st, 2021](https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/) so we migrated all packages to Maven central.
-
 2. Add the library as a dependency into your module build.gradle
 
     ```gradle
@@ -32,14 +28,6 @@ MapLibre GL Native for Android is a library for embedding interactive map views 
     ```
 
 3. Sync Gradle and rebuild your app.
-
-> **Note**
-> MapLibre by default ships with the proprietary Google Play Location Services. If you want to avoid pulling proprietary dependencies into your project, you can exclude Google Play Location Services as follows:
-> ```gradle
->    implementation ('org.maplibre.gl:android-sdk:<version>') {
->        exclude group: 'com.google.android.gms'
->    }
-> ```
 
 ## Documentation
 

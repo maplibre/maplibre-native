@@ -2,7 +2,8 @@
 
 #include <mbgl/style/source.hpp>
 #include <mbgl/util/image.hpp>
-#include <mbgl/util/optional.hpp>
+
+#include <optional>
 
 namespace mbgl {
 class LatLng;
@@ -15,7 +16,7 @@ public:
     ImageSource(std::string id, std::array<LatLng, 4>);
     ~ImageSource() override;
 
-    optional<std::string> getURL() const;
+    std::optional<std::string> getURL() const;
     void setURL(const std::string& url);
 
     void setImage(PremultipliedImage&&);
@@ -38,7 +39,7 @@ protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
-    optional<std::string> url;
+    std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
     mapbox::base::WeakPtrFactory<Source> weakFactory {this};
 };

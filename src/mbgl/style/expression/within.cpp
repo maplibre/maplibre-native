@@ -169,7 +169,7 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
     };
 }
 
-mbgl::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
+std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
                                          mbgl::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
         mbgl::style::conversion::Error error;
@@ -181,17 +181,17 @@ mbgl::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Converti
     }
 
     ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
-    return nullopt;
+    return std::nullopt;
 }
 
-mbgl::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
+std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
                                                       mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;
     }
     ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
-    return nullopt;
+    return std::nullopt;
 }
 } // namespace
 
@@ -318,7 +318,7 @@ bool Within::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Within::possibleOutputs() const {
+std::vector<std::optional<Value>> Within::possibleOutputs() const {
     return {{true}, {false}};
 }
 

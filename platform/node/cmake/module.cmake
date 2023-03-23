@@ -120,6 +120,22 @@ function(add_node_module NAME)
             )
         endif()
 
+        if(WIN32)
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(_ARCH x64)
+            else()
+                set(_ARCH x86)
+            endif()
+
+            # Download the win-${_ARCH} libraries if we are compiling on Windows and don't have them yet
+            if(NOT EXISTS "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
+                _node_module_download(
+                    "win-${_ARCH} library for Node ${_NODE_VERSION}"
+                    "https://nodejs.org/download/release/${_NODE_VERSION}/win-${_ARCH}/node.lib"
+                    "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib"
+                )
+            endif()
+        endif()
 
         # Generate the library
         set(_TARGET "${NAME}.abi-${_ABI}")
@@ -153,14 +169,18 @@ function(add_node_module NAME)
         )
 
         if(_NAN_VERSION)
-            # Nan requires C++11. Use a compile option to allow interfaces to override this with a later version.
-            target_compile_options(${_TARGET} PRIVATE -std=c++11)
             target_include_directories(${_TARGET} SYSTEM PRIVATE
                 "${_CACHE_DIR}/nan/${_NAN_VERSION}"
             )
         endif()
 
         target_link_libraries(${_TARGET} PRIVATE ${NAME} mbgl-compiler-options)
+
+        if(WIN32)
+            target_include_directories(${_TARGET} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/platform/windows/include")
+            target_compile_definitions(${_TARGET} PRIVATE _USE_MATH_DEFINES NOMINMAX)
+            target_link_libraries(${_TARGET} PRIVATE "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
+        endif()
 
         if(APPLE)
             # Ensures that linked symbols are loaded when the module is loaded instead of causing
@@ -171,6 +191,8 @@ function(add_node_module NAME)
             target_compile_definitions(${_TARGET} PRIVATE
                 "_DARWIN_USE_64_BIT_INODE=1"
             )
+        elseif(WIN32)
+            # Do nothing here
         else()
             # Ensures that linked symbols are loaded when the module is loaded instead of causing
             # unresolved symbol errors later during runtime.
@@ -187,6 +209,22 @@ function(add_node_module NAME)
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${_TARGET}>" "${_OUTPUT_PATH}"
         )
+
+        if(WIN32)
+            if(MBGL_WITH_OSMESA)
+                get_filename_component(_OUTPUT_PATH "${_OUTPUT_PATH}" DIRECTORY "${CMAKE_CURRENT_SOURCE_PATH}")
+
+                add_custom_command(
+                    TARGET ${_TARGET}
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libglapi.dll"  "${_OUTPUT_PATH}"
+                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv2.dll" "${_OUTPUT_PATH}"
+                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
+                )
+            endif()
+                
+            unset(_ARCH)
+        endif()
     endforeach()
 
     # Add a target that builds all Node ABIs.

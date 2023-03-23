@@ -97,7 +97,6 @@ public:
     TransitionOptions getTopImageSizeTransition() const;
 
     // Private implementation
-    /// @cond FALSE
 
     class Impl;
     const Impl& impl() const;
@@ -108,7 +107,7 @@ public:
 
 protected:
     // Dynamic properties
-    optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
+    std::optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
 
     StyleProperty getProperty(const std::string& name) const final;
     Value serialize() const final;

@@ -136,7 +136,7 @@ TransitionOptions FillLayer::getFillColorTransition() const {
 }
 
 PropertyValue<float> FillLayer::getDefaultFillOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& FillLayer::getFillOpacity() const {
@@ -217,7 +217,7 @@ TransitionOptions FillLayer::getFillPatternTransition() const {
 }
 
 PropertyValue<std::array<float, 2>> FillLayer::getDefaultFillTranslate() {
-    return {{{0, 0}}};
+    return {{{0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<float, 2>>& FillLayer::getFillTranslate() const {
@@ -373,7 +373,7 @@ Value FillLayer::serialize() const {
     return result;
 }
 
-optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
@@ -387,7 +387,7 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
         }
 
         setFillAntialias(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
     if (property == Property::FillColor || property == Property::FillOutlineColor) {
         Error error;
@@ -398,12 +398,12 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
 
         if (property == Property::FillColor) {
             setFillColor(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 
         if (property == Property::FillOutlineColor) {
             setFillOutlineColor(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
     }
     if (property == Property::FillOpacity || property == Property::FillSortKey) {
@@ -415,12 +415,12 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
 
         if (property == Property::FillOpacity) {
             setFillOpacity(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 
         if (property == Property::FillSortKey) {
             setFillSortKey(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
     }
     if (property == Property::FillPattern) {
@@ -431,7 +431,7 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
         }
 
         setFillPattern(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
     if (property == Property::FillTranslate) {
         Error error;
@@ -441,7 +441,7 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
         }
 
         setFillTranslate(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
     if (property == Property::FillTranslateAnchor) {
         Error error;
@@ -451,48 +451,48 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
         }
 
         setFillTranslateAnchor(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
 
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
 
     if (property == Property::FillAntialiasTransition) {
         setFillAntialiasTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillColorTransition) {
         setFillColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillOpacityTransition) {
         setFillOpacityTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillOutlineColorTransition) {
         setFillOutlineColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillPatternTransition) {
         setFillPatternTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillTranslateTransition) {
         setFillTranslateTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::FillTranslateAnchorTransition) {
         setFillTranslateAnchorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

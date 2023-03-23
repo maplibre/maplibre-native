@@ -36,8 +36,8 @@ bool Case::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Case::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Case::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& branch : branches) {
         for (auto& output : branch.second->possibleOutputs()) {
             result.push_back(std::move(output));
@@ -64,7 +64,7 @@ ParseResult Case::parse(const Convertible& value, ParsingContext& ctx) {
         return ParseResult();
     }
 
-    optional<type::Type> outputType;
+    std::optional<type::Type> outputType;
     if (ctx.getExpected() && *ctx.getExpected() != type::Value) {
         outputType = ctx.getExpected();
     }

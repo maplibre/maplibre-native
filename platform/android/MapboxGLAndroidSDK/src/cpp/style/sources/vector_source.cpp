@@ -36,7 +36,7 @@ namespace android {
     VectorSource::~VectorSource() = default;
 
     jni::Local<jni::String> VectorSource::getURL(jni::JNIEnv& env) {
-        optional<std::string> url = source.as<mbgl::style::VectorSource>()->VectorSource::getURL();
+        std::optional<std::string> url = source.as<mbgl::style::VectorSource>()->VectorSource::getURL();
         return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
     }
 

@@ -6,6 +6,10 @@
 #include "metadata.hpp"
 #include "runner.hpp"
 
+#if defined(WIN32) && defined(GetObject)
+#undef GetObject
+#endif
+
 #include <mbgl/map/map.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/storage/resource.hpp>
@@ -455,13 +459,13 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 
     metadata.document = std::move(maybeJson.get<mbgl::JSDocument>());
     if (!metadata.document.HasMember("metadata")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': %s", paths.stylePath.c_str());
+        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': " + paths.stylePath.string());
         return metadata;
     }
 
     const mbgl::JSValue& metadataValue = metadata.document["metadata"];
     if (!metadataValue.HasMember("test")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata.test': %s", paths.stylePath.c_str());
+        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata.test': " + paths.stylePath.string());
         return metadata;
     }
 
@@ -482,7 +486,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             metadata.mapMode = mbgl::MapMode::Static;
         else {
             mbgl::Log::Warning(
-                mbgl::Event::ParseStyle, "Unknown map mode: %s. Falling back to static mode", mapModeStr.c_str());
+                mbgl::Event::ParseStyle, "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
             metadata.mapMode = mbgl::MapMode::Static;
         }
     }
@@ -590,7 +594,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             assert(testValue["queryOptions"]["filter"].IsArray());
             auto& filterVal = testValue["queryOptions"]["filter"];
             Error error;
-            mbgl::optional<Filter> converted = convert<Filter>(filterVal, error);
+            std::optional<Filter> converted = convert<Filter>(filterVal, error);
             assert(converted);
             metadata.queryOptions.filter = std::move(*converted);
         }
@@ -707,7 +711,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             std::string imagePath = operationArray[2].GetString();
 
             result.emplace_back([imageName, imagePath, sdf, pixelRatio](TestContext& ctx) {
-                mbgl::optional<std::string> maybeImage;
+                std::optional<std::string> maybeImage;
                 bool requestCompleted = false;
 
                 auto req = ctx.getFileSource().request(mbgl::Resource::image("mapbox://render-tests/" + imagePath),
@@ -1035,7 +1039,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             using namespace mbgl::style::conversion;
 
             std::string sourceID;
-            mbgl::optional<std::string> sourceLayer;
+            std::optional<std::string> sourceLayer;
             std::string featureID;
             std::string stateKey;
             Value stateValue;
@@ -1058,9 +1062,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             }
             const JSValue* state = &operationArray[2];
 
-            const std::function<optional<Error>(const std::string&, const Convertible&)> convertFn =
-                [&](const std::string& k, const Convertible& v) -> optional<Error> {
-                optional<Value> value = toValue(v);
+            const std::function<std::optional<Error>(const std::string&, const Convertible&)> convertFn =
+                [&](const std::string& k, const Convertible& v) -> std::optional<Error> {
+                std::optional<Value> value = toValue(v);
                 if (value) {
                     stateValue = std::move(*value);
                     valueParsed = true;
@@ -1069,7 +1073,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     std::size_t length = arrayLength(v);
                     array.reserve(length);
                     for (size_t i = 0; i < length; ++i) {
-                        optional<Value> arrayVal = toValue(arrayMember(v, i));
+                        std::optional<Value> arrayVal = toValue(arrayMember(v, i));
                         if (arrayVal) {
                             array.emplace_back(*arrayVal);
                         }
@@ -1078,7 +1082,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     values[k] = std::move(array);
                     stateValue = std::move(values);
                     valueParsed = true;
-                    return nullopt;
+                    return std::nullopt;
 
                 } else if (isObject(v)) {
                     eachMember(v, convertFn);
@@ -1086,11 +1090,11 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
                 if (!valueParsed) {
                     metadata.errorMessage = std::string("Could not get feature state value, state key: ") + k;
-                    return nullopt;
+                    return std::nullopt;
                 }
                 stateKey = k;
                 parsedState[stateKey] = stateValue;
-                return nullopt;
+                return std::nullopt;
             };
 
             eachMember(state, convertFn);
@@ -1110,7 +1114,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsObject());
 
             std::string sourceID;
-            mbgl::optional<std::string> sourceLayer;
+            std::optional<std::string> sourceLayer;
             std::string featureID;
 
             const auto& featureOptions = operationArray[1].GetObject();
@@ -1144,9 +1148,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsObject());
 
             std::string sourceID;
-            mbgl::optional<std::string> sourceLayer;
+            std::optional<std::string> sourceLayer;
             std::string featureID;
-            mbgl::optional<std::string> stateKey;
+            std::optional<std::string> stateKey;
 
             const auto& featureOptions = operationArray[1].GetObject();
             if (featureOptions.HasMember("source")) {

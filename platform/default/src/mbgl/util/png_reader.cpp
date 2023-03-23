@@ -36,7 +36,7 @@ static void user_error_fn(png_structp, png_const_charp error_msg) {
 }
 
 static void user_warning_fn(png_structp, png_const_charp warning_msg) {
-    Log::Warning(Event::Image, "ImageReader (PNG): %s", warning_msg);
+    Log::Warning(Event::Image, std::string("ImageReader (PNG): ") + warning_msg);
 }
 
 static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {

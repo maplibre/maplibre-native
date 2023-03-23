@@ -1582,7 +1582,7 @@ TEST(OfflineDatabase, CorruptDatabaseOnQuery) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // The first request fails because the database is corrupt and has to be recreated.
-    EXPECT_EQ(nullopt, db.get(fixture::tile));
+    EXPECT_EQ(std::nullopt, db.get(fixture::tile));
     EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't read resource: database disk image is malformed"), true));
     EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -1616,7 +1616,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     // Now forbid any type of IO on the database and test that none of the calls crashes.
     fs.allowIO(false);
 
-    EXPECT_EQ(nullopt, db.get(fixture::resource));
+    EXPECT_EQ(std::nullopt, db.get(fixture::resource));
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -1637,12 +1637,12 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update region metadata: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    EXPECT_EQ(nullopt, db.getRegionResource(fixture::resource));
+    EXPECT_EQ(std::nullopt, db.getRegionResource(fixture::resource));
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    EXPECT_EQ(nullopt, db.hasRegionResource(fixture::resource));
+    EXPECT_EQ(std::nullopt, db.hasRegionResource(fixture::resource));
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't query region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 

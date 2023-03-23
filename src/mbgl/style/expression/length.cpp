@@ -38,8 +38,8 @@ bool Length::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Length::possibleOutputs() const {
-    return { nullopt };
+std::vector<std::optional<Value>> Length::possibleOutputs() const {
+    return { std::nullopt };
 }
 
 using namespace mbgl::style::conversion;

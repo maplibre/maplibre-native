@@ -1,9 +1,10 @@
 #pragma once
 
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/variant.hpp>
 #include <vector>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -109,7 +110,7 @@ using Type = variant<NullType,
 struct Array {
     explicit Array(Type itemType_) : itemType(std::move(itemType_)) {}
     Array(Type itemType_, std::size_t N_) : itemType(std::move(itemType_)), N(N_) {}
-    Array(Type itemType_, optional<std::size_t> N_) : itemType(std::move(itemType_)), N(std::move(N_)) {}
+    Array(Type itemType_, std::optional<std::size_t> N_) : itemType(std::move(itemType_)), N(std::move(N_)) {}
     std::string getName() const {
         if (N) {
             return "array<" + toString(itemType) + ", " + util::toString(*N) + ">";
@@ -123,7 +124,7 @@ struct Array {
     bool operator==(const Array& rhs) const { return itemType == rhs.itemType && N == rhs.N; }
     
     Type itemType;
-    optional<std::size_t> N;
+    std::optional<std::size_t> N;
 };
     
 template <class T>

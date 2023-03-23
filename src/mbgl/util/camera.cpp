@@ -183,7 +183,7 @@ void Camera::setPosition(const vec3& position) {
     updateTransform(transform, position);
 }
 
-optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
+std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
     vec3 upVector = up;
 
     vec2 xyForward = {{forward[0], forward[1]}};
@@ -203,7 +203,7 @@ optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec
     const vec3 right = vec3Cross(upVector, forward);
 
     if (vec3Length(right) < epsilon) {
-        return nullopt;
+        return std::nullopt;
     }
 
     const double bearing = std::atan2(-right[1], right[0]);
@@ -217,14 +217,14 @@ void FreeCameraOptions::setLocation(const LatLngAltitude& location) {
     position = util::toMercator(location.location, location.altitude);
 }
 
-optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
+std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
     if (!position) {
-        return nullopt;
+        return std::nullopt;
     }
 
     const vec3 positionValue = position.value();
     if (positionValue[1] < 0.0 || positionValue[1] > 1.0) {
-        return nullopt;
+        return std::nullopt;
     }
 
     const LatLng location = {util::latFromMercatorY(positionValue[1]), util::lngFromMercatorX(positionValue[0])};
@@ -236,8 +236,8 @@ optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
     return LatLngAltitude{location, altitude};
 }
 
-void FreeCameraOptions::lookAtPoint(const LatLng& location, const optional<vec3>& upVector) {
-    orientation = nullopt;
+void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector) {
+    orientation = std::nullopt;
     if (!position) {
         return;
     }

@@ -11,13 +11,13 @@ syntax supported by this SDK. For a more general introduction to predicates and
 expressions, consult the
 _[Predicate Programming Guide](https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Predicates/AdditionalChapters/Introduction.html)_
 in Apple developer documentation. For additional detail on how this SDK has
-extended the `NSExpression` class, consult the [`NSExpression(MGLAdditions)`](./Categories/NSExpression(MGLAdditions).html)
+extended the `NSExpression` class, consult the [`NSExpression(MLNAdditions)`](./Categories/NSExpression(MLNAdditions).html)
 section of this documentation.
 
 ## Using predicates to filter vector data
 
-Most style layer classes display `MGLFeature` objects that you can show or hide
-based on the feature’s attributes. Use the `MGLVectorStyleLayer.predicate`
+Most style layer classes display `MLNFeature` objects that you can show or hide
+based on the feature’s attributes. Use the `MLNVectorStyleLayer.predicate`
 property to include only the features in the source layer that satisfy a
 condition that you define.
 
@@ -55,15 +55,15 @@ The following aggregate operators are supported:
 `NSInPredicateOperatorType`       | `key IN { 'iOS', 'macOS', 'tvOS', 'watchOS' }`
 `NSContainsPredicateOperatorType` | `{ 'iOS', 'macOS', 'tvOS', 'watchOS' } CONTAINS key`
 
-You can use the `IN` and `CONTAINS` operators to test whether a value appears in a collection, whether a string is a substring of a larger string, or whether the evaluated feature (`SELF`) lies within a given `MGLShape` or `MGLFeature`. For example, to show one delicious local chain of sandwich shops, but not similarly named steakhouses and pizzerias:
+You can use the `IN` and `CONTAINS` operators to test whether a value appears in a collection, whether a string is a substring of a larger string, or whether the evaluated feature (`SELF`) lies within a given `MLNShape` or `MLNFeature`. For example, to show one delicious local chain of sandwich shops, but not similarly named steakhouses and pizzerias:
 
 ```objc
-MGLPolygon *cincinnati = [MGLPolygon polygonWithCoordinates:cincinnatiCoordinates count:sizeof(cincinnatiCoordinates) / sizeof(cincinnatiCoordinates[0])];
+MLNPolygon *cincinnati = [MLNPolygon polygonWithCoordinates:cincinnatiCoordinates count:sizeof(cincinnatiCoordinates) / sizeof(cincinnatiCoordinates[0])];
 deliLayer.predicate = [NSPredicate predicateWithFormat:@"class = 'food_and_drink' AND name CONTAINS 'Izzy' AND SELF IN %@", cincinnati];
 ```
 
 ```swift
-let cincinnati = MGLPolygon(coordinates: &cincinnatiCoordinates, count: UInt(cincinnatiCoordinates.count))
+let cincinnati = MLNPolygon(coordinates: &cincinnatiCoordinates, count: UInt(cincinnatiCoordinates.count))
 deliLayer.predicate = NSPredicate(format: "class = 'food_and_drink' AND name CONTAINS 'Izzy' AND SELF IN %@", cincinnati)
 ```
 
@@ -135,8 +135,8 @@ of `-[NSNumber numberWithFloat:]` to avoid precision issues.
 
 ### Key paths
 
-A key path expression refers to an attribute of the `MGLFeature` object being
-evaluated for display. For example, if a polygon’s `MGLFeature.attributes`
+A key path expression refers to an attribute of the `MLNFeature` object being
+evaluated for display. For example, if a polygon’s `MLNFeature.attributes`
 dictionary contains the `floorCount` key, then the key path `floorCount` refers
 to the value of the `floorCount` attribute when evaluating that particular
 polygon.
@@ -247,7 +247,7 @@ Conditionals are supported via the built-in
 `+[NSExpression expressionForConditional:trueExpression:falseExpression:]`
 method and `TERNARY()` operator. If you need to express multiple cases
 (“else-if”), you can either nest a conditional within a conditional or use the
-[`MGL_IF()`](#code-mgl_if-code) or [`MGL_MATCH()`](#code-mgl_match-code) function.
+[`MLN_IF()`](#code-mgl_if-code) or [`MLN_MATCH()`](#code-mgl_match-code) function.
 
 ### Aggregates
 
@@ -285,15 +285,15 @@ The following variables are defined by this SDK for use with style layers:
        <ul>
            <li>
                <code>Point</code> for point features, corresponding to the
-               <code>MGLPointAnnotation</code> class
+               <code>MLNPointAnnotation</code> class
            </li>
            <li>
                <code>LineString</code> for polyline features, corresponding to
-               the <code>MGLPolyline</code> class
+               the <code>MLNPolyline</code> class
            </li>
            <li>
                <code>Polygon</code> for polygon features, corresponding to the
-               <code>MGLPolygon</code> class
+               <code>MLNPolygon</code> class
            </li>
        </ul>
        This variable corresponds to the
@@ -330,7 +330,7 @@ The following variables are defined by this SDK for use with style layers:
       A number that indicates the relative distance along a line at a given
       point along the line. This variable evaluates to 0 at the beginning of the
       line and 1 at the end of the line. It can only be used with the
-      `MGLLineStyleLayer.lineGradient` property. It corresponds to the
+      `MLNLineStyleLayer.lineGradient` property. It corresponds to the
       <code>NSExpression.lineProgressVariableExpression</code> property.
    </td>
 </tr>
@@ -343,11 +343,11 @@ of a [Mapbox-specific function](#mapbox-specific-functions) that takes an
 `NSDictionary` as an argument:
 
 ```objc
-[NSExpression expressionWithFormat:@"MGL_LET('floorCount', 2, $floorCount + 1)"];
+[NSExpression expressionWithFormat:@"MLN_LET('floorCount', 2, $floorCount + 1)"];
 ```
 
 ```swift
-NSExpression(format: "MGL_LET(floorCount, 2, $floorCount + 1)")
+NSExpression(format: "MLN_LET(floorCount, 2, $floorCount + 1)")
 ```
 
 ## Mapbox-specific functions
@@ -546,7 +546,7 @@ operator in the Mapbox Style Specification.
 <dt>Selector:</dt>
 <dd><code>mgl_distanceFrom:</code></dd>
 <dt>Format string syntax:</dt>
-<dd><code>mgl_distanceFrom(%@)</code> with an <code>MGLShape</code></dd>
+<dd><code>mgl_distanceFrom(%@)</code> with an <code>MLNShape</code></dd>
 </dl>
 
 Returns the straight-line distance from the evaluated object to the given shape.
@@ -579,28 +579,28 @@ operator in the Mapbox Style Specification.
 <dd><code>mgl_attributed({x, y, z})</code></dd>
 </dl>
 
-Concatenates and returns the array of `MGLAttributedExpression` objects, for use 
-with the `MGLSymbolStyleLayer.text` property.
+Concatenates and returns the array of `MLNAttributedExpression` objects, for use 
+with the `MLNSymbolStyleLayer.text` property.
 
-`MGLAttributedExpression.attributes` valid attributes.
+`MLNAttributedExpression.attributes` valid attributes.
 
  Key | Value Type
  --- | ---
- `MGLFontNamesAttribute` | An `NSExpression` evaluating to an `NSString` array.
- `MGLFontScaleAttribute` | An `NSExpression` evaluating to an `NSNumber` value.
- `MGLFontColorAttribute` | An `NSExpression` evaluating to an `UIColor` (iOS) or `NSColor` (macOS).
+ `MLNFontNamesAttribute` | An `NSExpression` evaluating to an `NSString` array.
+ `MLNFontScaleAttribute` | An `NSExpression` evaluating to an `NSNumber` value.
+ `MLNFontColorAttribute` | An `NSExpression` evaluating to an `UIColor` (iOS) or `NSColor` (macOS).
 
 This function corresponds to the
 [`format`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-format)
 operator in the Mapbox Style Specification.
 
-### `MGL_LET`
+### `MLN_LET`
 
 <dl>
 <dt>Selector:</dt>
-<dd><code>MGL_LET:</code></dd>
+<dd><code>MLN_LET:</code></dd>
 <dt>Format string syntax:</dt>
-<dd><code>MGL_LET('age', uppercase('old'), 'name', uppercase('MacDonald'), mgl_join({$age, $name}))</code></dd>
+<dd><code>MLN_LET('age', uppercase('old'), 'name', uppercase('MacDonald'), mgl_join({$age, $name}))</code></dd>
 <dt>Arguments:</dt>
 <dd>
    Any number of variable names interspersed with their assigned
@@ -615,13 +615,13 @@ Compared to the
 function, this function takes the variable names and values inline before the
 expression that contains references to those variables.
 
-### `MGL_MATCH`
+### `MLN_MATCH`
 
 <dl>
 <dt>Selector:</dt>
-<dd><code>MGL_MATCH:</code></dd>
+<dd><code>MLN_MATCH:</code></dd>
 <dt>Format string syntax:</dt>
-<dd><code>MGL_MATCH(x, 0, 'zero match', 1, 'one match', 2, 'two match', 'default')</code></dd>
+<dd><code>MLN_MATCH(x, 0, 'zero match', 1, 'one match', 2, 'two match', 'default')</code></dd>
 <dt>Arguments:</dt>
 <dd>
    An input expression, then any number of argument pairs, followed by a default
@@ -638,18 +638,18 @@ Returns the result of matching the input expression against the given constant
 values.
 
 This function corresponds to the
-`+[NSExpression(MGLAdditions) mgl_expressionForMatchingExpression:inDictionary:defaultExpression:]`
+`+[NSExpression(MLNAdditions) mgl_expressionForMatchingExpression:inDictionary:defaultExpression:]`
 method and the
 [`match`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-match)
 operator in the Mapbox Style Specification.
 
-### `MGL_IF`
+### `MLN_IF`
 
 <dl>
 <dt>Selector:</dt>
-<dd><code>MGL_IF:</code></dd>
+<dd><code>MLN_IF:</code></dd>
 <dt>Format string syntax:</dt>
-<dd><code>MGL_IF(1 = 2, YES, 2 = 2, YES, NO)</code></dd>
+<dd><code>MLN_IF(1 = 2, YES, 2 = 2, YES, NO)</code></dd>
 <dt>Arguments:</dt>
 <dd>
    Alternating <code>NSPredicate</code> conditionals and resulting expressions,
@@ -665,18 +665,18 @@ and is supported on iOS 8._x_ and macOS 10.10._x_; however, each conditional
 passed into this function must be wrapped in a constant expression.
 
 This function corresponds to the
-`+[NSExpression(MGLAdditions) mgl_expressionForConditional:trueExpression:falseExpresssion:]`
+`+[NSExpression(MLNAdditions) mgl_expressionForConditional:trueExpression:falseExpresssion:]`
 method and the
 [`case`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-case)
 operator in the Mapbox Style Specification.
 
-### `MGL_FUNCTION`
+### `MLN_FUNCTION`
 
 <dl>
 <dt>Selector:</dt>
-<dd><code>MGL_FUNCTION:</code></dd>
+<dd><code>MLN_FUNCTION:</code></dd>
 <dt>Format string syntax:</dt>
-<dd><code>MGL_FUNCTION('typeof', mystery)</code></dd>
+<dd><code>MLN_FUNCTION('typeof', mystery)</code></dd>
 <dt>Arguments:</dt>
 <dd>
    Any arguments required by the expression operator.
@@ -699,7 +699,7 @@ or may result in undefined behavior.
 
 The Mapbox Style Specification defines some operators for which no custom
 function is available. To use these operators in an `NSExpression`, call the
-[`MGL_FUNCTION()`](#code-mgl_function-code) function with the same arguments
+[`MLN_FUNCTION()`](#code-mgl_function-code) function with the same arguments
 that the operator expects.
 
 ### `boolValue`
@@ -737,7 +737,7 @@ otherwise <code>TRUE</code>.
 <dd>
    An <code>NSExpression</code> that evaluates to an <code>NSString</code>
    representing the key to look up in the dictionary or the feature attribute to
-   look up in the evaluated object (see <code>MGLFeature.attributes</code>).
+   look up in the evaluated object (see <code>MLNFeature.attributes</code>).
 </dd>
 </dl>
 
@@ -781,7 +781,7 @@ defined in the context dictionary.
 This function corresponds to the
 [`let`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-let)
 operator in the Mapbox Style Specification. See also the
-[`MGL_LET`](#code-mgl_let-code) function, which is used on its own without the
+[`MLN_LET`](#code-mgl_let-code) function, which is used on its own without the
 `FUNCTION()` operator.
 
 ### `mgl_interpolateWithCurveType:parameters:stops:`
@@ -837,7 +837,7 @@ use a stop dictionary with the zoom levels 0, 10, and 20 as keys and the colors
 yellow, orange, and red as the values.
 
 This function corresponds to the
-`+[NSExpression(MGLAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]`
+`+[NSExpression(MLNAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]`
 method and the
 [`interpolate`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate)
 operator in the Mapbox Style Specification. See also the
@@ -921,7 +921,7 @@ use a stop dictionary with the zoom levels 0, 10, and 20 as keys and the colors
 yellow, orange, and red as the values.
 
 This function corresponds to the
-`+[NSExpression(MGLAdditions) mgl_expressionForSteppingExpression:fromExpression:stops:]`
+`+[NSExpression(MLNAdditions) mgl_expressionForSteppingExpression:fromExpression:stops:]`
 method and the
 [`step`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
 operator in the Mapbox Style Specification.
@@ -942,7 +942,7 @@ operator in the Mapbox Style Specification.
 The target string with each of the argument strings appended in order.
 
 This function corresponds to the
-`-[NSExpression(MGLAdditions) mgl_expressionByAppendingExpression:]`
+`-[NSExpression(MLNAdditions) mgl_expressionByAppendingExpression:]`
 method and is similar to the
 [`concat`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-concat)
 operator in the Mapbox Style Specification. See also the

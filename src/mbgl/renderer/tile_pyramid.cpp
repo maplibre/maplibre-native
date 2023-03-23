@@ -56,7 +56,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const style::Source::Impl& sourceImpl,
                          const uint16_t tileSize,
                          const Range<uint8_t> zoomRange,
-                         optional<LatLngBounds> bounds,
+                         std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile) {
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
@@ -90,8 +90,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     int32_t tileZoom = overscaledZoom;
     int32_t panZoom = zoomRange.max;
 
-    const optional<uint8_t>& sourcePrefetchZoomDelta = sourceImpl.getPrefetchZoomDelta();
-    const optional<uint8_t>& maxParentTileOverscaleFactor = sourceImpl.getMaxOverscaleFactorForParentTiles();
+    const std::optional<uint8_t>& sourcePrefetchZoomDelta = sourceImpl.getPrefetchZoomDelta();
+    const std::optional<uint8_t>& maxParentTileOverscaleFactor = sourceImpl.getMaxOverscaleFactorForParentTiles();
     const Duration minimumUpdateInterval = sourceImpl.getMinimumTileUpdateInterval();
     const bool isVolatile = sourceImpl.isVolatile();
 
@@ -126,9 +126,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
-                               "Provided camera options returned %zu tiles, only %s is taken in Tile mode.",
-                               idealTiles.size(),
-                               util::toString(idealTiles[0]).c_str());
+                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
+                               " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
         }
     }
@@ -157,7 +156,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // The min and max zoom for TileRange are based on the updateRenderables algorithm.
     // Tiles are created at the ideal tile zoom or at lower zoom levels. Child
     // tiles are used from the cache, but not created.
-    optional<util::TileRange> tileRange = {};
+    std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
         tileRange = util::TileRange::fromLatLngBounds(
             *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));

@@ -65,8 +65,8 @@ bool Step::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> Step::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Step::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& stop : stops) {
         for (auto& output : stop.second->possibleOutputs()) {
             result.push_back(std::move(output));
@@ -102,7 +102,7 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
     }
     
     std::map<double, std::unique_ptr<Expression>> stops;
-    optional<type::Type> outputType;
+    std::optional<type::Type> outputType;
     if (ctx.getExpected() && *ctx.getExpected() != type::Value) {
         outputType = ctx.getExpected();
     }
@@ -122,29 +122,29 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
     
     
     for (std::size_t i = 3; i + 1 < length; i += 2) {
-        const optional<mbgl::Value> labelValue = toValue(arrayMember(value, i));
-        optional<double> label;
+        const auto labelValue = toValue(arrayMember(value, i));
+        std::optional<double> label;
         if (labelValue) {
             labelValue->match(
                 [&](uint64_t n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{static_cast<double>(n)};
+                        label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
                 [&](int64_t n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{static_cast<double>(n)};
+                        label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
                 [&](double n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{n};
+                        label = std::optional<double>{n};
                     }
                 },
                 [&](const auto&) {}

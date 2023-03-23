@@ -52,8 +52,8 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 }
 
-optional<Color> RenderLayer::getSolidBackground() const {
-    return nullopt;
+std::optional<Color> RenderLayer::getSolidBackground() const {
+    return std::nullopt;
 }
 
 void RenderLayer::markContextDestroyed() {
@@ -69,20 +69,18 @@ void RenderLayer::checkRenderability(const PaintParameters& parameters,
 
     if (activeBindingCount > parameters.context.maximumVertexBindingCount) {
         Log::Error(Event::OpenGL,
-                   "The layer '%s' uses more data-driven properties than the current device "
+                   "The layer '" + getID() + "' uses more data-driven properties than the current device "
                    "supports, and will have rendering errors. To ensure compatibility with this "
-                   "device, use %d fewer data driven properties in this layer.",
-                   getID().c_str(),
-                   activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount);
+                   "device, use " + std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) +
+                   " fewer data driven properties in this layer.");
         hasRenderFailures = true;
     } else if (activeBindingCount > gfx::Context::minimumRequiredVertexBindingCount) {
         Log::Warning(Event::OpenGL,
-                     "The layer '%s' uses more data-driven properties than some devices may support. "
+                     "The layer '" + getID() + "' uses more data-driven properties than some devices may support. "
                      "Though it will render correctly on this device, it may have rendering errors "
-                     "on other devices. To ensure compatibility with all devices, use %d fewer "
-                     "data-driven properties in this layer.",
-                     getID().c_str(),
-                     activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount);
+                     "on other devices. To ensure compatibility with all devices, use " +
+                     std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) + "fewer "
+                     "data-driven properties in this layer.");
         hasRenderFailures = true;
     }
 }

@@ -2,7 +2,8 @@
 
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/geojson.hpp>
-#include <mbgl/util/optional.hpp>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -22,7 +23,7 @@ public:
 
     bool operator==(const Expression& e) const override;
 
-    std::vector<optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override;

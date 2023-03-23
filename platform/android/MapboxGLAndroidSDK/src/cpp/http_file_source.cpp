@@ -160,8 +160,8 @@ void HTTPRequest::onResponse(jni::JNIEnv& env, int code,
     } else if (code == 404) {
         response.error = std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
     } else if (code == 429) {
-        optional<std::string> retryAfter;
-        optional<std::string> xRateLimitReset;
+        std::optional<std::string> retryAfter;
+        std::optional<std::string> xRateLimitReset;
         if (jRetryAfter) {
             retryAfter = jni::Make<std::string>(env, jRetryAfter);
         }

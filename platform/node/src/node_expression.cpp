@@ -60,7 +60,7 @@ type::Type parseType(v8::Local<v8::Object> type) {
         v8::Local<v8::Context> context = type->GetCreationContext().ToLocalChecked();
 #endif
         type::Type itemType = parseType(Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
-        mbgl::optional<std::size_t> N;
+        std::optional<std::size_t> N;
 
         v8::Local<v8::String> Nkey = Nan::New("N").ToLocalChecked();
         if (Nan::Has(type, Nkey).FromMaybe(false)) {
@@ -80,7 +80,7 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return Nan::ThrowTypeError("Requires a JSON style expression argument.");
     }
 
-    mbgl::optional<type::Type> expected;
+    std::optional<type::Type> expected;
     if (info.Length() > 1 && info[1]->IsObject()) {
         expected = parseType(info[1]->ToObject(context).ToLocalChecked());
     }
@@ -247,17 +247,17 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
         return Nan::ThrowTypeError("Requires globals and feature arguments.");
     }
 
-    mbgl::optional<float> zoom;
+    std::optional<float> zoom;
     v8::Local<v8::Value> v8zoom = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("zoom").ToLocalChecked()).ToLocalChecked();
     if (v8zoom->IsNumber()) zoom = static_cast<float>(Nan::To<double>(v8zoom).FromJust());
 
-    mbgl::optional<double> heatmapDensity;
+    std::optional<double> heatmapDensity;
     v8::Local<v8::Value> v8heatmapDensity = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("heatmapDensity").ToLocalChecked()).ToLocalChecked();
     if (v8heatmapDensity->IsNumber()) heatmapDensity = Nan::To<double>(v8heatmapDensity).FromJust();
 
     Nan::JSON NanJSON;
     conversion::Error conversionError;
-    mbgl::optional<mbgl::GeoJSON> geoJSON = conversion::convert<mbgl::GeoJSON>(info[1], conversionError);
+    std::optional<mbgl::GeoJSON> geoJSON = conversion::convert<mbgl::GeoJSON>(info[1], conversionError);
     if (!geoJSON) {
         Nan::ThrowTypeError(conversionError.message.c_str());
         return;

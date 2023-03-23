@@ -4,7 +4,6 @@
 #include <mbgl/style/style_property.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
@@ -13,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -111,7 +111,7 @@ public:
     void setMaxZoom(float);
 
     // Dynamic properties
-    optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
+    std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;
     virtual Value serialize() const;
@@ -144,15 +144,15 @@ public:
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
-    virtual optional<conversion::Error> setPropertyInternal(const std::string& name,
+    virtual std::optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                             const conversion::Convertible& value) = 0;
     LayerObserver* observer;
     mapbox::base::WeakPtrFactory<Layer> weakFactory {this};
 
 private:
-    optional<conversion::Error> setVisibility(const conversion::Convertible& value);
-    optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
-    optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
+    std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
+    std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
+    std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
 };
 
 } // namespace style

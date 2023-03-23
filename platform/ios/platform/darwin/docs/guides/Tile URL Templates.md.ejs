@@ -10,8 +10,8 @@
 -->
 # Tile URL Templates
 
-`MGLTileSource` objects, specifically `MGLRasterTileSource` and
-`MGLVectorTileSource` objects, can be created using an initializer that accepts
+`MLNTileSource` objects, specifically `MLNRasterTileSource` and
+`MLNVectorTileSource` objects, can be created using an initializer that accepts
 an array of tile URL templates. Tile URL templates are strings that specify the
 URLs of the vector tiles or raster tile images to load. A template resembles an
 absolute URL, but with any number of placeholder strings that the source
@@ -54,18 +54,18 @@ all of which are optional:
        is 2<sup><var>z</var></sup>−1, the tile’s bottom edge corresponds to
        −arctan(sinh(π)), or approximately 85.0511 degrees south. The y axis is
        inverted if the <code>options</code> parameter contains
-       <code>MGLTileSourceOptionTileCoordinateSystem</code> with a value of
-       <code>MGLTileCoordinateSystemTMS</code>.</td>
+       <code>MLNTileSourceOptionTileCoordinateSystem</code> with a value of
+       <code>MLNTileCoordinateSystemTMS</code>.</td>
 </tr>
 <tr>
     <td><code>{z}</code></td>
     <td>The tile’s zoom level. At zoom level 0, each tile covers the entire
        world map; at zoom level 1, it covers ¼ of the world; at zoom level 2,
        <sup>1</sup>⁄<sub>16</sub> of the world, and so on. For tiles loaded by
-       a <code>MGLRasterTileSource</code> object, whether the tile zoom level
+       a <code>MLNRasterTileSource</code> object, whether the tile zoom level
        matches the map’s current zoom level depends on the value of the
        source’s tile size as specified in the
-       <code>MGLTileSourceOptionTileSize</code> key of the <code>options</code>
+       <code>MLNTileSourceOptionTileSize</code> key of the <code>options</code>
        parameter.</td>
 </tr>
 <tr>

@@ -149,6 +149,14 @@ global.propertyValueType = function (property) {
   }
 };
 
+function formatNumber(property, num = 0) {
+  if (evaluatedType(property) === "float") {
+    const str = num.toString();
+    return str + (str.includes(".") ? "" : ".") + "f";
+  }
+  return num.toString();
+}
+
 global.defaultValue = function (property) {
   // https://github.com/mapbox/mapbox-gl-native/issues/5258
   if (property.name === 'line-round-limit') {
@@ -165,11 +173,7 @@ global.defaultValue = function (property) {
 
   switch (property.type) {
   case 'number':
-  if (property.default === undefined) {
-    return 0;
-  } else {
-    return property.default;
-  }
+    return formatNumber(property, property.default);
   case 'formatted':
   case 'string':
   case 'resolvedImage':

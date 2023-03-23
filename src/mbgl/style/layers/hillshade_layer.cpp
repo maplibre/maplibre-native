@@ -93,7 +93,7 @@ TransitionOptions HillshadeLayer::getHillshadeAccentColorTransition() const {
 }
 
 PropertyValue<float> HillshadeLayer::getDefaultHillshadeExaggeration() {
-    return {0.5};
+    return {0.5f};
 }
 
 const PropertyValue<float>& HillshadeLayer::getHillshadeExaggeration() const {
@@ -174,7 +174,7 @@ TransitionOptions HillshadeLayer::getHillshadeIlluminationAnchorTransition() con
 }
 
 PropertyValue<float> HillshadeLayer::getDefaultHillshadeIlluminationDirection() {
-    return {335};
+    return {335.f};
 }
 
 const PropertyValue<float>& HillshadeLayer::getHillshadeIlluminationDirection() const {
@@ -318,7 +318,7 @@ Value HillshadeLayer::serialize() const {
     return result;
 }
 
-optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
@@ -334,17 +334,17 @@ optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, con
 
         if (property == Property::HillshadeAccentColor) {
             setHillshadeAccentColor(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeHighlightColor) {
             setHillshadeHighlightColor(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeShadowColor) {
             setHillshadeShadowColor(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
     }
     if (property == Property::HillshadeExaggeration || property == Property::HillshadeIlluminationDirection) {
@@ -356,12 +356,12 @@ optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, con
 
         if (property == Property::HillshadeExaggeration) {
             setHillshadeExaggeration(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
 
         if (property == Property::HillshadeIlluminationDirection) {
             setHillshadeIlluminationDirection(*typedValue);
-            return nullopt;
+            return std::nullopt;
         }
     }
     if (property == Property::HillshadeIlluminationAnchor) {
@@ -372,43 +372,43 @@ optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, con
         }
 
         setHillshadeIlluminationAnchor(*typedValue);
-        return nullopt;
+        return std::nullopt;
     }
 
     Error error;
-    optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
 
     if (property == Property::HillshadeAccentColorTransition) {
         setHillshadeAccentColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeExaggerationTransition) {
         setHillshadeExaggerationTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeHighlightColorTransition) {
         setHillshadeHighlightColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeIlluminationAnchorTransition) {
         setHillshadeIlluminationAnchorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeIlluminationDirectionTransition) {
         setHillshadeIlluminationDirectionTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     if (property == Property::HillshadeShadowColorTransition) {
         setHillshadeShadowColorTransition(*transition);
-        return nullopt;
+        return std::nullopt;
     }
 
     return Error{"layer doesn't support this property"};

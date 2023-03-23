@@ -30,7 +30,7 @@ namespace android {
             return style::CustomGeometrySource::Options();
         }
         Error error;
-        optional<style::CustomGeometrySource::Options> result = convert<style::CustomGeometrySource::Options>(Value(env, options), error);
+        std::optional<style::CustomGeometrySource::Options> result = convert<style::CustomGeometrySource::Options>(Value(env, options), error);
         if (!result) {
             throw std::logic_error(error.message);
         }

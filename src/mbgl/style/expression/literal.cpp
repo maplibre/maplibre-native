@@ -7,7 +7,7 @@ namespace style {
 namespace expression {
 
 template <typename T>
-optional<Value> checkNumber(T n) {
+std::optional<Value> checkNumber(T n) {
     if (n > std::numeric_limits<double>::max()) {
         return {std::numeric_limits<double>::infinity()};
     } else {
@@ -16,14 +16,14 @@ optional<Value> checkNumber(T n) {
 }
 
 using namespace mbgl::style::conversion;
-optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
+std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
     if (isUndefined(value)) return {Null};
     if (isObject(value)) {
         std::unordered_map<std::string, Value> result;
         bool error = false;
-        eachMember(value, [&] (const std::string& k, const mbgl::style::conversion::Convertible& v) -> optional<conversion::Error> {
+        eachMember(value, [&] (const std::string& k, const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
             if (!error) {
-                optional<Value> memberValue = parseValue(v, ctx);
+                std::optional<Value> memberValue = parseValue(v, ctx);
                 if (memberValue) {
                     result.emplace(k, *memberValue);
                 } else {
@@ -32,24 +32,24 @@ optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
             }
             return {};
         });
-        return error ? optional<Value>() : optional<Value>(result);
+        return error ? std::optional<Value>() : std::optional<Value>(result);
     }
     
     if (isArray(value)) {
         std::vector<Value> result;
         const auto length = arrayLength(value);
         for(std::size_t i = 0; i < length; i++) {
-            optional<Value> item = parseValue(arrayMember(value, i), ctx);
+            std::optional<Value> item = parseValue(arrayMember(value, i), ctx);
             if (item) {
                 result.emplace_back(*item);
             } else {
-                return optional<Value>();
+                return std::optional<Value>();
             }
         }
-        return optional<Value>(result);
+        return std::optional<Value>(result);
     }
     
-    optional<mbgl::Value> v = toValue(value);
+    std::optional<mbgl::Value> v = toValue(value);
     // since value represents a JSON value, if it's not undefined, object, or
     // array, it must be convertible to mbgl::Value
     assert(v);
@@ -59,7 +59,7 @@ optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
         [&](int64_t n) { return checkNumber(n); },
         [&](double n) { return checkNumber(n); },
         [&](const auto&) {
-            return optional<Value>(toExpressionValue(*v));
+            return std::optional<Value>(toExpressionValue(*v));
         }
     );
 }
@@ -74,7 +74,7 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
             ctx.error("'literal' expression requires exactly one argument, but found " + util::toString(arrayLength(value) - 1) + " instead.");
             return ParseResult();
         }
-        const optional<Value> parsedValue = parseValue(arrayMember(value, 1), ctx);
+        const std::optional<Value> parsedValue = parseValue(arrayMember(value, 1), ctx);
         if (!parsedValue) {
             return ParseResult();
         }
@@ -98,7 +98,7 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
         return ParseResult(std::make_unique<Literal>(*parsedValue));
     } else {
         // bare primitive value (string, number, boolean, null)
-        const optional<Value> parsedValue = parseValue(value, ctx);
+        const std::optional<Value> parsedValue = parseValue(value, ctx);
         return ParseResult(std::make_unique<Literal>(*parsedValue));
     }
 }

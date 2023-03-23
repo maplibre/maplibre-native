@@ -2,12 +2,13 @@
 
 #include <mbgl/util/range.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/geo.hpp>
+
 #include <tuple>
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <optional>
 
 namespace mbgl {
 
@@ -22,7 +23,7 @@ public:
     Scheme scheme;
     // DEMEncoding is not supported by the TileJSON spec
     DEMEncoding encoding;
-    optional<LatLngBounds> bounds;
+    std::optional<LatLngBounds> bounds;
 
     Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),
             Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},

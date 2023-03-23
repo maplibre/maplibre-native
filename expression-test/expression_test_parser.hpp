@@ -4,7 +4,6 @@
 
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/feature.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/rapidjson.hpp>
 
 #include <set>
@@ -14,9 +13,9 @@
 using namespace mbgl;
 
 struct Input {
-    Input(optional<float> zoom_,
-          optional<double> heatmapDensity_,
-          optional<CanonicalTileID> canonical_,
+    Input(std::optional<float> zoom_,
+          std::optional<double> heatmapDensity_,
+          std::optional<CanonicalTileID> canonical_,
           std::set<std::string> availableImages_,
           Feature feature_)
         : zoom(std::move(zoom_)),
@@ -24,9 +23,9 @@ struct Input {
           canonical(std::move(canonical_)),
           availableImages(std::move(availableImages_)),
           feature(std::move(feature_)) {}
-    optional<float> zoom;
-    optional<double> heatmapDensity;
-    optional<CanonicalTileID> canonical;
+    std::optional<float> zoom;
+    std::optional<double> heatmapDensity;
+    std::optional<CanonicalTileID> canonical;
     std::set<std::string> availableImages;
     Feature feature;
 };
@@ -50,9 +49,9 @@ struct Compiled {
 
 struct TestResult {
     Compiled compiled;
-    optional<Value> expression;
-    optional<Value> outputs;
-    optional<Value> serialized;
+    std::optional<Value> expression;
+    std::optional<Value> outputs;
+    std::optional<Value> serialized;
 };
 
 struct PropertySpec {
@@ -60,7 +59,7 @@ struct PropertySpec {
     std::string value;
     std::size_t length = 0;
     bool isDataDriven = false;
-    optional<Value> expression;
+    std::optional<Value> expression;
 };
 
 class TestData {
@@ -69,7 +68,7 @@ public:
     TestResult expected;
     TestResult result;
     TestResult recompiled;
-    optional<PropertySpec> spec;
+    std::optional<PropertySpec> spec;
     JSDocument document;
 };
 
@@ -87,17 +86,17 @@ Arguments parseArguments(int argc, char** argv);
 
 using Ignores = std::vector<Ignore>;
 Ignores parseExpressionIgnores();
-optional<TestData> parseTestData(const filesystem::path&);
+std::optional<TestData> parseTestData(const filesystem::path&);
 
 std::string toJSON(const Value& value, unsigned indent = 0, bool singleLine = false);
 JSDocument toDocument(const Value&);
 Value toValue(const Compiled&);
-optional<Value> toValue(const style::expression::Value&);
+std::optional<Value> toValue(const style::expression::Value&);
 
 std::unique_ptr<style::expression::Expression> parseExpression(const JSValue&,
-                                                               optional<PropertySpec>&,
+                                                               std::optional<PropertySpec>&,
                                                                TestResult&);
-std::unique_ptr<style::expression::Expression> parseExpression(const optional<Value>&,
-                                                               optional<PropertySpec>&,
+std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>&,
+                                                               std::optional<PropertySpec>&,
                                                                TestResult&);
 
