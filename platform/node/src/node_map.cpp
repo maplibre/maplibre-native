@@ -171,17 +171,23 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return Nan::ThrowTypeError("Use the new operator to create new Map objects");
     }
 
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() > 0 && !info[0]->IsObject()) {
         return Nan::ThrowTypeError("Requires an options object as first argument");
     }
 
-    auto options = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+    v8::Local<v8::Object> options;
 
-    // Check that 'request' is set. If 'cancel' is set it must be a
+    if(info.Length() > 0) {
+        options = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+    } else {
+        options = Nan::New<v8::Object>();
+    }
+
+    // Check that if 'request' is set it must be a function, if 'cancel' is set it must be a
     // function and if 'ratio' is set it must be a number.
-    if (!Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
-     || !Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
-        return Nan::ThrowError("Options object must have a 'request' method");
+    if (Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
+     && !Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
+        return Nan::ThrowError("Options object 'request' property must be a function");
     }
 
     if (Nan::Has(options, Nan::New("cancel").ToLocalChecked()).FromJust()
@@ -196,11 +202,14 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     info.This()->SetInternalField(1, options);
 
-    mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
-            return std::make_unique<node_mbgl::NodeFileSource>(
-                reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
-        });
+    if(Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust()
+     && Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
+        mbgl::FileSourceManager::get()->registerFileSourceFactory(
+            mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
+                return std::make_unique<node_mbgl::NodeFileSource>(
+                    reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
+            });
+    }
 
     try {
         auto nodeMap = new NodeMap(options);
