@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/gfx/shader.hpp>
+
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -7,8 +9,6 @@
 
 namespace mbgl {
 namespace gfx {
-
-class Shader;
 
 /// @brief A ShaderRegistry contains a collection of gfx::Shader instances.
 /// Using the registry, shaders may be dynamically registered or replaced
@@ -55,15 +55,14 @@ class ShaderRegistry {
         /// @brief Shorthand helper to quickly get a derived type from the registry.
         /// @tparam T Derived type, inheriting `gfx::Shader`
         /// @return T or nullptr if not found in the registry
-        template<typename T, std::enable_if_t<
-            std::is_base_of<gfx::Shader, T>::value, bool
-        > = true>
+        template<typename T,
+            typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
         std::shared_ptr<T> get() noexcept {
             auto shader = getShader(std::string(T::Name));
-            if (!shader) {
+            if (!shader || (shader->name() != T::Name)) {
                 return nullptr;
             }
-            return std::dynamic_pointer_cast<T>(shader);
+            return std::static_pointer_cast<T>(shader);
         }
 
     private:
