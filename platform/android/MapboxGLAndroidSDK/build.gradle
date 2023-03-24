@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     id 'org.jmailen.kotlinter'
     id 'org.jetbrains.dokka' version '1.7.20'
@@ -30,6 +32,23 @@ dependencies {
 
     androidTestImplementation dependenciesList.testRunner
     androidTestImplementation dependenciesList.testRules
+}
+
+tasks.withType(DokkaTask.class) {
+    moduleName.set("MapLibre GL Native for Android")
+
+    String dokkaBaseConfiguration = "{\"customAssets\": [\"${file('assets/MapLibre_Native_Android_Demo_Screenshot.png').getPath().replace('\\', '/')}\"]}"
+
+    pluginsMapConfiguration.set(
+        ["org.jetbrains.dokka.base.DokkaBase": dokkaBaseConfiguration]
+    )
+
+    dokkaSourceSets {
+
+        configureEach {
+            includes.from("GETTING-STARTED-GUIDE.md")
+        }
+    } 
 }
 
 android {
