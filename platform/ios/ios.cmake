@@ -1,4 +1,5 @@
 option(MBGL_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
+option(MBGL_IOS_RENDER_TEST "Include render tests" ON)
 
 if(NOT DEFINED IOS_DEPLOYMENT_TARGET)
     set(IOS_DEPLOYMENT_TARGET "11.0")
