@@ -3,8 +3,10 @@
 
 ### ✨ New features
 - *...Add new stuff here...*
-* Compile Node targets without -std=c++11 option by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/926
 * Make Node Map object options "request" property optional by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/904
+
+### 🐞 Bug fixes
+* Compile Node targets without -std=c++11 option by @tdcosta100 in https://github.com/maplibre/maplibre-gl-native/pull/926
 
 # 5.2.0
 * Adjust Typings for Node Platform by @etnav in https://github.com/maplibre/maplibre-gl-native/pull/871
