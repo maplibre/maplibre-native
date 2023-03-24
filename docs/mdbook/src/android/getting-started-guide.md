@@ -1,0 +1,113 @@
+# Quickstart
+
+1. Add bintray Maven repositories to your project-level Gradle file (usually `<project>/<app-module>/build.gradle`).
+
+    ```gradle
+        allprojects {
+            repositories {
+                ...
+                mavenCentral()                
+            }
+        }
+    ```
+
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Please replace `<version>` with a valid MapLibre GL version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`).
+
+    ```gradle
+        dependencies {
+            ...
+            implementation 'org.maplibre.gl:android-sdk:<version>'
+            ...
+        }
+    ```
+
+3. Sync your Android project with Gradle files.
+
+4. Add a `MapView` to your layout XML file (usually `<project>/<app-module>/src/main/res/layout/activity_main.xml`).
+
+    ```xml
+        ...
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+        ...
+    ```
+
+5. Initialize the `MapView` in your `MainActivity` file by following the example below:
+
+    ```kotlin
+
+        ...
+        import androidx.appcompat.app.AppCompatActivity
+        import android.os.Bundle
+        import android.view.LayoutInflater
+        import com.mapbox.mapboxsdk.Mapbox
+        import com.mapbox.mapboxsdk.camera.CameraPosition
+        import com.mapbox.mapboxsdk.geometry.LatLng
+        import com.mapbox.mapboxsdk.maps.MapView
+
+        class MainActivity : AppCompatActivity() {
+
+            // Declare a variable for MapView
+            private var mapView: MapView? = null
+
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                
+                // Init MapLibre
+                Mapbox.getInstance(this)
+
+                // Init layout view
+                val inflater = LayoutInflater.from(this)
+                val rootView = inflater.inflate(R.layout.activity_main, null)
+                setContentView(rootView)
+
+                // Init the MapView
+                mapView = rootView.findViewById(R.id.mapView)
+                mapView.getMapAsync { map ->
+                    map.setStyle("https://demotiles.maplibre.org/style.json")
+                    map.cameraPosition = CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build()
+                }
+            }
+
+            override fun onStart() {
+                super.onStart()
+                mapView?.onStart()
+            }
+
+            override fun onResume() {
+                super.onResume()
+                mapView?.onResume()
+            }
+
+            override fun onPause() {
+                super.onPause()
+                mapView?.onPause()
+            }
+
+            override fun onStop() {
+                super.onStop()
+                mapView?.onStop()
+            }
+
+            override fun onLowMemory() {
+                super.onLowMemory()
+                mapView?.onLowMemory()
+            }
+
+            override fun onDestroy() {
+                super.onDestroy()
+                mapView?.onDestroy()
+            }
+        }
+        
+    ```
+
+6. Build and run the app. If you run the app successfully, a map will be displayed as seen in the screenshot below.
+<div style="text-align: center;">
+<img src="/assets/MapLibre_Native_Android_Demo_Screenshot.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
+</div>
+
+
