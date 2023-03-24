@@ -41,9 +41,12 @@ MapLibre GL Native for Android is a library for embedding interactive map views 
 
 5. Initialize the `MapView` in your `MainActivity` file by following the example below:
 
-    ```kotlin
+        ```kotlin
 
         ...
+        import androidx.appcompat.app.AppCompatActivity
+        import android.os.Bundle
+        import android.view.LayoutInflater
         import com.mapbox.mapboxsdk.Mapbox
         import com.mapbox.mapboxsdk.camera.CameraPosition
         import com.mapbox.mapboxsdk.geometry.LatLng
@@ -61,14 +64,15 @@ MapLibre GL Native for Android is a library for embedding interactive map views 
                 Mapbox.getInstance(this)
 
                 // Init layout view
-                setContentView(R.layout.activity_main)
+                val inflater = LayoutInflater.from(this)
+                val rootView = inflater.inflate(R.layout.activity_main, null)
+                setContentView(rootView)
 
-                // Init map view
-                mapView = findViewById(R.id.mapView)
-                mapView?.onCreate(savedInstanceState)
-                mapView?.getMapAsync { map ->
+                // Init the MapView
+                mapView = rootView.findViewById(R.id.mapView)
+                mapView.getMapAsync { map ->
                     map.setStyle("https://demotiles.maplibre.org/style.json")
-                    map.setCameraPosition(CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build())
+                    map.cameraPosition = CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build()
                 }
             }
 
