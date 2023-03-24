@@ -35,7 +35,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Will be used during a `Map.render` call to request all necessary map resources (tiles, fonts...)
      */
-    request: (
+    request?: (
       request: { url: string; kind: ResourceKind },
       callback: (error?: Error, response?: RequestResponse) => void,
     ) => void;
@@ -111,7 +111,7 @@ declare module '@maplibre/maplibre-gl-native' {
    * A `Map` instance is used to render images from map views
    */
   class Map {
-    constructor(mapOptions: MapOptions);
+    constructor(mapOptions?: MapOptions);
 
     /**
      * Load a style into a map

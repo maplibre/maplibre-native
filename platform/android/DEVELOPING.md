@@ -122,3 +122,11 @@ allprojects {
 
 When hitting native crashes you can use ndk-stack to symbolicate crashes.
 More information in [this](https://github.com/mapbox/mapbox-gl-native-android/wiki/Getting-line-numbers-from-an-Android-crash-with-ndk-stack) guide.
+
+## Instrumentation Tests
+
+The results of the instrumentation tests can be accessed on the AWS Console:
+
+https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
+
+You can log with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
