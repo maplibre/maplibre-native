@@ -20,7 +20,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
