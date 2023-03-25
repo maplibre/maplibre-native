@@ -11,8 +11,7 @@ class Shader;
 // Populate type info for use with downcasting shaders.
 // This is done to ensure -frtti is not needed.
 #define DECLARE_SHADER_TYPEINFO(ClassName)                  \
-    using InternalTypeInfoDeclared = std::true_type;        \
-    static constexpr auto Name = #ClassName;                \
+    static constexpr std::string_view Name{#ClassName};     \
     const std::string_view name() const noexcept override { \
         return Name;                                        \
     }
@@ -25,7 +24,9 @@ class Shader;
 template<typename T>
 inline constexpr bool is_shader_v =
     std::is_base_of_v<gfx::Shader, T> &&
-    std::is_same_v<typename T::InternalTypeInfoDeclared, std::true_type> &&
+    std::is_same_v<
+        std::remove_cv_t<decltype(T::Name)>,
+        std::string_view> &&
     std::is_final_v<T>;
 
 

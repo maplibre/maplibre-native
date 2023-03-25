@@ -48,7 +48,7 @@ TEST(ShaderRegistry, RegisterShader) {
     gfx::ShaderRegistry registry;
 
     // The registry should start empty
-    ASSERT_FALSE(registry.isShader(StubProgram_1::Name));
+    ASSERT_FALSE(registry.isShader(std::string{StubProgram_1::Name}));
 
     // Register the program
     auto program = std::make_shared<StubProgram_1>();
@@ -56,7 +56,7 @@ TEST(ShaderRegistry, RegisterShader) {
     // We can't re-register the same program name
     ASSERT_FALSE(registry.registerShader(program));
     // Ensure the shader is present in the registry now
-    ASSERT_TRUE(registry.isShader(StubProgram_1::Name));
+    ASSERT_TRUE(registry.isShader(std::string{StubProgram_1::Name}));
     // And we can fetch it
     ASSERT_EQ(registry.get<StubProgram_1>(), program);
 
@@ -69,12 +69,12 @@ TEST(ShaderRegistry, RegisterShader) {
 TEST(ShaderRegistry, ReplaceShaderType) {
     gfx::ShaderRegistry registry;
 
-    ASSERT_FALSE(registry.isShader(StubProgram_1::Name));
+    ASSERT_FALSE(registry.isShader(std::string{StubProgram_1::Name}));
 
     auto program = std::make_shared<StubProgram_1>();
     ASSERT_TRUE(registry.registerShader(program));
     // Ensure the shader is present in the registry now
-    ASSERT_TRUE(registry.isShader(StubProgram_1::Name));
+    ASSERT_TRUE(registry.isShader(std::string{StubProgram_1::Name}));
     ASSERT_TRUE(registry.isShader(std::string{program->name()}));
 
     // Make sure downcasting to program1 works as expected
