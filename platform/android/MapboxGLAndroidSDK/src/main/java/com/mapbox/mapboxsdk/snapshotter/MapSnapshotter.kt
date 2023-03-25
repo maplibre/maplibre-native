@@ -433,7 +433,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      *
      * @param source the source to add
      */
-    private fun addSource(source: Source) {
+    private fun addSource(source: Source){
         nativeAddSource(source, source.nativePtr)
     }
 
@@ -491,7 +491,8 @@ open class MapSnapshotter(context: Context, options: Options) {
         val logo = createScaledLogo(snapshot)
         val longText = createTextView(mapSnapshot, false, logo.scale)
         val shortText = createTextView(mapSnapshot, true, logo.scale)
-        return AttributionMeasure.Builder().setSnapshot(snapshot).setLogo(logo.large).setLogoSmall(logo.small).setTextView(longText).setTextViewShort(shortText)
+        return AttributionMeasure.Builder().setSnapshot(snapshot).setLogo(logo.large).setLogoSmall(logo.small)
+            .setTextView(longText).setTextViewShort(shortText)
             .setMarginPadding(margin.toFloat()).build()
     }
 
@@ -504,11 +505,21 @@ open class MapSnapshotter(context: Context, options: Options) {
     private fun drawLogo(snapshot: Bitmap, canvas: Canvas, margin: Int, placement: AttributionLayout) {
         val selectedLogo = placement.logo
         if (selectedLogo != null) {
-            canvas.drawBitmap(selectedLogo, margin.toFloat(), (snapshot.height - selectedLogo.height - margin).toFloat(), null)
+            canvas.drawBitmap(
+                selectedLogo,
+                margin.toFloat(),
+                (snapshot.height - selectedLogo.height - margin).toFloat(),
+                null
+            )
         }
     }
 
-    private fun drawAttribution(mapSnapshot: MapSnapshot, canvas: Canvas, measure: AttributionMeasure, layout: AttributionLayout?) {
+    private fun drawAttribution(
+        mapSnapshot: MapSnapshot,
+        canvas: Canvas,
+        measure: AttributionMeasure,
+        layout: AttributionLayout?
+    ) {
         // draw attribution
         val anchorPoint = layout!!.anchorPoint
         if (anchorPoint != null) {
@@ -539,7 +550,8 @@ open class MapSnapshotter(context: Context, options: Options) {
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         val heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         val textView = TextView(context)
-        textView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        textView.layoutParams =
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         textView.isSingleLine = true
         textView.textSize = 10 * scale
         textView.setTextColor(textColor)
@@ -558,7 +570,9 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @return the parsed attribution string
      */
     private fun createAttributionString(mapSnapshot: MapSnapshot, shortText: Boolean): String {
-        val attributionParser = AttributionParser.Options(context).withAttributionData(*mapSnapshot.attributions).withCopyrightSign(false).withImproveMap(false).build()
+        val attributionParser =
+            AttributionParser.Options(context).withAttributionData(*mapSnapshot.attributions).withCopyrightSign(false)
+                .withImproveMap(false).build()
         return attributionParser.createAttributionString(shortText)
     }
 
@@ -651,25 +665,30 @@ open class MapSnapshotter(context: Context, options: Options) {
         if (!fullyLoaded) {
             fullyLoaded = true
             val builder = options.builder
-            if (builder != null) {
-                for (source in builder.sources) {
-                    nativeAddSource(source, source.nativePtr)
-                }
-                for (layerWrapper in builder.layers) {
-                    if (layerWrapper is LayerAtWrapper) {
-                        addLayerAt(layerWrapper.getLayer(), layerWrapper.index)
-                    } else if (layerWrapper is LayerAboveWrapper) {
-                        addLayerAbove(layerWrapper.getLayer(), layerWrapper.aboveLayer)
-                    } else if (layerWrapper is LayerBelowWrapper) {
-                        addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
-                    } else {
-                        addLayerBelow(layerWrapper.layer, MapboxConstants.LAYER_ID_ANNOTATIONS)
+                if (builder != null) {
+                    try {
+                        for (source in builder.sources) {
+                            nativeAddSource(source, source.nativePtr)
+                        }
+                        for (layerWrapper in builder.layers) {
+                            if (layerWrapper is LayerAtWrapper) {
+                                addLayerAt(layerWrapper.getLayer(), layerWrapper.index)
+                            } else if (layerWrapper is LayerAboveWrapper) {
+                                addLayerAbove(layerWrapper.getLayer(), layerWrapper.aboveLayer)
+                            } else if (layerWrapper is LayerBelowWrapper) {
+                                addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
+                            } else {
+                                addLayerBelow(layerWrapper.layer, MapboxConstants.LAYER_ID_ANNOTATIONS)
+                            }
+                        }
+                        for (image in builder.images) {
+                            addImage(image.id, image.bitmap, image.isSdf)
+                        }
+                    }catch (e: IllegalStateException){
+                        e.printStackTrace()
                     }
                 }
-                for (image in builder.images) {
-                    addImage(image.id, image.bitmap, image.isSdf)
-                }
-            }
+
         }
         if (observer != null) {
             observer!!.onDidFinishLoadingStyle()
