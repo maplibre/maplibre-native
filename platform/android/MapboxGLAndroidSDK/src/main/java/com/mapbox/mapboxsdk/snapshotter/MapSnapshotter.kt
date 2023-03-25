@@ -433,7 +433,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      *
      * @param source the source to add
      */
-    private fun addSource(source: Source){
+    private fun addSource(source: Source) {
         nativeAddSource(source, source.nativePtr)
     }
 
@@ -665,30 +665,29 @@ open class MapSnapshotter(context: Context, options: Options) {
         if (!fullyLoaded) {
             fullyLoaded = true
             val builder = options.builder
-                if (builder != null) {
-                    try {
-                        for (source in builder.sources) {
-                            nativeAddSource(source, source.nativePtr)
-                        }
-                        for (layerWrapper in builder.layers) {
-                            if (layerWrapper is LayerAtWrapper) {
-                                addLayerAt(layerWrapper.getLayer(), layerWrapper.index)
-                            } else if (layerWrapper is LayerAboveWrapper) {
-                                addLayerAbove(layerWrapper.getLayer(), layerWrapper.aboveLayer)
-                            } else if (layerWrapper is LayerBelowWrapper) {
-                                addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
-                            } else {
-                                addLayerBelow(layerWrapper.layer, MapboxConstants.LAYER_ID_ANNOTATIONS)
-                            }
-                        }
-                        for (image in builder.images) {
-                            addImage(image.id, image.bitmap, image.isSdf)
-                        }
-                    }catch (e: IllegalStateException){
-                        e.printStackTrace()
+            if (builder != null) {
+                try {
+                    for (source in builder.sources) {
+                        nativeAddSource(source, source.nativePtr)
                     }
+                    for (layerWrapper in builder.layers) {
+                        if (layerWrapper is LayerAtWrapper) {
+                            addLayerAt(layerWrapper.getLayer(), layerWrapper.index)
+                        } else if (layerWrapper is LayerAboveWrapper) {
+                            addLayerAbove(layerWrapper.getLayer(), layerWrapper.aboveLayer)
+                        } else if (layerWrapper is LayerBelowWrapper) {
+                            addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
+                        } else {
+                            addLayerBelow(layerWrapper.layer, MapboxConstants.LAYER_ID_ANNOTATIONS)
+                        }
+                    }
+                    for (image in builder.images) {
+                        addImage(image.id, image.bitmap, image.isSdf)
+                    }
+                } catch (e: IllegalStateException) {
+                    e.printStackTrace()
                 }
-
+            }
         }
         if (observer != null) {
             observer!!.onDidFinishLoadingStyle()
