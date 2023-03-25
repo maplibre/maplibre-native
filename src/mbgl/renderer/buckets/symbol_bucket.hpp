@@ -29,7 +29,7 @@ public:
                  WritingModeType writingModes_,
                  GeometryCoordinates line_,
                  std::vector<float> tileDistances_,
-                 optional<size_t> placedIconIndex_ = nullopt)
+                 std::optional<size_t> placedIconIndex_ = std::nullopt)
         : anchorPoint(anchorPoint_),
           segment(segment_),
           lowerSize(lowerSize_),
@@ -56,11 +56,11 @@ public:
     uint32_t crossTileID = 0u;
     // The placedOrientation is only used when symbol layer's property is set to support
     // placement for orientation variants.
-    optional<style::TextWritingModeType> placedOrientation;
+    std::optional<style::TextWritingModeType> placedOrientation;
     float angle = 0;
 
     // Reference to placed icon, only applicable for text symbols.
-    optional<size_t> placedIconIndex;
+    std::optional<size_t> placedIconIndex;
 };
 
 class SymbolBucket final : public Bucket {
@@ -100,8 +100,8 @@ public:
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
     SymbolInstanceReferences getSortedSymbols(float angle) const;
     // Returns references to the `symbolInstances` items, which belong to the `sortKeyRange` range;
-    // returns references to all the symbols if |sortKeyRange| is `nullopt`.
-    SymbolInstanceReferences getSymbols(const optional<SortKeyRange>& sortKeyRange = nullopt) const;
+    // returns references to all the symbols if |sortKeyRange| is `std::nullopt`.
+    SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
@@ -139,10 +139,10 @@ public:
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
 
-        optional<gfx::VertexBuffer<SymbolLayoutVertex>> vertexBuffer;
-        optional<gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>> dynamicVertexBuffer;
-        optional<gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>> opacityVertexBuffer;
-        optional<gfx::IndexBuffer> indexBuffer;
+        std::optional<gfx::VertexBuffer<SymbolLayoutVertex>> vertexBuffer;
+        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>> dynamicVertexBuffer;
+        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>> opacityVertexBuffer;
+        std::optional<gfx::IndexBuffer> indexBuffer;
     } text;
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
@@ -155,13 +155,13 @@ public:
         gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>> dynamicVertices;
         SegmentVector<CollisionBoxProgram::AttributeList> segments;
 
-        optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxLayoutAttributes>>> vertexBuffer;
-        optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxDynamicAttributes>>> dynamicVertexBuffer;
+        std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxLayoutAttributes>>> vertexBuffer;
+        std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxDynamicAttributes>>> dynamicVertexBuffer;
     };
 
     struct CollisionBoxBuffer : public CollisionBuffer {
         gfx::IndexVector<gfx::Lines> lines;
-        optional<gfx::IndexBuffer> indexBuffer;
+        std::optional<gfx::IndexBuffer> indexBuffer;
     };
     std::unique_ptr<CollisionBoxBuffer> iconCollisionBox;
     std::unique_ptr<CollisionBoxBuffer> textCollisionBox;
@@ -178,7 +178,7 @@ public:
 
     struct CollisionCircleBuffer : public CollisionBuffer {
         gfx::IndexVector<gfx::Triangles> triangles;
-        optional<gfx::IndexBuffer> indexBuffer;
+        std::optional<gfx::IndexBuffer> indexBuffer;
     };
     std::unique_ptr<CollisionCircleBuffer> iconCollisionCircle;
     std::unique_ptr<CollisionCircleBuffer> textCollisionCircle;
@@ -197,7 +197,7 @@ public:
     uint32_t bucketInstanceId;
     const bool allowVerticalPlacement;
     const std::vector<style::TextWritingModeType> placementModes;
-    mutable optional<bool> hasFormatSectionOverrides_;
+    mutable std::optional<bool> hasFormatSectionOverrides_;
 
     FeatureSortOrder featureSortOrder;
 };

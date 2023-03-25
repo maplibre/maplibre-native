@@ -121,7 +121,7 @@ StyleParseResult Parser::parse(const std::string& json) {
 
 void Parser::parseTransition(const JSValue& value) {
     conversion::Error error;
-    optional<TransitionOptions> converted = conversion::convert<TransitionOptions>(value, error);
+    std::optional<TransitionOptions> converted = conversion::convert<TransitionOptions>(value, error);
     if (!converted) {
         Log::Warning(Event::ParseStyle, error.message);
         return;
@@ -132,7 +132,7 @@ void Parser::parseTransition(const JSValue& value) {
 
 void Parser::parseLight(const JSValue& value) {
     conversion::Error error;
-    optional<Light> converted = conversion::convert<Light>(value, error);
+    std::optional<Light> converted = conversion::convert<Light>(value, error);
     if (!converted) {
         Log::Warning(Event::ParseStyle, error.message);
         return;
@@ -151,7 +151,7 @@ void Parser::parseSources(const JSValue& value) {
         std::string id { property.name.GetString(), property.name.GetStringLength() };
 
         conversion::Error error;
-        optional<std::unique_ptr<Source>> source =
+        std::optional<std::unique_ptr<Source>> source =
             conversion::convert<std::unique_ptr<Source>>(property.value, error, id);
         if (!source) {
             Log::Warning(Event::ParseStyle, error.message);
@@ -189,7 +189,7 @@ void Parser::parseLayers(const JSValue& value) {
 
         const std::string layerID = { id.GetString(), id.GetStringLength() };
         if (layersMap.find(layerID) != layersMap.end()) {
-            Log::Warning(Event::ParseStyle, "duplicate layer id %s", layerID.c_str());
+            Log::Warning(Event::ParseStyle, "duplicate layer id " + layerID);
             continue;
         }
 
@@ -222,7 +222,7 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
 
     // Make sure we have not previously attempted to parse this layer.
     if (std::find(stack.begin(), stack.end(), id) != stack.end()) {
-        Log::Warning(Event::ParseStyle, "layer reference of '%s' is circular", id.c_str());
+        Log::Warning(Event::ParseStyle, "layer reference of '" + id + "' is circular");
         return;
     }
 
@@ -230,14 +230,14 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
         // This layer is referencing another layer. Recursively parse that layer.
         const JSValue& refVal = value["ref"];
         if (!refVal.IsString()) {
-            Log::Warning(Event::ParseStyle, "layer ref of '%s' must be a string", id.c_str());
+            Log::Warning(Event::ParseStyle, "layer ref of '" + id +  "' must be a string");
             return;
         }
 
         const std::string ref { refVal.GetString(), refVal.GetStringLength() };
         auto it = layersMap.find(ref);
         if (it == layersMap.end()) {
-            Log::Warning(Event::ParseStyle, "layer '%s' references unknown layer %s", id.c_str(), ref.c_str());
+            Log::Warning(Event::ParseStyle, "layer '" + id + "' references unknown layer " + ref);
             return;
         }
 
@@ -257,7 +257,7 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
         conversion::setPaintProperties(*layer, conversion::Convertible(&value));
     } else {
         conversion::Error error;
-        optional<std::unique_ptr<Layer>> converted = conversion::convert<std::unique_ptr<Layer>>(value, error);
+        std::optional<std::unique_ptr<Layer>> converted = conversion::convert<std::unique_ptr<Layer>>(value, error);
         if (!converted) {
             Log::Warning(Event::ParseStyle, error.message);
             return;

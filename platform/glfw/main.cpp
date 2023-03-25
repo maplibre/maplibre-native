@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Set access token if present
-    const char* apikeyEnv = getenv("MGL_API_KEY");
+    const char* apikeyEnv = getenv("MLN_API_KEY");
     const std::string apikey = apikeyValue ? args::get(apikeyValue) : (apikeyEnv ? apikeyEnv : std::string());
 
     auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
         }
         settings.online = !settings.online;
         onlineFileSource->setProperty("online-status", settings.online);
-        mbgl::Log::Info(mbgl::Event::Setup, "Application is %s. Press `O` to toggle online status.", settings.online ? "online" : "offline");
+        mbgl::Log::Info(mbgl::Event::Setup, std::string("Application is ") + (settings.online ? "online" : "offline") + ". Press `O` to toggle online status.");
     });
 
     view->setChangeStyleCallback([&map,&orderedStyles] () {
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
         map.getStyle().loadURL(newStyle.getUrl());
         view->setWindowTitle(newStyle.getName());
 
-        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: %s", newStyle.getName().c_str());
+        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: " + newStyle.getName());
     });
 
     // Resource loader controls top-level request processing and can resume / pause all managed sources simultaneously.
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
     view->setResetCacheCallback([databaseFileSource]() {
         databaseFileSource->resetDatabase([](const std::exception_ptr& ex) {
             if (ex) {
-                mbgl::Log::Error(mbgl::Event::Database, "Failed to reset cache:: %s", mbgl::util::toString(ex).c_str());
+                mbgl::Log::Error(mbgl::Event::Database, "Failed to reset cache: " + mbgl::util::toString(ex));
             }
         });
     });
@@ -222,8 +222,10 @@ int main(int argc, char *argv[]) {
     settings.debug = mbgl::EnumType(map.getDebug());
     settings.save();
     mbgl::Log::Info(mbgl::Event::General,
-                    R"(Exit location: --lat="%f" --lon="%f" --zoom="%f" --bearing "%f")",
-                    settings.latitude, settings.longitude, settings.zoom, settings.bearing);
+                     "Exit location: --lat=\"" + std::to_string(settings.latitude) +
+                     "\" --lon=\"" + std::to_string(settings.longitude) +
+                     "\" --zoom=\"" + std::to_string(settings.zoom) +
+                     "\" --bearing=\"" + std::to_string(settings.bearing) + "\"");
 
     view = nullptr;
 

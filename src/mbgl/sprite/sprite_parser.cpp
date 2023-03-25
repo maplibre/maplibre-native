@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace mbgl {
 
@@ -25,21 +26,19 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
                                                const bool sdf,
                                                style::ImageStretches&& stretchX,
                                                style::ImageStretches&& stretchY,
-                                               const optional<style::ImageContent>& content) {
+                                               const std::optional<style::ImageContent>& content) {
     // Disallow invalid parameter configurations.
     if (width <= 0 || height <= 0 || width > 1024 || height > 1024 || ratio <= 0 || ratio > 10 || srcX < 0 ||
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
         srcX + width > static_cast<int32_t>(image.size.width) ||
         srcY + height > static_cast<int32_t>(image.size.height)) {
-        Log::Error(Event::Sprite,
-                   "Can't create image with invalid metrics: %dx%d@%d,%d in %ux%u@%sx sprite",
-                   width,
-                   height,
-                   srcX,
-                   srcY,
-                   image.size.width,
-                   image.size.height,
-                   util::toString(ratio).c_str());
+        std::ostringstream ss;
+        ss << "Can't create image with invalid metrics: "
+            << width << "x" << height << "@" << srcX << "," << srcY
+            << " in " << image.size.width << "x" << image.size.height
+            << "@" << util::toString(ratio) << "x"
+            << " sprite";
+        Log::Error(Event::Sprite, ss.str());
         return nullptr;
     }
 
@@ -53,7 +52,7 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
         return std::make_unique<style::Image>(
             id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content);
     } catch (const util::StyleImageException& ex) {
-        Log::Error(Event::Sprite, "Can't create image with invalid metadata: %s", ex.what());
+        Log::Error(Event::Sprite, std::string("Can't create image with invalid metadata: ") + ex.what());
         return nullptr;
     }
 }
@@ -67,9 +66,7 @@ uint16_t getUInt16(const JSValue& value, const char* property, const char* name,
             return v.GetUint();
         } else {
             Log::Warning(Event::Sprite,
-                         "Invalid sprite image '%s': value of '%s' must be an integer between 0 and 65535",
-                         name,
-                         property);
+                         std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be an integer between 0 and 65535");
         }
     }
 
@@ -82,7 +79,7 @@ double getDouble(const JSValue& value, const char* property, const char* name, c
         if (v.IsNumber()) {
             return v.GetDouble();
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be a number", name, property);
+            Log::Warning(Event::Sprite, std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a number");
         }
     }
 
@@ -95,7 +92,7 @@ bool getBoolean(const JSValue& value, const char* property, const char* name, co
         if (v.IsBool()) {
             return v.GetBool();
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be a boolean", name, property);
+            Log::Warning(Event::Sprite, std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a boolean");
         }
     }
 
@@ -116,20 +113,18 @@ style::ImageStretches getStretches(const JSValue& value, const char* property, c
                                                                stretch[rapidjson::SizeType(1)].GetFloat()});
                 } else {
                     Log::Warning(Event::Sprite,
-                                 "Invalid sprite image '%s': members of '%s' must be an array of two numbers",
-                                 name,
-                                 property);
+                                 "Invalid sprite image '" + std::string(name) + "': members of '" + property + "' must be an array of two numbers");
                 }
             }
         } else {
-            Log::Warning(Event::Sprite, "Invalid sprite image '%s': value of '%s' must be an array", name, property);
+            Log::Warning(Event::Sprite, "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array");
         }
     }
 
     return stretches;
 }
 
-optional<style::ImageContent> getContent(const JSValue& value, const char* property, const char* name) {
+std::optional<style::ImageContent> getContent(const JSValue& value, const char* property, const char* name) {
     if (value.HasMember(property)) {
         auto& content = value[property];
         if (content.IsArray() && content.Size() == 4 && content[rapidjson::SizeType(0)].IsNumber() &&
@@ -141,13 +136,11 @@ optional<style::ImageContent> getContent(const JSValue& value, const char* prope
                                        content[rapidjson::SizeType(3)].GetFloat()};
         } else {
             Log::Warning(Event::Sprite,
-                         "Invalid sprite image '%s': value of '%s' must be an array of four numbers",
-                         name,
-                         property);
+                         "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array of four numbers");
         }
     }
 
-    return nullopt;
+    return std::nullopt;
 }
 
 } // namespace
@@ -181,7 +174,7 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encode
             const bool sdf = getBoolean(value, "sdf", name.c_str(), false);
             style::ImageStretches stretchX = getStretches(value, "stretchX", name.c_str());
             style::ImageStretches stretchY = getStretches(value, "stretchY", name.c_str());
-            optional<style::ImageContent> content = getContent(value, "content", name.c_str());
+            std::optional<style::ImageContent> content = getContent(value, "content", name.c_str());
 
             auto image = createStyleImage(
                 name, raster, x, y, width, height, pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content);

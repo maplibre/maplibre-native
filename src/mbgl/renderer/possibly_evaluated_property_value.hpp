@@ -27,10 +27,10 @@ public:
         return value.template is<T>();
     }
 
-    optional<T> constant() const {
+    std::optional<T> constant() const {
         return value.match(
-            [&] (const T& t) { return optional<T>(t); },
-            [&] (const auto&) { return optional<T>(); });
+            [&] (const T& t) { return std::optional<T>(t); },
+            [&] (const auto&) { return std::optional<T>(); });
     }
 
     T constantOr(const T& t) const {
@@ -87,10 +87,10 @@ public:
         return value.template is<Faded<T>>();
     }
 
-    optional<Faded<T>> constant() const {
+    std::optional<Faded<T>> constant() const {
         return value.match(
-            [&] (const Faded<T>& t) { return optional<Faded<T>>(t); },
-            [&] (const auto&) { return optional<Faded<T>>(); });
+            [&] (const Faded<T>& t) { return std::optional<Faded<T>>(t); },
+            [&] (const auto&) { return std::optional<Faded<T>>(); });
     }
 
     Faded<T> constantOr(const Faded<T>& t) const {

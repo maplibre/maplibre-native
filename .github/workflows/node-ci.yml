@@ -8,13 +8,18 @@ on:
     tags:
       - 'node-*'
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
@@ -28,13 +33,18 @@ on:
     branches:
       - main
     paths:
+      - "platform/default/**"
       - 'platform/node/**'
+      - 'platform/windows/**'
+      - 'platform/darwin/**'
+      - 'platform/macos/**'
+      - 'platform/ios/platform/darwin/**'
+      - 'platform/ios/platform/macos/**'
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
       - "metrics/**"
-      - "platform/default/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
@@ -139,17 +149,21 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Update ccache (Windows)
-        if: runner.os == 'Windows'
-
-        run: |
-          choco.exe upgrade ccache
-          ccache.exe --version
-          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
-
-      - name: Set up ccache
+      - name: Set up ccache (MacOS/Linux)
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1
         with:
+          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+
+      - name: Set up ccache (Windows)
+        if: runner.os == 'Windows'
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          variant: 'sccache'
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -174,13 +188,31 @@ jobs:
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10
 
+      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
+        if: runner.os == 'Windows'
+        run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
+        shell: bash
+
+      - name: Restore vcpkg cache (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/platform/windows/vendor/vcpkg
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/buildtrees
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/packages
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
+          key: |
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
+
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -189,7 +221,6 @@ jobs:
 
       - name: Build maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
         run: |
           cmake --build build
 

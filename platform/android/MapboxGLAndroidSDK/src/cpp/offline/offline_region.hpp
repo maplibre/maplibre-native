@@ -25,7 +25,7 @@ public:
 
         static void onStatus(jni::JNIEnv&,
                             const jni::Object<OfflineRegionStatusCallback>&,
-                            mbgl::optional<mbgl::OfflineRegionStatus>);
+                            std::optional<mbgl::OfflineRegionStatus>);
     };
 
     class OfflineRegionDeleteCallback {
@@ -54,7 +54,7 @@ public:
 
         static void onUpdate(jni::JNIEnv&,
                             const jni::Object<OfflineRegionUpdateMetadataCallback>&,
-                            mbgl::optional<mbgl::OfflineRegionMetadata>);
+                            std::optional<mbgl::OfflineRegionMetadata>);
     };
 
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion"; };

@@ -13,11 +13,11 @@ namespace mbgl {
 void TaggedString::addTextSection(const std::u16string& sectionText,
                                   double scale,
                                   const FontStack& fontStack,
-                                  optional<Color> textColor) {
+                                  std::optional<Color> textColor) {
     styledText.first += sectionText;
     sections.emplace_back(scale, fontStack, std::move(textColor));
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
-    supportsVerticalWritingMode = nullopt;
+    supportsVerticalWritingMode = std::nullopt;
 }
 
 void TaggedString::addImageSection(const std::string& imageID) {
@@ -32,14 +32,14 @@ void TaggedString::addImageSection(const std::string& imageID) {
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
 }
 
-optional<char16_t> TaggedString::getNextImageSectionCharCode() {
+std::optional<char16_t> TaggedString::getNextImageSectionCharCode() {
     if (imageSectionID == 0u) {
         imageSectionID = PUAbegin;
         return imageSectionID;
     }
 
     if (++imageSectionID > PUAend) {
-        return nullopt;
+        return std::nullopt;
     }
 
     return imageSectionID;

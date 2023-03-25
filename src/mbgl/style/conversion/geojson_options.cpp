@@ -8,7 +8,7 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible& value,
+std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible& value,
                                                                Error& error) const {
     GeoJSONOptions options;
 
@@ -18,7 +18,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.minzoom = static_cast<uint8_t>(*toNumber(*minzoomValue));
         } else {
             error.message = "GeoJSON source minzoom value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -28,7 +28,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.maxzoom = static_cast<uint8_t>(*toNumber(*maxzoomValue));
         } else {
             error.message = "GeoJSON source maxzoom value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -38,7 +38,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.buffer = static_cast<uint16_t>(*toNumber(*bufferValue));
         } else {
             error.message = "GeoJSON source buffer value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -48,7 +48,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.tolerance = static_cast<double>(*toNumber(*toleranceValue));
         } else {
             error.message = "GeoJSON source tolerance value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -58,7 +58,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.cluster = *toBool(*clusterValue);
         } else {
             error.message = "GeoJSON source cluster value must be a boolean";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -68,7 +68,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.clusterMaxZoom = static_cast<uint8_t>(*toNumber(*clusterMaxZoomValue));
         } else {
             error.message = "GeoJSON source clusterMaxZoom value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -78,7 +78,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.clusterRadius = static_cast<uint16_t>(*toNumber(*clusterRadiusValue));
         } else {
             error.message = "GeoJSON source clusterRadius value must be a number";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -88,7 +88,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
             options.lineMetrics = *toBool(*lineMetricsValue);
         } else {
             error.message = "GeoJSON source lineMetrics value must be a boolean";
-            return nullopt;
+            return std::nullopt;
         }
     }
 
@@ -96,26 +96,26 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
     if (clusterProperties) {
         if (!isObject(*clusterProperties)) {
             error.message = "GeoJSON source clusterProperties value must be an object";
-            return nullopt;
+            return std::nullopt;
         }
         GeoJSONOptions::ClusterProperties result;
         assert(error.message.empty());
         eachMember(
             *clusterProperties,
             [&](const std::string& k,
-                const mbgl::style::conversion::Convertible& v) -> optional<conversion::Error> {
+                const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
                 // Each property shall be formed as ["key" : [operator, [mapExpression]]]
                 // or ["key" : [[operator, ['accumulated'], ['get', key]], [mapExpression]]]
                 if (!isArray(v) || arrayLength(v) != 2) {
                     error.message =
                         "GeoJSON source clusterProperties member must be an array with length of 2";
-                    return nullopt;
+                    return std::nullopt;
                 }
                 auto map = expression::dsl::createExpression(arrayMember(v, 1));
                 if (!map) {
                     error.message =
                         "Failed to convert GeoJSON source clusterProperties map expression";
-                    return nullopt;
+                    return std::nullopt;
                 }
                 std::unique_ptr<expression::Expression> reduce;
                 if (isArray(arrayMember(v, 0))) {
@@ -125,7 +125,7 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
                     if (!reduceOp) {
                         error.message =
                             "GeoJSON source clusterProperties member must contain a valid operator";
-                        return nullopt;
+                        return std::nullopt;
                     }
                     std::stringstream ss;
                     // Reformulate reduce expression to [operator, ['accumulated'], ['get', key]]
@@ -140,13 +140,13 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
                 if (!reduce) {
                     error.message =
                         "Failed to convert GeoJSON source clusterProperties reduce expression";
-                    return nullopt;
+                    return std::nullopt;
                 }
                 result.emplace(k, std::make_pair(std::move(map), std::move(reduce)));
-                return nullopt;
+                return std::nullopt;
             });
         if (!error.message.empty()) {
-            return nullopt;
+            return std::nullopt;
         }
         options.clusterProperties = std::move(result);
     }

@@ -11,7 +11,7 @@ const style::LayerTypeInfo* HillshadeLayerFactory::getTypeInfo() const noexcept 
 }
 
 std::unique_ptr<style::Layer> HillshadeLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
-    optional<std::string> source = getSource(value);
+    auto const source = getSource(value);
     if (!source) {
         return nullptr;
     }

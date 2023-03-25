@@ -134,19 +134,19 @@ std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOpti
     return tilePyramid.querySourceFeatures(options);
 }
 
-void RenderTileSource::setFeatureState(const optional<std::string>& sourceLayerID, const std::string& featureID,
+void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID, const std::string& featureID,
                                        const FeatureState& state) {
     featureState.updateState(sourceLayerID, featureID, state);
 }
 
-void RenderTileSource::getFeatureState(FeatureState& state, const optional<std::string>& sourceLayerID,
+void RenderTileSource::getFeatureState(FeatureState& state, const std::optional<std::string>& sourceLayerID,
                                        const std::string& featureID) const {
     featureState.getState(state, sourceLayerID, featureID);
 }
 
-void RenderTileSource::removeFeatureState(const optional<std::string>& sourceLayerID,
-                                          const optional<std::string>& featureID,
-                                          const optional<std::string>& stateKey) {
+void RenderTileSource::removeFeatureState(const std::optional<std::string>& sourceLayerID,
+                                          const std::optional<std::string>& featureID,
+                                          const std::optional<std::string>& stateKey) {
     featureState.removeState(sourceLayerID, featureID, stateKey);
 }
 
@@ -179,7 +179,7 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     enabled = needsRendering;
 
-    const optional<Tileset>& implTileset = getTileset();
+    const auto& implTileset = getTileset();
     // In Continuous mode, keep the existing tiles if the new cachedTileset is not
     // yet available, thus providing smart style transitions without flickering.
     // In other modes, allow clearing the tile pyramid first, before the early

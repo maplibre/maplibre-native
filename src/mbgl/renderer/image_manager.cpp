@@ -6,6 +6,8 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <sstream>
+
 namespace mbgl {
 
 static ImageManagerObserver nullObserver;
@@ -270,7 +272,9 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
 }
 
 void ImageManager::dumpDebugLogs() const {
-    Log::Info(Event::General, "ImageManager::loaded: %d", loaded);
+    std::ostringstream ss;
+    ss << "ImageManager::loaded: " << loaded;
+    Log::Info(Event::General, ss.str());
 }
 
 ImageRequestor::ImageRequestor(ImageManager& imageManager_) : imageManager(imageManager_) {

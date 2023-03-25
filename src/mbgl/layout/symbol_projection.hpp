@@ -25,7 +25,7 @@ namespace mbgl {
     struct PlacedGlyph {
         PlacedGlyph() = default;
 
-        PlacedGlyph(Point<float> point_, float angle_, optional<TileDistance> tileDistance_)
+        PlacedGlyph(Point<float> point_, float angle_, std::optional<TileDistance> tileDistance_)
             : point(point_), angle(angle_), tileDistance(std::move(tileDistance_))
         {}
         PlacedGlyph(PlacedGlyph&& other) noexcept
@@ -33,7 +33,7 @@ namespace mbgl {
         PlacedGlyph(const PlacedGlyph& other) = default;
         Point<float> point;
         float angle;
-        optional<TileDistance> tileDistance;
+        std::optional<TileDistance> tileDistance;
     };
 
     float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const PlacedSymbol& placedSymbol);
@@ -55,7 +55,7 @@ namespace mbgl {
             const mat4& posMatrix, bool pitchWithMap, bool rotateWithMap, bool keepUpright,
             const RenderTile&, const SymbolSizeBinder& sizeBinder, const TransformState&);
 
-    optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float fontScale,
+    std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float fontScale,
                                                                          float lineOffsetX,
                                                                          float lineOffsetY,
                                                                          bool flip,

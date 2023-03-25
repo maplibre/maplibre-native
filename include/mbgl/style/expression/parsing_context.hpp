@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/conversion.hpp>
@@ -12,6 +11,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -25,7 +25,7 @@ struct ParsingError {
     bool operator==(const ParsingError& rhs) const { return message == rhs.message && key == rhs.key; }
 };
 
-using ParseResult = optional<std::unique_ptr<Expression>>;
+using ParseResult = std::optional<std::unique_ptr<Expression>>;
 
 namespace detail {
 
@@ -39,14 +39,14 @@ public:
     const std::map<std::string, std::shared_ptr<Expression>>& bindings;
     std::shared_ptr<Scope> parent;
     
-    optional<std::shared_ptr<Expression>> get(const std::string& name) {
+    std::optional<std::shared_ptr<Expression>> get(const std::string& name) {
         auto it = bindings.find(name);
         if (it != bindings.end()) {
             return {it->second};
         } else if (parent) {
             return parent->get(name);
         } else {
-            return optional<std::shared_ptr<Expression>>();
+            return std::optional<std::shared_ptr<Expression>>();
         }
     }
 };
@@ -86,7 +86,7 @@ public:
     ParsingContext& operator=(const ParsingContext&) = delete;
 
     std::string getKey() const { return key; }
-    optional<type::Type> getExpected() const { return expected; }
+    std::optional<type::Type> getExpected() const { return expected; }
     const std::vector<ParsingError>& getErrors() const { return *errors; }
     std::string getCombinedErrors() const;
 
@@ -94,7 +94,7 @@ public:
         Parse the given style-spec JSON value as an expression.
     */
     ParseResult parseExpression(const mbgl::style::conversion::Convertible& value,
-                                const optional<TypeAnnotationOption>& = {});
+                                const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
         Parse the given style-spec JSON value as an expression intended to be used
@@ -108,24 +108,24 @@ public:
     */
     ParseResult parse(const mbgl::style::conversion::Convertible&,
                       std::size_t,
-                      optional<type::Type> = {},
-                      const optional<TypeAnnotationOption>& = {});
+                      std::optional<type::Type> = std::nullopt,
+                      const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
         Parse a child expression.  For use by individual Expression::parse() methods.
     */
     ParseResult parse(const mbgl::style::conversion::Convertible&,
                       std::size_t index,
-                      optional<type::Type>,
+                      std::optional<type::Type>,
                       const std::map<std::string, std::shared_ptr<Expression>>&);
 
     /**
         Check whether `t` is a subtype of `expected`, collecting an error if not.
      */
-    optional<std::string> checkType(const type::Type& t);
+    std::optional<std::string> checkType(const type::Type& t);
 
-    optional<std::shared_ptr<Expression>> getBinding(const std::string& name) {
-        if (!scope) return optional<std::shared_ptr<Expression>>();
+    std::optional<std::shared_ptr<Expression>> getBinding(const std::string& name) {
+        if (!scope) return std::optional<std::shared_ptr<Expression>>();
         return scope->get(name);
     }
 
@@ -153,7 +153,7 @@ public:
 private:
     ParsingContext(std::string key_,
                    std::shared_ptr<std::vector<ParsingError>> errors_,
-                   optional<type::Type> expected_,
+                   std::optional<type::Type> expected_,
                    std::shared_ptr<detail::Scope> scope_)
         : key(std::move(key_)),
           expected(std::move(expected_)),
@@ -168,10 +168,10 @@ private:
         type (either Literal, or the one named in value[0]) and dispatching to the
         appropriate ParseXxxx::parse(const V&, ParsingContext) method.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible& value, const optional<TypeAnnotationOption>& = {});
+    ParseResult parse(const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     std::string key;
-    optional<type::Type> expected;
+    std::optional<type::Type> expected;
     std::shared_ptr<detail::Scope> scope;
     std::shared_ptr<std::vector<ParsingError>> errors;
 };

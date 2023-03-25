@@ -71,7 +71,7 @@ open class MapLibreApplication : MultiDexApplication() {
         private const val API_KEY_NOT_SET_MESSAGE =
             (
                 "In order to run the Test App you need to set a valid " +
-                    "API key. During development, you can set the MGL_API_KEY environment variable for the SDK to " +
+                    "API key. During development, you can set the MLN_API_KEY environment variable for the SDK to " +
                     "automatically include it in the Test App. Otherwise, you can manually include it in the " +
                     "res/values/developer-config.xml file in the MapboxGLAndroidSDKTestApp folder."
                 )

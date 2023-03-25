@@ -46,7 +46,7 @@ public:
     void setLight(std::unique_ptr<Light>);
 
     // Images
-    optional<Image> getImage(const std::string&) const;
+    std::optional<Image> getImage(const std::string&) const;
     void addImage(std::unique_ptr<Image>);
     void removeImage(const std::string&);
 
@@ -67,7 +67,7 @@ public:
           Layer* getLayer(const std::string&);
     const Layer* getLayer(const std::string&) const;
 
-    void addLayer(std::unique_ptr<Layer>, const optional<std::string>& beforeLayerID = {});
+    void addLayer(std::unique_ptr<Layer>, const std::optional<std::string>& beforeLayerID = std::nullopt);
     std::unique_ptr<Layer> removeLayer(const std::string& layerID);
 
     // Private implementation

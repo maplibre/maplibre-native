@@ -5,10 +5,10 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/renderer/renderer_frontend.hpp>
 #include <mbgl/util/async_task.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <atomic>
 #include <memory>
+#include <optional>
 
 namespace mbgl {
 
@@ -26,12 +26,12 @@ public:
     HeadlessFrontend(float pixelRatio_,
                      gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
                      gfx::ContextMode mode = gfx::ContextMode::Unique,
-                     const optional<std::string>& localFontFamily = {});
+                     const std::optional<std::string>& localFontFamily = std::nullopt);
     HeadlessFrontend(Size,
                      float pixelRatio_,
                      gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
                      gfx::ContextMode mode = gfx::ContextMode::Unique,
-                     const optional<std::string>& localFontFamily = {});
+                     const std::optional<std::string>& localFontFamily = std::nullopt);
     ~HeadlessFrontend() override;
 
     void reset() override;
@@ -57,7 +57,7 @@ public:
     RenderResult render(Map&);
     void renderOnce(Map&);
 
-    optional<TransformState> getTransformState() const;
+    std::optional<TransformState> getTransformState() const;
 
 private:
     Size size;

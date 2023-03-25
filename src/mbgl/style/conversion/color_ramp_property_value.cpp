@@ -10,7 +10,7 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operator()(const Convertible& value, Error& error, bool, bool) const {
+std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operator()(const Convertible& value, Error& error, bool, bool) const {
     using namespace mbgl::style::expression;
     if (isUndefined(value)) {
         return ColorRampPropertyValue();
@@ -19,21 +19,21 @@ optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operator()(c
         ParseResult expression = ctx.parseLayerPropertyExpression(value);
         if (!expression) {
             error.message = ctx.getCombinedErrors();
-            return nullopt;
+            return std::nullopt;
         }
         assert(*expression);
         if (!isFeatureConstant(**expression)) {
             error.message = "data expressions not supported";
-            return nullopt;
+            return std::nullopt;
         }
         if (!isZoomConstant(**expression)) {
             error.message = "zoom expressions not supported";
-            return nullopt;
+            return std::nullopt;
         }
         return ColorRampPropertyValue(std::move(*expression));
     } else {
         error.message = "color ramp must be an expression";
-        return nullopt;
+        return std::nullopt;
     }
 }
 

@@ -10,17 +10,17 @@ namespace expression {
 struct FormatExpressionSection {
     explicit FormatExpressionSection(std::unique_ptr<Expression> content_);
 
-    void setTextSectionOptions(optional<std::unique_ptr<Expression>> fontScale_,
-                               optional<std::unique_ptr<Expression>> textFont_,
-                               optional<std::unique_ptr<Expression>> textColor_);
+    void setTextSectionOptions(std::optional<std::unique_ptr<Expression>> fontScale_,
+                               std::optional<std::unique_ptr<Expression>> textFont_,
+                               std::optional<std::unique_ptr<Expression>> textColor_);
 
     // Content can be expression that evaluates to String or Image.
     std::shared_ptr<Expression> content;
 
     // Text related section options.
-    optional<std::shared_ptr<Expression>> fontScale;
-    optional<std::shared_ptr<Expression>> textFont;
-    optional<std::shared_ptr<Expression>> textColor;
+    std::optional<std::shared_ptr<Expression>> fontScale;
+    std::optional<std::shared_ptr<Expression>> textFont;
+    std::optional<std::shared_ptr<Expression>> textColor;
 };
     
 class FormatExpression final : public Expression {
@@ -34,10 +34,10 @@ public:
     
     bool operator==(const Expression& e) const override;
     
-    std::vector<optional<Value>> possibleOutputs() const override {
+    std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the combinatoric set of all children
         // Usually, this.text will be undefined anyway
-        return { nullopt };
+        return { std::nullopt };
     }
     
     const std::vector<FormatExpressionSection>& getSections() const { return sections; }

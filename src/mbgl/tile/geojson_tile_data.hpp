@@ -39,15 +39,15 @@ public:
         return *geometry;
     }
 
-    optional<Value> getValue(const std::string& key) const override {
+    std::optional<Value> getValue(const std::string& key) const override {
         auto it = feature.properties.find(key);
         if (it != feature.properties.end()) {
-            return optional<Value>(it->second);
+            return std::optional<Value>(it->second);
         }
-        return optional<Value>();
+        return std::optional<Value>();
     }
 
-    mutable optional<GeometryCollection> geometry;
+    mutable std::optional<GeometryCollection> geometry;
 };
 
 class GeoJSONTileLayer : public GeometryTileLayer {

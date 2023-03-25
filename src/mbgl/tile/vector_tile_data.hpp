@@ -25,15 +25,15 @@ public:
     VectorTileFeature(const mapbox::vector_tile::layer&, const protozero::data_view&);
 
     FeatureType getType() const override;
-    optional<Value> getValue(const std::string& key) const override;
+    std::optional<Value> getValue(const std::string& key) const override;
     const PropertyMap& getProperties() const override;
     FeatureIdentifier getID() const override;
     const GeometryCollection& getGeometries() const override;
 
 private:
     mapbox::vector_tile::feature feature;
-    mutable optional<GeometryCollection> lines;
-    mutable optional<PropertyMap> properties;
+    mutable std::optional<GeometryCollection> lines;
+    mutable std::optional<PropertyMap> properties;
 };
 
 class VectorTileLayer : public GeometryTileLayer {

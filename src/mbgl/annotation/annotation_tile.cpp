@@ -52,12 +52,12 @@ FeatureType AnnotationTileFeature::getType() const {
     return data->type;
 }
 
-optional<Value> AnnotationTileFeature::getValue(const std::string& key) const {
+std::optional<Value> AnnotationTileFeature::getValue(const std::string& key) const {
     auto it = data->properties.find(key);
     if (it != data->properties.end()) {
-        return optional<Value>(it->second);
+        return std::optional<Value>(it->second);
     }
-    return optional<Value>();
+    return std::nullopt;
 }
 
 FeatureIdentifier AnnotationTileFeature::getID() const {

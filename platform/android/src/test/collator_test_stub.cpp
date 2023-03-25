@@ -7,7 +7,7 @@ namespace platform {
 
 class Collator::Impl {
 public:
-    Impl(optional<std::string>) {}
+    Impl(std::optional<std::string>) {}
 
     bool operator==(const Impl&) const { return true; }
 
@@ -16,7 +16,7 @@ public:
     std::string resolvedLocale() const { return ""; }
 };
 
-Collator::Collator(bool, bool, const optional<std::string>& locale_) : impl(std::make_shared<Impl>(locale_)) {}
+Collator::Collator(bool, bool, const std::optional<std::string>& locale_) : impl(std::make_shared<Impl>(locale_)) {}
 
 int Collator::compare(const std::string& lhs, const std::string& rhs) const {
     return impl->compare(lhs, rhs);

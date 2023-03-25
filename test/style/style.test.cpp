@@ -47,7 +47,7 @@ TEST(Style, Properties) {
 
     style.loadJSON(R"STYLE({})STYLE");
     ASSERT_EQ(Milliseconds(300), *style.getTransitionOptions().duration);
-    ASSERT_EQ(optional<Duration> {}, style.getTransitionOptions().delay);
+    ASSERT_EQ(std::optional<Duration>{}, style.getTransitionOptions().delay);
 
     style.loadJSON(R"STYLE({"transition": { "duration": 500, "delay": 50 }})STYLE");
     ASSERT_EQ(Milliseconds(500), *style.getTransitionOptions().duration);

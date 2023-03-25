@@ -10,7 +10,7 @@ namespace expression {
     
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
                    std::unique_ptr<Expression> diacriticSensitive_,
-                   optional<std::unique_ptr<Expression>> locale_)
+                   std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression, type::Collator)
     , caseSensitive(std::move(caseSensitive_))
     , diacriticSensitive(std::move(diacriticSensitive_))
@@ -31,7 +31,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
         return ParseResult();
     }
     
-    const optional<Convertible> caseSensitiveOption = objectMember(options, "case-sensitive");
+    const std::optional<Convertible> caseSensitiveOption = objectMember(options, "case-sensitive");
     ParseResult caseSensitive;
     if (caseSensitiveOption) {
         caseSensitive = ctx.parse(*caseSensitiveOption, 1, {type::Boolean});
@@ -42,7 +42,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
         return ParseResult();
     }
 
-    const optional<Convertible> diacriticSensitiveOption = objectMember(options, "diacritic-sensitive");
+    const std::optional<Convertible> diacriticSensitiveOption = objectMember(options, "diacritic-sensitive");
     ParseResult diacriticSensitive;
     if (diacriticSensitiveOption) {
         diacriticSensitive = ctx.parse(*diacriticSensitiveOption, 1, {type::Boolean});
@@ -53,7 +53,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
         return ParseResult();
     }
     
-    const optional<Convertible> localeOption = objectMember(options, "locale");
+    const std::optional<Convertible> localeOption = objectMember(options, "locale");
     ParseResult locale;
     if (localeOption) {
         locale = ctx.parse(*localeOption, 1, {type::String});

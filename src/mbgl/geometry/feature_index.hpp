@@ -92,7 +92,7 @@ public:
                float additionalQueryPadding,
                const SourceFeatureState& sourceFeatureState) const;
 
-    static optional<GeometryCoordinates> translateQueryGeometry(const GeometryCoordinates& queryGeometry,
+    static std::optional<GeometryCoordinates> translateQueryGeometry(const GeometryCoordinates& queryGeometry,
                                                                 const std::array<float, 2>& translate,
                                                                 style::TranslateAnchorType,
                                                                 float bearing,

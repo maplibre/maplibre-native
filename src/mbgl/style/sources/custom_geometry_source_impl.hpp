@@ -13,17 +13,17 @@ public:
     Impl(std::string id, const CustomGeometrySource::Options& options);
     Impl(const Impl&, const ActorRef<CustomTileLoader>&);
 
-    optional<std::string> getAttribution() const final;
+    std::optional<std::string> getAttribution() const final;
 
     Immutable<CustomGeometrySource::TileOptions> getTileOptions() const;
     Range<uint8_t> getZoomRange() const;
-    optional<ActorRef<CustomTileLoader>> getTileLoader() const;
+    std::optional<ActorRef<CustomTileLoader>> getTileLoader() const;
     bool operator!=(const Impl&) const noexcept;
 
 private:
     Immutable<CustomGeometrySource::TileOptions> tileOptions;
     Range<uint8_t> zoomRange;
-    optional<ActorRef<CustomTileLoader>> loaderRef;
+    std::optional<ActorRef<CustomTileLoader>> loaderRef;
 };
 
 } // namespace style

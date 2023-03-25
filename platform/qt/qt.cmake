@@ -366,6 +366,13 @@ if(NOT MBGL_QT_LIBRARY_ONLY)
         PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
     )
 
+    if(WIN32)
+        target_compile_definitions(
+            mbgl-test-runner
+            PRIVATE MBGL_BUILDING_LIB
+        )
+    endif()
+
     target_link_libraries(
         mbgl-test-runner
         PRIVATE

@@ -40,7 +40,7 @@ class RenderOrchestrator final : public GlyphManagerObserver,
                                  public ImageManagerObserver,
                                  public RenderSourceObserver {
 public:
-    RenderOrchestrator(bool backgroundLayerAsColor_, const optional<std::string>& localFontFamily_);
+    RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
     void markContextLost() {
@@ -59,16 +59,16 @@ public:
                                                  const Feature& feature,
                                                  const std::string& extension,
                                                  const std::string& extensionField,
-                                                 const optional<std::map<std::string, Value>>& args) const;
+                                                 const std::optional<std::map<std::string, Value>>& args) const;
 
-    void setFeatureState(const std::string& sourceID, const optional<std::string>& layerID,
+    void setFeatureState(const std::string& sourceID, const std::optional<std::string>& layerID,
                          const std::string& featureID, const FeatureState& state);
 
-    void getFeatureState(FeatureState& state, const std::string& sourceID, const optional<std::string>& layerID,
+    void getFeatureState(FeatureState& state, const std::string& sourceID, const std::optional<std::string>& layerID,
                          const std::string& featureID) const;
 
-    void removeFeatureState(const std::string& sourceID, const optional<std::string>& sourceLayerID,
-                            const optional<std::string>& featureID, const optional<std::string>& stateKey);
+    void removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
+                            const std::optional<std::string>& featureID, const std::optional<std::string>& stateKey);
 
     void reduceMemoryUse();
     void dumpDebugLogs();

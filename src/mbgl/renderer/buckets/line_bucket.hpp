@@ -46,8 +46,8 @@ public:
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<LineAttributes> segments;
 
-    optional<gfx::VertexBuffer<LineLayoutVertex>> vertexBuffer;
-    optional<gfx::IndexBuffer> indexBuffer;
+    std::optional<gfx::VertexBuffer<LineLayoutVertex>> vertexBuffer;
+    std::optional<gfx::IndexBuffer> indexBuffer;
 
     std::map<std::string, LineProgram::Binders> paintPropertyBinders;
 
@@ -68,12 +68,12 @@ private:
                           bool round,
                           std::size_t startVertex,
                           std::vector<LineBucket::TriangleElement>& triangleStore,
-                          optional<Distances> distances);
+                          std::optional<Distances> distances);
 
     void addPieSliceVertex(const GeometryCoordinate& currentVertex, double distance,
             const Point<double>& extrude, bool lineTurnsLeft, std::size_t startVertex,
             std::vector<TriangleElement>& triangleStore,
-            optional<Distances> distances);
+            std::optional<Distances> distances);
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;

@@ -1,15 +1,15 @@
 #import "MBXBenchViewController.h"
 #import "MBXBenchAppDelegate.h"
-#import "MGLMapView_Private.h"
-#import "MGLMapViewDelegate.h"
+#import "MLNMapView_Private.h"
+#import "MLNMapViewDelegate.h"
 
 #include "locations.hpp"
 
 #include <chrono>
 
-@interface MBXBenchViewController () <MGLMapViewDelegate>
+@interface MBXBenchViewController () <MLNMapViewDelegate>
 
-@property (nonatomic) MGLMapView *mapView;
+@property (nonatomic) MLNMapView *mapView;
 
 @end
 
@@ -22,7 +22,7 @@
     if (self == [MBXBenchViewController class])
     {
         [[NSUserDefaults standardUserDefaults] registerDefaults:@{
-            @"MBXUserTrackingMode": @(MGLUserTrackingModeNone),
+            @"MBXUserTrackingMode": @(MLNUserTrackingModeNone),
             @"MBXShowsUserLocation": @NO,
             @"MBXDebug": @NO,
         }];
@@ -37,14 +37,14 @@
     NSURL *tile = [[NSBundle mainBundle] URLForResource:@"11" withExtension:@"pbf" subdirectory:@"tiles/tiles/v3/5/7"];
     NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles" withExtension:@"json" subdirectory:@"tiles"];
     NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : @"maptiler://maps/streets"];
-    self.mapView = [[MGLMapView alloc] initWithFrame:self.view.bounds styleURL:url];
+    self.mapView = [[MLNMapView alloc] initWithFrame:self.view.bounds styleURL:url];
     self.mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapView.delegate = self;
     self.mapView.zoomEnabled = NO;
     self.mapView.scrollEnabled = NO;
     self.mapView.rotateEnabled = NO;
     self.mapView.userInteractionEnabled = YES;
-    self.mapView.preferredFramesPerSecond = MGLMapViewPreferredFramesPerSecondMaximum;
+    self.mapView.preferredFramesPerSecond = MLNMapViewPreferredFramesPerSecondMaximum;
 
     [self.view addSubview:self.mapView];
 }
@@ -137,7 +137,7 @@ static const int benchmarkDuration = 200; // frames
     }
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MGLMapView *)mapView fullyRendered:(__unused BOOL)fullyRendered
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(__unused BOOL)fullyRendered
 {
     if (state == State::Benchmarking)
     {

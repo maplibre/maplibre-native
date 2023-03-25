@@ -87,44 +87,18 @@ IOS_XCODEBUILD_SIM = xcodebuild \
 
 ifneq ($(MORE_SIMULATORS),)
 	IOS_LATEST = true
-	IOS_11 = true
-	IOS_10 = true
-	IOS_9 = true
 endif
 
 ifdef IOS_LATEST
 	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone Xs Max' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone Xr' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPad Pro (11-inch)'
-endif
-
-ifdef IOS_11
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPhone 7' \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPhone X' \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPad (5th generation)'
-endif
-
-ifdef IOS_10
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPhone SE' \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPhone 7 Plus' \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPad Pro (9.7-inch)'
-endif
-
-ifdef IOS_9
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPhone 6s Plus' \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPhone 6s' \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPad Air 2'
+	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 14 Pro' \
+	-destination 'platform=iOS Simulator,OS=latest,name=iPad (10th generation)'
 endif
 
 # If IOS_XCODEBUILD_SIM does not contain a simulator destination, add the default.
 ifeq (, $(findstring destination, $(IOS_XCODEBUILD_SIM)))
 	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 8'
+	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 14 Pro'
 else
 	IOS_XCODEBUILD_SIM += -parallel-testing-enabled YES
 endif
@@ -189,7 +163,7 @@ ios-uitest: $(IOS_PROJ_PATH)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
-ios-test: $(IOS_PROJ_PATH) style-code
+ios-test: style-code $(IOS_PROJ_PATH)
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: ios-integration-test
@@ -240,18 +214,6 @@ ideploy:
 idocument:
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
-#  make darwin-style-code
-.PHONY: darwin-style-code
-darwin-style-code:
-	node platform/darwin/scripts/generate-style-code.js
-	node platform/darwin/scripts/update-examples.js
-style-code: darwin-style-code
-
-# make darwin-update-examples
-.PHONY: darwin-update-examples
-darwin-update-examples:
-	node platform/darwin/scripts/update-examples.js
-
 .PHONY: darwin-check-public-symbols
 darwin-check-public-symbols:
 	node platform/darwin/scripts/check-public-symbols.js macOS iOS
@@ -259,6 +221,7 @@ darwin-check-public-symbols:
 endif
 
 ios-docs: $(IOS_PROJ_PATH) style-code
+	npm ci --prefix ../.. --ignore-scripts
 	$(IOS_XCODEBUILD_SIM) docbuild -scheme CI
 
 ios-docs-static: ios-docs
@@ -304,7 +267,7 @@ xproj: $(MACOS_PROJ_PATH) style-code
 
 #  make macos-test
 .PHONY: macos-test
-macos-test: $(MACOS_PROJ_PATH) style-code
+macos-test: style-code $(MACOS_PROJ_PATH)
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: macos-lint
@@ -336,9 +299,15 @@ endif
 
 #### Miscellaneous targets #####################################################
 
+.PHONY: node-modules
+node-modules:
+	npm ci --prefix ../.. --ignore-scripts
+
 .PHONY: style-code
-style-code:
+style-code: node-modules
 	node ../../scripts/generate-style-code.js
+	node platform/darwin/scripts/generate-style-code.js
+	node platform/darwin/scripts/update-examples.js
 
 .PHONY: codestyle
 codestyle:

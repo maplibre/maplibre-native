@@ -169,8 +169,8 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
 }
 
 void GeometryTileWorker::reset(uint64_t correlationID_) {
-    layers = nullopt;
-    data = nullopt;
+    layers = std::nullopt;
+    data = std::nullopt;
     correlationID = correlationID_;
 
     switch (state) {
@@ -288,7 +288,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap) {
                 GlyphIDs& pendingGlyphIDs = pendingGlyphDependency.second;
                 for (auto& newGlyph : newGlyphs) {
                     const GlyphID& glyphID = newGlyph.first;
-                    optional<Immutable<Glyph>>& glyph = newGlyph.second;
+                    std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
                         glyphs.emplace(glyphID, std::move(glyph));
@@ -450,7 +450,7 @@ void GeometryTileWorker::finalizeLayout() {
     }
     
     MBGL_TIMING_START(watch)
-    optional<AlphaImage> glyphAtlasImage;
+    std::optional<AlphaImage> glyphAtlasImage;
     ImageAtlas iconAtlas = makeImageAtlas(imageMap, patternMap, versionMap);
     if (!layouts.empty()) {
         GlyphAtlas glyphAtlas = makeGlyphAtlas(glyphMap);

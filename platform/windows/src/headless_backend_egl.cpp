@@ -6,6 +6,8 @@
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 namespace mbgl {
 namespace gl {
@@ -30,8 +32,9 @@ public:
         }
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-            mbgl::Log::Error(mbgl::Event::OpenGL, "eglBindAPI(EGL_OPENGL_ES_API) returned error %d",
-                             eglGetError());
+            std::ostringstream logMsg;
+            logMsg << "eglBindAPI(EGL_OPENGL_ES_API) returned error " << eglGetError();
+            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
             throw std::runtime_error("eglBindAPI() failed");
         }
 
@@ -82,8 +85,9 @@ public:
 
         eglContext = eglCreateContext(eglDisplay->display, eglDisplay->config, EGL_NO_CONTEXT, attribs);
         if (eglContext == EGL_NO_CONTEXT) {
-            mbgl::Log::Error(mbgl::Event::OpenGL, "eglCreateContext() returned error 0x%04x",
-                             eglGetError());
+            std::ostringstream logMsg;
+            logMsg << "eglCreateContext() returned error 0x" << std::setw(4) << std::setfill('0') << std::hex << eglGetError();
+            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
 
@@ -100,7 +104,7 @@ public:
 
         eglSurface = eglCreatePbufferSurface(eglDisplay->display, eglDisplay->config, surfAttribs);
         if (eglSurface == EGL_NO_SURFACE) {
-            throw std::runtime_error("Could not create surface: " + util::toString(eglGetError()));
+            throw std::runtime_error("Could not create surface: " + std::to_string(eglGetError()));
         }
     }
 

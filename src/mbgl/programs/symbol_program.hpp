@@ -137,8 +137,8 @@ public:
     }
 
     float layoutSize;
-    optional<std::tuple<Range<float>, Range<float>>> coveringRanges;
-    optional<style::PropertyExpression<float>> expression;
+    std::optional<std::tuple<Range<float>, Range<float>>> coveringRanges;
+    std::optional<style::PropertyExpression<float>> expression;
 };
 
 class SourceFunctionSymbolSizeBinder final : public SymbolSizeBinder {

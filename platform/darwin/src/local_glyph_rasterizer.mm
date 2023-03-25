@@ -64,9 +64,9 @@ public:
      Creates a new rasterizer with the given font names as a fallback.
      
      The fallback font names can also be specified in the style as a font stack
-     or in the `MGLIdeographicFontFamilyName` key of
+     or in the `MLNIdeographicFontFamilyName` key of
      `NSUserDefaults.standardUserDefaults`. The font stack takes precedence,
-     followed by the `MGLIdeographicFontFamilyName` user default, then finally
+     followed by the `MLNIdeographicFontFamilyName` user default, then finally
      the `fallbackFontNames_` parameter as a last resort.
      
      @param fallbackFontNames_ A list of font names, one per line. Each font
@@ -75,9 +75,9 @@ public:
         glyph rasterization globally. The system font is a good default value to
         pass into this constructor.
      */
-    Impl(const optional<std::string> fallbackFontNames_)
+    Impl(const std::optional<std::string> fallbackFontNames_)
     {
-        fallbackFontNames = [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"MGLIdeographicFontFamilyName"];
+        fallbackFontNames = [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"MLNIdeographicFontFamilyName"];
         if (fallbackFontNames_) {
             fallbackFontNames = [fallbackFontNames ?: @[] arrayByAddingObjectsFromArray:[@(fallbackFontNames_->c_str()) componentsSeparatedByString:@"\n"]];
         }
@@ -162,7 +162,7 @@ private:
     NSArray<NSString *> *fallbackFontNames;
 };
 
-LocalGlyphRasterizer::LocalGlyphRasterizer(const optional<std::string>& fontFamily)
+LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fontFamily)
     : impl(std::make_unique<Impl>(fontFamily))
 {}
 

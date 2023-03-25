@@ -228,8 +228,8 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
 }
 
 void RenderImageSource::dumpDebugLogs() const {
-    Log::Info(Event::General, "RenderImageSource::id: %s", impl().id.c_str());
-    Log::Info(Event::General, "RenderImageSource::loaded: %s", isLoaded() ? "yes" : "no");
+    Log::Info(Event::General, "RenderImageSource::id: " + impl().id);
+    Log::Info(Event::General, "RenderImageSource::loaded: " + std::string(isLoaded() ? "yes" : "no"));
 }
 
 } // namespace mbgl

@@ -63,11 +63,11 @@ TEST(PropertyExpression, Expression) {
 }
 
 TEST(PropertyExpression, Defaults) {
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0)
+    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f)
         .evaluate(oneInteger, 2.0f));
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0)
+    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f)
         .evaluate(oneDouble, 2.0f));
-    EXPECT_EQ(0.0f, PropertyExpression<float>(number(get("property")), 0.0)
+    EXPECT_EQ(0.0f, PropertyExpression<float>(number(get("property")), 0.0f)
         .evaluate(oneString, 2.0f));
     EXPECT_EQ(2.0f, PropertyExpression<float>(number(get("property")))
         .evaluate(oneString, 2.0f));

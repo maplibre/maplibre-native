@@ -5,13 +5,14 @@
 #include <mbgl/style/expression/step.hpp>
 
 #include <mbgl/util/variant.hpp>
-#include <mbgl/util/optional.hpp>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
 namespace expression {
 
-optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e);
+std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e);
 
 variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression* e);
 

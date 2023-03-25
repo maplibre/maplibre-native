@@ -33,7 +33,7 @@ StubFileSource::StubFileSource(const ResourceOptions& resourceOptions_, const Cl
         // Explicit copy to avoid iterator invalidation if ~StubFileRequest gets called within the loop.
         auto pending_ = pending;
         for (auto& pair : pending_) {
-            optional<Response> res = std::get<1>(pair.second)(std::get<0>(pair.second));
+            std::optional<Response> res = std::get<1>(pair.second)(std::get<0>(pair.second));
             if (res) {
                 // This must be before calling the callback, because it's possible that the callback
                 // could:
@@ -58,7 +58,7 @@ StubFileSource::~StubFileSource() = default;
 std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<StubFileRequest>(*this);
     if (type == ResponseType::Synchronous) {
-        optional<Response> res = response(resource);
+        std::optional<Response> res = response(resource);
         if (res) {
             callback(*res);
         }
@@ -84,7 +84,7 @@ mapbox::base::Value StubFileSource::getProperty(const std::string& key) const {
     return (it != properties.end()) ? it->second : mapbox::base::Value();
 }
 
-optional<Response> StubFileSource::defaultResponse(const Resource& resource) {
+std::optional<Response> StubFileSource::defaultResponse(const Resource& resource) {
     switch (resource.kind) {
     case Resource::Kind::Style:
         if (!styleResponse) throw std::runtime_error("unexpected style request");

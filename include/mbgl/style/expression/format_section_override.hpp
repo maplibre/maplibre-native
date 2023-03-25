@@ -70,8 +70,8 @@ public:
         return false;
     }
 
-    std::vector<optional<Value>> possibleOutputs() const final {
-        return {nullopt};
+    std::vector<std::optional<Value>> possibleOutputs() const final {
+        return {std::nullopt};
     }
 
     std::string getOperator() const final { return "format-section-override"; }

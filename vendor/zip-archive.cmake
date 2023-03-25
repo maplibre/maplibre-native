@@ -7,7 +7,7 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipArchive.h
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipArchive.m
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipCommon.h
-    ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/ZipArchive.h
+    ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/include/ZipArchive.h
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/minizip/mz.h
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/minizip/mz_compat.c
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/minizip/mz_compat.h
@@ -57,5 +57,6 @@ target_compile_definitions(
         HAVE_STDINT_H
         HAVE_WZAES
         HAVE_ZLIB
+        ZLIB_COMPAT
 )
 set_property(TARGET mbgl-vendor-zip-archive PROPERTY FOLDER RenderTestApp)

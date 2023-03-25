@@ -18,7 +18,7 @@ void Let::eachChild(const std::function<void(const Expression&)>& visit) const {
     visit(*result);
 }
 
-std::vector<optional<Value>> Let::possibleOutputs() const {
+std::vector<std::optional<Value>> Let::possibleOutputs() const {
     return result->possibleOutputs();
 }
 
@@ -36,7 +36,7 @@ ParseResult Let::parse(const Convertible& value, ParsingContext& ctx) {
 
     std::map<std::string, std::shared_ptr<Expression>> bindings_;
     for(std::size_t i = 1; i < length - 1; i += 2) {
-        optional<std::string> name = toString(arrayMember(value, i));
+        std::optional<std::string> name = toString(arrayMember(value, i));
         if (!name) {
             ctx.error("Expected string, but found " + getJSONType(arrayMember(value, i)) + " instead.", i);
             return ParseResult();
@@ -83,8 +83,8 @@ EvaluationResult Var::evaluate(const EvaluationContext& params) const {
 
 void Var::eachChild(const std::function<void(const Expression&)>&) const {}
 
-std::vector<optional<Value>> Var::possibleOutputs() const {
-    return { nullopt };
+std::vector<std::optional<Value>> Var::possibleOutputs() const {
+    return { std::nullopt };
 }
 
 ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
@@ -97,7 +97,7 @@ ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
 
     std::string name_ = *toString(arrayMember(value_, 1));
 
-    optional<std::shared_ptr<Expression>> bindingValue = ctx.getBinding(name_);
+    std::optional<std::shared_ptr<Expression>> bindingValue = ctx.getBinding(name_);
     if (!bindingValue) {
         ctx.error(R"(Unknown variable ")" + name_ +  R"(". Make sure ")" +
             name_ + R"(" has been bound in an enclosing "let" expression before using it.)", 1);

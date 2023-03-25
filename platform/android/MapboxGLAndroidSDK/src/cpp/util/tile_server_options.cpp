@@ -11,11 +11,11 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& e
         jni::String, jni::String, jni::String, jni::String, jni::String, 
         jni::String, jni::String, jni::jboolean, jni::String, jni::Array<jni::Object<DefaultStyle>>>(env);
     
-    optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
-    optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
-    optional<std::string> spritesVersionPrefixValue = tileServerOptions.spritesVersionPrefix();
-    optional<std::string> glyphsVersionPrefixValue = tileServerOptions.glyphsVersionPrefix();
-    optional<std::string> tileVersionPrefixValue = tileServerOptions.tileVersionPrefix();
+    std::optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
+    std::optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
+    std::optional<std::string> spritesVersionPrefixValue = tileServerOptions.spritesVersionPrefix();
+    std::optional<std::string> glyphsVersionPrefixValue = tileServerOptions.glyphsVersionPrefix();
+    std::optional<std::string> tileVersionPrefixValue = tileServerOptions.tileVersionPrefix();
 
     return javaClass.New(env, constructor,
         jni::Make<jni::String>(env, tileServerOptions.baseURL()),
@@ -119,31 +119,31 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env
     retVal.withSourceTemplate(
         jni::Make<std::string>(env, options.Get(env, sourceTemplateField)),
         jni::Make<std::string>(env, options.Get(env, sourceDomainNameField)),
-        sourcePrefixValue ? jni::Make<std::string>(env, sourcePrefixValue): optional<std::string>{});
+        sourcePrefixValue ? jni::Make<std::string>(env, sourcePrefixValue): std::optional<std::string>{});
 
     auto styleVersionPrefixValue = options.Get(env, styleVersionPrefixField);
     retVal.withStyleTemplate(
         jni::Make<std::string>(env, options.Get(env, styleTemplateField)),
         jni::Make<std::string>(env, options.Get(env, styleDomainNameField)),
-        styleVersionPrefixValue ? jni::Make<std::string>(env, styleVersionPrefixValue): optional<std::string>{});
+        styleVersionPrefixValue ? jni::Make<std::string>(env, styleVersionPrefixValue): std::optional<std::string>{});
 
     auto spritesVersionPrefixValue = options.Get(env, spritesVersionPrefixField);
     retVal.withSpritesTemplate(
             jni::Make<std::string>(env, options.Get(env, spritesTemplateField)),
             jni::Make<std::string>(env, options.Get(env, spritesDomainNameField)),
-            spritesVersionPrefixValue ? jni::Make<std::string>(env, spritesVersionPrefixValue): optional<std::string>{});
+            spritesVersionPrefixValue ? jni::Make<std::string>(env, spritesVersionPrefixValue): std::optional<std::string>{});
 
     auto glyphsVersionPrefixValue = options.Get(env, glyphsVersionPrefixField);           
     retVal.withGlyphsTemplate(
             jni::Make<std::string>(env, options.Get(env, glyphsTemplateField)),
             jni::Make<std::string>(env, options.Get(env, glyphsDomainNameField)),
-            glyphsVersionPrefixValue ? jni::Make<std::string>(env, glyphsVersionPrefixValue) : optional<std::string>{});
+            glyphsVersionPrefixValue ? jni::Make<std::string>(env, glyphsVersionPrefixValue) : std::optional<std::string>{});
 
     auto tileVersionPrefixValue = options.Get(env, tileVersionPrefixField);        
     retVal.withTileTemplate(
             jni::Make<std::string>(env, options.Get(env, tileTemplateField)),
             jni::Make<std::string>(env, options.Get(env, tileDomainNameField)),
-            tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue): optional<std::string>{});
+            tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue): std::optional<std::string>{});
 
     retVal.withDefaultStyle(jni::Make<std::string>(env, options.Get(env, defaultStyleField)));
     retVal.withDefaultStyles(defaultStyles);

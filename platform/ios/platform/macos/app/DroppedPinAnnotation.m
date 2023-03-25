@@ -5,7 +5,7 @@
 
 #import <Mapbox/Mapbox.h>
 
-static MGLCoordinateFormatter *DroppedPinCoordinateFormatter;
+static MLNCoordinateFormatter *DroppedPinCoordinateFormatter;
 
 @implementation DroppedPinAnnotation {
     NSTimer *_timer;
@@ -17,7 +17,7 @@ static MGLCoordinateFormatter *DroppedPinCoordinateFormatter;
 
 + (void)initialize {
     if (self == [DroppedPinAnnotation class]) {
-        DroppedPinCoordinateFormatter = [[MGLCoordinateFormatter alloc] init];
+        DroppedPinCoordinateFormatter = [[MLNCoordinateFormatter alloc] init];
     }
 }
 

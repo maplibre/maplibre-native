@@ -229,7 +229,7 @@ target_link_libraries(
     $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>
 )
 
-if(MSVC)
+if(WIN32)
     target_compile_definitions(
         mbgl-test
         PRIVATE MBGL_BUILDING_LIB

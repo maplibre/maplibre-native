@@ -86,8 +86,8 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     const gfx::ColorMode& colorMode,
                     const auto& tileBucket,
                     const auto& uniformValues,
-                    const optional<ImagePosition>& patternPositionA,
-                    const optional<ImagePosition>& patternPositionB,
+                    const std::optional<ImagePosition>& patternPositionA,
+                    const std::optional<ImagePosition>& patternPositionB,
                     const auto& textureBindings,
                     const std::string& uniqueName) {
         const auto& paintPropertyBinders = tileBucket.paintPropertyBinders.at(getID());
@@ -180,8 +180,8 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     continue;
                 }
                 auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
-                optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
-                optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+                std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
+                std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
 
                 draw(
                     parameters.programs.getFillExtrusionLayerPrograms().fillExtrusionPattern,

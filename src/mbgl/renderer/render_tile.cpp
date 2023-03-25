@@ -74,7 +74,7 @@ const LayerRenderData* RenderTile::getLayerRenderData(const style::Layer::Impl& 
     return renderData->getLayerRenderData(impl);
 }
 
-optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) const {
+std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) const {
     assert(renderData);
     return renderData->getPattern(pattern);
 }

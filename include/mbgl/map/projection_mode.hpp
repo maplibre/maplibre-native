@@ -1,8 +1,7 @@
 #pragma once
 
-#include <mbgl/util/optional.hpp>
-
 #include <functional>
+#include <optional>
 
 namespace mbgl {
 
@@ -18,17 +17,17 @@ struct ProjectionMode {
     /**
      * @brief Set to True to enable axonometric rendering, false otherwise.
      */
-    optional<bool> axonometric;
+    std::optional<bool> axonometric;
 
     /**
      * @brief The X skew value represents how much to skew on the x-axis.
      */
-    optional<double> xSkew;
+    std::optional<double> xSkew;
 
     /**
      * @brief The Y skew value represents how much to skew on the y-axis.
      */
-    optional<double> ySkew;
+    std::optional<double> ySkew;
 };
 
 }  // namespace mbgl

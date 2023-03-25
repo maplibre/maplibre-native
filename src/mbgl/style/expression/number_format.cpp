@@ -110,8 +110,8 @@ bool NumberFormat::operator==(const Expression& e) const {
     return false;
 }
 
-std::vector<optional<Value>> NumberFormat::possibleOutputs() const {
-    return { nullopt };
+std::vector<std::optional<Value>> NumberFormat::possibleOutputs() const {
+    return { std::nullopt };
 }
 
 using namespace mbgl::style::conversion;
@@ -141,7 +141,7 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
         return ParseResult();
     }
 
-    const optional<Convertible> localeOption = objectMember(options, localeKey);
+    const std::optional<Convertible> localeOption = objectMember(options, localeKey);
     ParseResult localeResult;
     if (localeOption) {
         localeResult = ctx.parse(*localeOption, 1, {type::String});
@@ -151,7 +151,7 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
         }
     }
 
-    const optional<Convertible> currencyOption = objectMember(options, currencyKey);
+    const std::optional<Convertible> currencyOption = objectMember(options, currencyKey);
     ParseResult currencyResult;
     if (currencyOption) {
         currencyResult = ctx.parse(*currencyOption, 1, {type::String});
@@ -161,7 +161,7 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
         }
     }
 
-    const optional<Convertible> minFractionDigitsOption = objectMember(options, minFractionDigitsKey);
+    const std::optional<Convertible> minFractionDigitsOption = objectMember(options, minFractionDigitsKey);
     ParseResult minFractionDigitsResult;
     if (minFractionDigitsOption) {
         minFractionDigitsResult = ctx.parse(*minFractionDigitsOption, 1, {type::Number});
@@ -171,7 +171,7 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
         }
     }
 
-    const optional<Convertible> maxFractionDigitsOption = objectMember(options, maxFractionDigitsKey);
+    const std::optional<Convertible> maxFractionDigitsOption = objectMember(options, maxFractionDigitsKey);
     ParseResult maxFractionDigitsResult;
     if (maxFractionDigitsOption) {
         maxFractionDigitsResult = ctx.parse(*maxFractionDigitsOption, 1, {type::Number});

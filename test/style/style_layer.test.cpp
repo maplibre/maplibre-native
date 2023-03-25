@@ -340,7 +340,7 @@ void testHasOverrides(LayoutType& layout) {
 
     // Constant, overridden text-color.
     auto formatted = Formatted("");
-    formatted.sections.emplace_back("section text"s, nullopt, nullopt, Color::green());
+    formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(formatted));
     EXPECT_TRUE(MockOverrides::hasOverrides(layout.template get<TextField>()));
 
@@ -352,7 +352,7 @@ void testHasOverrides(LayoutType& layout) {
 
     // Expression, overridden text-color.
     FormatExpressionSection section(literal(""));
-    section.setTextSectionOptions(nullopt, nullopt, toColor(literal("red")));
+    section.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("red")));
     auto formatExprOverride = std::make_unique<FormatExpression>(std::vector<FormatExpressionSection>{section});
     PropertyExpression<Formatted> propExprOverride(std::move(formatExprOverride));
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(propExprOverride));
@@ -361,7 +361,7 @@ void testHasOverrides(LayoutType& layout) {
     // Nested expressions, overridden text-color.
     auto formattedExpr1 = format("first paragraph");
     FormatExpressionSection secondParagraph(literal("second paragraph"));
-    secondParagraph.setTextSectionOptions(nullopt, nullopt, toColor(literal("blue")));
+    secondParagraph.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("blue")));
     std::vector<FormatExpressionSection> sections{{std::move(secondParagraph)}};
     auto formattedExpr2 = std::make_unique<FormatExpression>(std::move(sections));
     std::unordered_map<std::string, std::shared_ptr<Expression>> branches{ { "1st", std::move(formattedExpr1) },
@@ -399,7 +399,7 @@ TEST(Layer, SymbolLayerOverrides) {
 
         // Constant, overridden text-color.
         auto formatted = Formatted("");
-        formatted.sections.emplace_back("section text"s, nullopt, nullopt, Color::green());
+        formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
         layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
         paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         EXPECT_TRUE(paint.get<TextColor>().isConstant());

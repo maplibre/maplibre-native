@@ -701,7 +701,7 @@ CA
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                         <connections>
-                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLApiKey" id="iJE-S2-ALY"/>
+                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MLNApiKey" id="iJE-S2-ALY"/>
                         </connections>
                     </textField>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="c3S-LC-PoX">
@@ -721,7 +721,7 @@ CA
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MGLScrollWheelZoomsMapView" id="2AZ-bk-DM5"/>
+                            <binding destination="45S-yT-WUN" name="value" keyPath="values.MLNScrollWheelZoomsMapView" id="2AZ-bk-DM5"/>
                         </connections>
                     </button>
                 </subviews>
@@ -951,7 +951,7 @@ CA
             </view>
             <point key="canvasLocation" x="720" y="317"/>
         </window>
-        <arrayController objectClassName="MGLOfflinePack" editable="NO" avoidsEmptySelection="NO" id="dWe-R6-sRz" userLabel="Offline Packs Array Controller">
+        <arrayController objectClassName="MLNOfflinePack" editable="NO" avoidsEmptySelection="NO" id="dWe-R6-sRz" userLabel="Offline Packs Array Controller">
             <declaredKeys>
                 <string>context</string>
                 <string>countOfResourcesCompleted</string>

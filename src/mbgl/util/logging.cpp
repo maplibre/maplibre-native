@@ -64,31 +64,15 @@ void Log::record(EventSeverity severity, Event event, const std::string &msg) {
     get()->impl->record(severity, event, -1, msg);
 }
 
-void Log::record(EventSeverity severity, Event event, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    char msg[4096];
-    vsnprintf(msg, sizeof(msg), format, args);
-    va_end(args);
-
-    get()->impl->record(severity, event, -1, std::string{msg});
-}
-
-void Log::record(EventSeverity severity, Event event, int64_t code, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    char msg[4096];
-    vsnprintf(msg, sizeof(msg), format, args);
-    va_end(args);
-
-    get()->impl->record(severity, event, code, std::string{msg});
+void Log::record(EventSeverity severity, Event event, int64_t code, const std::string &msg) {
+    get()->impl->record(severity, event, code, msg);
 }
 
 void Log::record(EventSeverity severity,
                  Event event,
                  int64_t code,
                  const std::string& msg,
-                 const optional<std::string>& threadName) {
+                 const std::optional<std::string>& threadName) {
     std::lock_guard<std::mutex> lock(mutex);
     if (currentObserver && severity != EventSeverity::Debug &&
         currentObserver->onRecord(severity, event, code, msg)) {
