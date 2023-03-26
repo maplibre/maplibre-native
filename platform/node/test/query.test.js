@@ -1,4 +1,4 @@
-import {run} from '../../../maplibre-gl-js/test/integration/lib/query';
+import {run} from '../../../metrics/integration/lib/query';
 import implementation from './suite_implementation';
 import ignores from './ignores.json';
 

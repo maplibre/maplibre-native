@@ -12,8 +12,8 @@ rm -rf $BASE_DIR/test-data/
 mkdir -p $BASE_DIR/test-data/integration/
 mkdir -p $BASE_DIR/test-data/baselines/
 
-cp -r maplibre-gl-js/test/integration/render-tests $BASE_DIR/test-data/integration/
-cp -r maplibre-gl-js/test/integration/query-tests $BASE_DIR/test-data/integration/
+cp -r metrics/integration/render-tests $BASE_DIR/test-data/integration/
+cp -r metrics/integration/query-tests $BASE_DIR/test-data/integration/
 cp -r metrics/expectations $BASE_DIR/test-data/
 cp -r metrics/ignores $BASE_DIR/test-data/
 cp -r metrics/tests $BASE_DIR/test-data/

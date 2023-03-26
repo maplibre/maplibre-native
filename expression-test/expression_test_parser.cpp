@@ -342,7 +342,7 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         exit(2);
     }
 
-    filesystem::path rootPath {std::string(TEST_RUNNER_ROOT_PATH).append("/maplibre-gl-js/test/integration/expression-tests")};
+    filesystem::path rootPath {std::string(TEST_RUNNER_ROOT_PATH).append("/metrics/integration/expression-tests")};
     if (!filesystem::exists(rootPath)) {
         Log::Error(Event::General, "Test path '" + rootPath.string() + "' does not exist.");
         exit(3);
