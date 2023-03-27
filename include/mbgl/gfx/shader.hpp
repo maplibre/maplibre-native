@@ -8,14 +8,6 @@ namespace gfx {
 
 class Shader;
 
-// Populate type info for use with downcasting shaders.
-// This is done to ensure -frtti is not needed.
-#define DECLARE_SHADER_TYPEINFO(ClassName)                  \
-    static constexpr std::string_view Name{#ClassName};     \
-    const std::string_view name() const noexcept override { \
-        return Name;                                        \
-    }
-
 // Assert that a type is a valid shader for downcasting.
 // A valid shader must:
 //   * Inherit gfx::Shader

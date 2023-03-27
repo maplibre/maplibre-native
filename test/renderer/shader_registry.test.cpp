@@ -22,14 +22,20 @@ class StubProgramBase : public gfx::Shader {
 
 class StubProgram_1 final : public StubProgramBase<10> {
     public:
-        DECLARE_SHADER_TYPEINFO(StubProgram_1);
+        static constexpr std::string_view Name{"StubProgram_1"};
+        const std::string_view name() const noexcept override {
+            return Name;
+        }
 
         void setToken(uint32_t tok) { token = tok; }
 };
 
 class StubProgram_2 final : public StubProgramBase<20> {
     public:
-        DECLARE_SHADER_TYPEINFO(StubProgram_2);
+        static constexpr std::string_view Name{"StubProgram_2"};
+        const std::string_view name() const noexcept override {
+            return Name;
+        }
 };
 
 class StubShaderConsumer {
