@@ -3,6 +3,7 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/programs/background_program.hpp>
 #include <mbgl/programs/heatmap_texture_program.hpp>
 #include <mbgl/programs/programs.hpp>
@@ -19,7 +20,8 @@ class UploadPass;
 
 class RenderStaticData {
 public:
-    RenderStaticData(gfx::Context&, float pixelRatio);
+    RenderStaticData(gfx::Context&, float pixelRatio,
+        std::unique_ptr<gfx::ShaderRegistry>&& shaders_);
 
     void upload(gfx::UploadPass&);
 
@@ -40,7 +42,10 @@ public:
     bool uploaded = false;
     Size backendSize;
 
+    // @TODO: Migrate away from and remove `Programs`
     Programs programs;
+
+    std::unique_ptr<gfx::ShaderRegistry> shaders;
 
     const SegmentVector<BackgroundAttributes> clippingMaskSegments;
 
