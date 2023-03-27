@@ -18,6 +18,10 @@ namespace mbgl {
 class FileSource;
 class ResourceTransform;
 
+namespace gfx {
+class ShaderRegistry;
+}
+
 struct StillImageRequest {
     StillImageRequest(Map::StillImageCallback&& callback_)
         : callback(std::move(callback_)) {
@@ -47,6 +51,7 @@ public:
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
+    void onRegisterShaders(gfx::ShaderRegistry&) final;
 
     // Map
     void jumpTo(const CameraOptions&);

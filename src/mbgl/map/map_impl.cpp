@@ -182,4 +182,8 @@ void Map::Impl::onRemoveUnusedStyleImages(const std::vector<std::string>& unused
     }
 }
 
+void Map::Impl::onRegisterShaders(gfx::ShaderRegistry& registry) {
+    observer.onRegisterShaders(registry);
+}
+
 } // namespace mbgl
