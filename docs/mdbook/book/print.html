@@ -1,0 +1,1350 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>MapLibre GL Native Documentation</title>
+        <meta name="robots" content="noindex" />
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="diff.css">
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre GL Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MapLibre GL Native Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p><em><a href="https://github.com/maplibre/maplibre-gl-native">MapLibre GL Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers 
+vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em>MapLibre Style Specification,</em> a fork of the 
+Mapbox Style Specification. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="design"><a class="header" href="#design">Design</a></h1>
+<p>This section is dedicated to documenting current state of MapLibre GL Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
+<p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" /><br />
+<em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
+<p>From ten thousand foot, MapLibre Native is composed of <em>Map View</em> and a
+<em>Renderer</em>. MapLibre Native GL supports iOS, Android, Linux, QT, MacOS,
+and nodeJS at the time of writing. Each of these <em>platforms</em> have their
+own <em>Map View</em> and <em>Map Renderer</em> component. A <em>Map Renderer</em> talks to a
+shared codebase that renders map by using device GPU. This shared piece
+of code at the time of writing supports OpenGL as its choice of
+rendering API.</p>
+<p>Apart from the platform code, <em>MapLibre Native GL</em> offers shared
+implementation for <em>Style, Layers, Text, Glyphs</em>, and <em>Tiles</em>.</p>
+<p>To summarize:</p>
+<ol>
+<li>
+<p><em><strong>Map View</strong></em> is responsible for viewing a <em>slippy map,</em> a term
+referring to web maps which lets a user zoom and pan around. Each
+platform has its own <em>Map View</em>.</p>
+</li>
+<li>
+<p><em><strong>Map Renderer</strong></em> is composed of two parts, one is a platform
+specific map rendering loop. The other is a cross-platform renderer
+backend, denoted as <em>Renderer</em> in Figure 1.</p>
+</li>
+<li>
+<p>A <em>map renderer</em> uses a <em><strong>Tile Worker</strong></em> to render individual map
+tile. It uses an <em><strong>Actor Framework</strong></em> to send messages to a <em><strong>Tile
+Worker</strong></em> to produce said tiles.</p>
+</li>
+<li>
+<p>A <em>tile worker</em> prepares a tile one layer at a time. A map tile is
+composed of multiple <em>layers</em>.</p>
+</li>
+<li>
+<p>A <em><strong>Layer</strong></em> requires <em><strong>Style</strong></em>, <em><strong>Glyphs</strong></em>, and <em><strong>Sprites</strong></em>
+for to be ready for rendering. Features rendered in a <em><strong>Layer</strong></em> 
+come from data sources. And a <em><strong>Layer</strong></em> is composed of tiles produced
+from said features.</p>
+</li>
+</ol>
+<p>We will look a bit more into these components going forward<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<h3 id="map-view"><a class="header" href="#map-view">Map View</a></h3>
+<p>A <em>Map View</em> is a reusable map viewer that renders a raster or vector
+map in different platform specific viewports. It bears the standard of
+common map configuration across the platforms. These ranges from map
+viewport size, pixel ratio, tileset URL, style, collision configuration
+for text, and annotations<sup class="footnote-reference"><a href="#2">2</a></sup>. A <em>Map View</em> does not contain any
+rendering capability of its own. It publishes and listens to events
+through observers<sup class="footnote-reference"><a href="#3">3</a></sup>.</p>
+<p>Figure 1 does not display the explicit use of observers for brevity.</p>
+<h4 id="observers"><a class="header" href="#observers">Observers</a></h4>
+<p>Observers are a group of components that listen and publish events from
+and to a <em>Map View</em>. Observer come in two major flavours across
+platforms -- a <em>map observer</em> and a <em>rendering observer</em>. A <em>map
+observer</em> is responsible for handling events for map configuration
+changes. This includes events for loading and updating <em>style</em>, events
+for map becoming idle, events initialization and completion of
+rendering, and events for camera orientation changes. On the other hand,
+a rendering observer deals with events that are directly related to
+frame-by-frame map rendering. A rendering observer might publish a
+rendering event to map observers but they are usually rendering
+initialization or completion events. One key thing to remember here is a
+map configuration can lead to rendering changes such as camera switch,
+map center change, viewport size change, zoom, and pitch change.</p>
+<h3 id="style"><a class="header" href="#style">Style</a></h3>
+<p>Style component embodies a <em>MapLibre Style Document</em>. A style document
+is a JSON object that defines the visual appearance of a map through the
+order to draw it in, what to draw, and how to style the data while
+drawing it. Style sub-component is composed of classes and functions
+that allows downloading, and configuring a style. A style can be fetched
+from a remote HTTP resource or configured locally. The style component
+also carries a <em>Sprite Loader</em> to load sprites, remote HTTP URL for
+glyphs, layers to draw and sources of data to draw. A <em>sprite</em> is a
+single image that contains all the <em>icons</em> included in a style. Layers
+are composed of sources where a source could be a vector tile set,
+raster tile set, or GeoJSON data</p>
+<p><em>To complete initialization of a map component, we need to initialize a
+map, style with source and layers, and observers.</em></p>
+<h3 id="layer"><a class="header" href="#layer">Layer</a></h3>
+<p><em>Layer</em> is an overloaded terminology in the MapLibre GL Native's
+context. <em>Layer</em> can mean any of the following:</p>
+<ol>
+<li>
+<p>From the point of view of data that needs to be rendered on map,
+each map tile is composed of <em>layers</em> of data. Each layer, in this
+context, contains <em>features</em><sup class="footnote-reference"><a href="#4">4</a></sup> to be rendered in a map. These
+features are defined by a <em>source.</em> Each <em>layer</em> is tied to a
+<em>source</em>.</p>
+</li>
+<li>
+<p>From the point of view of <em>style</em>, a style's layer property list all
+the <em>layers</em> available in that <em>style</em>. A single style sheet can be
+applied atop one or many layers. This layer definition converges
+data to be rendered and the style to be applied on said layer.</p>
+</li>
+</ol>
+<p>When this document uses the word layer in context of rendering, it
+refers to the definition mentioned in 2.</p>
+<h3 id="glyphs"><a class="header" href="#glyphs">Glyphs</a></h3>
+<p>A <em>glyph</em> is a single representation of a character. A font is a map of
+characters<sup class="footnote-reference"><a href="#5">5</a></sup>. Map tiles use labels of text to show name of cities,
+administrative boundaries, or street names. Map tiles also need to show
+icons for amenities like bus stops and parks. A map style uses character
+map from fonts to display labels and icons. Collectively these are
+called <em>glyphs.</em> </p>
+<p><em>Glyphs</em> require resizing, rotation, and a halo for clarity in nearly every 
+interaction with the map. To achieve this, all <em>glyphs</em> are pre-rendered 
+in a shared texture, called <em>texture atlas</em>. This atlas is packed inside
+protobuf container. Each element of the atlas is an individual texture
+representing the SDF of the character to render.</p>
+<p>Each <em>glyph</em> bitmap inside is a field of floats, named signed distance. It
+represents how a <em>glyph</em> should be drawn by the GPU. Each <em>glyph</em> is of font 
+size 24 that stores the distance to the next outline in every pixel. Easily
+put if the pixel is inside the <em>glyph</em> outline it has a value between <code>192-255</code>.
+Every pixel outside the <em>glyph</em> outline has a value between <code>0-191</code>. This creates 
+a black and white atlas of all the <em>glyphs</em> inside.</p>
+<p>This document currently does not have a dedicated section on text rendering.
+When it does, we will dive more into <em>glyph</em> rendering.</p>
+<h3 id="actor-framework"><a class="header" href="#actor-framework">Actor Framework</a></h3>
+<p>MapLibre GL Native is used in mobile platforms. To be performant in
+underpowered environments, MapLibre GL Native tries to leverage message
+passing across threads to render frames asynchronously. The threading
+architecture in implementation realizes this using the Actor
+interface<sup class="footnote-reference"><a href="#6">6</a></sup>. In reality the messages are raw pointers. This ranges
+from raw message to actionable message. By actionable message this
+document means <em>anonymous functions</em> that are passed as messages between
+actors. These arbitrary messages are <em>immutable</em> by design. The current
+implementation of the Actor framework is done through two major
+components, a <em>MailBox</em> and an <em>Actor</em>. A <em>MailBox</em> is attached to a
+specific type of <em>Message</em>. In the current implementation, these are
+rendering events that render layers, sources, and subsequently tiles. An
+<em>Actor</em> is an independent thread passing messages to others.</p>
+<h3 id="renderer"><a class="header" href="#renderer">Renderer</a></h3>
+<p>A <em>Map Renderer</em> translates geospatial features in a vector or raster
+tile to rendered or rasterized map tiles shown in a <em>slippy map.</em>
+MapLibre GL Native uses a <em>Renderer</em> component to translate map tiles
+fetched from a tile server to a rendered map.</p>
+<p>MapLibre GL Native uses a pool of <em>workers</em>. These workers are
+responsible for background tile generation. A render thread continuously
+renders the current state of the map with available tiles at the time of
+rendering. In Javascript and iOS, the render thread is the same as the
+foreground/UI. For performance reasons, Android render thread is
+separated from the UI thread. The changes to the map on the UI due to
+user interaction is batched together and sent to the render thread for
+processing. The platforms also include worker threads for processing for
+platform-specific tasks such as running HTTP requests in the background.
+But the core code is agnostic about where those tasks get performed.
+Each platform is required to provide its own implementation of
+concurrency/threading primitives for MapLibre GL core to use. The
+platform code is also free to use its own threading model. For example,
+Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK uses
+<em>Grand Central Dispatch</em> for running asynchronous tasks.</p>
+<h3 id="tile-worker"><a class="header" href="#tile-worker">Tile Worker</a></h3>
+<p>We have noted early in this document that MapLibre GL Native uses message
+passing to communicate with the renderer. These messages are <em>immutable</em>
+by design and the render loops checks for these in each iteration. To
+simplify, there is only one thread allocated for rendering loop,
+background or foreground<sup class="footnote-reference"><a href="#7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
+a tile of a specific type. Geometry Tile Worker by the name of it,
+prepares a tile for rendering tiles that contains vector geometry.
+Following that same trend, MapLibre Native GL offers tile worker for
+raster tiles and elevation tiles. Messages sent to a tile worker can be
+processed by any thread, with the assumption that only one thread at a
+time will work with a tile worker instance.</p>
+<p>Tile workers are not based on a common interface or base class. Tiles
+are. MapLibre Native GL offers a base Tile class. Raster, Geometry, and
+Elevation tile instances are inherited from Tile base class. Through
+this inheritance MapLibre Native GL maintains the association of Tile
+types and tile workers. Any Tile Worker is an actor that accepts
+messages of a specific Tile type. For a Geometry Tile Worker, the type
+is a Geometry Tile.</p>
+<p>*To read in depth about the workflow of a Geometry Tile Worker, please
+check <a href="design/./geometry-tile-worker.html">Geometry Tile Worker</a> chapter.</p>
+<hr />
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>To read in depth about the data flow for map initialization and
+rendering in Android, please check 
+<a href="design/./android-map-rendering-data-flow.md.html">Android Map Rendering Data Flow</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>This document speaks of a simplified configuration for brevity.
+These also includes viewport mode, constrain mode, and north
+orientation.</p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>Platform SDKs might use a wrapper map view class atop the map
+component. This is to help establish contract between the device
+runtime running a different language. Android is a good example of
+this behaviour.</p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p>A feature is the spatial description of a real-world entity such
+as a road or a utility pole. Any geometry that is displayed on a map
+tile is either an individual feature or a part of a feature.</p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<p>This document used the term glyph and character interchangeably.
+In reality, a single character can have multiple glyphs. These are
+called alternates. On the other hand, a single glyph can represent
+multiple characters. These are called ligatures.</p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p>In the Javascript counterpart, MapLibre GL JS, this is achieved
+through usage of webworkers.</p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+<p>In iOS, the render thread runs on UI thread, as in it's a
+foreground thread. Android offers wider range of devices in terms of
+battery capacity. Hence, Android prefers to use a background thread
+for rendering loop.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="coordinate-system"><a class="header" href="#coordinate-system">Coordinate System</a></h1>
+<p>Before we jump into the coordinate system of MapLibre Native GL, let's
+quickly review the concepts of translating a position on the face of
+Earth to a map tile. This is not a comprehensive refresher of coordinate
+reference systems or rendering basics. Rather this intends to guide the
+reader on what we want to achieve in this section.</p>
+<p>We start from <em>Earth</em>, which is a geoid which is mathematically
+expensive to use as a reference coordinate system. Thus, we approximate
+the earth to reference ellipsoids or datum. For this documents' scope,
+WGS84 is used as the canonical datum. Our goal is to represent
+geometries defined by WGS84 longitude, latitude pair coordinates to a
+map tile.</p>
+<p>Instead of translating a full geometry, in the following subsections, we
+will project a WGS 84 point to a map tile rendered in MapLibre GL
+Native.</p>
+<h4 id="world-vs-earth"><a class="header" href="#world-vs-earth">World vs Earth</a></h4>
+<p>This document uses the word <em>Earth</em> when it refers to the planet in
+which we all live in and make map tiles for. This document uses the word
+<em>World</em> to denote the world MapLibre Native GL renders. The word <em>world</em>
+in rendering terms mean the <em>world</em> to render. It could be a set of
+cones and boxes, a modeled city, anything composed of 3D objects.
+MapLibre GL Native renders map tiles in a range of zoom levels on a 3D
+plane. Map tiles are already produced from a WGS84 ellipsoid. Therefore,
+when this document uses the word <em>World,</em> it means the 3D plane
+containing a set of map tiles to be rendered, not the <em>Earth</em>.</p>
+<h4 id="transformations"><a class="header" href="#transformations">Transformations</a></h4>
+<p>MapLibre GL requires a series of coordinate transformations to render a
+geometry from map tile. This is where we refresh our rendering knowledge
+a bit. To render anything through a GPU:</p>
+<ol>
+<li>
+<p>Design and define model in the <em>Local Space</em>. We call anything that
+needs to be renderer a <em>model.</em> In the Local space, a model lives in
+its own coordinate system. For MapLibre Native GL, in local space
+each individual tile is modeled. This map tile is already populated
+by a map tile generation process. The longitude, latitude bound per
+tile is now translated to pixel bounds in this local space.</p>
+</li>
+<li>
+<p>When model matrix is applied to local space, as in a camera is
+applied, <em>Local Space</em> transforms to <em>World Space</em>. In this space,
+the model coordinates are relative to the world's origin. In this
+space all the individual map tiles to be rendered are introduced in
+the world space.</p>
+</li>
+<li>
+<p>The <em>World Space</em> is not seen from a viewpoint of a camera. When we
+see the <em>world</em> from a viewpoint of a camera, view matrix
+transformation is applied. Cameras can see the world up to a
+distance like human eyes can. To emulate that we apply <em>Projection
+Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="footnote-reference"><a href="#8">1</a></sup>.</p>
+</li>
+<li>
+<p>Finally, the <em>World Space</em> is transformed to device screen by
+applying viewport transform matrix.</p>
+</li>
+</ol>
+<p>Going forward, scoping our discussion only to MapLibre GL Native, we
+will talk mostly about two categories of coordinate systems:</p>
+<ol>
+<li>
+<p>World Coordinates</p>
+</li>
+<li>
+<p>Device Coordinates</p>
+</li>
+</ol>
+<p>World Coordinates are defined in <em>World Space</em>. This speaks of how <em>this
+world defines itself in a three-dimensional space</em>.<sup class="footnote-reference"><a href="#9">2</a></sup> On the other
+hand, device coordinates are used through View, Clip, and Screen Space.
+The purpose of this set of coordinates is to define how the world will
+be projected on a screen. Device Coordinates define <em>how a world will be
+projected on a screen.</em></p>
+<p>The unit of measurement will be pixels in this document. When the map
+tiles are generated by a system, the unit of distance in each tile is
+measured in degree angles instead of meters. Because angular distance
+stays the same if we move the angle across the axis of earth.</p>
+<p>Figure 2 shows rendering map tile through the rendering spaces and
+transformations below:</p>
+<p><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt="" /><br />
+<em>Figure 2: Rendering Spaces and Transformations for Map Tiles</em></p>
+<h2 id="world-coordinates"><a class="header" href="#world-coordinates">World Coordinates</a></h2>
+<p>World Coordinates for maps start with <em>Geographic Coordinate Systems</em>.
+<em>Geographic Coordinate Systems</em> use the three-dimensional model of the
+earth (ellipsoid) to define specific locations on the surface to create
+a grid. Traditional longitude, and latitude coordinate pair to define a
+location is an example of using geographic coordinates. EPSG: 4326
+(WGS84) is the reference <em>Geographic Coordinate System</em> that most of the
+world's geospatial data is defined and stored<sup class="footnote-reference"><a href="#10">3</a></sup> in. There is no way
+to visualize the WGS84 coordinate system on a two-dimensional plane, in
+this case, the map.</p>
+<p>Projections are used to translate WGS84 coordinates to a plane. To be
+specific, projections are used to translate a location on the ellipsoid
+to a two-dimensional square. EPSG:3857<sup class="footnote-reference"><a href="#11">4</a></sup> or projected
+<em>Pseudo-Mercator Coordinate System</em> is such a coordinate system.
+EPSG:3857 is used by MapLibre GL Native as a default coordinate system
+to display maps. This system takes WGS84 coordinates and projects them
+into sphere. This stretches out the landmass in the hemispheres but
+mathematically makes it simpler to project a location back to a 2D
+plane. As in, a sphere divided into angular equidistant grid produces
+rectangular grids when projected into a 2D plane. The philosophy behind
+this was to make rendering maps easy, as in drawing 2D squares on a
+plane is computationally trivial.</p>
+<p>Our world can be now broken down into these squares or tiles as we will
+call it going forward. This system imagines the world as a giant grid of
+tiles. Each tile has a fixed size defined in pixels.</p>
+<pre><code>worldSize = tileSize * number of tiles across a single dimension
+</code></pre>
+<p>For brevity, this document assumes the reader knows that map tiles are
+divided into a range of zoom levels. And each tile in zoom N gets
+divided into 4 tiles in zoom N+1. A tile size of 512 pixels and zoom
+level 11 will deduce <em>worldSize</em> to be the following:</p>
+<pre><code>worldSize = 512 * 2^11 = 1048576
+</code></pre>
+<p>Although each tile breaks into 4 in the next zoom level, we used a power
+of 2. This is because X and Y both dimensions expand with a factor of 2.</p>
+<p>Example: We start from translating a WGS84 location with longitude
+-77.035915 and latitude 38.889814. To translate a degree longitude
+relies on normalizing the latitude range <code>[-180, 180]</code> to <code>[0, 1048576]</code>. This means the X pixel value of a specific tile requires
+shifting our coordinate by 180. For example, a location with longitude
+-77.035915 becomes*:*</p>
+<pre><code>X = (180 + longitude) / 360 * worldSize
+= (180 + -77.035915) / 360 * 1048576
+= 299,904
+</code></pre>
+<p>Finding the X coordinate is easy to compute. But the Y requires a more
+than normalizing the range. This is due to the aforementioned space
+stretching in the hemispheres<sup class="footnote-reference"><a href="#12">5</a></sup>. Latitude value (Y) defined in WGS84
+will not be the same position after stretching. The computation looks
+like the following if the latitude was 38.889814:</p>
+<pre><code>y = ln(tan(45 + latitude / 2))
+= ln(tan(45 + 38.889814/ 2))
+= 0.73781742861
+</code></pre>
+<p>Now, to compute the pixel value for y:</p>
+<pre><code>Y = (180 - y * (180 / π)) / 360 * worldSize
+= (180 - 42.27382˚) / 360 * 1048576
+= 401,156
+</code></pre>
+<h3 id="tile-coordinates"><a class="header" href="#tile-coordinates">Tile Coordinates</a></h3>
+<p>Our next pursuit is to translate <em>World Coordinates to Tile
+Coordinates</em>. Because we want to know where exactly inside a map tile a
+location (longitude, latitude) coordinate gets rendered and vice versa.
+This system creates different pixel ranges per zoom level. So, we append
+the zoom level along with the X and Y pixel values. Dividing the pixel
+values with the tile size normalizes the X and Y value <em>per tile</em>. This
+means <code>(x:299,904, y:401,156, z:11)</code> becomes <code>(585.7471, 783.5067, z11)</code>.</p>
+<p>We divide our X and Y pixel value by tile size because we want to know
+the starting coordinates of each tile instead of individual location
+coordinates. This helps in drawing a tile. If we now <em>floor</em> the
+components to integers, we get <code>(585/783/11)</code>. This marks an individual
+tile's X, Y, and Z.</p>
+<p>To reach our goal of translating a location to a coordinate inside a
+tile, we need to know what is the <em>extent</em> of the tile. MapLibre GL
+Native follows Mapbox Vector Tile (MVT) spec. Following said spec,
+MapLibre GL Native internally normalizes each tile to an <em>extent</em> of
+8192. Tile extent describes the width and height of the tile in integer
+coordinates. This means a tile coordinate can have higher precision than
+a pixel. Because normally a tile has a height and width of 512 pixels.
+In this case, with an extent of 8192, each <em><strong>Tile Coordinate</strong></em> has a
+precision of <code>512/8192 = 1/16</code>th of a pixel. Tile <em>extent</em> origin (0,0)
+is on top left corner of the tile, and the (Xmax, Ymax) is on the bottom
+right. This means (8192, 8192) <em>tile coordinate</em> will be in the bottom
+right. Any coordinate greater or lesser than the <em>extent</em> range is
+considered outside the <em>extent</em> of the tile. Geometries that extend past
+the tile's area as defined by the extent are often used as a <em>buffer</em>
+for rendering features that overlap multiple adjacent tiles.</p>
+<p>To finally deduce the <em><strong>Tile Coordinates</strong></em> we multiply the remainder
+of our Tile components with <em>extent:</em></p>
+<pre><code>(585.7471, 783.5067, z11) -&gt; (.7471 * 8192, .5067 * 8192) = (x:
+6120, y: 4151)
+</code></pre>
+<p>This makes the <em><strong>Tile</strong></em> to be <code>(585/783/11)</code> and <em><strong>Tile Coordinates</strong></em>
+to be <code>(x: 6120, y: 4151)</code> for WGS84 location with longitude -77.035915,
+and latitude 38.889814.</p>
+<p>After defining <em><strong>Tile Coordinates</strong></em>, our pursuit continues to
+translate these coordinates to native device coordinates. To reiterate
+our progress in the perspective of rendering, we just defined our local
+space with tile coordinates. Local coordinates are the coordinates of
+the object to be rendered relative to its local origin<sup class="footnote-reference"><a href="#13">6</a></sup>. In this
+case, the objects are the map tiles. The next step in traditional
+rendering workflow is to translate object coordinates to world
+coordinates. This is important to understand if we are to render
+multiple objects in the world. If we treat all tiles in a zoom level
+being rendered in a single 3D horizontal plane, then the World Space has
+only one object. And in MapLibre GL, this plane has an origin of (0,0),
+positioned on the top left.</p>
+<h2 id="device-coordinates"><a class="header" href="#device-coordinates">Device Coordinates</a></h2>
+<p>World space for MapLibre GL Native contains a plane in 3D with all the
+tiles for any specific zoom level. Map tiles are hierarchical in nature.
+As in they have different zoom levels. MapLibre GL Native internally
+stores a tree object that mimics a tile pyramid. However, it does not
+create a hierarchy of 3D planes where each plane mimics one zoom level.
+It reuses the same 3D plane to re-render the tiles in the requested zoom
+level at a time.</p>
+<p>The journey towards rendering the tiles in the device screen from the
+world space starts with <em>View Matrix</em>, as defined in the world space.
+The key part here is the <em>camera</em>. A <em>view matrix</em> is a matrix that
+scales, rotates, and translates<sup class="footnote-reference"><a href="#14">7</a></sup> the world space from the view of
+the camera. To add the perspective of the camera, we apply the
+<em>Projection Matrix</em>. In MapLibre GL Native, a camera initialization
+requires map center, bearing, and pitch.</p>
+<p><em>Initializing the map with a center (lon, lat) does not translate or
+move the 3D plane with tiles, rather moves the camera atop the defined
+position named center. In the rendering world, this is not the center of
+the 3D plane we render tiles on, rather the position of the camera.</em></p>
+<p><img src="design/media/perspective-frustum.png" alt="" /><br />
+<em>Figure 3: Perspective Frustum (Sourced from learnopengl.com)</em></p>
+<p>The benefit of tile coordinates continues here. The camera representation 
+we use here, to be specific the view matrix, can directly take the tile 
+coordinates to move the camera to a particular tile in a zoom level. 
+Once a tile is built, the GPU can quickly draw the same tile with different 
+bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
+<p>If we keep following Figure 2, we see we need to also add a projection
+matrix. And MapLibre GL Native uses a <em>perspective projection</em>.
+Perspective projection matrix introduces the sense of depth perspective
+through the camera. As in objects further from the camera will look
+smaller and objects closer to the camera will look bigger. This
+perspective component is defined by parameter <em>w.</em> That is why the
+shaders that MapLibre Native GL at the time of writing uses 4
+dimensional vectors over 3 dimensional vectors. The 4^th^ dimension is
+this parameter <em>w</em>. Therefore, theoretically a GL coordinate is of the
+form <code>(x, y, z, w)</code>.</p>
+<p>Before we jump into the transformations, let's revisit an example
+scenario:</p>
+<pre><code>zoom: 11.6
+map center: (38.891, -77.0822)
+bearing: -23.2 degrees
+pitch: 45 degrees
+tile: 585/783/11
+</code></pre>
+<p>On top of this, MapLibre GL Native uses a field of view of 36.87 degrees
+or 0.6435011087932844 radians. This is somewhat arbitrary. The altitude
+of the camera used to be defined as 1.5 screen heights above the ground.
+The ground is the 3D plane that paints the map tiles. The field of view
+is derived from the following formula:</p>
+<pre><code>fov = 2 * arctan((height / 2) / (height * 1.5))
+</code></pre>
+<p>Factoring only the transformations of zoom, map center, bearing, pitch,
+and tile in, with a viewport of 862 by 742 pixels, the projection matrix
+will look like<sup class="footnote-reference"><a href="#16">9</a></sup>:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th><strong>x</strong></th><th><strong>y</strong></th><th><strong>z</strong></th><th><strong>w</strong></th></tr></thead><tbody>
+<tr><td><strong>x</strong></td><td>0.224</td><td>-0.079</td><td>-0.026</td><td>-0.026</td></tr>
+<tr><td><strong>y</strong></td><td>-0.096</td><td>-0.184</td><td>-0.062</td><td>-0.061</td></tr>
+<tr><td><strong>z</strong></td><td>0.000</td><td>0.108</td><td>-0.036</td><td>-0.036</td></tr>
+<tr><td><strong>w</strong></td><td>-503.244</td><td>1071.633</td><td>1469.955</td><td>1470.211</td></tr>
+</tbody></table>
+</div>
+<p>To use our <em>tile coordinates,</em> we will turn it to a 4D vector of
+(x,y,z,w) with neutral w value 1. For brevity we used z value of 0. For
+buildings and extrusions z value will not be 0. But this document does
+not cover that.</p>
+<p>So, tile coordinate <code>(x: 6120, y: 4151, z:0, w:1)</code> will transform to the
+following due to a vector multiplication with the projection matrix:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th><strong>x</strong></th><th><strong>y</strong></th><th><strong>z</strong></th><th><strong>w</strong></th></tr></thead><tbody>
+<tr><td><strong>x = 6120</strong></td><td>0.2240.224 * 6120 = 1370.88</td><td>-0.079 * 6120 = -483.48</td><td>-0.026 * 6120 = -159.12</td><td>-0.026 * 6120 = -159.12</td></tr>
+<tr><td><strong>z = 4151</strong></td><td>-0.096 * 4151 = -398.496</td><td>-0.184 * 4151 = -763.784</td><td>-0.062 * 4151 = -257.362</td><td>-0.061 * 4151 = 253.311</td></tr>
+<tr><td><strong>z = 0</strong></td><td>0.000 * 0 = 0</td><td>0.108 * 0 = 0</td><td>-0.036 * 0 = 0</td><td>-0.036 * 0 = 0</td></tr>
+<tr><td><strong>w = 1</strong></td><td>-503.244 * 1 = -503.244</td><td>1071.633 * 1 = 1071.633</td><td>1469.955 * 1 = 1469.955</td><td>1470.211 * 1 = 1470.211</td></tr>
+<tr><td><strong>Final Vector</strong></td><td>469.14</td><td>-175.631</td><td>1053.473</td><td>1057.78</td></tr>
+</tbody></table>
+</div>
+<p>The finalized vector is off from what we have expected with the result
+from the simulation. This is due to multiplying with low precision.</p>
+<p>The final vector will be <code>(x: 472.1721, y: -177.8471, z: 1052.9670, w: 1053.7176)</code>. This is not perspective normalized. Perspective
+normalization happens when we divide all the components of this vector
+with perspective component <em>w</em>.</p>
+<pre><code>(472.1721 / 1053.72, -177.8471 / 1053.72, 1052.9670 / 1053.72)
+= (x: 0.4481, y: -0.1688, z: 0.9993)
+</code></pre>
+<p>Doing this will take us into <em>clip space.</em> Clip coordinates contain all
+the tile coordinates we wish to render in MapLibre GL Native but only in
+a normalized coordinate space of <code>[-1.0, 1.0]</code>.</p>
+<p>All that is left now is to translate this to viewport coordinates.
+Following Figure 2, we use <em>viewport transform</em> to produce these
+coordinates:</p>
+<pre><code>Pixel Coordinates: (NormalizedX * width + width / 2, height / 2 -
+NormalizedY * height)
+ = (0.4481 * 862 + 431, 371 - (-0.1688 * 742))
+ = (x: 624, y: 434)
+</code></pre>
+<p>These are our viewport screen coordinates where our desired WGS84
+location longitude -77.035915 and latitude 38.889814 will be rendered.</p>
+<hr />
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">1</sup>
+<p>Clip coordinates are normalized to -1.0 to 1.0. For brevity, this
+document does not dive deep into 3D rendering basics.</p>
+</div>
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">2</sup>
+<p>For brevity, this document is assuming the world we live in is
+three dimensional.</p>
+</div>
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">3</sup>
+<p>For brevity, this document does not dive deep into reference
+ellipsoids to approximates earth, also known as Datums. EPSG:4326 or
+WGS84 is such a Datum or reference ellipsoid.</p>
+</div>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">4</sup>
+<p>There are other coordinate systems such as EPSG:54001 that uses
+equirectangles over squares to project the WGS84 coordinates. This
+document focuses on EPSG:3857 because MapLibre GL Native uses it by
+default.</p>
+</div>
+<div class="footnote-definition" id="12"><sup class="footnote-definition-label">5</sup>
+<p>This document scopes out the trigonometric proof of this
+translation for brevity. To know more:
+<a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">https://en.wikipedia.org/wiki/Web_Mercator_projection</a></p>
+</div>
+<div class="footnote-definition" id="13"><sup class="footnote-definition-label">6</sup>
+<p>For brevity, this document does not speak in depth of rendering
+basics in regards to coordinate systems. For more, please check:
+<a href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a></p>
+</div>
+<div class="footnote-definition" id="14"><sup class="footnote-definition-label">7</sup>
+<p>Scale, rotate, and translate are common rendering transformation
+used to produce model, view, and projection matrices. These
+operations are applied right to left. As in translate first, rotate
+second, and scale last. Matrix multiplications are not commutative,
+so order of operation matters.</p>
+</div>
+<div class="footnote-definition" id="15"><sup class="footnote-definition-label">8</sup>
+<p>The piece of code we run on GPU is called a shader. We will see
+more how shaders influence MapLibre GL Native rendering later in the
+document.</p>
+</div>
+<div class="footnote-definition" id="16"><sup class="footnote-definition-label">9</sup>
+<p>Matrix and examples produced from Chris Loers work hosted in:
+<a href="https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60">https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="expressions"><a class="header" href="#expressions">Expressions</a></h1>
+<p>Expressions are <em>domain specific language (DSL)</em> built by Mapbox for
+vector styles. Mapbox Vector Style is used in Mapbox Vector Tiles.
+Mapbox Vector Tiles is a vector tile specification initiated by Mapbox
+which was later widely adopted by the geospatial community.</p>
+<p>To recap, Mapbox Vector Styles have 2 significant parts - <em>Sources</em> and <em>Layers</em>.
+Sources define where the geospatial features to display the map are loaded from. 
+They can be GeoJSON, Mapbox Vector Tiles (MVT) etc. We draw said features
+on map using <em>Layers</em>. </p>
+<p>A <em>Layer</em> references a single source. This is where expressions kick in. 
+Expressions define how the data from a source will be painted in a layer 
+following a style. For example, a heatmap, requires the ability to paint 
+features in different zoom levels with different colors. Expressions 
+facilitate that. The rendering depends on the style of the layer along with 
+pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>. 
+Another option that was used was to completely change the style in run time to 
+achieve the same outcome<sup class="footnote-reference"><a href="#17">1</a></sup>.</p>
+<p>The desire of being able to render a layer in different zoom levels
+differently based on data drove the birth of <em>expressions</em>. To
+summarize, expressions do the following:</p>
+<ol>
+<li>
+<p>Expressions filter features from a source layer. This allows to
+apply conditional styling on the full or parts of the feature.</p>
+</li>
+<li>
+<p>Expressions apply rendering transformations to filtered features.
+MapLibre offers expressions that can interpolate, and paint. An
+expression can be applied to a feature constantly, zoom dependent,
+property dependent, or in zoom and property dependent manner.</p>
+</li>
+</ol>
+<p>For a simple example of an expression, we will build a layer that displays
+a text field fixed text <code>hello world</code> for all features in a vector source:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;test&quot;,
+  &quot;type&quot;: &quot;symbol&quot;,
+  &quot;source&quot;: &quot;source&quot;,
+  &quot;layout&quot;: { &quot;text-field&quot;: &quot;Hello world&quot; }
+}
+</code></pre>
+<p>If we wanted it instead to display the name property of each feature, 
+we can use an expression like this:</p>
+<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;get&quot;, &quot;name&quot;] }
+</code></pre>
+<p>We can also mutate the value fetched from properties of the features. For
+examplel, we can append a prefix <code>Hello</code> to the name by using the <code>concat</code>
+expression:</p>
+<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;concat&quot;, &quot;Hello, &quot;, [&quot;get&quot;, &quot;name&quot;]] }
+</code></pre>
+<p>By now, you probably have figured it out that expressions use a JSON-like 
+syntax to define. For brevity, let's look at the construction of an example 
+expression below:</p>
+<pre><code>'^': [
+NumberType,
+NumberType, NumberType],
+(ctx, [b, e]) =&gt; Math.pow(b.evaluate(ctx), e.evaluate(ctx))
+]
+</code></pre>
+<p>This defines an expression named <code>^</code> that returns a number
+expression, and takes two number expressions as input. The
+implementation follows right after. Another part to notice here is the
+implementation evaluates both inputs because they are expressions too.
+Expressions can be nested.</p>
+<p><strong>Although it looks like JavaScript, for MapLibre Native GL</strong>, <strong>the
+parser for any expression is written in MapLibre GL Native Core</strong>. Each
+platform such as iOS, Android has their own Expression class which
+provides builders to build an expression and add it to a layer. When an
+expression is added to a layer, the rendering part of the code picks it
+up in the MapLibre Native GL Core.</p>
+<p>Also, inside MapLibre GL Core, this definition mechanism allows
+extending expressions library with custom expressions if desired.</p>
+<h2 id="expression-types"><a class="header" href="#expression-types">Expression Types</a></h2>
+<p>In the example expression, we saw how one expression is defined. The
+example also shows that expressions have types. Expression language can
+accept input and output types of null, number, string, boolean, color,
+object, value, array, error, collator, and formatted. The canonical 
+definition of Expressions is rooted in JSON. Like JSON, <code>object</code> type 
+is the mapping key type that maps a set of <em>keys</em> to <em>values</em>.</p>
+<p>Beside the aforementioned data types, Expressions offer built-in functions
+or operators such as assertion, coalesce, interpolate, distance etc. 
+The code uses the word <em>kind</em> to differentiate between these. 
+Each <em>kind</em> of expression performs a single responsibility.</p>
+<p><em>Assertion expressions</em> assert the returning type from one expression is
+asserted before putting into another. For example, a filter expression
+of <code>[&quot;get&quot;, &quot;feature_property&quot;]</code>, returns a generic <em>value</em> type. To
+use it on another expression that accepts a string type, an assertion
+such as <code>[&quot;string&quot;, [&quot;get&quot;, &quot;feature_property&quot;]]</code> is necessary.
+Assertion throws an evaluation-time error if the types don't match
+during evaluation. </p>
+<p>You might think this is a <em>coercion</em> instead of an <em>assertion</em>. If you are 
+seeking for coercions, read the upcoming paragraph. Expression names 
+that looks like <code>to-something</code> are coercions by convention.</p>
+<p><em>Coercion expressions</em> convert a return type to another type. It also
+allows to define a fallback if the conversion fails. A good example of
+this is <em>to-number</em> expression. For example, <code>[&quot;to-number&quot;, [&quot;get&quot;, &quot;feature_property&quot;], 0]</code> means that we are trying to cover the
+feature-property to a number. If it fails, we will use 0 as a fallback.</p>
+<p><em>Camera expressions</em> are expressions that allow style property
+manipulation based on zoom, pitch, and distance from center.</p>
+<p>Expressions are used <em>paint</em> property of a Mapbox Vector Style starting
+with a <em>layer</em> or <em>filter</em> selector. Expressions are evaluated by following an
+expression chain constructed from the root expression following the
+input expressions recursively.</p>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>Implementation wise, expressions are divided into builders and parsers.
+Each platform such as Android and iOS have dedicated builder classes for
+different types of expressions. An example of interpolate expression
+from Android will look like:</p>
+<pre><code>fillLayer.setProperties(
+    fillColor(
+        interpolate(
+            exponential(0.5f), zoom(),
+            stop(1.0f, color(Color.RED)),
+            stop(5.0f, color(Color.BLUE)),
+            stop(10.0f, color(Color.GREEN))
+        )
+    )
+);
+</code></pre>
+<p><strong>To render the built expression, MapLibre GL Native uses expression
+parsers.</strong> <strong>Expression parsers are written in MapLibre GL Native Core
+(in C++).</strong> Each expression outputs an <em>EvaluationResult</em> class.
+Resolving an <em>EvaluationResult</em> can be deferred. As in, the result of an
+expression can be computed only when its necessary to be computed in
+runtime. A change induced by data or interaction in an expression
+evaluation result will result in a new style load in the rendering loop.</p>
+<hr />
+<div class="footnote-definition" id="17"><sup class="footnote-definition-label">1</sup>
+<p>Sourced from Mapbox GL Native wiki:
+<a href="https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture">https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="architectural-problems--recommendations"><a class="header" href="#architectural-problems--recommendations">Architectural Problems &amp; Recommendations</a></h1>
+<p>Up until now, this document focused solely on the state of MapLibre GL
+Native at the time of writing. This section speaks of possible future
+improvements for MapLibre GL Native from an architectural point of view.
+Before that, let's look into the architectural challenges MapLibre GL
+Native is facing<sup class="footnote-reference"><a href="#18">1</a></sup>:</p>
+<h2 id="renderer-coupled-with-opengl"><a class="header" href="#renderer-coupled-with-opengl">Renderer coupled with OpenGL</a></h2>
+<p>The renderer component is tightly coupled to OpenGL ES. It uses OpenGL
+ES as its only preferred rendering backend. Furthermore, MapLibre GL
+Native does not have a clear separation between the following:</p>
+<ol>
+<li>
+<p>The logical responsibility of rendering a map tile. This involves
+sourcing layers, applying styles, fetching glyphs and sprites for a
+map tile.</p>
+</li>
+<li>
+<p>Rendering a prepared map tile in a rendering loop for a graphics API
+such as OpenGL.</p>
+</li>
+</ol>
+<p>The current rendering loop is only implemented for OpenGL. In 2018,
+Apple deprecated OpenGL for both iOS 12 and macOS in favour of Metal.
+Metal is Apple's own 3D graphics API. MapLibre GL Native's sole
+dependency on OpenGL ES puts it in a risk of deprecation for iOS
+customers.</p>
+<h2 id="lack-of-support-for-other-map-projections-except-web-mercator"><a class="header" href="#lack-of-support-for-other-map-projections-except-web-mercator">Lack of support for other map projections except Web Mercator</a></h2>
+<p>MapLibre GL Native supports Web Mercator (EPSG:3857) as its only
+supported projection. This fulfills most of the web and device map
+needs. At the time of writing, modern map renderers such as Google Maps
+and Mapbox GL offers 3D globe, conic, and rectangular projections too.
+At the time of writing, MapLibre GL Native renderer component does not
+have an architectural separation for supporting multiple projections and
+coordinate reference systems.</p>
+<h2 id="inconsistency-among-platforms"><a class="header" href="#inconsistency-among-platforms">Inconsistency among platforms</a></h2>
+<p>Each MapLibre GL Native platform has a Map View and Map Renderer
+component. The inconsistency introduced due to differences in
+concurrency model and programming language is unavoidable. But from an
+abstractions point of view there are inconsistencies that can be
+mitigated:</p>
+<ol>
+<li>
+<p>Map Configuration is modeled inside MapLibre GL Native Core, the
+shared cross platform codebase. Each platform creates its own
+configuration class and creates a shadow native object. The native
+configuration object is consistent across platforms but the platform
+specific configuration is not.</p>
+</li>
+<li>
+<p>MapLibre GL Native has a sister repository named MapLibre GL JS. At
+the time of writing, MapLibre GL JS does not share any code with
+MapLibre GL Native except shaders, the style specification, and
+render test fixtures. This creates a feature inconsistency across
+web and device experience for customers. The rendering architecture
+is also different between Web and Mobile. MapLibre GL JS currently
+uses WebGL through completely different implementations for Map,
+Style, Layers, Glyph, and TileWorker.</p>
+</li>
+<li>
+<p>MapLibre Rust is an initiative to port MapLibre GL capability
+through usage of <em>WebGPU</em>. At the time of writing, <em>WebGPU</em> is a
+young platform that exposes modern computer graphics capabilities,
+especially Direct3D 12, Metal, and Vulkan through a shared API. It
+has promise, but the API at the time of writing only supports
+ChromeOS, macOS, and Windows 10. Technically, it can be used with
+Android and iOS but these platforms do not provide out of the box
+support for it. This also has created a divergent experience for
+customers when it comes to using MapLibre GL Native.</p>
+</li>
+</ol>
+<h2 id="lack-of-documentation"><a class="header" href="#lack-of-documentation">Lack of documentation</a></h2>
+<p>Last but not the least, MapLibre GL Native suffers from a general lack
+of documentation. This includes current state of the code architecture,
+continuous integration and development, testing strategy, and a roadmap
+for future improvement. This document intends to address the first.</p>
+<h2 id="recommendations"><a class="header" href="#recommendations">Recommendations</a></h2>
+<p>This document proposes the following component architecture for MapLibre
+GL Native to address the architectural shortcomings.</p>
+<p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="" /><br />
+<em>Figure 4: Proposed Architecture of MapLibre GL Native</em></p>
+<p>Proposed architecture of MapLibre GL Native in Figure 4 addresses the 
+aforementioned problems by:</p>
+<h4 id="modular-rendering"><a class="header" href="#modular-rendering">Modular Rendering</a></h4>
+<p>Introducing modularized rendering through <em>Unified Rendering Interface</em>.
+Unified Rendering Interface component will be responsible for
+implementing different graphics API workers for any tile workers. Each
+of these rendering workers will use platform specific shaders. This
+document does not dive deep into how these shaders will be produced or
+orchestrated. The problem <em>Unified Rendering Interface</em> solves is
+architecturally drawing a boundary between</p>
+<ol>
+<li>
+<p>The responsibility of rendering a map tile through GPU and,</p>
+</li>
+<li>
+<p>Gathering all layers necessary to render a map tile through <em>tile
+workers</em>.</p>
+</li>
+</ol>
+<h4 id="projector-component"><a class="header" href="#projector-component">Projector Component</a></h4>
+<p>Introducing a new component named <em>Projector.</em> A <em>projector</em> component
+is responsible for adding multiple projection and coordinate system
+support for map tiles. Projector will take the <em>features</em> to be rendered
+as an input and project the layer to a projection or coordinate
+reference system. Projected world coordinates will then be translated to
+native device coordinates.</p>
+<p>One example of introducing new component is supporting 3D maps in the
+future. This could mean rendering map tiles on a spherical globe instead
+of a flat 3D plane. At the time of writing MapLibre GL Native supports
+2.5D extrusion for buildings and terrain tiles. Supporting confidential
+datums like <em>GCJ-02</em> can also be achieved through this.</p>
+<h4 id="future-convergence-with-maplibre-rust"><a class="header" href="#future-convergence-with-maplibre-rust">Future Convergence with MapLibre Rust</a></h4>
+<p>This document acknowledges the value proposition MapLibre Rust
+initiative brings. At the time of writing, MapLibre Native GL core is
+written in C++. Albeit written in C++, MapLibre Native GL code relies on
+immutable message passing between renderer and tile workers. Private
+functions also follow the <em>C++ move semantics</em>. This means, each private
+function takes ownership of the arguments passed to the function by
+copying it to a new memory.</p>
+<p>Rust as a programming language enforces such intentions through compile
+time safety checks. Provided Rust Foreign Function<sup class="footnote-reference"><a href="#19">2</a></sup> Interface allows
+interoperability with Rust, this document proposes the following to be
+done in sequence:</p>
+<ol>
+<li>
+<p>At first, this document proposes to implement <em><strong>Modularized
+Rendering</strong></em> in C++ for MapLibre GL Native. This document also
+proposes that Unified Rendering Interface will keep the door open
+for a <em>WebGPU</em> backed renderer in MapLibre Rust. This will address
+the divergence of web and native platforms in the future. The Rust
+renderer can be compiled to WebAssembly and enable WebGPU powered
+rendering for browsers. This paves the path forward for a single
+unified renderer implementation for web and mobile devices.</p>
+</li>
+<li>
+<p>After the delivery of <em><strong>Modularized Rendering</strong></em>, this document
+proposes to eventually migrate <em>Style, Layers, Text, Glyphs,
+Projector, Tile Worker, and Map</em> component to be migrated to Rust.</p>
+</li>
+<li>
+<p>Finally, this document proposes to migrate Unified Rendering
+Interface and its implementations to Rust. This will completely
+transform MapLibre GL Native from a C++ ecosystem to a Rust
+ecosystem.</p>
+</li>
+</ol>
+<p>Following the above steps will merge towards a single MapLibre
+implementation for web and native.</p>
+<hr />
+<div class="footnote-definition" id="18"><sup class="footnote-definition-label">1</sup>
+<p>This document deliberately does not speak of problems regarding
+build and infrastructure of MapLibre GL Native. They will be handled
+in individual design PR requests / documents.</p>
+</div>
+<div class="footnote-definition" id="19"><sup class="footnote-definition-label">2</sup>
+<p>Rust Foreign Function Interface allows interop bindings and code
+that needs to exchange C-Like strings with other programming
+languages.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="android-map-rendering-data-flow"><a class="header" href="#android-map-rendering-data-flow">Android Map Rendering Data Flow</a></h1>
+<p><img src="design/media/android-data-flow.jpg" alt="" /><br />
+<em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
+<p>Figure 5 shows a simplified data flow diagram of initializing a map. The
+device section of this data flow diagram is based on Android platform.</p>
+<p>Before the map initialization request makes it to MapLibre GL Native
+Core, the request initializes a set of peer components in the platform
+or device runtime. Especially for Android, we have parts written in C++
+using <em>Android Native Development Kit</em> and parts written in Java.</p>
+<p>A map initialization starts with initializing a map in an Android View.
+A View occupies a rectangular area on the screen and is responsible for
+drawing and event handling. In this diagram this is denoted as a Map
+View inside the device runtime. This view is also responsible for
+initiating a Device Map Renderer which subsequently initializes a GL
+Thread worker. This thread is a render loop that takes UI events from
+the Android View and passes it downstream to get the rendered map.</p>
+<p>On the native C++ side of the device code, we see a peer Map View
+component. This one is a wrapper class between the Android Map View and
+the generic Map Component. For Android, this maintains the JNI method
+contract established from the Java runtime. The render thread this
+document talked about before is seen in the form of <em>MapRenderer</em>. This
+is an Actor that passes the rendering events from the device runtime to
+<em>MapLibre GL Native</em> renderer.</p>
+<p><img src="design/media/workflow-of-rendering-tiles.jpg" alt="" /><br />
+<em>Figure 6: Workflow of rendering tiles</em></p>
+<p>Before the frame-by-frame map rendering
+starts with <em>MapLibre GL Native</em> renderer, the generic map component
+gets initialized. Rendering each frame of a map tile or initializing the
+map view requires a set of <em>Transforms.</em> Through transform basic
+mutations like rotation, tilt, projection is accomplished. Transforms
+are essential for every aspect of rendering such as resizing the
+viewport, setting initial map camera, changes in map camera due to tilt,
+zoom, and movement. Each of these operations manifest into a set of
+<em>Transforms</em> that gets applied to the to-be-rendered map tile or already
+rendered map tile. The <em>Transform</em> class noted in the diagram however
+does not represent a single or multitude of transformations. A Map View
+like other components inside MapLibre works as a state machine. The
+<em>Transform</em> class maintains the current set of global transforms applied
+to the map. To simplify to change the camera orientation, zoom, or pitch
+a Map View will update the state of the Transform class. And the
+Transform class will use observers to send a transform event to
+<em>MapLibre GL Native</em> renderer. This overall transform directive, such as
+change camera location from point A to point B will translate to a set
+of transformations deduced by the <em>Renderer</em> component.</p>
+<p>Along initializing the <em>Transform</em> state, the Map View will also
+initialize the <em>Style</em> sub-component. The Style component here also
+follows a state machine-esque behaviour. It holds the current state of
+used Styles for the Map View along with layers, glyphs, and sources. A
+change in style or initialization of style translates to re-loading the
+<em>Glyph Atlas</em>, <em>Sources, and Layers.</em> A <em>Glyph Atlas</em> is a combined
+image all glyphs. The renderer slices the necessary glyph by bounding
+boxes whenever necessary. Different sources are loaded differently. For
+Tilesets, the tile data is loaded but not rendered right away. For
+client provided data sources such as GeoJSON, the data is loaded from
+the file source or code. Then these sources are organized into layers
+dictated by the style and the layers are sent for rendering through the
+actors.</p>
+<p>The key philosophy of rendering tiles is tiles are rendered layer by
+layer. A collection of tiles is called a tile set. To optimize tile
+rendering, MapLibre Native GL only renders <em>dirty</em> tiles. A dirty tile
+is a tile rendered in the viewport that has changed due to user
+interaction. To initiate this process, MapLibre Native GL loads the
+tileset to be rendered first. In a rendering request, if the tileset is
+already loaded, MapLibre GL Native will use a cached tile set.</p>
+<p>The next decision to make here is which tiles are to be rendered on the
+viewport. To deduce this, MapLibre GL Native translates the device
+viewport coordinates<sup class="footnote-reference"><a href="#20">1</a></sup> to a tile cover. A tile cover loads all the
+tiles that will rendered to current viewport. If the viewport already
+has all the tiles that is needed to be rendered by the deduced tile
+cover, there are no <em>dirty</em> tiles. If the tile cover somehow has a
+single or all new tiles to be rendered in the viewport, the existing
+tiles displayed in the viewport are deduced to be <em>dirty.</em> And only
+these tiles are replaced instead of a complete re-render.</p>
+<p>Moving to the render flow now. The render flow is depicted in Figure 7.
+The diagram introduces a new component block named a <em>Tile Renderer.</em>
+These diagrams might look verbose but in reality, they are a simplified
+version of the actual code flow.</p>
+<p>The render workflow stays the same as the initialization workflow up to
+<em>reaching the Render Orchestrator.</em> This time instead of initializing
+the <em>render orchestrator</em>, the flow uses the render orchestrator to
+create a <em>Render Tree.</em> A render tree is a tree of to-be-rendered items
+in order. This includes rendering items from layers, sources, line
+atlas, and pattern atlas. A render orchestrator does not render anything
+by itself. It orchestrates render items for the <em>renderer</em>.</p>
+<p>In the render loop ran by the <em>Renderer</em>, each render request ends in
+<em>creating a new render tree, and the render function.</em> The render
+function uses a glyph manager for fetching glyphs and font stacks that
+contains said glyphs. Sources and Layers are translated to
+<em>RenderSource</em> and <em>RenderLayer</em> objects.</p>
+<p><em>For the sake of restating, a layer is composed of a set of sources.</em></p>
+<p><img src="design/media/android-rendering-map-tiles.jpg" alt="" /><br />
+<em>Figure 7: Simplified data flow diagram of rendering map tiles</em></p>
+<p>A <em>RenderSource</em> is produced from a single
+source that has an internal <em>update</em> method. This method produces the
+<em>tile pyramid</em> to render for said source if the source is a
+<em>TileSource</em>. For brevity, this document only talks about tile sources.
+There are other types such as GeoJSON sources. They work in a similar
+manner as the tile source.</p>
+<hr />
+<div class="footnote-definition" id="20"><sup class="footnote-definition-label">1</sup>
+<p>Viewport coordinates are derived from the coordinate system of
+the device screen. Anything rendered inside a unit cube of local
+space is translated to screen space of actual pixels. The tiles are
+rendered in a local space before rendered back to screen. We will
+see more about that in Coordinate System section.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="geometry-tile-worker"><a class="header" href="#geometry-tile-worker">Geometry Tile Worker</a></h1>
+<p><img src="design/media/geometry-tile-worker-state-machine.jpg" alt="" /><br />
+<em>Figure 8: Simplified Geometry Tile Worker State Machine</em></p>
+<p>Going back to Geometry Tile Worker, it is
+a state machine. The main principle is that Geometry Tile Worker should
+carry out each task till completion once it has begun even if it
+requires asynchronous waiting<sup class="footnote-reference"><a href="#21">1</a></sup>. When a Geometry Tile Worker is
+working on a task, any new message to said worker is queued. Messages
+per <em>unique tile</em> are grouped. Upon finishing work, Geometry Tile Worker
+picks the latest message from the queue. All changes introduced in the
+queued messages are <em>coalesced</em> for the next work item for the tile
+worker. This way, a Geometry Tile Worker saves itself from starvation
+when it is under heavy workload. <em>Coalescing</em> also helps at finalizing
+the result when all the messages are processed because the map has
+stopped moving.</p>
+<p>To dive a little bit deeper into this process, let's have a quick look
+at Figure 8. It shows a simplified representation of Geometry Tile
+Worker state machine. From a cursory look, the state transitions might
+not seem self-explanatory. We will take one step at a time to clarify.</p>
+<p><em>Going forward, this section will use the term <strong>worker</strong> to denote a
+<strong>Geometry Tile Worker</strong> for brevity.</em></p>
+<p>A <em>worker</em> is <em>Idle</em> when it has nothing to work on or completed
+<em>coalescing</em> queued messages. It is in <em>Coalescing</em> state when it has
+not finished processing all the messages in the queue. These two states
+are the two key states the <em>worker</em> floats between.</p>
+<p>The initial transition from <em>Idle</em> to <em>coalescing</em> starts from a
+<em><strong>set</strong></em> message. A worker can receive a <strong>set</strong> message for data or a
+layer that is dependent on data. Referring back to <strong>Figure 8</strong>, this is
+what the transition label (<strong>set</strong> {Data, Layers} ) from <em>Idle</em> to
+<em>Coalescing</em> state stands for. This initiates an internal workflow named
+<em><strong>Parsing.</strong></em> Parsing means understanding the features to be rendered
+in a layer. Parsing process is encapsulated in <em>parse()</em> method. In the
+end of this method, a worker will also deduce required glyphs and images
+to render the tile.</p>
+<p>A worker will send a message to the Tile it is working on fetching the
+necessary glyphs and images. From a threading perspective, it can happen
+in the same thread as the worker or in a different thread. Looking back
+to Figure 8, we also see another transition path from <em>Idle</em> state to
+<em>coalescing</em> state through <em>symbolDependenciesChanged</em> event. When a
+tile object is done with downloading pending glyphs and images it issues
+a <em>onImagesAvailable</em> or <em>onGlyphsAvailable</em> event to the worker<sup class="footnote-reference"><a href="#22">2</a></sup>.
+Both of these events will translate to <em>symbolDependenciesChanged</em> event
+in the end. When <em>symbolDependenciesChanged</em> is fired, if the worker is
+on <em>Idle</em> state, it will move to <em>Coalescing</em> state. If the worker was
+already working on a tile and <em>symbolDependenciesChanged</em> is fired in
+the middle, it will move to <em>NeedsSymbolLayout</em> state.</p>
+<h2 id="restart-a-worker-in-progress-needsparse-and-needssymbollayout-state"><a class="header" href="#restart-a-worker-in-progress-needsparse-and-needssymbollayout-state">Restart a worker in-progress: NeedsParse and NeedsSymbolLayout state</a></h2>
+<p>The logical question to ask right now is why does the worker have
+<em>NeedSymbolLayout</em> and <em>NeedsParse</em> state at all? Based on what we have
+seen so far, parsing and fetching symbols (glyphs, images) can be done
+in <em>Coalescing</em> state. This is to distinguish incremental changes
+introduced while the worker is already working on something. This was to
+facilitate a reset of current work and force the worker to <em>parse</em> and
+<em>fetch</em> symbols again from the <em>Coalescing</em> state. If we look back to
+Figure 8 now, we will see that <em>Coalescing</em> state goes to
+<em>NeedsSymbolLayout</em> if a symbol update (glyphs, images) has been
+encountered. <em>NeedsSymbolLayout</em> state will go to <em>NeedsParse</em> state
+with a <em><strong>set</strong></em> method invocation after updating the symbols.
+<em>Coalescing</em> state will go straight to <em>NeedsParse</em> state if only
+incremental data or layer change is introduced with a <em><strong>set</strong></em> method
+invocation.</p>
+<p>To summarize, restarting an in-progress <em>worker</em> requires:</p>
+<ol>
+<li>
+<p>Send <em>symbolDependenciesChanged</em> through <em>onImagesAvailable</em> or
+<em>onGlyphsAvailable event.</em> To re-emphasize, these are not messages
+passed to the worker, rather events invoked through methods.</p>
+</li>
+<li>
+<p>This will interrupt old parsing process and issue a new <em><strong>set</strong></em>
+method to re-parse data from <em>NeedsSymbolLayout</em> or <em>Coalescing</em>
+state. In both cases, the worker will end up in <em>NeedsParse</em> state
+to re-parse.</p>
+</li>
+</ol>
+<p><em>setShowCollisionBoxes</em> event works in similar fashion. This event is
+used to show text label collision boxes in the to-be-rendered tile. It
+is used for debugging collision detection of text labels.</p>
+<h2 id="finalization"><a class="header" href="#finalization">Finalization</a></h2>
+<p>A worker finalizes its work when all required data is parsed, and all
+symbols are loaded in a layout.</p>
+<p>A <em><strong>Symbol Layout</strong></em> is the process of turning raw features into OpenGL
+buffers ready to be rendered. To simplify, a <em>symbol layout</em> contains
+images, glyphs, and their collision metadata positions relative to the
+tile to be rendered.</p>
+<p>When a geometry tile worker has completed its work, it moves to <em>Idle</em>
+state by self-sending <em>coalesced</em> transition. Reiterating again, to
+consider the worker has coalesced, it has to <em>parse</em> all the <em>coalesced</em>
+data from available messages in the queue for a particular tile.</p>
+<hr />
+<div class="footnote-definition" id="21"><sup class="footnote-definition-label">1</sup>
+<p>This is not entirely true. Going forward this section will shed
+some light on <em>why.</em> For the time being, the assumption accelerates
+understanding.</p>
+</div>
+<div class="footnote-definition" id="22"><sup class="footnote-definition-label">2</sup>
+<p>In reality, <em>onGlyphsAvailable</em> and <em>onImagesAvailable</em> events
+will be fired from GlyphManager and ImageManger instances. For
+brevity, this document does not speak of these classes.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-gl-native-for-android"><a class="header" href="#maplibre-gl-native-for-android">MapLibre GL Native for Android</a></h1>
+<p>MapLibre GL Native for Android is a library for embedding interactive map views with scalable, customizable vector maps onto Android devices.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
+<ol>
+<li>
+<p>Add bintray Maven repositories to your project-level Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>).</p>
+<pre><code class="language-gradle">allprojects {
+    repositories {
+    ...
+    mavenCentral()                
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre GL Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre GL Native for android. </p>
+<pre><code class="language-gradle">dependencies {
+    ...
+    implementation 'org.maplibre.gl:android-sdk:&lt;version&gt;'
+    ...
+}
+</code></pre>
+</li>
+<li>
+<p>Sync your Android project with Gradle files.</p>
+</li>
+<li>
+<p>Add a <code>MapView</code> to your layout XML file (usually <code>&lt;project&gt;/&lt;app-module&gt;/src/main/res/layout/activity_main.xml</code>).</p>
+<pre><code class="language-xml">...
+&lt;com.mapbox.mapboxsdk.maps.MapView
+    android:id=&quot;@+id/mapView&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    /&gt;
+...
+</code></pre>
+</li>
+<li>
+<p>Initialize the <code>MapView</code> in your <code>MainActivity</code> file by following the example below:</p>
+<pre><code class="language-kotlin">import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.LayoutInflater
+import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.camera.CameraPosition
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapView
+
+class MainActivity : AppCompatActivity() {
+
+    // Declare a variable for MapView
+    private lateinit var mapView: MapView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Init MapLibre
+        Mapbox.getInstance(this)
+
+        // Init layout view
+        val inflater = LayoutInflater.from(this)
+        val rootView = inflater.inflate(R.layout.activity_main, null)
+        setContentView(rootView)
+
+        // Init the MapView
+        mapView = rootView.findViewById(R.id.mapView)
+        mapView.getMapAsync { map -&gt;
+            map.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+            map.cameraPosition = CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Build and run the app. If you run the app successfully, a map will be displayed as seen in the screenshot below.</p>
+</li>
+</ol>
+<div style="text-align: center;">
+<img src="https://user-images.githubusercontent.com/32692818/228113379-475e86f5-e3fa-4a36-8b4b-1fcba0f1eb3b.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
