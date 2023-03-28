@@ -112,7 +112,5 @@ class MainActivity : AppCompatActivity() {
 
 6. Build and run the app. If you run the app successfully, a map will be displayed as seen in the screenshot below.
 <div style="text-align: center;">
-<img src="/assets/MapLibre_Native_Android_Demo_Screenshot.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
+<img src="https://user-images.githubusercontent.com/32692818/228113379-475e86f5-e3fa-4a36-8b4b-1fcba0f1eb3b.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
 </div>
-
-
