@@ -11,7 +11,7 @@
         }
     ```
 
-2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Please replace `<version>` with a valid MapLibre GL version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`).
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the latest MapLibre GL Native version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`).
 
     ```gradle
         dependencies {
