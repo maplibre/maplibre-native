@@ -102,7 +102,7 @@
 
         override fun onSaveInstanceState(outState: Bundle) {
             super.onSaveInstanceState(outState)
-            mapView?.onSaveInstanceState(outState)
+            mapView.onSaveInstanceState(outState)
         }
     }
     ```
