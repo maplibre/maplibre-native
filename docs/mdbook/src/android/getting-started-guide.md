@@ -51,7 +51,7 @@
         class MainActivity : AppCompatActivity() {
 
             // Declare a variable for MapView
-            private var mapView: MapView? = null
+            private lateinit var mapView: MapView
 
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
