@@ -66,17 +66,40 @@ jobs:
         include:
           - runs-on: ubuntu-20.04
             arch: x86_64
+            build_type: RelWithDebInfo
+            egl: OFF
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
+            build_type: RelWithDebInfo
+            egl: OFF
           - runs-on: macos-12
             arch: x86_64
+            build_type: RelWithDebInfo
+            egl: OFF
           - runs-on: macos-12-arm
             arch: arm64
+            build_type: RelWithDebInfo
+            egl: OFF
           - runs-on: windows-2022
             arch: x86_64
+            build_type: RelWithDebInfo
+            egl: OFF
+          - runs-on: ubuntu-20.04
+            arch: x86_64
+            build_type: RelWithDebInfo
+            egl: ON
+          - runs-on: macos-12
+            arch: x86_64
+            build_type: RelWithDebInfo
+            egl: ON
+          - runs-on: windows-2022
+            arch: x86_64
+            build_type: RelWithDebInfo
+            egl: ON
     continue-on-error: true
     env:
-      BUILDTYPE: 'Release'
+      BUILD_TYPE: ${{ matrix.build_type }}
+      MBGL_WITH_EGL: ${{ matrix.egl }}
 
     defaults:
       run:
@@ -151,40 +174,42 @@ jobs:
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
         uses: hendrikmuhs/ccache-action@v1
         with:
           variant: 'sccache'
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}
 
       - name: Configure maplibre-gl-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DMBGL_WITH_EGL=${{ env.MBGL_WITH_EGL }}
 
       - name: Configure maplibre-gl-native (Linux)
         if: runner.os == 'Linux'
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10
+            -DCMAKE_CXX_COMPILER=g++-10 \
+            -DMBGL_WITH_EGL=${{ env.MBGL_WITH_EGL }}
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
@@ -202,15 +227,16 @@ jobs:
             !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
             !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
           key: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
+            ${{ matrix.runs-on }}-${{ env.BUILD_TYPE }}-${{ env.MBGL_WITH_EGL }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DMBGL_WITH_EGL=${{ env.MBGL_WITH_EGL }}
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
