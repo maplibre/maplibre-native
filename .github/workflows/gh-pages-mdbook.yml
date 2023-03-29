@@ -40,4 +40,4 @@ jobs:
         with:
           branch: gh-pages
           folder: artifacts
-          target-folder: docs/mdbook
+          target-folder: docs/book
