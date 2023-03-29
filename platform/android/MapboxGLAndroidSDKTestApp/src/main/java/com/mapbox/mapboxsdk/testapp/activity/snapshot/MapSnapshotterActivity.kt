@@ -76,6 +76,9 @@ class MapSnapshotterActivity : AppCompatActivity() {
                     }
                 )
             )
+            .fromJson(
+                assets.open("demotiles.json").bufferedReader().readText()
+            )
 
         // Define the dimensions
         val options = MapSnapshotter.Options(
