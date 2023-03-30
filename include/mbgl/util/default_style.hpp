@@ -1,8 +1,6 @@
 #pragma once
 
-#include <array>
 #include <string>
-#include <vector>
 
 namespace mbgl {
 namespace util {
