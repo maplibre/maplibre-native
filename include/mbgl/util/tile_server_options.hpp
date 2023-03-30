@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
-#include <memory>
 #include <mbgl/util/default_style.hpp>
 
+#include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 
