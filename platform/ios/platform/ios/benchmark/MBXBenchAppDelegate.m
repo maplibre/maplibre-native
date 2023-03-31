@@ -7,7 +7,11 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-    
+
+#ifndef MLN_DISABLE_LOGGING
+    [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
+#endif
+
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
