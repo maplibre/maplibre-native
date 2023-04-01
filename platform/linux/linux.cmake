@@ -5,6 +5,7 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(X11 REQUIRED)
+find_package(Threads REQUIRED)
 
 pkg_search_module(LIBUV libuv REQUIRED)
 
@@ -112,6 +113,7 @@ target_link_libraries(
         ${JPEG_LIBRARIES}
         ${LIBUV_LIBRARIES}
         ${X11_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
         $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<BOOL:${MBGL_USE_BUILTIN_ICU}>:mbgl-vendor-icu>

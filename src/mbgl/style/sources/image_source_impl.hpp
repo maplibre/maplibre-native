@@ -5,6 +5,8 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/geo.hpp>
 
+#include <array>
+
 namespace mbgl {
 
 namespace style {

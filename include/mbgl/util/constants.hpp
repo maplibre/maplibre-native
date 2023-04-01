@@ -4,8 +4,7 @@
 #include <mbgl/util/unitbezier.hpp>
 
 #include <cmath>
-#include <string>
-#include <vector>
+#include <cstddef>
 
 namespace mbgl {
 

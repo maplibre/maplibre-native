@@ -5,6 +5,10 @@
 
 namespace mbgl {
 
+namespace gfx {
+class ShaderRegistry;
+}
+
 class RendererObserver {
 public:
     virtual ~RendererObserver() = default;
@@ -36,6 +40,9 @@ public:
     using StyleImageMissingCallback = std::function<void()>;
     virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
+
+    // Entry point for custom shader registration
+    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
 };
 
 } // namespace mbgl

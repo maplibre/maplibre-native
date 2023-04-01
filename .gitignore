@@ -42,3 +42,4 @@ node_modules
 
 /bazel-*
 CMakeLists.txt.user
+CMakeFiles
