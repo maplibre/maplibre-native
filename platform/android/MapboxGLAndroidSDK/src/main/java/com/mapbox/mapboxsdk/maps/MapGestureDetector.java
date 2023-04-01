@@ -433,8 +433,8 @@ final class MapGestureDetector {
 
       // screenDensity and influcentcetilt come in here via animationTime
       // factor 1000 because speed is in pixels/s
-      // and the factor 0.28 was determined by testing: panning the map and releasing should result in fling
-      //  animation starting at same speed as the move before (not properly tested for different screen density and tilt)
+      // and the factor 0.28 was determined by testing: panning the map and releasing
+      //  should result in fling animation starting at same speed as the move before
       double offsetX = velocityX * animationTime * 0.28 / 1000;
       double offsetY = velocityY * animationTime * 0.28 / 1000;
 
