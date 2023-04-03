@@ -5,6 +5,7 @@
 #include <chrono>
 #include <limits>
 #include <string>
+#include <type_traits>
 
 namespace mbgl {
 

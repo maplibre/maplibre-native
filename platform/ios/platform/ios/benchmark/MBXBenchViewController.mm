@@ -133,7 +133,24 @@ static const int benchmarkDuration = 200; // frames
         }
         NSLog(@"Total FPS: %4.1f", totalFPS);
         NSLog(@"Average FPS: %4.1f", totalFPS / result.size());
-        exit(0);
+
+        // this does not shut the application down correctly,
+        // and results in an assertion failure in thread-local code
+        //exit(0);
+
+        // Use the UIApplication lifecycle instead.
+        // Terminating an app programmatically is strongly discouraged by Apple.
+        // Combined with the plist setting "Application does not run in background" suspend allows
+        // the XCUITest to wake up, so it doesn't need to guess how long we'll take and wait.
+        UIApplication *app = [UIApplication sharedApplication];
+        if ([app respondsToSelector:@selector(suspend)])
+        {
+            [app performSelector:@selector(suspend)];
+        }
+        else if ([app respondsToSelector:@selector(terminate)])
+        {
+            [app performSelector:@selector(terminate)];
+        }
     }
 }
 
