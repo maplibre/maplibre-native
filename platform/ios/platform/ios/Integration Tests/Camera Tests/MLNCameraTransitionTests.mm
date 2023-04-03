@@ -13,7 +13,7 @@
     expectation.expectedFulfillmentCount = 2;
     expectation.assertForOverFulfill = YES;
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
 
     self.regionDidChange = ^(MLNMapView *mapView, MLNCameraChangeReason reason, BOOL animated) {
 
@@ -44,7 +44,7 @@
     expectation.expectedFulfillmentCount = 2;
     expectation.assertForOverFulfill = YES;
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
 
     self.regionDidChange = ^(MLNMapView *mapView, MLNCameraChangeReason reason, BOOL animated) {
 
@@ -74,7 +74,7 @@
     expectation.expectedFulfillmentCount = 1;
     expectation.assertForOverFulfill = YES;
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
     __block BOOL startedReset = NO;
     __block BOOL finishedReset = NO;
 
@@ -122,7 +122,7 @@
     [self.mapView setCenterCoordinate:dc zoomLevel:zoomLevel animated:NO];
     [self.mapView setCenterCoordinate:dc_west zoomLevel:zoomLevel animated:YES];
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.15 * NSEC_PER_SEC),
                    dispatch_get_main_queue(),
@@ -152,7 +152,7 @@
     expectation.expectedFulfillmentCount = 2;
     expectation.assertForOverFulfill = YES;
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
     __block NSInteger delegateCallCount = 0;
 
     CLLocationCoordinate2D target = CLLocationCoordinate2DMake(40.0, 40.0);
@@ -229,7 +229,7 @@
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"regionDidChange expectation"];
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
     __block NSInteger delegateCallCount = 0;
     expectation.expectedFulfillmentCount = 3;
     expectation.assertForOverFulfill = YES;
@@ -333,7 +333,7 @@
 
 // MARK: - Pending tests
 
-- (void)testContinuallyResettingNorthInIsChanging🙁{
+- (void)testContinuallyResettingNorthInIsChangingPENDING{
     // See https://github.com/mapbox/mapbox-gl-native/pull/11614
     // This test currently fails, unsurprisingly, since we're continually
     // setting the camera to the same parameters during its update.
@@ -365,8 +365,8 @@
     XCTAssertEqualWithAccuracy(self.mapView.direction, 0.0, 0.001, @"Camera should have reset to north. %0.3f", self.mapView.direction);
 }
 
-- (void)testContinuallySettingCoordinateInIsChanging🙁 {
-    // See above comment in `-testContinuallyResettingNorthInIsChanging🙁`
+- (void)testContinuallySettingCoordinateInIsChangingPENDING {
+    // See above comment in `-testContinuallyResettingNorthInIsChangingPENDING`
 
     // Reset to non-zero, prior to testing
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(0.0, 0.0) animated:NO];
@@ -375,7 +375,7 @@
     expectation.expectedFulfillmentCount = 2;
     expectation.assertForOverFulfill = YES;
 
-    __weak typeof(self) weakself = self;
+    __weak MLNCameraTransitionTests *weakself = self;
 
     self.regionIsChanging = ^(MLNMapView *mapView) {
         [weakself.mapView setCenterCoordinate:CLLocationCoordinate2DMake(-40.0, -40.0) animated:YES];

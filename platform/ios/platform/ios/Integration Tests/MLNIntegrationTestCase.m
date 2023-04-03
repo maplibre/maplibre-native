@@ -16,8 +16,7 @@
     for (XCTest *test in tests) {
 
         // Check for pending tests
-        if ([test.name containsString:@"PENDING"] ||
-            [test.name containsString:@"🙁"]) {
+        if ([test.name containsString:@"PENDING"]) {
             if (!runPendingTests) {
                 printf("warning: '%s' is a pending test - skipping\n", test.name.UTF8String);
                 continue;
@@ -25,7 +24,7 @@
         }
 
         // Check for tests that require a valid access token
-        if ([test.name containsString:@"🔒"]) {
+        if ([test.name containsString:@"LOCKED"]) {
             if (!apiKey) {
                 printf("warning: MLN_API_KEY env var is required for test '%s' - skipping.\n", test.name.UTF8String);
                 continue;
@@ -43,7 +42,7 @@
 
     NSString *apiKey;
 
-    if ([self.name containsString:@"🔒"]) {
+    if ([self.name containsString:@"LOCKED"]) {
         apiKey = [[NSProcessInfo processInfo] environment][@"MLN_API_KEY"];
 
         if (!apiKey) {

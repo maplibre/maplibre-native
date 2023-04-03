@@ -20,7 +20,7 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
         MLNSettings.use(MLNWellKnownTileServer.mapTiler)
     }
 
-    func testCapturingSnapshotterInSnapshotCompletion🔒() {
+    func testCapturingSnapshotterInSnapshotCompletionLOCKED() {
         // See the Obj-C testDeallocatingSnapshotterDuringSnapshot
         // This Swift test, is essentially the same except for capturing the snapshotter
 
@@ -62,7 +62,7 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
         wait(for: [expectation], timeout: timeout)
     }
     
-    func testSnapshotOverlaySwiftErgonomics🔒() {
+    func testSnapshotOverlaySwiftErgonomicsLOCKED() {
         let options     = MLNMapSnapshotterSwiftTests.snapshotterOptions(size: mapView.bounds.size)
         let snapshotter = MLNMapSnapshotter(options: options)
         let expectation = self.expectation(description: "snapshot")
