@@ -419,7 +419,7 @@ final class MapGestureDetector {
 
       // calculate velocity vector for xy dimensions, independent from screen size
       double velocityXY = Math.hypot(velocityX / screenDensity, velocityY / screenDensity);
-      if (velocityXY < MapboxConstants.VELOCITY_THRESHOLD_IGNORE_FLING) {
+      if (velocityXY < uiSettings.getFlingThreshold()) {
         // ignore short flings, these can occur when other gestures just have finished executing
         return false;
       }
@@ -427,11 +427,17 @@ final class MapGestureDetector {
       // tilt results in a bigger translation, limiting input for #5281
       double tilt = transform.getTilt();
       double tiltFactor = 1.5 + ((tilt != 0) ? (tilt / 10) : 0);
-      double offsetX = velocityX / tiltFactor / screenDensity;
-      double offsetY = velocityY / tiltFactor / screenDensity;
 
       // calculate animation time based on displacement
-      long animationTime = (long) (velocityXY / 7 / tiltFactor + MapboxConstants.ANIMATION_DURATION_FLING_BASE);
+      long animationTime = (long) (velocityXY / 7 / tiltFactor + uiSettings.getFlingAnimationBaseTime());
+
+      // screenDensity and influcentcetilt come in here via animationTime
+      // factor 1000 because speed is in pixels/s
+      // and the factor 0.28 was determined by testing: panning the map and releasing
+      //  should result in fling animation starting at same speed as the move before
+      double offsetX = velocityX * animationTime * 0.28 / 1000;
+      double offsetY = velocityY * animationTime * 0.28 / 1000;
+
       if (!uiSettings.isHorizontalScrollGesturesEnabled()) {
         // determine if angle of fling is valid for performing a vertical fling
         double angle = Math.abs(Math.toDegrees(Math.atan(offsetX / offsetY)));
