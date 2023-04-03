@@ -98,7 +98,7 @@
     XCTAssertTrue(CGPointEqualToPoint(attributionView.frame.origin, expectedAttributionOrigin));
     
     UIEdgeInsets insets = UIEdgeInsetsMake(15, 10, 20, 5);
-    self.viewController.automaticallyAdjustsScrollViewInsets = NO;
+    self.mapView.automaticallyAdjustsContentInset = NO;
     self.mapView.contentInset = insets;
     
     [self.mapView setNeedsLayout];

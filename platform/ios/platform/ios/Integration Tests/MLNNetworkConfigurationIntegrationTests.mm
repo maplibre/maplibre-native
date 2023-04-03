@@ -211,7 +211,7 @@
     }
 }
 
-- (void)testNetworkConfigurationWithSharedSession🔒 {
+- (void)testNetworkConfigurationWithSharedSessionLOCKED {
     NSURLSession *session = [NSURLSession sharedSession];
     [self internalTestNetworkConfigurationWithSession:session shouldDownload:YES];
 }
@@ -230,19 +230,19 @@
     //  [self internalTestNetworkConfigurationWithSession:session], NSException, NSInvalidArgumentException);
 }
 
-- (void)testNetworkConfigurationWithDefaultSessionConfiguration🔒 {
+- (void)testNetworkConfigurationWithDefaultSessionConfigurationLOCKED {
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfig];
     [self internalTestNetworkConfigurationWithSession:session shouldDownload:YES];
 }
 
-- (void)testNetworkConfigurationWithEmphemeralSessionConfiguration🔒 {
+- (void)testNetworkConfigurationWithEmphemeralSessionConfigurationLOCKED {
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfig];
     [self internalTestNetworkConfigurationWithSession:session shouldDownload:YES];
 }
 
-- (void)testNetworkConfigurationWithSessionConfigurationWithDelegate🔒 {
+- (void)testNetworkConfigurationWithSessionConfigurationWithDelegateLOCKED {
     __block BOOL didCallAuthChallenge = NO;
     __block BOOL isMainThread = YES;
 
@@ -266,7 +266,7 @@
     XCTAssert(didCallAuthChallenge);
 }
 
-- (void)testFailureForNetworkConfigurationWithSessionWithDataDelegate🔒 {
+- (void)testFailureForNetworkConfigurationWithSessionWithDataDelegateLOCKED {
     __block BOOL didCallReceiveData = NO;
 
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -297,7 +297,7 @@
     XCTAssertFalse(didCallReceiveData);
 }
 
-- (void)testNetworkConfigurationWithSessionConfigurationWithCustomHeaders🔒 {
+- (void)testNetworkConfigurationWithSessionConfigurationWithCustomHeadersLOCKED {
     // Custom session configuration, based on `MLNNetworkConfiguration.defaultSessionConfiguration`
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
     sessionConfig.HTTPAdditionalHeaders = @{ @"testing" : @YES };

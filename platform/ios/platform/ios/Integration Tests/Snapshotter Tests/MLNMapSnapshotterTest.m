@@ -47,7 +47,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
 }
 
-- (void)testMultipleSnapshotsWithASingleSnapshotter🔒 {
+- (void)testMultipleSnapshotsWithASingleSnapshotterLOCKED {
     CGSize size = self.mapView.bounds.size;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshots"];
@@ -77,7 +77,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
-- (void)testSnapshotterWithoutStrongReference🔒 {
+- (void)testSnapshotterWithoutStrongReferenceLOCKED {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion handler should be called even if there’s no strong reference to the snapshotter."];
     
     CGSize size = self.mapView.bounds.size;
@@ -100,7 +100,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     MLNTestAssertNil(self, weakSnapshotter, @"Completion handler should not leak snapshotter.");
 }
 
-- (void)testSnapshotterInBackgroundWithoutStrongReference🔒 {
+- (void)testSnapshotterInBackgroundWithoutStrongReferenceLOCKED {
     // See also https://github.com/mapbox/mapbox-gl-native/issues/12336
 
     NSTimeInterval timeout         = 10.0;
@@ -146,7 +146,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     MLNTestAssertNil(self, weakSnapshotter, @"Snapshotter should not leak.");
 }
 
-- (void)testSnapshotterUsingNestedDispatchQueues🔒 {
+- (void)testSnapshotterUsingNestedDispatchQueuesLOCKED {
     // This is the opposite pair to the above test `testDeallocatingSnapshotterDuringSnapshot`
     // The only significant difference is that the snapshotter is a `__block` variable, so
     // its lifetime should continue until it's set to nil in the completion block.
@@ -189,7 +189,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:timeout];
 }
 
-- (void)testCancellingSnapshot🔒 {
+- (void)testCancellingSnapshotLOCKED {
     CGSize size                    = self.mapView.bounds.size;
     CLLocationCoordinate2D coord   = CLLocationCoordinate2DMake(30.0, 30.0);
 
@@ -209,7 +209,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     MLNTestAssertNil(self, weakSnapshotter, @"Snapshotter should not leak after being canceled.");
 }
 
-- (void)testAllocatingSnapshotOnBackgroundQueue🔒 {
+- (void)testAllocatingSnapshotOnBackgroundQueueLOCKED {
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshots"];
 
     CGSize size                  = self.mapView.bounds.size;
@@ -242,7 +242,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:2.0];
 }
 
-- (void)testSnapshotterFromBackgroundQueueShouldFail🔒 {
+- (void)testSnapshotterFromBackgroundQueueShouldFailLOCKED {
     CGSize size = self.mapView.bounds.size;
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(30.0, 30.0);
 
@@ -293,7 +293,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:60.0];
 }
 
-- (void)testMultipleSnapshotters🔒🙁 {
+- (void)testMultipleSnapshottersLOCKEDandPENDING {
     NSUInteger numSnapshots = 8;
     CGSize size = self.mapView.bounds.size;
 
@@ -335,7 +335,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:60.0];
 }
 
-- (void)testSnapshotPointConversion🔒 {
+- (void)testSnapshotPointConversionLOCKED {
     CGSize size = self.mapView.bounds.size;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshot"];
@@ -373,7 +373,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
-- (void)testSnapshotPointConversionCoordinateOrdering🔒 {
+- (void)testSnapshotPointConversionCoordinateOrderingLOCKED {
     CGSize size = self.mapView.bounds.size;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshot"];
@@ -416,7 +416,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
-- (void)testSnapshotWithOverlayHandlerFailure🔒 {
+- (void)testSnapshotWithOverlayHandlerFailureLOCKED {
     CGSize size = self.mapView.bounds.size;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshot with overlay fails"];
@@ -445,7 +445,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
-- (void)testSnapshotWithOverlayHandlerSuccess🔒 {
+- (void)testSnapshotWithOverlayHandlerSuccessLOCKED {
     CGSize size = self.mapView.bounds.size;
     CGRect snapshotRect = CGRectMake(0, 0, size.width, size.height);
 
@@ -485,7 +485,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
     [self waitForExpectations:@[expectation] timeout:10.0];
 }
 
-- (void)testSnapshotCoordinatesWithOverlayHandler🔒 {
+- (void)testSnapshotCoordinatesWithOverlayHandlerLOCKED {
     CGSize size = self.mapView.bounds.size;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"snapshot with overlay succeeds"];

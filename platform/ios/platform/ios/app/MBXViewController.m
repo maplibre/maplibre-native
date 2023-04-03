@@ -693,7 +693,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                         _originalContentInsets = [self.mapView contentInset];
                     }
                     _contentInsetsEnabled = !_contentInsetsEnabled;
-                    self.automaticallyAdjustsScrollViewInsets = !_contentInsetsEnabled;
+                    _mapView.automaticallyAdjustsContentInset = !_contentInsetsEnabled;
                     UIEdgeInsets contentInsets = self.mapView.bounds.size.width > self.mapView.bounds.size.height
                         ? UIEdgeInsetsMake(_originalContentInsets.top, 0.5 * self.mapView.bounds.size.width, _originalContentInsets.bottom, 0.0)
                         : UIEdgeInsetsMake(0.25 * self.mapView.bounds.size.height, 0.0, _originalContentInsets.bottom, 0.25 * self.mapView.bounds.size.width);
@@ -1833,7 +1833,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             [NSLayoutConstraint constraintWithItem:secondMapView
                                          attribute:NSLayoutAttributeBottom
                                          relatedBy:NSLayoutRelationEqual
-                                            toItem:self.bottomLayoutGuide
+                                            toItem:self.view.safeAreaLayoutGuide.bottomAnchor
                                          attribute:NSLayoutAttributeBottom
                                         multiplier:1
                                           constant:0],
@@ -1853,7 +1853,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.mapView
                                                               attribute:NSLayoutAttributeBottom
                                                               relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.bottomLayoutGuide
+                                                                 toItem:self.view.safeAreaLayoutGuide.bottomAnchor
                                                               attribute:NSLayoutAttributeTop
                                                              multiplier:1
                                                                constant:0]];
@@ -1976,7 +1976,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     if (_contentInsetsEnabled)
     {
         _contentInsetsEnabled = NO;
-        self.automaticallyAdjustsScrollViewInsets = YES;
+        _mapView.automaticallyAdjustsContentInset = YES;
         [self.mapView setContentInset:UIEdgeInsetsZero];
     }
     while (self.contentInsetsOverlays && [self.contentInsetsOverlays count]) {
