@@ -22,7 +22,7 @@ var classmbgl_1_1style_1_1Light =
     [ "setObserver", "classmbgl_1_1style_1_1Light.html#a92405ca9718868eed105fc927f120d4a", null ],
     [ "setPosition", "classmbgl_1_1style_1_1Light.html#a699426d4eb85ca55013b0696cb49fb09", null ],
     [ "setPositionTransition", "classmbgl_1_1style_1_1Light.html#a5990af14aa6e2ef93401b28ddad3be30", null ],
-    [ "setProperty", "classmbgl_1_1style_1_1Light.html#a497f53289523fb4fa5e5cf3752935dca", null ],
+    [ "setProperty", "classmbgl_1_1style_1_1Light.html#a447167568ce47c2ed74d81763678f57c", null ],
     [ "impl", "classmbgl_1_1style_1_1Light.html#a58f4f4b83db2d08109c0fcced77960fd", null ],
     [ "observer", "classmbgl_1_1style_1_1Light.html#a38900eb33127bcbe9d6293f05e432e5f", null ]
 ];

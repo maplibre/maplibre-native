@@ -101,13 +101,13 @@ $(document).ready(function(){initNavTree('conversion__impl_8hpp.html',''); initR
 <code>#include &lt;<a class="el" href="transition__options_8hpp_source.html">mbgl/style/transition_options.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="feature_8hpp_source.html">mbgl/util/feature.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="util_2geojson_8hpp_source.html">mbgl/util/geojson.hpp</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="optional_8hpp_source.html">mbgl/util/optional.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="traits_8hpp_source.html">mbgl/util/traits.hpp</a>&gt;</code><br />
 <code>#include &lt;mapbox/compatibility/value.hpp&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;chrono&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 </div>
 <p><a href="conversion__impl_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -139,9 +139,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a76bf6375dff788b122e80dd75f62bbec"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
-<tr class="memitem:a76bf6375dff788b122e80dd75f62bbec"><td class="memTemplItemLeft" align="right" valign="top">optional&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#a76bf6375dff788b122e80dd75f62bbec">mbgl::style::conversion::convert</a> (const Convertible &amp;value, Error &amp;error, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:a76bf6375dff788b122e80dd75f62bbec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd2f7cbe4d0342db9b88bb02a6ead54e"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
+<tr class="memitem:afd2f7cbe4d0342db9b88bb02a6ead54e"><td class="memTemplItemLeft" align="right" valign="top">std::optional&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#afd2f7cbe4d0342db9b88bb02a6ead54e">mbgl::style::conversion::convert</a> (const Convertible &amp;value, Error &amp;error, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:afd2f7cbe4d0342db9b88bb02a6ead54e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a1a1441aa294453eaf50b72e8fde9ed"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a4a1a1441aa294453eaf50b72e8fde9ed"><td class="memTemplItemLeft" align="right" valign="top">Value&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#a4a1a1441aa294453eaf50b72e8fde9ed">mbgl::style::conversion::makeValue</a> (T &amp;&amp;arg)</td></tr>
 <tr class="separator:a4a1a1441aa294453eaf50b72e8fde9ed"><td class="memSeparator" colspan="2">&#160;</td></tr>

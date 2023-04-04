@@ -110,6 +110,7 @@ var menudata={children:[
 {text:"v",url:"namespacemembers_type.html#index_v"}]},
 {text:"Enumerations",url:"namespacemembers_enum.html",children:[
 {text:"a",url:"namespacemembers_enum.html#index_a"},
+{text:"b",url:"namespacemembers_enum.html#index_b"},
 {text:"c",url:"namespacemembers_enum.html#index_c"},
 {text:"e",url:"namespacemembers_enum.html#index_e"},
 {text:"f",url:"namespacemembers_enum.html#index_f"},

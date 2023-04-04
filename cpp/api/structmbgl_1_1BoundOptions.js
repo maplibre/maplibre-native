@@ -5,9 +5,9 @@ var structmbgl_1_1BoundOptions =
     [ "withMaxZoom", "structmbgl_1_1BoundOptions.html#a32e7864beee8578d721b0313a58cb0e7", null ],
     [ "withMinPitch", "structmbgl_1_1BoundOptions.html#afcf612d20a3b272d88d0ed91496fd80a", null ],
     [ "withMinZoom", "structmbgl_1_1BoundOptions.html#a70fee36df2ede80ee288c89111ae8025", null ],
-    [ "bounds", "structmbgl_1_1BoundOptions.html#a8ea5ec0ac5fbe574fe880acdd6083a12", null ],
-    [ "maxPitch", "structmbgl_1_1BoundOptions.html#aa2794a49d69a5f1cafafff2fc1a640c1", null ],
-    [ "maxZoom", "structmbgl_1_1BoundOptions.html#ad98e38f782c1396ead8f56d3017a7c3a", null ],
-    [ "minPitch", "structmbgl_1_1BoundOptions.html#a19b548eeb23a191db5c65f29aa8d5599", null ],
-    [ "minZoom", "structmbgl_1_1BoundOptions.html#ab16dfbaad5e25d10920ecfe108265631", null ]
+    [ "bounds", "structmbgl_1_1BoundOptions.html#ae46202de3558c20b6b79e78bac696699", null ],
+    [ "maxPitch", "structmbgl_1_1BoundOptions.html#ad949c8993ad65f828b7af7b48830a58d", null ],
+    [ "maxZoom", "structmbgl_1_1BoundOptions.html#aecfc4ee89e6a2ca22dcd96a5a5ef1616", null ],
+    [ "minPitch", "structmbgl_1_1BoundOptions.html#ae2f3dce2736e74bf463826dedd809784", null ],
+    [ "minZoom", "structmbgl_1_1BoundOptions.html#ab76d14ade2de1ccaa6acc3fb3b00ab59", null ]
 ];

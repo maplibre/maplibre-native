@@ -20,6 +20,7 @@ var classmbgl_1_1MapObserver =
     [ "onDidFinishLoadingStyle", "classmbgl_1_1MapObserver.html#a1d9980c89f1b9c0dfdc30c4846bcf8fe", null ],
     [ "onDidFinishRenderingFrame", "classmbgl_1_1MapObserver.html#aafb034c807f07f1ccdfd1aa28929e32a", null ],
     [ "onDidFinishRenderingMap", "classmbgl_1_1MapObserver.html#a3f0a61ae22866cb5f65fa7d678e0d778", null ],
+    [ "onRegisterShaders", "classmbgl_1_1MapObserver.html#a355c18cf9952209b7d7df8c04d02a848", null ],
     [ "onSourceChanged", "classmbgl_1_1MapObserver.html#aa996a2433340751126ffaee0b452cc3d", null ],
     [ "onStyleImageMissing", "classmbgl_1_1MapObserver.html#acd151b552871e1d257b4a4d00be81bea", null ],
     [ "onWillStartLoadingMap", "classmbgl_1_1MapObserver.html#ab51fac0a23c2f94e4db32c0fbd29808c", null ],

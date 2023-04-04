@@ -5,6 +5,6 @@ var classmbgl_1_1style_1_1expression_1_1ImageExpression =
     [ "evaluate", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#abb952873b3a6d82fc0e865aa74f62b13", null ],
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#a5d2d49f0d55594d74b5cac95adef2634", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#a4c59af350cd65ab82b98b1c9dffc710d", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#a36917c35edbc358b3c43fb0c62b9a2f1", null ],
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#af1516f82b851aa837bbbc283bbac2882", null ],
     [ "serialize", "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#aa1fd382aa28eaad7d394228b52e82ffd", null ]
 ];

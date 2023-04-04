@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['viewportmode_3705',['ViewportMode',['../namespacembgl.html#a97f333a933a0354a892a34405ec2566b',1,'mbgl']]],
-  ['visibilitytype_3706',['VisibilityType',['../namespacembgl_1_1style.html#aba858621b96a3d33e76d7afa95d6c4ec',1,'mbgl::style']]]
+  ['usage_5061',['Usage',['../classmbgl_1_1Resource.html#aba6d94d6d20b44f2a638d911d53c5a01',1,'mbgl::Resource']]]
 ];

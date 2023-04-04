@@ -8,9 +8,9 @@ var classmbgl_1_1Response =
     [ "operator=", "classmbgl_1_1Response.html#a3cbe5818485ca68baa405b20f0bbdc54", null ],
     [ "data", "classmbgl_1_1Response.html#a59a50c4f534522cd40b1803b1927b08b", null ],
     [ "error", "classmbgl_1_1Response.html#a918a087da2c3a63e13e7ea3178711c3d", null ],
-    [ "etag", "classmbgl_1_1Response.html#ad3bc10b5dd3537aac0ae649e15196739", null ],
-    [ "expires", "classmbgl_1_1Response.html#ab3ca0c18856b6ef83252439664132344", null ],
-    [ "modified", "classmbgl_1_1Response.html#a2f173caff4c36d0bce796bb029f223fc", null ],
+    [ "etag", "classmbgl_1_1Response.html#afcf3c83873faf84f6ac3b630a1b40a4f", null ],
+    [ "expires", "classmbgl_1_1Response.html#a5deaad0b3a2150905f9ae16f7529a394", null ],
+    [ "modified", "classmbgl_1_1Response.html#ab2d974a99a77283346e305bdbe51b7e3", null ],
     [ "mustRevalidate", "classmbgl_1_1Response.html#a182607168993fc9aae6e0f0e5d739218", null ],
     [ "noContent", "classmbgl_1_1Response.html#a0f57c7bc5418ec898e6e64ef2817f5dd", null ],
     [ "notModified", "classmbgl_1_1Response.html#ac93bc0a03afca6fcac7aea72a6b33b12", null ]

@@ -92,9 +92,9 @@ $(document).ready(function(){initNavTree('conversion_2source_8hpp_source.html','
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="source_8hpp.html">mbgl/style/source.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="conversion_8hpp.html">mbgl/style/conversion.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span>style {</div>
@@ -103,7 +103,7 @@ $(document).ready(function(){initNavTree('conversion_2source_8hpp_source.html','
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">template</span> &lt;&gt;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">struct </span>Converter&lt;<a class="code" href="namespacestd.html">std</a>::unique_ptr&lt;Source&gt;&gt; {</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    optional&lt;std::unique_ptr&lt;Source&gt;&gt; operator()(<span class="keyword">const</span> Convertible&amp; value, Error&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>, <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; <span class="keywordtype">id</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    std::optional&lt;std::unique_ptr&lt;Source&gt;&gt; operator()(<span class="keyword">const</span> Convertible&amp; value, Error&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>, <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; <span class="keywordtype">id</span>) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;};</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;} <span class="comment">// namespace conversion</span></div>
@@ -114,7 +114,6 @@ $(document).ready(function(){initNavTree('conversion_2source_8hpp_source.html','
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_aa2e21231396635ff52d2809ca8f9e919"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">mbgl::style::expression::dsl::string</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; string(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdef"><b>Definition:</b> <a href="tile__id_8hpp_source.html#l00256">tile_id.hpp:256</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 <div class="ttc" id="asource_8hpp_html"><div class="ttname"><a href="source_8hpp.html">source.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

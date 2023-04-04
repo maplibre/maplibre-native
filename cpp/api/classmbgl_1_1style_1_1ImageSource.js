@@ -4,7 +4,7 @@ var classmbgl_1_1style_1_1ImageSource =
     [ "~ImageSource", "classmbgl_1_1style_1_1ImageSource.html#a5f3d95d5fa63ce48322c7a27b0de95cb", null ],
     [ "createMutable", "classmbgl_1_1style_1_1ImageSource.html#aba580f5816148ffdab01456b7f965b3d", null ],
     [ "getCoordinates", "classmbgl_1_1style_1_1ImageSource.html#ab878ac7995f4200ec0116e65f8bb99e7", null ],
-    [ "getURL", "classmbgl_1_1style_1_1ImageSource.html#a2bad74c87f3ebf808be4cc1457c8c384", null ],
+    [ "getURL", "classmbgl_1_1style_1_1ImageSource.html#a55886967c363757ea83717de1d68c77f", null ],
     [ "impl", "classmbgl_1_1style_1_1ImageSource.html#a0972fcf3cd8dfb50c1a3e57ffb0b26a7", null ],
     [ "loadDescription", "classmbgl_1_1style_1_1ImageSource.html#aebfa971aa669b3e8acd319c3b85d059e", null ],
     [ "makeWeakPtr", "classmbgl_1_1style_1_1ImageSource.html#afa2f9f6f963a36284fc3e25094f76d21", null ],

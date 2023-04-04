@@ -87,7 +87,8 @@ $(document).ready(function(){initNavTree('namespacembgl_1_1gfx.html',''); initRe
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">mbgl::gfx Namespace Reference</div>  </div>
 </div><!--header-->
@@ -107,6 +108,12 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmbgl_1_1gfx_1_1RenderingStats.html">RenderingStats</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1Shader.html">Shader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A shader is used as the base class for all programs across any supported backend API. Shaders are registered with a <code><a class="el" href="classmbgl_1_1gfx_1_1ShaderRegistry.html" title="A ShaderRegistry contains a collection of gfx::Shader instances. Using the registry,...">gfx::ShaderRegistry</a></code> instance.  <a href="classmbgl_1_1gfx_1_1Shader.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1ShaderRegistry.html">ShaderRegistry</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="classmbgl_1_1gfx_1_1ShaderRegistry.html" title="A ShaderRegistry contains a collection of gfx::Shader instances. Using the registry,...">ShaderRegistry</a> contains a collection of <a class="el" href="classmbgl_1_1gfx_1_1Shader.html" title="A shader is used as the base class for all programs across any supported backend API....">gfx::Shader</a> instances. Using the registry, shaders may be dynamically registered or replaced at runtime.  <a href="classmbgl_1_1gfx_1_1ShaderRegistry.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -119,6 +126,12 @@ Enumerations</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a6c1d0d922886eb4ecb1f2b08800eb8ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="util_8hpp.html#acd93fda7c5b7cdbb81b08f286dc23312">MBGL_CONSTEXPR</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1gfx.html#a6c1d0d922886eb4ecb1f2b08800eb8ba">operator==</a> (const <a class="el" href="classmbgl_1_1gfx_1_1RendererBackend.html">RendererBackend</a> &amp;a, const <a class="el" href="classmbgl_1_1gfx_1_1RendererBackend.html">RendererBackend</a> &amp;b)</td></tr>
 <tr class="separator:a6c1d0d922886eb4ecb1f2b08800eb8ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:aec9770b6a564d3b441ec4ebb49bc1247"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aec9770b6a564d3b441ec4ebb49bc1247"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1gfx.html#aec9770b6a564d3b441ec4ebb49bc1247">is_shader_v</a></td></tr>
+<tr class="separator:aec9770b6a564d3b441ec4ebb49bc1247"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="ae2b1d33f7f3c78b39addb9b3a8330469"></a>
@@ -177,6 +190,39 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="gfx_2renderer__backend_8hpp_source.html#l00067">67</a> of file <a class="el" href="gfx_2renderer__backend_8hpp_source.html">renderer_backend.hpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="aec9770b6a564d3b441ec4ebb49bc1247"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9770b6a564d3b441ec4ebb49bc1247">&#9670;&nbsp;</a></span>is_shader_v</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool mbgl::gfx::is_shader_v</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    std::is_base_of_v&lt;gfx::Shader, T&gt; &amp;&amp;</div>
+<div class="line">    std::is_same_v&lt;</div>
+<div class="line">        std::remove_cv_t&lt;decltype(T::Name)&gt;,</div>
+<div class="line">        std::string_view&gt; &amp;&amp;</div>
+<div class="line">    std::is_final_v&lt;T&gt;</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="shader_8hpp_source.html#l00017">17</a> of file <a class="el" href="shader_8hpp_source.html">shader.hpp</a>.</p>
 
 </div>
 </div>

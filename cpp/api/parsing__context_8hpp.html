@@ -94,8 +94,7 @@ $(document).ready(function(){initNavTree('parsing__context_8hpp.html',''); initR
 <div class="title">parsing_context.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="optional_8hpp_source.html">mbgl/util/optional.hpp</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="string_8hpp_source.html">mbgl/util/string.hpp</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="string_8hpp_source.html">mbgl/util/string.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="type_8hpp_source.html">mbgl/style/expression/type.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="conversion_8hpp_source.html">mbgl/style/conversion.hpp</a>&gt;</code><br />
 <code>#include &lt;iterator&gt;</code><br />
@@ -105,6 +104,7 @@ $(document).ready(function(){initNavTree('parsing__context_8hpp.html',''); initR
 <code>#include &lt;unordered_map&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 </div>
 <p><a href="parsing__context_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -130,8 +130,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a3d0cdda28e1a62aae9cbf8e340811eeb"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1expression.html#a3d0cdda28e1a62aae9cbf8e340811eeb">mbgl::style::expression::ParseResult</a> = optional&lt; std::unique_ptr&lt; Expression &gt; &gt;</td></tr>
-<tr class="separator:a3d0cdda28e1a62aae9cbf8e340811eeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31dcdfaccefcc3122e2a270517738cec"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1expression.html#a31dcdfaccefcc3122e2a270517738cec">mbgl::style::expression::ParseResult</a> = std::optional&lt; std::unique_ptr&lt; Expression &gt; &gt;</td></tr>
+<tr class="separator:a31dcdfaccefcc3122e2a270517738cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>

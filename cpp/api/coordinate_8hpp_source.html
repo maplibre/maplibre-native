@@ -92,29 +92,28 @@ $(document).ready(function(){initNavTree('coordinate_8hpp_source.html',''); init
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="conversion_8hpp.html">mbgl/style/conversion.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="geo_8hpp.html">mbgl/util/geo.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span>style {</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span>conversion {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;            </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">template</span>&lt;&gt;</div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html">   12</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structmbgl_1_1style_1_1conversion_1_1Converter.html">Converter</a>&lt;<a class="code" href="classmbgl_1_1LatLng.html">LatLng</a>&gt; {</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html#a8cd80e064ffcfc85cdc0067ec30821f9">   14</a></span>&#160;    <a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional&lt;LatLng&gt;</a> operator() (<span class="keyword">const</span> <a class="code" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">Convertible</a>&amp; value, <a class="code" href="structmbgl_1_1style_1_1conversion_1_1Error.html">Error</a>&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;};</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;} <span class="comment">// namespace conversion</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;} <span class="comment">// namespace style</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span>style {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span>conversion {</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;            </div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">template</span>&lt;&gt;</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html">   13</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structmbgl_1_1style_1_1conversion_1_1Converter.html">Converter</a>&lt;<a class="code" href="classmbgl_1_1LatLng.html">LatLng</a>&gt; {</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html#a9618dff2b994d0709f2d3b7ff49e45a6">   15</a></span>&#160;    std::optional&lt;LatLng&gt; operator() (<span class="keyword">const</span> <a class="code" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">Convertible</a>&amp; value, <a class="code" href="structmbgl_1_1style_1_1conversion_1_1Error.html">Error</a>&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;};</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;} <span class="comment">// namespace conversion</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;} <span class="comment">// namespace style</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;} <span class="comment">// namespace mbgl</span></div>
 <div class="ttc" id="aclassmbgl_1_1LatLng_html"><div class="ttname"><a href="classmbgl_1_1LatLng.html">mbgl::LatLng</a></div><div class="ttdef"><b>Definition:</b> <a href="geo_8hpp_source.html#l00024">geo.hpp:24</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1style_1_1conversion_1_1Convertible_html"><div class="ttname"><a href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">mbgl::style::conversion::Convertible</a></div><div class="ttdef"><b>Definition:</b> <a href="conversion__impl_8hpp_source.html#l00096">conversion_impl.hpp:96</a></div></div>
 <div class="ttc" id="aconversion_8hpp_html"><div class="ttname"><a href="conversion_8hpp.html">conversion.hpp</a></div></div>
 <div class="ttc" id="ageo_8hpp_html"><div class="ttname"><a href="geo_8hpp.html">geo.hpp</a></div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_a170f540a1fc3f7a49ed57c8fe40e632b"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">mbgl::style::expression::dsl::error</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; error(std::string)</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anamespacembgl_html_aa6a95f917451eaac0acffd8f137cba1c"><div class="ttname"><a href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">mbgl::optional</a></div><div class="ttdeci">std::experimental::optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition:</b> <a href="optional_8hpp_source.html#l00008">optional.hpp:8</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 <div class="ttc" id="astructmbgl_1_1style_1_1conversion_1_1Converter_html"><div class="ttname"><a href="structmbgl_1_1style_1_1conversion_1_1Converter.html">mbgl::style::conversion::Converter</a></div><div class="ttdef"><b>Definition:</b> <a href="conversion_8hpp_source.html#l00021">conversion.hpp:21</a></div></div>
 <div class="ttc" id="astructmbgl_1_1style_1_1conversion_1_1Error_html"><div class="ttname"><a href="structmbgl_1_1style_1_1conversion_1_1Error.html">mbgl::style::conversion::Error</a></div><div class="ttdef"><b>Definition:</b> <a href="conversion_8hpp_source.html#l00013">conversion.hpp:13</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

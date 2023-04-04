@@ -7,6 +7,6 @@ var classmbgl_1_1style_1_1expression_1_1Literal =
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1Literal.html#a81ed63b644adb13220bf73e6736dd29a", null ],
     [ "getValue", "classmbgl_1_1style_1_1expression_1_1Literal.html#a3e936f99db69dce894c053afa5b222c6", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1Literal.html#ad0c91088fbe7f59f5b67083481a971eb", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Literal.html#af7cc214a3a1abf00a15c90966a249648", null ],
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Literal.html#a169b7541922075d8e36c749303910ee0", null ],
     [ "serialize", "classmbgl_1_1style_1_1expression_1_1Literal.html#a859865728a4f1224da72c83b68bd3202", null ]
 ];

@@ -92,9 +92,9 @@ $(document).ready(function(){initNavTree('conversion_2layer_8hpp_source.html',''
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="layer_8hpp.html">mbgl/style/layer.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="conversion_8hpp.html">mbgl/style/conversion.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span>style {</div>
@@ -103,10 +103,10 @@ $(document).ready(function(){initNavTree('conversion_2layer_8hpp_source.html',''
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">template</span> &lt;&gt;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">struct </span>Converter&lt;<a class="code" href="namespacestd.html">std</a>::unique_ptr&lt;Layer&gt;&gt; {</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    optional&lt;std::unique_ptr&lt;Layer&gt;&gt; operator()(<span class="keyword">const</span> Convertible&amp; value, Error&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    std::optional&lt;std::unique_ptr&lt;Layer&gt;&gt; operator()(<span class="keyword">const</span> Convertible&amp; value, Error&amp; <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">error</a>) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;};</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="namespacembgl_1_1style_1_1conversion.html#a99303a12e74b49b364d8b90b13a0ba23">   19</a></span>&#160;<a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional&lt;Error&gt;</a> <a class="code" href="namespacembgl_1_1style_1_1conversion.html#a99303a12e74b49b364d8b90b13a0ba23">setPaintProperties</a>(Layer&amp; layer, <span class="keyword">const</span> <a class="code" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">Convertible</a>&amp; value);</div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="namespacembgl_1_1style_1_1conversion.html#ad5b2b20fcfe4154f706b295894cf9b53">   19</a></span>&#160;std::optional&lt;Error&gt; <a class="code" href="namespacembgl_1_1style_1_1conversion.html#ad5b2b20fcfe4154f706b295894cf9b53">setPaintProperties</a>(Layer&amp; layer, <span class="keyword">const</span> <a class="code" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">Convertible</a>&amp; value);</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;} <span class="comment">// namespace conversion</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;} <span class="comment">// namespace style</span></div>
@@ -114,12 +114,10 @@ $(document).ready(function(){initNavTree('conversion_2layer_8hpp_source.html',''
 <div class="ttc" id="aclassmbgl_1_1style_1_1conversion_1_1Convertible_html"><div class="ttname"><a href="classmbgl_1_1style_1_1conversion_1_1Convertible.html">mbgl::style::conversion::Convertible</a></div><div class="ttdef"><b>Definition:</b> <a href="conversion__impl_8hpp_source.html#l00096">conversion_impl.hpp:96</a></div></div>
 <div class="ttc" id="aconversion_8hpp_html"><div class="ttname"><a href="conversion_8hpp.html">conversion.hpp</a></div></div>
 <div class="ttc" id="alayer_8hpp_html"><div class="ttname"><a href="layer_8hpp.html">layer.hpp</a></div></div>
-<div class="ttc" id="anamespacembgl_1_1style_1_1conversion_html_a99303a12e74b49b364d8b90b13a0ba23"><div class="ttname"><a href="namespacembgl_1_1style_1_1conversion.html#a99303a12e74b49b364d8b90b13a0ba23">mbgl::style::conversion::setPaintProperties</a></div><div class="ttdeci">optional&lt; Error &gt; setPaintProperties(Layer &amp;layer, const Convertible &amp;value)</div></div>
+<div class="ttc" id="anamespacembgl_1_1style_1_1conversion_html_ad5b2b20fcfe4154f706b295894cf9b53"><div class="ttname"><a href="namespacembgl_1_1style_1_1conversion.html#ad5b2b20fcfe4154f706b295894cf9b53">mbgl::style::conversion::setPaintProperties</a></div><div class="ttdeci">std::optional&lt; Error &gt; setPaintProperties(Layer &amp;layer, const Convertible &amp;value)</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_a170f540a1fc3f7a49ed57c8fe40e632b"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a170f540a1fc3f7a49ed57c8fe40e632b">mbgl::style::expression::dsl::error</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; error(std::string)</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anamespacembgl_html_aa6a95f917451eaac0acffd8f137cba1c"><div class="ttname"><a href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">mbgl::optional</a></div><div class="ttdeci">std::experimental::optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition:</b> <a href="optional_8hpp_source.html#l00008">optional.hpp:8</a></div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdef"><b>Definition:</b> <a href="tile__id_8hpp_source.html#l00256">tile_id.hpp:256</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

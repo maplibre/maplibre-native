@@ -64,21 +64,24 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "actor_8hpp.html",
-"classmbgl_1_1FileSourceManager.html#a462800e66dde382b60590fcf8e7a25ee",
-"classmbgl_1_1MapOptions.html#ad4850632bf13596eaa78756bdf6b58b4",
-"classmbgl_1_1Response_1_1Error.html#a2e77727020d7ae797aad1439411ea530a38c300f4fc9ce8a77aad4a30de05cad8",
-"classmbgl_1_1style_1_1Image.html#a352624f212be33b20d87740d861b0154",
-"classmbgl_1_1style_1_1expression_1_1BasicComparison.html#a0bb976c63411637842dc30fe70d68ddd",
-"classmbgl_1_1style_1_1expression_1_1ParsingContext.html#a47db67ce91fc27dd993c47bbd9bf2328",
-"dir_b257a8b604797a3f995df8091f36df0c.html",
-"functions_vars_o.html",
-"image__source_8hpp_source.html",
-"namespacembgl.html#aaf49647a789036d0afc8411f5ebdfb47ac3636e09fae62a62466b8574fb72d02d",
-"namespacembgl_1_1platform.html#af7e4568c7827d519c98073cf5b04ea4f",
-"namespacembgl_1_1util.html#a4f3ba088cd34e71ba4cb920db27014c0",
-"string_8hpp.html#ae9cb0f4081c3426ffdd67376c48bd9b4",
-"structmbgl_1_1style_1_1expression_1_1type_1_1BooleanType.html#a2a0fd3570d77f604f81bfd5947b4d69a",
-"util_2geojson_8hpp.html#a68520f359f4fb625b983df023196a890"
+"classmbgl_1_1FileSource.html#aee93a9d679099ef51a9d7b77b5d88b2f",
+"classmbgl_1_1MapOptions.html#a746ee3e68dab1bd501e938fcc01ce8d9",
+"classmbgl_1_1Response.html#a94647214898db709acf650218608bd1b",
+"classmbgl_1_1style_1_1CircleLayer.html#a576d5598d962d5a7094c93c07ffb902d",
+"classmbgl_1_1style_1_1HillshadeLayer.html#af3a5981b3c660baa4e2bb7a0a7799b74",
+"classmbgl_1_1style_1_1RasterLayer.html#a06d052f5989bb7e3988434f7fece5bbc",
+"classmbgl_1_1style_1_1TransitionOptions.html#a00250900f172977c80035d795476f1de",
+"classmbgl_1_1style_1_1expression_1_1In.html#a9ee0e95d89bcbbad5c5bc76f40de4fb1",
+"constants_8hpp.html#aa8f2af430f247d81fca05c064f0ba117",
+"find__zoom__curve_8hpp.html#aa367a1c79df01f6134e1068b1f68d5b1",
+"gl__functions_8hpp.html#aa191175bb4fe5d3153a0cc079fc18052",
+"namespacembgl.html#a252018403a3ef71467e52b804c1469e9a198d167ebb04c8c4ef9d7a51a3275b2d",
+"namespacembgl_1_1platform.html#a51ec82f4e5801c59a8023f506b6bc7ab",
+"namespacembgl_1_1style_1_1expression.html#a01fc776e5439634829dffd06e6c050b1",
+"namespaces.html",
+"structmbgl_1_1Resource_1_1TileData.html#aa5a9eb2cc587b8f11bcabed5fce575a3",
+"structmbgl_1_1util_1_1Interpolator.html#addc1b2b56bf2c6f24cb561ee4f873670",
+"value_8hpp_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

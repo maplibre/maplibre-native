@@ -13,7 +13,7 @@ var namespacembgl_1_1style_1_1expression_1_1type =
     [ "ImageType", "structmbgl_1_1style_1_1expression_1_1type_1_1ImageType.html", "structmbgl_1_1style_1_1expression_1_1type_1_1ImageType" ],
     [ "Array", "structmbgl_1_1style_1_1expression_1_1type_1_1Array.html", "structmbgl_1_1style_1_1expression_1_1type_1_1Array" ],
     [ "Type", "namespacembgl_1_1style_1_1expression_1_1type.html#ae780a97069201c9b5d0d0ff72d331ba8", null ],
-    [ "checkSubtype", "namespacembgl_1_1style_1_1expression_1_1type.html#a6fdb4530bd3f702cc4734e56737d7834", null ],
+    [ "checkSubtype", "namespacembgl_1_1style_1_1expression_1_1type.html#aee251c5d059f69a619569656cfe49021", null ],
     [ "toString", "namespacembgl_1_1style_1_1expression_1_1type.html#acaed2e7ee3fdaf6bd7242ca7bc716e5a", null ],
     [ "Boolean", "namespacembgl_1_1style_1_1expression_1_1type.html#aaabfa595176e16149d37081c85a3dac6", null ],
     [ "Collator", "namespacembgl_1_1style_1_1expression_1_1type.html#ad086f176e9ab544d825ddde67bae20bd", null ],

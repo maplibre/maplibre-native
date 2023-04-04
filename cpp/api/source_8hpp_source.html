@@ -93,13 +93,13 @@ $(document).ready(function(){initNavTree('source_8hpp_source.html',''); initResi
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="types_8hpp.html">mbgl/style/types.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="chrono_8hpp.html">mbgl/util/chrono.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="immutable_8hpp.html">mbgl/util/immutable.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;mapbox/util/type_wrapper.hpp&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;mapbox/util/type_wrapper.hpp&gt;</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
@@ -136,7 +136,7 @@ $(document).ready(function(){initNavTree('source_8hpp_source.html',''); initResi
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="namespacembgl_1_1style.html#ae40dd78a0d5dbdec51158da3f5a7a709">SourceType</a> getType() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a> getID() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    optional&lt;std::string&gt; getAttribution() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    std::optional&lt;std::string&gt; getAttribution() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="comment">// The data from the volatile sources are not stored in a persistent storage.</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">bool</span> isVolatile() const noexcept;</div>
@@ -151,8 +151,8 @@ $(document).ready(function(){initNavTree('source_8hpp_source.html',''); initResi
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    SourceObserver* observer = <span class="keywordtype">nullptr</span>;</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    virtual <span class="keywordtype">void</span> loadDescription(FileSource&amp;) = 0;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keywordtype">void</span> setPrefetchZoomDelta(<a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional</a>&lt;uint8_t&gt; delta) noexcept;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional</a>&lt;uint8_t&gt; getPrefetchZoomDelta() const noexcept;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keywordtype">void</span> setPrefetchZoomDelta(<a class="code" href="namespacestd.html">std</a>::optional&lt;uint8_t&gt; delta) noexcept;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="namespacestd.html">std</a>::optional&lt;uint8_t&gt; getPrefetchZoomDelta() const noexcept;</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">// If the given source supports loading tiles from a server,</span></div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="comment">// sets the minimum tile update interval.</span></div>
@@ -174,8 +174,8 @@ $(document).ready(function(){initNavTree('source_8hpp_source.html',''); initResi
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="comment">// minimum zoom level of a parent tile that could be used in place of an ideal</span></div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="comment">// tile during rendering would be zoom 0. By default, no limit is set, so any</span></div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="comment">// parent tile may be used.</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordtype">void</span> setMaxOverscaleFactorForParentTiles(<a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional</a>&lt;uint8_t&gt; overscaleFactor) noexcept;</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional</a>&lt;uint8_t&gt; getMaxOverscaleFactorForParentTiles() const noexcept;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordtype">void</span> setMaxOverscaleFactorForParentTiles(<a class="code" href="namespacestd.html">std</a>::optional&lt;uint8_t&gt; overscaleFactor) noexcept;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <a class="code" href="namespacestd.html">std</a>::optional&lt;uint8_t&gt; getMaxOverscaleFactorForParentTiles() const noexcept;</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordtype">void</span> dumpDebugLogs() const;</div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    virtual <span class="keywordtype">bool</span> supportsLayerType(const <a class="code" href="namespacembgl.html">mbgl</a>::style::LayerTypeInfo*) const = 0;</div>
@@ -202,9 +202,8 @@ $(document).ready(function(){initNavTree('source_8hpp_source.html',''); initResi
 <div class="ttc" id="anamespacembgl_1_1style_html_ae40dd78a0d5dbdec51158da3f5a7a709"><div class="ttname"><a href="namespacembgl_1_1style.html#ae40dd78a0d5dbdec51158da3f5a7a709">mbgl::style::SourceType</a></div><div class="ttdeci">SourceType</div><div class="ttdef"><b>Definition:</b> <a href="types_8hpp_source.html#l00010">types.hpp:10</a></div></div>
 <div class="ttc" id="anamespacembgl_1_1style_html_ae6d59ea91a653c7e57588780918e0293af31bbdd1b3e85bccd652680e16935819"><div class="ttname"><a href="namespacembgl_1_1style.html#ae6d59ea91a653c7e57588780918e0293af31bbdd1b3e85bccd652680e16935819">mbgl::style::SymbolZOrderType::Source</a></div><div class="ttdeci">@ Source</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anamespacembgl_html_aa6a95f917451eaac0acffd8f137cba1c"><div class="ttname"><a href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">mbgl::optional</a></div><div class="ttdeci">std::experimental::optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition:</b> <a href="optional_8hpp_source.html#l00008">optional.hpp:8</a></div></div>
-<div class="ttc" id="anamespacembgl_html_afeaf2eb805c334a86d8faa77a9663018"><div class="ttname"><a href="namespacembgl.html#afeaf2eb805c334a86d8faa77a9663018">mbgl::Duration</a></div><div class="ttdeci">Clock::duration Duration</div><div class="ttdef"><b>Definition:</b> <a href="chrono_8hpp_source.html#l00017">chrono.hpp:17</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
+<div class="ttc" id="anamespacembgl_html_afeaf2eb805c334a86d8faa77a9663018"><div class="ttname"><a href="namespacembgl.html#afeaf2eb805c334a86d8faa77a9663018">mbgl::Duration</a></div><div class="ttdeci">Clock::duration Duration</div><div class="ttdef"><b>Definition:</b> <a href="chrono_8hpp_source.html#l00018">chrono.hpp:18</a></div></div>
+<div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdef"><b>Definition:</b> <a href="tile__id_8hpp_source.html#l00256">tile_id.hpp:256</a></div></div>
 <div class="ttc" id="atypes_8hpp_html"><div class="ttname"><a href="types_8hpp.html">types.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

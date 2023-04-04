@@ -90,49 +90,46 @@ $(document).ready(function(){initNavTree('enum_8hpp_source.html',''); initResiza
 <div class="contents">
 <a href="enum_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160; </div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html">   12</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Enum.html">Enum</a> {</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">   14</a></span>&#160;    <span class="keyword">using</span> <a class="code" href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">Type</a> = T;</div>
-<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a4aa27eac2c0aa5f5dce47d4f53b87df8">   15</a></span>&#160;    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classmbgl_1_1Enum.html#a4aa27eac2c0aa5f5dce47d4f53b87df8">toString</a>(T);</div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a706f9e47bb88e6e7243e6d2d051a8a1c">   16</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">optional&lt;T&gt;</a> <a class="code" href="classmbgl_1_1Enum.html#a706f9e47bb88e6e7243e6d2d051a8a1c">toEnum</a>(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp;);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;};</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="enum_8hpp.html#a23982fc927c0edb84fabbd9f648b5660">   19</a></span>&#160;<span class="preprocessor">#define MBGL_DEFINE_ENUM(T, ...)                                                   \</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">static const constexpr std::pair&lt;const T, const char *&gt; T##_names[] = __VA_ARGS__; \</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">template &lt;&gt;                                                                        \</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">const char * Enum&lt;T&gt;::toString(T t) {                                              \</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">    auto it = std::find_if(std::begin(T##_names), std::end(T##_names),             \</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">        [&amp;] (const auto&amp; v) { return t == v.first; });                             \</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">    assert(it != std::end(T##_names)); return it-&gt;second;                          \</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">}                                                                                  \</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">template &lt;&gt;                                                                        \</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">optional&lt;T&gt; Enum&lt;T&gt;::toEnum(const std::string&amp; s) {                                \</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">    auto it = std::find_if(std::begin(T##_names), std::end(T##_names),             \</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">        [&amp;] (const auto&amp; v) { return s == v.second; });                            \</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">    return it == std::end(T##_names) ? optional&lt;T&gt;() : it-&gt;first;                  \</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">}</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;} <span class="comment">// namespace mbgl</span></div>
-<div class="ttc" id="aclassmbgl_1_1Enum_html"><div class="ttname"><a href="classmbgl_1_1Enum.html">mbgl::Enum</a></div><div class="ttdef"><b>Definition:</b> <a href="enum_8hpp_source.html#l00012">enum.hpp:12</a></div></div>
-<div class="ttc" id="aclassmbgl_1_1Enum_html_a3ee4010a2225bd5619948d99e682e204"><div class="ttname"><a href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">mbgl::Enum::Type</a></div><div class="ttdeci">T Type</div><div class="ttdef"><b>Definition:</b> <a href="enum_8hpp_source.html#l00014">enum.hpp:14</a></div></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html">   11</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Enum.html">Enum</a> {</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">   13</a></span>&#160;    <span class="keyword">using</span> <a class="code" href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">Type</a> = T;</div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a4aa27eac2c0aa5f5dce47d4f53b87df8">   14</a></span>&#160;    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classmbgl_1_1Enum.html#a4aa27eac2c0aa5f5dce47d4f53b87df8">toString</a>(T);</div>
+<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="classmbgl_1_1Enum.html#a64b26b1c3e8ad789f0cddbdf27070146">   15</a></span>&#160;    <span class="keyword">static</span> std::optional&lt;T&gt; <a class="code" href="classmbgl_1_1Enum.html#a64b26b1c3e8ad789f0cddbdf27070146">toEnum</a>(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp;);</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;};</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="enum_8hpp.html#a23982fc927c0edb84fabbd9f648b5660">   18</a></span>&#160;<span class="preprocessor">#define MBGL_DEFINE_ENUM(T, ...)                                                   \</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">static const constexpr std::pair&lt;const T, const char *&gt; T##_names[] = __VA_ARGS__; \</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">template &lt;&gt;                                                                        \</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">const char * Enum&lt;T&gt;::toString(T t) {                                              \</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">    auto it = std::find_if(std::begin(T##_names), std::end(T##_names),             \</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">        [&amp;] (const auto&amp; v) { return t == v.first; });                             \</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">    assert(it != std::end(T##_names)); return it-&gt;second;                          \</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">}                                                                                  \</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">                                                                                   \</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">template &lt;&gt;                                                                        \</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">std::optional&lt;T&gt; Enum&lt;T&gt;::toEnum(const std::string&amp; s) {                                \</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    auto it = std::find_if(std::begin(T##_names), std::end(T##_names),             \</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">        [&amp;] (const auto&amp; v) { return s == v.second; });                            \</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">    return it == std::end(T##_names) ? std::optional&lt;T&gt;() : it-&gt;first;                  \</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">}</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="ttc" id="aclassmbgl_1_1Enum_html"><div class="ttname"><a href="classmbgl_1_1Enum.html">mbgl::Enum</a></div><div class="ttdef"><b>Definition:</b> <a href="enum_8hpp_source.html#l00011">enum.hpp:11</a></div></div>
+<div class="ttc" id="aclassmbgl_1_1Enum_html_a3ee4010a2225bd5619948d99e682e204"><div class="ttname"><a href="classmbgl_1_1Enum.html#a3ee4010a2225bd5619948d99e682e204">mbgl::Enum::Type</a></div><div class="ttdeci">T Type</div><div class="ttdef"><b>Definition:</b> <a href="enum_8hpp_source.html#l00013">enum.hpp:13</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1Enum_html_a4aa27eac2c0aa5f5dce47d4f53b87df8"><div class="ttname"><a href="classmbgl_1_1Enum.html#a4aa27eac2c0aa5f5dce47d4f53b87df8">mbgl::Enum::toString</a></div><div class="ttdeci">static const char * toString(T)</div></div>
-<div class="ttc" id="aclassmbgl_1_1Enum_html_a706f9e47bb88e6e7243e6d2d051a8a1c"><div class="ttname"><a href="classmbgl_1_1Enum.html#a706f9e47bb88e6e7243e6d2d051a8a1c">mbgl::Enum::toEnum</a></div><div class="ttdeci">static optional&lt; T &gt; toEnum(const std::string &amp;)</div></div>
+<div class="ttc" id="aclassmbgl_1_1Enum_html_a64b26b1c3e8ad789f0cddbdf27070146"><div class="ttname"><a href="classmbgl_1_1Enum.html#a64b26b1c3e8ad789f0cddbdf27070146">mbgl::Enum::toEnum</a></div><div class="ttdeci">static std::optional&lt; T &gt; toEnum(const std::string &amp;)</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_aa2e21231396635ff52d2809ca8f9e919"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">mbgl::style::expression::dsl::string</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; string(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anamespacembgl_html_aa6a95f917451eaac0acffd8f137cba1c"><div class="ttname"><a href="namespacembgl.html#aa6a95f917451eaac0acffd8f137cba1c">mbgl::optional</a></div><div class="ttdeci">std::experimental::optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition:</b> <a href="optional_8hpp_source.html#l00008">optional.hpp:8</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

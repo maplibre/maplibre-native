@@ -93,7 +93,7 @@ $(document).ready(function(){initNavTree('functions_o.html',''); initResizable()
 , <a class="el" href="classmbgl_1_1MessageImpl.html#ae1250a0a1a898ee73d5d8bc9bf6192c1">mbgl::MessageImpl&lt; Object, MemberFn, ArgsTuple &gt;</a>
 </li>
 <li>objectMember
-: <a class="el" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html#af7c40b372203178b4b5882f09e8ba2cf">mbgl::style::conversion::Convertible</a>
+: <a class="el" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html#a8c997958f8e369b1b69a76ef54ac77dd">mbgl::style::conversion::Convertible</a>
 </li>
 <li>ObjectType()
 : <a class="el" href="structmbgl_1_1style_1_1expression_1_1type_1_1ObjectType.html#addd2d52e71dd18bcecabe5b5c43d2410">mbgl::style::expression::type::ObjectType</a>
@@ -153,6 +153,10 @@ $(document).ready(function(){initNavTree('functions_o.html',''); initResizable()
 </li>
 <li>onRecord()
 : <a class="el" href="classmbgl_1_1Log_1_1Observer.html#ab903c85271e24fbc099f144fb9177778">mbgl::Log::Observer</a>
+</li>
+<li>onRegisterShaders()
+: <a class="el" href="classmbgl_1_1MapObserver.html#a355c18cf9952209b7d7df8c04d02a848">mbgl::MapObserver</a>
+, <a class="el" href="classmbgl_1_1RendererObserver.html#a227cd4d5e1c5e6dadea2f7b91fb6cf91">mbgl::RendererObserver</a>
 </li>
 <li>onRemoveUnusedStyleImages()
 : <a class="el" href="classmbgl_1_1RendererObserver.html#a12d85cc6331b8dd84c87363fda3f11d8">mbgl::RendererObserver</a>
@@ -218,25 +222,25 @@ $(document).ready(function(){initNavTree('functions_o.html',''); initResizable()
 , <a class="el" href="structmbgl_1_1FontStackHasher.html#a617dc11339253b542d95d6c99e3da16c">mbgl::FontStackHasher</a>
 , <a class="el" href="classmbgl_1_1Message.html#a7a8bb73633c9dae8b46f6d26e0bfe2db">mbgl::Message</a>
 , <a class="el" href="classmbgl_1_1MessageImpl.html#ab4164b990253fb44a060ffe676349154">mbgl::MessageImpl&lt; Object, MemberFn, ArgsTuple &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01bool_01_4.html#a86d37f8d74cd1c40bf1130e712a6f67b">mbgl::style::conversion::Converter&lt; bool &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Color_01_4.html#a0e2f9a3bcfcf9ada1f2b1717a8b7ab23">mbgl::style::conversion::Converter&lt; Color &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01ColorRampPropertyValue_01_4.html#a63ccbd5d34f4da6d053d9f0d18430539">mbgl::style::conversion::Converter&lt; ColorRampPropertyValue &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01CustomGeometrySource_1_1Options_01_4.html#aafe92c3e6bd2c129727db705a27cbc82">mbgl::style::conversion::Converter&lt; CustomGeometrySource::Options &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Formatted_01_4.html#a7a09df728eb5291cdf02e9fe751a39ae">mbgl::style::conversion::Converter&lt; expression::Formatted &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Image_01_4.html#a68e6709303b82901b2a930c1ea960c49">mbgl::style::conversion::Converter&lt; expression::Image &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Filter_01_4.html#a54da7d1e3b1cbdd893e9f7bf47b20d57">mbgl::style::conversion::Converter&lt; Filter &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01float_01_4.html#a15a25628538edd972e09aa1cac13f192">mbgl::style::conversion::Converter&lt; float &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01GeoJSON_01_4.html#a65d5eb3bc5941af0ebaeba48ba4e9f3f">mbgl::style::conversion::Converter&lt; GeoJSON &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01GeoJSONOptions_01_4.html#a61cf711b61d3c53a9d498d84f36476b5">mbgl::style::conversion::Converter&lt; GeoJSONOptions &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html#a8cd80e064ffcfc85cdc0067ec30821f9">mbgl::style::conversion::Converter&lt; LatLng &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Light_01_4.html#a4ce0e6be58d9f986a627557f35b0c82d">mbgl::style::conversion::Converter&lt; Light &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Position_01_4.html#a593c3874c984f0e1e861e11c0fb94542">mbgl::style::conversion::Converter&lt; Position &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01PropertyValue_3_01T_01_4_01_4.html#a21867eda61739fb8f6d4a5b74a16c7b1">mbgl::style::conversion::Converter&lt; PropertyValue&lt; T &gt; &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01style_1_1Rotation_01_4.html#a0e2fe25d58f9caf9142053570947c83b">mbgl::style::conversion::Converter&lt; style::Rotation &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Tileset_01_4.html#ae5d9a80d50056c09abfe963c5f59bf88">mbgl::style::conversion::Converter&lt; Tileset &gt;</a>
-, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01TransitionOptions_01_4.html#a27e813e138d370b4f5515b93696a2ce3">mbgl::style::conversion::Converter&lt; TransitionOptions &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01bool_01_4.html#aba8d44400be8ff540c0ef411e7bba92e">mbgl::style::conversion::Converter&lt; bool &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Color_01_4.html#af658e12baf0376908fe863f4a0a3dad4">mbgl::style::conversion::Converter&lt; Color &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01ColorRampPropertyValue_01_4.html#a283f4f65764b4cf92d8ed1b2f373bf7e">mbgl::style::conversion::Converter&lt; ColorRampPropertyValue &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01CustomGeometrySource_1_1Options_01_4.html#ac300000042f22590ec9c69e2c3c6edbe">mbgl::style::conversion::Converter&lt; CustomGeometrySource::Options &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Formatted_01_4.html#ae15903f5687bf4b1185d55a1fa6d6fa8">mbgl::style::conversion::Converter&lt; expression::Formatted &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Image_01_4.html#a70002f6e57c7ec3dd2c34ed9ce5809ad">mbgl::style::conversion::Converter&lt; expression::Image &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Filter_01_4.html#a685e53f3f526cb79730266b184c1c194">mbgl::style::conversion::Converter&lt; Filter &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01float_01_4.html#a9d7494969c52d2fb8b2526aa80ad3f88">mbgl::style::conversion::Converter&lt; float &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01GeoJSON_01_4.html#aa7f14f6f5f7f85bc2a5e99a23d207818">mbgl::style::conversion::Converter&lt; GeoJSON &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01GeoJSONOptions_01_4.html#a5aabd9494d322a671693a8e6731ab1d1">mbgl::style::conversion::Converter&lt; GeoJSONOptions &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01LatLng_01_4.html#a9618dff2b994d0709f2d3b7ff49e45a6">mbgl::style::conversion::Converter&lt; LatLng &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Light_01_4.html#af448e205a0b5fd4258885be85432d443">mbgl::style::conversion::Converter&lt; Light &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Position_01_4.html#af27af07a632e6fb5975d1b9b007d4f50">mbgl::style::conversion::Converter&lt; Position &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01PropertyValue_3_01T_01_4_01_4.html#ad2b4c49feb46de4a4738cd1599501975">mbgl::style::conversion::Converter&lt; PropertyValue&lt; T &gt; &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01style_1_1Rotation_01_4.html#aa69a691d29c53c9a83c9e7475b50256a">mbgl::style::conversion::Converter&lt; style::Rotation &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01Tileset_01_4.html#af6f3583c59851f3cc0dc305a32a257cc">mbgl::style::conversion::Converter&lt; Tileset &gt;</a>
+, <a class="el" href="structmbgl_1_1style_1_1conversion_1_1Converter_3_01TransitionOptions_01_4.html#a1596185c9d7667e3bebcc848dc50b203">mbgl::style::conversion::Converter&lt; TransitionOptions &gt;</a>
 , <a class="el" href="classmbgl_1_1style_1_1Filter.html#a8fcf482df1dd2d3740104c2a57811a9d">mbgl::style::Filter</a>
-, <a class="el" href="structmbgl_1_1ToFeatureType.html#a3dfd2c590f2813d1286ef1b9fa18a620">mbgl::ToFeatureType</a>
+, <a class="el" href="structmbgl_1_1ToFeatureType.html#ad029488e17b3ff58117adf01025c0799">mbgl::ToFeatureType</a>
 , <a class="el" href="structmbgl_1_1util_1_1Interpolator.html#addc1b2b56bf2c6f24cb561ee4f873670">mbgl::util::Interpolator&lt; T, Enabled &gt;</a>
 , <a class="el" href="structmbgl_1_1util_1_1Interpolator_3_01Color_01_4.html#a7f51845e7d40ff9426d6f6356ff26584">mbgl::util::Interpolator&lt; Color &gt;</a>
 , <a class="el" href="structmbgl_1_1util_1_1Interpolator_3_01float_01_4.html#a1c382f152cce94d3c20ff453b6954fb2">mbgl::util::Interpolator&lt; float &gt;</a>
@@ -269,15 +273,16 @@ $(document).ready(function(){initNavTree('functions_o.html',''); initResizable()
 , <a class="el" href="classmbgl_1_1UnwrappedTileID.html#abfb8443415707b3fdf9c822994efe10c">mbgl::UnwrappedTileID</a>
 </li>
 <li>operator=()
-: <a class="el" href="classmbgl_1_1ClientOptions.html#adaa0e22a70408528da5d3cd93236d6c2">mbgl::ClientOptions</a>
+: <a class="el" href="classmbgl_1_1ClientOptions.html#a1639bb0ceaf6d81499bfcb5fa21d2a6d">mbgl::ClientOptions</a>
 , <a class="el" href="classmbgl_1_1FileSource.html#a38aeda582a8608b4aff3ec7d973c907e">mbgl::FileSource</a>
 , <a class="el" href="classmbgl_1_1gfx_1_1RenderableResource.html#af980d0ed0f227eb518818a9d1185e59f">mbgl::gfx::RenderableResource</a>
 , <a class="el" href="classmbgl_1_1gfx_1_1RendererBackend.html#aca9accb9edaa95ea07c5e883456ece10">mbgl::gfx::RendererBackend</a>
+, <a class="el" href="classmbgl_1_1gfx_1_1ShaderRegistry.html#a0dcfc513ae3aad286624315a088f83be">mbgl::gfx::ShaderRegistry</a>
 , <a class="el" href="classmbgl_1_1Image.html#a9e4bf1842bb0b1d43fdd17ec9e0e55df">mbgl::Image&lt; Mode &gt;</a>
-, <a class="el" href="classmbgl_1_1Immutable.html#a0489a06d06eb64826c85e70982c9ff53">mbgl::Immutable&lt; T &gt;</a>
+, <a class="el" href="classmbgl_1_1Immutable.html#ac20f916bf42e75f4ac86a6dab9a4a3f0">mbgl::Immutable&lt; T &gt;</a>
 , <a class="el" href="classmbgl_1_1Mutable.html#aede1fc2f77908835375581e840124e83">mbgl::Mutable&lt; T &gt;</a>
 , <a class="el" href="classmbgl_1_1Pass.html#ab7ada6ef920cb8c93f659e427b3fe7c6">mbgl::Pass&lt; T &gt;</a>
-, <a class="el" href="classmbgl_1_1ResourceOptions.html#a2318e88e39fd1fdfeb0d7548e57f1684">mbgl::ResourceOptions</a>
+, <a class="el" href="classmbgl_1_1ResourceOptions.html#a52bec89ad40ca1f7655fa157a972787a">mbgl::ResourceOptions</a>
 , <a class="el" href="classmbgl_1_1Response.html#a3cbe5818485ca68baa405b20f0bbdc54">mbgl::Response</a>
 , <a class="el" href="classmbgl_1_1style_1_1conversion_1_1Convertible.html#aff28e4ec62bdfd9550bbb3b40f269d8f">mbgl::style::conversion::Convertible</a>
 , <a class="el" href="classmbgl_1_1style_1_1expression_1_1ParsingContext.html#afa4431c81946ca10a8891ae910cb85f1">mbgl::style::expression::ParsingContext</a>
@@ -353,7 +358,7 @@ $(document).ready(function(){initNavTree('functions_o.html',''); initResizable()
 , <a class="el" href="structmbgl_1_1util_1_1UnitBezier.html#a2f35661243dec2f167697759b31be8db">mbgl::util::UnitBezier</a>
 </li>
 <li>orientation
-: <a class="el" href="structmbgl_1_1FreeCameraOptions.html#ae01bcf72132af5fc2d29de7dea79378e">mbgl::FreeCameraOptions</a>
+: <a class="el" href="structmbgl_1_1FreeCameraOptions.html#ad1215d3c0a6d32cf7c0b63e7e31d5ea6">mbgl::FreeCameraOptions</a>
 </li>
 <li>outlineColor
 : <a class="el" href="classmbgl_1_1FillAnnotation.html#a57ff3db01d675a88e10dc4f755dc7ec4">mbgl::FillAnnotation</a>

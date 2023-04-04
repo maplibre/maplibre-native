@@ -90,19 +90,20 @@ $(document).ready(function(){initNavTree('i18n_2number__format_8hpp_source.html'
 <div class="contents">
 <a href="i18n_2number__format_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160; </div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">namespace </span>platform {</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
-<div class="line"><a name="l00008"></a><span class="lineno"><a class="line" href="namespacembgl_1_1platform.html#afaa4bbe6443472c194feee5479a6bf22">    8</a></span>&#160;<a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a> <a class="code" href="namespacembgl_1_1platform.html#afaa4bbe6443472c194feee5479a6bf22">formatNumber</a>(<span class="keywordtype">double</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a5bbf32a92aba32d0dbb40808206007dc">number</a>,</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;                         <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; localeId,</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;                         <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; currency,</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;                         uint8_t minFractionDigits,</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;                         uint8_t maxFractionDigits);</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;} <span class="comment">// namespace platform</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>platform {</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
+<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="namespacembgl_1_1platform.html#afaa4bbe6443472c194feee5479a6bf22">    9</a></span>&#160;<a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a> <a class="code" href="namespacembgl_1_1platform.html#afaa4bbe6443472c194feee5479a6bf22">formatNumber</a>(<span class="keywordtype">double</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a5bbf32a92aba32d0dbb40808206007dc">number</a>,</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;                         <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; localeId,</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;                         <span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; currency,</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;                         uint8_t minFractionDigits,</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;                         uint8_t maxFractionDigits);</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;} <span class="comment">// namespace platform</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;} <span class="comment">// namespace mbgl</span></div>
 <div class="ttc" id="anamespacembgl_1_1platform_html_afaa4bbe6443472c194feee5479a6bf22"><div class="ttname"><a href="namespacembgl_1_1platform.html#afaa4bbe6443472c194feee5479a6bf22">mbgl::platform::formatNumber</a></div><div class="ttdeci">std::string formatNumber(double number, const std::string &amp;localeId, const std::string &amp;currency, uint8_t minFractionDigits, uint8_t maxFractionDigits)</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_a5bbf32a92aba32d0dbb40808206007dc"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a5bbf32a92aba32d0dbb40808206007dc">mbgl::style::expression::dsl::number</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; number(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_aa2e21231396635ff52d2809ca8f9e919"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">mbgl::style::expression::dsl::string</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; string(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>

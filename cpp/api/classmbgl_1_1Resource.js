@@ -31,7 +31,7 @@ var classmbgl_1_1Resource =
       [ "Online", "classmbgl_1_1Resource.html#aba6d94d6d20b44f2a638d911d53c5a01a54f664c70c22054ea0d8d26fc3997ce7", null ],
       [ "Offline", "classmbgl_1_1Resource.html#aba6d94d6d20b44f2a638d911d53c5a01a8d9da4bc0e49a50e09ac9f7e56789d39", null ]
     ] ],
-    [ "Resource", "classmbgl_1_1Resource.html#a8404b21360761f4222ba1dde48eae85b", null ],
+    [ "Resource", "classmbgl_1_1Resource.html#ab00f86b5950299f5b7c9d5ddff20032c", null ],
     [ "hasLoadingMethod", "classmbgl_1_1Resource.html#a494775cf3255aaaf2c5462e2c96c9529", null ],
     [ "setPriority", "classmbgl_1_1Resource.html#a677dfa4cd0400b60d772e3cfe807939a", null ],
     [ "setUsage", "classmbgl_1_1Resource.html#a299939be0e5190337945e8409e94a612", null ],
@@ -39,12 +39,12 @@ var classmbgl_1_1Resource =
     [ "loadingMethod", "classmbgl_1_1Resource.html#ab9fc19bfdf4da30f803287742a9181d5", null ],
     [ "minimumUpdateInterval", "classmbgl_1_1Resource.html#a563ca9197561a36a3b561333fd269a0e", null ],
     [ "priorData", "classmbgl_1_1Resource.html#af1833eda99d9383b2b2f6b2a8cc976f0", null ],
-    [ "priorEtag", "classmbgl_1_1Resource.html#ac0d6d1c921b1ae3ea00ef5f788daaa90", null ],
-    [ "priorExpires", "classmbgl_1_1Resource.html#a4b63ff415e626ab4e5999ae910a69296", null ],
+    [ "priorEtag", "classmbgl_1_1Resource.html#aa13704dc69dbe0a29eda5a6c58caee80", null ],
+    [ "priorExpires", "classmbgl_1_1Resource.html#a2de078302596bdc108e87f73099c6d71", null ],
     [ "priority", "classmbgl_1_1Resource.html#a92011a7d83f2bb1a567cd180e49169fa", null ],
-    [ "priorModified", "classmbgl_1_1Resource.html#ad10c855ce1c59fea7a6f82227e77f613", null ],
+    [ "priorModified", "classmbgl_1_1Resource.html#a774a19ab688dd6186b70870a3ed10d4b", null ],
     [ "storagePolicy", "classmbgl_1_1Resource.html#a44ab4411cf4c642699795568afabbff0", null ],
-    [ "tileData", "classmbgl_1_1Resource.html#a1a2f4dfa36c49f447c8b1e8b46dcc3e6", null ],
+    [ "tileData", "classmbgl_1_1Resource.html#afb718ae98ad408792ae664c8e6910046", null ],
     [ "url", "classmbgl_1_1Resource.html#a71a8ff5efd5378b78c5a9fea7e32c5e3", null ],
     [ "usage", "classmbgl_1_1Resource.html#a4553d27127abd132e26ec9a885acb55d", null ]
 ];

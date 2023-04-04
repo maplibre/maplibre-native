@@ -90,52 +90,50 @@ $(document).ready(function(){initNavTree('mailbox_8hpp_source.html',''); initRes
 <div class="contents">
 <a href="mailbox_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160; </div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">class </span>Scheduler;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">class </span>Message;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html">   17</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Mailbox.html">Mailbox</a> : <span class="keyword">public</span> std::enable_shared_from_this&lt;Mailbox&gt; {</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;   </div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#ab1d563b791e4f5b1a68ffbbeebb7d796">   24</a></span>&#160;    <a class="code" href="classmbgl_1_1Mailbox.html#ab1d563b791e4f5b1a68ffbbeebb7d796">Mailbox</a>();</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    </div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a4d67f071864f0655e071c26aa35f9812">   26</a></span>&#160;    <a class="code" href="classmbgl_1_1Mailbox.html#a4d67f071864f0655e071c26aa35f9812">Mailbox</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>&amp;);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a8c8df49bb613ba221e206cce8afee79c">   31</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#a8c8df49bb613ba221e206cce8afee79c">open</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>&amp; scheduler_);</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a274ab5ff87bfdc38265b280d8898ba6b">   32</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#a274ab5ff87bfdc38265b280d8898ba6b">close</a>();</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">class </span>Scheduler;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">class </span>Message;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
+<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html">   15</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Mailbox.html">Mailbox</a> : <span class="keyword">public</span> std::enable_shared_from_this&lt;Mailbox&gt; {</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;   </div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#ab1d563b791e4f5b1a68ffbbeebb7d796">   22</a></span>&#160;    <a class="code" href="classmbgl_1_1Mailbox.html#ab1d563b791e4f5b1a68ffbbeebb7d796">Mailbox</a>();</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    </div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a4d67f071864f0655e071c26aa35f9812">   24</a></span>&#160;    <a class="code" href="classmbgl_1_1Mailbox.html#a4d67f071864f0655e071c26aa35f9812">Mailbox</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>&amp;);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a8c8df49bb613ba221e206cce8afee79c">   29</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#a8c8df49bb613ba221e206cce8afee79c">open</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>&amp; scheduler_);</div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a274ab5ff87bfdc38265b280d8898ba6b">   30</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#a274ab5ff87bfdc38265b280d8898ba6b">close</a>();</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a6fc43dd0f4cf08262fd0bcabcb4032e6">   32</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classmbgl_1_1Mailbox.html#a6fc43dd0f4cf08262fd0bcabcb4032e6">isOpen</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a6fc43dd0f4cf08262fd0bcabcb4032e6">   34</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classmbgl_1_1Mailbox.html#a6fc43dd0f4cf08262fd0bcabcb4032e6">isOpen</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#ab76f59f458730f6610c3b352d2336d50">   36</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#ab76f59f458730f6610c3b352d2336d50">push</a>(std::unique_ptr&lt;Message&gt;);</div>
-<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#abf85ddcc467cecadb579e104a49d691a">   37</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#abf85ddcc467cecadb579e104a49d691a">receive</a>();</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#aff192f8f5c039f2318776cabd2504e5d">   39</a></span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#aff192f8f5c039f2318776cabd2504e5d">maybeReceive</a>(<span class="keyword">const</span> std::weak_ptr&lt;Mailbox&gt;&amp;);</div>
-<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a06865e582010189cbaa52ee8b5258c76">   40</a></span>&#160;    <span class="keyword">static</span> std::function&lt;void()&gt; <a class="code" href="classmbgl_1_1Mailbox.html#a06865e582010189cbaa52ee8b5258c76">makeClosure</a>(std::weak_ptr&lt;Mailbox&gt;);</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    mapbox::base::WeakPtr&lt;Scheduler&gt; weakScheduler;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    std::recursive_mutex receivingMutex;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    std::mutex pushingMutex;</div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#ab76f59f458730f6610c3b352d2336d50">   34</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#ab76f59f458730f6610c3b352d2336d50">push</a>(std::unique_ptr&lt;Message&gt;);</div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#abf85ddcc467cecadb579e104a49d691a">   35</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#abf85ddcc467cecadb579e104a49d691a">receive</a>();</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#aff192f8f5c039f2318776cabd2504e5d">   37</a></span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Mailbox.html#aff192f8f5c039f2318776cabd2504e5d">maybeReceive</a>(<span class="keyword">const</span> std::weak_ptr&lt;Mailbox&gt;&amp;);</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classmbgl_1_1Mailbox.html#a06865e582010189cbaa52ee8b5258c76">   38</a></span>&#160;    <span class="keyword">static</span> std::function&lt;void()&gt; <a class="code" href="classmbgl_1_1Mailbox.html#a06865e582010189cbaa52ee8b5258c76">makeClosure</a>(std::weak_ptr&lt;Mailbox&gt;);</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    mapbox::base::WeakPtr&lt;Scheduler&gt; weakScheduler;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    std::recursive_mutex receivingMutex;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    std::mutex pushingMutex;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">bool</span> closed { <span class="keyword">false</span> };</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordtype">bool</span> closed { <span class="keyword">false</span> };</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    std::mutex queueMutex;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    std::queue&lt;std::unique_ptr&lt;Message&gt;&gt; queue;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;};</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;} <span class="comment">// namespace mbgl</span></div>
-<div class="ttc" id="aclassmbgl_1_1Mailbox_html"><div class="ttname"><a href="classmbgl_1_1Mailbox.html">mbgl::Mailbox</a></div><div class="ttdef"><b>Definition:</b> <a href="mailbox_8hpp_source.html#l00017">mailbox.hpp:17</a></div></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    std::mutex queueMutex;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    std::queue&lt;std::unique_ptr&lt;Message&gt;&gt; queue;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;};</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="ttc" id="aclassmbgl_1_1Mailbox_html"><div class="ttname"><a href="classmbgl_1_1Mailbox.html">mbgl::Mailbox</a></div><div class="ttdef"><b>Definition:</b> <a href="mailbox_8hpp_source.html#l00015">mailbox.hpp:15</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1Mailbox_html_a06865e582010189cbaa52ee8b5258c76"><div class="ttname"><a href="classmbgl_1_1Mailbox.html#a06865e582010189cbaa52ee8b5258c76">mbgl::Mailbox::makeClosure</a></div><div class="ttdeci">static std::function&lt; void()&gt; makeClosure(std::weak_ptr&lt; Mailbox &gt;)</div></div>
 <div class="ttc" id="aclassmbgl_1_1Mailbox_html_a274ab5ff87bfdc38265b280d8898ba6b"><div class="ttname"><a href="classmbgl_1_1Mailbox.html#a274ab5ff87bfdc38265b280d8898ba6b">mbgl::Mailbox::close</a></div><div class="ttdeci">void close()</div></div>
 <div class="ttc" id="aclassmbgl_1_1Mailbox_html_a4d67f071864f0655e071c26aa35f9812"><div class="ttname"><a href="classmbgl_1_1Mailbox.html#a4d67f071864f0655e071c26aa35f9812">mbgl::Mailbox::Mailbox</a></div><div class="ttdeci">Mailbox(Scheduler &amp;)</div></div>
@@ -147,7 +145,6 @@ $(document).ready(function(){initNavTree('mailbox_8hpp_source.html',''); initRes
 <div class="ttc" id="aclassmbgl_1_1Mailbox_html_aff192f8f5c039f2318776cabd2504e5d"><div class="ttname"><a href="classmbgl_1_1Mailbox.html#aff192f8f5c039f2318776cabd2504e5d">mbgl::Mailbox::maybeReceive</a></div><div class="ttdeci">static void maybeReceive(const std::weak_ptr&lt; Mailbox &gt; &amp;)</div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html"><div class="ttname"><a href="classmbgl_1_1Scheduler.html">mbgl::Scheduler</a></div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00036">scheduler.hpp:36</a></div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

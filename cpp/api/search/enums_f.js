@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['textjustifytype_3697',['TextJustifyType',['../namespacembgl_1_1style.html#af8525b115b2b8a7e1ed09a59f7741f82',1,'mbgl::style']]],
-  ['texttransformtype_3698',['TextTransformType',['../namespacembgl_1_1style.html#a18fd2cf5b87823420f34786122b76f81',1,'mbgl::style']]],
-  ['textwritingmodetype_3699',['TextWritingModeType',['../namespacembgl_1_1style.html#a9b47b137cca5ed7e0e05a05b443941e8',1,'mbgl::style']]],
-  ['tilenecessity_3700',['TileNecessity',['../namespacembgl.html#acb7480cb6eb8cf2b7c5238f95545a9cf',1,'mbgl']]],
-  ['translateanchortype_3701',['TranslateAnchorType',['../namespacembgl_1_1style.html#a1010740bb57c3733fa520fd42d740597',1,'mbgl::style']]],
-  ['type_3702',['Type',['../classmbgl_1_1gfx_1_1Backend.html#acf257eeecee7a194d105f63275a1e04b',1,'mbgl::gfx::Backend::Type()'],['../classmbgl_1_1util_1_1RunLoop.html#a946b7dc8d49a9b51366d2ac791513163',1,'mbgl::util::RunLoop::Type()']]],
-  ['typeannotationoption_3703',['TypeAnnotationOption',['../namespacembgl_1_1style_1_1expression.html#a35623c7b26acf1c31d7e16677f504ea8',1,'mbgl::style::expression']]]
+  ['scheme_5046',['Scheme',['../classmbgl_1_1Tileset.html#a0859947f7eb01f64845d6fd2ad70dee3',1,'mbgl::Tileset']]],
+  ['scopetype_5047',['ScopeType',['../classmbgl_1_1gfx_1_1BackendScope.html#a33ed9ed3bfc7be04ae74068909c01088',1,'mbgl::gfx::BackendScope']]],
+  ['sourcetype_5048',['SourceType',['../namespacembgl_1_1style.html#ae40dd78a0d5dbdec51158da3f5a7a709',1,'mbgl::style']]],
+  ['status_5049',['Status',['../classmbgl_1_1NetworkStatus.html#aacbab31113cafb1f7c9c7d41b4641386',1,'mbgl::NetworkStatus']]],
+  ['storagepolicy_5050',['StoragePolicy',['../classmbgl_1_1Resource.html#aa7a13065c757b524b097f9000ec0d0d9',1,'mbgl::Resource']]],
+  ['symbolanchortype_5051',['SymbolAnchorType',['../namespacembgl_1_1style.html#aba1d69160a6d9d30a23f3651efd14aef',1,'mbgl::style']]],
+  ['symbolplacementtype_5052',['SymbolPlacementType',['../namespacembgl_1_1style.html#ae0bdb60a28e3d3767be0f8be2049def3',1,'mbgl::style']]],
+  ['symbolzordertype_5053',['SymbolZOrderType',['../namespacembgl_1_1style.html#ae6d59ea91a653c7e57588780918e0293',1,'mbgl::style']]]
 ];

@@ -12,7 +12,7 @@ var classmbgl_1_1Tileset =
     [ "operator!=", "classmbgl_1_1Tileset.html#a2326d41710a7662755fbf9d40d7f351b", null ],
     [ "operator==", "classmbgl_1_1Tileset.html#ac2476e06add3acd8996b63f652325d61", null ],
     [ "attribution", "classmbgl_1_1Tileset.html#a71e19be49723a621c7d4ae437b1aa647", null ],
-    [ "bounds", "classmbgl_1_1Tileset.html#aa3769dd5b9490d2ff3a9826205ff83b1", null ],
+    [ "bounds", "classmbgl_1_1Tileset.html#a4535cae9caaa27135e9c30e701cc19a5", null ],
     [ "encoding", "classmbgl_1_1Tileset.html#ac19f36985066d9e39bf48a738a20cfa0", null ],
     [ "scheme", "classmbgl_1_1Tileset.html#a48ae88aac6820864c85c7dac9be6d13a", null ],
     [ "tiles", "classmbgl_1_1Tileset.html#a02231821e104c57a50385778c62ca96e", null ],

@@ -5,6 +5,6 @@ var classmbgl_1_1style_1_1expression_1_1Coercion =
     [ "evaluate", "classmbgl_1_1style_1_1expression_1_1Coercion.html#a5ccd3f0618223fdaa45a94a2f6efeb5a", null ],
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1Coercion.html#a0503b37f96e2802098a6956a4d072fca", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1Coercion.html#a33413b1ec4481bf34c8463acc19a0522", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Coercion.html#a253a446d1060485e0b221fc02cc7c373", null ],
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Coercion.html#a1418399ab2039937181cffd97238c710", null ],
     [ "serialize", "classmbgl_1_1style_1_1expression_1_1Coercion.html#ae3acda915f109985a0bb4a7c8c4fcf1e", null ]
 ];

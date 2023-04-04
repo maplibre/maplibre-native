@@ -8,6 +8,6 @@ var classmbgl_1_1style_1_1expression_1_1Step =
     [ "getInput", "classmbgl_1_1style_1_1expression_1_1Step.html#a828e61f94601ce89ed02c1dc31aaa9a5", null ],
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1Step.html#a83b69ae6b8dc5f47c3c0e32b0fec2be7", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1Step.html#ad031ad10e4f37514e2c7f8918ac6e7aa", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Step.html#a0d46459411a99be6f1c02a06f056ba52", null ],
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Step.html#a0abcb69b94492ea7789b6e7f6e18d0e8", null ],
     [ "serialize", "classmbgl_1_1style_1_1expression_1_1Step.html#a882f480efe6dde435d4c61fb2fe8c440", null ]
 ];

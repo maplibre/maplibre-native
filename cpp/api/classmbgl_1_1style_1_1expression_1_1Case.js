@@ -6,5 +6,5 @@ var classmbgl_1_1style_1_1expression_1_1Case =
     [ "evaluate", "classmbgl_1_1style_1_1expression_1_1Case.html#a9a8635aab9b49085e84f383c6367a0da", null ],
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1Case.html#a830f25be2b91dbc6cbcd8a8d0d88773d", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1Case.html#a7ea225e49441c001ff37bc35000db8f9", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Case.html#a23e8d58341794b0635b242796cd4f00e", null ]
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Case.html#ab4c8ad16a6aa46037797fededbabd837", null ]
 ];

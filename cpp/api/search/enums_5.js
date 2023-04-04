@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['hillshadeilluminationanchortype_3670',['HillshadeIlluminationAnchorType',['../namespacembgl_1_1style.html#aa135492a05444c995b58804b5cc62646',1,'mbgl::style']]]
+  ['featuretype_5025',['FeatureType',['../namespacembgl.html#a0db3d18f0d48e15bb502948e66dfeea8',1,'mbgl']]],
+  ['filesourcetype_5026',['FileSourceType',['../namespacembgl.html#adf7174b5dd87b03d8a2db63c342294f6',1,'mbgl']]]
 ];

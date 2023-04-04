@@ -30,9 +30,9 @@ var namespacembgl_1_1style_1_1conversion =
     [ "ValueFactory< expression::Formatted >", "structmbgl_1_1style_1_1conversion_1_1ValueFactory_3_01expression_1_1Formatted_01_4.html", null ],
     [ "Converter< expression::Image >", "structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Image_01_4.html", "structmbgl_1_1style_1_1conversion_1_1Converter_3_01expression_1_1Image_01_4" ],
     [ "ValueFactory< expression::Image >", "structmbgl_1_1style_1_1conversion_1_1ValueFactory_3_01expression_1_1Image_01_4.html", null ],
-    [ "convert", "namespacembgl_1_1style_1_1conversion.html#a76bf6375dff788b122e80dd75f62bbec", null ],
-    [ "convertFunctionToExpression", "namespacembgl_1_1style_1_1conversion.html#a569194aea2cffbfe9ff8b8bbdeb40bdf", null ],
-    [ "convertFunctionToExpression", "namespacembgl_1_1style_1_1conversion.html#ad67439b1a44d28c3014a6b47818f9699", null ],
+    [ "convert", "namespacembgl_1_1style_1_1conversion.html#afd2f7cbe4d0342db9b88bb02a6ead54e", null ],
+    [ "convertFunctionToExpression", "namespacembgl_1_1style_1_1conversion.html#a25b4fc7ced1e763dc8ea2e76904d1e56", null ],
+    [ "convertFunctionToExpression", "namespacembgl_1_1style_1_1conversion.html#ab6e9ea2a59a98be479735af6174e23b3", null ],
     [ "convertTokenStringToExpression", "namespacembgl_1_1style_1_1conversion.html#a39b9646bedfb6041b131da12682e6b20", null ],
     [ "convertTokenStringToFormatExpression", "namespacembgl_1_1style_1_1conversion.html#ae0f83d419d7e4a6ddc92fd8ca91b041b", null ],
     [ "convertTokenStringToImageExpression", "namespacembgl_1_1style_1_1conversion.html#ab9a565a23988a11dfc7d5e11cf01aa86", null ],
@@ -42,6 +42,6 @@ var namespacembgl_1_1style_1_1conversion =
     [ "makeStyleProperty", "namespacembgl_1_1style_1_1conversion.html#ad54497e951c1988b1c4593b028d5ec30", null ],
     [ "makeStyleProperty", "namespacembgl_1_1style_1_1conversion.html#a56fcde75cfc48604ed1df6822c5bde25", null ],
     [ "makeValue", "namespacembgl_1_1style_1_1conversion.html#a4a1a1441aa294453eaf50b72e8fde9ed", null ],
-    [ "parseGeoJSON", "namespacembgl_1_1style_1_1conversion.html#a4ed8ec17545b2f79e5f523f828f4923a", null ],
-    [ "setPaintProperties", "namespacembgl_1_1style_1_1conversion.html#a99303a12e74b49b364d8b90b13a0ba23", null ]
+    [ "parseGeoJSON", "namespacembgl_1_1style_1_1conversion.html#aa67f5295265159e824c6677c1a4249bc", null ],
+    [ "setPaintProperties", "namespacembgl_1_1style_1_1conversion.html#ad5b2b20fcfe4154f706b295894cf9b53", null ]
 ];

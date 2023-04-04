@@ -8,8 +8,8 @@ var classmbgl_1_1Response_1_1Error =
       [ "RateLimit", "classmbgl_1_1Response_1_1Error.html#a2e77727020d7ae797aad1439411ea530a5b70480fbb8adb69a265c5edad77341b", null ],
       [ "Other", "classmbgl_1_1Response_1_1Error.html#a2e77727020d7ae797aad1439411ea530a6311ae17c1ee52b36e68aaf4ad066387", null ]
     ] ],
-    [ "Error", "classmbgl_1_1Response_1_1Error.html#ae1926cc534a722e5a3b4e18deea5d7b4", null ],
+    [ "Error", "classmbgl_1_1Response_1_1Error.html#ac858f1c456a927301c2ca4b015533c0e", null ],
     [ "message", "classmbgl_1_1Response_1_1Error.html#a3fd3faf86164f68799112f78e8a0eb58", null ],
     [ "reason", "classmbgl_1_1Response_1_1Error.html#a2a0b0855fbeba8aa29de8290fe6e2147", null ],
-    [ "retryAfter", "classmbgl_1_1Response_1_1Error.html#a2401f5517f75c93d37767ae29b36b73a", null ]
+    [ "retryAfter", "classmbgl_1_1Response_1_1Error.html#ac3c76386ad66dff1a1ee9da518c6d9ed", null ]
 ];

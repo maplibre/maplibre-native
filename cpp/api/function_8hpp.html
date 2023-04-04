@@ -96,6 +96,7 @@ $(document).ready(function(){initNavTree('function_8hpp.html',''); initResizable
 <code>#include &lt;<a class="el" href="conversion_8hpp_source.html">mbgl/style/conversion.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="expression_8hpp_source.html">mbgl/style/expression/expression.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="value_8hpp_source.html">mbgl/style/expression/value.hpp</a>&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 </div>
 <p><a href="function_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -118,11 +119,11 @@ Functions</h2></td></tr>
 <tr class="separator:ab9a565a23988a11dfc7d5e11cf01aa86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39b9646bedfb6041b131da12682e6b20"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; expression::Expression &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#a39b9646bedfb6041b131da12682e6b20">mbgl::style::conversion::convertTokenStringToExpression</a> (const std::string &amp;)</td></tr>
 <tr class="separator:a39b9646bedfb6041b131da12682e6b20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad67439b1a44d28c3014a6b47818f9699"><td class="memItemLeft" align="right" valign="top">optional&lt; std::unique_ptr&lt; expression::Expression &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#ad67439b1a44d28c3014a6b47818f9699">mbgl::style::conversion::convertFunctionToExpression</a> (expression::type::Type, const Convertible &amp;, Error &amp;, bool convertTokens)</td></tr>
-<tr class="separator:ad67439b1a44d28c3014a6b47818f9699"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a569194aea2cffbfe9ff8b8bbdeb40bdf"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:a569194aea2cffbfe9ff8b8bbdeb40bdf"><td class="memTemplItemLeft" align="right" valign="top">optional&lt; PropertyExpression&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#a569194aea2cffbfe9ff8b8bbdeb40bdf">mbgl::style::conversion::convertFunctionToExpression</a> (const Convertible &amp;value, Error &amp;error, bool convertTokens)</td></tr>
-<tr class="separator:a569194aea2cffbfe9ff8b8bbdeb40bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6e9ea2a59a98be479735af6174e23b3"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::unique_ptr&lt; expression::Expression &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#ab6e9ea2a59a98be479735af6174e23b3">mbgl::style::conversion::convertFunctionToExpression</a> (expression::type::Type, const Convertible &amp;, Error &amp;, bool convertTokens)</td></tr>
+<tr class="separator:ab6e9ea2a59a98be479735af6174e23b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25b4fc7ced1e763dc8ea2e76904d1e56"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a25b4fc7ced1e763dc8ea2e76904d1e56"><td class="memTemplItemLeft" align="right" valign="top">std::optional&lt; PropertyExpression&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1style_1_1conversion.html#a25b4fc7ced1e763dc8ea2e76904d1e56">mbgl::style::conversion::convertFunctionToExpression</a> (const Convertible &amp;value, Error &amp;error, bool convertTokens)</td></tr>
+<tr class="separator:a25b4fc7ced1e763dc8ea2e76904d1e56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

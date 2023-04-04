@@ -13,5 +13,9 @@ var dir_cf9e71e2fd80a20aa1c940144d48267a =
     [ "renderer_backend.hpp", "gfx_2renderer__backend_8hpp.html", "gfx_2renderer__backend_8hpp" ],
     [ "rendering_stats.hpp", "rendering__stats_8hpp.html", [
       [ "RenderingStats", "structmbgl_1_1gfx_1_1RenderingStats.html", "structmbgl_1_1gfx_1_1RenderingStats" ]
+    ] ],
+    [ "shader.hpp", "shader_8hpp.html", "shader_8hpp" ],
+    [ "shader_registry.hpp", "shader__registry_8hpp.html", [
+      [ "ShaderRegistry", "classmbgl_1_1gfx_1_1ShaderRegistry.html", "classmbgl_1_1gfx_1_1ShaderRegistry" ]
     ] ]
 ];

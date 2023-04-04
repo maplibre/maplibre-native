@@ -94,15 +94,15 @@ $(document).ready(function(){initNavTree('layer_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="style__property_8hpp.html">mbgl/style/style_property.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="types_8hpp.html">mbgl/style/types.hpp</a>&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="immutable_8hpp.html">mbgl/util/immutable.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="optional_8hpp.html">mbgl/util/optional.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;mapbox/util/type_wrapper.hpp&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;mapbox/util/type_wrapper.hpp&gt;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">namespace </span>style {</div>
@@ -155,7 +155,7 @@ $(document).ready(function(){initNavTree('layer_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="keywordtype">void</span> setMaxZoom(<span class="keywordtype">float</span>);</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="comment">// Dynamic properties</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    optional&lt;conversion::Error&gt; setProperty(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; name, <span class="keyword">const</span> conversion::Convertible&amp; value);</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    std::optional&lt;conversion::Error&gt; setProperty(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; name, <span class="keyword">const</span> conversion::Convertible&amp; value);</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="keyword">virtual</span> StyleProperty getProperty(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp;) <span class="keyword">const</span> = 0;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="namespacembgl.html#a6e6adeecad5c94902c9dc56ce6facb8d">Value</a> serialize() <span class="keyword">const</span>;</div>
@@ -187,15 +187,15 @@ $(document).ready(function(){initNavTree('layer_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <span class="keyword">virtual</span> Mutable&lt;Impl&gt; mutableBaseImpl() <span class="keyword">const</span> = 0;</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordtype">void</span> serializeProperty(<a class="code" href="namespacembgl.html#a6e6adeecad5c94902c9dc56ce6facb8d">Value</a>&amp;, <span class="keyword">const</span> StyleProperty&amp;, <span class="keyword">const</span> <span class="keywordtype">char</span>* propertyName, <span class="keywordtype">bool</span> isPaint) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keyword">virtual</span> optional&lt;conversion::Error&gt; setPropertyInternal(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; name,</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keyword">virtual</span> std::optional&lt;conversion::Error&gt; setPropertyInternal(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; name,</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                                                            <span class="keyword">const</span> conversion::Convertible&amp; value) = 0;</div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    LayerObserver* observer;</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    mapbox::base::WeakPtrFactory&lt;Layer&gt; weakFactory {<span class="keyword">this</span>};</div>
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    optional&lt;conversion::Error&gt; setVisibility(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    optional&lt;conversion::Error&gt; setMinZoom(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    optional&lt;conversion::Error&gt; setMaxZoom(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    std::optional&lt;conversion::Error&gt; setVisibility(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    std::optional&lt;conversion::Error&gt; setMinZoom(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    std::optional&lt;conversion::Error&gt; setMaxZoom(<span class="keyword">const</span> conversion::Convertible&amp; value);</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;};</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160; </div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;} <span class="comment">// namespace style</span></div>
@@ -208,10 +208,9 @@ $(document).ready(function(){initNavTree('layer_8hpp_source.html',''); initResiz
 <div class="ttc" id="anamespacembgl_1_1style_html_ae40dd78a0d5dbdec51158da3f5a7a709acc026343458d4beac4a1f6cd47791bdc"><div class="ttname"><a href="namespacembgl_1_1style.html#ae40dd78a0d5dbdec51158da3f5a7a709acc026343458d4beac4a1f6cd47791bdc">mbgl::style::SourceType::RasterDEM</a></div><div class="ttdeci">@ RasterDEM</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_html_ae6d59ea91a653c7e57588780918e0293af31bbdd1b3e85bccd652680e16935819"><div class="ttname"><a href="namespacembgl_1_1style.html#ae6d59ea91a653c7e57588780918e0293af31bbdd1b3e85bccd652680e16935819">mbgl::style::SymbolZOrderType::Source</a></div><div class="ttdeci">@ Source</div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anamespacembgl_html_a6e6adeecad5c94902c9dc56ce6facb8d"><div class="ttname"><a href="namespacembgl.html#a6e6adeecad5c94902c9dc56ce6facb8d">mbgl::Value</a></div><div class="ttdeci">mapbox::base::Value Value</div><div class="ttdef"><b>Definition:</b> <a href="feature_8hpp_source.html#l00010">feature.hpp:10</a></div></div>
-<div class="ttc" id="anamespacembgl_html_a8b31921b31cd2379ed8dac6939ce5411"><div class="ttname"><a href="namespacembgl.html#a8b31921b31cd2379ed8dac6939ce5411">mbgl::Geometry</a></div><div class="ttdeci">mapbox::geometry::geometry&lt; T &gt; Geometry</div><div class="ttdef"><b>Definition:</b> <a href="geometry_8hpp_source.html#l00040">geometry.hpp:40</a></div></div>
+<div class="ttc" id="anamespacembgl_html_a6e6adeecad5c94902c9dc56ce6facb8d"><div class="ttname"><a href="namespacembgl.html#a6e6adeecad5c94902c9dc56ce6facb8d">mbgl::Value</a></div><div class="ttdeci">mapbox::base::Value Value</div><div class="ttdef"><b>Definition:</b> <a href="feature_8hpp_source.html#l00011">feature.hpp:11</a></div></div>
+<div class="ttc" id="anamespacembgl_html_a8b31921b31cd2379ed8dac6939ce5411"><div class="ttname"><a href="namespacembgl.html#a8b31921b31cd2379ed8dac6939ce5411">mbgl::Geometry</a></div><div class="ttdeci">mapbox::geometry::geometry&lt; T &gt; Geometry</div><div class="ttdef"><b>Definition:</b> <a href="geometry_8hpp_source.html#l00042">geometry.hpp:42</a></div></div>
 <div class="ttc" id="anamespacembgl_html_acb7480cb6eb8cf2b7c5238f95545a9cfab651efdb98a5d6bd2b3935d0c3f4a5e2"><div class="ttname"><a href="namespacembgl.html#acb7480cb6eb8cf2b7c5238f95545a9cfab651efdb98a5d6bd2b3935d0c3f4a5e2">mbgl::TileNecessity::Required</a></div><div class="ttdeci">@ Required</div></div>
-<div class="ttc" id="aoptional_8hpp_html"><div class="ttname"><a href="optional_8hpp.html">optional.hpp</a></div></div>
 <div class="ttc" id="astyle__property_8hpp_html"><div class="ttname"><a href="style__property_8hpp.html">style_property.hpp</a></div></div>
 <div class="ttc" id="atypes_8hpp_html"><div class="ttname"><a href="types_8hpp.html">types.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

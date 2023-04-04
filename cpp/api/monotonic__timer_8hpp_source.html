@@ -91,32 +91,29 @@ $(document).ready(function(){initNavTree('monotonic__timer_8hpp_source.html','')
 <a href="monotonic__timer_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;chrono&gt;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="noncopyable_8hpp.html">mbgl/util/noncopyable.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span>util {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
-<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html">   11</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html">MonotonicTimer</a> {</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">   13</a></span>&#160;    <span class="keyword">static</span> std::chrono::duration&lt;double&gt; <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>();</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F, <span class="keyword">typename</span>... Args&gt;</div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">   16</a></span>&#160;    <span class="keyword">inline</span> <span class="keyword">static</span> std::chrono::duration&lt;double&gt; <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">duration</a>(F&amp;&amp; func, Args&amp;&amp;... args) {</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        <span class="keyword">auto</span> start = <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>();</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;        func(std::forward&lt;Args&gt;(args)...);</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>() - start;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    }</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;};</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;} <span class="comment">// namespace util</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;} <span class="comment">// namespace mbgl</span></div>
-<div class="ttc" id="aclassmbgl_1_1util_1_1MonotonicTimer_html"><div class="ttname"><a href="classmbgl_1_1util_1_1MonotonicTimer.html">mbgl::util::MonotonicTimer</a></div><div class="ttdef"><b>Definition:</b> <a href="monotonic__timer_8hpp_source.html#l00011">monotonic_timer.hpp:11</a></div></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>util {</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
+<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html">    9</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html">MonotonicTimer</a> {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">   11</a></span>&#160;    <span class="keyword">static</span> std::chrono::duration&lt;double&gt; <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>();</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F, <span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">   14</a></span>&#160;    <span class="keyword">inline</span> <span class="keyword">static</span> std::chrono::duration&lt;double&gt; <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">duration</a>(F&amp;&amp; func, Args&amp;&amp;... args) {</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <span class="keyword">auto</span> start = <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>();</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        func(std::forward&lt;Args&gt;(args)...);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">now</a>() - start;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    }</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;};</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;} <span class="comment">// namespace util</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="ttc" id="aclassmbgl_1_1util_1_1MonotonicTimer_html"><div class="ttname"><a href="classmbgl_1_1util_1_1MonotonicTimer.html">mbgl::util::MonotonicTimer</a></div><div class="ttdef"><b>Definition:</b> <a href="monotonic__timer_8hpp_source.html#l00009">monotonic_timer.hpp:9</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1util_1_1MonotonicTimer_html_a23001f3ff10d99de60ba18e8a69fdcba"><div class="ttname"><a href="classmbgl_1_1util_1_1MonotonicTimer.html#a23001f3ff10d99de60ba18e8a69fdcba">mbgl::util::MonotonicTimer::now</a></div><div class="ttdeci">static std::chrono::duration&lt; double &gt; now()</div></div>
-<div class="ttc" id="aclassmbgl_1_1util_1_1MonotonicTimer_html_a71994216270f8b7a3a02b97b2dc70635"><div class="ttname"><a href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">mbgl::util::MonotonicTimer::duration</a></div><div class="ttdeci">static std::chrono::duration&lt; double &gt; duration(F &amp;&amp;func, Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition:</b> <a href="monotonic__timer_8hpp_source.html#l00016">monotonic_timer.hpp:16</a></div></div>
+<div class="ttc" id="aclassmbgl_1_1util_1_1MonotonicTimer_html_a71994216270f8b7a3a02b97b2dc70635"><div class="ttname"><a href="classmbgl_1_1util_1_1MonotonicTimer.html#a71994216270f8b7a3a02b97b2dc70635">mbgl::util::MonotonicTimer::duration</a></div><div class="ttdeci">static std::chrono::duration&lt; double &gt; duration(F &amp;&amp;func, Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition:</b> <a href="monotonic__timer_8hpp_source.html#l00014">monotonic_timer.hpp:14</a></div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="anoncopyable_8hpp_html"><div class="ttname"><a href="noncopyable_8hpp.html">noncopyable.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

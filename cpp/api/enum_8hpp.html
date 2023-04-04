@@ -92,10 +92,10 @@ $(document).ready(function(){initNavTree('enum_8hpp.html',''); initResizable(); 
 <div class="title">enum.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="optional_8hpp_source.html">mbgl/util/optional.hpp</a>&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;cassert&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 </div>
 <p><a href="enum_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -151,15 +151,15 @@ Macros</h2></td></tr>
 <div class="line">}                                                                                  \</div>
 <div class="line">                                                                                   \</div>
 <div class="line">template &lt;&gt;                                                                        \</div>
-<div class="line">optional&lt;T&gt; Enum&lt;T&gt;::toEnum(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; s) {                                \</div>
+<div class="line">std::optional&lt;T&gt; Enum&lt;T&gt;::toEnum(<span class="keyword">const</span> <a class="code" href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">std::string</a>&amp; s) {                                \</div>
 <div class="line">    auto it = std::find_if(std::begin(T##_names), std::end(T##_names),             \</div>
 <div class="line">        [&amp;] (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; v) { <span class="keywordflow">return</span> s == v.second; });                            \</div>
-<div class="line">    return it == std::end(T##_names) ? optional&lt;T&gt;() : it-&gt;first;                  \</div>
+<div class="line">    return it == std::end(T##_names) ? std::optional&lt;T&gt;() : it-&gt;first;                  \</div>
 <div class="line">}</div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_a9b2ddc0c34aa096aa5697adaadadd44e"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#a9b2ddc0c34aa096aa5697adaadadd44e">mbgl::style::expression::dsl::toString</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; toString(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>
 <div class="ttc" id="anamespacembgl_1_1style_1_1expression_1_1dsl_html_aa2e21231396635ff52d2809ca8f9e919"><div class="ttname"><a href="namespacembgl_1_1style_1_1expression_1_1dsl.html#aa2e21231396635ff52d2809ca8f9e919">mbgl::style::expression::dsl::string</a></div><div class="ttdeci">std::unique_ptr&lt; Expression &gt; string(std::unique_ptr&lt; Expression &gt;, std::unique_ptr&lt; Expression &gt; def=nullptr)</div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="enum_8hpp_source.html#l00019">19</a> of file <a class="el" href="enum_8hpp_source.html">enum.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="enum_8hpp_source.html#l00018">18</a> of file <a class="el" href="enum_8hpp_source.html">enum.hpp</a>.</p>
 
 </div>
 </div>

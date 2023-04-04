@@ -51,7 +51,6 @@ var dir_07e4eb750e5bf7de6cf6964589d792b6 =
       [ "MonotonicTimer", "classmbgl_1_1util_1_1MonotonicTimer.html", null ]
     ] ],
     [ "noncopyable.hpp", "noncopyable_8hpp.html", "noncopyable_8hpp" ],
-    [ "optional.hpp", "optional_8hpp.html", "optional_8hpp" ],
     [ "pass_types.hpp", "pass__types_8hpp.html", "pass__types_8hpp" ],
     [ "platform.hpp", "platform_8hpp.html", "platform_8hpp" ],
     [ "premultiply.hpp", "premultiply_8hpp.html", "premultiply_8hpp" ],

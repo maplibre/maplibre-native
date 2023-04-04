@@ -9,7 +9,7 @@ var classmbgl_1_1style_1_1expression_1_1Interpolate =
     [ "getOperator", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#a1f60254daac59d7da36611ea35125196", null ],
     [ "interpolationFactor", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#a980f113869d2a162173dfb53bfb691fd", null ],
     [ "operator==", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#ab2529b4c2a3d4265ecc016b443d27e1d", null ],
-    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#a2b7d84d83e18af70b877725599b25a85", null ],
+    [ "possibleOutputs", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#abe3cc676d953bda4934b7177f6e93bfb", null ],
     [ "serialize", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#a5606ee964a322ce9b185b85ff4111be8", null ],
     [ "input", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#a4f2e3bde6a2077132a210dc2e96e8012", null ],
     [ "interpolator", "classmbgl_1_1style_1_1expression_1_1Interpolate.html#aed11bb362615c19d271780da9566dceb", null ],
