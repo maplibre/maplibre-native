@@ -208,3 +208,4 @@ jobs:
           app_type: ANDROID_APP
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}
+          timeout: 28800
