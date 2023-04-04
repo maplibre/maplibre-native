@@ -2,6 +2,7 @@ export BUILDTYPE ?= Debug
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 export CI ?= 0
+export DEV_TEAM ?= ""
 
 # When only the dependencies in the package.json are installed
 # Node.js will error when running a script from the root scripts directory
@@ -155,6 +156,11 @@ ios-lint: ios-pod-lint
 .PHONY: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
+
+#  make ios-sizetest
+.PHONY: ios-sizetest
+ios-sizetest:
+	./scripts/size-check.sh ${DEV_TEAM}
 
 #  make ios-uitest
 .PHONY: ios-uitest
