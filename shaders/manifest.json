@@ -1,0 +1,164 @@
+[
+    {
+        "name": "Prelude",
+        "header": "prelude",
+        "glsl_vert": "_prelude.vertex.glsl",
+        "glsl_frag": "_prelude.fragment.glsl"
+    },
+    {
+        "name": "BackgroundProgram",
+        "header": "background",
+        "glsl_vert": "background.vertex.glsl",
+        "glsl_frag": "background.fragment.glsl"
+    },
+    {
+        "name": "BackgroundPatternProgram",
+        "header": "background_pattern",
+        "glsl_vert": "background_pattern.vertex.glsl",
+        "glsl_frag": "background_pattern.fragment.glsl"
+    },
+    {
+        "name": "CircleProgram",
+        "header": "circle",
+        "glsl_vert": "circle.vertex.glsl",
+        "glsl_frag": "circle.fragment.glsl"
+    },
+    {
+        "name": "ClippingMaskProgram",
+        "header": "clipping_mask",
+        "glsl_vert": "clipping_mask.vertex.glsl",
+        "glsl_frag": "clipping_mask.fragment.glsl"
+    },
+    {
+        "name": "CollisionBoxProgram",
+        "header": "collision_box",
+        "glsl_vert": "collision_box.vertex.glsl",
+        "glsl_frag": "collision_box.fragment.glsl"
+    },
+    {
+        "name": "CollisionCircleProgram",
+        "header": "collision_circle",
+        "glsl_vert": "collision_circle.vertex.glsl",
+        "glsl_frag": "collision_circle.fragment.glsl"
+    },
+    {
+        "name": "DebugProgram",
+        "header": "debug",
+        "glsl_vert": "debug.vertex.glsl",
+        "glsl_frag": "debug.fragment.glsl"
+    },
+    {
+        "name": "FillExtrusionPatternProgram",
+        "header": "fill_extrusion_pattern",
+        "glsl_vert": "fill_extrusion_pattern.vertex.glsl",
+        "glsl_frag": "fill_extrusion_pattern.fragment.glsl"
+    },
+    {
+        "name": "FillExtrusionProgram",
+        "header": "fill_extrusion",
+        "glsl_vert": "fill_extrusion.vertex.glsl",
+        "glsl_frag": "fill_extrusion.fragment.glsl"
+    },
+    {
+        "name": "FillOutlinePatternProgram",
+        "header": "fill_outline_pattern",
+        "glsl_vert": "fill_outline_pattern.vertex.glsl",
+        "glsl_frag": "fill_outline_pattern.fragment.glsl"
+    },
+    {
+        "name": "FillOutlineProgram",
+        "header": "fill_outline",
+        "glsl_vert": "fill_outline.vertex.glsl",
+        "glsl_frag": "fill_outline.fragment.glsl"
+    },
+    {
+        "name": "FillPatternProgram",
+        "header": "fill_pattern",
+        "glsl_vert": "fill_pattern.vertex.glsl",
+        "glsl_frag": "fill_pattern.fragment.glsl"
+    },
+    {
+        "name": "FillProgram",
+        "header": "fill",
+        "glsl_vert": "fill.vertex.glsl",
+        "glsl_frag": "fill.fragment.glsl"
+    },
+    {
+        "name": "HeatmapTextureProgram",
+        "header": "heatmap_texture",
+        "glsl_vert": "heatmap_texture.vertex.glsl",
+        "glsl_frag": "heatmap_texture.fragment.glsl"
+    },
+    {
+        "name": "HeatmapProgram",
+        "header": "heatmap",
+        "glsl_vert": "heatmap.vertex.glsl",
+        "glsl_frag": "heatmap.fragment.glsl"
+    },
+    {
+        "name": "HillshadePrepareProgram",
+        "header": "hillshade_prepare",
+        "glsl_vert": "hillshade_prepare.vertex.glsl",
+        "glsl_frag": "hillshade_prepare.fragment.glsl"
+    },
+    {
+        "name": "HillshadeProgram",
+        "header": "hillshade",
+        "glsl_vert": "hillshade.vertex.glsl",
+        "glsl_frag": "hillshade.fragment.glsl"
+    },
+    {
+        "name": "LineGradientProgram",
+        "header": "line_gradient",
+        "glsl_vert": "line_gradient.vertex.glsl",
+        "glsl_frag": "line_gradient.fragment.glsl"
+    },
+    {
+        "name": "LinePatternProgram",
+        "header": "line_pattern",
+        "glsl_vert": "line_pattern.vertex.glsl",
+        "glsl_frag": "line_pattern.fragment.glsl"
+    },
+    {
+        "name": "LineSDFProgram",
+        "header": "line_sdf",
+        "glsl_vert": "line_sdf.vertex.glsl",
+        "glsl_frag": "line_sdf.fragment.glsl"
+    },
+    {
+        "name": "LineProgram",
+        "header": "line",
+        "glsl_vert": "line.vertex.glsl",
+        "glsl_frag": "line.fragment.glsl"
+    },
+    {
+        "name": "RasterProgram",
+        "header": "raster",
+        "glsl_vert": "raster.vertex.glsl",
+        "glsl_frag": "raster.fragment.glsl"
+    },
+    {
+        "name": "SymbolIconProgram",
+        "header": "symbol_icon",
+        "glsl_vert": "symbol_icon.vertex.glsl",
+        "glsl_frag": "symbol_icon.fragment.glsl"
+    },
+    {
+        "name": "SymbolSDFTextProgram",
+        "header": "symbol_sdf_text",
+        "glsl_vert": "symbol_sdf.vertex.glsl",
+        "glsl_frag": "symbol_sdf.fragment.glsl"
+    },
+    {
+        "name": "SymbolSDFIconProgram",
+        "header": "symbol_sdf_icon",
+        "glsl_vert": "symbol_sdf.vertex.glsl",
+        "glsl_frag": "symbol_sdf.fragment.glsl"
+    },
+    {
+        "name": "SymbolTextAndIconProgram",
+        "header": "symbol_text_and_icon",
+        "glsl_vert": "symbol_text_and_icon.vertex.glsl",
+        "glsl_frag": "symbol_text_and_icon.fragment.glsl"
+    }
+]
