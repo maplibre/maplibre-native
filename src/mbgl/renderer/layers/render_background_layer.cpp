@@ -1,3 +1,4 @@
+#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
@@ -51,6 +52,9 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters &paramet
         : RenderPass::Opaque | RenderPass::Translucent;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+    
+    drawables.clear();
+    drawables.emplace_back(std::make_shared<mbgl::gl::DrawableGL>());
 }
 
 bool RenderBackgroundLayer::hasTransition() const {
@@ -179,7 +183,7 @@ void addPatternIfNeeded(const std::string& id, const LayerPrepareParameters& par
 void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        // Ensures that the pattern bitmap gets copied to atlas bitmap. 
+        // Ensures that the pattern bitmap gets copied to atlas bitmap.
         // Atlas bitmap is uploaded to atlas texture in upload.
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().from.id(), params);
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().to.id(), params);

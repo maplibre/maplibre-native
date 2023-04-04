@@ -140,6 +140,17 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
+    // Drawables
+    {
+        // TODO: sort into proper draw order
+        // auto layerDrawables = renderTree.getDrawables();
+        // std::sort(layerDrawables.begin(), layerDrawables.end(), drawableSorter());
+
+        for (const auto &drawable : renderTree.getDrawables()) {
+            drawable->draw(/*parameters*/);
+        }
+    }
+    
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {

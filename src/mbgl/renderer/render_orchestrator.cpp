@@ -64,10 +64,12 @@ public:
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
                    Immutable<Placement> placement_,
-                   bool updateSymbolOpacities_)
+                   bool updateSymbolOpacities_,
+                   std::vector<gfx::DrawablePtr>&& drawables_ = {})
         : RenderTree(std::move(parameters_)),
           layerRenderItems(std::move(layerRenderItems_)),
           sourceRenderItems(std::move(sourceRenderItems_)),
+          drawables(std::move(drawables_)),
           lineAtlas(lineAtlas_),
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
@@ -89,11 +91,13 @@ public:
         for (const auto& item : sourceRenderItems) result.emplace_back(*item);
         return result;
     }
+    const std::vector<gfx::DrawablePtr>& getDrawables() const override { return drawables; }
     LineAtlas& getLineAtlas() const override { return lineAtlas; }
     PatternAtlas& getPatternAtlas() const override { return patternAtlas; }
 
     std::set<LayerRenderItem> layerRenderItems;
     std::vector<std::unique_ptr<RenderItem>> sourceRenderItems;
+    std::vector<gfx::DrawablePtr> drawables;
     std::reference_wrapper<LineAtlas> lineAtlas;
     std::reference_wrapper<PatternAtlas> patternAtlas;
     RenderLayerReferences layersNeedPlacement;
@@ -294,6 +298,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     layersNeedPlacement.clear();
     auto renderItemsEmplaceHint = layerRenderItems.begin();
 
+    std::vector<gfx::DrawablePtr> drawables;
+    for (const auto& pair : renderLayers) {
+        const auto& layerDrawables = pair.second->getDrawables();
+        drawables.insert(drawables.end(), layerDrawables.begin(), layerDrawables.end());
+    }
+
     // Reserve size for filteredLayersForSource if there are sources.
     if (!sourceImpls->empty()) {
         filteredLayersForSource.reserve(layerImpls->size());
@@ -456,7 +466,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
-                                            symbolBucketsChanged);
+                                            symbolBucketsChanged,
+                                            std::move(drawables));
 }
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry, const RenderedQueryOptions& options) const {

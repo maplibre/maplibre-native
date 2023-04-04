@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -123,6 +124,8 @@ public:
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
 
+    const std::vector<gfx::DrawablePtr>& getDrawables() const { return drawables; }
+
 protected:
     // Checks whether the current hardware can render this layer. If it can't, we'll show a warning
     // in the console to inform the developer.
@@ -141,6 +144,8 @@ protected:
     RenderPass passes = RenderPass::None;
 
     LayerPlacementData placementData;
+
+    std::vector<gfx::DrawablePtr> drawables;
 
 private:
     // Some layers may not render correctly on some hardware when the vertex attribute limit of

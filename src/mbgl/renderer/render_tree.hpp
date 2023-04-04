@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 
 #include <cassert>
@@ -61,6 +62,7 @@ public:
     // Render items
     virtual RenderItems getLayerRenderItems() const = 0;
     virtual RenderItems getSourceRenderItems() const = 0;
+    virtual const std::vector<gfx::DrawablePtr>& getDrawables() const = 0;
     // Resources
     virtual LineAtlas& getLineAtlas() const = 0;
     virtual PatternAtlas& getPatternAtlas() const = 0;
