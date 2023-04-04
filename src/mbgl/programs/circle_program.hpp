@@ -12,7 +12,7 @@ namespace uniforms {
 MBGL_DEFINE_UNIFORM_SCALAR(bool, scale_with_map);
 } // namespace uniforms
 
-class CircleProgram : public Program<
+class CircleProgram final : public Program<
     CircleProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
@@ -28,6 +28,11 @@ class CircleProgram : public Program<
     style::CirclePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"CircleProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     /*

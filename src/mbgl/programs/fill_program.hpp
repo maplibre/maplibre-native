@@ -33,7 +33,7 @@ using FillPatternUniforms = TypeList<
     uniforms::pixel_coord_upper,
     uniforms::pixel_coord_lower>;
 
-class FillProgram : public Program<
+class FillProgram final : public Program<
     FillProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
@@ -42,6 +42,11 @@ class FillProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p) {
@@ -54,7 +59,7 @@ public:
     }
 };
 
-class FillPatternProgram : public Program<
+class FillPatternProgram final : public Program<
     FillPatternProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
@@ -64,6 +69,11 @@ class FillPatternProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillPatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(mat4 matrix,
@@ -75,7 +85,7 @@ public:
                                                    float pixelRatio);
 };
 
-class FillOutlineProgram : public Program<
+class FillOutlineProgram final : public Program<
     FillOutlineProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
@@ -84,10 +94,15 @@ class FillOutlineProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillOutlineProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 
-class FillOutlinePatternProgram : public Program<
+class FillOutlinePatternProgram final : public Program<
     FillOutlinePatternProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
@@ -97,6 +112,11 @@ class FillOutlinePatternProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillOutlinePatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 

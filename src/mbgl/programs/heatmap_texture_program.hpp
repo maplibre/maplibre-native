@@ -9,7 +9,7 @@
 
 namespace mbgl {
 
-class HeatmapTextureProgram : public Program<
+class HeatmapTextureProgram final : public Program<
     HeatmapTextureProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<attributes::pos>,
@@ -22,6 +22,11 @@ class HeatmapTextureProgram : public Program<
         textures::color_ramp>,
     style::Properties<>> {
 public:
+    static constexpr std::string_view Name{"HeatmapTextureProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p) {

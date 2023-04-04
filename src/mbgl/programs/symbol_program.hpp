@@ -195,7 +195,7 @@ public:
     Range<float> coveringZoomStops;
 };
 
-class SymbolProgramBase {
+class SymbolProgramBase : public gfx::Shader {
 public:
     static gfx::Vertex<SymbolLayoutAttributes> layoutVertex(Point<float> labelAnchor,
                                                             Point<float> o,
@@ -382,7 +382,7 @@ public:
     }
 };
 
-class SymbolIconProgram : public SymbolProgram<
+class SymbolIconProgram final : public SymbolProgram<
     SymbolIconProgram,
     gfx::PrimitiveType::Triangle,
     SymbolLayoutAttributes,
@@ -404,6 +404,11 @@ class SymbolIconProgram : public SymbolProgram<
     style::IconPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"SymbolIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolProgram::SymbolProgram;
 
     static LayoutUniformValues layoutUniformValues(bool isText,
@@ -472,7 +477,7 @@ public:
 
 using SymbolTextAndIconProgramUniforms = TypeList<uniforms::texsize_icon>;
 
-class SymbolTextAndIconProgram
+class SymbolTextAndIconProgram final
     : public SymbolProgram<SymbolTextAndIconProgram,
                            gfx::PrimitiveType::Triangle,
                            SymbolLayoutAttributes,
@@ -480,6 +485,11 @@ class SymbolTextAndIconProgram
                            TypeList<textures::texture, textures::texture_icon>,
                            style::TextPaintProperties> {
 public:
+    static constexpr std::string_view Name{"SymbolTextAndIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using BaseProgram = SymbolProgram<SymbolTextAndIconProgram,
                                       gfx::PrimitiveType::Triangle,
                                       SymbolLayoutAttributes,
@@ -504,13 +514,23 @@ public:
                                                    SymbolSDFPart);
 };
 
-class SymbolSDFIconProgram : public SymbolSDFProgram<SymbolSDFIconProgram, style::IconPaintProperties> {
+class SymbolSDFIconProgram final : public SymbolSDFProgram<SymbolSDFIconProgram, style::IconPaintProperties> {
 public:
+    static constexpr std::string_view Name{"SymbolSDFIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolSDFProgram::SymbolSDFProgram;
 };
 
-class SymbolSDFTextProgram : public SymbolSDFProgram<SymbolSDFTextProgram, style::TextPaintProperties> {
+class SymbolSDFTextProgram final : public SymbolSDFProgram<SymbolSDFTextProgram, style::TextPaintProperties> {
 public:
+    static constexpr std::string_view Name{"SymbolSDFTextProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolSDFProgram::SymbolSDFProgram;
 };
 

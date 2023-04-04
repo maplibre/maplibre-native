@@ -17,7 +17,7 @@ using CollisionBoxLayoutAttributes = TypeList<
 
 using CollisionBoxDynamicAttributes = TypeList<attributes::placed, attributes::shift>;
 
-class CollisionBoxProgram : public Program<
+class CollisionBoxProgram final : public Program<
     CollisionBoxProgram,
     gfx::PrimitiveType::Line,
     TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
@@ -29,6 +29,11 @@ class CollisionBoxProgram : public Program<
     style::Properties<>>
 {
 public:
+    static constexpr std::string_view Name{"CollisionBoxProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static gfx::Vertex<CollisionBoxLayoutAttributes> layoutVertex(Point<float> a, Point<float> anchor, Point<float> o) {
@@ -108,7 +113,7 @@ public:
 };
 
 
-class CollisionCircleProgram : public Program<
+class CollisionCircleProgram final : public Program<
     CollisionCircleProgram,
     gfx::PrimitiveType::Triangle,
     TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
@@ -121,6 +126,11 @@ class CollisionCircleProgram : public Program<
     style::Properties<>>
 {
 public:
+    static constexpr std::string_view Name{"CollisionCircleProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static gfx::Vertex<CollisionBoxLayoutAttributes> vertex(Point<float> a, Point<float> anchor, Point<float> o) {

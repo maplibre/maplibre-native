@@ -39,7 +39,7 @@ using BackgroundPatternUniforms = TypeList<
     uniforms::pixel_coord_lower,
     uniforms::tile_units_to_pixels>;
 
-class BackgroundProgram : public Program<
+class BackgroundProgram final : public Program<
     BackgroundProgram,
     gfx::PrimitiveType::Triangle,
     BackgroundLayoutAttributes,
@@ -48,10 +48,15 @@ class BackgroundProgram : public Program<
     style::Properties<>>
 {
 public:
+    static constexpr std::string_view Name{"BackgroundProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 
-class BackgroundPatternProgram : public Program<
+class BackgroundPatternProgram final : public Program<
     BackgroundPatternProgram,
     gfx::PrimitiveType::Triangle,
     BackgroundLayoutAttributes,
@@ -61,6 +66,11 @@ class BackgroundPatternProgram : public Program<
     style::Properties<>>
 {
 public:
+    static constexpr std::string_view Name{"BackgroundPatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(mat4 matrix,

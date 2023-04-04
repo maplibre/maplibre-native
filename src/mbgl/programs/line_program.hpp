@@ -30,7 +30,7 @@ using LineLayoutAttributes = TypeList<
     attributes::pos_normal,
     attributes::data<uint8_t, 4>>;
 
-class LineProgram : public Program<
+class LineProgram final : public Program<
     LineProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
@@ -43,6 +43,11 @@ class LineProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     /*
@@ -95,7 +100,7 @@ public:
                                                    float pixelRatio);
 };
 
-class LinePatternProgram : public Program<
+class LinePatternProgram final : public Program<
     LinePatternProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
@@ -112,6 +117,11 @@ class LinePatternProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LinePatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(const style::LinePaintProperties::PossiblyEvaluated&,
@@ -123,7 +133,7 @@ public:
                                                    const CrossfadeParameters& crossfade);
 };
 
-class LineSDFProgram : public Program<
+class LineSDFProgram final : public Program<
     LineSDFProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
@@ -143,6 +153,11 @@ class LineSDFProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineSDFProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues
@@ -157,7 +172,7 @@ public:
                         float atlasWidth);
 };
 
-class LineGradientProgram : public Program<
+class LineGradientProgram final : public Program<
     LineGradientProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
@@ -171,6 +186,11 @@ class LineGradientProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineGradientProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(const style::LinePaintProperties::PossiblyEvaluated&,

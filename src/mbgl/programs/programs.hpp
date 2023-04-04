@@ -26,7 +26,7 @@ public:
 
     /// @brief Registers built-in programs with the provided registry.
     /// @param registry gfx::ShaderRegistry to populate with built-in programs.
-    void registerWith(gfx::ShaderRegistry& registry) noexcept;
+    void registerWith(gfx::ShaderRegistry& registry);
 
     BackgroundLayerPrograms& getBackgroundLayerPrograms() noexcept;
     RasterLayerPrograms& getRasterLayerPrograms() noexcept;

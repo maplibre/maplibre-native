@@ -13,7 +13,7 @@ namespace uniforms {
 MBGL_DEFINE_UNIFORM_SCALAR(float, intensity);
 } // namespace uniforms
 
-class HeatmapProgram : public Program<
+class HeatmapProgram final : public Program<
     HeatmapProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
@@ -26,6 +26,11 @@ class HeatmapProgram : public Program<
     style::HeatmapPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"HeatmapProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     /*

@@ -54,7 +54,7 @@ using FillExtrusionPatternUniforms = TypeList<
     uniforms::lightintensity,
     uniforms::vertical_gradient>;
 
-class FillExtrusionProgram : public Program<
+class FillExtrusionProgram final : public Program<
     FillExtrusionProgram,
     gfx::PrimitiveType::Triangle,
     FillExtrusionLayoutAttributes,
@@ -63,6 +63,11 @@ class FillExtrusionProgram : public Program<
     style::FillExtrusionPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillExtrusionProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
@@ -89,7 +94,7 @@ public:
         mat4, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient);
 };
 
-class FillExtrusionPatternProgram : public Program<
+class FillExtrusionPatternProgram final : public Program<
     FillExtrusionPatternProgram,
     gfx::PrimitiveType::Triangle,
     FillExtrusionLayoutAttributes,
@@ -99,6 +104,11 @@ class FillExtrusionPatternProgram : public Program<
     style::FillExtrusionPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillExtrusionPatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(mat4,

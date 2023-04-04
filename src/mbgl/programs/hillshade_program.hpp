@@ -18,7 +18,7 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 2, light);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 2, latrange);
 } // namespace uniforms
 
-class HillshadeProgram : public Program<
+class HillshadeProgram final : public Program<
     HillshadeProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
@@ -35,6 +35,11 @@ class HillshadeProgram : public Program<
         textures::image>,
     style::HillshadePaintProperties>{
 public:
+    static constexpr std::string_view Name{"HillshadeProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {

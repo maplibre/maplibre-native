@@ -11,13 +11,18 @@ namespace mbgl {
 namespace uniforms {
 MBGL_DEFINE_UNIFORM_SCALAR(float, overlay_scale);
 }
-class DebugProgram : public Program<DebugProgram,
+class DebugProgram final : public Program<DebugProgram,
                                     gfx::PrimitiveType::Line,
                                     TypeList<attributes::pos>,
                                     TypeList<uniforms::matrix, uniforms::color, uniforms::overlay_scale>,
                                     TypeList<textures::overlay>,
                                     style::Properties<>> {
 public:
+    static constexpr std::string_view Name{"DebugProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 

@@ -14,7 +14,7 @@ MBGL_DEFINE_UNIFORM_SCALAR(float, maxzoom);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 4, unpack);
 } // namespace uniforms
 
-class HillshadePrepareProgram : public Program<
+class HillshadePrepareProgram final : public Program<
     HillshadePrepareProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
@@ -30,6 +30,11 @@ class HillshadePrepareProgram : public Program<
         textures::image>,
     style::Properties<>> {
 public:
+    static constexpr std::string_view Name{"HillshadePrepareProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/gfx/shader.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/programs/segment.hpp>
@@ -24,7 +25,7 @@ template <class Name,
           class LayoutUniformList,
           class Textures,
           class PaintProps>
-class Program {
+class Program : public gfx::Shader {
 public:
     using LayoutVertex = gfx::Vertex<LayoutAttributeList>;
 
