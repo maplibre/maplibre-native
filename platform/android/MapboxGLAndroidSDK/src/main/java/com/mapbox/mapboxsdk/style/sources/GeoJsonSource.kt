@@ -238,7 +238,16 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        nativeSetFeature(feature)
+        if (feature == null) {
+            nativeSetFeature(null)
+        } else {
+            // Directly use the feature will lead to concurrency
+            // For example if the feature creates in the main thread then
+            // it will sent to the worker thread to add it to the map core
+            // mean while the feature could be operating by main thread then
+            // the concurrency happens. In Grab this issue's crash rate is about 0.1%
+            nativeSetFeature(Feature.fromJson(feature.toJson()))
+        }
     }
 
     /**
