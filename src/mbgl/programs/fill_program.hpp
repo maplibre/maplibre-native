@@ -35,6 +35,7 @@ using FillPatternUniforms = TypeList<
 
 class FillProgram final : public Program<
     FillProgram,
+    shaders::BuiltIn::FillProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
     FillUniforms,
@@ -61,6 +62,7 @@ public:
 
 class FillPatternProgram final : public Program<
     FillPatternProgram,
+    shaders::BuiltIn::FillPatternProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
     FillPatternUniforms,
@@ -87,6 +89,7 @@ public:
 
 class FillOutlineProgram final : public Program<
     FillOutlineProgram,
+    shaders::BuiltIn::FillOutlineProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
     FillUniforms,
@@ -104,6 +107,7 @@ public:
 
 class FillOutlinePatternProgram final : public Program<
     FillOutlinePatternProgram,
+    shaders::BuiltIn::FillOutlinePatternProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
     FillPatternUniforms,
@@ -122,18 +126,5 @@ public:
 
 using FillLayoutVertex = FillProgram::LayoutVertex;
 using FillAttributes = FillProgram::AttributeList;
-
-class FillLayerPrograms final : public LayerTypePrograms {
-public:
-    FillLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : fill(context, programParameters),
-          fillPattern(context, programParameters),
-          fillOutline(context, programParameters),
-          fillOutlinePattern(context, programParameters) {}
-    FillProgram fill;
-    FillPatternProgram fillPattern;
-    FillOutlineProgram fillOutline;
-    FillOutlinePatternProgram fillOutlinePattern;
-};
 
 } // namespace mbgl

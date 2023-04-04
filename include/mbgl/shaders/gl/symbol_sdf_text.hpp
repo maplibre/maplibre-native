@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/symbol_sdf_text_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<SymbolSDFTextProgram> {
-    static constexpr const char* name = "symbol_sdf_text";
-    static constexpr const uint8_t hash[8] = {0x46, 0xe9, 0x60, 0xde, 0x1e, 0x85, 0x36, 0x54};
-    static constexpr const auto vertexOffset = 53609;
-    static constexpr const auto fragmentOffset = 57649;
-};
-
-constexpr const char* ShaderSource<SymbolSDFTextProgram>::name;
-constexpr const uint8_t ShaderSource<SymbolSDFTextProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<SymbolSDFTextProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<SymbolSDFTextProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of symbol_sdf_text.vertex.glsl:
-/*
-const float PI = 3.141592653589793;
+template <> struct ShaderSource<BuiltIn::SymbolSDFTextProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
 attribute vec4 a_pos_offset;
 attribute vec4 a_data;
@@ -73,7 +40,6 @@ uniform vec2 u_texsize;
 varying vec2 v_data0;
 varying vec3 v_data1;
 
-
 #ifndef HAS_UNIFORM_u_fill_color
 uniform lowp float u_fill_color_t;
 attribute highp vec4 a_fill_color;
@@ -81,8 +47,6 @@ varying highp vec4 fill_color;
 #else
 uniform highp vec4 u_fill_color;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_color
 uniform lowp float u_halo_color_t;
 attribute highp vec4 a_halo_color;
@@ -90,8 +54,6 @@ varying highp vec4 halo_color;
 #else
 uniform highp vec4 u_halo_color;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
 attribute lowp vec2 a_opacity;
@@ -99,8 +61,6 @@ varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_width
 uniform lowp float u_halo_width_t;
 attribute lowp vec2 a_halo_width;
@@ -108,8 +68,6 @@ varying lowp float halo_width;
 #else
 uniform lowp float u_halo_width;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_blur
 uniform lowp float u_halo_blur_t;
 attribute lowp vec2 a_halo_blur;
@@ -118,43 +76,32 @@ varying lowp float halo_blur;
 uniform lowp float u_halo_blur;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_fill_color
-    fill_color = unpack_mix_color(a_fill_color, u_fill_color_t);
+    #ifndef HAS_UNIFORM_u_fill_color
+fill_color = unpack_mix_color(a_fill_color, u_fill_color_t);
 #else
-    highp vec4 fill_color = u_fill_color;
+highp vec4 fill_color = u_fill_color;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_halo_color
-    halo_color = unpack_mix_color(a_halo_color, u_halo_color_t);
+    #ifndef HAS_UNIFORM_u_halo_color
+halo_color = unpack_mix_color(a_halo_color, u_halo_color_t);
 #else
-    highp vec4 halo_color = u_halo_color;
+highp vec4 halo_color = u_halo_color;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
-    lowp float opacity = u_opacity;
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_halo_width
-    halo_width = unpack_mix_vec2(a_halo_width, u_halo_width_t);
+    #ifndef HAS_UNIFORM_u_halo_width
+halo_width = unpack_mix_vec2(a_halo_width, u_halo_width_t);
 #else
-    lowp float halo_width = u_halo_width;
+lowp float halo_width = u_halo_width;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_halo_blur
-    halo_blur = unpack_mix_vec2(a_halo_blur, u_halo_blur_t);
+    #ifndef HAS_UNIFORM_u_halo_blur
+halo_blur = unpack_mix_vec2(a_halo_blur, u_halo_blur_t);
 #else
-    lowp float halo_blur = u_halo_blur;
+lowp float halo_blur = u_halo_blur;
 #endif
-
 
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;
@@ -224,12 +171,8 @@ void main() {
     v_data0 = a_tex / u_texsize;
     v_data1 = vec3(gamma_scale, size, interpolated_fade_opacity);
 }
-
-*/
-
-// Uncompressed source of symbol_sdf_text.fragment.glsl:
-/*
-#define SDF_PX 8.0
+)";
+    static constexpr const char* fragment = R"(#define SDF_PX 8.0
 
 uniform bool u_is_halo;
 uniform sampler2D u_texture;
@@ -240,68 +183,48 @@ uniform bool u_is_text;
 varying vec2 v_data0;
 varying vec3 v_data1;
 
-
 #ifndef HAS_UNIFORM_u_fill_color
 varying highp vec4 fill_color;
 #else
 uniform highp vec4 u_fill_color;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_color
 varying highp vec4 halo_color;
 #else
 uniform highp vec4 u_halo_color;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_width
 varying lowp float halo_width;
 #else
 uniform lowp float u_halo_width;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_halo_blur
 varying lowp float halo_blur;
 #else
 uniform lowp float u_halo_blur;
 #endif
 
-
 void main() {
-    
-#ifdef HAS_UNIFORM_u_fill_color
-    highp vec4 fill_color = u_fill_color;
+    #ifdef HAS_UNIFORM_u_fill_color
+highp vec4 fill_color = u_fill_color;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_halo_color
-    highp vec4 halo_color = u_halo_color;
+    #ifdef HAS_UNIFORM_u_halo_color
+highp vec4 halo_color = u_halo_color;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = u_opacity;
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_halo_width
-    lowp float halo_width = u_halo_width;
+    #ifdef HAS_UNIFORM_u_halo_width
+lowp float halo_width = u_halo_width;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_halo_blur
-    lowp float halo_blur = u_halo_blur;
+    #ifdef HAS_UNIFORM_u_halo_blur
+lowp float halo_blur = u_halo_blur;
 #endif
-
 
     float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
 
@@ -331,6 +254,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

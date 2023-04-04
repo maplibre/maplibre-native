@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/line_pattern_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<LinePatternProgram> {
-    static constexpr const char* name = "line_pattern";
-    static constexpr const uint8_t hash[8] = {0x38, 0x9c, 0x3d, 0xde, 0xb4, 0xe0, 0xd1, 0x61};
-    static constexpr const auto vertexOffset = 38066;
-    static constexpr const auto fragmentOffset = 41460;
-};
-
-constexpr const char* ShaderSource<LinePatternProgram>::name;
-constexpr const uint8_t ShaderSource<LinePatternProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<LinePatternProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<LinePatternProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of line_pattern.vertex.glsl:
-/*
-// floor(127 / 2) == 63.0
+template <> struct ShaderSource<BuiltIn::LinePatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
 // there are also "special" normals that have a bigger length (of up to 126 in
@@ -64,7 +31,6 @@ varying vec2 v_width2;
 varying float v_linesofar;
 varying float v_gamma_scale;
 
-
 #ifndef HAS_UNIFORM_u_blur
 uniform lowp float u_blur_t;
 attribute lowp vec2 a_blur;
@@ -72,8 +38,6 @@ varying lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
 attribute lowp vec2 a_opacity;
@@ -81,32 +45,24 @@ varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_offset
 uniform lowp float u_offset_t;
 attribute lowp vec2 a_offset;
 #else
 uniform lowp float u_offset;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_gapwidth
 uniform lowp float u_gapwidth_t;
 attribute mediump vec2 a_gapwidth;
 #else
 uniform mediump float u_gapwidth;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_width
 uniform lowp float u_width_t;
 attribute mediump vec2 a_width;
 #else
 uniform mediump float u_width;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
 attribute lowp vec4 a_pattern_from;
@@ -114,8 +70,6 @@ varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
 attribute lowp vec4 a_pattern_to;
@@ -124,57 +78,42 @@ varying lowp vec4 pattern_to;
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_vec2(a_blur, u_blur_t);
+    #ifndef HAS_UNIFORM_u_blur
+blur = unpack_mix_vec2(a_blur, u_blur_t);
 #else
-    lowp float blur = u_blur;
+lowp float blur = u_blur;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
-    lowp float opacity = u_opacity;
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_offset
-    lowp float offset = unpack_mix_vec2(a_offset, u_offset_t);
+    #ifndef HAS_UNIFORM_u_offset
+lowp float offset = unpack_mix_vec2(a_offset, u_offset_t);
 #else
-    lowp float offset = u_offset;
+lowp float offset = u_offset;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_gapwidth
-    mediump float gapwidth = unpack_mix_vec2(a_gapwidth, u_gapwidth_t);
+    #ifndef HAS_UNIFORM_u_gapwidth
+mediump float gapwidth = unpack_mix_vec2(a_gapwidth, u_gapwidth_t);
 #else
-    mediump float gapwidth = u_gapwidth;
+mediump float gapwidth = u_gapwidth;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_vec2(a_width, u_width_t);
+    #ifndef HAS_UNIFORM_u_width
+mediump float width = unpack_mix_vec2(a_width, u_width_t);
 #else
-    mediump float width = u_width;
+mediump float width = u_width;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_from
-    pattern_from = a_pattern_from;
+    #ifndef HAS_UNIFORM_u_pattern_from
+pattern_from = a_pattern_from;
 #else
-    mediump vec4 pattern_from = u_pattern_from;
+mediump vec4 pattern_from = u_pattern_from;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_to
-    pattern_to = a_pattern_to;
+    #ifndef HAS_UNIFORM_u_pattern_to
+pattern_to = a_pattern_to;
 #else
-    mediump vec4 pattern_to = u_pattern_to;
+mediump vec4 pattern_to = u_pattern_to;
 #endif
-
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -225,12 +164,8 @@ void main() {
     v_linesofar = a_linesofar;
     v_width2 = vec2(outset, inset);
 }
-
-*/
-
-// Uncompressed source of line_pattern.fragment.glsl:
-/*
-uniform lowp float u_device_pixel_ratio;
+)";
+    static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
 uniform vec2 u_texsize;
 uniform float u_fade;
 uniform mediump vec4 u_scale;
@@ -242,57 +177,41 @@ varying vec2 v_width2;
 varying float v_linesofar;
 varying float v_gamma_scale;
 
-
 #ifndef HAS_UNIFORM_u_pattern_from
 varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 varying lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_blur
 varying lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
-    
-#ifdef HAS_UNIFORM_u_pattern_from
-    mediump vec4 pattern_from = u_pattern_from;
+    #ifdef HAS_UNIFORM_u_pattern_from
+mediump vec4 pattern_from = u_pattern_from;
+#endif
+    #ifdef HAS_UNIFORM_u_pattern_to
+mediump vec4 pattern_to = u_pattern_to;
 #endif
 
-    
-#ifdef HAS_UNIFORM_u_pattern_to
-    mediump vec4 pattern_to = u_pattern_to;
+    #ifdef HAS_UNIFORM_u_blur
+lowp float blur = u_blur;
 #endif
-
-
-    
-#ifdef HAS_UNIFORM_u_blur
-    lowp float blur = u_blur;
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = u_opacity;
-#endif
-
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -340,6 +259,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

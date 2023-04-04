@@ -23,6 +23,7 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 2, tl_parent);
 
 class RasterProgram final : public Program<
     RasterProgram,
+    shaders::BuiltIn::RasterProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos,
@@ -68,12 +69,5 @@ public:
 
 using RasterLayoutVertex = RasterProgram::LayoutVertex;
 using RasterAttributes = RasterProgram::AttributeList;
-
-class RasterLayerPrograms final : public LayerTypePrograms {
-public:
-    RasterLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : raster(context, programParameters) {}
-    RasterProgram raster;
-};
 
 } // namespace mbgl

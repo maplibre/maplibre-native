@@ -32,6 +32,7 @@ using LineLayoutAttributes = TypeList<
 
 class LineProgram final : public Program<
     LineProgram,
+    shaders::BuiltIn::LineProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -102,6 +103,7 @@ public:
 
 class LinePatternProgram final : public Program<
     LinePatternProgram,
+    shaders::BuiltIn::LinePatternProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -135,6 +137,7 @@ public:
 
 class LineSDFProgram final : public Program<
     LineSDFProgram,
+    shaders::BuiltIn::LineSDFProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -174,6 +177,7 @@ public:
 
 class LineGradientProgram final : public Program<
     LineGradientProgram,
+    shaders::BuiltIn::LineGradientProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -202,18 +206,5 @@ public:
 
 using LineLayoutVertex = LineProgram::LayoutVertex;
 using LineAttributes = LineProgram::AttributeList;
-
-class LineLayerPrograms final : public LayerTypePrograms {
-public:
-    LineLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : line(context, programParameters),
-          lineGradient(context, programParameters),
-          lineSDF(context, programParameters),
-          linePattern(context, programParameters) {}
-    LineProgram line;
-    LineGradientProgram lineGradient;
-    LineSDFProgram lineSDF;
-    LinePatternProgram linePattern;
-};
 
 } // namespace mbgl

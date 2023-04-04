@@ -41,6 +41,7 @@ using BackgroundPatternUniforms = TypeList<
 
 class BackgroundProgram final : public Program<
     BackgroundProgram,
+    shaders::BuiltIn::BackgroundProgram,
     gfx::PrimitiveType::Triangle,
     BackgroundLayoutAttributes,
     BackgroundUniforms,
@@ -58,6 +59,7 @@ public:
 
 class BackgroundPatternProgram final : public Program<
     BackgroundPatternProgram,
+    shaders::BuiltIn::BackgroundPatternProgram,
     gfx::PrimitiveType::Triangle,
     BackgroundLayoutAttributes,
     BackgroundPatternUniforms,
@@ -85,14 +87,5 @@ public:
 
 using BackgroundLayoutVertex = BackgroundProgram::LayoutVertex;
 using BackgroundAttributes = BackgroundProgram::AttributeList;
-
-class BackgroundLayerPrograms final : public LayerTypePrograms  {
-public:
-    BackgroundLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : background(context, programParameters),
-          backgroundPattern(context, programParameters) {}
-    BackgroundProgram background;
-    BackgroundPatternProgram backgroundPattern;
-};
 
 } // namespace mbgl

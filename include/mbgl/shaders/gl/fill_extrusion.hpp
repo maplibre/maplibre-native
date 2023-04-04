@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/fill_extrusion_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<FillExtrusionProgram> {
-    static constexpr const char* name = "fill_extrusion";
-    static constexpr const uint8_t hash[8] = {0x9d, 0x76, 0x7f, 0xaa, 0x86, 0x57, 0x56, 0x96};
-    static constexpr const auto vertexOffset = 21491;
-    static constexpr const auto fragmentOffset = 23422;
-};
-
-constexpr const char* ShaderSource<FillExtrusionProgram>::name;
-constexpr const uint8_t ShaderSource<FillExtrusionProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<FillExtrusionProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<FillExtrusionProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of fill_extrusion.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::FillExtrusionProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec3 u_lightcolor;
 uniform lowp vec3 u_lightpos;
 uniform lowp float u_lightintensity;
@@ -51,23 +18,18 @@ attribute vec4 a_normal_ed;
 
 varying vec4 v_color;
 
-
 #ifndef HAS_UNIFORM_u_base
 uniform lowp float u_base_t;
 attribute highp vec2 a_base;
 #else
 uniform highp float u_base;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_height
 uniform lowp float u_height_t;
 attribute highp vec2 a_height;
 #else
 uniform highp float u_height;
 #endif
-
-
 
 #ifndef HAS_UNIFORM_u_color
 uniform lowp float u_color_t;
@@ -76,29 +38,22 @@ attribute highp vec4 a_color;
 uniform highp vec4 u_color;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_base
-    highp float base = unpack_mix_vec2(a_base, u_base_t);
+    #ifndef HAS_UNIFORM_u_base
+highp float base = unpack_mix_vec2(a_base, u_base_t);
 #else
-    highp float base = u_base;
+highp float base = u_base;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_height
-    highp float height = unpack_mix_vec2(a_height, u_height_t);
+    #ifndef HAS_UNIFORM_u_height
+highp float height = unpack_mix_vec2(a_height, u_height_t);
 #else
-    highp float height = u_height;
+highp float height = u_height;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_color
-    highp vec4 color = unpack_mix_color(a_color, u_color_t);
+    #ifndef HAS_UNIFORM_u_color
+highp vec4 color = unpack_mix_color(a_color, u_color_t);
 #else
-    highp vec4 color = u_color;
+highp vec4 color = u_color;
 #endif
-
 
     vec3 normal = a_normal_ed.xyz;
 
@@ -144,12 +99,8 @@ void main() {
     v_color.b += clamp(color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
     v_color *= u_opacity;
 }
-
-*/
-
-// Uncompressed source of fill_extrusion.fragment.glsl:
-/*
-varying vec4 v_color;
+)";
+    static constexpr const char* fragment = R"(varying vec4 v_color;
 
 void main() {
     gl_FragColor = v_color;
@@ -158,6 +109,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

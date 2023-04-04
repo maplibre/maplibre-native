@@ -20,6 +20,7 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 2, latrange);
 
 class HillshadeProgram final : public Program<
     HillshadeProgram,
+    shaders::BuiltIn::HillshadeProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos,
@@ -58,14 +59,5 @@ public:
 
 using HillshadeLayoutVertex = HillshadeProgram::LayoutVertex;
 using HillshadeAttributes = HillshadeProgram::AttributeList;
-
-class HillshadeLayerPrograms final : public LayerTypePrograms  {
-public:
-    HillshadeLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : hillshade(context, programParameters),
-          hillshadePrepare(context, programParameters) {}
-    HillshadeProgram hillshade;
-    HillshadePrepareProgram hillshadePrepare;
-};
 
 } // namespace mbgl

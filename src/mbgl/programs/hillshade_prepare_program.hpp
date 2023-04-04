@@ -16,6 +16,7 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 4, unpack);
 
 class HillshadePrepareProgram final : public Program<
     HillshadePrepareProgram,
+    shaders::BuiltIn::HillshadePrepareProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos,

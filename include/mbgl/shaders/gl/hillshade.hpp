@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/hillshade_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<HillshadeProgram> {
-    static constexpr const char* name = "hillshade";
-    static constexpr const uint8_t hash[8] = {0x8a, 0x11, 0x29, 0x18, 0x52, 0x7f, 0x3b, 0xbb};
-    static constexpr const auto vertexOffset = 29333;
-    static constexpr const auto fragmentOffset = 29504;
-};
-
-constexpr const char* ShaderSource<HillshadeProgram>::name;
-constexpr const uint8_t ShaderSource<HillshadeProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<HillshadeProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<HillshadeProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of hillshade.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 
 attribute vec2 a_pos;
 attribute vec2 a_texture_pos;
@@ -50,12 +17,8 @@ void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
     v_pos = a_texture_pos / 8192.0;
 }
-
-*/
-
-// Uncompressed source of hillshade.fragment.glsl:
-/*
-uniform sampler2D u_image;
+)";
+    static constexpr const char* fragment = R"(uniform sampler2D u_image;
 varying vec2 v_pos;
 
 uniform vec2 u_latrange;
@@ -107,6 +70,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

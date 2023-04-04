@@ -11,6 +11,7 @@ namespace mbgl {
 
 class HeatmapTextureProgram final : public Program<
     HeatmapTextureProgram,
+    shaders::BuiltIn::HeatmapTextureProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<attributes::pos>,
     TypeList<

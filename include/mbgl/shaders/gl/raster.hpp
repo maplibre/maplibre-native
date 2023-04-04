@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/raster_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<RasterProgram> {
-    static constexpr const char* name = "raster";
-    static constexpr const uint8_t hash[8] = {0x40, 0x3d, 0x6c, 0xf4, 0xd0, 0x41, 0x51, 0x0e};
-    static constexpr const auto vertexOffset = 49047;
-    static constexpr const auto fragmentOffset = 49396;
-};
-
-constexpr const char* ShaderSource<RasterProgram>::name;
-constexpr const uint8_t ShaderSource<RasterProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<RasterProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<RasterProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of raster.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_tl_parent;
 uniform float u_scale_parent;
 uniform float u_buffer_scale;
@@ -60,12 +27,8 @@ void main() {
     v_pos0 = (((a_texture_pos / 8192.0) - 0.5) / u_buffer_scale ) + 0.5;
     v_pos1 = (v_pos0 * u_scale_parent) + u_tl_parent;
 }
-
-*/
-
-// Uncompressed source of raster.fragment.glsl:
-/*
-uniform float u_fade_t;
+)";
+    static constexpr const char* fragment = R"(uniform float u_fade_t;
 uniform float u_opacity;
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;
@@ -117,6 +80,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

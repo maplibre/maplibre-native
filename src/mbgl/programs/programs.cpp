@@ -23,7 +23,7 @@ Programs::~Programs() = default;
 
 template<typename ... T>
 void registerTypes(gfx::ShaderRegistry& registry,
-    gfx::Context& context_, const ProgramParameters& programParameters_)
+    const ProgramParameters& programParameters_)
 {
     ( [](bool expr) {
         if (!expr) {
@@ -33,44 +33,38 @@ void registerTypes(gfx::ShaderRegistry& registry,
                 " with shader registry!");
         }
     }( registry.registerShader(
-        std::make_shared<T>(context_, programParameters_))), ... );
+        std::make_shared<T>(programParameters_))), ... );
 }
 
 void Programs::registerWith([[maybe_unused]] gfx::ShaderRegistry& registry) {
-    try {
-        registerTypes<
-            BackgroundProgram,
-            BackgroundPatternProgram,
-            RasterProgram,
-            HeatmapProgram,
-            HeatmapTextureProgram,
-            HillshadeProgram,
-            HillshadePrepareProgram,
-            FillProgram,
-            FillPatternProgram,
-            FillOutlineProgram,
-            FillOutlinePatternProgram,
-            FillExtrusionProgram,
-            FillExtrusionPatternProgram,
-            CircleProgram,
-            LineProgram,
-            LineGradientProgram,
-            LineSDFProgram,
-            LinePatternProgram,
-            SymbolIconProgram,
-            SymbolSDFIconProgram,
-            SymbolSDFTextProgram,
-            SymbolTextAndIconProgram,
-            CollisionBoxProgram,
-            CollisionCircleProgram,
-            DebugProgram,
-            ClippingMaskProgram
-        >(registry, context, programParameters);
-    } catch (const std::runtime_error& e) {
-        Log::Error(Event::Shader, e.what());
-        assert(0 && "Programs::registerWith failed");
-        std::rethrow_exception(std::current_exception());
-    }
+    registerTypes<
+        BackgroundProgram,
+        BackgroundPatternProgram,
+        RasterProgram,
+        HeatmapProgram,
+        HeatmapTextureProgram,
+        HillshadeProgram,
+        HillshadePrepareProgram,
+        FillProgram,
+        FillPatternProgram,
+        FillOutlineProgram,
+        FillOutlinePatternProgram,
+        FillExtrusionProgram,
+        FillExtrusionPatternProgram,
+        CircleProgram,
+        LineProgram,
+        LineGradientProgram,
+        LineSDFProgram,
+        LinePatternProgram,
+        SymbolIconProgram,
+        SymbolSDFIconProgram,
+        SymbolSDFTextProgram,
+        SymbolTextAndIconProgram,
+        CollisionBoxProgram,
+        CollisionCircleProgram,
+        DebugProgram,
+        ClippingMaskProgram
+    >(registry, programParameters);
 }
 
 } // namespace mbgl

@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/symbol_icon_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<SymbolIconProgram> {
-    static constexpr const char* name = "symbol_icon";
-    static constexpr const uint8_t hash[8] = {0xa9, 0xd8, 0x73, 0xdf, 0xd9, 0xd8, 0x82, 0xf2};
-    static constexpr const auto vertexOffset = 50455;
-    static constexpr const auto fragmentOffset = 53204;
-};
-
-constexpr const char* ShaderSource<SymbolIconProgram>::name;
-constexpr const uint8_t ShaderSource<SymbolIconProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<SymbolIconProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<SymbolIconProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of symbol_icon.vertex.glsl:
-/*
-const float PI = 3.141592653589793;
+template <> struct ShaderSource<BuiltIn::SymbolIconProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
 attribute vec4 a_pos_offset;
 attribute vec4 a_data;
@@ -69,7 +36,6 @@ uniform vec2 u_texsize;
 varying vec2 v_tex;
 varying float v_fade_opacity;
 
-
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
 attribute lowp vec2 a_opacity;
@@ -78,15 +44,12 @@ varying lowp float opacity;
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
-    lowp float opacity = u_opacity;
+lowp float opacity = u_opacity;
 #endif
-
 
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;
@@ -147,16 +110,11 @@ void main() {
     float fade_change = fade_opacity[1] > 0.5 ? u_fade_change : -u_fade_change;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 }
-
-*/
-
-// Uncompressed source of symbol_icon.fragment.glsl:
-/*
-uniform sampler2D u_texture;
+)";
+    static constexpr const char* fragment = R"(uniform sampler2D u_texture;
 
 varying vec2 v_tex;
 varying float v_fade_opacity;
-
 
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
@@ -164,13 +122,10 @@ varying lowp float opacity;
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
-    
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = u_opacity;
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
 #endif
-
 
     lowp float alpha = opacity * v_fade_opacity;
     gl_FragColor = texture2D(u_texture, v_tex) * alpha;
@@ -179,6 +134,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

@@ -16,8 +16,7 @@
 
 #include <mbgl/util/logging.hpp>
 #include <mbgl/programs/program_parameters.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/programs/gl/shaders.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 
 #include <string>
 
@@ -36,9 +35,6 @@ public:
     }
 
     const ProgramParameters programParameters;
-
-    static constexpr const auto vertexOffset = programs::gl::ShaderSource<Name>::vertexOffset;
-    static constexpr const auto fragmentOffset = programs::gl::ShaderSource<Name>::fragmentOffset;
 
     class Instance {
     public:
@@ -63,19 +59,15 @@ public:
             std::initializer_list<const char*> vertexSource = {
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
-                (programs::gl::shaderSource() + programs::gl::vertexPreludeOffset),
-                programParameters.vertexSource(gfx::Backend::Type::OpenGL).length() == 0 ?
-                    (programs::gl::shaderSource() + vertexOffset) :
-                    programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()
+                shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
+                programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()
             };
 
             std::initializer_list<const char*> fragmentSource = {
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
-                (programs::gl::shaderSource() + programs::gl::fragmentPreludeOffset),
-                programParameters.fragmentSource(gfx::Backend::Type::OpenGL).length() == 0 ?
-                    (programs::gl::shaderSource() + fragmentOffset) :
-                    programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()
+                shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
+                programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()
             };
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);
@@ -111,13 +103,17 @@ public:
         const uint32_t key = gl::AttributeKey<AttributeList>::compute(attributeBindings);
         auto it = instances.find(key);
         if (it == instances.end()) {
-            it = instances
-                     .emplace(key,
-                              Instance::createInstance(
-                                  context,
-                                  programParameters,
-                                  gl::AttributeKey<AttributeList>::defines(attributeBindings)))
-                     .first;
+            try {
+                it = instances.emplace(key,
+                    Instance::createInstance(
+                        context,
+                        programParameters,
+                        gl::AttributeKey<AttributeList>::defines(attributeBindings)
+                )).first;
+            } catch (const std::runtime_error& e) {
+                Log::Error(Event::OpenGL, e.what());
+                return;
+            }
         }
 
         auto& instance = *it->second;

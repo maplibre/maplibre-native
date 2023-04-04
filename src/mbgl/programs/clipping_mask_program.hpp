@@ -9,6 +9,7 @@ namespace mbgl {
 
 class ClippingMaskProgram final : public Program<
     ClippingMaskProgram,
+    shaders::BuiltIn::ClippingMaskProgram,
     gfx::PrimitiveType::Triangle,
     PositionOnlyLayoutAttributes,
     TypeList<

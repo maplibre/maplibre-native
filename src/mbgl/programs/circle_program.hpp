@@ -14,6 +14,7 @@ MBGL_DEFINE_UNIFORM_SCALAR(bool, scale_with_map);
 
 class CircleProgram final : public Program<
     CircleProgram,
+    shaders::BuiltIn::CircleProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos>,
@@ -53,12 +54,5 @@ public:
 
 using CircleLayoutVertex = CircleProgram::LayoutVertex;
 using CircleAttributes = CircleProgram::AttributeList;
-
-class CircleLayerPrograms final : public LayerTypePrograms  {
-public:
-    CircleLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : circle(context, programParameters) {}
-    CircleProgram circle;
-};
 
 } // namespace mbgl

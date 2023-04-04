@@ -15,6 +15,7 @@ MBGL_DEFINE_UNIFORM_SCALAR(float, intensity);
 
 class HeatmapProgram final : public Program<
     HeatmapProgram,
+    shaders::BuiltIn::HeatmapProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos>,
@@ -51,14 +52,5 @@ public:
 
 using HeatmapLayoutVertex = HeatmapProgram::LayoutVertex;
 using HeatmapAttributes = HeatmapProgram::AttributeList;
-
-class HeatmapLayerPrograms final : public LayerTypePrograms  {
-public:
-    HeatmapLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters) 
-        : heatmap(context, programParameters),
-          heatmapTexture(context, programParameters) {}
-    HeatmapProgram heatmap;
-    HeatmapTextureProgram heatmapTexture;
-};
 
 } // namespace mbgl

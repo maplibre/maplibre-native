@@ -174,7 +174,6 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
         if (!registry.replaceShader(std::make_shared<FillProgram>(
-            map.frontend.getBackend()->getContext(),
             ProgramParameters(1.0f, false))))
         {
             throw std::runtime_error("Failed to register shader!");
@@ -203,7 +202,6 @@ TEST(ShaderRegistry, GLSLReplacement1) {
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
         if (!registry.replaceShader(std::make_shared<FillProgram>(
-            map.frontend.getBackend()->getContext(),
             ProgramParameters(1.0f, false).withShaderSource(
                 ProgramParameters::ProgramSource(
                     gfx::Backend::Type::OpenGL,
@@ -243,7 +241,6 @@ TEST(ShaderRegistry, GLSLReplacement2) {
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
         if (!registry.replaceShader(std::make_shared<FillProgram>(
-            map.frontend.getBackend()->getContext(),
             ProgramParameters(1.0f, false).withShaderSource(
                 ProgramParameters::ProgramSource(
                     gfx::Backend::Type::OpenGL,
@@ -255,21 +252,16 @@ varying highp vec4 color;
 uniform highp vec4 u_color;
 #endif
 
-
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 
-
 void main() {
-    
 #ifdef HAS_UNIFORM_u_color
     highp vec4 color = u_color;
 #endif
-
-    
 #ifdef HAS_UNIFORM_u_opacity
     lowp float opacity = u_opacity;
 #endif
@@ -280,7 +272,6 @@ void main() {
 #ifdef OVERDRAW_INSPECTOR
     gl_FragColor = vec4(1.0);
 #endif
-
 }
                     )"
                 )

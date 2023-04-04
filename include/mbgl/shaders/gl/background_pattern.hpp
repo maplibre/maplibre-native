@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/background_pattern_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<BackgroundPatternProgram> {
-    static constexpr const char* name = "background_pattern";
-    static constexpr const uint8_t hash[8] = {0x70, 0x13, 0xc8, 0x7e, 0xba, 0x18, 0xf5, 0x19};
-    static constexpr const auto vertexOffset = 1675;
-    static constexpr const auto fragmentOffset = 2266;
-};
-
-constexpr const char* ShaderSource<BackgroundPatternProgram>::name;
-constexpr const uint8_t ShaderSource<BackgroundPatternProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<BackgroundPatternProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<BackgroundPatternProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of background_pattern.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::BackgroundPatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_pattern_size_a;
 uniform vec2 u_pattern_size_b;
 uniform vec2 u_pixel_coord_upper;
@@ -59,12 +26,8 @@ void main() {
     v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_a * u_pattern_size_a, u_tile_units_to_pixels, a_pos);
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_b * u_pattern_size_b, u_tile_units_to_pixels, a_pos);
 }
-
-*/
-
-// Uncompressed source of background_pattern.fragment.glsl:
-/*
-uniform vec2 u_pattern_tl_a;
+)";
+    static constexpr const char* fragment = R"(uniform vec2 u_pattern_tl_a;
 uniform vec2 u_pattern_br_a;
 uniform vec2 u_pattern_tl_b;
 uniform vec2 u_pattern_br_b;
@@ -92,6 +55,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

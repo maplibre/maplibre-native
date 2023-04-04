@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/fill_outline_pattern_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<FillOutlinePatternProgram> {
-    static constexpr const char* name = "fill_outline_pattern";
-    static constexpr const uint8_t hash[8] = {0x56, 0x9c, 0x2f, 0x58, 0x6b, 0x31, 0xff, 0x84};
-    static constexpr const auto vertexOffset = 15345;
-    static constexpr const auto fragmentOffset = 17205;
-};
-
-constexpr const char* ShaderSource<FillOutlinePatternProgram>::name;
-constexpr const uint8_t ShaderSource<FillOutlinePatternProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<FillOutlinePatternProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<FillOutlinePatternProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of fill_outline_pattern.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::FillOutlinePatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_world;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
@@ -51,7 +18,6 @@ varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec2 v_pos;
 
-
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
 attribute lowp vec2 a_opacity;
@@ -59,8 +25,6 @@ varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
 attribute lowp vec4 a_pattern_from;
@@ -68,8 +32,6 @@ varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
 attribute lowp vec4 a_pattern_to;
@@ -78,29 +40,22 @@ varying lowp vec4 pattern_to;
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
-    lowp float opacity = u_opacity;
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_from
-    pattern_from = a_pattern_from;
+    #ifndef HAS_UNIFORM_u_pattern_from
+pattern_from = a_pattern_from;
 #else
-    mediump vec4 pattern_from = u_pattern_from;
+mediump vec4 pattern_from = u_pattern_from;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_to
-    pattern_to = a_pattern_to;
+    #ifndef HAS_UNIFORM_u_pattern_to
+pattern_to = a_pattern_to;
 #else
-    mediump vec4 pattern_to = u_pattern_to;
+mediump vec4 pattern_to = u_pattern_to;
 #endif
-
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -122,12 +77,8 @@ void main() {
 
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
-
-*/
-
-// Uncompressed source of fill_outline_pattern.fragment.glsl:
-/*
-
+)";
+    static constexpr const char* fragment = R"(
 uniform vec2 u_texsize;
 uniform sampler2D u_image;
 uniform float u_fade;
@@ -136,44 +87,32 @@ varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec2 v_pos;
 
-
 #ifndef HAS_UNIFORM_u_opacity
 varying lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_from
 varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 varying lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
-    
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = u_opacity;
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_pattern_from
-    mediump vec4 pattern_from = u_pattern_from;
+    #ifdef HAS_UNIFORM_u_pattern_from
+mediump vec4 pattern_from = u_pattern_from;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_pattern_to
-    mediump vec4 pattern_to = u_pattern_to;
+    #ifdef HAS_UNIFORM_u_pattern_to
+mediump vec4 pattern_to = u_pattern_to;
 #endif
-
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -200,6 +139,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl

@@ -1,45 +1,12 @@
-// NOTE: DO NOT CHANGE THIS FILE. IT IS AUTOMATICALLY GENERATED.
-// clang-format off
-#include <mbgl/programs/fill_extrusion_pattern_program.hpp>
-#include <mbgl/programs/gl/preludes.hpp>
-#include <mbgl/programs/gl/shader_source.hpp>
-#include <mbgl/gl/program.hpp>
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
-namespace programs {
-namespace gl {
+namespace shaders {
 
-template <typename>
-struct ShaderSource;
-
-template <>
-struct ShaderSource<FillExtrusionPatternProgram> {
-    static constexpr const char* name = "fill_extrusion_pattern";
-    static constexpr const uint8_t hash[8] = {0x5a, 0x8f, 0x1a, 0xbf, 0x43, 0x62, 0xf0, 0x86};
-    static constexpr const auto vertexOffset = 23538;
-    static constexpr const auto fragmentOffset = 26509;
-};
-
-constexpr const char* ShaderSource<FillExtrusionPatternProgram>::name;
-constexpr const uint8_t ShaderSource<FillExtrusionPatternProgram>::hash[8];
-
-} // namespace gl
-} // namespace programs
-
-namespace gfx {
-
-template <>
-std::unique_ptr<gfx::Program<FillExtrusionPatternProgram>>
-Backend::Create<gfx::Backend::Type::OpenGL>(const ProgramParameters& programParameters) {
-    return std::make_unique<gl::Program<FillExtrusionPatternProgram>>(programParameters);
-}
-
-} // namespace gfx
-} // namespace mbgl
-
-// Uncompressed source of fill_extrusion_pattern.vertex.glsl:
-/*
-uniform mat4 u_matrix;
+template <> struct ShaderSource<BuiltIn::FillExtrusionPatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
 uniform float u_height_factor;
@@ -58,7 +25,6 @@ varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec4 v_lighting;
 
-
 #ifndef HAS_UNIFORM_u_base
 uniform lowp float u_base_t;
 attribute lowp vec2 a_base;
@@ -66,8 +32,6 @@ varying lowp float base;
 #else
 uniform lowp float u_base;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_height
 uniform lowp float u_height_t;
 attribute lowp vec2 a_height;
@@ -75,8 +39,6 @@ varying lowp float height;
 #else
 uniform lowp float u_height;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
 attribute lowp vec4 a_pattern_from;
@@ -84,8 +46,6 @@ varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
 attribute lowp vec4 a_pattern_to;
@@ -94,36 +54,27 @@ varying lowp vec4 pattern_to;
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
-    
-#ifndef HAS_UNIFORM_u_base
-    base = unpack_mix_vec2(a_base, u_base_t);
+    #ifndef HAS_UNIFORM_u_base
+base = unpack_mix_vec2(a_base, u_base_t);
 #else
-    lowp float base = u_base;
+lowp float base = u_base;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_height
-    height = unpack_mix_vec2(a_height, u_height_t);
+    #ifndef HAS_UNIFORM_u_height
+height = unpack_mix_vec2(a_height, u_height_t);
 #else
-    lowp float height = u_height;
+lowp float height = u_height;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_from
-    pattern_from = a_pattern_from;
+    #ifndef HAS_UNIFORM_u_pattern_from
+pattern_from = a_pattern_from;
 #else
-    mediump vec4 pattern_from = u_pattern_from;
+mediump vec4 pattern_from = u_pattern_from;
 #endif
-
-    
-#ifndef HAS_UNIFORM_u_pattern_to
-    pattern_to = a_pattern_to;
+    #ifndef HAS_UNIFORM_u_pattern_to
+pattern_to = a_pattern_to;
 #else
-    mediump vec4 pattern_to = u_pattern_to;
+mediump vec4 pattern_to = u_pattern_to;
 #endif
-
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -171,12 +122,8 @@ void main() {
     v_lighting.rgb += clamp(directional * u_lightcolor, mix(vec3(0.0), vec3(0.3), 1.0 - u_lightcolor), vec3(1.0));
     v_lighting *= u_opacity;
 }
-
-*/
-
-// Uncompressed source of fill_extrusion_pattern.fragment.glsl:
-/*
-uniform vec2 u_texsize;
+)";
+    static constexpr const char* fragment = R"(uniform vec2 u_texsize;
 uniform float u_fade;
 
 uniform sampler2D u_image;
@@ -185,56 +132,40 @@ varying vec2 v_pos_a;
 varying vec2 v_pos_b;
 varying vec4 v_lighting;
 
-
 #ifndef HAS_UNIFORM_u_base
 varying lowp float base;
 #else
 uniform lowp float u_base;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_height
 varying lowp float height;
 #else
 uniform lowp float u_height;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_from
 varying lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
-
-
 #ifndef HAS_UNIFORM_u_pattern_to
 varying lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
 
-
 void main() {
-    
-#ifdef HAS_UNIFORM_u_base
-    lowp float base = u_base;
+    #ifdef HAS_UNIFORM_u_base
+lowp float base = u_base;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_height
-    lowp float height = u_height;
+    #ifdef HAS_UNIFORM_u_height
+lowp float height = u_height;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_pattern_from
-    mediump vec4 pattern_from = u_pattern_from;
+    #ifdef HAS_UNIFORM_u_pattern_from
+mediump vec4 pattern_from = u_pattern_from;
 #endif
-
-    
-#ifdef HAS_UNIFORM_u_pattern_to
-    mediump vec4 pattern_to = u_pattern_to;
+    #ifdef HAS_UNIFORM_u_pattern_to
+mediump vec4 pattern_to = u_pattern_to;
 #endif
-
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -257,6 +188,8 @@ void main() {
     gl_FragColor = vec4(1.0);
 #endif
 }
+)";
+};
 
-*/
-// clang-format on
+} // namespace shaders
+} // namespace mbgl
