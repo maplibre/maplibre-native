@@ -18,8 +18,9 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 2, light);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 2, latrange);
 } // namespace uniforms
 
-class HillshadeProgram : public Program<
+class HillshadeProgram final : public Program<
     HillshadeProgram,
+    shaders::BuiltIn::HillshadeProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos,
@@ -35,6 +36,11 @@ class HillshadeProgram : public Program<
         textures::image>,
     style::HillshadePaintProperties>{
 public:
+    static constexpr std::string_view Name{"HillshadeProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
@@ -53,14 +59,5 @@ public:
 
 using HillshadeLayoutVertex = HillshadeProgram::LayoutVertex;
 using HillshadeAttributes = HillshadeProgram::AttributeList;
-
-class HillshadeLayerPrograms final : public LayerTypePrograms  {
-public:
-    HillshadeLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : hillshade(context, programParameters),
-          hillshadePrepare(context, programParameters) {}
-    HillshadeProgram hillshade;
-    HillshadePrepareProgram hillshadePrepare;
-};
 
 } // namespace mbgl

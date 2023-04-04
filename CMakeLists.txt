@@ -869,6 +869,35 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.cpp
@@ -919,37 +948,6 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/background.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/background_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/circle.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/clipping_mask.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/collision_box.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/collision_circle.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/debug.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_extrusion.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_extrusion_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_outline.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_outline_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/heatmap.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/heatmap_texture.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/hillshade.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/hillshade_prepare.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_gradient.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_sdf.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/preludes.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/raster.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shader_source.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shader_source.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shaders.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shaders.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_sdf_icon.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_sdf_text.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_text_and_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer.cpp

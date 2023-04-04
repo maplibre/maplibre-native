@@ -8,6 +8,10 @@
 namespace mbgl {
 
 class FillBucket;
+class FillProgram;
+class FillPatternProgram;
+class FillOutlineProgram;
+class FillOutlinePatternProgram;
 
 class RenderFillLayer final : public RenderLayer {
 public:
@@ -31,6 +35,12 @@ private:
 
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;
+
+    // Programs
+    std::shared_ptr<FillProgram> fillProgram;
+    std::shared_ptr<FillPatternProgram> fillPatternProgram;
+    std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
+    std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
 };
 
 } // namespace mbgl

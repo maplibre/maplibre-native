@@ -48,7 +48,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& renderTreeParameters = renderTree.getParameters();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(backend.getContext(), pixelRatio,
+        staticData = std::make_unique<RenderStaticData>(pixelRatio,
             std::make_unique<gfx::ShaderRegistry>());
         staticData->programs.registerWith(*staticData->shaders);
         observer->onRegisterShaders(*staticData->shaders);

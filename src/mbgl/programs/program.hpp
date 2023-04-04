@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/gfx/shader.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/programs/segment.hpp>
@@ -12,6 +13,11 @@
 
 #include <unordered_map>
 
+#include <mbgl/shaders/shader_manifest.hpp>
+#ifdef MBGL_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/program.hpp>
+#endif
+
 namespace mbgl {
 
 namespace gfx {
@@ -19,12 +25,13 @@ class RenderPass;
 } // namespace gfx
 
 template <class Name,
+          shaders::BuiltIn ShaderSource,
           gfx::PrimitiveType Primitive,
           class LayoutAttributeList,
           class LayoutUniformList,
           class Textures,
           class PaintProps>
-class Program {
+class Program : public gfx::Shader {
 public:
     using LayoutVertex = gfx::Vertex<LayoutAttributeList>;
 
@@ -45,8 +52,23 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
-    Program(gfx::Context& context, const ProgramParameters& programParameters)
-        : program(context.createProgram<Name>(programParameters)) {
+    Program(const ProgramParameters& programParameters) {
+        switch (gfx::Backend::GetType()) {
+#ifdef MBGL_RENDER_BACKEND_OPENGL
+            case gfx::Backend::Type::OpenGL: {
+                program = std::make_unique<gl::Program<Name>>(programParameters
+                    .withDefaultSource({
+                        gfx::Backend::Type::OpenGL,
+                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
+                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment
+                    }));
+                break;
+            }
+#endif
+            default: {
+                throw std::runtime_error("Unsupported rendering backend!");
+            }
+        }
     }
 
     static UniformValues computeAllUniformValues(

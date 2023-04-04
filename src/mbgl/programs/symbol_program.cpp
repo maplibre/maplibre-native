@@ -123,9 +123,9 @@ SymbolIconProgram::layoutUniformValues(const bool isText,
     );
 }
 
-template <class Name, class PaintProperties>
-typename SymbolSDFProgram<Name, PaintProperties>::LayoutUniformValues
-SymbolSDFProgram<Name, PaintProperties>::layoutUniformValues(const bool isText,
+template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>
+typename SymbolSDFProgram<Name, ShaderSource, PaintProperties>::LayoutUniformValues
+SymbolSDFProgram<Name, ShaderSource, PaintProperties>::layoutUniformValues(const bool isText,
                                                        const bool hasVariablePacement,
                                                        const style::SymbolPropertyValues& values,
                                                        const Size& texsize,
@@ -140,7 +140,7 @@ SymbolSDFProgram<Name, PaintProperties>::layoutUniformValues(const bool isText,
                               ? static_cast<float>(std::cos(state.getPitch())) * state.getCameraToCenterDistance()
                               : 1.0f);
 
-    return makeValues<SymbolSDFProgram<Name, PaintProperties>::LayoutUniformValues>(
+    return makeValues<SymbolSDFProgram<Name, ShaderSource, PaintProperties>::LayoutUniformValues>(
         isText,
         hasVariablePacement,
         values,
@@ -168,21 +168,23 @@ SymbolTextAndIconProgram::LayoutUniformValues SymbolTextAndIconProgram::layoutUn
     const TransformState& state,
     const float symbolFadeChange,
     const SymbolSDFPart part) {
-    return {SymbolSDFProgram<SymbolSDFTextProgram, style::TextPaintProperties>::layoutUniformValues(true,
-                                                                                                    hasVariablePacement,
-                                                                                                    values,
-                                                                                                    texsize,
-                                                                                                    pixelsToGLUnits,
-                                                                                                    pixelRatio,
-                                                                                                    alongLine,
-                                                                                                    tile,
-                                                                                                    state,
-                                                                                                    symbolFadeChange,
-                                                                                                    part)
-                .concat(gfx::UniformValues<SymbolTextAndIconProgramUniforms>(uniforms::texsize::Value(texsize_icon)))};
+    return {SymbolSDFProgram<SymbolSDFTextProgram, shaders::BuiltIn::SymbolSDFTextProgram, style::TextPaintProperties>
+        ::layoutUniformValues(
+            true,
+            hasVariablePacement,
+            values,
+            texsize,
+            pixelsToGLUnits,
+            pixelRatio,
+            alongLine,
+            tile,
+            state,
+            symbolFadeChange,
+            part)
+        .concat(gfx::UniformValues<SymbolTextAndIconProgramUniforms>(uniforms::texsize::Value(texsize_icon)))};
 }
 
-template class SymbolSDFProgram<SymbolSDFIconProgram, style::IconPaintProperties>;
-template class SymbolSDFProgram<SymbolSDFTextProgram, style::TextPaintProperties>;
+template class SymbolSDFProgram<SymbolSDFIconProgram, shaders::BuiltIn::SymbolSDFIconProgram, style::IconPaintProperties>;
+template class SymbolSDFProgram<SymbolSDFTextProgram, shaders::BuiltIn::SymbolSDFTextProgram, style::TextPaintProperties>;
 
 } // namespace mbgl

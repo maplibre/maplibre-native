@@ -21,8 +21,9 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 3, spin_weights);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 2, tl_parent);
 } // namespace uniforms
 
-class RasterProgram : public Program<
+class RasterProgram final : public Program<
     RasterProgram,
+    shaders::BuiltIn::RasterProgram,
     gfx::PrimitiveType::Triangle,
     TypeList<
         attributes::pos,
@@ -45,6 +46,11 @@ class RasterProgram : public Program<
     style::RasterPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"RasterProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
@@ -63,12 +69,5 @@ public:
 
 using RasterLayoutVertex = RasterProgram::LayoutVertex;
 using RasterAttributes = RasterProgram::AttributeList;
-
-class RasterLayerPrograms final : public LayerTypePrograms {
-public:
-    RasterLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : raster(context, programParameters) {}
-    RasterProgram raster;
-};
 
 } // namespace mbgl

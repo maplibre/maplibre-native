@@ -7,8 +7,9 @@
 
 namespace mbgl {
 
-class ClippingMaskProgram : public Program<
+class ClippingMaskProgram final : public Program<
     ClippingMaskProgram,
+    shaders::BuiltIn::ClippingMaskProgram,
     gfx::PrimitiveType::Triangle,
     PositionOnlyLayoutAttributes,
     TypeList<
@@ -17,6 +18,11 @@ class ClippingMaskProgram : public Program<
     style::Properties<>>
 {
 public:
+    static constexpr std::string_view Name{"ClippingMaskProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 

@@ -39,10 +39,13 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties {};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto& programInstance = parameters.programs.debug;
+    auto programInstance = parameters.shaders.get<DebugProgram>();
+    if (!programInstance) {
+        return;
+    }
 
     for (auto matrix : matrices) {
-        programInstance.draw(parameters.context,
+        programInstance->draw(parameters.context,
                              *parameters.renderPass,
                              gfx::LineStrip{4.0f * parameters.pixelRatio},
                              gfx::DepthMode::disabled(),

@@ -33,8 +33,9 @@ using FillPatternUniforms = TypeList<
     uniforms::pixel_coord_upper,
     uniforms::pixel_coord_lower>;
 
-class FillProgram : public Program<
+class FillProgram final : public Program<
     FillProgram,
+    shaders::BuiltIn::FillProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
     FillUniforms,
@@ -42,6 +43,11 @@ class FillProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p) {
@@ -54,8 +60,9 @@ public:
     }
 };
 
-class FillPatternProgram : public Program<
+class FillPatternProgram final : public Program<
     FillPatternProgram,
+    shaders::BuiltIn::FillPatternProgram,
     gfx::PrimitiveType::Triangle,
     FillLayoutAttributes,
     FillPatternUniforms,
@@ -64,6 +71,11 @@ class FillPatternProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillPatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(mat4 matrix,
@@ -75,8 +87,9 @@ public:
                                                    float pixelRatio);
 };
 
-class FillOutlineProgram : public Program<
+class FillOutlineProgram final : public Program<
     FillOutlineProgram,
+    shaders::BuiltIn::FillOutlineProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
     FillUniforms,
@@ -84,11 +97,17 @@ class FillOutlineProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillOutlineProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 
-class FillOutlinePatternProgram : public Program<
+class FillOutlinePatternProgram final : public Program<
     FillOutlinePatternProgram,
+    shaders::BuiltIn::FillOutlinePatternProgram,
     gfx::PrimitiveType::Line,
     FillLayoutAttributes,
     FillPatternUniforms,
@@ -97,23 +116,15 @@ class FillOutlinePatternProgram : public Program<
     style::FillPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillOutlinePatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 };
 
 using FillLayoutVertex = FillProgram::LayoutVertex;
 using FillAttributes = FillProgram::AttributeList;
-
-class FillLayerPrograms final : public LayerTypePrograms {
-public:
-    FillLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : fill(context, programParameters),
-          fillPattern(context, programParameters),
-          fillOutline(context, programParameters),
-          fillOutlinePattern(context, programParameters) {}
-    FillProgram fill;
-    FillPatternProgram fillPattern;
-    FillOutlineProgram fillOutline;
-    FillOutlinePatternProgram fillOutlinePattern;
-};
 
 } // namespace mbgl

@@ -20,8 +20,7 @@ class UploadPass;
 
 class RenderStaticData {
 public:
-    RenderStaticData(gfx::Context&, float pixelRatio,
-        std::unique_ptr<gfx::ShaderRegistry>&& shaders_);
+    RenderStaticData(float pixelRatio, std::unique_ptr<gfx::ShaderRegistry>&& shaders_);
 
     void upload(gfx::UploadPass&);
 
