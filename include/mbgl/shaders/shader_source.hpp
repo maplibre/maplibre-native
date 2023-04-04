@@ -1,10 +1,14 @@
 // Generated code, do not modify this file!
+// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+
 #pragma once
 #include <mbgl/gfx/backend.hpp>
 
 namespace mbgl {
 namespace shaders {
 
+/// @brief This enum is used with the ShaderSource template to select
+/// source code for the desired program and graphics back-end.
 enum class BuiltIn {
     None,
     Prelude,
