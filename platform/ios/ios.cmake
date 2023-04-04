@@ -2,7 +2,7 @@ option(MBGL_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
 option(MBGL_IOS_RENDER_TEST "Include render tests" ON)
 
 if(NOT DEFINED IOS_DEPLOYMENT_TARGET)
-    set(IOS_DEPLOYMENT_TARGET "11.0")
+    set(IOS_DEPLOYMENT_TARGET "12.0")
 endif()
 
 # Override default CMake NATIVE_ARCH_ACTUAL
@@ -25,7 +25,7 @@ set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC
 if(MBGL_WITH_OPENGL)
     target_compile_definitions(
         mbgl-core
-        PUBLIC MBGL_USE_GLES2 GLES_SILENCE_DEPRECATION
+        PUBLIC MBGL_USE_GLES2 GLES_SILENCE_DEPRECATION GLES_SILENCE_DEPRECATION
     )
     target_sources(
         mbgl-core
