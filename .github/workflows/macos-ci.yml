@@ -118,7 +118,7 @@ jobs:
 
       - name: Run macOS Objective-C tests
         run: |
-          ../macos/scripts/run-in-macos-gui-env.sh "make macos-test"
+          platform/macos/scripts/run-in-macos-gui-env.sh "make macos-test"
 
       - name: npm install  # C++ tests are run with root as working directory
         run: npm ci --ignore-scripts
