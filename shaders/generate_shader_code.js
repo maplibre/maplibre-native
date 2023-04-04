@@ -163,6 +163,7 @@ template <> struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenG
 fs.writeFileSync(path.join(args.output, "shader_manifest.hpp"),
 `${generatedHeader}
 #pragma once
+#include <mbgl/shaders/shader_source.hpp>
 
 #ifdef MBGL_RENDER_BACKEND_OPENGL
 ${generatedHeaders.join('\n')}
