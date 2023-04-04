@@ -21,7 +21,7 @@ class SymbolLayerPrograms;
 
 class Programs {
 public:
-    Programs(gfx::Context&, const ProgramParameters&);
+    Programs(const ProgramParameters&);
     ~Programs();
 
     /// @brief Registers built-in programs with the provided registry.
@@ -29,7 +29,6 @@ public:
     void registerWith(gfx::ShaderRegistry& registry);
 
 private:
-    gfx::Context& context;
     ProgramParameters programParameters;
 };
 

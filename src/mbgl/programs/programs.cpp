@@ -15,9 +15,8 @@
 
 namespace mbgl {
 
-Programs::Programs(gfx::Context& context_, const ProgramParameters& programParameters_)
-    : context(context_),
-      programParameters(programParameters_) {}
+Programs::Programs(const ProgramParameters& programParameters_)
+    : programParameters(programParameters_) {}
 
 Programs::~Programs() = default;
 
@@ -36,7 +35,7 @@ void registerTypes(gfx::ShaderRegistry& registry,
         std::make_shared<T>(programParameters_))), ... );
 }
 
-void Programs::registerWith([[maybe_unused]] gfx::ShaderRegistry& registry) {
+void Programs::registerWith(gfx::ShaderRegistry& registry) {
     registerTypes<
         BackgroundProgram,
         BackgroundPatternProgram,
