@@ -64,18 +64,18 @@ public:
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 (programs::gl::shaderSource() + programs::gl::vertexPreludeOffset),
-                programParameters.vertexSource().length() == 0 ?
+                programParameters.vertexSource(gfx::Backend::Type::OpenGL).length() == 0 ?
                     (programs::gl::shaderSource() + vertexOffset) :
-                    programParameters.vertexSource().c_str()
+                    programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()
             };
 
             std::initializer_list<const char*> fragmentSource = {
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 (programs::gl::shaderSource() + programs::gl::fragmentPreludeOffset),
-                programParameters.fragmentSource().length() == 0 ?
+                programParameters.fragmentSource(gfx::Backend::Type::OpenGL).length() == 0 ?
                     (programs::gl::shaderSource() + fragmentOffset) :
-                    programParameters.fragmentSource().c_str()
+                    programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()
             };
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);

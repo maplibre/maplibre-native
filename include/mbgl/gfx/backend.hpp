@@ -11,6 +11,7 @@ class Backend {
 public:
     enum class Type : uint8_t {
         OpenGL,
+        TYPE_MAX,
     };
 
     static constexpr Type DefaultType = Type::OpenGL;
