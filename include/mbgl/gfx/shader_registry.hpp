@@ -65,6 +65,26 @@ class ShaderRegistry {
             return std::static_pointer_cast<T>(shader);
         }
 
+        /// @brief Ensure the destination 'to' is populated with the requested
+        /// shader. If already non-null, does nothing.
+        /// @tparam T Derived type, inheriting `gfx::Shader`
+        /// @param to Location to store the shader
+        /// @return True if 'to' has a valid program object, false otherwise.
+        template<typename T,
+            typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
+        bool populate(std::shared_ptr<T>& to) noexcept {
+            if (to) {
+                return true;
+            }
+
+            auto shader = getShader(std::string(T::Name));
+            if (!shader || (shader->name() != T::Name)) {
+                return false;
+            }
+            to = std::static_pointer_cast<T>(shader);
+            return true;
+        }
+
     private:
         std::unordered_map<
             std::string,

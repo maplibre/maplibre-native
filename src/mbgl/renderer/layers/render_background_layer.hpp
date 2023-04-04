@@ -24,6 +24,10 @@ private:
     // Paint properties
     style::BackgroundPaintProperties::Unevaluated unevaluated;
     SegmentVector<BackgroundAttributes> segments;
+
+    // Programs
+    std::shared_ptr<BackgroundProgram> backgroundProgram;
+    std::shared_ptr<BackgroundPatternProgram> backgroundPatternProgram;
 };
 
 } // namespace mbgl

@@ -28,30 +28,7 @@ public:
     /// @param registry gfx::ShaderRegistry to populate with built-in programs.
     void registerWith(gfx::ShaderRegistry& registry);
 
-    BackgroundLayerPrograms& getBackgroundLayerPrograms() noexcept;
-    RasterLayerPrograms& getRasterLayerPrograms() noexcept;
-    HeatmapLayerPrograms& getHeatmapLayerPrograms() noexcept;
-    CircleLayerPrograms& getCircleLayerPrograms() noexcept;
-    HillshadeLayerPrograms& getHillshadeLayerPrograms() noexcept;
-    FillLayerPrograms& getFillLayerPrograms() noexcept;
-    FillExtrusionLayerPrograms& getFillExtrusionLayerPrograms() noexcept;
-    LineLayerPrograms& getLineLayerPrograms() noexcept;
-    SymbolLayerPrograms& getSymbolLayerPrograms() noexcept;
-
-    DebugProgram debug;
-    ClippingMaskProgram clippingMask;
-
 private:
-    std::unique_ptr<LayerTypePrograms> backgroundPrograms;
-    std::unique_ptr<LayerTypePrograms> circlePrograms;
-    std::unique_ptr<LayerTypePrograms> rasterPrograms;
-    std::unique_ptr<LayerTypePrograms> heatmapPrograms;
-    std::unique_ptr<LayerTypePrograms> hillshadePrograms;
-    std::unique_ptr<LayerTypePrograms> fillPrograms;
-    std::unique_ptr<LayerTypePrograms> fillExtrusionPrograms;
-    std::unique_ptr<LayerTypePrograms> linePrograms;
-    std::unique_ptr<LayerTypePrograms> symbolPrograms;
-
     gfx::Context& context;
     ProgramParameters programParameters;
 };
