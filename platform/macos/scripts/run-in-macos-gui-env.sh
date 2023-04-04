@@ -10,6 +10,8 @@
 # exit code as the command. See also this blog post:
 # https://aahlenst.dev/blog/accessing-the-macos-gui-in-automation-contexts/#continuous-integration-with-ssh
 
+set -eo pipefail
+
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <command>"
   exit 1
