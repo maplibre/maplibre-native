@@ -82,12 +82,11 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
 
-    struct DrawableSorter;
-    using DrawableSet = std::set<gfx::DrawablePtr, DrawableSorter>;
-    const DrawableSet& getDrawables() const { return drawables; }
+    using DrawableMap = std::map<util::SimpleIdentity, gfx::DrawablePtr>;
+    const DrawableMap& getDrawables() const { return drawables; }
 
     void addDrawable(gfx::DrawablePtr);
-    void removeDrawable(const gfx::DrawablePtr&);
+    void removeDrawable(const util::SimpleIdentity& drawableId);
 
     void processChanges();
 
@@ -149,16 +148,8 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
-    // Keep drawables in priority order so we don't need a sort on every render pass
-public:
-    struct DrawableSorter {
-        bool operator()(const gfx::DrawablePtr& l, const gfx::DrawablePtr& r) const {
-            return l->getDrawPriority() < r->getDrawPriority();
-        }
-    };
-
 protected:
-    DrawableSet drawables;
+    DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 };
 

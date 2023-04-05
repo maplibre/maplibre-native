@@ -276,6 +276,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geo.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geojson.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/ignore.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/immutable.hpp
@@ -803,6 +804,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/interpolate.cpp

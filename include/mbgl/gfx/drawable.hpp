@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/identity.hpp>
+
 #include <memory>
 
 namespace mbgl {
@@ -20,10 +22,13 @@ public:
 
     virtual void draw(const PaintParameters &) const = 0;
 
+    const util::SimpleIdentity& getId() const { return uniqueID; }
+
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
 protected:
+    util::SimpleIdentity uniqueID;
     DrawPriority drawPriority = 0;
 };
 

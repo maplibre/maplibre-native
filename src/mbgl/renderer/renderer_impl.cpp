@@ -145,8 +145,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     
     // Draw Drawables
     {
-        for (const auto &drawable : orchestrator.getDrawables()) {
-            drawable->draw(parameters);
+        for (const auto &pair : orchestrator.getDrawables()) {
+            pair.second->draw(parameters);
         }
     }
     

@@ -731,14 +731,13 @@ void RenderOrchestrator::clearData() {
 
 void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
     if (drawable) {
-        drawables.insert(std::move(drawable));
+        const auto id = drawable->getId();
+        drawables.insert(std::make_pair(id, std::move(drawable)));
     }
 }
 
-void RenderOrchestrator::removeDrawable(const gfx::DrawablePtr& drawable) {
-    if (drawable) {
-        drawables.erase(drawable);
-    }
+void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) {
+    drawables.erase(drawableId);
 }
 
 void RenderOrchestrator::processChanges() {

@@ -1,15 +1,18 @@
 #pragma once
 
+#include <mbgl/util/identity.hpp>
+
 #include <memory>
 
 namespace mbgl {
+
+class RenderOrchestrator;
 
 namespace gfx {
     class Drawable;
     using DrawablePtr = std::shared_ptr<Drawable>;
 }   // namespace gfx
 
-class RenderOrchestrator;
 
 /**
     Base class for changes to be made to the scene
@@ -53,18 +56,13 @@ protected:
  */
 class RemoveDrawableRequest : public ChangeRequest {
 public:
-    // Lacking a unique identifier, we need an actual reference to the drawable for now.
-    RemoveDrawableRequest(gfx::DrawablePtr drawable_)
-        : drawable(std::move(drawable_)) {
-    }
-    RemoveDrawableRequest(RemoveDrawableRequest&& other)
-        : drawable(std::move(other.drawable)) {
-    }
+    RemoveDrawableRequest(util::SimpleIdentity drawableId_) : drawableId(drawableId_) { }
+    RemoveDrawableRequest(const RemoveDrawableRequest& other) : drawableId(other.drawableId) { }
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    gfx::DrawablePtr drawable;
+    util::SimpleIdentity drawableId;
 };
 
 

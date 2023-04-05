@@ -8,8 +8,7 @@ void AddDrawableRequest::execute(RenderOrchestrator &orchestrator) {
 }
 
 void RemoveDrawableRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.removeDrawable(drawable);
-    drawable.reset();
+    orchestrator.removeDrawable(drawableId);
 }
 
 } // namespace mbgl
