@@ -11,9 +11,9 @@ DrawableGL::DrawableGL()
 DrawableGL::~DrawableGL() {
 }
 
-void DrawableGL::draw(/*const PaintParameters &*/) const
+void DrawableGL::draw(const PaintParameters &parameters) const
 {
-    impl->draw(/*parameters*/);
+    impl->draw(parameters);
 }
 
 } // namespace gl

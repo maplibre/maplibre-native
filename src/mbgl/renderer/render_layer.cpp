@@ -1,3 +1,4 @@
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -50,6 +51,10 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
     addRenderPassesFromTiles();
+}
+
+std::vector<std::unique_ptr<ChangeRequest>> RenderLayer::buildChanges() {
+    return {};
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {

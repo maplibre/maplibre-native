@@ -19,6 +19,7 @@
 
 namespace mbgl {
 
+class ChangeRequest;
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -31,6 +32,11 @@ class LineAtlas;
 class PatternAtlas;
 class CrossTileSymbolIndex;
 class RenderTree;
+
+namespace gfx {
+    class Drawable;
+    using DrawablePtr = std::shared_ptr<Drawable>;
+}   // namespace gfx
 
 namespace style {
     class LayerProperties;
@@ -75,6 +81,15 @@ public:
     void collectPlacedSymbolData(bool);
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
+
+    struct DrawableSorter;
+    using DrawableSet = std::set<gfx::DrawablePtr, DrawableSorter>;
+    const DrawableSet& getDrawables() const { return drawables; }
+
+    void addDrawable(gfx::DrawablePtr);
+    void removeDrawable(const gfx::DrawablePtr&);
+
+    void processChanges();
 
 private:
     bool isLoaded() const;
@@ -133,6 +148,18 @@ private:
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
+
+    // Keep drawables in priority order so we don't need a sort on every render pass
+public:
+    struct DrawableSorter {
+        bool operator()(const gfx::DrawablePtr& l, const gfx::DrawablePtr& r) const {
+            return l->getDrawPriority() < r->getDrawPriority();
+        }
+    };
+
+protected:
+    DrawableSet drawables;
+    std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 };
 
 } // namespace mbgl

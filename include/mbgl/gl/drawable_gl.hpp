@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
-//#include <mbgl/gfx/draw_scope.hpp>
 
 #include <memory>
 
@@ -15,7 +14,7 @@ public:
     DrawableGL();
     virtual ~DrawableGL();
 
-    void draw(/*const PaintParameters &*/) const override;
+    void draw(const PaintParameters &) const override;
     
 protected:
     class Impl;

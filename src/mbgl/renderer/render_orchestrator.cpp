@@ -2,6 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -64,12 +65,10 @@ public:
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
                    Immutable<Placement> placement_,
-                   bool updateSymbolOpacities_,
-                   std::vector<gfx::DrawablePtr>&& drawables_ = {})
+                   bool updateSymbolOpacities_)
         : RenderTree(std::move(parameters_)),
           layerRenderItems(std::move(layerRenderItems_)),
           sourceRenderItems(std::move(sourceRenderItems_)),
-          drawables(std::move(drawables_)),
           lineAtlas(lineAtlas_),
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
@@ -91,13 +90,11 @@ public:
         for (const auto& item : sourceRenderItems) result.emplace_back(*item);
         return result;
     }
-    const std::vector<gfx::DrawablePtr>& getDrawables() const override { return drawables; }
     LineAtlas& getLineAtlas() const override { return lineAtlas; }
     PatternAtlas& getPatternAtlas() const override { return patternAtlas; }
 
     std::set<LayerRenderItem> layerRenderItems;
     std::vector<std::unique_ptr<RenderItem>> sourceRenderItems;
-    std::vector<gfx::DrawablePtr> drawables;
     std::reference_wrapper<LineAtlas> lineAtlas;
     std::reference_wrapper<PatternAtlas> patternAtlas;
     RenderLayerReferences layersNeedPlacement;
@@ -267,6 +264,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
+
+            auto layerChanges = layer.buildChanges();
+            pendingChanges.insert(pendingChanges.end(), std::make_move_iterator(layerChanges.begin()),
+                                                        std::make_move_iterator(layerChanges.end()));
+
         }
     }
 
@@ -297,12 +299,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
     auto renderItemsEmplaceHint = layerRenderItems.begin();
-
-    std::vector<gfx::DrawablePtr> drawables;
-    for (const auto& pair : renderLayers) {
-        const auto& layerDrawables = pair.second->getDrawables();
-        drawables.insert(drawables.end(), layerDrawables.begin(), layerDrawables.end());
-    }
 
     // Reserve size for filteredLayersForSource if there are sources.
     if (!sourceImpls->empty()) {
@@ -466,8 +462,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
-                                            symbolBucketsChanged,
-                                            std::move(drawables));
+                                            symbolBucketsChanged);
 }
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry, const RenderedQueryOptions& options) const {
@@ -703,13 +698,18 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
 }
 
 bool RenderOrchestrator::isLoaded() const {
+    // do the simple boolean check before iterating over all the tiles in all the sources
+    if (!imageManager->isLoaded()) {
+        return false;
+    }
+    
     for (const auto& entry: renderSources) {
         if (!entry.second->isLoaded()) {
             return false;
         }
     }
 
-    return imageManager->isLoaded();
+    return true;
 }
 
 void RenderOrchestrator::clearData() {
@@ -727,6 +727,24 @@ void RenderOrchestrator::clearData() {
 
     imageManager->clear();
     glyphManager->evict(fontStacks(*layerImpls));
+}
+
+void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
+    if (drawable) {
+        drawables.insert(std::move(drawable));
+    }
+}
+
+void RenderOrchestrator::removeDrawable(const gfx::DrawablePtr& drawable) {
+    if (drawable) {
+        drawables.erase(drawable);
+    }
+}
+
+void RenderOrchestrator::processChanges() {
+    for (auto &change : std::move(pendingChanges)) {
+        change->execute(*this);
+    }
 }
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {

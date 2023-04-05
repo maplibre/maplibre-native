@@ -140,14 +140,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
-    // Drawables
+    // Run changes
+    orchestrator.processChanges();
+    
+    // Draw Drawables
     {
-        // TODO: sort into proper draw order
-        // auto layerDrawables = renderTree.getDrawables();
-        // std::sort(layerDrawables.begin(), layerDrawables.end(), drawableSorter());
-
-        for (const auto &drawable : renderTree.getDrawables()) {
-            drawable->draw(/*parameters*/);
+        for (const auto &drawable : orchestrator.getDrawables()) {
+            drawable->draw(parameters);
         }
     }
     

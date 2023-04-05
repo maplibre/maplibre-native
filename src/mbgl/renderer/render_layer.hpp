@@ -13,6 +13,7 @@
 namespace mbgl {
 
 class Bucket;
+class ChangeRequest;
 class TransitionParameters;
 class PropertyEvaluationParameters;
 class UploadParameters;
@@ -112,6 +113,9 @@ public:
 
     virtual void prepare(const LayerPrepareParameters&);
 
+    /// Produce any necessary change requests
+    virtual std::vector<std::unique_ptr<ChangeRequest>> buildChanges();
+
     const LayerPlacementData& getPlacementData() const { return placementData; }
 
     // Latest evaluated properties.
@@ -123,8 +127,6 @@ public:
 
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
-
-    const std::vector<gfx::DrawablePtr>& getDrawables() const { return drawables; }
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't, we'll show a warning
@@ -145,7 +147,7 @@ protected:
 
     LayerPlacementData placementData;
 
-    std::vector<gfx::DrawablePtr> drawables;
+    gfx::DrawablePtr drawables;
 
 private:
     // Some layers may not render correctly on some hardware when the vertex attribute limit of

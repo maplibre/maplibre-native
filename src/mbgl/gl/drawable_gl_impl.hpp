@@ -25,7 +25,7 @@ public:
     }
     ~Impl() = default;
 
-    void draw(/*const PaintParameters &*/) const {
+    void draw(const PaintParameters& /*parameters*/) const {
             MBGL_CHECK_ERROR(glDrawElements(
                 Enum<gfx::DrawModeType>::to(type),
                 static_cast<GLsizei>(indexLength),

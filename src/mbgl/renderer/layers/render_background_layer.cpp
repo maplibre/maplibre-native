@@ -2,6 +2,7 @@
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
@@ -36,7 +37,8 @@ void RenderBackgroundLayer::transition(const TransitionParameters &parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
-void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters &parameters) {
+void RenderBackgroundLayer::evaluate(
+        const PropertyEvaluationParameters &parameters) {
     auto properties = makeMutable<BackgroundLayerProperties>(
         staticImmutableCast<BackgroundLayer::Impl>(baseImpl),
         parameters.getCrossfadeParameters(),
@@ -52,9 +54,17 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters &paramet
         : RenderPass::Opaque | RenderPass::Translucent;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-    
-    drawables.clear();
-    drawables.emplace_back(std::make_shared<mbgl::gl::DrawableGL>());
+}
+
+std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges() {
+    std::vector<std::unique_ptr<ChangeRequest>> reqs;
+    if (!drawable /* && visible/enabled */) {
+        drawable = std::make_shared<gl::DrawableGL>();
+        reqs.emplace_back(std::make_unique<AddDrawableRequest>(drawable));
+    //} else if (drawable && !visible/enabled) {
+    //    return { std::make_unique<RemoveDrawableRequest>(std::move(drawable)) };
+    }
+    return reqs;
 }
 
 bool RenderBackgroundLayer::hasTransition() const {

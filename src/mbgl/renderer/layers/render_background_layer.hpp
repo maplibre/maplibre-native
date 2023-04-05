@@ -5,7 +5,18 @@
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 
+#include <optional>
+#include <memory>
+#include <vector>
+
 namespace mbgl {
+
+namespace gfx {
+    class Drawable;
+    using DrawablePtr = std::shared_ptr<Drawable>;
+}   // namespace gfc
+
+class ChangeRequest;
 
 class RenderBackgroundLayer final : public RenderLayer {
 public:
@@ -20,6 +31,7 @@ private:
     std::optional<Color> getSolidBackground() const override;
     void render(PaintParameters&) override;
     void prepare(const LayerPrepareParameters&) override;
+    std::vector<std::unique_ptr<ChangeRequest>> buildChanges() override;
 
     // Paint properties
     style::BackgroundPaintProperties::Unevaluated unevaluated;
@@ -28,6 +40,8 @@ private:
     // Programs
     std::shared_ptr<BackgroundProgram> backgroundProgram;
     std::shared_ptr<BackgroundPatternProgram> backgroundPatternProgram;
+    
+    gfx::DrawablePtr drawable;
 };
 
 } // namespace mbgl
