@@ -112,8 +112,8 @@ if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
 else()
     add_library(mbgl-core STATIC)
 endif()
-target_sources(
-    mbgl-core PRIVATE
+
+list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/aspiring_actor.hpp
@@ -305,6 +305,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_task.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_task_impl.hpp
+)
+list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/mailbox.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/scheduler.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/update_renderables.hpp
@@ -858,9 +860,8 @@ if(MBGL_WITH_OPENGL)
         mbgl-core
         PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
     )
-    target_sources(
-        mbgl-core
-        PRIVATE
+    list(APPEND 
+        INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
@@ -898,6 +899,9 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
+    )
+    list(APPEND 
+        SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.cpp
@@ -957,6 +961,14 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
     )
 endif()
+
+target_sources(
+    mbgl-core PRIVATE
+    ${INCLUDE_FILES}
+    ${SRC_FILES}
+)
+source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
+source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git/HEAD)
     execute_process(
