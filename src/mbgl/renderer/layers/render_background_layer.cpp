@@ -9,6 +9,7 @@
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/programs/programs.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -57,6 +58,11 @@ void RenderBackgroundLayer::evaluate(
 }
 
 std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges() {
+    
+    std::unique_ptr<gfx::Shader> x = std::make_unique<gl::ShaderProgramGL>();
+    auto y = x->to<gl::ShaderProgramGL>();
+    y->name();
+
     std::vector<std::unique_ptr<ChangeRequest>> reqs;
     if (!drawable /* && visible/enabled */) {
         drawable = std::make_shared<gl::DrawableGL>();
