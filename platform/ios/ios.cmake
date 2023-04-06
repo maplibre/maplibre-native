@@ -27,11 +27,11 @@ if(MBGL_WITH_OPENGL)
         mbgl-core
         PUBLIC MBGL_USE_GLES2 GLES_SILENCE_DEPRECATION GLES_SILENCE_DEPRECATION
     )
-    target_sources(
-        mbgl-core
-        PRIVATE
+    list(APPEND 
+        PLATFORM_FILES
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
-            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_eagl.mm
+            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp 
+            ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_eagl.mm
     )
     target_link_libraries(
         mbgl-core
@@ -39,12 +39,17 @@ if(MBGL_WITH_OPENGL)
     )
 endif()
 
-target_sources(
-    mbgl-core
-    PRIVATE
+if(MBGL_PUBLIC_BUILD)
+    list(APPEND 
+        PLATFORM_FILES
+            ${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm
+    )
+endif()
+
+list(APPEND 
+    PLATFORM_FILES
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/collator.mm
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm>
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/image.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/local_glyph_rasterizer.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/logging_nslog.mm
@@ -79,6 +84,12 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
 )
+
+target_sources(
+    mbgl-core PRIVATE
+    ${PLATFORM_FILES}
+)
+source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${PLATFORM_FILES})
 
 target_include_directories(
     mbgl-core
