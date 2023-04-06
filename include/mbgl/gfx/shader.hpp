@@ -11,7 +11,7 @@ class Shader;
 // Assert that a type is a valid shader for downcasting.
 // A valid shader must:
 //   * Inherit gfx::Shader
-//   * Have properly called DECLARE_SHADER_TYPEINFO in the class body
+//   * Declare a public, unique type name (string_view T::Name)
 //   * Be a final class
 template<typename T>
 inline constexpr bool is_shader_v =
@@ -28,9 +28,9 @@ class Shader {
     public:
         virtual ~Shader() = default;
 
-        /// @brief Get the name of this shader
-        /// @return Shader name
-        virtual const std::string_view name() const noexcept = 0;
+        /// @brief Get the type name of this shader
+        /// @return Shader type name
+        virtual const std::string_view typeName() const noexcept = 0;
 
         /// @brief Downcast to a type
         /// @tparam T Derived type
@@ -38,7 +38,7 @@ class Shader {
         template<typename T,
             typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
         T* to() noexcept {
-            if (name() != T::Name) {
+            if (typeName() != T::Name) {
                 return nullptr;
             }
             return static_cast<T*>(this);

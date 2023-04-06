@@ -76,7 +76,7 @@ class StubProgramBase : public gfx::Shader {
 class StubProgram_1 final : public StubProgramBase<10> {
     public:
         static constexpr std::string_view Name{"StubProgram_1"};
-        const std::string_view name() const noexcept override {
+        const std::string_view typeName() const noexcept override {
             return Name;
         }
 
@@ -86,7 +86,7 @@ class StubProgram_1 final : public StubProgramBase<10> {
 class StubProgram_2 final : public StubProgramBase<20> {
     public:
         static constexpr std::string_view Name{"StubProgram_2"};
-        const std::string_view name() const noexcept override {
+        const std::string_view typeName() const noexcept override {
             return Name;
         }
 };
@@ -134,7 +134,7 @@ TEST(ShaderRegistry, ReplaceShaderType) {
     ASSERT_TRUE(registry.registerShader(program));
     // Ensure the shader is present in the registry now
     ASSERT_TRUE(registry.isShader(std::string{StubProgram_1::Name}));
-    ASSERT_TRUE(registry.isShader(std::string{program->name()}));
+    ASSERT_TRUE(registry.isShader(std::string{program->typeName()}));
 
     // Make sure downcasting to program1 works as expected
     StubShaderConsumer consumer;
@@ -163,6 +163,65 @@ TEST(ShaderRegistry, ShaderRTTI) {
     // Should convert to program 1 but not program 2
     ASSERT_EQ(asBase->to<StubProgram_1>(), &program1);
     ASSERT_EQ(asBase->to<StubProgram_2>(), nullptr);
+}
+
+// Register the same type under different names
+TEST(ShaderRegistry, MultiRegister) {
+    gfx::ShaderRegistry registry;
+
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
+        "SecondProgram"));
+    
+    // Default option, register as the type name
+    ASSERT_NE(registry.get<StubProgram_1>(), nullptr);
+    // Register with an explicit name
+    ASSERT_NE(registry.get<StubProgram_1>("SecondProgram"), nullptr);
+    ASSERT_NE(
+        registry.get<StubProgram_1>(),
+        registry.get<StubProgram_1>("SecondProgram"));
+}
+
+// Test fetching
+TEST(ShaderRegistry, RegistryFetch) {
+    gfx::ShaderRegistry registry;
+
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
+        "SecondProgram"));
+    
+    std::shared_ptr<StubProgram_1> progA;
+    std::shared_ptr<StubProgram_1> progB;
+
+    ASSERT_TRUE(registry.populate(progA));
+    ASSERT_TRUE(registry.populate(progB, "SecondProgram"));
+    ASSERT_NE(progA, progB);
+    ASSERT_NE(progA, nullptr);
+    ASSERT_NE(progB, nullptr);
+}
+
+// Replace a manually named shader
+TEST(ShaderRegistry, NamedReplace) {
+    gfx::ShaderRegistry registry;
+
+    // Register
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
+        "CustomName"));
+    
+    std::shared_ptr<StubProgram_1> progA;
+    ASSERT_TRUE(registry.populate(progA, "CustomName"));
+    ASSERT_NE(progA, nullptr);
+
+    // Replace it with a new instance
+    ASSERT_TRUE(registry.replaceShader(std::make_shared<StubProgram_1>(),
+        "CustomName"));
+    
+    std::shared_ptr<StubProgram_1> progB;
+    ASSERT_TRUE(registry.populate(progB, "CustomName"));
+    ASSERT_NE(progB, nullptr);
+    
+    // Should be different instances
+    ASSERT_NE(progA, progB);
 }
 
 // Test replacing an actual program instance with a similar instance

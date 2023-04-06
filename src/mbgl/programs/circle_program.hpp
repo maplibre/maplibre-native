@@ -30,7 +30,7 @@ class CircleProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"CircleProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 

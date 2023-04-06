@@ -65,7 +65,7 @@ class FillExtrusionProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillExtrusionProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -107,7 +107,7 @@ class FillExtrusionPatternProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillExtrusionPatternProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
