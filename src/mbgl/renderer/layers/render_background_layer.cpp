@@ -58,11 +58,6 @@ void RenderBackgroundLayer::evaluate(
 }
 
 std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges() {
-    
-    std::unique_ptr<gfx::Shader> x = std::make_unique<gl::ShaderProgramGL>();
-    auto y = x->to<gl::ShaderProgramGL>();
-    y->name();
-
     std::vector<std::unique_ptr<ChangeRequest>> reqs;
     if (!drawable /* && visible/enabled */) {
         drawable = std::make_shared<gl::DrawableGL>();
@@ -88,6 +83,33 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Ensure programs are available
     if (!parameters.shaders.populate(backgroundProgram)) return;
     if (!parameters.shaders.populate(backgroundPatternProgram)) return;
+
+    // TODO: this should happen a GL-specific part of map initialization
+    auto vert = R"(
+        //#version 300 es
+        precision highp float;
+        attribute vec3 pos;  //layout (location = 0) in vec3 pos;
+        void main() {
+            gl_Position = vec4(pos, 1.0);
+        })";
+    auto frag = R"(
+        //#version 300 es
+        precision highp float;
+        //out vec4 color;
+        void main() {
+            //color = vec4(1.0,0.0,0.0,1.0);
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        })";
+    try {
+        if (std::shared_ptr<ShaderProgramBase> generic =
+                gl::ShaderProgramGL::create((gl::Context&)parameters.context, "background", vert, frag)) {
+            if (auto specific = generic->to<gl::ShaderProgramGL>()) {
+                specific->name();
+            }
+        }
+    } catch (const std::runtime_error& ex) {
+        // ...
+    }
 
     const Properties<>::PossiblyEvaluated properties;
     const BackgroundProgram::Binders paintAttributeData(properties, 0);
@@ -183,7 +205,8 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
         return std::nullopt;
     }
 
-    return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    return std::nullopt;
+    //return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
 }
 
 namespace {
