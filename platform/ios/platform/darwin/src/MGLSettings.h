@@ -30,14 +30,14 @@ typedef NS_ENUM(NSUInteger, MGLWellKnownTileServer) {
 MGL_EXPORT
 @interface MGLSettings : NSObject
 
-#pragma mark Tile Server Configuration
+// MARK: Tile Server Configuration
 
 /**
  Tile server options
  */
 @property (class, copy, nullable) MGLTileServerOptions* tileServerOptions;
 
-#pragma mark Authorizing Access
+// MARK: Authorizing Access
 
 /**
  The API Key used by all instances of `MGLMapView` in the current application.

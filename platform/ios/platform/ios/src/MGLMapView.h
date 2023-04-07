@@ -191,7 +191,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLUserLocationAnnotationTyp
 MGL_EXPORT
 @interface MGLMapView : UIView <MGLStylable>
 
-#pragma mark Creating Instances
+// MARK: Creating Instances
 
 /**
  Initializes and returns a newly allocated map view with the specified frame
@@ -225,7 +225,7 @@ MGL_EXPORT
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
-#pragma mark Accessing the Delegate
+// MARK: Accessing the Delegate
 
 /**
  The receiver’s delegate.
@@ -237,7 +237,7 @@ MGL_EXPORT
  */
 @property(nonatomic, weak, nullable) IBOutlet id<MGLMapViewDelegate> delegate;
 
-#pragma mark Configuring the Map’s Appearance
+// MARK: Configuring the Map’s Appearance
 
 /**
  The style currently displayed in the receiver.
@@ -449,7 +449,7 @@ MGL_EXPORT
  */
 @property (nonatomic, assign) BOOL prefetchesTiles;
 
-#pragma mark Displaying the User’s Location
+// MARK: Displaying the User’s Location
 
 /**
  The object that this map view uses to start and stop the delivery of
@@ -671,7 +671,7 @@ MGL_EXPORT
  */
 - (void)setTargetCoordinate:(CLLocationCoordinate2D)targetCoordinate animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
 
-#pragma mark Configuring How the User Interacts with the Map
+// MARK: Configuring How the User Interacts with the Map
 
 /**
  A Boolean value that determines whether the user may zoom the map in and
@@ -772,7 +772,7 @@ MGL_EXPORT
  */
 @property(nonatomic) CGFloat decelerationRate;
 
-#pragma mark Manipulating the Viewpoint
+// MARK: Manipulating the Viewpoint
 
 /**
  The geographic coordinate at the center of the map view.
@@ -1453,7 +1453,7 @@ MGL_EXPORT
  */
 - (void)setContentInset:(UIEdgeInsets)contentInset animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
 
-#pragma mark Converting Geographic Coordinates
+// MARK: Converting Geographic Coordinates
 
 /**
  Converts a point in the given view’s coordinate system to a geographic
@@ -1540,7 +1540,7 @@ MGL_EXPORT
  */
 - (MGLMapProjection*)mapProjection;
 
-#pragma mark Annotating the Map
+// MARK: Annotating the Map
 
 /**
  The complete list of annotations associated with the receiver. (read-only)
@@ -1678,7 +1678,7 @@ MGL_EXPORT
  */
 - (nullable NSArray<id <MGLAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
 
-#pragma mark Managing Annotation Selections
+// MARK: Managing Annotation Selections
 
 /**
  The currently selected annotations.
@@ -1763,7 +1763,7 @@ MGL_EXPORT
  */
 - (void)deselectAnnotation:(nullable id <MGLAnnotation>)annotation animated:(BOOL)animated;
 
-#pragma mark Overlaying the Map
+// MARK: Overlaying the Map
 
 /**
  The complete list of overlays associated with the receiver. (read-only)
@@ -1813,7 +1813,7 @@ MGL_EXPORT
  */
 - (void)removeOverlays:(NSArray<id <MGLOverlay>> *)overlays;
 
-#pragma mark Accessing the Underlying Map Data
+// MARK: Accessing the Underlying Map Data
 
 /**
  Returns an array of rendered map features that intersect with a given point.
@@ -2026,7 +2026,7 @@ MGL_EXPORT
  */
 - (NSArray<id <MGLFeature>> *)visibleFeaturesInRect:(CGRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
-#pragma mark Debugging the Map
+// MARK: Debugging the Map
 
 /**
  The options that determine which debugging aids are shown on the map.

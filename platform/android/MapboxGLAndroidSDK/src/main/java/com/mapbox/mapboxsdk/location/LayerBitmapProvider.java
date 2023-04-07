@@ -27,7 +27,7 @@ class LayerBitmapProvider {
   }
 
   Bitmap generateShadowBitmap(@NonNull LocationComponentOptions options) {
-    Drawable shadowDrawable = BitmapUtils.getDrawableFromRes(context, R.drawable.mapbox_user_icon_shadow);
+    Drawable shadowDrawable = BitmapUtils.getDrawableFromRes(context, R.drawable.maplibre_user_icon_shadow);
     return generateShadow(shadowDrawable, options.elevation());
   }
 }

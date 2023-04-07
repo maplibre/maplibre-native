@@ -15,7 +15,7 @@
 
 @implementation MBXBenchViewController
 
-#pragma mark - Setup
+// MARK: - Setup
 
 + (void)initialize
 {

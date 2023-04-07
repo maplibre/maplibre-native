@@ -5,33 +5,22 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - ".gitignore"
-      - "**.md"
-      # ignore other platforms
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/node/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/actions/**"
+    paths:
+      - 'platform/android/**'
       - ".github/workflows/android-ci.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node-ci.yml"
-      - ".github/workflows/node-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - maplibre-gl-js
+      - ".gitmodules"
+      - "!**/*.md"
 
 concurrency:
   # cancel jobs on PRs only
@@ -40,14 +29,11 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
@@ -58,11 +44,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -79,6 +60,9 @@ jobs:
       - name: npm install
         run: npm install --ignore-scripts
         working-directory: platform/android
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
 
       - name: Prepare ccache
         run: ccache --clear
@@ -116,12 +100,17 @@ jobs:
 
       - name: Run Android unit tests
         run: make run-android-unit-test
-
+    
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.10.2
+          ninjaVersion: latest
+      
       - name: Build libmapbox-gl.so for arm-v8
-        run: make android-lib-arm-v8
-
-      - name: Generate Espresso sanity tests
-        run: make test-code-android
+        run: |
+          cmake --version
+          make android-lib-arm-v8
 
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3

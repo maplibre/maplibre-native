@@ -142,7 +142,7 @@ static NSString * const MBXOfflinePacksTableViewActiveCellReuseIdentifier = @"Ac
 }
 
 
-#pragma mark - Table view data source
+// MARK: - Table view data source
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [MGLOfflineStorage sharedOfflineStorage].packs.count;
@@ -209,7 +209,7 @@ static NSString * const MBXOfflinePacksTableViewActiveCellReuseIdentifier = @"Ac
     }
 }
 
-#pragma mark - Table view delegate
+// MARK: - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -240,7 +240,7 @@ static NSString * const MBXOfflinePacksTableViewActiveCellReuseIdentifier = @"Ac
     }
 }
 
-#pragma mark - Offline pack delegate
+// MARK: - Offline pack delegate
 
 - (void)offlinePackProgressDidChange:(NSNotification *)notification {
     MGLOfflinePack *pack = notification.object;

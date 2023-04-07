@@ -44,7 +44,7 @@ FOUNDATION_EXTERN MGL_EXPORT MGLExceptionName const MGLRedundantSourceIdentifier
 MGL_EXPORT
 @interface MGLStyle : NSObject
 
-#pragma mark Accessing Default Styles
+// MARK: Accessing Default Styles
 
 /**
  Returns list of predefined styles
@@ -67,7 +67,7 @@ MGL_EXPORT
  */
 + (MGLDefaultStyle*) predefinedStyle:(NSString*)withStyleName;
 
-#pragma mark Accessing Metadata About the Style
+// MARK: Accessing Metadata About the Style
 
 /**
  The name of the style.
@@ -76,7 +76,7 @@ MGL_EXPORT
  */
 @property (readonly, copy, nullable) NSString *name;
 
-#pragma mark Managing Sources
+// MARK: Managing Sources
 
 /**
  A set containing the style’s sources.
@@ -165,7 +165,7 @@ MGL_EXPORT
 - (BOOL)removeSource:(MGLSource *)source error:(NSError * __nullable * __nullable)outError;
 
 
-#pragma mark Managing Style Layers
+// MARK: Managing Style Layers
 
 /**
  The layers included in the style, arranged according to their back-to-front
@@ -292,7 +292,7 @@ MGL_EXPORT
  */
 - (void)removeLayer:(MGLStyleLayer *)layer;
 
-#pragma mark Managing a Style’s Images
+// MARK: Managing a Style’s Images
 
 /**
  Returns the image associated with the given name in the style.
@@ -345,14 +345,14 @@ MGL_EXPORT
 - (void)removeImageForName:(NSString *)name;
 
 
-#pragma mark Managing the Style's Light
+// MARK: Managing the Style's Light
 
 /**
  Provides global light source for the style.
  */
 @property (nonatomic, strong) MGLLight *light;
 
-#pragma mark Localizing Map Content
+// MARK: Localizing Map Content
 
 /**
  Attempts to localize labels in the style into the given locale.

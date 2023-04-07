@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLUserLocation : NSObject <MGLAnnotation, NSSecureCoding>
 
-#pragma mark Determining the User’s Position
+// MARK: Determining the User’s Position
 
 /**
  The current location of the device. (read-only)
@@ -44,7 +44,7 @@ MGL_EXPORT
  */
 @property (nonatomic, readonly, nullable) CLHeading *heading;
 
-#pragma mark Accessing the User Annotation Text
+// MARK: Accessing the User Annotation Text
 
 /** The title to display for the user location annotation. */
 @property (nonatomic, copy) NSString *title;

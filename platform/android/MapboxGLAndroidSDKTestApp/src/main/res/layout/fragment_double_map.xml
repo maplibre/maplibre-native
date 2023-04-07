@@ -16,7 +16,7 @@
         <com.mapbox.mapboxsdk.maps.MapView
             android:id="@+id/mini_map"
             android:layout_width="100dp"
-            maps:mapbox_enableZMediaOverlay="true"
+            maps:maplibre_enableZMediaOverlay="true"
             android:layout_height="100dp" />
     </FrameLayout>
 </RelativeLayout>

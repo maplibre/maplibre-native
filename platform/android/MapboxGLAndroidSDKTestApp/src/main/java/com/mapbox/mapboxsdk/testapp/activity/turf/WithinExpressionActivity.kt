@@ -21,8 +21,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_physical_circle.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityWithinExpressionBinding
 
 /**
  * An Activity that showcases the within expression to filter features outside a geometry
@@ -30,6 +29,9 @@ import kotlinx.android.synthetic.main.activity_physical_circle.*
 class WithinExpressionActivity : AppCompatActivity() {
 
     private lateinit var mapboxMap: MapboxMap
+    private lateinit var binding: ActivityWithinExpressionBinding
+    private lateinit var mapView: MapView
+
     private val handler: Handler = Handler()
     private val runnable: Runnable = Runnable {
         optimizeStyle()
@@ -37,7 +39,9 @@ class WithinExpressionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_within_expression)
+        binding = ActivityWithinExpressionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapView = binding.mapView
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
@@ -157,9 +161,9 @@ class WithinExpressionActivity : AppCompatActivity() {
         )
 
         // Hide other types of labels to highlight POI labels
-        (style.getLayer("road_label") as SymbolLayer).setProperties(visibility(NONE))
-        (style.getLayer("airport-label-major") as SymbolLayer).setProperties(visibility(NONE))
-        (style.getLayer("poi_transit") as SymbolLayer).setProperties(visibility(NONE))
+        (style.getLayer("road_label") as SymbolLayer?)?.setProperties(visibility(NONE))
+        (style.getLayer("airport-label-major") as SymbolLayer?)?.setProperties(visibility(NONE))
+        (style.getLayer("poi_transit") as SymbolLayer?)?.setProperties(visibility(NONE))
     }
 
     override fun onStart() {
@@ -193,7 +197,7 @@ class WithinExpressionActivity : AppCompatActivity() {
         mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
             mapView.onSaveInstanceState(it)

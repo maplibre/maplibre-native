@@ -175,7 +175,7 @@ extern void (* const glGetShaderiv)(GLuint, GLenum, GLint *);
 /// Pointer to glGetShaderSource OpenGL function.
 extern void (* const glGetShaderSource)(GLuint, GLsizei, GLsizei *, GLchar *);
 /// Pointer to glGetString OpenGL function.
-extern const GLubyte *(*glGetString)(GLenum);
+extern const GLubyte *(* const glGetString)(GLenum);
 /// Pointer to glGetTexParameterfv OpenGL function.
 extern void (* const glGetTexParameterfv)(GLenum, GLenum, GLfloat *);
 /// Pointer to glGetTexParameteriv OpenGL function.

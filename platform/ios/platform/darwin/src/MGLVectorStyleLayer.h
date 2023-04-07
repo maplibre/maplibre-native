@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 MGL_EXPORT
 @interface MGLVectorStyleLayer : MGLForegroundStyleLayer
 
-#pragma mark Refining a Style Layer’s Content
+// MARK: Refining a Style Layer’s Content
 
 /**
  Identifier of the layer within the source identified by the `sourceIdentifier`

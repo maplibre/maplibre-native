@@ -24,6 +24,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Fix memory access violation exception in vector_tile_data.cpp [#632](https://github.com/maplibre/maplibre-gl-native/pull/632)
 - [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-gl-native/pull/498).
 - [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-gl-native/pull/198).
 

@@ -18,7 +18,7 @@ template <> struct is_utf16char_like<char16_t>: std::true_type {};
 template <> struct is_utf16char_like<wchar_t>: std::true_type {};
 template <> struct is_utf16char_like<uint16_t>: std::true_type {};
 
-template <typename T> using is_utf16char_like_pointer = std::integral_constant<bool, std::is_pointer<T>::value
+template <typename T> using is_utf16char_like_pointer = std::integral_constant<bool, std::is_pointer_v<T>
                                                                                      && is_utf16char_like<typename std::remove_pointer<T>::type>::value>;
 
 template <class OutPointer, class InChar>

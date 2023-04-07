@@ -2,7 +2,7 @@
 
 @implementation NSValue (MGLAdditions)
 
-#pragma mark Geometry
+// MARK: Geometry
 
 + (instancetype)valueWithMGLCoordinate:(CLLocationCoordinate2D)coordinate {
     return [self valueWithBytes:&coordinate objCType:@encode(CLLocationCoordinate2D)];
@@ -54,7 +54,7 @@
     return quad;
 }
 
-#pragma mark Offline maps
+// MARK: Offline maps
 
 + (NSValue *)valueWithMGLOfflinePackProgress:(MGLOfflinePackProgress)progress {
     return [NSValue value:&progress withObjCType:@encode(MGLOfflinePackProgress)];
@@ -66,7 +66,7 @@
     return progress;
 }
 
-#pragma mark Working with Transition Values
+// MARK: Working with Transition Values
 
 + (NSValue *)valueWithMGLTransition:(MGLTransition)transition {
     return [NSValue value:&transition withObjCType:@encode(MGLTransition)];

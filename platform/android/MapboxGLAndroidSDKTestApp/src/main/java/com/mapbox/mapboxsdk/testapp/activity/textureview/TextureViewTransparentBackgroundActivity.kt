@@ -17,7 +17,7 @@ import java.io.IOException
  * Example showcasing how to create a TextureView with a transparent background.
  */
 class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
-    private var mapView: MapView? = null
+    private lateinit var mapView: MapView
     private val mapboxMap: MapboxMap? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +43,8 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
                 .build()
         )
         mapView = MapView(this, mapboxMapOptions)
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap: MapboxMap -> initMap(mapboxMap) }
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap: MapboxMap -> initMap(mapboxMap) }
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView)
     }
 
@@ -60,36 +60,36 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 }

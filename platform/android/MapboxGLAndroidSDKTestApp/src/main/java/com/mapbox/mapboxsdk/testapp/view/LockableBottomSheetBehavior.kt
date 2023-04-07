@@ -7,7 +7,7 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
-class LockableBottomSheetBehavior<V : View?>(context: Context?, attrs: AttributeSet?) :
+class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeSet?) :
     BottomSheetBehavior<V>(context, attrs) {
     private var locked = false
     fun setLocked(locked: Boolean) {

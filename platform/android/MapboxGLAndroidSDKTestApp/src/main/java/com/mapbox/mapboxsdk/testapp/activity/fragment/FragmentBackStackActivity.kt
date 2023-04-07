@@ -6,8 +6,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.maps.SupportMapFragment
 import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityBackstackFragmentBinding
 import com.mapbox.mapboxsdk.testapp.utils.NavUtils
-import kotlinx.android.synthetic.main.activity_backstack_fragment.*
 
 /**
  * Test activity showcasing using the MapFragment API as part of a backstacked fragment.
@@ -18,11 +18,13 @@ class FragmentBackStackActivity : AppCompatActivity() {
         private const val FRAGMENT_TAG = "map_fragment"
     }
 
+    private lateinit var binding: ActivityBackstackFragmentBinding
     private lateinit var mapFragment: SupportMapFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_backstack_fragment)
+        binding = ActivityBackstackFragmentBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         if (savedInstanceState == null) {
             mapFragment = SupportMapFragment.newInstance()
@@ -39,7 +41,7 @@ class FragmentBackStackActivity : AppCompatActivity() {
             }
         }
 
-        button.setOnClickListener { handleClick() }
+        binding.button.setOnClickListener { handleClick() }
     }
 
     private fun initMap(mapboxMap: MapboxMap) {

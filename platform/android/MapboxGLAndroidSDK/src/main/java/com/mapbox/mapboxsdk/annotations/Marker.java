@@ -244,7 +244,7 @@ public class Marker extends Annotation {
   @Nullable
   private InfoWindow getInfoWindow(@NonNull MapView mapView) {
     if (infoWindow == null && mapView.getContext() != null) {
-      infoWindow = new InfoWindow(mapView, R.layout.mapbox_infowindow_content, getMapboxMap());
+      infoWindow = new InfoWindow(mapView, R.layout.maplibre_infowindow_content, getMapboxMap());
     }
     return infoWindow;
   }

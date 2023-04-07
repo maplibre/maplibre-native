@@ -8,9 +8,9 @@
     <com.mapbox.mapboxsdk.maps.MapView
             android:layout_gravity="center"
             android:id="@id/mapView"
-            app:mapbox_cameraZoom="1"
+            app:maplibre_cameraZoom="1"
             android:layout_width="1080px"
             android:layout_height="1920px"
-            app:mapbox_pixelRatio="1"/>
+            app:maplibre_pixelRatio="1"/>
 
 </FrameLayout>

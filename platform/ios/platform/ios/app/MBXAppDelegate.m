@@ -19,7 +19,7 @@
     return YES;
 }
 
-#pragma mark - Quick actions
+// MARK: - Quick actions
 
 - (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler {
     completionHandler([self handleShortcut:shortcutItem]);

@@ -110,7 +110,7 @@
     self.delegate = nil;
 }
 
-#pragma mark - CLLocationManagerDelegate
+// MARK: - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
     if ([self.delegate respondsToSelector:@selector(locationManager:didUpdateLocations:)]) {

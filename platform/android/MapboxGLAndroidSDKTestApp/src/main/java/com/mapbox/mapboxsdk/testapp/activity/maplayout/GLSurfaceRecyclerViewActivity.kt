@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_recyclerview.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityRecyclerviewBinding
 
 /**
  * TestActivity showcasing how to integrate multiple GLSurfaceView MapViews in a RecyclerView.
@@ -21,23 +21,26 @@ import kotlinx.android.synthetic.main.activity_recyclerview.*
 @SuppressLint("ClickableViewAccessibility")
 open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
 
+    lateinit var binding: ActivityRecyclerviewBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recyclerview)
-        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        recyclerView.adapter = ItemAdapter(this, LayoutInflater.from(this))
+        binding = ActivityRecyclerviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        binding.recyclerView.adapter = ItemAdapter(this, LayoutInflater.from(this))
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
         // to release memory, we need to call MapView#onLowMemory
-        (recyclerView.adapter as ItemAdapter).onLowMemory()
+        (binding.recyclerView.adapter as ItemAdapter).onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         // to perform cleanup, we need to call MapView#onDestroy
-        (recyclerView.adapter as ItemAdapter).onDestroy()
+        (binding.recyclerView.adapter as ItemAdapter).onDestroy()
     }
 
     open fun getMapItemLayoutId(): Int {

@@ -5,6 +5,6 @@
         android:id="@id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_cameraTargetLat="45.38301927899065"
-        app:mapbox_cameraTargetLng="8.63525390625"
-        app:mapbox_cameraZoom="7"/>
+        app:maplibre_cameraTargetLat="45.38301927899065"
+        app:maplibre_cameraTargetLng="8.63525390625"
+        app:maplibre_cameraZoom="7"/>

@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-#pragma mark Responding to Map Viewpoint Changes
+// MARK: Responding to Map Viewpoint Changes
 
 /**
  Tells the delegate that the viewpoint depicted by the map view is about to
@@ -87,7 +87,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)mapView:(MGLMapView *)mapView shouldChangeFromCamera:(MGLMapCamera *)oldCamera toCamera:(MGLMapCamera *)newCamera;
 
-#pragma mark Loading the Map
+// MARK: Loading the Map
 
 /**
  Tells the delegate that the map view will begin to load.
@@ -197,7 +197,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)mapView:(MGLMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
 
-#pragma mark Managing the Appearance of Annotations
+// MARK: Managing the Appearance of Annotations
 
 /**
  Returns an annotation image object to mark the given point annotation object on
@@ -270,7 +270,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGFloat)mapView:(MGLMapView *)mapView lineWidthForPolylineAnnotation:(MGLPolyline *)annotation;
 
-#pragma mark Selecting Annotations
+// MARK: Selecting Annotations
 
 /**
  Returns a Boolean value indicating whether the shape annotation can be selected.
@@ -304,7 +304,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MGLMapView *)mapView didDeselectAnnotation:(id <MGLAnnotation>)annotation;
 
-#pragma mark Managing Callout Popovers
+// MARK: Managing Callout Popovers
 
 /**
  Returns a Boolean value indicating whether the annotation is able to display

@@ -144,7 +144,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     mapboxMapOptions = options;
 
     // add accessibility support
-    setContentDescription(context.getString(R.string.mapbox_mapActionDescription));
+    setContentDescription(context.getString(R.string.maplibre_mapActionDescription));
     setWillNotDraw(false);
     initialiseDrawingSurface(options);
   }
@@ -209,7 +209,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     compassView.setTag("compassView");
     compassView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
     compassView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
-    compassView.setContentDescription(getResources().getString(R.string.mapbox_compassContentDescription));
+    compassView.setContentDescription(getResources().getString(R.string.maplibre_compassContentDescription));
     compassView.injectCompassAnimationListener(createCompassAnimationListener(cameraDispatcher));
     compassView.setOnClickListener(createCompassClickListener(cameraDispatcher));
     return compassView;
@@ -224,8 +224,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     attrView.setAdjustViewBounds(true);
     attrView.setClickable(true);
     attrView.setFocusable(true);
-    attrView.setContentDescription(getResources().getString(R.string.mapbox_attributionsIconContentDescription));
-    attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_info_bg_selector));
+    attrView.setContentDescription(getResources().getString(R.string.maplibre_attributionsIconContentDescription));
+    attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.maplibre_info_bg_selector));
     // inject widgets with MapboxMap
     attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(getContext(), mapboxMap));
     return attrView;
@@ -237,7 +237,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     logoView.setTag("logoView");
     logoView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
     logoView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
-    logoView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.mapbox_logo_icon));
+    logoView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.maplibre_logo_icon));
     return logoView;
   }
 

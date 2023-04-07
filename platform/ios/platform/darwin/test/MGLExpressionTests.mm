@@ -43,7 +43,7 @@ using namespace std::string_literals;
 
 @implementation MGLExpressionTests
 
-#pragma mark - Utility
+// MARK: - Utility
 
 - (NSComparisonPredicate *)equalityComparisonPredicateWithRightConstantValue:(id)rightConstantValue
 {
@@ -56,7 +56,7 @@ using namespace std::string_literals;
     return predicate;
 }
 
-#pragma mark - Objective-C Example Code for MGL Expressions
+// MARK: - Objective-C Example Code for MGL Expressions
 
 - (void)testSteppingExpression {
     //#-example-code
@@ -131,7 +131,7 @@ using namespace std::string_literals;
     NSLog(@"%s %@", __FUNCTION__, functionExpression);
 }
 
-#pragma mark - Valuation tests
+// MARK: - Valuation tests
 
 - (void)testStringValuation {
     MGLAssertConstantEqualsValue(@"bar", "bar"s, @"NSString should convert to std::string.");
@@ -208,7 +208,7 @@ using namespace std::string_literals;
     MGLAssertConstantEqualsValue([NSNull null], nullValue, @"NSNull should convert to mbgl::NullValue.");
 }
 
-#pragma mark - Feature type tests
+// MARK: - Feature type tests
 
 - (void)testFeatureType {
     XCTAssertEqual([NSExpression expressionForConstantValue:@"Point"].mgl_featureType, mbgl::FeatureType::Point);
@@ -227,7 +227,7 @@ using namespace std::string_literals;
     XCTAssertEqual([NSExpression expressionForConstantValue:nil].mgl_featureType, mbgl::FeatureType::Unknown);
 }
 
-#pragma mark - JSON expression object tests
+// MARK: - JSON expression object tests
 
 - (void)testVariableExpressionObject {
     {
@@ -1373,7 +1373,7 @@ using namespace std::string_literals;
     }
 }
 
-#pragma mark - Localization tests
+// MARK: - Localization tests
 
 - (void)testLocalization {
     {
@@ -1548,7 +1548,7 @@ using namespace std::string_literals;
 
 }
 
-#pragma mark - Objective-C Example Code for Expected Failures
+// MARK: - Objective-C Example Code for Expected Failures
 
 - (void)testExpectPassObjC {
     XCTAssertNotNil(@1);

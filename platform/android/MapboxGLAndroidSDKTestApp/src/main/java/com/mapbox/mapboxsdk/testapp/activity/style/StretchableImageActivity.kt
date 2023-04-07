@@ -22,7 +22,7 @@ import java.util.ArrayList
  * Test stretchable image as a background for text..
  */
 class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,7 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.e("json is null.")
             return
         }
-        val style = mapboxMap!!.style
+        val style = mapboxMap.style
         if (style != null) {
             val featureCollection = FeatureCollection.fromJson(json)
             val stretchSource = GeoJsonSource(STRETCH_SOURCE, featureCollection)
@@ -125,37 +125,37 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     companion object {

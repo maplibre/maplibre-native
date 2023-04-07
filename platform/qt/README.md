@@ -1,4 +1,6 @@
-# MapLibre Maps SDK for Qt
+# MapLibre GL Native for Qt
+
+[![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/qt-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/qt-ci.yml) 
 
 This is a community maintained MapLibre SDK for usage in Qt apps.
 Both Qt5 (minimal 5.6) and Qt6 are supported.

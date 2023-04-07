@@ -51,16 +51,14 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
         fab.setOnClickListener { view: View? ->
-            if (mapboxMap != null) {
-                updateMarker()
-            }
+            updateMarker()
         }
     }
 
     private fun updateMarker() {
         // update model
-        val first = mapView!!.tag as Boolean
-        mapView!!.tag = !first
+        val first = mapView.tag as Boolean
+        mapView.tag = !first
 
         // update marker
         marker!!.position =
@@ -68,15 +66,19 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
         marker!!.icon = IconUtils.drawableToIcon(
             this,
             R.drawable.ic_stars,
-            if (first) ResourcesCompat.getColor(
-                resources,
-                R.color.blueAccent,
-                theme
-            ) else ResourcesCompat.getColor(
-                resources,
-                R.color.redAccent,
-                theme
-            )
+            if (first) {
+                ResourcesCompat.getColor(
+                    resources,
+                    R.color.blueAccent,
+                    theme
+                )
+            } else {
+                ResourcesCompat.getColor(
+                    resources,
+                    R.color.redAccent,
+                    theme
+                )
+            }
         )
         marker!!.title =
             if (first) getString(R.string.dynamic_marker_chelsea_title) else getString(R.string.dynamic_marker_arsenal_title)
@@ -86,37 +88,37 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {

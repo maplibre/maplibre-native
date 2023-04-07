@@ -4,17 +4,24 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 10.0.0 - February 10, 2023
+
 ### ✨ Features and improvements
 
 * Add your pull request...
+* Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` [647](https://github.com/maplibre/maplibre-gl-native/pull/647) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
+* GMS location: Replace new LocationRequest() with LocationRequest.Builder, and LocationRequest.PRIORITY_X with Priority.PRIORITY_X ([620](https://github.com/maplibre/maplibre-gl-native/pull/620)) 
 
 ### 🐞 Bug fixes
 
-* Add your pull request...
+* Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014
+*    and lessens the backward compatibility burden ([630](https://github.com/maplibre/maplibre-gl-native/pull/630))
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
 
 ### ⛵ Dependencies
 
-* Add your pull request...
+* Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
+
 
 ## 9.6.0 - December 18, 2022
 

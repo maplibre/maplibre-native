@@ -3,7 +3,7 @@ package com.mapbox.mapboxsdk.maps
 import android.content.Context
 import android.graphics.PointF
 import androidx.test.annotation.UiThreadTest
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.mapboxsdk.AppCenter
 import com.mapbox.mapboxsdk.Mapbox
@@ -14,16 +14,15 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters
 import com.mapbox.mapboxsdk.maps.renderer.MapRenderer
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions
-import com.mapbox.mapboxsdk.testapp.MapboxApplication
 import com.mapbox.mapboxsdk.testapp.utils.TestConstants
-import junit.framework.Assert.*
 import org.junit.After
 import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class NativeMapViewTest : AppCenter() {
 
     private lateinit var nativeMapView: NativeMap
@@ -55,7 +54,7 @@ class NativeMapViewTest : AppCenter() {
     fun after() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiKey = Mapbox.getApiKey()
-        Mapbox.getInstance(context, apiKey, MapboxApplication.TILE_SERVER)
+        Mapbox.getInstance(context)
         nativeMapView.destroy()
     }
 
@@ -173,8 +172,8 @@ class NativeMapViewTest : AppCenter() {
         nativeMapView.contentPadding = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
         nativeMapView.jumpTo(LATLNG_TEST, ZOOM_TEST, PITCH_TEST, BEARING_TEST, PADDING_TEST)
         val actual = nativeMapView.cameraPosition
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, DELTA)
         assertEquals("Bearing should match", expected.bearing, actual.bearing, DELTA)
         assertEquals("Pitch should match", expected.tilt, actual.tilt, DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, DELTA)
@@ -323,11 +322,11 @@ class NativeMapViewTest : AppCenter() {
             .build()
         // verify that the lazily set padding is ignored when a value is provided with the camera
         nativeMapView.contentPadding = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
-        nativeMapView.flyTo(expected.target, expected.zoom, expected.bearing, expected.tilt, PADDING_TEST, 0)
+        nativeMapView.flyTo(expected.target!!, expected.zoom, expected.bearing, expected.tilt, PADDING_TEST, 0)
         val actual = nativeMapView.cameraPosition
         assertEquals("Bearing should match", expected.bearing, actual.bearing, TestConstants.BEARING_DELTA)
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, TestConstants.LAT_LNG_DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, TestConstants.LAT_LNG_DELTA)
         assertEquals("Tilt should match", expected.tilt, actual.tilt, TestConstants.TILT_DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, TestConstants.ZOOM_DELTA)
         Assert.assertArrayEquals(expected.padding, actual.padding, DELTA)
@@ -345,11 +344,11 @@ class NativeMapViewTest : AppCenter() {
             .build()
         // verify that the lazily set padding is ignored when a value is provided with the camera
         nativeMapView.contentPadding = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
-        nativeMapView.easeTo(expected.target, expected.zoom, expected.bearing, expected.tilt, PADDING_TEST, 0, false)
+        nativeMapView.easeTo(expected.target!!, expected.zoom, expected.bearing, expected.tilt, PADDING_TEST, 0, false)
         val actual = nativeMapView.cameraPosition
         assertEquals("Bearing should match", expected.bearing, actual.bearing, TestConstants.BEARING_DELTA)
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, TestConstants.LAT_LNG_DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, TestConstants.LAT_LNG_DELTA)
         assertEquals("Tilt should match", expected.tilt, actual.tilt, TestConstants.TILT_DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, TestConstants.ZOOM_DELTA)
         Assert.assertArrayEquals(expected.padding, actual.padding, DELTA)
@@ -369,8 +368,8 @@ class NativeMapViewTest : AppCenter() {
         nativeMapView.resetPosition()
         val actual = nativeMapView.cameraPosition
         assertEquals("Bearing should match", expected.bearing, actual.bearing, TestConstants.BEARING_DELTA)
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, TestConstants.LAT_LNG_DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, TestConstants.LAT_LNG_DELTA)
         assertEquals("Tilt should match", expected.tilt, actual.tilt, TestConstants.TILT_DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, TestConstants.ZOOM_DELTA)
         Assert.assertArrayEquals(expected.padding, actual.padding, DELTA)
@@ -392,8 +391,8 @@ class NativeMapViewTest : AppCenter() {
             0.0
         )
         assertEquals("Bearing should match", expected.bearing, actual.bearing, TestConstants.BEARING_DELTA)
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, TestConstants.LAT_LNG_DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, TestConstants.LAT_LNG_DELTA)
         assertEquals("Tilt should match", expected.tilt, actual.tilt, TestConstants.TILT_DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, TestConstants.ZOOM_DELTA)
     }
@@ -410,8 +409,8 @@ class NativeMapViewTest : AppCenter() {
         nativeMapView.moveBy(12.0, 12.0, 0)
         val actual = nativeMapView.cameraPosition
         assertEquals("Bearing should match", expected.bearing, actual.bearing, TestConstants.BEARING_DELTA)
-        assertEquals("Latitude should match", expected.target.latitude, actual.target.latitude, TestConstants.LAT_LNG_DELTA)
-        assertEquals("Longitude should match", expected.target.longitude, actual.target.longitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Latitude should match", expected.target!!.latitude, actual.target!!.latitude, TestConstants.LAT_LNG_DELTA)
+        assertEquals("Longitude should match", expected.target!!.longitude, actual.target!!.longitude, TestConstants.LAT_LNG_DELTA)
         assertEquals("Tilt should match", expected.tilt, actual.tilt, TestConstants.TILT_DELTA)
         assertEquals("Zoom should match", expected.zoom, actual.zoom, TestConstants.ZOOM_DELTA)
     }

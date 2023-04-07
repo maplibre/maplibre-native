@@ -3,50 +3,34 @@ name: android-ci
 on:
   workflow_dispatch:
   push:
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - ".gitignore"
-      - "**.md"
-      # ignore other platforms
-      - "platform/darwin/**"
-      - "platform/glfw/**"
-      - "platform/ios/**"
-      - "platform/macos/**"
-      - "platform/node/**"
-      - "platform/qt/**"
-      # ignore CI for other platforms
-      - ".github/FUNDING.yml"
-      - ".github/actions/**"
-      - ".github/workflows/android-ci-pull.yml"
-      - ".github/workflows/android-docker-base.yml"
-      - ".github/workflows/android-docker-ndk-r21b.yml"
-      - ".github/workflows/gh-pages-android-api.yml"
-      - ".github/workflows/gh-pages-ios-api.yml"
-      - ".github/workflows/ios-ci.yml"
-      - ".github/workflows/ios-pre-release.yml"
-      - ".github/workflows/ios-release.yml"
-      - ".github/workflows/macos-ci.yml"
-      - ".github/workflows/macos-release.yml"
-      - ".github/workflows/node-ci.yml"
-      - ".github/workflows/node-release.yml"
-      - ".github/workflows/qt-ci-windows.yml"
-      - ".github/workflows/qt-ci.yml"
-      - ".github/workflows/update-gl-js.yml"
+    branches:
+      - main
+    tags:
+      - 'android-*'
+    paths:
+      - 'platform/android/**'
+      - ".github/workflows/android-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - maplibre-gl-js
+      - ".gitmodules"
+      - "!**/*.md"
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: platform/android
-    container:
-      image: ghcr.io/maplibre/android-ndk-r21b
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
     env:
-      LIBSYSCONFCPUS: 8
       JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
@@ -58,11 +42,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -77,6 +56,9 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
 
       - name: Prepare ccache
         run: ccache --clear
@@ -117,48 +99,6 @@ jobs:
 
       - name: Build libmapbox-gl.so for arm-v8
         run: make android-lib-arm-v8
-
-      - name: Generate Espresso sanity tests
-        run: make test-code-android
-
-      - name: Build Test APK
-        run: |
-          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
-            make android-ui-test-arm-v8
-          else
-            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash
-
-      - name: Log in to Google Cloud Platform
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            echo "Activating google cloud account..."
-            echo "${GLCLOUD_SERVICE_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project maptiler-gl-mobile
-            rm secret.json
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping google cloud login..."
-          fi
-        shell: bash
-
-      - name: Run instrumentation tests on Firebase
-        run: |
-          GLCLOUD_SERVICE_JSON='${{ secrets.GLCLOUD_SERVICE_JSON }}'
-          if [[ -n "${GLCLOUD_SERVICE_JSON}" ]]; then
-            gcloud firebase test android models list
-            gcloud firebase test android run --type instrumentation \
-              --app MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk \
-              --test MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk \
-              --device-ids sailfish --os-version-ids 26 --locales en --orientations portrait --timeout 20m \
-              --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" --directories-to-pull /sdcard --results-dir maplibre-android-sdk-${{ github.run_number }}
-          else
-            echo "No secrets.GLCLOUD_SERVICE_JSON variable set, skipping instrumentation tests..."
-          fi
-        shell: bash
 
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3

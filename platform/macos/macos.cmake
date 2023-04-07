@@ -158,4 +158,11 @@ set_target_properties(mbgl-benchmark-runner mbgl-test-runner mbgl-render-test-ru
 if(NOT DEFINED ENV{CI})
     add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
-add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_test(
+    NAME mbgl-test-runner
+    COMMAND
+        node
+        ${PROJECT_SOURCE_DIR}/test/storage/with-server.js
+        ${PROJECT_SOURCE_DIR}/test/storage/server.js
+        $<TARGET_FILE:mbgl-test-runner>
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

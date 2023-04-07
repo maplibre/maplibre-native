@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
     "maplibre",
@@ -19,18 +19,18 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@mapbox/cmake-node-module": "^1.2.0",
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
-    "minimatch": "^5.1.0",
+    "@mapbox/cmake-node-module": "^1.2.0",
+    "minimatch": "^6.1.6",
     "npm-run-all": "^4.0.2"
   },
   "devDependencies": {
     "@mapbox/flow-remove-types": "^2.0.0",
     "@mapbox/mvt-fixtures": "3.10.0",
-    "@octokit/plugin-retry": "^3.0.9",
-    "@octokit/rest": "^19.0.5",
-    "aws-sdk": "^2.1277.0",
+    "@octokit/plugin-retry": "^4.1.1",
+    "@octokit/rest": "^19.0.7",
+    "aws-sdk": "^2.1309.0",
     "csscolorparser": "~1.0.2",
     "d3-queue": "3.0.7",
     "diff": "5.1.0",
@@ -38,18 +38,18 @@
     "esm": "~3.2.25",
     "express": "^4.18.2",
     "json-stringify-pretty-compact": "^4.0.0",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.16.4",
     "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^6.0.0",
-    "pretty-bytes": "^6.0.0",
+    "pretty-bytes": "^6.1.0",
     "request": "^2.88.0",
     "semver": "^7.3.8",
     "shuffle-seed": "1.1.6",
     "st": "3.0.0",
-    "tape": "^5.6.1",
+    "tape": "^5.6.3",
     "xcode": "^3.0.1"
   },
   "engines": {

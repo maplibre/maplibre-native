@@ -64,17 +64,17 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         addCustomInfoWindowAdapter(mapboxMap!!)
 
         // Keep info windows open on click
-        mapboxMap!!.uiSettings.isDeselectMarkersOnTap = false
+        mapboxMap.uiSettings.isDeselectMarkersOnTap = false
 
         // Add a marker
         marker = addMarker(mapboxMap!!)
-        mapboxMap!!.selectMarker(marker!!)
+        mapboxMap.selectMarker(marker!!)
 
         // On map click, change the info window contents
-        mapboxMap!!.addOnMapClickListener(mapClickListener)
+        mapboxMap.addOnMapClickListener(mapClickListener)
 
         // Focus on Paris
-        mapboxMap!!.animateCamera(CameraUpdateFactory.newLatLng(PARIS))
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(PARIS))
     }
 
     private fun addMarker(mapboxMap: MapboxMap): Marker {
@@ -85,7 +85,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
                     IconUtils.drawableToIcon(
                         this,
                         R.drawable.ic_location_city,
-                        ResourcesCompat.getColor(resources, R.color.mapbox_blue, theme)
+                        ResourcesCompat.getColor(resources, R.color.maplibre_blue, theme)
                     )
                 )
         )
@@ -105,40 +105,40 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (mapboxMap != null) {
-            mapboxMap!!.removeOnMapClickListener(mapClickListener)
+            mapboxMap.removeOnMapClickListener(mapClickListener)
         }
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {

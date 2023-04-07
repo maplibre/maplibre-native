@@ -194,18 +194,18 @@ int HTTPFileSource::Impl::handleSocket(CURL * /* handle */, curl_socket_t s, int
     switch (action) {
     case CURL_POLL_IN: {
         using namespace std::placeholders;
-        util::RunLoop::Get()->addWatch(s, util::RunLoop::Event::Read,
+        util::RunLoop::Get()->addWatch(static_cast<int>(s), util::RunLoop::Event::Read,
                 std::bind(&Impl::perform, context, _1, _2));
         break;
     }
     case CURL_POLL_OUT: {
         using namespace std::placeholders;
-        util::RunLoop::Get()->addWatch(s, util::RunLoop::Event::Write,
+        util::RunLoop::Get()->addWatch(static_cast<int>(s), util::RunLoop::Event::Write,
                 std::bind(&Impl::perform, context, _1, _2));
         break;
     }
     case CURL_POLL_REMOVE:
-        util::RunLoop::Get()->removeWatch(s);
+        util::RunLoop::Get()->removeWatch(static_cast<int>(s));
         break;
     default:
         throw std::runtime_error("Unhandled CURL socket action");

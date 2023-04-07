@@ -20,7 +20,7 @@ public:
         // Lock the mutex while processing so that cancel() will block.
         std::lock_guard<std::recursive_mutex> lock(mutex);
         if (!*canceled) {
-            invoke(std::make_index_sequence<std::tuple_size<P>::value>{});
+            invoke(std::make_index_sequence<std::tuple_size_v<P>>{});
         }
     }
 

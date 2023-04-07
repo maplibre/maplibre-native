@@ -1,6 +1,6 @@
 package com.mapbox.mapboxsdk.snapshotter
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -8,8 +8,8 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity
-import junit.framework.Assert.assertNotNull
 import org.junit.Assert
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates if a snapshotter creation
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4ClassRunner::class)
 class MapSnapshotterTest {
 
     @Rule

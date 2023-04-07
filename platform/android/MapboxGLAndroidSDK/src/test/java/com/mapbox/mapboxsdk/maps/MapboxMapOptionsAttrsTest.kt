@@ -77,13 +77,13 @@ class MapboxMapOptionsAttrsTest {
 
     private fun mockEnableLocalIdeograph(enabled: Boolean) {
         every {
-            typedArray.getBoolean(R.styleable.mapbox_MapView_mapbox_localIdeographEnabled, true)
+            typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_localIdeographEnabled, true)
         }.returns(enabled)
     }
 
     private fun mockLocalIdeographString(font: String) {
         every {
-            typedArray.getString(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamily)
+            typedArray.getString(R.styleable.maplibre_MapView_maplibre_localIdeographFontFamily)
         }.returns(font)
     }
 
@@ -91,7 +91,7 @@ class MapboxMapOptionsAttrsTest {
         val resId = 9000
 
         every {
-            typedArray.getResourceId(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamilies, 0)
+            typedArray.getResourceId(R.styleable.maplibre_MapView_maplibre_localIdeographFontFamilies, 0)
         }.returns(resId)
 
         every {

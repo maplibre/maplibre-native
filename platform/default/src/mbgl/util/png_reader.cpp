@@ -18,7 +18,7 @@ static std::string sprintf(const char *msg, Args... args) {
     return std::string(res, len);
 }
 
-const static bool png_version_check __attribute__((unused)) = []() {
+const static bool png_version_check [[maybe_unused]] = []() {
     const png_uint_32 version = png_access_version_number();
     if (version != PNG_LIBPNG_VER) {
         throw std::runtime_error(sprintf<96>(

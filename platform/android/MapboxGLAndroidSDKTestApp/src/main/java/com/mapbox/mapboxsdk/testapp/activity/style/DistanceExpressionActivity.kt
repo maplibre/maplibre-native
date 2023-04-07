@@ -16,16 +16,16 @@ import com.mapbox.mapboxsdk.style.layers.Property.NONE
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityWithinExpressionBinding
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfTransformation
-import kotlinx.android.synthetic.main.activity_physical_circle.*
 
 /**
  * An Activity that showcases the within expression to filter features outside a geometry
  */
 class DistanceExpressionActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityWithinExpressionBinding
     private lateinit var mapboxMap: MapboxMap
 
     private val lat = 37.78794572301525
@@ -33,10 +33,11 @@ class DistanceExpressionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_within_expression)
+        binding = ActivityWithinExpressionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { map ->
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync { map ->
             mapboxMap = map
 
             // Setup camera position above Georgetown
@@ -84,46 +85,46 @@ class DistanceExpressionActivity : AppCompatActivity() {
             )
 
             // Hide other types of labels to highlight POI labels
-            (style.getLayer("road_label") as SymbolLayer).setProperties(visibility(NONE))
-            (style.getLayer("airport-label-major") as SymbolLayer).setProperties(visibility(NONE))
-            (style.getLayer("poi_transit") as SymbolLayer).setProperties(visibility(NONE))
+            (style.getLayer("road_label") as SymbolLayer?)?.setProperties(visibility(NONE))
+            (style.getLayer("airport-label-major") as SymbolLayer?)?.setProperties(visibility(NONE))
+            (style.getLayer("poi_transit") as SymbolLayer?)?.setProperties(visibility(NONE))
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
-            mapView.onSaveInstanceState(it)
+            binding.mapView.onSaveInstanceState(it)
         }
     }
 

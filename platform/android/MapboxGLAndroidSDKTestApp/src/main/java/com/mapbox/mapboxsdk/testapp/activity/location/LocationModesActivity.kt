@@ -31,7 +31,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap.CancelableCallback
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
-import java.util.ArrayList
 
 class LocationModesActivity :
     AppCompatActivity(),
@@ -44,7 +43,7 @@ class LocationModesActivity :
     private var protectedGestureArea: View? = null
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private var mapboxMap: MapboxMap? = null
+    private lateinit var mapboxMap: MapboxMap
     private var defaultStyle = false
 
     @CameraMode.Mode
@@ -205,7 +204,7 @@ class LocationModesActivity :
         defaultStyle = !defaultStyle
         var options = LocationComponentOptions.createFromAttributes(
             this,
-            if (defaultStyle) R.style.mapbox_LocationComponent else R.style.CustomLocationComponent
+            if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
             val padding: IntArray
@@ -226,12 +225,17 @@ class LocationModesActivity :
         if (locationComponent == null) {
             return
         }
-        mapboxMap!!.getStyle { style: Style ->
+        mapboxMap.getStyle { style: Style ->
             val styleUrl =
-                if (Style.getPredefinedStyle("Bright") == style.uri) Style.getPredefinedStyle("Bright") else Style.getPredefinedStyle(
-                    "Pastel"
+                Style.getPredefinedStyle(
+                    if (Style.getPredefinedStyle("Bright") == style.uri) {
+                        "Bright"
+                    } else {
+                        "Pastel"
+                    }
                 )
-            mapboxMap!!.setStyle(Style.Builder().fromUri(styleUrl))
+
+            mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
         }
     }
 
@@ -253,7 +257,7 @@ class LocationModesActivity :
         if (locationComponent == null) {
             return
         }
-        val rectF = RectF(0f, 0f, mapView!!.width / 2f, mapView!!.height / 2f)
+        val rectF = RectF(0f, 0f, mapView.width / 2f, mapView.height / 2f)
         protectedGestureArea!!.layoutParams.height = rectF.bottom.toInt()
         protectedGestureArea!!.layoutParams.width = rectF.right.toInt()
         val options = locationComponent!!
@@ -268,28 +272,28 @@ class LocationModesActivity :
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     @SuppressLint("MissingPermission")
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
         outState.putInt(SAVED_STATE_CAMERA, cameraMode)
         outState.putInt(SAVED_STATE_RENDER, renderMode)
         if (locationComponent != null) {
@@ -299,12 +303,12 @@ class LocationModesActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onLocationComponentClick() {
@@ -326,7 +330,7 @@ class LocationModesActivity :
         listPopup.anchorView = locationModeBtn
         listPopup.setOnItemClickListener { parent: AdapterView<*>?, itemView: View?, position: Int, id: Long ->
             val selectedMode = modes[position]
-            locationModeBtn!!.text = selectedMode
+            locationModeBtn.text = selectedMode
             if (selectedMode.contentEquals("Normal")) {
                 setRendererMode(RenderMode.NORMAL)
             } else if (selectedMode.contentEquals("Compass")) {
@@ -339,15 +343,16 @@ class LocationModesActivity :
         listPopup.show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setRendererMode(@RenderMode.Mode mode: Int) {
         renderMode = mode
         locationComponent!!.renderMode = mode
         if (mode == RenderMode.NORMAL) {
-            locationModeBtn!!.text = "Normal"
+            locationModeBtn.text = "Normal"
         } else if (mode == RenderMode.COMPASS) {
-            locationModeBtn!!.text = "Compass"
+            locationModeBtn.text = "Compass"
         } else if (mode == RenderMode.GPS) {
-            locationModeBtn!!.text = "Gps"
+            locationModeBtn.text = "Gps"
         }
     }
 
@@ -370,7 +375,7 @@ class LocationModesActivity :
         listPopup.anchorView = locationTrackingBtn
         listPopup.setOnItemClickListener { parent: AdapterView<*>?, itemView: View?, position: Int, id: Long ->
             val selectedTrackingType = trackingTypes[position]
-            locationTrackingBtn!!.text = selectedTrackingType
+            locationTrackingBtn.text = selectedTrackingType
             if (selectedTrackingType.contentEquals("None")) {
                 setCameraTrackingMode(CameraMode.NONE)
             } else if (selectedTrackingType.contentEquals("None Compass")) {
@@ -418,26 +423,28 @@ class LocationModesActivity :
         )
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCameraTrackingDismissed() {
-        locationTrackingBtn!!.text = "None"
+        locationTrackingBtn.text = "None"
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCameraTrackingChanged(currentMode: Int) {
         cameraMode = currentMode
         if (currentMode == CameraMode.NONE) {
-            locationTrackingBtn!!.text = "None"
+            locationTrackingBtn.text = "None"
         } else if (currentMode == CameraMode.NONE_COMPASS) {
-            locationTrackingBtn!!.text = "None Compass"
+            locationTrackingBtn.text = "None Compass"
         } else if (currentMode == CameraMode.NONE_GPS) {
-            locationTrackingBtn!!.text = "None GPS"
+            locationTrackingBtn.text = "None GPS"
         } else if (currentMode == CameraMode.TRACKING) {
-            locationTrackingBtn!!.text = "Tracking"
+            locationTrackingBtn.text = "Tracking"
         } else if (currentMode == CameraMode.TRACKING_COMPASS) {
-            locationTrackingBtn!!.text = "Tracking Compass"
+            locationTrackingBtn.text = "Tracking Compass"
         } else if (currentMode == CameraMode.TRACKING_GPS) {
-            locationTrackingBtn!!.text = "Tracking GPS"
+            locationTrackingBtn.text = "Tracking GPS"
         } else if (currentMode == CameraMode.TRACKING_GPS_NORTH) {
-            locationTrackingBtn!!.text = "Tracking GPS North"
+            locationTrackingBtn.text = "Tracking GPS North"
         }
     }
 

@@ -317,17 +317,17 @@ struct ValueFactory<Color> {
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<(!std::is_enum<T>::value && !is_linear_container<T>::value)>::type> {
+struct ValueFactory<T, typename std::enable_if_t<(!std::is_enum_v<T> && !is_linear_container<T>::value)>> {
     static Value make(const T& arg) { return {arg}; }
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+struct ValueFactory<T, typename std::enable_if_t<std::is_enum_v<T>>> {
     static Value make(T arg) { return {Enum<T>::toString(arg)}; }
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<is_linear_container<T>::value>::type> {
+struct ValueFactory<T, typename std::enable_if_t<is_linear_container<T>::value>> {
     static Value make(const T& arg) {
         mapbox::base::ValueArray result;
         result.reserve(arg.size());

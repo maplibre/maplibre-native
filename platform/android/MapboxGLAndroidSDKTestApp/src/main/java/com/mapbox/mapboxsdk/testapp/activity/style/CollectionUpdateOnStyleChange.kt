@@ -18,7 +18,7 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.testapp.R
-import kotlinx.android.synthetic.main.activity_collection_update_on_style_change.*
+import com.mapbox.mapboxsdk.testapp.databinding.ActivityCollectionUpdateOnStyleChangeBinding
 import java.util.*
 
 /**
@@ -26,14 +26,16 @@ import java.util.*
  */
 class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, Style.OnStyleLoaded {
 
+    private lateinit var binding: ActivityCollectionUpdateOnStyleChangeBinding
     private lateinit var mapboxMap: MapboxMap
     private var currentStyleIndex: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_collection_update_on_style_change)
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
+        binding = ActivityCollectionUpdateOnStyleChangeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync(this)
         setupStyleChangeView()
         Toast.makeText(
             this,
@@ -77,37 +79,37 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     companion object {
@@ -128,8 +130,8 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
         private fun getLatLngInBounds(bounds: LatLngBounds): LatLng {
             val generator = Random()
-            val randomLat = bounds.latSouth + generator.nextDouble() * (bounds.latNorth - bounds.latSouth)
-            val randomLon = bounds.lonWest + generator.nextDouble() * (bounds.lonEast - bounds.lonWest)
+            val randomLat = bounds.latitudeSouth + generator.nextDouble() * (bounds.latitudeNorth - bounds.latitudeSouth)
+            val randomLon = bounds.longitudeWest + generator.nextDouble() * (bounds.longitudeEast - bounds.longitudeWest)
             return LatLng(randomLat, randomLon)
         }
     }
