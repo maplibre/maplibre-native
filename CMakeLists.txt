@@ -872,9 +872,11 @@ if(MBGL_WITH_OPENGL)
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
@@ -928,6 +930,7 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/draw_scope_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.hpp
@@ -963,6 +966,8 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp

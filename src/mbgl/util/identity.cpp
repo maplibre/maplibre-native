@@ -10,6 +10,8 @@ namespace {
 namespace mbgl {
 namespace util {
 
+const SimpleIdentity SimpleIdentity::Empty = {emptyID};
+
 SimpleIdentity::SimpleIdentity()
     : uniqueID(nextId++)
 {

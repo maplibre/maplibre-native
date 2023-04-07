@@ -1,4 +1,4 @@
-#include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
@@ -60,8 +60,29 @@ void RenderBackgroundLayer::evaluate(
 std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges() {
     std::vector<std::unique_ptr<ChangeRequest>> reqs;
     if (!drawable /* && visible/enabled */) {
-        drawable = std::make_shared<gl::DrawableGL>();
-        reqs.emplace_back(std::make_unique<AddDrawableRequest>(drawable));
+        auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method
+
+        //tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());
+        gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices = [](){
+            gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
+            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{            0,            0 }}}));
+            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT,            0 }}}));
+            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{            0, util::EXTENT }}}));
+            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT, util::EXTENT }}}));
+            return result;
+        }();
+
+        gfx::IndexVector<gfx::Triangles> result;    // uploadPass.createIndexBuffer(quadTriangleIndices());
+        result.emplace_back(0, 1, 2);
+        result.emplace_back(1, 2, 3);
+
+        SegmentVector<BackgroundAttributes> segs;   // RenderStaticData::tileTriangleSegments
+        segs.emplace_back(/*vertexOffset=*/0, /*indexOffset=*/0, /*vertexLength=*/4, /*indexLength=*/6);
+
+        builder->flush();
+        for (auto &draw : builder->clearDrawables()) {
+            reqs.emplace_back(std::make_unique<AddDrawableRequest>(std::move(draw)));
+        }
     //} else if (drawable && !visible/enabled) {
     //    return { std::make_unique<RemoveDrawableRequest>(std::move(drawable)) };
     }

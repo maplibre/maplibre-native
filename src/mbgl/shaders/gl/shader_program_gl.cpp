@@ -5,7 +5,7 @@ namespace gl {
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         Context& context,
-        std::string_view name,
+        __unused std::string_view name,
         std::string_view vertexSource,
         std::string_view fragmentSource) noexcept(false) {
     
