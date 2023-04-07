@@ -93,13 +93,13 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
         return ParseResult();
     }
 
-    optional<Interpolator> interpolator;
+    std::optional<Interpolator> interpolator;
     
-    const optional<std::string> interpName = toString(arrayMember(interp, 0));
+    const std::optional<std::string> interpName = toString(arrayMember(interp, 0));
     if (interpName && *interpName == "linear") {
         interpolator = {ExponentialInterpolator(1.0)};
     } else if (interpName && *interpName == "exponential") {
-        optional<double> base;
+        std::optional<double> base;
         if (arrayLength(interp) == 2) {
             base = toDouble(arrayMember(interp, 1));
         }
@@ -109,10 +109,10 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
         }
         interpolator = {ExponentialInterpolator(*base)};
     } else if (interpName && *interpName == "cubic-bezier") {
-        optional<double> x1;
-        optional<double> y1;
-        optional<double> x2;
-        optional<double> y2;
+        std::optional<double> x1;
+        std::optional<double> y1;
+        std::optional<double> x2;
+        std::optional<double> y2;
         if (arrayLength(interp) == 5) {
             x1 = toDouble(arrayMember(interp, 1));
             y1 = toDouble(arrayMember(interp, 2));
@@ -156,7 +156,7 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
     }
 
     std::map<double, std::unique_ptr<Expression>> stops;
-    optional<type::Type> outputType;
+    std::optional<type::Type> outputType;
     if (ctx.getExpected() && *ctx.getExpected() != type::Value) {
         outputType = ctx.getExpected();
     }
@@ -164,30 +164,30 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
     double previous = - std::numeric_limits<double>::infinity();
     
     for (std::size_t i = 3; i + 1 < length; i += 2) {
-        const optional<mbgl::Value> labelValue = toValue(arrayMember(value, i));
-        optional<double> label;
-        optional<std::string> labelError;
+        const std::optional<mbgl::Value> labelValue = toValue(arrayMember(value, i));
+        std::optional<double> label;
+        std::optional<std::string> labelError;
         if (labelValue) {
             labelValue->match(
                 [&](uint64_t n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{static_cast<double>(n)};
+                        label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
                 [&](int64_t n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{static_cast<double>(n)};
+                        label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
                 [&](double n) {
                     if (n > std::numeric_limits<double>::max()) {
-                        label = optional<double>{std::numeric_limits<double>::infinity()};
+                        label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
-                        label = optional<double>{n};
+                        label = std::optional<double>{n};
                     }
                 },
                 [&](const auto&) {}
@@ -272,8 +272,8 @@ Interpolate::Interpolate(const type::Type& type_,
     assert(input->getType() == type::Number);
 }
 
-std::vector<optional<Value>> Interpolate::possibleOutputs() const {
-    std::vector<optional<Value>> result;
+std::vector<std::optional<Value>> Interpolate::possibleOutputs() const {
+    std::vector<std::optional<Value>> result;
     for (const auto& stop : stops) {
         for (auto& output : stop.second->possibleOutputs()) {
             result.push_back(std::move(output));

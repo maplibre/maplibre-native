@@ -21,24 +21,24 @@
     self.layer.borderWidth = selected ? 2.0 : 0;
 }
 
-- (void)setDragState:(MGLAnnotationViewDragState)dragState animated:(BOOL)animated
+- (void)setDragState:(MLNAnnotationViewDragState)dragState animated:(BOOL)animated
 {
     [super setDragState:dragState animated:NO];
 
     switch (dragState) {
-        case MGLAnnotationViewDragStateNone:
+        case MLNAnnotationViewDragStateNone:
             break;
-        case MGLAnnotationViewDragStateStarting: {
+        case MLNAnnotationViewDragStateStarting: {
             [UIView animateWithDuration:.4 delay:0 usingSpringWithDamping:.4 initialSpringVelocity:.5 options:UIViewAnimationOptionCurveLinear animations:^{
                 self.transform = CGAffineTransformScale(CGAffineTransformIdentity, 2, 2);
             } completion:nil];
             break;
         }
-        case MGLAnnotationViewDragStateDragging:
+        case MLNAnnotationViewDragStateDragging:
             break;
-        case MGLAnnotationViewDragStateCanceling:
+        case MLNAnnotationViewDragStateCanceling:
             break;
-        case MGLAnnotationViewDragStateEnding: {
+        case MLNAnnotationViewDragStateEnding: {
             self.transform = CGAffineTransformScale(CGAffineTransformIdentity, 2, 2);
             [UIView animateWithDuration:.4 delay:0 usingSpringWithDamping:.4 initialSpringVelocity:.5 options:UIViewAnimationOptionCurveLinear animations:^{
                 self.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);

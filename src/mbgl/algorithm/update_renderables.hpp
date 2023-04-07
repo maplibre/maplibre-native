@@ -2,10 +2,10 @@
 
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_necessity.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/range.hpp>
 
 #include <unordered_set>
+#include <optional>
 
 namespace mbgl {
 namespace algorithm {
@@ -21,7 +21,7 @@ void updateRenderables(GetTileFn getTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
                        const Range<uint8_t>& zoomRange,
-                       const optional<uint8_t>& maxParentOverscaleFactor = nullopt) {
+                       const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
     bool covered;
     int32_t overscaledZ;

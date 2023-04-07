@@ -8,19 +8,20 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <optional>
 
 namespace mbgl {
 namespace style {
 
 class Filter {
 public:
-    optional<std::shared_ptr<const expression::Expression>> expression;
+    std::optional<std::shared_ptr<const expression::Expression>> expression;
 private:
-    optional<mbgl::Value> legacyFilter;
+    std::optional<mbgl::Value> legacyFilter;
 public:
     Filter() = default;
 
-    Filter(expression::ParseResult _expression, optional<mbgl::Value> _filter = {})
+    Filter(expression::ParseResult _expression, std::optional<mbgl::Value> _filter = std::nullopt)
     : expression(std::move(*_expression)),
      legacyFilter(std::move(_filter)){
         assert(!expression || *expression != nullptr);

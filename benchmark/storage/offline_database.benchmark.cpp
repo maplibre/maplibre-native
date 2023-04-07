@@ -127,7 +127,7 @@ BENCHMARK_F(OfflineDatabase, GetTile)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         auto res = db.get(Resource::tile("mapbox://tile_ambient" + util::toString(dis(gen)), 1, 0, 0, 0, Tileset::Scheme::XYZ));
-        assert(res != nullopt);
+        assert(res != std::nullopt);
     }
 }
 
@@ -177,7 +177,7 @@ BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)(benchmark::State& stat
 
     while (state.KeepRunning()) {
         auto res = db.get(Resource::tile("mapbox://tile_ambient", 1, 0, 0, 0, Tileset::Scheme::XYZ));
-        assert(res == nullopt);
+        assert(res == std::nullopt);
     }
 }
 

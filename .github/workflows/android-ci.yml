@@ -20,7 +20,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
@@ -100,6 +99,66 @@ jobs:
       - name: Build libmapbox-gl.so for arm-v8
         run: make android-lib-arm-v8
 
+      - name: Copy developer config with API key for UI tests
+        run: |
+          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+          else
+            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
+          fi
+    
+      - name: Build UI tests
+        run: make android-ui-test-arm-v8
+
+      - name: Configure AWS Credentials
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 1200
+          role-session-name: MySessionName
+
+      - name: Create upload
+        if: github.ref == 'refs/heads/main'
+        uses: realm/aws-devicefarm/create-upload@master
+        id: upload-android-app
+        with:
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          name: MapboxGLAndroidSDKTestApp-debug.apk
+          type: ANDROID_APP
+
+      - name: Create upload
+        if: github.ref == 'refs/heads/main'
+        uses: realm/aws-devicefarm/create-upload@master
+        id: upload-android-test
+        with:
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          name: MapboxGLAndroidSDKTestApp-debug-androidTest.apk
+          type: INSTRUMENTATION_TEST_PACKAGE
+
+      - name: Upload Android UI test
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+
+      - name: Write uploads.env
+        if: github.ref == 'refs/heads/main'
+        working-directory: .
+        run: |
+          echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
+          echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
+
+      - uses: actions/upload-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: uploadsEnv
+          path: uploads.env
+
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -112,3 +171,41 @@ jobs:
             MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+
+  instrumentation-test:
+    needs: build
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
+
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: uploadsEnv
+
+      - name: Read uploads.env
+        run: cat uploads.env >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 21600
+          role-session-name: MySessionName
+
+      - name: Schedule test run
+        uses: realm/aws-devicefarm/test-application@master
+        with:
+          name: MapLibre Native Android Instrumentation Test
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
+          app_arn: ${{ env.ANDROID_APP_ARN }}
+          app_type: ANDROID_APP
+          test_type: INSTRUMENTATION
+          test_package_arn: ${{ env.ANDROID_TEST_ARN }}
+          timeout: 28800

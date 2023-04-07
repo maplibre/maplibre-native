@@ -8,6 +8,10 @@
 
 namespace mbgl {
 
+namespace gfx {
+class ShaderRegistry;
+}
+
 enum class MapLoadError {
     StyleParseError,
     StyleLoadError,
@@ -57,6 +61,9 @@ public:
     /// This method should return true if unused image can be removed,
     /// false otherwise. By default, unused image will be removed.
     virtual bool onCanRemoveUnusedStyleImage(const std::string&) { return true; }
+    // Observe this event to easily mutate or observe shaders as soon
+    // as the registry becomes available.
+    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
 };
 
 } // namespace mbgl

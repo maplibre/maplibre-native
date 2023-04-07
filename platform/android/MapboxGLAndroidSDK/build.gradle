@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     id 'org.jmailen.kotlinter'
     id 'org.jetbrains.dokka' version '1.7.20'
@@ -31,6 +33,17 @@ dependencies {
 
     androidTestImplementation dependenciesList.testRunner
     androidTestImplementation dependenciesList.testRules
+}
+
+tasks.withType(DokkaTask.class) {
+    moduleName.set("MapLibre GL Native for Android")
+
+    dokkaSourceSets {
+
+        configureEach {
+            includes.from("README.md")
+        }
+    } 
 }
 
 android {

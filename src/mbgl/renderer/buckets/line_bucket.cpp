@@ -125,7 +125,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         return;
     }
 
-    optional<Distances> lineDistances;
+    std::optional<Distances> lineDistances;
 
     const auto &props = feature.getProperties();
     auto clip_start_it = props.find("mapbox_clip_start");
@@ -156,11 +156,11 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
     double distance = 0.0;
     bool startOfLine = true;
-    optional<GeometryCoordinate> currentCoordinate;
-    optional<GeometryCoordinate> prevCoordinate;
-    optional<GeometryCoordinate> nextCoordinate;
-    optional<Point<double>> prevNormal;
-    optional<Point<double>> nextNormal;
+    std::optional<GeometryCoordinate> currentCoordinate;
+    std::optional<GeometryCoordinate> prevCoordinate;
+    std::optional<GeometryCoordinate> nextCoordinate;
+    std::optional<Point<double>> prevNormal;
+    std::optional<Point<double>> nextNormal;
 
     // the last three vertices added
     e1 = e2 = e3 = -1;
@@ -459,7 +459,7 @@ void LineBucket::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
                                   bool round,
                                   std::size_t startVertex,
                                   std::vector<TriangleElement>& triangleStore,
-                                  optional<Distances> lineDistances) {
+                                  std::optional<Distances> lineDistances) {
     Point<double> extrude = normal;
     double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
@@ -500,7 +500,7 @@ void LineBucket::addPieSliceVertex(const GeometryCoordinate& currentVertex,
                                    bool lineTurnsLeft,
                                    std::size_t startVertex,
                                    std::vector<TriangleElement>& triangleStore,
-                                   optional<Distances> lineDistances) {
+                                   std::optional<Distances> lineDistances) {
     Point<double> flippedExtrude = extrude * (lineTurnsLeft ? -1.0 : 1.0);
     if (lineDistances) {
         distance = lineDistances->scaleToMaxLineDistance(distance);

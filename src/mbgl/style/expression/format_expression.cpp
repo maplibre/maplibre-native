@@ -8,9 +8,9 @@ namespace expression {
 
 FormatExpressionSection::FormatExpressionSection(std::unique_ptr<Expression> content_) : content(std::move(content_)) {}
 
-void FormatExpressionSection::setTextSectionOptions(optional<std::unique_ptr<Expression>> fontScale_,
-                                                    optional<std::unique_ptr<Expression>> textFont_,
-                                                    optional<std::unique_ptr<Expression>> textColor_) {
+void FormatExpressionSection::setTextSectionOptions(std::optional<std::unique_ptr<Expression>> fontScale_,
+                                                    std::optional<std::unique_ptr<Expression>> textFont_,
+                                                    std::optional<std::unique_ptr<Expression>> textColor_) {
     if (fontScale_) {
         assert(*fontScale_);
         fontScale = std::shared_ptr<Expression>(std::move(*fontScale_));
@@ -54,7 +54,7 @@ ParseResult FormatExpression::parse(const Convertible& value, ParsingContext& ct
         if (nextTokenMayBeObject && isObject(arg)) {
             nextTokenMayBeObject = false;
 
-            const optional<Convertible> fontScaleOption = objectMember(arg, kFormattedSectionFontScale);
+            auto fontScaleOption = objectMember(arg, kFormattedSectionFontScale);
             ParseResult fontScale;
             if (fontScaleOption) {
                 fontScale = ctx.parse(*fontScaleOption, 1, {type::Number});
@@ -63,7 +63,7 @@ ParseResult FormatExpression::parse(const Convertible& value, ParsingContext& ct
                 }
             }
 
-            const optional<Convertible> textFontOption = objectMember(arg, kFormattedSectionTextFont);
+            auto textFontOption = objectMember(arg, kFormattedSectionTextFont);
             ParseResult textFont;
             if (textFontOption) {
                 textFont = ctx.parse(*textFontOption, 1, {type::Array(type::String)});
@@ -71,7 +71,7 @@ ParseResult FormatExpression::parse(const Convertible& value, ParsingContext& ct
                     return ParseResult();
                 }
             }
-            const optional<Convertible> textColorOption = objectMember(arg, kFormattedSectionTextColor);
+            auto textColorOption = objectMember(arg, kFormattedSectionTextColor);
             ParseResult textColor;
             if (textColorOption) {
                 textColor = ctx.parse(*textColorOption, 1, {type::Color});
@@ -168,7 +168,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             return contentResult.error();
         }
 
-        optional<std::string> evaluatedText;
+        std::optional<std::string> evaluatedText;
         if (typeOf(*contentResult) == type::Image) {
             const auto& image = contentResult->get<Image>();
             // Omit sections with empty image ids.
@@ -184,7 +184,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             }
         }
 
-        optional<double> evaluatedFontScale;
+        std::optional<double> evaluatedFontScale;
         if (section.fontScale) {
             auto fontScaleResult = (*section.fontScale)->evaluate(params);
             if (!fontScaleResult) {
@@ -193,7 +193,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             evaluatedFontScale = fontScaleResult->get<double>();
         }
 
-        optional<FontStack> evaluatedTextFont;
+        std::optional<FontStack> evaluatedTextFont;
         if (section.textFont) {
             auto textFontResult = (*section.textFont)->evaluate(params);
             if (!textFontResult) {
@@ -206,7 +206,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             evaluatedTextFont = *textFontValue;
         }
 
-        optional<Color> evaluatedTextColor;
+        std::optional<Color> evaluatedTextColor;
         if (section.textColor) {
             auto textColorResult = (*section.textColor)->evaluate(params);
             if (!textColorResult) {

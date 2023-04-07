@@ -5,14 +5,15 @@
 #include <mbgl/style/expression/is_constant.hpp>
 
 #include <mbgl/util/variant.hpp>
-#include <mbgl/util/optional.hpp>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
 namespace expression {
 
-optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e) {
-    optional<variant<const Interpolate*, const Step*, ParsingError>> result;
+std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e) {
+    std::optional<variant<const Interpolate*, const Step*, ParsingError>> result;
     
     switch (e->getKind()) {
     case Kind::Let: {
@@ -60,7 +61,7 @@ optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(c
     }
     
     e->eachChild([&](const Expression& child) {
-        optional<variant<const Interpolate*, const Step*, ParsingError>> childResult(findZoomCurve(&child));
+        std::optional<variant<const Interpolate*, const Step*, ParsingError>> childResult(findZoomCurve(&child));
         if (childResult) {
             if (childResult->is<ParsingError>()) {
                 result = childResult;

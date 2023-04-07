@@ -1,5 +1,4 @@
 #include <mbgl/style/sources/image_source_impl.hpp>
-#include <mbgl/util/geo.hpp>
 
 namespace mbgl {
 namespace style {
@@ -15,6 +14,7 @@ ImageSource::Impl::Impl(const Impl& rhs, PremultipliedImage&& image_)
     coords(rhs.coords),
     image(std::make_shared<PremultipliedImage>(std::move(image_))) {
 }
+
 ImageSource::Impl::~Impl() = default;
 
 std::shared_ptr<PremultipliedImage> ImageSource::Impl::getImage() const {
@@ -25,7 +25,7 @@ std::array<LatLng, 4> ImageSource::Impl::getCoordinates() const {
     return coords;
 }
 
-optional<std::string> ImageSource::Impl::getAttribution() const {
+std::optional<std::string> ImageSource::Impl::getAttribution() const {
     return {};
 }
 

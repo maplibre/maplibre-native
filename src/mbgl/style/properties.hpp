@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    mutable optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
+    mutable std::optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
     TimePoint begin;
     TimePoint end;
     Value value;

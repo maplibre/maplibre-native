@@ -91,8 +91,8 @@ if(MBGL_IOS_UNIT_TEST)
     execute_process(COMMAND ditto ${PROJECT_SOURCE_DIR}/test/fixtures ${CMAKE_CURRENT_BINARY_DIR}/test-data/test/fixtures)
     execute_process(
         COMMAND
-            ditto ${PROJECT_SOURCE_DIR}/maplibre-gl-js/src/style-spec/reference
-            ${CMAKE_CURRENT_BINARY_DIR}/test-data/maplibre-gl-js/src/style-spec/reference
+            ditto ${PROJECT_SOURCE_DIR}/scripts/style-spec-reference
+            ${CMAKE_CURRENT_BINARY_DIR}/test-data/scripts/style-spec-reference
     )
 
     set(RESOURCES ${PROJECT_SOURCE_DIR}/platform/ios/test/common/Main.storyboard

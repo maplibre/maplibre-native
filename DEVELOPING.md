@@ -1,14 +1,5 @@
 # Developing
 
-This is been rewritten to include:
-
-- How to build for the platforms we support.
-- Acceptance criteria for code contributions (style, static asserts)
-- How to run the unit tests.
-- How to run the benchmarks.
-- How to rebaseline baselines metrics.
-- How to use GL Native as a 3rd party library in your project.
-
 ## Render Tests
 
 To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests is stored in the MapLibre GL JS submodule which means that GL JS and Native are in fact quasi pixel-identical in their rendering.
@@ -16,14 +7,13 @@ To check that the output of the rendering is correct, we compare actual rendered
 The directory sturcture of the render tests looks like:
 
 ```
-maplibre-gl-js/
-  test/
-    integration/
-      render-tests/
-        <name-of-style-spec-feature>/
-          <name-of-feature-value>/
-            expected.png
-            style.json
+maetrics/
+  integration/
+    render-tests/
+      <name-of-style-spec-feature>/
+        <name-of-feature-value>/
+          expected.png
+          style.json
 ```
 
 After the render test run, the folder will also contain an `actual.png` file and a `diff.png` which is the difference between the expected and the actual image. There is a pixel difference threshold value which is used to decide if a render test passed or failed.
@@ -71,7 +61,7 @@ The render test results are summarized in a HTML website located next to the man
 
 # MapLibre & C++
 
-MapLibre makes use of a common set of C++ files for iOS, macOS, Android, Linux & QT.  See [`platform/default/src/mbgl/`](`platform/default/src/mbgl/`), 
+MapLibre makes use of a common set of C++ files for iOS, macOS, Android, Linux & Qt.  See [`platform/default/src/mbgl/`](`platform/default/src/mbgl/`), 
 or any of the platform make files:
 
 * [`platform/android/android.cmake`](platform/android/android.cmake)
@@ -170,4 +160,5 @@ autoload -Uz compinit && compinit
 ```
 
 ### Kotlin and Java compatibility
+
 We are moving the Android SDK to Kotlin, which is backward compatible with Java, but if you need a Java version of the Android SDK there is a `before-kotlin-port` tag available.

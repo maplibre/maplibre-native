@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mbgl/geometry/feature_index.hpp>
+
 #include <mbgl/text/collision_feature.hpp>
 #include <mbgl/util/grid_index.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/map/transform_state.hpp>
 
 #include <array>
@@ -43,8 +43,8 @@ public:
         bool allowOverlap,
         bool pitchWithMap,
         bool collisionDebug,
-        const optional<CollisionBoundaries>& avoidEdges,
-        const optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+        const std::optional<CollisionBoundaries>& avoidEdges,
+        const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
         std::vector<ProjectedCollisionBox>& /*out*/);
 
     void insertFeature(const CollisionFeature& feature, const std::vector<ProjectedCollisionBox>&, bool ignorePlacement, uint32_t bucketInstanceId, uint16_t collisionGroupId);
@@ -74,8 +74,8 @@ private:
         bool allowOverlap,
         bool pitchWithMap,
         bool collisionDebug,
-        const optional<CollisionBoundaries>& avoidEdges,
-        const optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+        const std::optional<CollisionBoundaries>& avoidEdges,
+        const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
         std::vector<ProjectedCollisionBox>& /*out*/);
 
     float approximateTileDistance(const TileDistance& tileDistance,

@@ -329,7 +329,7 @@ void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::
     mbgl::AnimationOptions animationOptions;
     if (duration > 0) {
        animationOptions.duration.emplace(mbgl::Milliseconds(duration));
-       animationOptions.easing.emplace(mbgl::util::UnitBezier {0.25, 0.46, 0.45, 0.94});
+       animationOptions.easing.emplace(mbgl::util::UnitBezier {0.1, 0.4, 0.35, 1.0});
     }
     map->moveBy({dx, dy}, animationOptions);
 }
@@ -407,7 +407,7 @@ void NativeMapView::flyTo(jni::JNIEnv& env, jni::jdouble bearing, jni::jdouble l
 }
 
 jni::Local<jni::Object<LatLng>> NativeMapView::getLatLng(JNIEnv& env) {
-    return LatLng::New(env, *map->getCameraOptions(mbgl::nullopt).center);
+    return LatLng::New(env, *map->getCameraOptions(std::nullopt).center);
 }
 
 void NativeMapView::setLatLng(jni::JNIEnv& env, jni::jdouble latitude, jni::jdouble longitude, const jni::Array<jni::jdouble>& padding, jni::jlong duration) {
@@ -547,7 +547,7 @@ void NativeMapView::setVisibleCoordinateBounds(JNIEnv& env, const jni::Array<jni
 }
 
 void NativeMapView::getVisibleCoordinateBounds(JNIEnv& env, jni::Array<jdouble>& output) {
-    auto latlngBounds = map->latLngBoundsForCameraUnwrapped(map->getCameraOptions(mbgl::nullopt));
+    auto latlngBounds = map->latLngBoundsForCameraUnwrapped(map->getCameraOptions(std::nullopt));
 
     double latNorth = latlngBounds.north();
     double lonEast = latlngBounds.east();
@@ -583,7 +583,7 @@ void NativeMapView::scheduleSnapshot(jni::JNIEnv&) {
 }
 
 jni::Local<jni::Object<CameraPosition>> NativeMapView::getCameraPosition(jni::JNIEnv& env) {
-    return CameraPosition::New(env, map->getCameraOptions(mbgl::nullopt), pixelRatio);
+    return CameraPosition::New(env, map->getCameraOptions(std::nullopt), pixelRatio);
 }
 
 void NativeMapView::updateMarker(jni::JNIEnv& env, jni::jlong markerId, jni::jdouble lat, jni::jdouble lon, const jni::String& jid) {
@@ -861,7 +861,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> NativeMapView::queryRender
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
-    mbgl::optional<std::vector<std::string>> layers;
+    std::optional<std::vector<std::string>> layers;
     if (layerIds && layerIds.Length(env) > 0) {
         layers = android::conversion::toVector(env, layerIds);
     }
@@ -878,7 +878,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> NativeMapView::queryRender
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
-    mbgl::optional<std::vector<std::string>> layers;
+    std::optional<std::vector<std::string>> layers;
     if (layerIds && layerIds.Length(env) > 0) {
         layers = toVector(env, layerIds);
     }
@@ -937,7 +937,7 @@ void NativeMapView::addLayer(JNIEnv& env, jlong nativeLayerPtr, const jni::Strin
     try {
         layer->addToStyle(
             map->getStyle(),
-            before ? mbgl::optional<std::string>(jni::Make<std::string>(env, before)) : mbgl::optional<std::string>());
+            before ? std::optional<std::string>(jni::Make<std::string>(env, before)) : std::optional<std::string>());
     } catch (const std::runtime_error& error) {
         jni::ThrowNew(env, jni::FindClass(env, "com/mapbox/mapboxsdk/style/layers/CannotAddLayerException"), error.what());
     }
@@ -961,7 +961,7 @@ void NativeMapView::addLayerAbove(JNIEnv& env, jlong nativeLayerPtr, const jni::
     }
 
     // Check if we found a sibling to place before
-    mbgl::optional<std::string> before;
+    std::optional<std::string> before;
     if (index + 1 > layers.size()) {
         // Not found
         jni::ThrowNew(env, jni::FindClass(env, "com/mapbox/mapboxsdk/style/layers/CannotAddLayerException"),
@@ -989,7 +989,7 @@ void NativeMapView::addLayerAt(JNIEnv& env, jlong nativeLayerPtr, jni::jint inde
     // Check index
     int numLayers = layers.size() - 1;
     if (index > numLayers || index < 0) {
-        Log::Error(Event::JNI, "Index out of range: %i", index);
+        Log::Error(Event::JNI, "Index out of range: " + std::to_string(index));
         jni::ThrowNew(env, jni::FindClass(env, "com/mapbox/mapboxsdk/style/layers/CannotAddLayerException"),
             std::string("Invalid index").c_str());
         return;
@@ -1013,7 +1013,7 @@ jni::jboolean NativeMapView::removeLayerAt(JNIEnv& env, jni::jint index) {
     // Check index
     int numLayers = layers.size() - 1;
     if (index > numLayers || index < 0) {
-        Log::Warning(Event::JNI, "Index out of range: %i", index);
+        Log::Warning(Event::JNI, "Index out of range: " + std::to_string(index));
         return jni::jni_false;
     }
 

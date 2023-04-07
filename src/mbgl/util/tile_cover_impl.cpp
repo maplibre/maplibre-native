@@ -340,7 +340,7 @@ bool TileCover::Impl::hasNext() const {
             && tileY < (1u << zoom));
 }
 
-optional<UnwrappedTileID> TileCover::Impl::next() {
+std::optional<UnwrappedTileID> TileCover::Impl::next() {
     if (!hasNext()) return {};
 
     const auto x = tileX;

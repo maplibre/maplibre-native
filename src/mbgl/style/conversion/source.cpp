@@ -16,40 +16,40 @@ namespace style {
 namespace conversion {
 
 // A tile source can either specify a URL to TileJSON, or inline TileJSON.
-static optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
+static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
     auto urlVal = objectMember(value, "url");
     if (!urlVal) {
-        optional<Tileset> tileset = convert<Tileset>(value, error);
+        std::optional<Tileset> tileset = convert<Tileset>(value, error);
         if (!tileset) {
-            return nullopt;
+            return std::nullopt;
         }
         return { *tileset };
     }
 
-    optional<std::string> url = toString(*urlVal);
+    std::optional<std::string> url = toString(*urlVal);
     if (!url) {
         error.message = "source url must be a string";
-        return nullopt;
+        return std::nullopt;
     }
 
     return { *url };
 }
 
-static optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
+static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
                                                              const Convertible& value,
                                                              Error& error) {
-    optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
-        return nullopt;
+        return std::nullopt;
     }
 
     uint16_t tileSize = util::tileSize_I;
     auto tileSizeValue = objectMember(value, "tileSize");
     if (tileSizeValue) {
-        optional<float> size = toNumber(*tileSizeValue);
+        std::optional<float> size = toNumber(*tileSizeValue);
         if (!size || *size < 0 || *size > std::numeric_limits<uint16_t>::max()) {
             error.message = "invalid tileSize";
-            return nullopt;
+            return std::nullopt;
         }
         tileSize = static_cast<uint16_t>(*size);
     }
@@ -57,21 +57,21 @@ static optional<std::unique_ptr<Source>> convertRasterSource(const std::string& 
     return { std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize) };
 }
 
-static optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
+static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
                                                              const Convertible& value,
                                                              Error& error) {
-    optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
-        return nullopt;
+        return std::nullopt;
     }
 
     uint16_t tileSize = util::tileSize_I;
     auto tileSizeValue = objectMember(value, "tileSize");
     if (tileSizeValue) {
-        optional<float> size = toNumber(*tileSizeValue);
+        std::optional<float> size = toNumber(*tileSizeValue);
         if (!size || *size < 0 || *size > std::numeric_limits<uint16_t>::max()) {
             error.message = "invalid tileSize";
-            return nullopt;
+            return std::nullopt;
         }
         tileSize = static_cast<uint16_t>(*size);
     }
@@ -79,97 +79,97 @@ static optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::strin
     return { std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize) };
 }
 
-static optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
+static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
                                                              const Convertible& value,
                                                              Error& error) {
-    optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
-        return nullopt;
+        return std::nullopt;
     }
     auto maxzoomValue = objectMember(value, "maxzoom");
-    optional<float> maxzoom;
+    std::optional<float> maxzoom;
     if (maxzoomValue) {
         maxzoom = toNumber(*maxzoomValue);
         if (!maxzoom || *maxzoom < 0 || *maxzoom > std::numeric_limits<uint8_t>::max()) {
             error.message = "invalid maxzoom";
-            return nullopt;
+            return std::nullopt;
         }
     }
     auto minzoomValue = objectMember(value, "minzoom");
-    optional<float> minzoom;
+    std::optional<float> minzoom;
     if (minzoomValue) {
         minzoom = toNumber(*minzoomValue);
         if (!minzoom || *minzoom < 0 || *minzoom > std::numeric_limits<uint8_t>::max()) {
             error.message = "invalid minzoom";
-            return nullopt;
+            return std::nullopt;
         }
     }
     return {std::make_unique<VectorSource>(id, std::move(*urlOrTileset), std::move(maxzoom), std::move(minzoom))};
 }
 
-static optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
+static std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
                                                               const Convertible& value,
                                                               Error& error) {
     auto dataValue = objectMember(value, "data");
     if (!dataValue) {
         error.message = "GeoJSON source must have a data value";
-        return nullopt;
+        return std::nullopt;
     }
 
     Immutable<GeoJSONOptions> options = GeoJSONOptions::defaultOptions();
-    if (optional<GeoJSONOptions> converted = convert<GeoJSONOptions>(value, error)) {
+    if (std::optional<GeoJSONOptions> converted = convert<GeoJSONOptions>(value, error)) {
         options = makeMutable<GeoJSONOptions>(std::move(*converted));
     }
 
     auto result = std::make_unique<GeoJSONSource>(id, std::move(options));
 
     if (isObject(*dataValue)) {
-        optional<GeoJSON> geoJSON = convert<GeoJSON>(*dataValue, error);
+        auto geoJSON = convert<GeoJSON>(*dataValue, error);
         if (!geoJSON) {
-            return nullopt;
+            return std::nullopt;
         }
         result->setGeoJSON(*geoJSON);
     } else if (toString(*dataValue)) {
         result->setURL(*toString(*dataValue));
     } else {
         error.message = "GeoJSON data must be a URL or an object";
-        return nullopt;
+        return std::nullopt;
     }
 
     return { std::move(result) };
 }
 
-static optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
+static std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
                                                             const Convertible& value,
                                                             Error& error) {
     auto urlValue = objectMember(value, "url");
     if (!urlValue) {
         error.message = "Image source must have a url value";
-        return nullopt;
+        return std::nullopt;
     }
 
     auto urlString = toString(*urlValue);
     if (!urlString) {
         error.message = "Image url must be a URL string";
-        return nullopt;
+        return std::nullopt;
     }
 
     auto coordinatesValue = objectMember(value, "coordinates");
     if (!coordinatesValue) {
         error.message = "Image source must have a coordinates values";
-        return nullopt;
+        return std::nullopt;
     }
 
     if (!isArray(*coordinatesValue) || arrayLength(*coordinatesValue) != 4) {
         error.message = "Image coordinates must be an array of four longitude latitude pairs";
-        return nullopt;
+        return std::nullopt;
     }
 
     std::array<LatLng, 4> coordinates;
     for (std::size_t i=0; i < 4; i++) {
         auto latLng = conversion::convert<LatLng>(arrayMember(*coordinatesValue,i), error);
         if (!latLng) {
-            return nullopt;
+            return std::nullopt;
         }
         coordinates[i] = *latLng;
     }
@@ -179,22 +179,22 @@ static optional<std::unique_ptr<Source>> convertImageSource(const std::string& i
     return { std::move(result) };
 }
 
-optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()(const Convertible& value, Error& error, const std::string& id) const {
+std::optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()(const Convertible& value, Error& error, const std::string& id) const {
     if (!isObject(value)) {
         error.message = "source must be an object";
-        return nullopt;
+        return std::nullopt;
     }
 
     auto typeValue = objectMember(value, "type");
     if (!typeValue) {
         error.message = "source must have a type";
-        return nullopt;
+        return std::nullopt;
     }
 
-    optional<std::string> type = toString(*typeValue);
+    std::optional<std::string> type = toString(*typeValue);
     if (!type) {
         error.message = "source type must be a string";
-        return nullopt;
+        return std::nullopt;
     }
     const std::string& tname = type.value();
     if (tname == "raster") {
@@ -209,7 +209,7 @@ optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()
         return convertImageSource(id, value, error);
     } else {
         error.message = "invalid source type";
-        return nullopt;
+        return std::nullopt;
     }
 }
 

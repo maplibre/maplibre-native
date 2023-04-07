@@ -211,7 +211,7 @@ public:
 
         for (mapbox::sqlite::Query q(stmt); q.run();) {
 
-            optional<std::string> data = q.get<optional<std::string>>(0);
+            std::optional<std::string> data = q.get<std::optional<std::string>>(0);
             if (data) {
                 response.data = std::make_shared<std::string>(*data);
                 response.noContent = false;

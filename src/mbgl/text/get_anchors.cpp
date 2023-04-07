@@ -130,7 +130,7 @@ Anchors getAnchors(const GeometryCoordinates& line,
     return resample(line, offset, spacing, angleWindowSize, maxAngle, labelLength, continuedLine, false);
 }
 
-optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
+std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
                                  const float maxAngle,
                                  const float textLeft,
                                  const float textRight,
@@ -167,7 +167,7 @@ optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
                 return anchor;
             }
 
-            return nullopt;
+            return std::nullopt;
         }
         
         prevDistance += segmentDistance;

@@ -70,10 +70,10 @@ fi
 cp platform/ios/platform/ios/framework/Info-static.plist "$temp_info_static_plist"
 cp platform/ios/platform/ios/framework/Info.plist "$temp_info_plist"
 
-plutil -replace MGLSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
-plutil -replace MGLCommitHash -string "$hash" "$temp_info_static_plist"
-plutil -replace MGLSemanticVersionString -string "$sem_version" "$temp_info_plist"
-plutil -replace MGLCommitHash -string "$hash" "$temp_info_plist"
+plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
+plutil -replace MLNCommitHash -string "$hash" "$temp_info_static_plist"
+plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_plist"
+plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 

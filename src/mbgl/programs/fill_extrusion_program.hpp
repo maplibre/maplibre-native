@@ -54,8 +54,9 @@ using FillExtrusionPatternUniforms = TypeList<
     uniforms::lightintensity,
     uniforms::vertical_gradient>;
 
-class FillExtrusionProgram : public Program<
+class FillExtrusionProgram final : public Program<
     FillExtrusionProgram,
+    shaders::BuiltIn::FillExtrusionProgram,
     gfx::PrimitiveType::Triangle,
     FillExtrusionLayoutAttributes,
     FillExtrusionUniforms,
@@ -63,6 +64,11 @@ class FillExtrusionProgram : public Program<
     style::FillExtrusionPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillExtrusionProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
@@ -89,8 +95,9 @@ public:
         mat4, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient);
 };
 
-class FillExtrusionPatternProgram : public Program<
+class FillExtrusionPatternProgram final : public Program<
     FillExtrusionPatternProgram,
+    shaders::BuiltIn::FillExtrusionPatternProgram,
     gfx::PrimitiveType::Triangle,
     FillExtrusionLayoutAttributes,
     FillExtrusionPatternUniforms,
@@ -99,6 +106,11 @@ class FillExtrusionPatternProgram : public Program<
     style::FillExtrusionPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"FillExtrusionPatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(mat4,
@@ -115,16 +127,5 @@ public:
 
 using FillExtrusionLayoutVertex = FillExtrusionProgram::LayoutVertex;
 using FillExtrusionAttributes = FillExtrusionProgram::AttributeList;
-
-
-class FillExtrusionLayerPrograms final : public LayerTypePrograms {
-public:
-    FillExtrusionLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : fillExtrusion(context, programParameters),
-          fillExtrusionPattern(context, programParameters) {
-    }
-    FillExtrusionProgram fillExtrusion;
-    FillExtrusionPatternProgram fillExtrusionPattern;
-};
 
 } // namespace mbgl

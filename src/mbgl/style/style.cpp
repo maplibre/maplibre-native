@@ -60,9 +60,9 @@ const Light* Style::getLight() const {
     return impl->getLight();
 }
 
-optional<Image> Style::getImage(const std::string& name) const {
+std::optional<Image> Style::getImage(const std::string& name) const {
     auto image = impl->getImage(name);
-    if (!image) return nullopt;
+    if (!image) return std::nullopt;
     return style::Image(std::move(*image));
 }
 
@@ -122,7 +122,7 @@ const Layer* Style::getLayer(const std::string& layerID) const {
     return impl->getLayer(layerID);
 }
 
-void Style::addLayer(std::unique_ptr<Layer> layer, const optional<std::string>& before) {
+void Style::addLayer(std::unique_ptr<Layer> layer, const std::optional<std::string>& before) {
     impl->mutated = true;
     impl->addLayer(std::move(layer), before);
 }

@@ -6,7 +6,6 @@
 #include <mbgl/util/logging.hpp>
 
 #include <mbgl/util/util.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/timer.hpp>
@@ -21,6 +20,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <optional>
 
 static void handleError(CURLMcode code) {
     if (code != CURLM_OK) {
@@ -96,8 +96,8 @@ private:
     std::shared_ptr<std::string> data;
     std::unique_ptr<Response> response;
 
-    optional<std::string> retryAfter;
-    optional<std::string> xRateLimitReset;
+    std::optional<std::string> retryAfter;
+    std::optional<std::string> xRateLimitReset;
 
     CURL *handle = nullptr;
     curl_slist *headers = nullptr;

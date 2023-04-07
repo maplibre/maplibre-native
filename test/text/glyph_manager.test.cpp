@@ -194,7 +194,7 @@ TEST(GlyphManager, LoadingCancel) {
 
     test.fileSource.glyphsResponse = [&] (const Resource&) {
         test.end();
-        return optional<Response>();
+        return std::optional<Response>();
     };
 
     test.observer.glyphsLoaded = [&] (const FontStack&, const GlyphRange&) {
@@ -214,7 +214,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
 
     test.fileSource.glyphsResponse = [&] (const Resource&) {
         glyphResponses++;
-        return optional<Response>();
+        return std::optional<Response>();
     };
 
     test.observer.glyphsLoaded = [&] (const FontStack&, const GlyphRange&) {

@@ -31,6 +31,7 @@
     "@mapbox/mvt-fixtures": "3.10.0",
     "@octokit/plugin-retry": "^4.1.2",
     "@octokit/rest": "^19.0.7",
+    "argparse": "^2.0.1",
     "aws-sdk": "^2.1318.0",
     "csscolorparser": "~1.0.2",
     "d3-queue": "3.0.7",

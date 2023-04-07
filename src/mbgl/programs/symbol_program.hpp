@@ -17,6 +17,11 @@
 #include <cmath>
 #include <array>
 
+#include <mbgl/shaders/shader_manifest.hpp>
+#ifdef MBGL_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/program.hpp>
+#endif
+
 namespace mbgl {
 
 const uint16_t MAX_GLYPH_ICON_SIZE = 255;
@@ -137,8 +142,8 @@ public:
     }
 
     float layoutSize;
-    optional<std::tuple<Range<float>, Range<float>>> coveringRanges;
-    optional<style::PropertyExpression<float>> expression;
+    std::optional<std::tuple<Range<float>, Range<float>>> coveringRanges;
+    std::optional<style::PropertyExpression<float>> expression;
 };
 
 class SourceFunctionSymbolSizeBinder final : public SymbolSizeBinder {
@@ -195,7 +200,7 @@ public:
     Range<float> coveringZoomStops;
 };
 
-class SymbolProgramBase {
+class SymbolProgramBase : public gfx::Shader {
 public:
     static gfx::Vertex<SymbolLayoutAttributes> layoutVertex(Point<float> labelAnchor,
                                                             Point<float> o,
@@ -241,6 +246,7 @@ public:
 };
 
 template <class Name,
+          shaders::BuiltIn ShaderSource,
           gfx::PrimitiveType Primitive,
           class LayoutAttributeList,
           class LayoutUniformList,
@@ -270,8 +276,23 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
-    SymbolProgram(gfx::Context& context, const ProgramParameters& programParameters)
-        : program(context.createProgram<Name>(programParameters)) {
+    SymbolProgram(const ProgramParameters& programParameters) {
+        switch (gfx::Backend::GetType()) {
+#ifdef MBGL_RENDER_BACKEND_OPENGL
+            case gfx::Backend::Type::OpenGL: {
+                program = std::make_unique<gl::Program<Name>>(programParameters
+                    .withDefaultSource({
+                        gfx::Backend::Type::OpenGL,
+                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
+                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment
+                    }));
+                break;
+            }
+#endif
+            default: {
+                throw std::runtime_error("Unsupported rendering backend!");
+            }
+        }
     }
 
     static UniformValues computeAllUniformValues(
@@ -382,8 +403,9 @@ public:
     }
 };
 
-class SymbolIconProgram : public SymbolProgram<
+class SymbolIconProgram final : public SymbolProgram<
     SymbolIconProgram,
+    shaders::BuiltIn::SymbolIconProgram,
     gfx::PrimitiveType::Triangle,
     SymbolLayoutAttributes,
     TypeList<
@@ -404,6 +426,11 @@ class SymbolIconProgram : public SymbolProgram<
     style::IconPaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"SymbolIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolProgram::SymbolProgram;
 
     static LayoutUniformValues layoutUniformValues(bool isText,
@@ -438,8 +465,9 @@ using SymbolSDFProgramUniforms = TypeList<uniforms::matrix,
                                           uniforms::device_pixel_ratio,
                                           uniforms::is_halo>;
 
-template <class Name, class PaintProperties>
+template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>
 class SymbolSDFProgram : public SymbolProgram<Name,
+                                              ShaderSource,
                                               gfx::PrimitiveType::Triangle,
                                               SymbolLayoutAttributes,
                                               SymbolSDFProgramUniforms,
@@ -447,6 +475,7 @@ class SymbolSDFProgram : public SymbolProgram<Name,
                                               PaintProperties> {
 public:
     using BaseProgram = SymbolProgram<Name,
+                                      ShaderSource,
                                       gfx::PrimitiveType::Triangle,
                                       SymbolLayoutAttributes,
                                       SymbolSDFProgramUniforms,
@@ -472,15 +501,22 @@ public:
 
 using SymbolTextAndIconProgramUniforms = TypeList<uniforms::texsize_icon>;
 
-class SymbolTextAndIconProgram
+class SymbolTextAndIconProgram final
     : public SymbolProgram<SymbolTextAndIconProgram,
+                           shaders::BuiltIn::SymbolTextAndIconProgram,
                            gfx::PrimitiveType::Triangle,
                            SymbolLayoutAttributes,
                            TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
                            TypeList<textures::texture, textures::texture_icon>,
                            style::TextPaintProperties> {
 public:
+    static constexpr std::string_view Name{"SymbolTextAndIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using BaseProgram = SymbolProgram<SymbolTextAndIconProgram,
+                                      shaders::BuiltIn::SymbolTextAndIconProgram,
                                       gfx::PrimitiveType::Triangle,
                                       SymbolLayoutAttributes,
                                       TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
@@ -504,35 +540,36 @@ public:
                                                    SymbolSDFPart);
 };
 
-class SymbolSDFIconProgram : public SymbolSDFProgram<SymbolSDFIconProgram, style::IconPaintProperties> {
+class SymbolSDFIconProgram final : public SymbolSDFProgram<
+    SymbolSDFIconProgram,
+    shaders::BuiltIn::SymbolSDFIconProgram,
+    style::IconPaintProperties>
+{
 public:
+    static constexpr std::string_view Name{"SymbolSDFIconProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolSDFProgram::SymbolSDFProgram;
 };
 
-class SymbolSDFTextProgram : public SymbolSDFProgram<SymbolSDFTextProgram, style::TextPaintProperties> {
+class SymbolSDFTextProgram final : public SymbolSDFProgram<
+    SymbolSDFTextProgram,
+    shaders::BuiltIn::SymbolSDFTextProgram,
+    style::TextPaintProperties>
+{
 public:
+    static constexpr std::string_view Name{"SymbolSDFTextProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using SymbolSDFProgram::SymbolSDFProgram;
 };
 
 using SymbolLayoutVertex = gfx::Vertex<SymbolLayoutAttributes>;
 using SymbolIconAttributes = SymbolIconProgram::AttributeList;
 using SymbolTextAttributes = SymbolSDFTextProgram::AttributeList;
-
-class SymbolLayerPrograms final : public LayerTypePrograms {
-public:
-    SymbolLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : symbolIcon(context, programParameters),
-          symbolIconSDF(context, programParameters),
-          symbolGlyph(context, programParameters),
-          symbolTextAndIcon(context, programParameters),
-          collisionBox(context, programParameters),
-          collisionCircle(context, programParameters) {}
-    SymbolIconProgram symbolIcon;
-    SymbolSDFIconProgram symbolIconSDF;
-    SymbolSDFTextProgram symbolGlyph;
-    SymbolTextAndIconProgram symbolTextAndIcon;
-    CollisionBoxProgram collisionBox;
-    CollisionCircleProgram collisionCircle;
-};
 
 } // namespace mbgl

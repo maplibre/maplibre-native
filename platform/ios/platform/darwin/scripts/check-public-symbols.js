@@ -7,7 +7,7 @@ const path = require('path');
 const execFileSync = require('child_process').execFileSync;
 const _ = require('lodash');
 
-const keyword = /\bMGL_EXPORT\b/;
+const keyword = /\bMLN_EXPORT\b/;
 
 let scanned = [];
 

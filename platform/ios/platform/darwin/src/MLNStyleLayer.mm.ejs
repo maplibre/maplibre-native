@@ -1,0 +1,265 @@
+<%
+  const type = locals.type;
+  const layoutProperties = locals.layoutProperties;
+  const paintProperties = locals.paintProperties;
+  const enumProperties = locals.enumProperties;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
+
+#import "MLNSource.h"
+#import "NSPredicate+MLNPrivateAdditions.h"
+#import "NSDate+MLNAdditions.h"
+#import "MLNStyleLayer_Private.h"
+#import "MLNStyleValue_Private.h"
+#import "MLN<%- camelize(type) %>StyleLayer.h"
+#import "MLNLoggingConfiguration_Private.h"
+#import "MLN<%- camelize(type) %>StyleLayer_Private.h"
+
+#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+#include <mbgl/style/transition_options.hpp>
+
+<% if (enumProperties) { -%>
+
+namespace mbgl {
+
+<% if (layoutProperties.length) { -%>
+<% for (const property of layoutProperties) { -%>
+<% if (definesEnum(property, layoutProperties)) { -%>
+    MBGL_DEFINE_ENUM(MLN<%- camelize(enumName(property)) %>, {
+<% for (const value in property.values) { -%>
+        { MLN<%- camelize(enumName(property)) %><%- camelize(value) %>, "<%-value%>" },
+<% } -%>
+    });
+
+<% } -%>
+<% } -%>
+<% } -%>
+<% if (paintProperties.length) { -%>
+<% for (const property of paintProperties) { -%>
+<% if (definesEnum(property, paintProperties)) { -%>
+    MBGL_DEFINE_ENUM(MLN<%- camelize(enumName(property)) %>, {
+<% for (const value in property.values) { -%>
+        { MLN<%- camelize(enumName(property)) %><%- camelize(value) %>, "<%-value%>" },
+<% } -%>
+    });
+
+<% } -%>
+<% } -%>
+<% } -%>
+}
+<% } -%>
+
+@interface MLN<%- camelize(type) %>StyleLayer ()
+
+@property (nonatomic, readonly) mbgl::style::<%- camelize(type) %>Layer *rawLayer;
+
+@end
+
+@implementation MLN<%- camelize(type) %>StyleLayer
+
+<% if (type == 'background') { -%>
+- (instancetype)initWithIdentifier:(NSString *)identifier
+{
+    MLNLogDebug(@"Initializing %@ with identifier: %@", NSStringFromClass([self class]), identifier);
+    auto layer = std::make_unique<mbgl::style::<%- camelize(type) %>Layer>(identifier.UTF8String);
+    return self = [super initWithPendingLayer:std::move(layer)];
+}
+
+<% } else { -%>
+- (instancetype)initWithIdentifier:(NSString *)identifier source:(MLNSource *)source
+{
+    MLNLogDebug(@"Initializing %@ with identifier: %@ source: %@", NSStringFromClass([self class]), identifier, source);
+    auto layer = std::make_unique<mbgl::style::<%- camelize(type) %>Layer>(identifier.UTF8String, source.identifier.UTF8String);
+    return self = [super initWithPendingLayer:std::move(layer)];
+}
+
+<% } -%>
+- (mbgl::style::<%- camelize(type) %>Layer *)rawLayer
+{
+    return (mbgl::style::<%- camelize(type) %>Layer *)super.rawLayer;
+}
+
+<% if (type !== 'background') { -%>
+- (NSString *)sourceIdentifier
+{
+    MLNAssertStyleLayerIsValid();
+
+    return @(self.rawLayer->getSourceID().c_str());
+}
+
+<% if (type !== 'raster' && type !== 'hillshade') { -%>
+- (NSString *)sourceLayerIdentifier
+{
+    MLNAssertStyleLayerIsValid();
+
+    auto layerID = self.rawLayer->getSourceLayer();
+    return layerID.empty() ? nil : @(layerID.c_str());
+}
+
+- (void)setSourceLayerIdentifier:(NSString *)sourceLayerIdentifier
+{
+    MLNAssertStyleLayerIsValid();
+    MLNLogDebug(@"Setting sourceLayerIdentifier: %@", sourceLayerIdentifier);
+
+    self.rawLayer->setSourceLayer(sourceLayerIdentifier.UTF8String ?: "");
+}
+
+- (void)setPredicate:(NSPredicate *)predicate
+{
+    MLNAssertStyleLayerIsValid();
+    MLNLogDebug(@"Setting predicate: %@", predicate);
+
+    self.rawLayer->setFilter(predicate ? predicate.mgl_filter : mbgl::style::Filter());
+}
+
+- (NSPredicate *)predicate
+{
+    MLNAssertStyleLayerIsValid();
+
+    return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
+}
+
+<% }} -%>
+<% if (layoutProperties.length) { -%>
+// MARK: - Accessing the Layout Attributes
+
+<% for (const property of layoutProperties) { -%>
+- (void)set<%- camelize(property.name) %>:(NSExpression *)<%- objCName(property) %> {
+    MLNAssertStyleLayerIsValid();
+    MLNLogDebug(@"Setting <%- objCName(property) %>: %@", <%- objCName(property) %>);
+
+<% if (property.tokens) { -%>
+    if (<%- objCName(property) %> && <%- objCName(property) %>.expressionType == NSConstantValueExpressionType) {
+        std::string string = ((NSString *)<%- objCName(property) %>.constantValue).UTF8String;
+        if (mbgl::style::conversion::hasTokens(string)) {
+<% if (property.type === 'formatted') { -%>
+            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<mbgl::style::expression::Formatted>(
+                mbgl::style::conversion::convertTokenStringToFormatExpression(string)));
+<% } else if (property.type === 'resolvedImage') { -%>
+            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<mbgl::style::expression::Image>(
+                mbgl::style::conversion::convertTokenStringToImageExpression(string)));
+<% } else { -%>
+            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<std::string>(
+                mbgl::style::conversion::convertTokenStringToExpression(string)));
+<% } -%>
+            return;
+        }
+    }
+<% } -%>
+<% if (isDataDriven(property)) { -%>
+    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, true);
+<% } else { -%>
+    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, false);
+<% } -%>
+    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+}
+
+- (NSExpression *)<%- objCGetter(property) %> {
+    MLNAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+    if (propertyValue.isUndefined()) {
+        propertyValue = self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
+    }
+    return MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(propertyValue);
+}
+
+<% if (property.original) { -%>
+- (void)set<%- camelize(originalPropertyName(property)) %>:(NSExpression *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
+}
+
+- (NSExpression *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
+    return self.<%- objCGetter(property) %>;
+}
+
+<% } -%>
+<% } -%>
+<% } -%>
+<% if (paintProperties.length) { -%>
+// MARK: - Accessing the Paint Attributes
+<% for (const property of paintProperties) { -%>
+
+- (void)set<%- camelize(property.name) %>:(NSExpression *)<%- objCName(property) %> {
+    MLNAssertStyleLayerIsValid();
+    MLNLogDebug(@"Setting <%- objCName(property) %>: %@", <%- objCName(property) %>);
+
+<% switch (property['property-type']) {
+    case 'color-ramp': -%>
+    auto mbglValue = MLNStyleValueTransformer<mbgl::Color, MLNColor *>().toPropertyValue<mbgl::style::ColorRampPropertyValue>(<%- objCName(property) %>);
+<%     break
+    case 'data-driven':
+    case 'cross-faded-data-driven': -%>
+    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, true);
+<%     break
+    default: -%>
+    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, false);
+<% } -%>
+    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+}
+
+- (NSExpression *)<%- objCGetter(property) %> {
+    MLNAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+    if (propertyValue.isUndefined()) {
+        propertyValue = self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
+    }
+    return MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(propertyValue);
+}
+<% if (property["transition"]) { -%>
+
+- (void)set<%- camelize(property.name) %>Transition:(MLNTransition )transition {
+    MLNAssertStyleLayerIsValid();
+    MLNLogDebug(@"Setting <%- objCName(property) %>Transition: %@", MLNStringFromMLNTransition(transition));
+
+    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>Transition(MLNOptionsFromTransition(transition));
+}
+
+- (MLNTransition)<%- objCGetter(property) %>Transition {
+    MLNAssertStyleLayerIsValid();
+
+    mbgl::style::TransitionOptions transitionOptions = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>Transition();
+
+    return MLNTransitionFromOptions(transitionOptions);
+}
+<% } -%>
+<% if (property.original) { -%>
+
+- (void)set<%- camelize(originalPropertyName(property)) %>:(NSExpression *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
+}
+
+- (NSExpression *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
+    return self.<%- objCGetter(property) %>;
+}
+<% } -%>
+<% } -%>
+<% } -%>
+
+@end
+<% if (enumProperties) { -%>
+
+@implementation NSValue (MLN<%- camelize(type) %>StyleLayerAdditions)
+
+<% for (let property of enumProperties) { -%>
++ (NSValue *)valueWithMLN<%- camelize(enumName(property)) %>:(MLN<%- camelize(enumName(property)) %>)<%- objCName(property) %> {
+    return [NSValue value:&<%- objCName(property) %> withObjCType:@encode(MLN<%- camelize(enumName(property)) %>)];
+}
+
+- (MLN<%- camelize(enumName(property)) %>)MLN<%- camelize(enumName(property)) %>Value {
+    MLN<%- camelize(enumName(property)) %> <%- objCName(property) %>;
+    [self getValue:&<%- objCName(property) %>];
+    return <%- objCName(property) %>;
+}
+
+<% } -%>
+@end
+<% } -%>
+
+namespace mbgl {
+
+MLNStyleLayer* <%- camelize(type) %>StyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
+    return [[MLN<%- camelize(type) %>StyleLayer alloc] initWithRawLayer:rawLayer];
+}
+
+}  // namespace mbgl

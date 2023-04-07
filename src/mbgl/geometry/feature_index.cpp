@@ -159,7 +159,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
         }
         FeatureState state;
         if (sourceFeatureState != nullptr) {
-            optional<std::string> idStr = featureIDtoString(geometryTileFeature->getID());
+            std::optional<std::string> idStr = featureIDtoString(geometryTileFeature->getID());
             if (idStr) {
                 sourceFeatureState->getState(state, sourceLayer->getName(), *idStr);
             }
@@ -184,7 +184,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
     }
 }
 
-optional<GeometryCoordinates> FeatureIndex::translateQueryGeometry(
+std::optional<GeometryCoordinates> FeatureIndex::translateQueryGeometry(
         const GeometryCoordinates& queryGeometry,
         const std::array<float, 2>& translate,
         const style::TranslateAnchorType anchorType,

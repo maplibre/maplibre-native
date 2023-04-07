@@ -39,10 +39,13 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties {};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto& programInstance = parameters.programs.debug;
+    auto programInstance = parameters.shaders.get<DebugProgram>();
+    if (!programInstance) {
+        return;
+    }
 
     for (auto matrix : matrices) {
-        programInstance.draw(parameters.context,
+        programInstance->draw(parameters.context,
                              *parameters.renderPass,
                              gfx::LineStrip{4.0f * parameters.pixelRatio},
                              gfx::DepthMode::disabled(),
@@ -228,8 +231,8 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
 }
 
 void RenderImageSource::dumpDebugLogs() const {
-    Log::Info(Event::General, "RenderImageSource::id: %s", impl().id.c_str());
-    Log::Info(Event::General, "RenderImageSource::loaded: %s", isLoaded() ? "yes" : "no");
+    Log::Info(Event::General, "RenderImageSource::id: " + impl().id);
+    Log::Info(Event::General, "RenderImageSource::loaded: " + std::string(isLoaded() ? "yes" : "no"));
 }
 
 } // namespace mbgl

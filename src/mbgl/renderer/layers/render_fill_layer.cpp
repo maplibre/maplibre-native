@@ -74,6 +74,12 @@ bool RenderFillLayer::hasCrossfade() const {
 
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
+
+    if (!parameters.shaders.populate(fillProgram)) return;
+    if (!parameters.shaders.populate(fillPatternProgram)) return;
+    if (!parameters.shaders.populate(fillOutlineProgram)) return;
+    if (!parameters.shaders.populate(fillOutlinePatternProgram)) return;
+
     if (unevaluated.get<FillPattern>().isUndefined()) {
         parameters.renderTileClippingMasks(renderTiles);
         for (const RenderTile& tile : *renderTiles) {
@@ -132,7 +138,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                 && evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
                 && parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
             if (bucket.triangleIndexBuffer && parameters.pass == fillRenderPass) {
-                draw(parameters.programs.getFillLayerPrograms().fill,
+                draw(*fillProgram,
                      gfx::Triangles(),
                      parameters.depthModeForSublayer(1, parameters.pass == RenderPass::Opaque
                         ? gfx::DepthMaskType::ReadWrite
@@ -143,7 +149,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
             }
 
             if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
-                draw(parameters.programs.getFillLayerPrograms().fillOutline,
+                draw(*fillOutlineProgram,
                      gfx::Lines{ 2.0f },
                      parameters.depthModeForSublayer(
                          unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0,
@@ -170,8 +176,8 @@ void RenderFillLayer::render(PaintParameters& parameters) {
             const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
 
             const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-            optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
-            optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+            std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
+            std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
 
             auto draw = [&] (auto& programInstance,
                              const auto& drawMode,
@@ -222,7 +228,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
             };
 
             if (bucket.triangleIndexBuffer) {
-                draw(parameters.programs.getFillLayerPrograms().fillPattern,
+                draw(*fillPatternProgram,
                      gfx::Triangles(),
                      parameters.depthModeForSublayer(1, gfx::DepthMaskType::ReadWrite),
                      *bucket.triangleIndexBuffer,
@@ -232,7 +238,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                      });
             }
             if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
-                draw(parameters.programs.getFillLayerPrograms().fillOutlinePattern,
+                draw(*fillOutlinePatternProgram,
                      gfx::Lines { 2.0f },
                      parameters.depthModeForSublayer(2, gfx::DepthMaskType::ReadOnly),
                      *bucket.lineIndexBuffer,

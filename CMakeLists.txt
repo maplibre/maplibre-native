@@ -112,8 +112,8 @@ if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
 else()
     add_library(mbgl-core STATIC)
 endif()
-target_sources(
-    mbgl-core PRIVATE
+
+list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/aspiring_actor.hpp
@@ -126,6 +126,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
@@ -281,7 +283,6 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/util/optional.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/pass_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/premultiply.hpp
@@ -304,6 +305,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_task.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/work_task_impl.hpp
+)
+list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/mailbox.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/scheduler.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/update_renderables.hpp
@@ -350,6 +353,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/types.hpp
@@ -856,9 +860,8 @@ if(MBGL_WITH_OPENGL)
         mbgl-core
         PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
     )
-    target_sources(
-        mbgl-core
-        PRIVATE
+    list(APPEND 
+        INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
@@ -867,6 +870,38 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
+    )
+    list(APPEND 
+        SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.cpp
@@ -917,37 +952,6 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/background.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/background_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/circle.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/clipping_mask.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/collision_box.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/collision_circle.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/debug.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_extrusion.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_extrusion_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_outline.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_outline_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/fill_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/heatmap.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/heatmap_texture.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/hillshade.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/hillshade_prepare.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_gradient.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_pattern.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/line_sdf.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/preludes.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/raster.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shader_source.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shader_source.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shaders.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/shaders.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_sdf_icon.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_sdf_text.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/programs/gl/symbol_text_and_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer.cpp
@@ -957,6 +961,14 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
     )
 endif()
+
+target_sources(
+    mbgl-core PRIVATE
+    ${INCLUDE_FILES}
+    ${SRC_FILES}
+)
+source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
+source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git/HEAD)
     execute_process(

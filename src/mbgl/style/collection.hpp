@@ -1,10 +1,10 @@
 #pragma once
 
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <memory>
 #include <string>
+#include <optional>
 
 namespace mbgl {
 namespace style {
@@ -62,7 +62,7 @@ class Collection<T, false /*persistentImplsOrder*/> : public CollectionBase<T> {
     using Base = CollectionBase<T>;
 
 public:
-    T* add(std::unique_ptr<T> wrapper, const optional<std::string>& before = nullopt) {
+    T* add(std::unique_ptr<T> wrapper, const std::optional<std::string>& before = std::nullopt) {
         std::size_t idx = before ? Base::index(*before) : Base::size();
         return Base::add(idx, idx, std::move(wrapper));
     }

@@ -482,7 +482,7 @@ void MapWindow::initializeGL()
     // Set default location to Helsinki.
     m_map->setCoordinateZoom(QMapLibreGL::Coordinate(60.170448, 24.942046), 5);
 
-    QString styleUrl = qgetenv("MGL_STYLE_URL");
+    QString styleUrl = qgetenv("MLN_STYLE_URL");
     if (styleUrl.isEmpty()) {
         changeStyle();
     } else {

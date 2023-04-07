@@ -21,6 +21,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/programs/symbol_program.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/fixture_log_observer.cpp
@@ -229,7 +230,7 @@ target_link_libraries(
     $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>
 )
 
-if(MSVC)
+if(WIN32)
     target_compile_definitions(
         mbgl-test
         PRIVATE MBGL_BUILDING_LIB

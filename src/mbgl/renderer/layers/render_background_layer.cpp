@@ -10,6 +10,7 @@
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 
 namespace mbgl {
 
@@ -64,6 +65,10 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Note that for bottommost layers without a pattern, the background color is drawn with
     // glClear rather than this method.
 
+    // Ensure programs are available
+    if (!parameters.shaders.populate(backgroundProgram)) return;
+    if (!parameters.shaders.populate(backgroundPatternProgram)) return;
+
     const Properties<>::PossiblyEvaluated properties;
     const BackgroundProgram::Binders paintAttributeData(properties, 0);
 
@@ -106,9 +111,9 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
     if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        optional<ImagePosition> imagePosA =
+        std::optional<ImagePosition> imagePosA =
             parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().from.id());
-        optional<ImagePosition> imagePosB =
+        std::optional<ImagePosition> imagePosB =
             parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().to.id());
 
         if (!imagePosA || !imagePosB)
@@ -117,7 +122,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         uint32_t i = 0;
         for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
             const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
-            draw(parameters.programs.getBackgroundLayerPrograms().backgroundPattern,
+            draw(*backgroundPatternProgram,
                  BackgroundPatternProgram::layoutUniformValues(parameters.matrixForTile(unwrappedTileID),
                                                                evaluated.get<BackgroundOpacity>(),
                                                                parameters.patternAtlas.getPixelSize(),
@@ -140,7 +145,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         }
         uint32_t i = 0;
         for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
-            draw(parameters.programs.getBackgroundLayerPrograms().background,
+            draw(*backgroundProgram,
                  BackgroundProgram::LayoutUniformValues{
                      uniforms::matrix::Value(parameters.matrixForTile(tileID.toUnwrapped())),
                      uniforms::color::Value(evaluated.get<BackgroundColor>()),
@@ -152,10 +157,10 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     }
 }
 
-optional<Color> RenderBackgroundLayer::getSolidBackground() const {
+std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
-        return nullopt;
+        return std::nullopt;
     }
 
     return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };

@@ -2,6 +2,7 @@ export BUILDTYPE ?= Debug
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 export CI ?= 0
+export DEV_TEAM ?= ""
 
 # When only the dependencies in the package.json are installed
 # Node.js will error when running a script from the root scripts directory
@@ -87,44 +88,18 @@ IOS_XCODEBUILD_SIM = xcodebuild \
 
 ifneq ($(MORE_SIMULATORS),)
 	IOS_LATEST = true
-	IOS_11 = true
-	IOS_10 = true
-	IOS_9 = true
 endif
 
 ifdef IOS_LATEST
 	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone Xs Max' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone Xr' \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPad Pro (11-inch)'
-endif
-
-ifdef IOS_11
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPhone 7' \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPhone X' \
-	-destination 'platform=iOS Simulator,OS=11.4,name=iPad (5th generation)'
-endif
-
-ifdef IOS_10
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPhone SE' \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPhone 7 Plus' \
-	-destination 'platform=iOS Simulator,OS=10.3.1,name=iPad Pro (9.7-inch)'
-endif
-
-ifdef IOS_9
-	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPhone 6s Plus' \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPhone 6s' \
-	-destination 'platform=iOS Simulator,OS=9.3,name=iPad Air 2'
+	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 14 Pro' \
+	-destination 'platform=iOS Simulator,OS=latest,name=iPad (10th generation)'
 endif
 
 # If IOS_XCODEBUILD_SIM does not contain a simulator destination, add the default.
 ifeq (, $(findstring destination, $(IOS_XCODEBUILD_SIM)))
 	IOS_XCODEBUILD_SIM += \
-	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 8'
+	-destination 'platform=iOS Simulator,OS=latest,name=iPhone 14 Pro'
 else
 	IOS_XCODEBUILD_SIM += -parallel-testing-enabled YES
 endif
@@ -181,6 +156,11 @@ ios-lint: ios-pod-lint
 .PHONY: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
+
+#  make ios-sizetest
+.PHONY: ios-sizetest
+ios-sizetest:
+	./scripts/size-check.sh ${DEV_TEAM}
 
 #  make ios-uitest
 .PHONY: ios-uitest

@@ -7,6 +7,7 @@
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
@@ -758,7 +759,7 @@ TEST(Map, DisabledSources) {
     MapTest<> test;
 
     // Always load the same image tile for raster layers.
-    test.fileSource->response = [] (const Resource& res) -> optional<Response> {
+    test.fileSource->response = [] (const Resource& res) -> std::optional<Response> {
         if (res.url == "asset://tile.png") {
             Response response;
             response.data = std::make_shared<std::string>(
@@ -1245,8 +1246,8 @@ TEST(Map, PrefetchDeltaOverride) {
         }
     };
 
-    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta(nullopt);
-    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta(nullopt);
+    test.map.getStyle().getSource("vector")->setPrefetchZoomDelta(std::nullopt);
+    test.map.getStyle().getSource("custom")->setPrefetchZoomDelta(std::nullopt);
     test.runLoop.run();
 
     // Each source requests 4 additional parent tiles.
@@ -1575,4 +1576,24 @@ TEST(Map, VolatileSource) {
     test.observer.didFinishLoadingMapCallback = [&] { test.runLoop.stop(); };
     test.runLoop.run();
     EXPECT_EQ(8, requestedTiles);
+}
+
+TEST(Map, ObserveShaderRegistration) {
+    MapTest<> test;
+
+    bool observedRegistry = false;
+    test.observer.onRegisterShadersCallback = [&observedRegistry](gfx::ShaderRegistry&) {
+        observedRegistry = true;
+    };
+
+    test.map.jumpTo(CameraOptions().withZoom(10));
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    
+    test.frontend.render(test.map);
+    EXPECT_EQ(observedRegistry, true);
+    
+    // Should not see it again
+    observedRegistry = false;
+    test.frontend.render(test.map);
+    EXPECT_EQ(observedRegistry, false);
 }

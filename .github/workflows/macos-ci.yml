@@ -21,7 +21,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
@@ -42,7 +41,6 @@ on:
       - "src/**"
       - "test/**"
       - "vendor/**"
-      - maplibre-gl-js
       - ".gitmodules"
       - "!**/*.md"
 
@@ -120,7 +118,7 @@ jobs:
 
       - name: Run macOS Objective-C tests
         run: |
-          make macos-test
+          ../macos/scripts/run-in-macos-gui-env.sh "make macos-test"
 
       - name: npm install  # C++ tests are run with root as working directory
         run: npm ci --ignore-scripts

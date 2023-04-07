@@ -74,7 +74,7 @@ const LayerRenderData* RenderTile::getLayerRenderData(const style::Layer::Impl& 
     return renderData->getLayerRenderData(impl);
 }
 
-optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) const {
+std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) const {
     assert(renderData);
     return renderData->getPattern(pattern);
 }
@@ -134,14 +134,17 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties {};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto& program = parameters.programs.debug;
+    auto program = parameters.shaders.get<DebugProgram>();
+    if (!program) {
+        return;
+    }
 
     if (parameters.debugOptions & (MapDebugOptions::Timestamps | MapDebugOptions::ParseStatus)) {
         assert(debugBucket);
         const auto allAttributeBindings =
             DebugProgram::computeAllAttributeBindings(*debugBucket->vertexBuffer, paintAttributeData, properties);
 
-        program.draw(parameters.context,
+        program->draw(parameters.context,
                      *parameters.renderPass,
                      gfx::Lines{4.0f * parameters.pixelRatio},
                      gfx::DepthMode::disabled(),
@@ -161,7 +164,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
                      "text-outline");
 
-        program.draw(parameters.context,
+        program->draw(parameters.context,
                      *parameters.renderPass,
                      gfx::Lines{2.0f * parameters.pixelRatio},
                      gfx::DepthMode::disabled(),
@@ -187,7 +190,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
         if (debugBucket->tileBorderSegments.empty()) {
             debugBucket->tileBorderSegments = RenderStaticData::tileBorderSegments();
         }
-        parameters.programs.debug.draw(
+        program->draw(
             parameters.context,
             *parameters.renderPass,
             gfx::LineStrip{4.0f * parameters.pixelRatio},

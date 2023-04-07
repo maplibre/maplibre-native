@@ -1,21 +1,22 @@
 #pragma once
 
 #include <mbgl/util/chrono.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <mapbox/compatibility/value.hpp>
+
+#include <optional>
 
 namespace mbgl {
 namespace style {
 
 class TransitionOptions {
 public:
-    optional<Duration> duration;
-    optional<Duration> delay;
+    std::optional<Duration> duration;
+    std::optional<Duration> delay;
     bool enablePlacementTransitions;
 
-    TransitionOptions(optional<Duration> duration_ = {},
-                      optional<Duration> delay_ = {},
+    TransitionOptions(std::optional<Duration> duration_ = std::nullopt,
+                      std::optional<Duration> delay_ = std::nullopt,
                       bool enablePlacementTransitions_ = true)
         : duration(std::move(duration_)),
           delay(std::move(delay_)),

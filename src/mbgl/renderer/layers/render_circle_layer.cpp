@@ -8,6 +8,7 @@
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 
@@ -80,6 +81,9 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
     if (parameters.pass == RenderPass::Opaque) {
         return;
     }
+
+    if (!parameters.shaders.populate(circleProgram)) return;
+
     const auto drawTile = [&](const RenderTile& tile, const LayerRenderData* data, const auto& segments) {
         auto& circleBucket = static_cast<CircleBucket&>(*data->bucket);
         const auto& evaluated = getEvaluated<CircleLayerProperties>(data->layerProperties);
@@ -87,7 +91,6 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
         const bool pitchWithMap = evaluated.template get<CirclePitchAlignment>() == AlignmentType::Map;
         const auto& paintPropertyBinders = circleBucket.paintPropertyBinders.at(getID());
 
-        auto& programInstance = parameters.programs.getCircleLayerPrograms().circle;
         using LayoutUniformValues = CircleProgram::LayoutUniformValues;
         const auto& allUniformValues = CircleProgram::computeAllUniformValues(
             LayoutUniformValues(
@@ -110,19 +113,19 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
 
         checkRenderability(parameters, CircleProgram::activeBindingCount(allAttributeBindings));
 
-        programInstance.draw(parameters.context,
-                             *parameters.renderPass,
-                             gfx::Triangles(),
-                             parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-                             gfx::StencilMode::disabled(),
-                             parameters.colorModeForRenderPass(),
-                             gfx::CullFaceMode::disabled(),
-                             *circleBucket.indexBuffer,
-                             segments,
-                             allUniformValues,
-                             allAttributeBindings,
-                             CircleProgram::TextureBindings{},
-                             getID());
+        circleProgram->draw(parameters.context,
+                            *parameters.renderPass,
+                            gfx::Triangles(),
+                            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                            gfx::StencilMode::disabled(),
+                            parameters.colorModeForRenderPass(),
+                            gfx::CullFaceMode::disabled(),
+                            *circleBucket.indexBuffer,
+                            segments,
+                            allUniformValues,
+                            allAttributeBindings,
+                            CircleProgram::TextureBindings{},
+                            getID());
     };
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<CircleSortKey>().isUndefined();

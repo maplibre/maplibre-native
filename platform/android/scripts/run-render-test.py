@@ -9,7 +9,7 @@ testCounter = 0
 for cat in os.listdir(catPath):
     testPath = catPath + cat + "/"
     for test in os.listdir(testPath):
-        inputPath = os.getcwd() + "../../../maplibre-gl-js/test/integration/render-tests/" + cat + "/" + test
+        inputPath = os.getcwd() + "../../../metrics/integration/render-tests/" + cat + "/" + test
         outputPath = testPath + test
 
         expected = outputPath + "/expected.png"

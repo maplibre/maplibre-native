@@ -16,7 +16,7 @@
 			<key>DefaultValue</key>
 			<true/>
 			<key>Key</key>
-			<string>MGLMapboxMetricsEnabled</string>
+			<string>MLNMapboxMetricsEnabled</string>
 			<key>Title</key>
 			<string>TELEMETRY_SWITCH_TITLE</string>
 			<key>Type</key>

@@ -12,7 +12,7 @@ RenderVectorSource::RenderVectorSource(Immutable<style::VectorSource::Impl> impl
     : RenderTileSetSource(std::move(impl_)) {
 }
 
-const optional<Tileset>& RenderVectorSource::getTileset() const {
+const std::optional<Tileset>& RenderVectorSource::getTileset() const {
     return static_cast<const style::VectorSource::Impl&>(*baseImpl).tileset;
 }
 

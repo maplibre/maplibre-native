@@ -2,9 +2,10 @@
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/geo.hpp>
-#include <mbgl/util/optional.hpp>
 #include <mbgl/util/unitbezier.hpp>
 #include <mbgl/util/vectors.hpp>
+
+#include <optional>
 
 #include <functional>
 
@@ -16,34 +17,34 @@ namespace mbgl {
     center point when both are set.
     */
 struct CameraOptions {
-    CameraOptions& withCenter(const optional<LatLng>& o) { center = o; return *this; }
-    CameraOptions& withPadding(const optional<EdgeInsets>& p) { padding = p; return *this; }
-    CameraOptions& withAnchor(const optional<ScreenCoordinate>& o) { anchor = o; return *this; }
-    CameraOptions& withZoom(const optional<double>& o) { zoom = o; return *this; }
-    CameraOptions& withBearing(const optional<double>& o) { bearing = o; return *this; }
-    CameraOptions& withPitch(const optional<double>& o) { pitch = o; return *this; }
+    CameraOptions& withCenter(const std::optional<LatLng>& o) { center = o; return *this; }
+    CameraOptions& withPadding(const std::optional<EdgeInsets>& p) { padding = p; return *this; }
+    CameraOptions& withAnchor(const std::optional<ScreenCoordinate>& o) { anchor = o; return *this; }
+    CameraOptions& withZoom(const std::optional<double>& o) { zoom = o; return *this; }
+    CameraOptions& withBearing(const std::optional<double>& o) { bearing = o; return *this; }
+    CameraOptions& withPitch(const std::optional<double>& o) { pitch = o; return *this; }
 
     /** Coordinate at the center of the map. */
-    optional<LatLng> center;
+    std::optional<LatLng> center;
 
     /** Padding around the interior of the view that affects the frame of
         reference for `center`. */
-    optional<EdgeInsets> padding;
+    std::optional<EdgeInsets> padding;
 
     /** Point of reference for `zoom` and `angle`, assuming an origin at the
         top-left corner of the view. */
-    optional<ScreenCoordinate> anchor;
+    std::optional<ScreenCoordinate> anchor;
 
     /** Zero-based zoom level. Constrained to the minimum and maximum zoom
         levels. */
-    optional<double> zoom;
+    std::optional<double> zoom;
 
     /** Bearing, measured in degrees from true north. Wrapped to [0, 360). */
-    optional<double> bearing;
+    std::optional<double> bearing;
 
     /** Pitch toward the horizon measured in degrees , with 0 deg resulting in a
         two-dimensional map. */
-    optional<double> pitch;
+    std::optional<double> pitch;
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
@@ -64,21 +65,21 @@ constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
     struct is used. */
 struct AnimationOptions {
     /** Time to animate to the viewpoint defined herein. */
-    optional<Duration> duration;
+    std::optional<Duration> duration;
 
     /** Average velocity of a flyTo() transition, measured in screenfuls per
         second, assuming a linear timing curve.
 
         A <i>screenful</i> is the visible span in pixels. It does not correspond
         to a fixed physical distance but rather varies by zoom level. */
-    optional<double> velocity;
+    std::optional<double> velocity;
 
     /** Zero-based zoom level at the peak of the flyTo() transition’s flight
         path. */
-    optional<double> minZoom;
+    std::optional<double> minZoom;
 
     /** The easing timing curve of the transition. */
-    optional<mbgl::util::UnitBezier> easing;
+    std::optional<mbgl::util::UnitBezier> easing;
 
     /** A function that is called on each frame of the transition, just before a
         screen update, except on the last frame. The first parameter indicates
@@ -107,7 +108,7 @@ struct FreeCameraOptions {
         - Z coordinate is conformal and must respect minimum and maximum zoom values.
         - Zoom is automatically computed from the altitude (z)
     */
-    optional<vec3> position = nullopt;
+    std::optional<vec3> position = std::nullopt;
 
     /** Orientation of the camera represented as a unit quaternion [x, y, z, w].
         The default pose of the camera is such that the forward vector is looking up the -Z axis and
@@ -119,19 +120,19 @@ struct FreeCameraOptions {
         Orientation can be set freely but certain constraints still apply
          - Orientation must be representable with only pitch and bearing.
          - Pitch has an upper limit */
-    optional<vec4> orientation = nullopt;
+    std::optional<vec4> orientation = std::nullopt;
 
     /** Helper function for setting the mercator position as Lat&Lng and altitude in meters */
     void setLocation(const LatLngAltitude& location);
 
     /** Helper function for converting mercator position into Lat&Lng and altitude in meters.
         This function fails to return a value if `position` is invalid or is not set */
-    optional<LatLngAltitude> getLocation() const;
+    std::optional<LatLngAltitude> getLocation() const;
 
     /** Helper function for setting orientation of the camera by defining a focus point
         on the map. Up vector is required in certain scenarios where bearing can't be deduced
         from the viewing direction */
-    void lookAtPoint(const LatLng& location, const optional<vec3>& upVector = nullopt);
+    void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt);
 
     /** Helper function for setting the orientation of the camera as a pitch and a bearing.
         Both values are in degrees */

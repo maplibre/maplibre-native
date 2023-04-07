@@ -49,40 +49,32 @@ CONNECTION_TIMEOUT = 360000
 MBGL_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 MBGL_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MBGL_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
 
-# Lists all devices, and extracts the identifiers, then obtains the ABI for every one.
-# Some devices return \r\n, so we'll have to remove the carriage return before concatenating.
-MBGL_ANDROID_ACTIVE_ARCHS = $(shell adb devices | sed '1d;/^\*/d;s/[[:space:]].*//' | xargs -n 1 -I DEV `type -P adb` -s DEV shell getprop ro.product.cpu.abi | tr -d '\r')
-
 # Generate code based on the style specification
 .PHONY: android-style-code
 android-style-code:
 	node scripts/generate-style-code.js
 style-code: android-style-code
 
-# Configuration file for running CMake from Gradle within Android Studio.
-gradle/configuration.gradle:
-	@printf "ext {\n    node = '`command -v node || command -v nodejs`'\n    npm = '`command -v npm`'\n    ccache = '`command -v ccache`'\n}" > $@
-
 define ANDROID_RULES
 # $1 = arm-v7 (short arch)
 # $2 = armeabi-v7a (internal arch)
 
 .PHONY: android-test-lib-$1
-android-test-lib-$1: gradle/configuration.gradle
+android-test-lib-$1:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 -Pmapbox.with_test=true :MapboxGLAndroidSDKTestApp:assemble$(BUILDTYPE)
 
 .PHONY: android-benchmark-$1
-android-benchmark-$1: gradle/configuration.gradle
+android-benchmark-$1:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 -Pmapbox.with_benchmark=true :MapboxGLAndroidSDKTestApp:assemble$(BUILDTYPE)
 
 # Build SDK for for specified abi
 .PHONY: android-lib-$1
-android-lib-$1: gradle/configuration.gradle
+android-lib-$1:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDK:assemble$(BUILDTYPE)
 
 # Build test app and SDK for for specified abi
 .PHONY: android-$1
-android-$1: gradle/configuration.gradle
+android-$1:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:assemble$(BUILDTYPE)
 
 # Build the core test for specified abi
@@ -94,13 +86,13 @@ android-core-test-$1: android-test-lib-$1
 
 run-android-core-test-$1-%: android-core-test-$1
 	# Ensure clean state on the device
-	adb shell "rm -Rf $(MBGL_ANDROID_LOCAL_WORK_DIR) && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/test && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/maplibre-gl-js/src/style-spec/reference"
+	adb shell "rm -Rf $(MBGL_ANDROID_LOCAL_WORK_DIR) && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/test && mkdir -p $(MBGL_ANDROID_LOCAL_WORK_DIR)/scripts/style-spec-reference"
 
 	# Push all needed files to the device
 	adb push $(MBGL_ANDROID_CORE_TEST_DIR)/classes.dex $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmapbox-gl.so $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 	adb push test/fixtures $(MBGL_ANDROID_LOCAL_WORK_DIR)/test > /dev/null 2>&1
-	adb push maplibre-gl-js/src/style-spec/reference/v8.json $(MBGL_ANDROID_LOCAL_WORK_DIR)/maplibre-gl-js/src/style-spec/reference > /dev/null 2>&1
+	adb push scripts/style-spec-reference/v8.json $(MBGL_ANDROID_LOCAL_WORK_DIR)/scripts/style-spec-reference > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/cmake/$(buildtype)/obj/$2/mbgl-test $(MBGL_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 
 # Create gtest filter for skipped tests.
@@ -146,40 +138,40 @@ run-android-benchmark-$1-%: android-benchmark-$1
 
 # Run the test app on connected android device with specified abi
 .PHONY: run-android-$1
-run-android-$1: gradle/configuration.gradle
+run-android-$1:
 	-adb uninstall com.mapbox.mapboxsdk.testapp 2> /dev/null
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:install$(BUILDTYPE) && adb shell am start -n com.mapbox.mapboxsdk.testapp/.activity.FeatureOverviewActivity
 
 # Build test app instrumentation tests apk and test app apk for specified abi
 .PHONY: android-ui-test-$1
-android-ui-test-$1: gradle/configuration.gradle
+android-ui-test-$1:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:assembleDebug :MapboxGLAndroidSDKTestApp:assembleAndroidTest
 
 # Run test app instrumentation tests on a connected android device or emulator with specified abi
 .PHONY: run-android-ui-test-$1
-run-android-ui-test-$1: gradle/configuration.gradle
+run-android-ui-test-$1:
 	-adb uninstall com.mapbox.mapboxsdk.testapp 2> /dev/null
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:connectedAndroidTest
 
 # Run Java Instrumentation tests on a connected android device or emulator with specified abi and test filter
-run-android-ui-test-$1-%: gradle/configuration.gradle
+run-android-ui-test-$1-%:
 	-adb uninstall com.mapbox.mapboxsdk.testapp 2> /dev/null
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="$$*"
 
 # Symbolicate native stack trace with the specified abi
 .PHONY: android-ndk-stack-$1
-android-ndk-stack-$1: gradle/configuration.gradle
+android-ndk-stack-$1:
 	adb logcat | ndk-stack -sym MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj/$2/
 
 # Run render tests with pixelmatch
 .PHONY: run-android-render-test-$1
-run-android-render-test-$1: $(BUILD_DEPS) gradle/configuration.gradle
+run-android-render-test-$1: $(BUILD_DEPS)
 	-adb uninstall com.mapbox.mapboxsdk.testapp 2> /dev/null
 	# delete old test results
 	rm -rf build/render-test/mapbox/
   # copy test definitions & ignore file to test app assets folder, clear old ones first
 	rm -rf MapboxGLAndroidSDKTestApp/src/main/assets/integration
-	cp -r maplibre-gl-js/test/integration MapboxGLAndroidSDKTestApp/src/main/assets
+	cp -r metrics/integration MapboxGLAndroidSDKTestApp/src/main/assets
 	cp platform/node/test/ignores.json MapboxGLAndroidSDKTestApp/src/main/assets/integration/ignores.json
 	# run RenderTest.java to generate static map images
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapboxGLAndroidSDKTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="com.mapbox.mapboxsdk.testapp.render.RenderTest"
@@ -218,30 +210,20 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
-run-android-unit-test: gradle/configuration.gradle
+run-android-unit-test:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testDebugUnitTest --info
-run-android-unit-test-%: gradle/configuration.gradle
+run-android-unit-test-%:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testDebugUnitTest  --info --tests "$*"
-
-# Run unit test and build a coverage report from .exec file generated by unit tests and .ec file generated by instrumentation tests
-#.PHONY: android-create-jacoco-report
-#android-create-jacoco-report: gradle/configuration.gradle
-#	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:jacocoTestReport
-
-## Parse merged jacoco report and send it to S3
-#.PHONY: android-parse-and-send-jacoco-report
-#android-parse-and-send-jacoco-report:
-#	python scripts/parse-jacoco-report.py
 
 # Builds a release package of the Android SDK
 .PHONY: apackage
-apackage: gradle/configuration.gradle
+apackage: 
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all assemble$(BUILDTYPE)
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
-android-ui-test: gradle/configuration.gradle
+android-ui-test:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all :MapboxGLAndroidSDKTestApp:assembleDebug :MapboxGLAndroidSDKTestApp:assembleAndroidTest
 
 #Run instrumentations tests on MicroSoft App Center, ${devices} can be "xiaomi","huawei","OnePlus","htc"
@@ -251,7 +233,7 @@ run-android-test-app-center:
 
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
-run-android-publish: gradle/configuration.gradle
+run-android-publish:
 	$(MBGL_ANDROID_GRADLE_SINGLE_JOB) -Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
@@ -265,32 +247,32 @@ android-check : android-ktlint android-checkstyle android-lint-sdk android-lint-
 
 # Runs checkstyle on the java code
 .PHONY: android-checkstyle
-android-checkstyle: gradle/configuration.gradle
+android-checkstyle:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:checkstyle :MapboxGLAndroidSDKTestApp:checkstyle
 
 # Runs checkstyle on the kotlin code
 .PHONY: android-ktlint
-android-ktlint: gradle/configuration.gradle
+android-ktlint:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none checkstyle
 
 # Runs lint on the Android SDK java code
 .PHONY: android-lint-sdk
-android-lint-sdk: gradle/configuration.gradle
+android-lint-sdk:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:lint
 
 # Runs lint on the Android test app java code
 .PHONY: android-lint-test-app
-android-lint-test-app: gradle/configuration.gradle
+android-lint-test-app:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDKTestApp:lint
 
 # Generates javadoc from the Android SDK
 .PHONY: android-javadoc
-android-javadoc: gradle/configuration.gradle
+android-javadoc:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:javadocrelease
 
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
-android-license: gradle/configuration.gradle
+android-license:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:licenseReleaseReport
 	python scripts/generate-license.py
 
@@ -298,21 +280,9 @@ android-license: gradle/configuration.gradle
 .PHONY: android-ndk-stack
 android-ndk-stack: android-ndk-stack-arm-v7
 
-# Open Android Studio if machine is macos
-ifeq ($(HOST_PLATFORM), macos)
-.PHONY: aproj
-aproj: gradle/configuration.gradle
-	open -b com.google.android.studio
-endif
-
-# Creates the configuration needed to build with Android Studio
-.PHONY: android-configuration
-android-configuration: gradle/configuration.gradle
-	cat gradle/configuration.gradle
-
 # Updates Android's vendor submodules
 .PHONY: android-update-vendor
-android-update-vendor: gradle/configuration.gradle
+android-update-vendor:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
 
 # Run android nitpick script
@@ -322,20 +292,19 @@ run-android-nitpick: android-update-vendor
 
 # Creates a dependency graph using Graphviz
 .PHONY: android-graph
-android-graph: gradle/configuration.gradle
+android-graph:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:generateDependencyGraphMapboxLibraries
 
 # Lists tasks
 .PHONY: list-tasks
-list-tasks: gradle/configuration.gradle
+list-tasks:
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all tasks
 
 #### Miscellaneous targets #####################################################
 
 .PHONY: clean
 clean:
-	-rm -rf ./gradle/configuration.gradle \
-	        ./MapboxGLAndroidSDK/build \
+	-rm -rf ./MapboxGLAndroidSDK/build \
 	        ./MapboxGLAndroidSDK/.externalNativeBuild \
 	        ./MapboxGLAndroidSDKTestApp/build \
 	        ./MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/activity/gen \

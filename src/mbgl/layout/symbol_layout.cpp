@@ -354,7 +354,7 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
         if (feature.geometry.empty()) continue;
 
         ShapedTextOrientations shapedTextOrientations;
-        optional<PositionedIcon> shapedIcon;
+        std::optional<PositionedIcon> shapedIcon;
         std::array<float, 2> textOffset{{0.0f, 0.0f}};
         const float layoutTextSize = layout->evaluate<TextSize>(zoom + 1, feature, canonicalID);
         const float layoutTextSizeAtBucketZoomLevel = layout->evaluate<TextSize>(zoom, feature, canonicalID);
@@ -516,7 +516,7 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
 void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                               const SymbolFeature& feature,
                               const ShapedTextOrientations& shapedTextOrientations,
-                              optional<PositionedIcon> shapedIcon,
+                              std::optional<PositionedIcon> shapedIcon,
                               const ImageMap& imageMap,
                               std::array<float, 2> textOffset,
                               float layoutTextSize,
@@ -563,7 +563,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const auto iconTextFit = evaluatedLayoutProperties.get<style::IconTextFit>();
     const bool hasIconTextFit = iconTextFit != IconTextFitType::None;
     // Adjust shaped icon size when icon-text-fit is used.
-    optional<PositionedIcon> verticallyShapedIcon;
+    std::optional<PositionedIcon> verticallyShapedIcon;
     if (shapedIcon && hasIconTextFit) {
         // Create vertically shaped icon for vertical writing mode if needed.
         if (allowVerticalPlacement && shapedTextOrientations.vertical) {
@@ -664,7 +664,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
         // "lines" with only one point are ignored as in clipLines
         for (const auto& line : feature.geometry) {
             if (line.size() > 1) {
-                optional<Anchor> anchor = getCenterAnchor(line,
+                std::optional<Anchor> anchor = getCenterAnchor(line,
                                                           textMaxAngle,
                                                           (shapedTextOrientations.vertical ? shapedTextOrientations.vertical : getDefaultHorizontalShaping(shapedTextOrientations)).left,
                                                           (shapedTextOrientations.vertical ? shapedTextOrientations.vertical : getDefaultHorizontalShaping(shapedTextOrientations)).right,
@@ -818,9 +818,9 @@ void SymbolLayout::createBucket(const ImagePositions&,
         }
 
         if (hasText && feature.formattedText) {
-            optional<std::size_t> lastAddedSection;
+            std::optional<std::size_t> lastAddedSection;
             if (singleLine) {
-                optional<std::size_t> placedTextIndex;
+                std::optional<std::size_t> placedTextIndex;
                 lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                        symbolInstance,
                                                        feature,
@@ -909,10 +909,10 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                               SymbolInstance& symbolInstance,
                                               const SymbolFeature& feature,
                                               WritingModeType writingMode,
-                                              optional<size_t>& placedIndex,
+                                              std::optional<size_t>& placedIndex,
                                               const SymbolQuads& glyphQuads,
                                               const CanonicalTileID& canonical,
-                                              optional<std::size_t> lastAddedSection) {
+                                              std::optional<std::size_t> lastAddedSection) {
     const Range<float> sizeData = bucket.textSizeBinder->getVertexSizeData(feature);
     const bool hasFormatSectionOverrides = bucket.hasFormatSectionOverrides();
     const auto& placedIconIndex = writingMode == WritingModeType::Vertical ? symbolInstance.placedVerticalIconIndex : symbolInstance.placedIconIndex;

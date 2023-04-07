@@ -51,10 +51,11 @@ PaintParameters::PaintParameters(gfx::Context& context_,
     timePoint(timePoint_),
     pixelRatio(pixelRatio_),
 #ifndef NDEBUG
-    programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs)
+    programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
 #else
-    programs(staticData_.programs)
+    programs(staticData_.programs),
 #endif
+    shaders(*staticData_.shaders)
 {
     pixelsToGLUnits = {{ 2.0f  / state.getSize().width, -2.0f / state.getSize().height }};
 
@@ -121,7 +122,11 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
     tileClippingMaskIDs.clear();
 
-    auto& program = staticData.programs.clippingMask;
+    auto program = staticData.shaders->get<ClippingMaskProgram>();
+    if (!program) {
+        return;
+    }
+    
     const style::Properties<>::PossiblyEvaluated properties {};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
@@ -129,7 +134,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         const int32_t stencilID = nextStencilID++;
         tileClippingMaskIDs.emplace(renderTile.id, stencilID);
 
-        program.draw(context,
+        program->draw(context,
                      *renderPass,
                      gfx::Triangles(),
                      gfx::DepthMode::disabled(),

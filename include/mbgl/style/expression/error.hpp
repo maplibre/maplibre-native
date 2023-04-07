@@ -24,7 +24,7 @@ public:
         return EvaluationError{message};
     }
 
-    std::vector<optional<Value>> possibleOutputs() const override {
+    std::vector<std::optional<Value>> possibleOutputs() const override {
         return {};
     }
 

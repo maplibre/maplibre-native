@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>LSMultipleInstancesProhibited</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -24,7 +28,7 @@
 	<string>15256</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>MGLMapboxMetricsEnabledSettingShownInApp</key>
+	<key>MLNMapboxMetricsEnabledSettingShownInApp</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2015–2019 Mapbox</string>

@@ -76,10 +76,10 @@ class SuperclusterData final : public GeoJSONData {
 template <class T>
 T evaluateFeature(const mapbox::feature::feature<double>& f,
                   const std::shared_ptr<expression::Expression>& expression,
-                  optional<T> accumulated = nullopt) {
+                  std::optional<T> accumulated = std::nullopt) {
     const expression::EvaluationResult result = expression->evaluate(accumulated, f);
     if (result) {
-        optional<T> typed = expression::fromExpressionValue<T>(*result);
+        std::optional<T> typed = expression::fromExpressionValue<T>(*result);
         if (typed) {
             return std::move(*typed);
         }
@@ -113,7 +113,7 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
                     continue;
                 }
                 feature->properties = toFill;
-                optional<Value> accumulated(toReturn[p.first]);
+                std::optional<Value> accumulated(toReturn[p.first]);
                 toReturn[p.first] = evaluateFeature<Value>(*feature, p.second.second, accumulated);
             }
         };
@@ -146,7 +146,7 @@ std::weak_ptr<GeoJSONData> GeoJSONSource::Impl::getData() const {
     return data;
 }
 
-optional<std::string> GeoJSONSource::Impl::getAttribution() const {
+std::optional<std::string> GeoJSONSource::Impl::getAttribution() const {
     return {};
 }
 

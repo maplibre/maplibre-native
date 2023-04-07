@@ -5,7 +5,6 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/optional.hpp>
 
 #include <map>
 #include <set>

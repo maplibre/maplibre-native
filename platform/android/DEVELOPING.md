@@ -65,24 +65,9 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
   * node
   * `JAVA_HOME="/Applications/Android Studio.app/Contents/jre/Contents/Home"`
   * `ANDROID_SDK_ROOT=~/Library/Android/sdk`
-  * In Android Studio, go to Tools > [SDK Manager](https://developer.android.com/studio/projects/install-ndk#specific-version) to install CMake and the specific NDK version specified in `[dependencies.gradle](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/android/gradle/dependencies.gradle)`.
+  * In Android Studio, go to Tools > [SDK Manager](https://developer.android.com/studio/projects/install-ndk#specific-version) to install CMake and the specific NDK version specified in [`dependencies.gradle`](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/android/gradle/dependencies.gradle).
 
-```
-cd platform/android
-
-# generate the required build files and open the project with Android Studio
-make aproj
-
-# Build package
-BUILDTYPE=Debug make apackage
-# BUILDTYPE=Release make apackage
-
-# Build release Test App
-make android
-
-# Generate javadoc
-make android-javadoc
-```
+Open `platform/android` with Android Studio.
 
 ### Linux
 
@@ -104,7 +89,7 @@ With buck build support, Android Studio can complain about duplicate source file
 
 _The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key._
 
-With the first gradle invocation, gradle will take the value of the `MGL_API_KEY` environment variable and save it to `MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your api key to the `api_key` resource.  
+With the first gradle invocation, gradle will take the value of the `MLN_API_KEY` environment variable and save it to `MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your api key to the `api_key` resource.  
 
 ## Running project
 
@@ -137,3 +122,11 @@ allprojects {
 
 When hitting native crashes you can use ndk-stack to symbolicate crashes.
 More information in [this](https://github.com/mapbox/mapbox-gl-native-android/wiki/Getting-line-numbers-from-an-Android-crash-with-ndk-stack) guide.
+
+## Instrumentation Tests
+
+The results of the instrumentation tests can be accessed on the AWS Console:
+
+https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
+
+You can log with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).

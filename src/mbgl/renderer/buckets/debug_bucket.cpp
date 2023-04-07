@@ -12,8 +12,8 @@ namespace mbgl {
 DebugBucket::DebugBucket(const OverscaledTileID& id,
                          const bool renderable_,
                          const bool complete_,
-                         optional<Timestamp> modified_,
-                         optional<Timestamp> expires_,
+                         std::optional<Timestamp> modified_,
+                         std::optional<Timestamp> expires_,
                          MapDebugOptions debugMode_)
     : renderable(renderable_),
       complete(complete_),
@@ -25,7 +25,7 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
             if (c < 32 || c >= 127)
                 continue;
 
-            optional<Point<int16_t>> prev;
+            std::optional<Point<int16_t>> prev;
 
             const glyph& glyph = simplex[c - 32];
             for (int32_t j = 0; j < glyph.length; j += 2) {

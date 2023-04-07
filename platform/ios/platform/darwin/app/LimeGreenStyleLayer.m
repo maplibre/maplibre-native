@@ -9,7 +9,7 @@
     GLuint _aPos;
 }
 
-- (void)didMoveToMapView:(MGLMapView *)mapView {
+- (void)didMoveToMapView:(MLNMapView *)mapView {
     static const GLchar *vertexShaderSource = "attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 1, 1); }";
     static const GLchar *fragmentShaderSource = "void main() { gl_FragColor = vec4(0, 0.5, 0, 0.5); }";
 
@@ -32,7 +32,7 @@
     glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(GLfloat), triangle, GL_STATIC_DRAW);
 }
 
-- (void)drawInMapView:(MGLMapView *)mapView withContext:(MGLStyleLayerDrawingContext)context {
+- (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
     glUseProgram(_program);
     glBindBuffer(GL_ARRAY_BUFFER, _buffer);
     glEnableVertexAttribArray(_aPos);
@@ -42,7 +42,7 @@
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
 }
 
-- (void)willMoveFromMapView:(MGLMapView *)mapView {
+- (void)willMoveFromMapView:(MLNMapView *)mapView {
     if (!_program) {
         return;
     }

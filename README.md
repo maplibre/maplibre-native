@@ -50,6 +50,9 @@ To contribute to MapLibre GL Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) an
 
 Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
 
+### Bounties 💰
+
+Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
 
 ## Sponsors
 
@@ -59,16 +62,15 @@ Read more about the MapLibre Sponsorship Program at [https://maplibre.org/sponso
 
 Platinum:
 
-<img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/>
-
+<a href="https://aws.com"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
 
 Silver:
 
-<img src="https://maplibre.org/img/meta-logo.svg" alt="Logo Meta" width="50%"/>
+<a href="https://meta.com"><img src="https://maplibre.org/img/meta-logo.svg" alt="Logo Meta" width="25%"/></a>
 
-Stone:
+<a href="https://www.mierune.co.jp/?lang=en"><img src="https://maplibre.org/img/mierune-logo.svg" alt="Logo MIERUNE" width="25%"/></a>
 
-[MIERUNE Inc.](https://www.mierune.co.jp/?lang=en)
+<a href="https://komoot.com/"><img src="https://maplibre.org/img/komoot-logo.svg" alt="Logo komoot" width="25%"/></a>
 
 Backers and Supporters:
 

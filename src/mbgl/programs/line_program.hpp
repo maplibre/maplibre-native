@@ -30,8 +30,9 @@ using LineLayoutAttributes = TypeList<
     attributes::pos_normal,
     attributes::data<uint8_t, 4>>;
 
-class LineProgram : public Program<
+class LineProgram final : public Program<
     LineProgram,
+    shaders::BuiltIn::LineProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -43,6 +44,11 @@ class LineProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     /*
@@ -95,8 +101,9 @@ public:
                                                    float pixelRatio);
 };
 
-class LinePatternProgram : public Program<
+class LinePatternProgram final : public Program<
     LinePatternProgram,
+    shaders::BuiltIn::LinePatternProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -112,6 +119,11 @@ class LinePatternProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LinePatternProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(const style::LinePaintProperties::PossiblyEvaluated&,
@@ -123,8 +135,9 @@ public:
                                                    const CrossfadeParameters& crossfade);
 };
 
-class LineSDFProgram : public Program<
+class LineSDFProgram final : public Program<
     LineSDFProgram,
+    shaders::BuiltIn::LineSDFProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -143,6 +156,11 @@ class LineSDFProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineSDFProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues
@@ -157,8 +175,9 @@ public:
                         float atlasWidth);
 };
 
-class LineGradientProgram : public Program<
+class LineGradientProgram final : public Program<
     LineGradientProgram,
+    shaders::BuiltIn::LineGradientProgram,
     gfx::PrimitiveType::Triangle,
     LineLayoutAttributes,
     TypeList<
@@ -171,6 +190,11 @@ class LineGradientProgram : public Program<
     style::LinePaintProperties>
 {
 public:
+    static constexpr std::string_view Name{"LineGradientProgram"};
+    const std::string_view name() const noexcept override {
+        return Name;
+    }
+
     using Program::Program;
 
     static LayoutUniformValues layoutUniformValues(const style::LinePaintProperties::PossiblyEvaluated&,
@@ -182,18 +206,5 @@ public:
 
 using LineLayoutVertex = LineProgram::LayoutVertex;
 using LineAttributes = LineProgram::AttributeList;
-
-class LineLayerPrograms final : public LayerTypePrograms {
-public:
-    LineLayerPrograms(gfx::Context& context, const ProgramParameters& programParameters)
-        : line(context, programParameters),
-          lineGradient(context, programParameters),
-          lineSDF(context, programParameters),
-          linePattern(context, programParameters) {}
-    LineProgram line;
-    LineGradientProgram lineGradient;
-    LineSDFProgram lineSDF;
-    LinePatternProgram linePattern;
-};
 
 } // namespace mbgl
