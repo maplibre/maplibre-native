@@ -117,6 +117,8 @@ public:
     virtual Value serialize() const;
 
     // Private implementation
+    /// @cond FALSE
+
     // TODO : We should not have public mutable data members.
     class Impl;
     Immutable<Impl> baseImpl;

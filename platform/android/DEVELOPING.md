@@ -60,10 +60,12 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
 
 ### macOS
 
-* Environment:  Android Studio + NDK
-  * `JAVA_HOME=/Applications/Android Studio.app/Contents/jre/Contents/Home`
+* Environment
+  * Android Studio
+  * node
+  * `JAVA_HOME="/Applications/Android Studio.app/Contents/jre/Contents/Home"`
   * `ANDROID_SDK_ROOT=~/Library/Android/sdk`
-  * See NDK version discussion on issue: [maplibre/maplibre-gl-native/#xxx](https://github.com/maplibre/maplibre-gl-native/issues/xxx)  
+  * In Android Studio, go to Tools > [SDK Manager](https://developer.android.com/studio/projects/install-ndk#specific-version) to install CMake and the specific NDK version specified in `[dependencies.gradle](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/android/gradle/dependencies.gradle)`.
 
 ```
 cd platform/android

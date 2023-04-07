@@ -49,3 +49,6 @@
 [submodule "maplibre-gl-js"]
 	path = maplibre-gl-js
 	url = https://github.com/maplibre/maplibre-gl-js.git
+[submodule "docs/doxygen/doxygen-awesome-css"]
+	path = docs/doxygen/doxygen-awesome-css
+	url = https://github.com/jothepro/doxygen-awesome-css.git

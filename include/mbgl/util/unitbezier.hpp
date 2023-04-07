@@ -32,7 +32,7 @@ namespace mbgl {
 namespace util {
 
 struct UnitBezier {
-    // Calculate the polynomial coefficients, implicit first and last control points are (0,0) and (1,1).
+    /// Calculate the polynomial coefficients, implicit first and last control points are (0,0) and (1,1).
     constexpr UnitBezier(double p1x, double p1y, double p2x, double p2y)
         : cx(3.0 * p1x)
         , bx(3.0 * (p2x - p1x) - (3.0 * p1x))
@@ -66,7 +66,7 @@ struct UnitBezier {
         return (3.0 * ax * t + 2.0 * bx) * t + cx;
     }
 
-    // Given an x value, find a parametric value it came from.
+    /// Given an x value, find a parametric value it came from.
     double solveCurveX(double x, double epsilon) const {
         double t0;
         double t1;

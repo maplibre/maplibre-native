@@ -34,7 +34,7 @@ public:
         : sourceLayers(std::move(sourceLayers_)),
           filter(std::move(filter_)) {}
 
-    // Required for VectorSource, ignored for GeoJSONSource
+    /// Required for VectorSource, ignored for GeoJSONSource
     optional<std::vector<std::string>> sourceLayers;
 
     optional<style::Filter> filter;

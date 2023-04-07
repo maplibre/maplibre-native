@@ -10,7 +10,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.engine.LocationEngine
-import com.mapbox.mapboxsdk.location.engine.LocationEngineProvider
+import com.mapbox.mapboxsdk.location.engine.LocationEngineDefault
 import com.mapbox.mapboxsdk.location.engine.LocationEngineRequest
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.location.permissions.PermissionsListener
@@ -29,7 +29,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_manual_update)
-        locationEngine = LocationEngineProvider.getBestLocationEngine(this, false)
+        locationEngine = LocationEngineDefault.getDefaultLocationEngine(mapView.context)
         val fabManualUpdate = findViewById<FloatingActionButton>(R.id.fabManualLocationChange)
         fabManualUpdate.setOnClickListener { v: View? ->
             if (locationComponent != null && locationComponent!!.locationEngine == null) {

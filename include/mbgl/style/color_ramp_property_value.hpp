@@ -7,7 +7,7 @@
 namespace mbgl {
 namespace style {
 
-/*
+/**
  * Special-case implementation of (a subset of) the PropertyValue<T> interface
  * used for building the HeatmapColor paint property traits class.
  */

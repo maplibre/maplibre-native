@@ -33,8 +33,7 @@ public:
 
     /**
      * @brief Gets the previously set (or default) map mode.
-     *
-     * @return map mode.
+     * @return Returns a #mbgl::MapMode
      */
     MapMode mapMode() const;
 

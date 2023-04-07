@@ -25,8 +25,8 @@ class SourceObserver;
 struct LayerTypeInfo;
 
 /**
- * The runtime representation of a [source](https://www.mapbox.com/mapbox-gl-style-spec/#sources) from the Mapbox Style
- * Specification.
+ * The runtime representation of a [source](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/)
+ * from the MapLibre Style Specification.
  *
  * `Source` is an abstract base class; concrete derived classes are provided for each source type. `Source` contains
  * functionality that is common to all layer types:
@@ -47,11 +47,11 @@ public:
 
     virtual ~Source();
 
-    // Check whether this source is of the given subtype.
+    /// Check whether this source is of the given subtype.
     template <class T>
     bool is() const;
 
-    // Dynamically cast this source to the given subtype.
+    /// Dynamically cast this source to the given subtype.
     template <class T>
     T* as() {
         return is<T>() ? reinterpret_cast<T*>(this) : nullptr;
@@ -71,6 +71,8 @@ public:
     void setVolatile(bool) noexcept;
 
     // Private implementation
+    /// @cond FALSE
+
     class Impl;
     Immutable<Impl> baseImpl;
 

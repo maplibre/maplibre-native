@@ -12,7 +12,7 @@
 
 namespace mbgl {
 
-/*
+/**
     An `EstablishedActor<O>` is one half of the pair of types that comprise an actor (see `Actor<O>`),
     the other half being `AspiringActor<O>`.  It is responsible for managing the lifetime of the
     target object `O` and the open/closed state of the parent's `mailbox`.
@@ -23,7 +23,6 @@ namespace mbgl {
     similarly executes the `~O` destructor (after closing the mailbox). `EstablishedActor` should
     therefore live entirely on the thread intended to own `O`.
 */
-
 template <class Object>
 class EstablishedActor {
 public:
