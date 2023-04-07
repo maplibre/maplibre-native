@@ -7,20 +7,14 @@
 namespace mbgl {
 namespace gl {
 
-class ShaderProgramGL final : public ShaderProgramBase {
+class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
-    ShaderProgramGL(UniqueProgram&& glProgram_)
-        : ShaderProgramBase(),
-          glProgram(std::move(glProgram_)) {
-    }
-    ShaderProgramGL(ShaderProgramGL&& other)
-        : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
-          glProgram(std::move(other.glProgram)) {
-    }
-    virtual ~ShaderProgramGL() = default;
+    ShaderProgramGL(UniqueProgram&& glProgram_);
+    ShaderProgramGL(ShaderProgramGL&& other);
+    virtual ~ShaderProgramGL() noexcept = default;
 
     static constexpr std::string_view Name{"GenericGLShader"};
-    const std::string_view name() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     static std::shared_ptr<ShaderProgramGL> create(
         Context&,

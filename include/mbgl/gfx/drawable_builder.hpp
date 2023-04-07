@@ -12,11 +12,10 @@ namespace gfx {
  */
 class DrawableBuilder {
 protected:
-    DrawableBuilder() {
-    }
+    DrawableBuilder();
 
 public:
-    virtual ~DrawableBuilder() = default;
+    virtual ~DrawableBuilder();
 
     /// Get the drawable we're currently working on, if any
     DrawablePtr getCurrentDrawable(bool createIfNone);
@@ -41,14 +40,26 @@ public:
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
 
+    /// Add a triangle
+    void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+    /// Add another triangle based on the previous two points
+    void appendTriangle(int16_t x0, int16_t y0);
+
+    /// Add a rectangle consisting of two triangles
+    void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+
 protected:
     /// Create an instance of the appropriate drawable type
     virtual DrawablePtr createDrawable() const = 0;
 
 protected:
     DrawPriority drawPriority = 0;
+
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
+    
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace gfx

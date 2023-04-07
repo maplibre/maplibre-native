@@ -5,13 +5,13 @@
 namespace mbgl {
 namespace mtl {
 
-class ShaderProgramMTL final : public ShaderProgramBase {
+class ShaderProgramMTL final : public gfx::ShaderProgramBase {
 public:
     ShaderProgramMTL() : ShaderProgramBase() { }
     virtual ~ShaderProgramMTL() = default;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
-    const std::string_view name() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     //bool compile(std::string_view vert, std::string_view frag);
     // Load compiled Metal functions from the default library in a bundle

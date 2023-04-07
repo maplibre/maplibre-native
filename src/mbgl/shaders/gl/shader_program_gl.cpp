@@ -3,26 +3,30 @@
 namespace mbgl {
 namespace gl {
 
+ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
+    : ShaderProgramBase(),
+      glProgram(std::move(glProgram_)) {
+}
+
+ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
+    : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
+      glProgram(std::move(other.glProgram)) {
+}
+
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         Context& context,
-        __unused std::string_view name,
+        std::string_view /*name*/,
         std::string_view vertexSource,
         std::string_view fragmentSource) noexcept(false) {
     
-    // search registry for existing `name`
-    // If found check for duplicate/mismatch
-
     const auto firstAttrib = "pos";
-            
+
     // throws on compile error
     auto program = context.createProgram(
           context.createShader(ShaderType::Vertex, std::initializer_list<const char*>{vertexSource.data()}),
           context.createShader(ShaderType::Fragment, std::initializer_list<const char*>{fragmentSource.data()}),
                           firstAttrib);
 
-    // add to registry with `name`
-    
-    //return std::shared_ptr<ShaderProgramGL>(new ShaderProgramGL(std::move(program)));
     return std::make_shared<ShaderProgramGL>(std::move(program));
 }
 

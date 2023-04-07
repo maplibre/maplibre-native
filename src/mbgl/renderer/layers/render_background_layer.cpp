@@ -62,24 +62,41 @@ std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges(
     if (!drawable /* && visible/enabled */) {
         auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method
 
+
+        
+        //gfx::VertexVector<gfx::VertexType<attributes::pos>> tileVertics;
         //tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());
-        gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices = [](){
-            gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
-            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{            0,            0 }}}));
-            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT,            0 }}}));
-            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{            0, util::EXTENT }}}));
-            result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT, util::EXTENT }}}));
-            return result;
-        }();
+        //gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices
 
-        gfx::IndexVector<gfx::Triangles> result;    // uploadPass.createIndexBuffer(quadTriangleIndices());
-        result.emplace_back(0, 1, 2);
-        result.emplace_back(1, 2, 3);
+        //gfx::VertexVector<gfx::Vertex<TypeList<attributes::pos>>> x;
+        //gfx::VertexVector<gfx::detail::Vertex<TypeList<attributes::pos>>::Type> y;
 
-        SegmentVector<BackgroundAttributes> segs;   // RenderStaticData::tileTriangleSegments
-        segs.emplace_back(/*vertexOffset=*/0, /*indexOffset=*/0, /*vertexLength=*/4, /*indexLength=*/6);
+        //gfx::detail::Vertex<TypeList<attributes::pos>> a;
+        //gfx::VertexVector<gfx::detail::Vertex<TypeList<attributes::pos>>> b;
+        //b.emplace_back(a);
+
+        //using VT = gfx::detail::VertexType<gfx::AttributeType<short,2>>;
+        //gfx::VertexVector<VT> tileVertices = [](){
+        //    gfx::VertexVector<VT> result;
+        //    result.emplace_back(VT({{{            0,            0 }}}));
+        //    result.emplace_back(VT({{{ util::EXTENT,            0 }}}));
+        //    result.emplace_back(VT({{{            0, util::EXTENT }}}));
+        //    result.emplace_back(VT({{{ util::EXTENT, util::EXTENT }}}));
+        //    return result;
+        //}();
+
+        //gfx::IndexVector<gfx::Triangles> result;    // uploadPass.createIndexBuffer(quadTriangleIndices());
+        //result.emplace_back(0, 1, 2);
+        //result.emplace_back(1, 2, 3);
+
+        ////SegmentVector<BackgroundAttributes> segs;   // RenderStaticData::tileTriangleSegments
+        //SegmentVector<TypeList<void>> segs;   // type is actually ignorable here
+        //segs.emplace_back(/*vertexOffset=*/0, /*indexOffset=*/0, /*vertexLength=*/4, /*indexLength=*/6);
+
+        builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
 
         builder->flush();
+
         for (auto &draw : builder->clearDrawables()) {
             reqs.emplace_back(std::make_unique<AddDrawableRequest>(std::move(draw)));
         }
@@ -122,12 +139,20 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
             gl_FragColor = vec4(1.0,0.0,0.0,1.0);
         })";
     try {
-        if (std::shared_ptr<ShaderProgramBase> generic =
-                gl::ShaderProgramGL::create((gl::Context&)parameters.context, "background", vert, frag)) {
+        const auto shaderName = "background_generic";
+        //auto shader = parameters.shaders.get<gl::ShaderProgramGL>();
+        //auto shader = parameters.shaders.getShader(shaderName);
+        //if (shader) ... check for duplicate/mismatch
+        //if (!shader) {
+
+        if (std::shared_ptr<gfx::ShaderProgramBase> generic =
+                gl::ShaderProgramGL::create((gl::Context&)parameters.context, shaderName, vert, frag)) {
             if (auto specific = generic->to<gl::ShaderProgramGL>()) {
-                specific->name();
+                specific->typeName();
             }
         }
+        
+        //parameters.shaders.registerShader(shader, shaderName);
     } catch (const std::runtime_error& ex) {
         // ...
     }
