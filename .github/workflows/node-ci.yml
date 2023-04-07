@@ -58,6 +58,8 @@ jobs:
         include:
           - runs-on: ubuntu-20.04
             arch: x86_64
+          - runs-on: [self-hosted, linux, ARM64]
+            arch: arm64
           - runs-on: macos-12
             arch: x86_64
           - runs-on: macos-12-arm
@@ -66,7 +68,7 @@ jobs:
             arch: x86_64
     continue-on-error: true
     env:
-      BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
+      BUILDTYPE: 'Release'
 
     defaults:
       run:
@@ -120,7 +122,9 @@ jobs:
             libuv1-dev \
             g++-10 \
             libc++-9-dev \
-            libc++abi-9-dev
+            libc++abi-9-dev \
+            libjpeg-dev \
+            libpng-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
@@ -225,54 +229,3 @@ jobs:
         run: |
           npm pack --dry-run
           
-  test_linux_arm:
-    runs-on: ubuntu-latest
-    name: test (ubuntu-20.04, arm64)
-    env:
-      DOCKERTAG: node-test-${{ github.run_id }}-${{ github.run_attempt }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'arm64'
-
-      - name: Install dependencies macOS
-        if: runner.os == 'macOS'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew install docker docker-compose
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Create the docker build image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          platforms: linux/arm64
-          file: platform/node/scripts/Dockerfile_Build
-          tags: ${{ env.DOCKERTAG }}
-          push: false
-          load: true
-
-      - name: Run the docker build image and create node libs
-        run:  docker run --rm -v $(pwd):/data ${{ env.DOCKERTAG }}
-
-      - name: Clean up the docker build image
-        if: always()
-        run:  docker rmi $(docker images | grep ${{ env.DOCKERTAG }} | tr -s ' ' | cut -d ' ' -f 3) --force
-
-      # On PRs make sure that the npm package can be packaged.
-      - name: Pack
-        if: github.ref != 'refs/heads/main'
-        run: |
-          npm pack --dry-run

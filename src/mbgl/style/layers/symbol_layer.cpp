@@ -709,7 +709,7 @@ TransitionOptions SymbolLayer::getIconColorTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultIconHaloBlur() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getIconHaloBlur() const {
@@ -763,7 +763,7 @@ TransitionOptions SymbolLayer::getIconHaloColorTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultIconHaloWidth() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getIconHaloWidth() const {
@@ -790,7 +790,7 @@ TransitionOptions SymbolLayer::getIconHaloWidthTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultIconOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getIconOpacity() const {
@@ -817,7 +817,7 @@ TransitionOptions SymbolLayer::getIconOpacityTransition() const {
 }
 
 PropertyValue<std::array<float, 2>> SymbolLayer::getDefaultIconTranslate() {
-    return {{{0, 0}}};
+    return {{{0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<float, 2>>& SymbolLayer::getIconTranslate() const {
@@ -898,7 +898,7 @@ TransitionOptions SymbolLayer::getTextColorTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultTextHaloBlur() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getTextHaloBlur() const {
@@ -952,7 +952,7 @@ TransitionOptions SymbolLayer::getTextHaloColorTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultTextHaloWidth() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getTextHaloWidth() const {
@@ -979,7 +979,7 @@ TransitionOptions SymbolLayer::getTextHaloWidthTransition() const {
 }
 
 PropertyValue<float> SymbolLayer::getDefaultTextOpacity() {
-    return {1};
+    return {1.f};
 }
 
 const PropertyValue<float>& SymbolLayer::getTextOpacity() const {
@@ -1006,7 +1006,7 @@ TransitionOptions SymbolLayer::getTextOpacityTransition() const {
 }
 
 PropertyValue<std::array<float, 2>> SymbolLayer::getDefaultTextTranslate() {
-    return {{{0, 0}}};
+    return {{{0.f, 0.f}}};
 }
 
 const PropertyValue<std::array<float, 2>>& SymbolLayer::getTextTranslate() const {

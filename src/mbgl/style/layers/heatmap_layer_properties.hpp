@@ -20,19 +20,19 @@ struct HeatmapColor : ColorRampProperty {
 };
 
 struct HeatmapIntensity : PaintProperty<float> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct HeatmapOpacity : PaintProperty<float> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 struct HeatmapRadius : DataDrivenPaintProperty<float, attributes::radius, uniforms::radius> {
-    static float defaultValue() { return 30; }
+    static float defaultValue() { return 30.f; }
 };
 
 struct HeatmapWeight : DataDrivenPaintProperty<float, attributes::weight, uniforms::weight> {
-    static float defaultValue() { return 1; }
+    static float defaultValue() { return 1.f; }
 };
 
 class HeatmapPaintProperties : public Properties<
