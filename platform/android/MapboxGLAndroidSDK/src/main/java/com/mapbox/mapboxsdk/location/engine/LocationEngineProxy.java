@@ -16,7 +16,7 @@ public class LocationEngineProxy<T> implements LocationEngine {
   private final LocationEngineImpl<T> locationEngineImpl;
   private Map<LocationEngineCallback<LocationEngineResult>, T> listeners;
 
-  LocationEngineProxy(LocationEngineImpl<T> locationEngineImpl) {
+  public LocationEngineProxy(LocationEngineImpl<T> locationEngineImpl) {
     this.locationEngineImpl = locationEngineImpl;
   }
 
