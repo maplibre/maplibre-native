@@ -47,3 +47,54 @@ mapbox-gl-native.code-workspace
 /scripts/generate-shaders.list
 /scripts/generate-style-code.list
 *.patch
+
+
+# node platform/darwin/scripts/generate-style-code.js
+# generated file list will be in:
+# platform/ios/platform/darwin/scripts/generate-style-code.list
+
+platform/darwin/src/MGLLight.h
+platform/darwin/src/MGLLight.mm
+platform/darwin/test/MGLLightTest.mm
+platform/darwin/src/MGLBackgroundStyleLayer.h
+platform/darwin/src/MGLBackgroundStyleLayer_Private.h
+platform/darwin/src/MGLBackgroundStyleLayer.mm
+platform/darwin/test/MGLBackgroundStyleLayerTests.mm
+platform/darwin/src/MGLCircleStyleLayer.h
+platform/darwin/src/MGLCircleStyleLayer_Private.h
+platform/darwin/src/MGLCircleStyleLayer.mm
+platform/darwin/test/MGLCircleStyleLayerTests.mm
+platform/darwin/src/MGLFillStyleLayer.h
+platform/darwin/src/MGLFillStyleLayer_Private.h
+platform/darwin/src/MGLFillStyleLayer.mm
+platform/darwin/test/MGLFillStyleLayerTests.mm
+platform/darwin/src/MGLFillExtrusionStyleLayer.h
+platform/darwin/src/MGLFillExtrusionStyleLayer_Private.h
+platform/darwin/src/MGLFillExtrusionStyleLayer.mm
+platform/darwin/test/MGLFillExtrusionStyleLayerTests.mm
+platform/darwin/src/MGLHeatmapStyleLayer.h
+platform/darwin/src/MGLHeatmapStyleLayer_Private.h
+platform/darwin/src/MGLHeatmapStyleLayer.mm
+platform/darwin/test/MGLHeatmapStyleLayerTests.mm
+platform/darwin/src/MGLHillshadeStyleLayer.h
+platform/darwin/src/MGLHillshadeStyleLayer_Private.h
+platform/darwin/src/MGLHillshadeStyleLayer.mm
+platform/darwin/test/MGLHillshadeStyleLayerTests.mm
+platform/darwin/src/MGLLineStyleLayer.h
+platform/darwin/src/MGLLineStyleLayer_Private.h
+platform/darwin/src/MGLLineStyleLayer.mm
+platform/darwin/test/MGLLineStyleLayerTests.mm
+platform/darwin/src/MGLRasterStyleLayer.h
+platform/darwin/src/MGLRasterStyleLayer_Private.h
+platform/darwin/src/MGLRasterStyleLayer.mm
+platform/darwin/test/MGLRasterStyleLayerTests.mm
+platform/darwin/src/MGLSymbolStyleLayer.h
+platform/darwin/src/MGLSymbolStyleLayer_Private.h
+platform/darwin/src/MGLSymbolStyleLayer.mm
+platform/darwin/test/MGLSymbolStyleLayerTests.mm
+platform/ios/docs/guides/For Style Authors.md
+platform/macos/docs/guides/For Style Authors.md
+platform/ios/docs/guides/Migrating to Expressions.md
+platform/macos/docs/guides/Migrating to Expressions.md
+platform/ios/docs/guides/Tile URL Templates.md
+platform/macos/docs/guides/Tile URL Templates.md

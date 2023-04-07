@@ -31,7 +31,8 @@ global.unhyphenate = function (str) {
 var files = [];
 process.on('exit', function() {
   const list = path.join(path.dirname(process.argv[1]), path.basename(process.argv[1], '.js') + '.list');
-  fs.writeFileSync(list, files.join('\n'));
+  console.log(`Writing files that this script modifies to: ${list}`);
+  fs.writeFileSync(list, files.join("\n"));
 });
 
 global.writeIfModified = function(filename, newContent) {

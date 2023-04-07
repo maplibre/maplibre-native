@@ -3,6 +3,13 @@ export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 export CI ?= 0
 
+# When only the dependencies in the package.json are installed
+# Node.js will error when running a script from the root scripts directory
+# Getting rid of the duplicate package.json file is an open issue
+# https://github.com/maplibre/maplibre-gl-native/issues/657
+
+export NODE_PATH = ./node_modules
+
 CMAKE ?= cmake
 
 
@@ -182,7 +189,7 @@ ios-uitest: $(IOS_PROJ_PATH)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
-ios-test: $(IOS_PROJ_PATH)
+ios-test: $(IOS_PROJ_PATH) style-code
 	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: ios-integration-test
@@ -289,7 +296,7 @@ xproj: $(MACOS_PROJ_PATH)
 
 #  make macos-test
 .PHONY: macos-test
-macos-test: $(MACOS_PROJ_PATH)
+macos-test: $(MACOS_PROJ_PATH) style-code
 	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
 
 .PHONY: macos-lint
@@ -323,8 +330,8 @@ endif
 
 .PHONY: style-code
 style-code:
-	node scripts/generate-style-code.js
-	node scripts/generate-shaders.js
+	node ../../scripts/generate-style-code.js
+	# node ../../scripts/generate-shaders.js
 
 .PHONY: codestyle
 codestyle:

@@ -27,7 +27,11 @@ NodeRequest::~NodeRequest() {
 Nan::Persistent<v8::Function> NodeRequest::constructor;
 
 void NodeRequest::Init(v8::Local<v8::Object> target) {
+#if defined NODE_MODULE_VERSION && NODE_MODULE_VERSION < 93
     v8::Local<v8::Context> context = target->CreationContext();
+#else
+    v8::Local<v8::Context> context = target->GetCreationContext().ToLocalChecked();
+#endif
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
 
     tpl->InstanceTemplate()->SetInternalFieldCount(1);

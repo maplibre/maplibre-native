@@ -24,7 +24,8 @@
           "puck_shadow.png",
           {"pixelRatio": 2.0}
         ]
-      ]
+      ],
+      "ignoreProbing": true
     }
   },
   "sources": {
