@@ -12,8 +12,13 @@ add_node_module(
         48
         51
 )
-find_package(PkgConfig REQUIRED)
-pkg_search_module(LIBUV libuv REQUIRED)
+
+if(WIN32)
+    find_package(LIBUV REQUIRED)
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(LIBUV libuv REQUIRED)
+endif()
 
 add_library(mbgl-node-loop STATIC)
 

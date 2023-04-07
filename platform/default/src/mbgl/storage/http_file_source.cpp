@@ -280,6 +280,11 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, Fil
         curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
     }
 
+#ifdef WIN32
+    // Windows has issues with TLSv1.3, so we limit to TLSv1.2. Should be resolved in a later cURL release
+    // https://github.com/curl/curl/issues/9431
+    handleError(curl_easy_setopt(handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_MAX_TLSv1_2));
+#endif
     handleError(curl_easy_setopt(handle, CURLOPT_PRIVATE, this));
     handleError(curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, error));
     handleError(curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1));

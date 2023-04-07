@@ -1,7 +1,18 @@
 find_package(OpenGL REQUIRED)
-find_package(PkgConfig REQUIRED)
 
-pkg_search_module(GLFW glfw3 REQUIRED)
+if(WIN32)
+    if(MBGL_WITH_OSMESA)
+        message(WARNING "mbgl-glfw does not work with -DMBGL_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
+        return()
+    endif()
+
+    find_package(glfw3 REQUIRED)
+    find_package(libuv REQUIRED)
+else()
+    find_package(PkgConfig REQUIRED)
+
+    pkg_search_module(GLFW glfw3 REQUIRED)
+endif()
 
 add_executable(
     mbgl-glfw
@@ -50,10 +61,32 @@ target_link_libraries(
     PRIVATE $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}>
 )
 
+if(WIN32)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE
+            _USE_MATH_DEFINES
+            NOMINMAX
+            CURL_STATICLIB
+    )
+
+    target_link_libraries(
+        mbgl-glfw
+        PRIVATE
+            glfw
+            uv_a
+    )
+else()
+    target_link_libraries(
+        mbgl-glfw
+        PRIVATE
+            ${GLFW_LIBRARIES}
+    )
+endif()
+
 target_link_libraries(
     mbgl-glfw
     PRIVATE
-        ${GLFW_LIBRARIES}
         Mapbox::Base::Extras::args
         Mapbox::Base::Extras::filesystem
         Mapbox::Base::Extras::rapidjson
@@ -62,7 +95,7 @@ target_link_libraries(
         Mapbox::Base::cheap-ruler-cpp
 )
 
-if(MBGL_WITH_OPENGL)
+if(NOT WIN32 AND MBGL_WITH_OPENGL)
     target_link_libraries(
         mbgl-glfw
         PRIVATE OpenGL::GL

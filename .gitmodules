@@ -52,3 +52,6 @@
 [submodule "docs/doxygen/doxygen-awesome-css"]
 	path = docs/doxygen/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "platform/windows/vendor/vcpkg"]
+	path = platform/windows/vendor/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

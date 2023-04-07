@@ -85,11 +85,15 @@ int main(int argc, char *argv[]) {
     const std::string cacheDB = cacheDBValue ? args::get(cacheDBValue) : "/tmp/mbgl-cache.db";
 
     // sigint handling
+#ifdef WIN32
+    signal(SIGINT, &quit_handler);
+#else
     struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = quit_handler;
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
     sigaction(SIGINT, &sigIntHandler, nullptr);
+#endif
 
     if (benchmark) {
         mbgl::Log::Info(mbgl::Event::General, "BENCHMARK MODE: Some optimizations are disabled.");
