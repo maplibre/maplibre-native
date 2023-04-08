@@ -12,6 +12,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
+## 10.0.2-snapshot - April 08, 2023
+
+### ✨ Features and improvements
+
+- Private build of a 10.0.2 with the 'gesture.setAngleTHreshold(3)' call removed to allow the rotation threshold to be set externally
+
 ## 10.0.2 - February 23, 2023
 
 ### 🐞 Bug fixes
