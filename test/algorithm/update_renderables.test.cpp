@@ -1,10 +1,9 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/mock.hpp>
-#include <mbgl/util/variant.hpp>
-
-#include <mapbox/variant_io.hpp>
 
 #include <mbgl/algorithm/update_renderables.hpp>
+
+#include <variant>
 
 using namespace mbgl;
 
@@ -69,7 +68,8 @@ std::ostream& operator<<(std::ostream& os, const RenderTileAction& action) {
               << action.tileData.tileID.canonical.y << " }\n";
 }
 
-using ActionLogEntry = variant<GetTileDataAction, CreateTileDataAction, RetainTileDataAction, RenderTileAction>;
+using ActionLogEntry =
+    std::variant<GetTileDataAction, CreateTileDataAction, RetainTileDataAction, RenderTileAction>;
 using ActionLog = std::vector<ActionLogEntry>;
 
 template <typename T>
