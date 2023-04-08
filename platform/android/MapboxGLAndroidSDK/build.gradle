@@ -13,8 +13,7 @@ apply from: "${rootDir}/gradle/native-build.gradle"
 dependencies {
     lintChecks project(":MapboxGLAndroidSDKLint")
     api dependenciesList.mapboxJavaGeoJSON
-    api 'com.mapbox.mapboxsdk:mapbox-android-gestures:0.8.1-SNAPSHOT'
-    //api dependenciesList.mapboxAndroidGestures
+    api dependenciesList.mapboxAndroidGestures
 
     implementation dependenciesList.mapboxJavaTurf
     implementation dependenciesList.supportAnnotations
