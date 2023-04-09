@@ -44,7 +44,7 @@ class FillProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -72,7 +72,7 @@ class FillPatternProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillPatternProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -98,7 +98,7 @@ class FillOutlineProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillOutlineProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -117,7 +117,7 @@ class FillOutlinePatternProgram final : public Program<
 {
 public:
     static constexpr std::string_view Name{"FillOutlinePatternProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 

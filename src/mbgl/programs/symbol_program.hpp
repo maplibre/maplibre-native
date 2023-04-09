@@ -427,7 +427,7 @@ class SymbolIconProgram final : public SymbolProgram<
 {
 public:
     static constexpr std::string_view Name{"SymbolIconProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -511,7 +511,7 @@ class SymbolTextAndIconProgram final
                            style::TextPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolTextAndIconProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -547,7 +547,7 @@ class SymbolSDFIconProgram final : public SymbolSDFProgram<
 {
 public:
     static constexpr std::string_view Name{"SymbolSDFIconProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 
@@ -561,7 +561,7 @@ class SymbolSDFTextProgram final : public SymbolSDFProgram<
 {
 public:
     static constexpr std::string_view Name{"SymbolSDFTextProgram"};
-    const std::string_view name() const noexcept override {
+    const std::string_view typeName() const noexcept override {
         return Name;
     }
 

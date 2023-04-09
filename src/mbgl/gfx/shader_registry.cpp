@@ -28,26 +28,36 @@ const std::shared_ptr<gfx::Shader> ShaderRegistry::getShader(const std::string& 
 bool ShaderRegistry::replaceShader(
     std::shared_ptr<gfx::Shader>&& shader) noexcept
 {
+    return replaceShader(std::move(shader), std::string{shader->typeName()});
+}
+
+bool ShaderRegistry::replaceShader(std::shared_ptr<Shader>&& shader,
+    const std::string& shaderName) noexcept
+{
     std::unique_lock<std::shared_mutex> writerLock(programLock);
-    const std::string programName{shader->name()}; // TODO: C++ 20 heterogenous lookup
-    if (programs.find(programName) == programs.end()) {
+    if (programs.find(shaderName) == programs.end()) {
         return false;
     }
 
-    programs[programName] = std::move(shader);
+    programs[shaderName] = std::move(shader);
     return true;
 }
 
 bool ShaderRegistry::registerShader(
     std::shared_ptr<gfx::Shader>&& shader) noexcept
 {
+    return registerShader(std::move(shader), std::string{shader->typeName()});
+}
+
+bool ShaderRegistry::registerShader(std::shared_ptr<Shader>&& shader,
+    const std::string& shaderName) noexcept
+{
     std::unique_lock<std::shared_mutex> writerLock(programLock);
-    const std::string programName{shader->name()};
-    if (programs.find(programName) != programs.end()) {
+    if (programs.find(shaderName) != programs.end()) {
         return false;
     }
 
-    programs.emplace(programName, std::move(shader));
+    programs.emplace(shaderName, std::move(shader));
     return true;
 }
 
