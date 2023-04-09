@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.IntDef
 import androidx.annotation.Keep
+import androidx.compose.runtime.getValue
 import com.mapbox.mapboxsdk.LibraryLoader
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver
@@ -32,6 +33,9 @@ class OfflineRegion @Keep private constructor(offlineRegionPtr: Long, fileSource
    */
     // Region id
     val id: Long
+
+    @Deprecated("Use 'id' instead", ReplaceWith("id"))
+    val ID: Int by this::id
 
     // delete status
     private var isDeleted = false
