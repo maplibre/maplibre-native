@@ -21,6 +21,7 @@ dependencies {
     implementation dependenciesList.okhttp3
     implementation dependenciesList.timber
     implementation dependenciesList.interpolator
+    implementation dependenciesList.androidxRuntime
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockito
