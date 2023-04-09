@@ -35,7 +35,7 @@ class OfflineRegion @Keep private constructor(offlineRegionPtr: Long, fileSource
     val id: Long
 
     @Deprecated("Use 'id' instead", ReplaceWith("id"))
-    val ID: Int by this::id
+    val ID: Long by this::id
 
     // delete status
     private var isDeleted = false

@@ -42,7 +42,8 @@ ext {
             commonsIO       : '2.11.0',
             assertj         : '3.23.1',
             gradleNexus     : "1.1.0",
-            multidex        : "2.0.1"
+            multidex        : "2.0.1",
+            androidxRuntime : "1.3.2"
     ]
     
     dependenciesList = [
@@ -88,6 +89,8 @@ ext {
             lintChecks             : "com.android.tools.lint:lint-checks:${versions.lint}",
             lintTests              : "com.android.tools.lint:lint-tests:${versions.lint}",
 
-            gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}"
+            gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}",
+
+            androidxRuntime        : "androidx.compose.runtime:runtime:${versions.androidxRuntime}"
     ]
 }
