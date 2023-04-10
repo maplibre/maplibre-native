@@ -30,5 +30,5 @@ void main() {
     float distance_to_edge = abs(extrude_length - radius);
     float opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
 
-    gl_FragColor = opacity_t * color;
+    fragColor = opacity_t * color;
 }

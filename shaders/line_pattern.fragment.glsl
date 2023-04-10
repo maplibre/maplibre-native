@@ -62,9 +62,9 @@ void main() {
 
     vec4 color = mix(texture2D(u_image, pos_a), texture2D(u_image, pos_b), u_fade);
 
-    gl_FragColor = color * alpha * opacity;
+    fragColor = color * alpha * opacity;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }

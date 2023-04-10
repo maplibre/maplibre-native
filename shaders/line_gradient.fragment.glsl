@@ -26,9 +26,9 @@ void main() {
     // scaled to [0, 2^15), and the gradient ramp is stored in a texture.
     vec4 color = texture2D(u_image, vec2(v_lineprogress, 0.5));
 
-    gl_FragColor = color * (alpha * opacity);
+    fragColor = color * (alpha * opacity);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }

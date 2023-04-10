@@ -33,9 +33,9 @@ void main() {
 
     vec4 mixedColor = mix(color1, color2, u_fade);
 
-    gl_FragColor = mixedColor * v_lighting;
+    fragColor = mixedColor * v_lighting;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }

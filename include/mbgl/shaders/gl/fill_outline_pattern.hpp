@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -14,30 +14,30 @@ uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
 uniform vec4 u_scale;
 
-attribute vec2 a_pos;
+layout (location = 0) in vec2 a_pos;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
-varying vec2 v_pos;
+out vec2 v_pos_a;
+out vec2 v_pos_b;
+out vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 1) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
-attribute lowp vec4 a_pattern_from;
-varying lowp vec4 pattern_from;
+layout (location = 2) in lowp vec4 a_pattern_from;
+out lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
-attribute lowp vec4 a_pattern_to;
-varying lowp vec4 pattern_to;
+layout (location = 3) in lowp vec4 a_pattern_to;
+out lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
@@ -85,22 +85,22 @@ uniform vec2 u_texsize;
 uniform sampler2D u_image;
 uniform float u_fade;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
-varying vec2 v_pos;
+in vec2 v_pos_a;
+in vec2 v_pos_b;
+in vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-varying lowp vec4 pattern_from;
+in lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-varying lowp vec4 pattern_to;
+in lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
@@ -135,10 +135,10 @@ mediump vec4 pattern_to = u_pattern_to;
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
 
-    gl_FragColor = mix(color1, color2, u_fade) * alpha * opacity;
+    fragColor = mix(color1, color2, u_fade) * alpha * opacity;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";
