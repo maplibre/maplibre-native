@@ -74,14 +74,6 @@ public:
         return { size, readFramebuffer(size, format, flip) };
     }
 
-#if !MBGL_USE_GLES2
-    template <typename Image>
-    void drawPixels(const Image& image) {
-        auto format = image.channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha;
-        drawPixels(image.size, image.data.get(), format);
-    }
-#endif // MBGL_USE_GLES2
-
     void clear(std::optional<mbgl::Color> color,
                std::optional<float> depth,
                std::optional<int32_t> stencil);
@@ -154,13 +146,6 @@ public:
     State<value::PixelStorePack> pixelStorePack;
     State<value::PixelStoreUnpack> pixelStoreUnpack;
 
-#if !MBGL_USE_GLES2
-    State<value::PixelZoom> pixelZoom;
-    State<value::RasterPos> rasterPos;
-    State<value::PixelTransferDepth> pixelTransferDepth;
-    State<value::PixelTransferStencil> pixelTransferStencil;
-#endif // MBGL_USE_GLES2
-
 private:
     State<value::StencilFunc> stencilFunc;
     State<value::StencilMask> stencilMask;
@@ -183,9 +168,6 @@ private:
     State<value::CullFace> cullFace;
     State<value::CullFaceSide> cullFaceSide;
     State<value::CullFaceWinding> cullFaceWinding;
-#if !MBGL_USE_GLES2
-    State<value::PointSize> pointSize;
-#endif // MBGL_USE_GLES2
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
@@ -198,9 +180,6 @@ private:
 
     UniqueFramebuffer createFramebuffer();
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-#if !MBGL_USE_GLES2
-    void drawPixels(Size size, const void* data, gfx::TexturePixelType);
-#endif // MBGL_USE_GLES2
 
     VertexArray createVertexArray();
     bool supportsVertexArrays() const;

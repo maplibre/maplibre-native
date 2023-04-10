@@ -12,16 +12,7 @@
 #endif
 #endif
 
-#define GL_GLEXT_PROTOTYPES
-
-#ifdef MBGL_USE_GLES2
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
-
+#include <GLES3/gl3.h>
 #include <GL/wgl.h>
 
 #ifdef __cplusplus
@@ -494,15 +485,6 @@ BOOL(* const wglChoosePixelFormatARB)(HDC, const int*, const FLOAT*, UINT, int*,
 HGLRC(* const wglCreateContextAttribsARB)(HDC, HGLRC, const int*) = [](HDC hDC, HGLRC hShareContext, const int* attribList) { if (!opengl32) loadWGL(); return ::wgl_wglCreateContextAttribsARB(hDC, hShareContext, attribList); };
 const char* (* const wglGetExtensionsStringARB)(HDC) = [](HDC hdc) { if (!opengl32) loadWGL(); return ::wgl_wglGetExtensionsStringARB(hdc); };
 const char* (* const wglGetExtensionsStringEXT)() = [](void) { if (!opengl32) loadWGL(); return ::wgl_wglGetExtensionsStringEXT(); };
-
-#ifndef MBGL_USE_GLES2
-void (* const glDrawPixels)(GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = ::glDrawPixels;
-void (* const glGetDoublev)(GLenum, GLdouble *) = ::glGetDoublev;
-void (* const glPixelTransferf)(GLenum, GLfloat) = ::glPixelTransferf;
-void (* const glPixelZoom)(GLfloat, GLfloat) = ::glPixelZoom;
-void (* const glPointSize)(GLfloat) = ::glPointSize;
-void (* const glRasterPos4d)(GLdouble, GLdouble, GLdouble, GLdouble) = ::glRasterPos4d;
-#endif
 
 }  // namespace platform
 }  // namespace mbgl

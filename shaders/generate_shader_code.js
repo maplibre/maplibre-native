@@ -10,7 +10,34 @@ const generatedHeader = `// Generated code, do not modify this file!
 // Generated on ${new Date().toISOString()} by ${os.userInfo().username} using shaders/generate_shader_code.js
 `;
 
-const pragmaMapConvert = (source, pragmaMap, pipelineStage) => {
+const newAttribLocationMapping = (source) => {
+    return {
+        __alloc: findHighestAttribLocation(source)
+    };
+}
+
+const locationForAttrib = (attribLocations, locationName) => {
+    if (attribLocations[locationName]) {
+        return attribLocations[attribLocations];
+    }
+
+    attribLocations[locationName] = ++attribLocations.__alloc;
+    return attribLocations[locationName];
+};
+
+const findHighestAttribLocation = (source) => {
+    const re = /layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*in\s+/g;
+    let match;
+    let topIndex = -1;
+
+    while (match = re.exec(source)) {
+        topIndex = Number(match[1]) > topIndex ? Number(match[1]) : topIndex;
+    }
+
+    return topIndex;
+}
+
+const pragmaMapConvert = (source, pragmaMap, attribLocations, pipelineStage) => {
     const re = /#pragma mapbox: ([\w]+) ([\w]+) ([\w]+) ([\w]+)/g;
 
     if (pipelineStage == "fragment") {
@@ -18,7 +45,7 @@ const pragmaMapConvert = (source, pragmaMap, pipelineStage) => {
             pragmaMap[name] = true;
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
-varying ${precision} ${type} ${name};
+in ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif`;
@@ -40,8 +67,8 @@ ${precision} ${type} ${name} = u_${name};
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
 uniform lowp float u_${name}_t;
-attribute ${precision} ${attrType} a_${name};
-varying ${precision} ${type} ${name};
+layout (location = ${locationForAttrib(attribLocations, name)}) in ${precision} ${attrType} a_${name};
+out ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif`;
@@ -65,7 +92,7 @@ ${precision} ${type} ${name} = u_${name};
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
 uniform lowp float u_${name}_t;
-attribute ${precision} ${attrType} a_${name};
+layout (location = ${locationForAttrib(attribLocations, name)}) in ${precision} ${attrType} a_${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif`;
@@ -131,11 +158,14 @@ let shaderNames = [];
 JSON.parse(fs.readFileSync(path.join(args.input, "manifest.json")))
     .filter(it => typeof it == "object")
     .forEach((elem) => {
-        let pragmaMap = [];
         const fragmentSource = fs.readFileSync(path.join(args.input, elem.glsl_frag), {encoding: "utf8"});
         const vertexSource = fs.readFileSync(path.join(args.input, elem.glsl_vert), {encoding: "utf8"});
-        const frag = pragmaMapConvert(fragmentSource, pragmaMap, "fragment");
-        const vert = pragmaMapConvert(vertexSource, pragmaMap, "vertex");
+
+        let pragmaMap = [];
+        let attribMap = newAttribLocationMapping(vertexSource);
+
+        const frag = pragmaMapConvert(fragmentSource, pragmaMap, attribMap, "fragment");
+        const vert = pragmaMapConvert(vertexSource, pragmaMap, attribMap, "vertex");
 
         fs.writeFileSync(
             path.join(args.output, elem.header + ".hpp"),
