@@ -62,13 +62,13 @@ void main() {
         (g + h + h + i) - (a + b + b + c)
     ) /  pow(2.0, (u_zoom - u_maxzoom) * exaggeration + 19.2562 - u_zoom);
 
-    gl_FragColor = clamp(vec4(
+    fragColor = clamp(vec4(
         deriv.x / 2.0 + 0.5,
         deriv.y / 2.0 + 0.5,
         1.0,
         1.0), 0.0, 1.0);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
