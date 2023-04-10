@@ -72,8 +72,6 @@ target_compile_definitions(
     mbgl-core
     PRIVATE
         CURL_STATICLIB
-    PUBLIC
-        MBGL_USE_GLES2
 )
 
 if(MBGL_WITH_EGL)
