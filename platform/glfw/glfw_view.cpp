@@ -281,20 +281,6 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             case GLFW_KEY_S:
                 if (view->changeStyleCallback) view->changeStyleCallback();
                 break;
-#if !MBGL_USE_GLES2
-        case GLFW_KEY_B: {
-            auto debug = view->map->getDebug();
-            if (debug & mbgl::MapDebugOptions::StencilClip) {
-                debug &= ~mbgl::MapDebugOptions::StencilClip;
-                debug |= mbgl::MapDebugOptions::DepthBuffer;
-            } else if (debug & mbgl::MapDebugOptions::DepthBuffer) {
-                debug &= ~mbgl::MapDebugOptions::DepthBuffer;
-            } else {
-                debug |= mbgl::MapDebugOptions::StencilClip;
-            }
-            view->map->setDebug(debug);
-        } break;
-#endif // MBGL_USE_GLES2
         case GLFW_KEY_N:
             if (!mods)
                 view->map->easeTo(mbgl::CameraOptions().withBearing(0.0), mbgl::AnimationOptions {{mbgl::Milliseconds(500)}});
@@ -677,14 +663,9 @@ void GLFWView::updateAnimatedAnnotations() {
 
 void GLFWView::cycleDebugOptions() {
     auto debug = map->getDebug();
-#if !MBGL_USE_GLES2
-    if (debug & mbgl::MapDebugOptions::StencilClip)
+
+    if (debug & mbgl::MapDebugOptions::Overdraw)
         debug = mbgl::MapDebugOptions::NoDebug;
-    else if (debug & mbgl::MapDebugOptions::Overdraw)
-        debug = mbgl::MapDebugOptions::StencilClip;
-#else
-    if (debug & mbgl::MapDebugOptions::Overdraw) debug = mbgl::MapDebugOptions::NoDebug;
-#endif // MBGL_USE_GLES2
     else if (debug & mbgl::MapDebugOptions::Collision)
         debug = mbgl::MapDebugOptions::Overdraw;
     else if (debug & mbgl::MapDebugOptions::Timestamps)

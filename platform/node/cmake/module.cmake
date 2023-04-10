@@ -218,7 +218,7 @@ function(add_node_module NAME)
                     TARGET ${_TARGET}
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libglapi.dll"  "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv2.dll" "${_OUTPUT_PATH}"
+                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv3.dll" "${_OUTPUT_PATH}"
                     COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
                 )
             endif()

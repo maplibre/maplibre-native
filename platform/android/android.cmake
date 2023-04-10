@@ -83,7 +83,7 @@ target_link_libraries(
     mbgl-core
     PRIVATE
         EGL
-        GLESv2
+        GLESv3
         Mapbox::Base::jni.hpp
         android
         atomic
@@ -107,7 +107,7 @@ target_include_directories(
 target_link_libraries(
     example-custom-layer
     PRIVATE
-        GLESv2
+        GLESv3
         Mapbox::Base
         Mapbox::Base::optional
         log
