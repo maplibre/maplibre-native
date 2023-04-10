@@ -4,11 +4,11 @@ uniform sampler2D u_image;
 uniform float u_sdfgamma;
 uniform float u_mix;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying vec2 v_tex_a;
-varying vec2 v_tex_b;
-varying float v_gamma_scale;
+in vec2 v_normal;
+in vec2 v_width2;
+in vec2 v_tex_a;
+in vec2 v_tex_b;
+in float v_gamma_scale;
 
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float blur

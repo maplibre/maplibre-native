@@ -9,8 +9,8 @@ uniform sampler2D u_texture_icon;
 uniform highp float u_gamma_scale;
 uniform lowp float u_device_pixel_ratio;
 
-varying vec4 v_data0;
-varying vec4 v_data1;
+in vec4 v_data0;
+in vec4 v_data1;
 
 #pragma mapbox: define highp vec4 fill_color
 #pragma mapbox: define highp vec4 halo_color

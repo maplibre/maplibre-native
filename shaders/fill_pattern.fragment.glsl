@@ -3,8 +3,8 @@ uniform float u_fade;
 
 uniform sampler2D u_image;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
+in vec2 v_pos_a;
+in vec2 v_pos_b;
 
 #pragma mapbox: define lowp float opacity
 #pragma mapbox: define lowp vec4 pattern_from

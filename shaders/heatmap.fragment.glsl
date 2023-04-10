@@ -1,6 +1,6 @@
 uniform highp float u_intensity;
 
-varying vec2 v_extrude;
+in vec2 v_extrude;
 
 #pragma mapbox: define highp float weight
 

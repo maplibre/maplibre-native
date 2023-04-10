@@ -1,7 +1,7 @@
 uniform sampler2D u_image;
 uniform sampler2D u_color_ramp;
 uniform float u_opacity;
-varying vec2 v_pos;
+in vec2 v_pos;
 
 void main() {
     float t = texture2D(u_image, v_pos).r;

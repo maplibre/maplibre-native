@@ -5,10 +5,10 @@ uniform mediump vec4 u_scale;
 
 uniform sampler2D u_image;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying float v_linesofar;
-varying float v_gamma_scale;
+in vec2 v_normal;
+in vec2 v_width2;
+in float v_linesofar;
+in float v_gamma_scale;
 
 #pragma mapbox: define lowp vec4 pattern_from
 #pragma mapbox: define lowp vec4 pattern_to

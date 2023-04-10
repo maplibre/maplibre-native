@@ -6,8 +6,8 @@ uniform highp float u_gamma_scale;
 uniform lowp float u_device_pixel_ratio;
 uniform bool u_is_text;
 
-varying vec2 v_data0;
-varying vec3 v_data1;
+in vec2 v_data0;
+in vec3 v_data1;
 
 #pragma mapbox: define highp vec4 fill_color
 #pragma mapbox: define highp vec4 halo_color

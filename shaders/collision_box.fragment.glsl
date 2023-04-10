@@ -1,6 +1,6 @@
 
-varying float v_placed;
-varying float v_notUsed;
+in float v_placed;
+in float v_notUsed;
 
 void main() {
 

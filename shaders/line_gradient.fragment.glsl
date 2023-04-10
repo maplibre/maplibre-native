@@ -1,10 +1,10 @@
 uniform lowp float u_device_pixel_ratio;
 uniform sampler2D u_image;
 
-varying vec2 v_width2;
-varying vec2 v_normal;
-varying float v_gamma_scale;
-varying highp float v_lineprogress;
+in vec2 v_width2;
+in vec2 v_normal;
+in float v_gamma_scale;
+in highp float v_lineprogress;
 
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
