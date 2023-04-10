@@ -1,10 +1,10 @@
 uniform float u_overscale_factor;
 
-varying float v_placed;
-varying float v_notUsed;
-varying float v_radius;
-varying vec2 v_extrude;
-varying vec2 v_extrude_scale;
+in float v_placed;
+in float v_notUsed;
+in float v_radius;
+in vec2 v_extrude;
+in vec2 v_extrude_scale;
 
 void main() {
     float alpha = 0.5;

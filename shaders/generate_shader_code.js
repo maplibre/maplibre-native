@@ -18,7 +18,7 @@ const pragmaMapConvert = (source, pragmaMap, pipelineStage) => {
             pragmaMap[name] = true;
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
-varying ${precision} ${type} ${name};
+in ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif`;
@@ -41,7 +41,7 @@ ${precision} ${type} ${name} = u_${name};
                 return `#ifndef HAS_UNIFORM_u_${name}
 uniform lowp float u_${name}_t;
 attribute ${precision} ${attrType} a_${name};
-varying ${precision} ${type} ${name};
+out ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif`;

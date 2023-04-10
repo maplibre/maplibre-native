@@ -2,8 +2,8 @@ uniform float u_fade_t;
 uniform float u_opacity;
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;
-varying vec2 v_pos0;
-varying vec2 v_pos1;
+in vec2 v_pos0;
+in vec2 v_pos1;
 
 uniform float u_brightness_low;
 uniform float u_brightness_high;

@@ -8,8 +8,8 @@ uniform float u_opacity;
 
 uniform sampler2D u_image;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
+in vec2 v_pos_a;
+in vec2 v_pos_b;
 
 void main() {
     vec2 imagecoord = mod(v_pos_a, 1.0);

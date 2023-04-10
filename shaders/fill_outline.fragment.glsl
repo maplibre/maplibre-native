@@ -1,4 +1,4 @@
-varying vec2 v_pos;
+in vec2 v_pos;
 
 #pragma mapbox: define highp vec4 outline_color
 #pragma mapbox: define lowp float opacity

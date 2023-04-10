@@ -3,9 +3,9 @@ uniform float u_fade;
 
 uniform sampler2D u_image;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
-varying vec4 v_lighting;
+in vec2 v_pos_a;
+in vec2 v_pos_b;
+in vec4 v_lighting;
 
 #pragma mapbox: define lowp float base
 #pragma mapbox: define lowp float height

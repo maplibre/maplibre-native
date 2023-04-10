@@ -1,4 +1,4 @@
-varying vec3 v_data;
+in vec3 v_data;
 
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define mediump float radius

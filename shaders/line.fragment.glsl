@@ -1,8 +1,8 @@
 uniform lowp float u_device_pixel_ratio;
 
-varying vec2 v_width2;
-varying vec2 v_normal;
-varying float v_gamma_scale;
+in vec2 v_width2;
+in vec2 v_normal;
+in float v_gamma_scale;
 
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float blur

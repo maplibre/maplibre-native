@@ -1,7 +1,7 @@
 uniform highp vec4 u_color;
 uniform sampler2D u_overlay;
 
-varying vec2 v_uv;
+in vec2 v_uv;
 
 void main() {
     vec4 overlay_color = texture2D(u_overlay, v_uv);

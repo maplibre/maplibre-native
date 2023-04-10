@@ -1,5 +1,5 @@
 uniform sampler2D u_image;
-varying vec2 v_pos;
+in vec2 v_pos;
 
 uniform vec2 u_latrange;
 uniform vec2 u_light;

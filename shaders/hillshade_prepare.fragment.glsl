@@ -3,7 +3,7 @@ precision highp float;
 #endif
 
 uniform sampler2D u_image;
-varying vec2 v_pos;
+in vec2 v_pos;
 uniform vec2 u_dimension;
 uniform float u_zoom;
 uniform float u_maxzoom;
