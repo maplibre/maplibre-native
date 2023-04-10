@@ -5,8 +5,6 @@
 #include "../conversion/url_or_tileset.hpp"
 #include "source.hpp"
 
-#include <mbgl/util/variant.hpp>
-
 #include <string>
 
 namespace mbgl {

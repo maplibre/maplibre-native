@@ -8,14 +8,14 @@
 #include <mbgl/math/log2.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/ignore.hpp>
+#include <mbgl/util/overloaded.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/platform.hpp>
-#include <mbgl/util/variant.hpp>
-
 #include <mapbox/eternal.hpp>
 
 #include <cmath>
 #include <limits>
+#include <variant>
 
 namespace mbgl {
 namespace style {
@@ -47,16 +47,17 @@ namespace detail {
 struct SignatureBase {
     using Args = std::vector<std::unique_ptr<Expression>>;
 
-    SignatureBase(type::Type result_, variant<std::vector<type::Type>, VarargsType> params_, std::string name_)
+    SignatureBase(type::Type result_, std::variant<std::vector<type::Type>, VarargsType> params_, std::string name_)
         : result(std::move(result_)),
           params(std::move(params_)),
-          name(std::move(name_)) {}
+          name(std::move(name_))
+    {}
     virtual ~SignatureBase() = default;
 
     virtual EvaluationResult apply(const EvaluationContext&, const Args&) const = 0;
 
     type::Type result;
-    variant<std::vector<type::Type>, VarargsType> params;
+    std::variant<std::vector<type::Type>, VarargsType> params;
     std::string name;
 };
 
@@ -1000,7 +1001,7 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
     std::vector<std::string> overloads;
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();
-        signature->params.match(
+        std::visit(util::Overload{
             [&](const VarargsType& varargs) {
                 std::string overload = "(" + toString(varargs.type) + ")";
                 overloads.push_back(overload);
@@ -1019,7 +1020,8 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
                 } else {
                     availableOverloads.push_back(overload);
                 }
-            });
+            }
+        }, signature->params);
     }
     std::string signatures = overloads.empty() ? boost::algorithm::join(availableOverloads, " | ")
                                                : boost::algorithm::join(overloads, " | ");
@@ -1044,8 +1046,8 @@ static ParseResult createCompoundExpression(const Definitions& definitions,
         const auto& signature = it->second();
         signatureContext.clearErrors();
 
-        if (signature->params.is<std::vector<type::Type>>()) {
-            const std::vector<type::Type>& params = signature->params.get<std::vector<type::Type>>();
+        if (std::holds_alternative<std::vector<type::Type>>(signature->params)) {
+            const std::vector<type::Type>& params = std::get<std::vector<type::Type>>(signature->params);
             if (params.size() != args.size()) {
                 signatureContext.error("Expected " + util::toString(params.size()) + " arguments, but found " +
                                        util::toString(args.size()) + " instead.");
@@ -1059,8 +1061,8 @@ static ParseResult createCompoundExpression(const Definitions& definitions,
                     signatureContext.error(*err, i + 1);
                 }
             }
-        } else if (signature->params.is<VarargsType>()) {
-            const type::Type& paramType = signature->params.get<VarargsType>().type;
+        } else if (std::holds_alternative<VarargsType>(signature->params)) {
+            const type::Type& paramType = std::get<VarargsType>(signature->params).type;
             for (std::size_t i = 0; i < args.size(); i++) {
                 const std::unique_ptr<Expression>& arg = args[i];
                 std::optional<std::string> err = type::checkSubtype(paramType, arg->getType());
@@ -1098,8 +1100,9 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();
 
-        if (signature->params.is<VarargsType>() ||
-            signature->params.get<std::vector<type::Type>>().size() == length - 1) {
+        if (std::holds_alternative<VarargsType>(signature->params) ||
+            std::get<std::vector<type::Type>>(signature->params).size() == length - 1
+            ) {
             // First parse all the args, potentially coercing to the
             // types expected by this overload.
             ctx.clearErrors();
@@ -1108,9 +1111,11 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
             args.reserve(length - 1);
 
             for (std::size_t i = 1; i < length; i++) {
-                std::optional<type::Type> expected = signature->params.match(
+                std::optional<type::Type> expected = std::visit(util::Overload{
                     [](const VarargsType& varargs) { return varargs.type; },
-                    [&](const std::vector<type::Type>& params_) { return params_[i - 1]; });
+                    [&](const std::vector<type::Type>& params_) { return params_[i - 1]; }},
+                    signature->params
+                );
 
                 auto parsed = ctx.parse(arrayMember(value, i), i, expected);
                 if (!parsed) {
@@ -1171,9 +1176,10 @@ EvaluationResult CompoundExpression::evaluate(const EvaluationContext& evaluatio
 }
 
 std::optional<std::size_t> CompoundExpression::getParameterCount() const {
-    return signature.params.match(
+    return std::visit(util::Overload{
         [&](const VarargsType&) -> std::optional<std::size_t> { return std::nullopt; },
-        [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); });
+        [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); }},
+        signature.params);
 }
 
 std::vector<std::optional<Value>> CompoundExpression::possibleOutputs() const {
