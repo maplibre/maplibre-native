@@ -4,7 +4,7 @@ endif()
 
 target_compile_definitions(
     mbgl-core
-    PUBLIC MBGL_USE_GLES2
+    PUBLIC
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)

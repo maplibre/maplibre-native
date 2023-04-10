@@ -43,20 +43,12 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
   private static final String TAG = "Mbgl-EGLConfigChooser";
 
   /**
-   * Requires API level 17
+   * Requires API level 18
    *
-   * @see android.opengl.EGL14.EGL_CONFORMANT;
+   * @see android.opengl.EGL15.EGL_OPENGL_ES3_BIT;
    */
   @SuppressWarnings("JavadocReference")
-  private static final int EGL_CONFORMANT = 0x3042;
-
-  /**
-   * Requires API level 17
-   *
-   * @see android.opengl.EGL14.EGL_OPENGL_ES2_BIT;
-   */
-  @SuppressWarnings("JavadocReference")
-  private static final int EGL_OPENGL_ES2_BIT = 0x0004;
+  private static final int EGL_OPENGL_ES3_BIT = 0x0040;
 
   private boolean translucentSurface;
 
@@ -144,16 +136,14 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     class Config implements Comparable<Config> {
       private final BufferFormat bufferFormat;
       private final DepthStencilFormat depthStencilFormat;
-      private final boolean isNotConformant;
       private final boolean isCaveat;
       private final int index;
       private final EGLConfig config;
 
       public Config(BufferFormat bufferFormat, DepthStencilFormat depthStencilFormat,
-                    boolean isNotConformant, boolean isCaveat, int index, EGLConfig config) {
+                    boolean isCaveat, int index, EGLConfig config) {
         this.bufferFormat = bufferFormat;
         this.depthStencilFormat = depthStencilFormat;
-        this.isNotConformant = isNotConformant;
         this.isCaveat = isCaveat;
         this.index = index;
         this.config = config;
@@ -168,11 +158,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
         }
 
         i = compare(depthStencilFormat.value, other.depthStencilFormat.value);
-        if (i != 0) {
-          return i;
-        }
-
-        i = compare(isNotConformant, other.isNotConformant);
         if (i != 0) {
           return i;
         }
@@ -202,7 +187,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
       i++;
 
       int caveat = getConfigAttr(egl, display, config, EGL_CONFIG_CAVEAT);
-      int conformant = getConfigAttr(egl, display, config, EGL_CONFORMANT);
       int bits = getConfigAttr(egl, display, config, EGL_BUFFER_SIZE);
       int red = getConfigAttr(egl, display, config, EGL_RED_SIZE);
       int green = getConfigAttr(egl, display, config, EGL_GREEN_SIZE);
@@ -243,12 +227,11 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
           depthStencilFormat = DepthStencilFormat.Format24Depth8Stencil;
         }
 
-        boolean isNotConformant = (conformant & EGL_OPENGL_ES2_BIT) != EGL_OPENGL_ES2_BIT;
         boolean isCaveat = caveat != EGL_NONE;
 
         // Ignore formats we don't recognise
         if (bufferFormat != BufferFormat.Unknown) {
-          matches.add(new Config(bufferFormat, depthStencilFormat, isNotConformant, isCaveat, i, config));
+          matches.add(new Config(bufferFormat, depthStencilFormat, isCaveat, i, config));
         }
       }
 
@@ -266,10 +249,6 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
     if (bestMatch.isCaveat) {
       Logger.w(TAG, "Chosen config has a caveat.");
-    }
-
-    if (bestMatch.isNotConformant) {
-      Logger.w(TAG, "Chosen config is not conformant.");
     }
 
     return bestMatch.config;
@@ -300,9 +279,8 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
       EGL_ALPHA_SIZE, translucentSurface ? 8 : 0,
       EGL_DEPTH_SIZE, 16,
       EGL_STENCIL_SIZE, 8,
-      (emulator ? EGL_NONE : EGL_CONFORMANT), EGL_OPENGL_ES2_BIT,
       (emulator ? EGL_NONE : EGL_COLOR_BUFFER_TYPE), EGL_RGB_BUFFER,
-      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
       EGL_NONE
     };
   }

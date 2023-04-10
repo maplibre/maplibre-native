@@ -1,8 +1,6 @@
 #include <mbgl/platform/gl_functions.hpp>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 
 namespace mbgl {
 namespace platform {
