@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -32,7 +32,7 @@ uniform vec4 u_accent;
 #define PI 3.141592653589793
 
 void main() {
-    vec4 pixel = texture2D(u_image, v_pos);
+    vec4 pixel = texture(u_image, v_pos);
 
     vec2 deriv = ((pixel.rg * 2.0) - 1.0);
 

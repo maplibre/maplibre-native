@@ -60,7 +60,7 @@ void main() {
     vec2 pos_a = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, vec2(x_a, y_a));
     vec2 pos_b = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, vec2(x_b, y_b));
 
-    vec4 color = mix(texture2D(u_image, pos_a), texture2D(u_image, pos_b), u_fade);
+    vec4 color = mix(texture(u_image, pos_a), texture(u_image, pos_b), u_fade);
 
     fragColor = color * alpha * opacity;
 

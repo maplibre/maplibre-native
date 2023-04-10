@@ -11,7 +11,7 @@ uniform vec4 u_unpack;
 
 float getElevation(vec2 coord, float bias) {
     // Convert encoded elevation value to meters
-    vec4 data = texture2D(u_image, coord) * 255.0;
+    vec4 data = texture(u_image, coord) * 255.0;
     data.a = -1.0;
     return dot(data, u_unpack) / 4.0;
 }

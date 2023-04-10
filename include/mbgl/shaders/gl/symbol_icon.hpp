@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -130,7 +130,7 @@ lowp float opacity = u_opacity;
 #endif
 
     lowp float alpha = opacity * v_fade_opacity;
-    fragColor = texture2D(u_texture, v_tex) * alpha;
+    fragColor = texture(u_texture, v_tex) * alpha;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

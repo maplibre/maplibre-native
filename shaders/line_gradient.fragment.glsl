@@ -24,7 +24,7 @@ void main() {
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,
     // scaled to [0, 2^15), and the gradient ramp is stored in a texture.
-    vec4 color = texture2D(u_image, vec2(v_lineprogress, 0.5));
+    vec4 color = texture(u_image, vec2(v_lineprogress, 0.5));
 
     fragColor = color * (alpha * opacity);
 
