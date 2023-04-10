@@ -107,14 +107,6 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
             vertexArray = std::make_unique<extension::VertexArray>(fn);
         }
 
-        constexpr const char* halfFloatExtensionName = "OES_texture_half_float";
-        constexpr const char* halfFloatColorBufferExtensionName = "EXT_color_buffer_half_float";
-        if (strstr(extensions, halfFloatExtensionName) != nullptr &&
-            strstr(extensions, halfFloatColorBufferExtensionName) != nullptr) {
-
-            supportsHalfFloatTextures = true;
-        }
-
         if (!supportsVertexArrays()) {
             Log::Warning(Event::OpenGL, "Not using Vertex Array Objects");
         }
