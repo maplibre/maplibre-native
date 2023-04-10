@@ -39,9 +39,7 @@ public:
         }
 
         const EGLint attribs[] = {
-#if MBGL_USE_GLES2
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-#endif
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
             EGL_NONE
         };

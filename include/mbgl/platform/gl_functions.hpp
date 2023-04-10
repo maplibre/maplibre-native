@@ -313,21 +313,6 @@ extern void (* const glVertexAttribPointer)(GLuint, GLint, GLenum, GLboolean, GL
 /// Pointer to glViewport OpenGL function.
 extern void (* const glViewport)(GLint, GLint, GLsizei, GLsizei);
 
-#ifndef MBGL_USE_GLES2
-/// Pointer to glDrawPixels OpenGL function.
-extern void (* const glDrawPixels)(GLsizei, GLsizei, GLenum, GLenum, const GLvoid *);
-/// Pointer to glGetDoublev OpenGL function.
-extern void (* const glGetDoublev)(GLenum, GLdouble *);
-/// Pointer to glPixelTransferf OpenGL function.
-extern void (* const glPixelTransferf)(GLenum, GLfloat);
-/// Pointer to glPixelZoom OpenGL function.
-extern void (* const glPixelZoom)(GLfloat, GLfloat);
-/// Pointer to glPointSize OpenGL function.
-extern void (* const glPointSize)(GLfloat);
-/// Pointer to glRasterPos4d OpenGL function.
-extern void (* const glRasterPos4d)(GLdouble, GLdouble, GLdouble, GLdouble);
-#endif
-
 #ifndef NDEBUG
 /// Check for GL errors and print on the console.
 void glCheckError(const char *cmd, const char *file, int line);

@@ -40,9 +40,7 @@
 #pragma warning(pop)
 #endif
 
-#if MBGL_USE_GLES2
-#define GLFW_INCLUDE_ES2
-#endif // MBGL_USE_GLES2
+#define GLFW_INCLUDE_ES3
 
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
@@ -158,11 +156,9 @@ GLFWView::GLFWView(bool fullscreen_, bool benchmark_, const mbgl::ResourceOption
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif
 
-#if MBGL_USE_GLES2
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-#endif
 
     if (mbgl::gfx::Backend::GetType() != mbgl::gfx::Backend::Type::OpenGL) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

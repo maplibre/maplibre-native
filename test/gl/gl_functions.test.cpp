@@ -145,14 +145,3 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glVertexAttribPointer, nullptr);
     EXPECT_NE(glViewport, nullptr);
 }
-
-#ifndef MBGL_USE_GLES2
-TEST(GLFunctions, OpenDesktop) {
-    EXPECT_NE(glDrawPixels, nullptr);
-    EXPECT_NE(glGetDoublev, nullptr);
-    EXPECT_NE(glPixelTransferf, nullptr);
-    EXPECT_NE(glPixelZoom, nullptr);
-    EXPECT_NE(glPointSize, nullptr);
-    EXPECT_NE(glRasterPos4d, nullptr);
-}
-#endif

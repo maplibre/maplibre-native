@@ -107,13 +107,8 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
             vertexArray = std::make_unique<extension::VertexArray>(fn);
         }
 
-#if MBGL_USE_GLES2
         constexpr const char* halfFloatExtensionName = "OES_texture_half_float";
         constexpr const char* halfFloatColorBufferExtensionName = "EXT_color_buffer_half_float";
-#else
-        constexpr const char* halfFloatExtensionName = "ARB_half_float_pixel";
-        constexpr const char* halfFloatColorBufferExtensionName = "ARB_color_buffer_float";
-#endif
         if (strstr(extensions, halfFloatExtensionName) != nullptr &&
             strstr(extensions, halfFloatColorBufferExtensionName) != nullptr) {
 
@@ -316,18 +311,6 @@ std::unique_ptr<uint8_t[]> Context::readFramebuffer(const Size size, const gfx::
     return data;
 }
 
-#if !MBGL_USE_GLES2
-void Context::drawPixels(const Size size, const void* data, gfx::TexturePixelType format) {
-    pixelStoreUnpack = { 1 };
-    // TODO
-    if (format != gfx::TexturePixelType::RGBA) {
-        format = gfx::TexturePixelType::Luminance;
-    }
-    MBGL_CHECK_ERROR(glDrawPixels(size.width, size.height, Enum<gfx::TexturePixelType>::to(format),
-                                  GL_UNSIGNED_BYTE, data));
-}
-#endif // MBGL_USE_GLES2
-
 namespace {
 
 void checkFramebuffer() {
@@ -482,17 +465,9 @@ void Context::setDirtyState() {
     cullFaceSide.setDirty();
     cullFaceWinding.setDirty();
     program.setDirty();
-    lineWidth.setDirty();
     activeTextureUnit.setDirty();
     pixelStorePack.setDirty();
     pixelStoreUnpack.setDirty();
-#if !MBGL_USE_GLES2
-    pointSize.setDirty();
-    pixelZoom.setDirty();
-    rasterPos.setDirty();
-    pixelTransferDepth.setDirty();
-    pixelTransferStencil.setDirty();
-#endif // MBGL_USE_GLES2
     for (auto& tex : texture) {
        tex.setDirty();
     }
@@ -608,22 +583,6 @@ void Context::finish() {
 void Context::draw(const gfx::DrawMode& drawMode,
                    std::size_t indexOffset,
                    std::size_t indexLength) {
-    switch (drawMode.type) {
-    case gfx::DrawModeType::Points:
-#if !MBGL_USE_GLES2
-        // In OpenGL ES 2, the point size is set in the vertex shader.
-        pointSize = drawMode.size;
-#endif // MBGL_USE_GLES2
-        break;
-    case gfx::DrawModeType::Lines:
-    case gfx::DrawModeType::LineLoop:
-    case gfx::DrawModeType::LineStrip:
-        lineWidth = drawMode.size;
-        break;
-    default:
-        break;
-    }
-
     MBGL_CHECK_ERROR(glDrawElements(
         Enum<gfx::DrawModeType>::to(drawMode.type),
         static_cast<GLsizei>(indexLength),
@@ -727,56 +686,12 @@ void Context::reduceMemoryUsage() {
 
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {
-#if !MBGL_USE_GLES2
-    setStencilMode(gfx::StencilMode::disabled());
-    setDepthMode(gfx::DepthMode::disabled());
-    setColorMode(gfx::ColorMode::unblended());
-    program = 0;
-
-    // Reset the value in case someone else changed it, or it's dirty.
-    pixelTransferStencil = gl::value::PixelTransferStencil::Default;
-
-    // Read the stencil buffer
-    const auto viewportValue = viewport.getCurrentValue();
-    auto image = readFramebuffer<AlphaImage, gfx::TexturePixelType::Stencil>(viewportValue.size, false);
-
-    // Scale the Stencil buffer to cover the entire color space.
-    auto it = image.data.get();
-    auto end = it + viewportValue.size.width * viewportValue.size.height;
-    const auto factor = 255.0f / *std::max_element(it, end);
-    for (; it != end; ++it) {
-        *it *= factor;
-    }
-
-    pixelZoom = { 1, 1 };
-    rasterPos = { -1, -1, 0, 1 };
-    drawPixels(image);
-#endif
+    throw std::runtime_error("Not yet implemented");
 }
 
-void Context::visualizeDepthBuffer(const float depthRangeSize) {
-    (void)depthRangeSize;
-#if !MBGL_USE_GLES2
-    setStencilMode(gfx::StencilMode::disabled());
-    setDepthMode(gfx::DepthMode::disabled());
-    setColorMode(gfx::ColorMode::unblended());
-    program = 0;
-
-    // Scales the values in the depth buffer so that they cover the entire grayscale range. This
-    // makes it easier to spot tiny differences.
-    const float base = 1.0f / (1.0f - depthRangeSize);
-    pixelTransferDepth = { base, 1.0f - base };
-
-    // Read the stencil buffer
-    auto viewportValue = viewport.getCurrentValue();
-    auto image = readFramebuffer<AlphaImage, gfx::TexturePixelType::Depth>(viewportValue.size, false);
-
-    pixelZoom = { 1, 1 };
-    rasterPos = { -1, -1, 0, 1 };
-    drawPixels(image);
-#endif
+void Context::visualizeDepthBuffer([[maybe_unused]] const float depthRangeSize) {
+    throw std::runtime_error("Not yet implemented");
 }
-
 #endif
 
 void Context::clearStencilBuffer(const int32_t bits) {
