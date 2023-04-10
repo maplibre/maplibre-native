@@ -14,6 +14,7 @@
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 
@@ -123,38 +124,40 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.populate(backgroundPatternProgram)) return;
 
     // TODO: this should happen a GL-specific part of map initialization
-    auto vert = R"(
-        //#version 300 es
-        precision highp float;
-        attribute vec3 pos;  //layout (location = 0) in vec3 pos;
-        void main() {
-            gl_Position = vec4(pos, 1.0);
-        })";
-    auto frag = R"(
-        //#version 300 es
-        precision highp float;
-        //out vec4 color;
-        void main() {
-            //color = vec4(1.0,0.0,0.0,1.0);
-            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-        })";
-    try {
-        const auto shaderName = "background_generic";
-        //auto shader = parameters.shaders.get<gl::ShaderProgramGL>();
-        //auto shader = parameters.shaders.getShader(shaderName);
-        //if (shader) ... check for duplicate/mismatch
-        //if (!shader) {
+    constexpr auto shaderName = "background_generic";
+    auto shader = parameters.shaders.get<gl::ShaderProgramGL>(shaderName);
+    if (!shader) {
+        constexpr auto vert = R"(
+            //#version 300 es
+            precision highp float;
+            attribute vec3 pos;  //layout (location = 0) in vec3 pos;
+            void main() {
+                gl_Position = vec4(pos, 1.0);
+            })";
+        constexpr auto frag = R"(
+            //#version 300 es
+            precision highp float;
+            //out vec4 color;
+            void main() {
+                //color = vec4(1.0,0.0,0.0,1.0);
+                gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+            })";
 
-        if (std::shared_ptr<gfx::ShaderProgramBase> generic =
-                gl::ShaderProgramGL::create((gl::Context&)parameters.context, shaderName, vert, frag)) {
-            if (auto specific = generic->to<gl::ShaderProgramGL>()) {
-                specific->typeName();
+        try {
+            shader = gl::ShaderProgramGL::create((gl::Context&)parameters.context, shaderName, vert, frag);
+            if (shader) {
+                if (!parameters.shaders.registerShader(shader, shaderName)) {
+                    Log::Warning(Event::General, "Shader conflict - " + std::string(shaderName));
+                    return;
+                }
+            } else {
+                Log::Warning(Event::General, "Shader create failed - " + std::string(shaderName));
+                return;
             }
-        }
-        
-        //parameters.shaders.registerShader(shader, shaderName);
     } catch (const std::runtime_error& ex) {
-        // ...
+            Log::Warning(Event::General, "Shader create exception - " + std::string(ex.what()));
+            return;
+        }
     }
 
     const Properties<>::PossiblyEvaluated properties;
