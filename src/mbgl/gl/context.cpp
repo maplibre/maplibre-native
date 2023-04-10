@@ -465,6 +465,7 @@ void Context::setDirtyState() {
     cullFaceSide.setDirty();
     cullFaceWinding.setDirty();
     program.setDirty();
+    lineWidth.setDirty();
     activeTextureUnit.setDirty();
     pixelStorePack.setDirty();
     pixelStoreUnpack.setDirty();
@@ -583,6 +584,18 @@ void Context::finish() {
 void Context::draw(const gfx::DrawMode& drawMode,
                    std::size_t indexOffset,
                    std::size_t indexLength) {
+    switch (drawMode.type) {
+    case gfx::DrawModeType::Points:
+        break;
+    case gfx::DrawModeType::Lines:
+    case gfx::DrawModeType::LineLoop:
+    case gfx::DrawModeType::LineStrip:
+        lineWidth = drawMode.size;
+        break;
+    default:
+        break;
+    }
+
     MBGL_CHECK_ERROR(glDrawElements(
         Enum<gfx::DrawModeType>::to(drawMode.type),
         static_cast<GLsizei>(indexLength),
