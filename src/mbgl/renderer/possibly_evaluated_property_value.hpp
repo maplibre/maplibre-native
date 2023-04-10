@@ -3,16 +3,18 @@
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
 #include <mbgl/style/property_expression.hpp>
 #include <mbgl/util/interpolate.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mbgl/util/overloaded.hpp>
 
 #include <cmath>
+#include <utility>
+#include <variant>
 
 namespace mbgl {
 
 template <class T>
 class PossiblyEvaluatedPropertyValue {
 private:
-    using Value = variant<T, style::PropertyExpression<T>>;
+    using Value = std::variant<T, style::PropertyExpression<T>>;
 
     Value value;
 
@@ -21,18 +23,20 @@ public:
     PossiblyEvaluatedPropertyValue(Value v)
         : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<T>(); }
+    bool isConstant() const { return std::holds_alternative<T>(value); }
 
     std::optional<T> constant() const {
-        return value.match([&](const T& t) { return std::optional<T>(t); },
-                           [&](const auto&) { return std::optional<T>(); });
+        return std::visit(util::Overload{
+            [&] (const T& t) { return std::optional<T>(t); },
+            [&] (const auto&) { return std::optional<T>(); }},
+            value);
     }
 
     T constantOr(const T& t) const { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
-        return value.match(std::forward<Ts>(ts)...);
+        return std::visit(util::Overload{std::forward<Ts>(ts)...}, value);
     }
 
     template <class Feature>
@@ -63,7 +67,7 @@ public:
 template <class T>
 class PossiblyEvaluatedPropertyValue<Faded<T>> {
 private:
-    using Value = variant<Faded<T>, style::PropertyExpression<T>>;
+    using Value = std::variant< Faded<T>, style::PropertyExpression<T>>;
 
     Value value;
 
@@ -72,18 +76,22 @@ public:
     PossiblyEvaluatedPropertyValue(Value v)
         : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<Faded<T>>(); }
+    bool isConstant() const {
+        return std::holds_alternative<Faded<T>>(value);
+    }
 
     std::optional<Faded<T>> constant() const {
-        return value.match([&](const Faded<T>& t) { return std::optional<Faded<T>>(t); },
-                           [&](const auto&) { return std::optional<Faded<T>>(); });
+        return std::visit(util::Overload{
+            [&] (const Faded<T>& t) { return std::optional<Faded<T>>(t); },
+            [&] (const auto&) { return std::optional<Faded<T>>(); }},
+            value);
     }
 
     Faded<T> constantOr(const Faded<T>& t) const { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
-        return value.match(std::forward<Ts>(ts)...);
+        return std::visit(util::Overload{std::forward<Ts>(ts)...}, value);
     }
 
     template <class Feature>
