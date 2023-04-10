@@ -114,7 +114,7 @@ void MLNMapViewOpenGLImpl::createView() {
     }
 
     if (!resource.context) {
-        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
         assert(resource.context);
     }
 
