@@ -3,11 +3,11 @@
 #include "TargetConditionals.h"
 
 #if TARGET_OS_IPHONE
-    #include <OpenGLES/ES2/gl.h>
-    #include <OpenGLES/ES2/glext.h>
+    #include <OpenGLES/ES3/gl.h>
+    #include <OpenGLES/ES3/glext.h>
 #elif TARGET_OS_SIMULATOR
-    #include <OpenGLES/ES2/gl.h>
-    #include <OpenGLES/ES2/glext.h>
+    #include <OpenGLES/ES3/gl.h>
+    #include <OpenGLES/ES3/glext.h>
 #elif TARGET_OS_MAC
     #include <OpenGL/OpenGL.h>
     #include <OpenGL/gl.h>
@@ -166,15 +166,6 @@ void (* const glVertexAttrib4f)(GLuint, GLfloat, GLfloat, GLfloat, GLfloat) = ::
 void (* const glVertexAttrib4fv)(GLuint, const GLfloat *) = ::glVertexAttrib4fv;
 void (* const glVertexAttribPointer)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void *) = ::glVertexAttribPointer;
 void (* const glViewport)(GLint, GLint, GLsizei, GLsizei) = ::glViewport;
-
-#ifndef MBGL_USE_GLES2
-void (* const glDrawPixels)(GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = ::glDrawPixels;
-void (* const glGetDoublev)(GLenum, GLdouble *) = ::glGetDoublev;
-void (* const glPixelTransferf)(GLenum, GLfloat) = ::glPixelTransferf;
-void (* const glPixelZoom)(GLfloat, GLfloat) = ::glPixelZoom;
-void (* const glPointSize)(GLfloat) = ::glPointSize;
-void (* const glRasterPos4d)(GLdouble, GLdouble, GLdouble, GLdouble) = ::glRasterPos4d;
-#endif
 
 }  // namespace platform
 }  // namespace mbgl
