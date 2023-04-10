@@ -873,13 +873,18 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
@@ -932,6 +937,7 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/extension.hpp
@@ -968,7 +974,11 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp

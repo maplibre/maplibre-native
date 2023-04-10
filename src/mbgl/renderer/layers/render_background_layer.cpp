@@ -1,4 +1,7 @@
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
+#include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
@@ -12,8 +15,6 @@
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/logging.hpp>
 
 namespace mbgl {
@@ -63,7 +64,7 @@ std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges(
     if (!drawable /* && visible/enabled */) {
         auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method
 
-
+        builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across many drawables
         
         //gfx::VertexVector<gfx::VertexType<attributes::pos>> tileVertics;
         //tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());

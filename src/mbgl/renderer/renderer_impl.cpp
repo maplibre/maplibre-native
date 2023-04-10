@@ -2,12 +2,13 @@
 
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/gfx/render_pass.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
@@ -134,6 +135,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             color = renderTreeParameters.backgroundColor;
         }
         parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
+    }
+
+    // Update drawables
+    {
+        for (const auto& pair : orchestrator.getDrawables()) {
+            auto& drawable = pair.second;
+            for (auto& tweaker : drawable->getTweakers()) {
+                tweaker->execute(*drawable, parameters);
+            }
+        }
     }
 
     // Actually render the layers

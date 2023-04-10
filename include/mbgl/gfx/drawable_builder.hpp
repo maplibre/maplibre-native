@@ -2,10 +2,14 @@
 
 #include <mbgl/gfx/drawable.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace mbgl {
 namespace gfx {
+
+class DrawableTweaker;
+using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 /**
     Base class for drawable builders, which construct Drawables from primitives
@@ -48,6 +52,9 @@ public:
     /// Add a rectangle consisting of two triangles
     void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
+    /// Add a tweaker to be attached to each emitted drawable
+    void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
+
 protected:
     /// Create an instance of the appropriate drawable type
     virtual DrawablePtr createDrawable() const = 0;
@@ -57,7 +64,9 @@ protected:
 
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
-    
+
+    std::vector<DrawableTweakerPtr> tweakers;
+
     struct Impl;
     std::unique_ptr<Impl> impl;
 };

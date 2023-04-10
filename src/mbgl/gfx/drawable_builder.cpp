@@ -24,7 +24,6 @@ DrawableBuilder::~DrawableBuilder() = default;
 DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
         currentDrawable = createDrawable();
-        currentDrawable->setDrawPriority(drawPriority);
     }
     return currentDrawable;
 }
@@ -32,6 +31,8 @@ DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         auto draw = getCurrentDrawable(/*create=*/true);
+        currentDrawable->setDrawPriority(drawPriority);
+        currentDrawable->addTweakers(tweakers.begin(), tweakers.end());
         //draw->setVertexData(impl->vertices, impl->indices);
     }
     if (currentDrawable) {
