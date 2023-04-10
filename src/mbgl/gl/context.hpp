@@ -163,6 +163,7 @@ private:
     State<value::ClearDepth> clearDepth;
     State<value::ClearColor> clearColor;
     State<value::ClearStencil> clearStencil;
+    State<value::LineWidth> lineWidth;
     State<value::BindRenderbuffer> bindRenderbuffer;
     State<value::CullFace> cullFace;
     State<value::CullFaceSide> cullFaceSide;
