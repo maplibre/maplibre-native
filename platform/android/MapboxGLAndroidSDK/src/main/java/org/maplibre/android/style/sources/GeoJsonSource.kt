@@ -2,6 +2,7 @@ package org.maplibre.android.style.sources
 
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
+import com.google.gson.JsonObject
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Geometry
@@ -238,15 +239,12 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (feature == null) {
-            nativeSetFeature(null)
+        nativeSetFeature(feature)
+
+        if (safeSetGeoJson && feature != null) {
+            nativeSetGeoJsonString(feature.toJson())
         } else {
-            // Directly use the feature will lead to concurrency
-            // For example if the feature creates in the main thread then
-            // it will sent to the worker thread to add it to the map core
-            // mean while the feature could be operating by main thread then
-            // the concurrency happens. In Grab this issue's crash rate is about 0.1%
-            nativeSetFeature(Feature.fromJson(feature.toJson()))
+            nativeSetFeature(feature)
         }
     }
 
@@ -261,7 +259,12 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        nativeSetGeometry(geometry)
+
+        if (safeSetGeoJson && geometry != null) {
+            nativeSetGeoJsonString(geometry.toJson())
+        } else {
+            nativeSetGeometry(geometry)
+        }
     }
 
     /**
@@ -275,12 +278,16 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (featureCollection != null && featureCollection.features() != null) {
-            val features = featureCollection.features()
-            val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+        if (safeSetGeoJson && featureCollection != null) {
+            nativeSetGeoJsonString(featureCollection.toJson())
         } else {
-            nativeSetFeatureCollection(featureCollection)
+            if (featureCollection?.features() != null) {
+                val features = featureCollection.features()
+                val featuresCopy: List<Feature> = ArrayList(features)
+                nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+            } else {
+                nativeSetFeatureCollection(featureCollection)
+            }
         }
     }
 
@@ -406,6 +413,15 @@ class GeoJsonSource : Source {
             checkThread()
             return nativeGetUrl()
         }
+
+    /**
+     * The flag of prevent concurrency of GeoJson for `func setGeoJson`'s parameters
+     *
+     * If the flag turned into true, then the GeoJson Object will turn itself to json
+     * string and sent the json string to the map to prevent concurrency between main thread
+     * and worker thread.
+     */
+    var safeSetGeoJson: Boolean = true
 
     /**
      * Queries the source for features.
