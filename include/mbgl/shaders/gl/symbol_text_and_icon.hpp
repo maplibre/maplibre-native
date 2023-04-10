@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -237,10 +237,10 @@ lowp float halo_blur = u_halo_blur;
     if (v_data1.w == ICON) {
         vec2 tex_icon = v_data0.zw;
         lowp float alpha = opacity * fade_opacity;
-        gl_FragColor = texture2D(u_texture_icon, tex_icon) * alpha;
+        fragColor = texture(u_texture_icon, tex_icon) * alpha;
 
 #ifdef OVERDRAW_INSPECTOR
-        gl_FragColor = vec4(1.0);
+        fragColor = vec4(1.0);
 #endif
         return;
     }
@@ -263,7 +263,7 @@ lowp float halo_blur = u_halo_blur;
         buff = (6.0 - halo_width / fontScale) / SDF_PX;
     }
 
-    lowp float dist = texture2D(u_texture, tex).a;
+    lowp float dist = texture(u_texture, tex).a;
     highp float gamma_scaled = gamma * gamma_scale;
     highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 

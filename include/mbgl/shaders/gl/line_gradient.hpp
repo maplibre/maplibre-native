@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -181,7 +181,7 @@ lowp float opacity = u_opacity;
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,
     // scaled to [0, 2^15), and the gradient ramp is stored in a texture.
-    vec4 color = texture2D(u_image, vec2(v_lineprogress, 0.5));
+    vec4 color = texture(u_image, vec2(v_lineprogress, 0.5));
 
     fragColor = color * (alpha * opacity);
 

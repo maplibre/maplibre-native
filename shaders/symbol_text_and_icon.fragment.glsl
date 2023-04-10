@@ -30,10 +30,10 @@ void main() {
     if (v_data1.w == ICON) {
         vec2 tex_icon = v_data0.zw;
         lowp float alpha = opacity * fade_opacity;
-        gl_FragColor = texture2D(u_texture_icon, tex_icon) * alpha;
+        fragColor = texture(u_texture_icon, tex_icon) * alpha;
 
 #ifdef OVERDRAW_INSPECTOR
-        gl_FragColor = vec4(1.0);
+        fragColor = vec4(1.0);
 #endif
         return;
     }
@@ -56,7 +56,7 @@ void main() {
         buff = (6.0 - halo_width / fontScale) / SDF_PX;
     }
 
-    lowp float dist = texture2D(u_texture, tex).a;
+    lowp float dist = texture(u_texture, tex).a;
     highp float gamma_scaled = gamma * gamma_scale;
     highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 

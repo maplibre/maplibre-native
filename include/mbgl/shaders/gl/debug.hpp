@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -27,7 +27,7 @@ uniform sampler2D u_overlay;
 in vec2 v_uv;
 
 void main() {
-    vec4 overlay_color = texture2D(u_overlay, v_uv);
+    vec4 overlay_color = texture(u_overlay, v_uv);
     fragColor = mix(u_color, overlay_color, overlay_color.a);
 }
 )";

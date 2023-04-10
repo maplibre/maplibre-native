@@ -10,7 +10,7 @@ uniform vec4 u_accent;
 #define PI 3.141592653589793
 
 void main() {
-    vec4 pixel = texture2D(u_image, v_pos);
+    vec4 pixel = texture(u_image, v_pos);
 
     vec2 deriv = ((pixel.rg * 2.0) - 1.0);
 

@@ -9,7 +9,7 @@ void main() {
     #pragma mapbox: initialize lowp float opacity
 
     lowp float alpha = opacity * v_fade_opacity;
-    fragColor = texture2D(u_texture, v_tex) * alpha;
+    fragColor = texture(u_texture, v_tex) * alpha;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

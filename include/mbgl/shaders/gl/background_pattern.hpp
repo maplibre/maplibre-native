@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T03:24:44.935Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -44,11 +44,11 @@ in vec2 v_pos_b;
 void main() {
     vec2 imagecoord = mod(v_pos_a, 1.0);
     vec2 pos = mix(u_pattern_tl_a / u_texsize, u_pattern_br_a / u_texsize, imagecoord);
-    vec4 color1 = texture2D(u_image, pos);
+    vec4 color1 = texture(u_image, pos);
 
     vec2 imagecoord_b = mod(v_pos_b, 1.0);
     vec2 pos2 = mix(u_pattern_tl_b / u_texsize, u_pattern_br_b / u_texsize, imagecoord_b);
-    vec4 color2 = texture2D(u_image, pos2);
+    vec4 color2 = texture(u_image, pos2);
 
     fragColor = mix(color1, color2, u_mix) * u_opacity;
 
