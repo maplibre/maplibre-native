@@ -115,10 +115,6 @@ public:
         return debugging.get();
     }
 
-    extension::VertexArray* getVertexArrayExtension() const {
-        return vertexArray.get();
-    }
-
     void setCleanupOnDestruction(bool cleanup) {
         cleanupOnDestruction = cleanup;
     }
@@ -129,7 +125,6 @@ private:
 
     gfx::RenderingStats stats;
     std::unique_ptr<extension::Debugging> debugging;
-    std::unique_ptr<extension::VertexArray> vertexArray;
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
@@ -140,7 +135,7 @@ public:
     State<value::Program> program;
     State<value::BindVertexBuffer> vertexBuffer;
 
-    State<value::BindVertexArray, const Context&> bindVertexArray { *this };
+    State<value::BindVertexArray> bindVertexArray;
     VertexArrayState globalVertexArrayState { UniqueVertexArray(0, { const_cast<Context*>(this) }) };
 
     State<value::PixelStorePack> pixelStorePack;
@@ -203,9 +198,6 @@ private:
     std::vector<RenderbufferID> abandonedRenderbuffers;
 
 public:
-    // For testing
-    bool disableVAOExtension = false;
-
 #if !defined(NDEBUG)
 public:
     void visualizeStencilBuffer() override;

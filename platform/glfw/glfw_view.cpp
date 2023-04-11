@@ -40,7 +40,9 @@
 #pragma warning(pop)
 #endif
 
+#if !defined(__APPLE__)
 #define GLFW_INCLUDE_ES3
+#endif
 
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>

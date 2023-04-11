@@ -8,7 +8,7 @@
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/vertex_array_extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -98,7 +98,7 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
         // Block Adreno 4xx as it crashes in a driver when VBOs are destructed (Android 5.1.1)
         // Block ARM Mali-T720 (in some MT8163 chipsets) as it crashes on glBindVertexArray
         // Block ANGLE on Direct3D as the combination of Qt + Windows + ANGLE leads to crashes
-        if (renderer.find("Adreno (TM) 2") == std::string::npos &&
+        /*if (renderer.find("Adreno (TM) 2") == std::string::npos &&
             renderer.find("Adreno (TM) 3") == std::string::npos &&
             renderer.find("Adreno (TM) 4") == std::string::npos &&
             (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) &&
@@ -109,7 +109,7 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
 
         if (!supportsVertexArrays()) {
             Log::Warning(Event::OpenGL, "Not using Vertex Array Objects");
-        }
+        }*/
     }
 }
 
@@ -207,24 +207,25 @@ UniqueTexture Context::createUniqueTexture() {
 }
 
 bool Context::supportsVertexArrays() const {
-    return vertexArray &&
+    return true; /*vertexArray &&
            vertexArray->genVertexArrays &&
            vertexArray->bindVertexArray &&
-           vertexArray->deleteVertexArrays;
+           vertexArray->deleteVertexArrays;*/
 }
 
 VertexArray Context::createVertexArray() {
-    if (supportsVertexArrays()) {
+    //if (supportsVertexArrays()) {
         VertexArrayID id = 0;
-        MBGL_CHECK_ERROR(vertexArray->genVertexArrays(1, &id));
+        //MBGL_CHECK_ERROR(vertexArray->genVertexArrays(1, &id));
+        MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
         // NOLINTNEXTLINE(performance-move-const-arg)
         UniqueVertexArray vao(std::move(id), { this });
         return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
-    } else {
+    /*} else {
         // On GL implementations which do not support vertex arrays, attribute bindings are global state.
         // So return a VertexArray which shares our global state tracking and whose deleter is a no-op.
         return { UniqueVertexArrayState(&globalVertexArrayState, VertexArrayStateDeleter { false }) };
-    }
+    }*/
 }
 
 UniqueFramebuffer Context::createFramebuffer() {
@@ -656,8 +657,8 @@ void Context::performCleanup() {
                 bindVertexArray.setDirty();
             }
         }
-        MBGL_CHECK_ERROR(vertexArray->deleteVertexArrays(int(abandonedVertexArrays.size()),
-                                                         abandonedVertexArrays.data()));
+        //MBGL_CHECK_ERROR(vertexArray->deleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
+        MBGL_CHECK_ERROR(glDeleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
         abandonedVertexArrays.clear();
     }
 
