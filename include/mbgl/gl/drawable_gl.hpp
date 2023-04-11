@@ -15,8 +15,12 @@ public:
     virtual ~DrawableGL();
 
     void draw(const PaintParameters &) const override;
+
+    void setVertData(std::vector<std::uint8_t> data) { vertData = std::move(data); }
     
 protected:
+    std::vector<std::uint8_t> vertData;
+
     class Impl;
     const std::unique_ptr<const Impl> impl;
 

@@ -15,7 +15,10 @@ public:
     virtual ~DrawableGLBuilder() = default;
 
 protected:
-    virtual gfx::DrawablePtr createDrawable() const override;
+    gfx::DrawablePtr createDrawable() const override;
+    
+    /// Setup the SDK-specific aspects after all the values are present
+    void init() override;
 };
 
 } // namespace gl

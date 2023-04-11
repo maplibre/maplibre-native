@@ -974,6 +974,7 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp

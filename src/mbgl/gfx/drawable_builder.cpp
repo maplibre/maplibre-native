@@ -1,25 +1,21 @@
 #include <mbgl/gfx/drawable_builder.hpp>
-
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/gfx/drawable_builder_impl.hpp>
 
 namespace mbgl {
 namespace gfx {
-
-struct DrawableBuilder::Impl {
-    using VT = gfx::detail::VertexType<gfx::AttributeType<short,2>>;
-    gfx::VertexVector<VT> vertices;
-    gfx::IndexVector<gfx::Triangles> indexes;
-    SegmentVector<TypeList<void>> segments;
-};
 
 DrawableBuilder::DrawableBuilder()
     : impl(std::make_unique<Impl>()) {
 }
 
 DrawableBuilder::~DrawableBuilder() = default;
+
+const Color& DrawableBuilder::getColor() const {
+    return impl->currentColor;
+}
+void DrawableBuilder::setColor(const Color& value) {
+    impl->currentColor = value;
+}
 
 DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
@@ -33,7 +29,7 @@ void DrawableBuilder::flush() {
         auto draw = getCurrentDrawable(/*create=*/true);
         currentDrawable->setDrawPriority(drawPriority);
         currentDrawable->addTweakers(tweakers.begin(), tweakers.end());
-        //draw->setVertexData(impl->vertices, impl->indices);
+        init();
     }
     if (currentDrawable) {
         drawables.push_back(currentDrawable);
@@ -69,12 +65,14 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     impl->vertices.emplace_back(Impl::VT({{{ x1, y1 }}}));
     impl->vertices.emplace_back(Impl::VT({{{ x2, y2 }}}));
     impl->indexes.emplace_back(n, n+1, n+2);
+    impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
 }
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{ x0, y0 }}}));
     impl->indexes.emplace_back(n-1, n, n+1);
+    impl->colors.emplace_back(impl->currentColor);
 }
 
 void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {

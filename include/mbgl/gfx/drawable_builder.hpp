@@ -1,14 +1,19 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
+//#include <mbgl/util/color.hpp>
 
 #include <memory>
 #include <vector>
 
 namespace mbgl {
+
+class Color;
+
 namespace gfx {
 
 class DrawableTweaker;
+
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 /**
@@ -44,6 +49,10 @@ public:
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
 
+    /// The color used for emitted vertexes
+    const Color& getColor() const;
+    void setColor(const Color& value);
+    
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
     /// Add another triangle based on the previous two points
@@ -58,6 +67,9 @@ public:
 protected:
     /// Create an instance of the appropriate drawable type
     virtual DrawablePtr createDrawable() const = 0;
+
+    /// Setup the SDK-specific aspects after all the values are present
+    virtual void init() = 0;
 
 protected:
     DrawPriority drawPriority = 0;
