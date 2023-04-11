@@ -125,6 +125,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.populate(backgroundPatternProgram)) return;
 
     // TODO: this should happen a GL-specific part of map initialization
+    auto &glContext = static_cast<gl::Context&>(parameters.context);
     constexpr auto shaderName = "background_generic";
     auto shader = parameters.shaders.get<gl::ShaderProgramGL>(shaderName);
     if (!shader) {
@@ -145,7 +146,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
             })";
 
         try {
-            shader = gl::ShaderProgramGL::create((gl::Context&)parameters.context, shaderName, vert, frag);
+            shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
             if (shader) {
                 if (!parameters.shaders.registerShader(shader, shaderName)) {
                     Log::Warning(Event::General, "Shader conflict - " + std::string(shaderName));

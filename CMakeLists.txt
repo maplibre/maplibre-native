@@ -123,11 +123,16 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
@@ -349,6 +354,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
@@ -363,6 +372,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/background_layer_factory.cpp
@@ -871,9 +881,6 @@ if(MBGL_WITH_OPENGL)
     list(APPEND 
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
@@ -972,10 +979,6 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
@@ -989,6 +992,26 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
+    )
+endif()
+
+if(MBGL_WITH_METAL)
+    message(STATUS "Configuring Metal renderer backend")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MBGL_RENDER_BACKEND_METAL=1
+    )
+    list(APPEND 
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_tweaker.hpp
+    )
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
     )
 endif()
 
