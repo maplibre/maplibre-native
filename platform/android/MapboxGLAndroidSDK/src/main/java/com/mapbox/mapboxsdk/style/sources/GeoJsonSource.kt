@@ -239,7 +239,6 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        nativeSetFeature(feature)
 
         if (safeSetGeoJson && feature != null) {
             nativeSetGeoJsonString(feature.toJson())
