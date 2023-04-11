@@ -176,7 +176,8 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: ${{ matrix.name }}_${{ matrix.qt_version }}
+          key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
+          append-timestamp: false
 
       - name: Build maplibre-gl-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
