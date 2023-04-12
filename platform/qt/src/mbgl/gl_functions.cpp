@@ -2,6 +2,7 @@
 
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 
 namespace mbgl {
 namespace platform {
@@ -579,316 +580,316 @@ void (* const glViewport)(GLint, GLint, GLsizei, GLsizei) = [](auto... args) {
 /* OpenGL ES 3.0 */
 
 void (* const glReadBuffer)(GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glReadBuffer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glReadBuffer(args...);
 };
 void (* const glDrawRangeElements)(GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDrawRangeElements(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDrawRangeElements(args...);
 };
 void (* const glTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glTexImage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glTexImage3D(args...);
 };
 void (* const glTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glTexSubImage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glTexSubImage3D(args...);
 };
 void (* const glCopyTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glCopyTexSubImage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glCopyTexSubImage3D(args...);
 };
 void (* const glCompressedTexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glCompressedTexImage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glCompressedTexImage3D(args...);
 };
 void (* const glCompressedTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glCompressedTexSubImage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glCompressedTexSubImage3D(args...);
 };
 void (* const glGenQueries)(GLsizei, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGenQueries(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGenQueries(args...);
 };
 void (* const glDeleteQueries)(GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDeleteQueries(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDeleteQueries(args...);
 };
 GLboolean (* const glIsQuery)(GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glIsQuery(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glIsQuery(args...);
 };
 void (* const glBeginQuery)(GLenum, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBeginQuery(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBeginQuery(args...);
 };
 void (* const glEndQuery)(GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glEndQuery(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glEndQuery(args...);
 };
 void (* const glGetQueryiv)(GLenum, GLenum, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetQueryiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetQueryiv(args...);
 };
 void (* const glGetQueryObjectuiv)(GLuint, GLenum, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetQueryObjectuiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetQueryObjectuiv(args...);
 };
 GLboolean (* const glUnmapBuffer)(GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUnmapBuffer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUnmapBuffer(args...);
 };
 void (* const glGetBufferPointerv)(GLenum, GLenum, GLvoid**) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetBufferPointerv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetBufferPointerv(args...);
 };
 void (* const glDrawBuffers)(GLsizei, const GLenum*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDrawBuffers(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDrawBuffers(args...);
 };
 void (* const glUniformMatrix2x3fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix2x3fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix2x3fv(args...);
 };
 void (* const glUniformMatrix3x2fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix3x2fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix3x2fv(args...);
 };
 void (* const glUniformMatrix2x4fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix2x4fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix2x4fv(args...);
 };
 void (* const glUniformMatrix4x2fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix4x2fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix4x2fv(args...);
 };
 void (* const glUniformMatrix3x4fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix3x4fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix3x4fv(args...);
 };
 void (* const glUniformMatrix4x3fv)(GLint, GLsizei, GLboolean, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformMatrix4x3fv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformMatrix4x3fv(args...);
 };
 void (* const glBlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBlitFramebuffer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBlitFramebuffer(args...);
 };
 void (* const glRenderbufferStorageMultisample)(GLenum, GLsizei, GLenum, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glRenderbufferStorageMultisample(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glRenderbufferStorageMultisample(args...);
 };
 void (* const glFramebufferTextureLayer)(GLenum, GLenum, GLuint, GLint, GLint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glFramebufferTextureLayer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glFramebufferTextureLayer(args...);
 };
 GLvoid* (* const glMapBufferRange)(GLenum, GLintptr, GLsizeiptr, GLbitfield) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glMapBufferRange(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glMapBufferRange(args...);
 };
 void (* const glFlushMappedBufferRange)(GLenum, GLintptr, GLsizeiptr) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glFlushMappedBufferRange(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glFlushMappedBufferRange(args...);
 };
 void (* const glBindVertexArray)(GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBindVertexArray(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBindVertexArray(args...);
 };
 void (* const glDeleteVertexArrays)(GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDeleteVertexArrays(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDeleteVertexArrays(args...);
 };
 void (* const glGenVertexArrays)(GLsizei, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGenVertexArrays(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGenVertexArrays(args...);
 };
 GLboolean (* const glIsVertexArray)(GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glIsVertexArray(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glIsVertexArray(args...);
 };
 void (* const glGetIntegeri_v)(GLenum, GLuint, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetIntegeri_v(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetIntegeri_v(args...);
 };
 void (* const glBeginTransformFeedback)(GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBeginTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBeginTransformFeedback(args...);
 };
 void (* const glEndTransformFeedback)() = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glEndTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glEndTransformFeedback(args...);
 };
 void (* const glBindBufferRange)(GLenum, GLuint, GLuint, GLintptr, GLsizeiptr) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBindBufferRange(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBindBufferRange(args...);
 };
 void (* const glBindBufferBase)(GLenum, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBindBufferBase(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBindBufferBase(args...);
 };
 void (* const glTransformFeedbackVaryings)(GLuint, GLsizei, const GLchar* const, GLenum) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glTransformFeedbackVaryings(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glTransformFeedbackVaryings(args...);
 };
 void (* const glGetTransformFeedbackVarying)(GLuint, GLuint, GLsizei, GLsizei*, GLsizei*, GLenum*, GLchar*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetTransformFeedbackVarying(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetTransformFeedbackVarying(args...);
 };
 void (* const glVertexAttribIPointer)(GLuint, GLint, GLenum, GLsizei, const GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribIPointer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribIPointer(args...);
 };
 void (* const glGetVertexAttribIiv)(GLuint, GLenum, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetVertexAttribIiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetVertexAttribIiv(args...);
 };
 void (* const glGetVertexAttribIuiv)(GLuint, GLenum, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetVertexAttribIuiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetVertexAttribIuiv(args...);
 };
 void (* const glVertexAttribI4i)(GLuint, GLint, GLint, GLint, GLint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribI4i(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribI4i(args...);
 };
 void (* const glVertexAttribI4ui)(GLuint, GLuint, GLuint, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribI4ui(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribI4ui(args...);
 };
 void (* const glVertexAttribI4iv)(GLuint, const GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribI4iv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribI4iv(args...);
 };
 void (* const glVertexAttribI4uiv)(GLuint, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribI4uiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribI4uiv(args...);
 };
 void (* const glGetUniformuiv)(GLuint, GLint, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetUniformuiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetUniformuiv(args...);
 };
 GLint (* const glGetFragDataLocation)(GLuint, const GLchar) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetFragDataLocation(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetFragDataLocation(args...);
 };
 void (* const glUniform1ui)(GLint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform1ui(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform1ui(args...);
 };
 void (* const glUniform2ui)(GLint, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform2ui(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform2ui(args...);
 };
 void (* const glUniform3ui)(GLint, GLuint, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform3ui(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform3ui(args...);
 };
 void (* const glUniform4ui)(GLint, GLuint, GLuint, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform4ui(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform4ui(args...);
 };
 void (* const glUniform1uiv)(GLint, GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform1uiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform1uiv(args...);
 };
 void (* const glUniform2uiv)(GLint, GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform2uiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform2uiv(args...);
 };
 void (* const glUniform3uiv)(GLint, GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform3uiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform3uiv(args...);
 };
 void (* const glUniform4uiv)(GLint, GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniform4uiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniform4uiv(args...);
 };
 void (* const glClearBufferiv)(GLenum, GLint, const GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glClearBufferiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glClearBufferiv(args...);
 };
 void (* const glClearBufferuiv)(GLenum, GLint, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glClearBufferuiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glClearBufferuiv(args...);
 };
 void (* const glClearBufferfv)(GLenum, GLint, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glClearBufferfv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glClearBufferfv(args...);
 };
 void (* const glClearBufferfi)(GLenum, GLint, GLfloat, GLint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glClearBufferfi(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glClearBufferfi(args...);
 };
 const GLubyte* (* const glGetStringi)(GLenum, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetStringi(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetStringi(args...);
 };
 void (* const glCopyBufferSubData)(GLenum, GLenum, GLintptr, GLintptr, GLsizeiptr) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glCopyBufferSubData(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glCopyBufferSubData(args...);
 };
 void (* const glGetUniformIndices)(GLuint, GLsizei, const GLchar* const, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetUniformIndices(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetUniformIndices(args...);
 };
 void (* const glGetActiveUniformsiv)(GLuint, GLsizei, const GLuint*, GLenum, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetActiveUniformsiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetActiveUniformsiv(args...);
 };
 GLuint (* const glGetUniformBlockIndex)(GLuint, const GLchar*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetUniformBlockIndex(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetUniformBlockIndex(args...);
 };
 void (* const glGetActiveUniformBlockiv)(GLuint, GLuint, GLenum, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetActiveUniformBlockiv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetActiveUniformBlockiv(args...);
 };
 void (* const glGetActiveUniformBlockName)(GLuint, GLuint, GLsizei, GLsizei*, GLchar*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetActiveUniformBlockName(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetActiveUniformBlockName(args...);
 };
 void (* const glUniformBlockBinding)(GLuint, GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glUniformBlockBinding(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glUniformBlockBinding(args...);
 };
 void (* const glDrawArraysInstanced)(GLenum, GLint, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDrawArraysInstanced(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDrawArraysInstanced(args...);
 };
 void (* const glDrawElementsInstanced)(GLenum, GLsizei, GLenum, const GLvoid*, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDrawElementsInstanced(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDrawElementsInstanced(args...);
 };
 GLsync (* const glFenceSync)(GLenum, GLbitfield) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glFenceSync(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glFenceSync(args...);
 };
 GLboolean (* const glIsSync)(GLsync) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glIsSync(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glIsSync(args...);
 };
 void (* const glDeleteSync)(GLsync) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDeleteSync(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDeleteSync(args...);
 };
 GLenum (* const glClientWaitSync)(GLsync, GLbitfield, GLuint64) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glClientWaitSync(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glClientWaitSync(args...);
 };
 void (* const glWaitSync)(GLsync, GLbitfield, GLuint64) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glWaitSync(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glWaitSync(args...);
 };
 void (* const glGetInteger64v)(GLenum, GLint64*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetInteger64v(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetInteger64v(args...);
 };
 void (* const glGetSynciv)(GLsync, GLenum, GLsizei, GLsizei*, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetSynciv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetSynciv(args...);
 };
 void (* const glGetInteger64i_v)(GLenum, GLuint, GLint64*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetInteger64i_v(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetInteger64i_v(args...);
 };
 void (* const glGetBufferParameteri64v)(GLenum, GLenum, GLint64*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetBufferParameteri64v(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetBufferParameteri64v(args...);
 };
 void (* const glGenSamplers)(GLsizei, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGenSamplers(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGenSamplers(args...);
 };
 void (* const glDeleteSamplers)(GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDeleteSamplers(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDeleteSamplers(args...);
 };
 GLboolean (* const glIsSampler)(GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glIsSampler(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glIsSampler(args...);
 };
 void (* const glBindSampler)(GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBindSampler(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBindSampler(args...);
 };
 void (* const glSamplerParameteri)(GLuint, GLenum, GLint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glSamplerParameteri(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glSamplerParameteri(args...);
 };
 void (* const glSamplerParameteriv)(GLuint, GLenum, const GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glSamplerParameteriv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glSamplerParameteriv(args...);
 };
 void (* const glSamplerParameterf)(GLuint, GLenum, GLfloat) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glSamplerParameterf(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glSamplerParameterf(args...);
 };
 void (* const glSamplerParameterfv)(GLuint, GLenum, const GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glSamplerParameterfv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glSamplerParameterfv(args...);
 };
 void (* const glGetSamplerParameteriv)(GLuint, GLenum, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetSamplerParameteriv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetSamplerParameteriv(args...);
 };
 void (* const glGetSamplerParameterfv)(GLuint, GLenum, GLfloat*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetSamplerParameterfv(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetSamplerParameterfv(args...);
 };
 void (* const glVertexAttribDivisor)(GLuint, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glVertexAttribDivisor(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glVertexAttribDivisor(args...);
 };
 void (* const glBindTransformFeedback)(GLenum, GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glBindTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glBindTransformFeedback(args...);
 };
 void (* const glDeleteTransformFeedbacks)(GLsizei, const GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glDeleteTransformFeedbacks(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glDeleteTransformFeedbacks(args...);
 };
 void (* const glGenTransformFeedbacks)(GLsizei, GLuint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGenTransformFeedbacks(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGenTransformFeedbacks(args...);
 };
 GLboolean (* const glIsTransformFeedback)(GLuint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glIsTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glIsTransformFeedback(args...);
 };
 void (* const glPauseTransformFeedback)() = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glPauseTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glPauseTransformFeedback(args...);
 };
 void (* const glResumeTransformFeedback)() = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glResumeTransformFeedback(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glResumeTransformFeedback(args...);
 };
 void (* const glGetProgramBinary)(GLuint, GLsizei, GLsizei*, GLenum*, GLvoid*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetProgramBinary(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetProgramBinary(args...);
 };
 void (* const glProgramBinary)(GLuint, GLenum, const GLvoid*, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glProgramBinary(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glProgramBinary(args...);
 };
 void (* const glProgramParameteri)(GLuint, GLenum, GLint) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glProgramParameteri(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glProgramParameteri(args...);
 };
 void (* const glInvalidateFramebuffer)(GLenum, GLsizei, const GLenum*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glInvalidateFramebuffer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glInvalidateFramebuffer(args...);
 };
 void (* const glInvalidateSubFramebuffer)(GLenum, GLsizei, const GLenum*, GLint, GLint, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glInvalidateSubFramebuffer(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glInvalidateSubFramebuffer(args...);
 };
 void (* const glTexStorage2D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glTexStorage2D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glTexStorage2D(args...);
 };
 void (* const glTexStorage3D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glTexStorage3D(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glTexStorage3D(args...);
 };
 void (* const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint*) = [](auto... args) {
-    return QOpenGLContext::currentContext()->functions()->glGetInternalformativ(args...);
+    return QOpenGLContext::currentContext()->extraFunctions()->glGetInternalformativ(args...);
 };
 
 }  // namespace platform
