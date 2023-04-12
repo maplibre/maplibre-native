@@ -690,7 +690,7 @@ void (* const glBindBufferRange)(GLenum, GLuint, GLuint, GLintptr, GLsizeiptr) =
 void (* const glBindBufferBase)(GLenum, GLuint, GLuint) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glBindBufferBase(args...);
 };
-void (* const glTransformFeedbackVaryings)(GLuint, GLsizei, const GLchar* const, GLenum) = [](auto... args) {
+void (* const glTransformFeedbackVaryings)(GLuint, GLsizei, const GLchar* const*, GLenum) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glTransformFeedbackVaryings(args...);
 };
 void (* const glGetTransformFeedbackVarying)(GLuint, GLuint, GLsizei, GLsizei*, GLsizei*, GLenum*, GLchar*) = [](auto... args) {
@@ -720,7 +720,7 @@ void (* const glVertexAttribI4uiv)(GLuint, const GLuint*) = [](auto... args) {
 void (* const glGetUniformuiv)(GLuint, GLint, GLuint*) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glGetUniformuiv(args...);
 };
-GLint (* const glGetFragDataLocation)(GLuint, const GLchar) = [](auto... args) {
+GLint (* const glGetFragDataLocation)(GLuint, const GLchar*) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glGetFragDataLocation(args...);
 };
 void (* const glUniform1ui)(GLint, GLuint) = [](auto... args) {
@@ -765,7 +765,7 @@ const GLubyte* (* const glGetStringi)(GLenum, GLuint) = [](auto... args) {
 void (* const glCopyBufferSubData)(GLenum, GLenum, GLintptr, GLintptr, GLsizeiptr) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glCopyBufferSubData(args...);
 };
-void (* const glGetUniformIndices)(GLuint, GLsizei, const GLchar* const, GLuint*) = [](auto... args) {
+void (* const glGetUniformIndices)(GLuint, GLsizei, const GLchar* const*, GLuint*) = [](auto... args) {
     return QOpenGLContext::currentContext()->extraFunctions()->glGetUniformIndices(args...);
 };
 void (* const glGetActiveUniformsiv)(GLuint, GLsizei, const GLuint*, GLenum, GLint*) = [](auto... args) {
