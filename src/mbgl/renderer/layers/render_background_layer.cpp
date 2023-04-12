@@ -132,8 +132,16 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         constexpr auto vert = R"(
             //#version 300 es
             precision highp float;
+            uniform float a;
+            uniform int b;
+            uniform mat4 c;
             attribute vec3 pos;  //layout (location = 0) in vec3 pos;
+            attribute float d;
+            //attribute int e;
+            attribute mat2 f;
+            attribute mat4 g;
             void main() {
+                gl_Position = vec4(a, g[0][0], f[0][0], d);
                 gl_Position = vec4(pos, 1.0);
             })";
         constexpr auto frag = R"(
@@ -146,8 +154,18 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
             })";
 
         try {
+            // Compile
             shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
             if (shader) {
+                // Set default values
+                if (auto *attr = shader->getVertexAttributes().get("a")) {
+                    attr->at(0) = 12.3f;
+                }
+                if (auto *attr = shader->getVertexAttributes().get("b")) {
+                    attr->at(0) = 123;
+                }
+
+                // Add to the registry
                 if (!parameters.shaders.registerShader(shader, shaderName)) {
                     Log::Warning(Event::General, "Shader conflict - " + std::string(shaderName));
                     return;

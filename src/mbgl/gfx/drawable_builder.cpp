@@ -28,6 +28,8 @@ void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         auto draw = getCurrentDrawable(/*create=*/true);
         currentDrawable->setDrawPriority(drawPriority);
+        currentDrawable->setShaderID(shaderID);
+        currentDrawable->setVertexAttributes(getVertexAttributes());
         currentDrawable->addTweakers(tweakers.begin(), tweakers.end());
         init();
     }

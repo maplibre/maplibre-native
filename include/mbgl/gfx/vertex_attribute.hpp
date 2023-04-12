@@ -7,17 +7,13 @@
 #include <memory>
 #include <string>
 #include <variant>
-#include <vector>
+#include <unordered_map>
 
 namespace mbgl {
 
-using mat2 = std::array<double, 4>;
-using mat3 = std::array<double, 9>;
-using mat4 = std::array<double, 16>;
-
-using matf2 = std::array<float, 4>;
-using matf3 = std::array<float, 9>;
-using matf4 = std::array<float, 16>;
+using mat2 = std::array<double, 2*2>;
+using mat3 = std::array<double, 3*3>;
+using mat4 = std::array<double, 4*4>;
 
 namespace gfx {
 
@@ -27,41 +23,127 @@ namespace gfx {
 
 class VertexAttributeArray;
 
-class VertexAttribute final {
+class VertexAttribute {
 public:
-    using ElementType = std::variant<int8_t, int16_t, int32_t, float, matf2, matf4>;
+    using float2 = std::array<float, 2>;
+    using float3 = std::array<float, 3>;
+    using matf2 = std::array<float, 2*2>;
+    using matf3 = std::array<float, 3*3>;
+    using matf4 = std::array<float, 4*4>;
+    using int2 = std::array<std::int32_t, 2>;
+    using int3 = std::array<std::int32_t, 3>;
+    using int4 = std::array<std::int32_t, 4>;
 
-    // Can only be created by VertexAttributeArray
-private:
-    friend VertexAttributeArray;
-    VertexAttribute(AttributeDataType dataType_, std::size_t count_)
-        : dataType(dataType_),
+    using ElementType = std::variant<std::int32_t, int2, int3, int4, float, float2, float3, matf2, matf4>;
+
+    // Can only be created by VertexAttributeArray implementations
+protected:
+    VertexAttribute(int index_, AttributeDataType dataType_, std::size_t count_)
+        : index(index_),
+          dataType(dataType_),
           items(count_) {
+    }
+    VertexAttribute(const VertexAttribute &) = default;
+    VertexAttribute(VertexAttribute&& other)
+        : index(other.index),
+          dataType(other.dataType),
+          items(std::move(other.items)) {
     }
 
 public:
+    int getIndex() const { return index; }
+
     AttributeDataType getDataType() const { return dataType; }
 
     std::size_t getCount() const { return items.size(); }
 
+    ElementType& at(std::size_t i) { return items[i]; }
+    const ElementType& at(std::size_t i) const { return items[i]; }
+
+protected:
+    VertexAttribute& operator=(const VertexAttribute&) = default;
+    VertexAttribute& operator=(const VertexAttribute&& other) {
+        index = other.index;
+        dataType = other.dataType;
+        items = std::move(other.items);
+        return *this;
+    }
+
 private:
+    int index;
     AttributeDataType dataType;
     std::vector<ElementType> items;
 };
 
-class VertexAttributeArray final {
+/// Stores a collection of vertex attributes by name
+class VertexAttributeArray {
 public:
-    VertexAttributeArray() = default;
-    ~VertexAttributeArray() = default;
-    
-    VertexAttribute& add(AttributeDataType dataType, std::size_t count) {
-        //attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
-        attrs.emplace_back(std::unique_ptr<VertexAttribute>(new VertexAttribute(dataType, count)));
-        return *attrs.back();
+    using AttributeMap = std::unordered_map<std::string, std::unique_ptr<VertexAttribute>>;
+
+    VertexAttributeArray(int initCapacity = 10);
+    VertexAttributeArray(VertexAttributeArray &&);
+    VertexAttributeArray(const VertexAttributeArray&);
+    virtual ~VertexAttributeArray() = default;
+
+    std::size_t size() const { return attrs.size(); }
+    AttributeMap::const_iterator begin() const { return attrs.begin(); }
+    AttributeMap::const_iterator end() const { return attrs.end(); }
+
+    /// Add a new attribute element.
+    /// Returns a pointer to the new element on success, or null if the attribute already exists.
+    /// The result is valid only until the next non-const method call on this class.
+    VertexAttribute* get(const std::string& name) const {
+        const auto result = attrs.find(name);
+        return (result != attrs.end()) ? result->second.get() : nullptr;
     }
-private:
-    
-    std::vector<std::unique_ptr<VertexAttribute>> attrs;
+
+    /// Add a new attribute element.
+    /// Returns a pointer to the new element on success, or null if the attribute already exists.
+    /// The result is valid only until the next non-const method call on this class.
+    VertexAttribute* add(std::string name, int index, AttributeDataType dataType, std::size_t count) {
+        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+        if (result.second) {
+            result.first->second = create(index, dataType, count);
+            return result.first->second.get();
+        } else {
+            return nullptr;
+        }
+    }
+
+    /// Add a new attribute element if it doesn't already exist.
+    /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
+    /// The result is valid only until the next non-const method call on this class.
+    VertexAttribute* getOrAdd(std::string name, int index, AttributeDataType dataType, std::size_t count) {
+        //attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
+        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+        if (result.second) {
+            result.first->second = create(index, dataType, count);
+        } else if (result.first->second->getDataType() != dataType ||
+                   result.first->second->getCount() != count) {
+            return nullptr;
+        }
+        return result.first->second.get();
+    }
+
+    VertexAttributeArray& operator=(VertexAttributeArray &&);
+    VertexAttributeArray& operator=(const VertexAttributeArray&);
+
+protected:
+    VertexAttribute* add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
+        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+        if (result.second) {
+            result.first->second = std::move(attr);
+            return result.first->second.get();
+        } else {
+            return nullptr;
+        }
+    }
+
+    virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType, std::size_t count) = 0;
+    virtual std::unique_ptr<VertexAttribute> copy(const VertexAttribute& attr) = 0;
+
+protected:
+    AttributeMap attrs;
 };
 
 } // namespace gfx

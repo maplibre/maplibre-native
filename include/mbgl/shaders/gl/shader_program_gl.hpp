@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/vertex_array.hpp>
+#include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
 namespace mbgl {
@@ -21,11 +21,15 @@ public:
         std::string_view name,
         std::string_view vertexSource,
         std::string_view fragmentSource) noexcept(false);
-    
+
+    const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
+
+    UniqueVertexArray buildVAO(const gfx::VertexAttributeArray& overrides);
+
 protected:
     UniqueProgram glProgram;
-    //VertexArray vertexArray;
-    //gfx::DrawScope drawScopeResource;
+    
+    VertexAttributeArrayGL vertexAttributes;
 };
 
 } // namespace gl

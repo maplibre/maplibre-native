@@ -14,6 +14,7 @@
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -157,7 +158,18 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Draw Drawables
     {
         for (const auto &pair : orchestrator.getDrawables()) {
-            pair.second->draw(parameters);
+            const auto& drawable = *pair.second;
+            
+            if (!drawable.getShaderID().empty()) {
+                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
+                    // Context.activate(shader)
+                    // if (vao missing or stale)
+                    auto newVAO = shader->buildVAO(drawable.getVertexAttributes());
+                }
+                // Context.bind(vao)
+            }
+
+            drawable.draw(parameters);
         }
     }
     

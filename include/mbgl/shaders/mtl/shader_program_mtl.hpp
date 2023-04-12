@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace mtl {
 
-class ShaderProgramMTL final : public gfx::ShaderProgramBase {
+class ShaderProgramMTL : public gfx::ShaderProgramBase {
 public:
     ShaderProgramMTL() : ShaderProgramBase() { }
     virtual ~ShaderProgramMTL() = default;

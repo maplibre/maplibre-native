@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
-//#include <mbgl/util/color.hpp>
+#include <mbgl/gfx/vertex_attribute.hpp>
 
 #include <memory>
 #include <vector>
@@ -52,7 +52,16 @@ public:
     /// The color used for emitted vertexes
     const Color& getColor() const;
     void setColor(const Color& value);
-    
+
+    /// Which shader to use when rendering emitted drawables
+    //util::SimpleIdentity getShaderID() const { return shaderID; }
+    //void setShaderID(util::SimpleIdentity value) { shaderID = value; }
+    const std::string& getShaderID() const { return shaderID; }
+    void setShaderID(std::string value) { shaderID = std::move(value); }
+
+    /// Get the vertex attributes that override default values in the shader program
+    virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
     /// Add another triangle based on the previous two points
@@ -73,6 +82,9 @@ protected:
 
 protected:
     DrawPriority drawPriority = 0;
+
+    //util::SimpleIdentity shaderID = util::SimpleIdentity::Empty;
+    std::string shaderID;
 
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
