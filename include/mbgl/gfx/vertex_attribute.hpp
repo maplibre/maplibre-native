@@ -6,8 +6,9 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <variant>
 #include <unordered_map>
+#include <variant>
+#include <vector>
 
 namespace mbgl {
 
