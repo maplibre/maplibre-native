@@ -5,6 +5,9 @@
 using namespace mbgl::platform;
 
 TEST(GLFunctions, OpenGLES) {
+
+    /* OpenGL ES 2.0 */
+
     EXPECT_NE(glActiveTexture, nullptr);
     EXPECT_NE(glAttachShader, nullptr);
     EXPECT_NE(glBindAttribLocation, nullptr);
@@ -74,6 +77,7 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glGetRenderbufferParameteriv, nullptr);
     EXPECT_NE(glGetShaderInfoLog, nullptr);
     EXPECT_NE(glGetShaderiv, nullptr);
+    EXPECT_NE(glGetShaderPrecisionFormat, nullptr);
     EXPECT_NE(glGetShaderSource, nullptr);
     EXPECT_NE(glGetString, nullptr);
     EXPECT_NE(glGetTexParameterfv, nullptr);
@@ -97,9 +101,11 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glPixelStorei, nullptr);
     EXPECT_NE(glPolygonOffset, nullptr);
     EXPECT_NE(glReadPixels, nullptr);
+    EXPECT_NE(glReleaseShaderCompiler, nullptr);
     EXPECT_NE(glRenderbufferStorage, nullptr);
     EXPECT_NE(glSampleCoverage, nullptr);
     EXPECT_NE(glScissor, nullptr);
+    EXPECT_NE(glShaderBinary, nullptr);
     EXPECT_NE(glShaderSource, nullptr);
     EXPECT_NE(glStencilFunc, nullptr);
     EXPECT_NE(glStencilFuncSeparate, nullptr);
@@ -144,4 +150,8 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glVertexAttrib4fv, nullptr);
     EXPECT_NE(glVertexAttribPointer, nullptr);
     EXPECT_NE(glViewport, nullptr);
+
+    /* OpenGL ES 3.0 */
+
+
 }
