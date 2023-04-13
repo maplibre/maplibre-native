@@ -974,7 +974,6 @@ if(MBGL_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/value.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
