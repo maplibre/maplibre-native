@@ -189,26 +189,12 @@ UniqueTexture Context::createUniqueTexture() {
     return UniqueTexture{std::move(id), {this}};
 }
 
-bool Context::supportsVertexArrays() const {
-    return true; /*vertexArray &&
-           vertexArray->genVertexArrays &&
-           vertexArray->bindVertexArray &&
-           vertexArray->deleteVertexArrays;*/
-}
-
 VertexArray Context::createVertexArray() {
-    //if (supportsVertexArrays()) {
-        VertexArrayID id = 0;
-        //MBGL_CHECK_ERROR(vertexArray->genVertexArrays(1, &id));
-        MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
-        // NOLINTNEXTLINE(performance-move-const-arg)
-        UniqueVertexArray vao(std::move(id), { this });
-        return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
-    /*} else {
-        // On GL implementations which do not support vertex arrays, attribute bindings are global state.
-        // So return a VertexArray which shares our global state tracking and whose deleter is a no-op.
-        return { UniqueVertexArrayState(&globalVertexArrayState, VertexArrayStateDeleter { false }) };
-    }*/
+    VertexArrayID id = 0;
+    MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    UniqueVertexArray vao(std::move(id), { this });
+    return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
 }
 
 UniqueFramebuffer Context::createFramebuffer() {
@@ -634,13 +620,11 @@ void Context::performCleanup() {
     }
 
     if (!abandonedVertexArrays.empty()) {
-        assert(supportsVertexArrays());
         for (const auto id : abandonedVertexArrays) {
             if (bindVertexArray == id) {
                 bindVertexArray.setDirty();
             }
         }
-        //MBGL_CHECK_ERROR(vertexArray->deleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
         MBGL_CHECK_ERROR(glDeleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
         abandonedVertexArrays.clear();
     }

@@ -177,7 +177,6 @@ private:
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
 
     VertexArray createVertexArray();
-    bool supportsVertexArrays() const;
 
     friend detail::ProgramDeleter;
     friend detail::ShaderDeleter;
