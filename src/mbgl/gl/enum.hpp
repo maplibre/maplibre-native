@@ -15,6 +15,9 @@ public:
 
     static T from(InType);
     static OutType to(T);
+
+    template<typename U>
+    static OutType sizedFor(T, U type);
 };
 
 } // namespace gl

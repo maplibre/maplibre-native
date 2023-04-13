@@ -1,12 +1,10 @@
-
 uniform mat4 u_matrix;
 uniform float u_extrude_scale;
 uniform float u_opacity;
 uniform float u_intensity;
 
-attribute vec2 a_pos;
-
-varying vec2 v_extrude;
+layout (location = 0) in vec2 a_pos;
+out vec2 v_extrude;
 
 #pragma mapbox: define highp float weight
 #pragma mapbox: define mediump float radius

@@ -1,7 +1,7 @@
 #include <mbgl/gl/value.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
-#include <mbgl/gl/vertex_array_extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
 
 namespace mbgl {
@@ -378,27 +378,13 @@ BindElementBuffer::Type BindElementBuffer::Get() {
 
 const constexpr BindVertexArray::Type BindVertexArray::Default;
 
-void BindVertexArray::Set(const Type& value, const Context& context) {
-    if (auto vertexArray = context.getVertexArrayExtension()) {
-        if (vertexArray->bindVertexArray) {
-            MBGL_CHECK_ERROR(vertexArray->bindVertexArray(value));
-        }
-    }
+void BindVertexArray::Set(const Type& value) {
+    MBGL_CHECK_ERROR(glBindVertexArray(value));
 }
 
-BindVertexArray::Type BindVertexArray::Get(const Context& context) {
+BindVertexArray::Type BindVertexArray::Get() {
     GLint binding = 0;
-    if (context.getVertexArrayExtension()) {
-#ifdef GL_VERTEX_ARRAY_BINDING
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &binding));
-#elif GL_VERTEX_ARRAY_BINDING_OES
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, &binding));
-#elif GL_VERTEX_ARRAY_BINDING_ARB
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING_ARB, &binding));
-#elif GLVERTEX_ARRAY_BINDING_APPLE
-        MBGL_CHECK_ERROR(glGetIntegerv(GLVERTEX_ARRAY_BINDING_APPLE, &binding));
-#endif
-    }
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &binding));
     return binding;
 }
 
@@ -541,76 +527,6 @@ PixelStoreUnpack::Type PixelStoreUnpack::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_UNPACK_ALIGNMENT, &value.alignment));
     return value;
 }
-
-#if !MBGL_USE_GLES2
-
-const constexpr PointSize::Type PointSize::Default;
-
-void PointSize::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glPointSize(value));
-}
-
-PointSize::Type PointSize::Get() {
-    GLfloat pointSize;
-    MBGL_CHECK_ERROR(glGetFloatv(GL_POINT_SIZE, &pointSize));
-    return pointSize;
-}
-
-const constexpr PixelZoom::Type PixelZoom::Default;
-
-void PixelZoom::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glPixelZoom(value.xfactor, value.yfactor));
-}
-
-PixelZoom::Type PixelZoom::Get() {
-    GLfloat xfactor;
-    GLfloat yfactor;
-    MBGL_CHECK_ERROR(glGetFloatv(GL_ZOOM_X, &xfactor));
-    MBGL_CHECK_ERROR(glGetFloatv(GL_ZOOM_Y, &yfactor));
-    return { xfactor, yfactor };
-}
-
-const constexpr RasterPos::Type RasterPos::Default;
-
-void RasterPos::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glRasterPos4d(value.x, value.y, value.z, value.w));
-}
-
-RasterPos::Type RasterPos::Get() {
-    GLdouble pos[4];
-    MBGL_CHECK_ERROR(glGetDoublev(GL_CURRENT_RASTER_POSITION, pos));
-    return { pos[0], pos[1], pos[2], pos[3] };
-}
-
-const constexpr PixelTransferDepth::Type PixelTransferDepth::Default;
-
-void PixelTransferDepth::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glPixelTransferf(GL_DEPTH_SCALE, value.scale));
-    MBGL_CHECK_ERROR(glPixelTransferf(GL_DEPTH_BIAS, value.bias));
-}
-
-PixelTransferDepth::Type PixelTransferDepth::Get() {
-    Type value;
-    MBGL_CHECK_ERROR(glGetFloatv(GL_DEPTH_SCALE, &value.scale));
-    MBGL_CHECK_ERROR(glGetFloatv(GL_DEPTH_BIAS, &value.bias));
-    return value;
-}
-
-const constexpr PixelTransferStencil::Type PixelTransferStencil::Default;
-
-void PixelTransferStencil::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glPixelTransferf(GL_INDEX_SHIFT, value.shift));
-    MBGL_CHECK_ERROR(glPixelTransferf(GL_INDEX_OFFSET, value.offset));
-}
-
-PixelTransferStencil::Type PixelTransferStencil::Get() {
-    Type value;
-    MBGL_CHECK_ERROR(glGetIntegerv(GL_INDEX_SHIFT, &value.shift));
-    MBGL_CHECK_ERROR(glGetIntegerv(GL_INDEX_OFFSET, &value.offset));
-    return value;
-}
-
-#endif // MBGL_USE_GLES2
 
 } // namespace value
 } // namespace gl

@@ -122,7 +122,7 @@ target_sources(
 target_compile_definitions(
     mbgl-core
     PRIVATE QT_IMAGE_DECODERS
-    PUBLIC __QT__ MBGL_USE_GLES2
+    PUBLIC __QT__
 )
 
 target_include_directories(
