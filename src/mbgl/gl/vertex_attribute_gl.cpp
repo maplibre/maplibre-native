@@ -2,6 +2,8 @@
 
 #include <mbgl/gl/defines.hpp>
 
+#include <cstring>
+
 namespace mbgl {
 namespace gl {
 
@@ -56,7 +58,7 @@ const std::vector<uint8_t>& VertexAttributeGL::getRaw() {
             
             for (std::size_t i = 0; i < count; ++i) {
                 if (const auto rawPtr = getPtr(items[i], getGLType())) {
-                    memcpy(outPtr, rawPtr, sizes.first);
+                    std::memcpy(outPtr, rawPtr, sizes.first);
                 }
                 outPtr += stride;
             }
