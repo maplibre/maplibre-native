@@ -249,7 +249,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
 
     // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::to(format),
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::sizedFor(format, type),
                                   size.width, size.height, 0,
                                   Enum<gfx::TexturePixelType>::to(format),
                                   Enum<gfx::TextureChannelDataType>::to(type), nullptr));
