@@ -1,10 +1,15 @@
+# Note: this workflow has been copied from node-ci.yml
+# That workflow runs for main, this one runs for gles-2 due to
+# the lacking OpenGL ES 3.0 support on macOS.
+# Once the Metal backend is completed this workflow can be removed.
+
 name: node-ci
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - gles-2
     tags:
       - 'node-*'
     paths:
@@ -30,7 +35,7 @@ on:
 
   pull_request:
     branches:
-      - main
+      - gles-2
     paths:
       - "platform/default/**"
       - 'platform/node/**'
@@ -64,12 +69,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-20.04
+          - runs-on: macos-12
             arch: x86_64
-          - runs-on: [self-hosted, linux, ARM64]
+          - runs-on: macos-12-arm
             arch: arm64
-          - runs-on: windows-2022
-            arch: x86_64
     continue-on-error: true
     env:
       BUILDTYPE: 'Release'
