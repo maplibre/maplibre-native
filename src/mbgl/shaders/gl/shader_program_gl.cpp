@@ -125,27 +125,28 @@ UniqueVertexArray ShaderProgramGL::buildVAO(const gfx::VertexAttributeArray& ove
     std::vector<GLuint> vbos(vertexAttributes.size());
     MBGL_CHECK_ERROR(glGenBuffers(static_cast<GLsizei>(vbos.size()), &vbos[0]));
 
-    std::size_t i = 0;
-    for (auto& kv : vertexAttributes) {
-        const auto& name = kv.first;
-        auto& defaultAttr = static_cast<gl::VertexAttributeGL&>(*kv.second);
+    std::size_t index = 0;
+    vertexAttributes.resolve(overrides, [&](const std::string& /*name*/,
+                                            const gfx::VertexAttribute& defaultAttr,
+                                            const gfx::VertexAttribute* overrideAttr) {
 
-        auto *effectiveAttr = &defaultAttr;
-        if (auto overrideAttr = overrides.get(name)) {
-            effectiveAttr = static_cast<gl::VertexAttributeGL*>(overrideAttr);
-        }
+        const auto& effectiveAttr = *(overrideAttr ? overrideAttr : &defaultAttr);
+        const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
+        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
 
-        MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vbos[i]));
+        MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vbos[index]));
 
-        const auto& rawData = effectiveAttr->getRaw();
+        const auto& rawData = effectiveGL.getRaw();
         MBGL_CHECK_ERROR(glVertexAttribPointer(
             static_cast<GLuint>(defaultAttr.getIndex()),
             static_cast<GLint>(rawData.size()),
-            defaultAttr.getGLType(),
-            effectiveAttr->getNormalized() ? GL_TRUE : GL_FALSE,
-            static_cast<GLsizei>(effectiveAttr->getStride()),
+            defaultGL.getGLType(),
+            effectiveGL.getNormalized() ? GL_TRUE : GL_FALSE,
+            static_cast<GLsizei>(effectiveGL.getStride()),
             &rawData[0]));
-    }
+        
+        index += 1;
+    });
     //MBGL_CHECK_ERROR(glDisableVertexAttribArray());
     //MBGL_CHECK_ERROR(glUnbindVertexArray());
 

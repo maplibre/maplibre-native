@@ -32,13 +32,13 @@ public:
     void setNormalized(bool value) { normalized = value; }
 
     std::size_t getStride() const { return stride; }
-    const std::vector<uint8_t>& getRaw();
+    const std::vector<uint8_t>& getRaw() const;
 
 private:
     platform::GLenum glType = 0;
-    int stride = 0;
     bool normalized = false;
-    std::vector<uint8_t> rawData;
+    mutable int stride = 0;
+    mutable std::vector<uint8_t> rawData;
 };
 
 /// Stores a collection of vertex attributes by name

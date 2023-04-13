@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -77,7 +78,10 @@ protected:
 
 protected:
     int index;
-    bool dirty = true;
+
+    /// indicates that a value has changed and any cached result should be discarded
+    mutable bool dirty = true;
+
     AttributeDataType dataType;
     std::vector<ElementType> items;
 };
@@ -93,44 +97,25 @@ public:
     virtual ~VertexAttributeArray() = default;
 
     std::size_t size() const { return attrs.size(); }
-    AttributeMap::const_iterator begin() const { return attrs.begin(); }
-    AttributeMap::const_iterator end() const { return attrs.end(); }
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* get(const std::string& name) const {
-        const auto result = attrs.find(name);
-        return (result != attrs.end()) ? result->second.get() : nullptr;
-    }
+    VertexAttribute* get(const std::string& name) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* add(std::string name, int index, AttributeDataType dataType, std::size_t count) {
-        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
-        if (result.second) {
-            result.first->second = create(index, dataType, count);
-            return result.first->second.get();
-        } else {
-            return nullptr;
-        }
-    }
+    VertexAttribute* add(std::string name, int index, AttributeDataType, std::size_t count);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* getOrAdd(std::string name, int index, AttributeDataType dataType, std::size_t count) {
-        //attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
-        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
-        if (result.second) {
-            result.first->second = create(index, dataType, count);
-        } else if (result.first->second->getDataType() != dataType ||
-                   result.first->second->getCount() != count) {
-            return nullptr;
-        }
-        return result.first->second.get();
-    }
+    VertexAttribute* getOrAdd(std::string name, int index, AttributeDataType, std::size_t count);
+
+    using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const VertexAttribute*)>;
+    /// Call the provided delegate with each value, providing the override if one exists.
+    void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
     VertexAttributeArray& operator=(VertexAttributeArray &&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);

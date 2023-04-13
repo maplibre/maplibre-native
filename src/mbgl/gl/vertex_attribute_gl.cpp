@@ -43,7 +43,7 @@ static const void* getPtr(const gfx::VertexAttribute::ElementType& element, GLen
     }
 }
 
-const std::vector<uint8_t>& VertexAttributeGL::getRaw() {
+const std::vector<uint8_t>& VertexAttributeGL::getRaw() const {
     if (dirty) {
         const auto count = getCount();
         const auto sizes = getSizeAndStride(getGLType());
