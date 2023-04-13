@@ -96,6 +96,35 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
+        
+        for (const auto& pair : orchestrator.getDrawables()) {
+            auto& drawable = *pair.second;
+            
+            // TODO: if (drawable vao is stale ...
+            
+            // TODO: avoid having to do this twice
+            if (!drawable.getShaderID().empty()) {
+                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
+                    
+                    auto& defaults = shader->getVertexAttributes();
+                    auto& overrides = drawable.getVertexAttributes();
+                    
+                    const auto usage = gfx::BufferUsageType::StaticDraw;
+                    auto attributeBindings = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+
+                    std::size_t indexCount = 0;
+                    int indexSize = 0;
+                    void* indexData = nullptr;
+                    auto indexBuffer = gfx::IndexBuffer{ indexCount, uploadPass->createIndexBufferResource(indexData, indexSize, usage) };
+
+                    auto& glContext = static_cast<gl::Context&>(context);
+                    auto vertexArray = glContext.createVertexArray();
+                    vertexArray.bind(glContext, indexBuffer, attributeBindings);
+                    
+                    // TODO: Store with drawable?
+                }
+            }
+        }
     }
 
     // - 3D PASS -------------------------------------------------------------------------------------
@@ -161,13 +190,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             const auto& drawable = *pair.second;
             
             if (!drawable.getShaderID().empty()) {
+                // if shader != currentShader
                 if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
                     // Context.activate(shader)
-                    // if (vao missing or stale)
-                    auto newVAO = shader->buildVAO(drawable.getVertexAttributes());
                 }
-                // Context.bind(vao)
             }
+
+            // Context.bind(drawable vao)
 
             drawable.draw(parameters);
         }

@@ -114,44 +114,5 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     return std::make_shared<ShaderProgramGL>(std::move(program));
 }
 
-UniqueVertexArray ShaderProgramGL::buildVAO(const gfx::VertexAttributeArray& overrides) {
-    using namespace platform;
-
-    GLuint vao = 0;
-    //MBGL_CHECK_ERROR(glGenVertexArray(&vao));
-    //MBGL_CHECK_ERROR(glBindVertexArray(vao));
-    //MBGL_CHECK_ERROR(glEnableVertexAttribArray(vao));
-    
-    std::vector<GLuint> vbos(vertexAttributes.size());
-    MBGL_CHECK_ERROR(glGenBuffers(static_cast<GLsizei>(vbos.size()), &vbos[0]));
-
-    std::size_t index = 0;
-    vertexAttributes.resolve(overrides, [&](const std::string& /*name*/,
-                                            const gfx::VertexAttribute& defaultAttr,
-                                            const gfx::VertexAttribute* overrideAttr) {
-
-        const auto& effectiveAttr = *(overrideAttr ? overrideAttr : &defaultAttr);
-        const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
-        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
-
-        MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vbos[index]));
-
-        const auto& rawData = effectiveGL.getRaw();
-        MBGL_CHECK_ERROR(glVertexAttribPointer(
-            static_cast<GLuint>(defaultAttr.getIndex()),
-            static_cast<GLint>(rawData.size()),
-            defaultGL.getGLType(),
-            effectiveGL.getNormalized() ? GL_TRUE : GL_FALSE,
-            static_cast<GLsizei>(effectiveGL.getStride()),
-            &rawData[0]));
-        
-        index += 1;
-    });
-    //MBGL_CHECK_ERROR(glDisableVertexAttribArray());
-    //MBGL_CHECK_ERROR(glUnbindVertexArray());
-
-    return UniqueVertexArray(vao+0, detail::VertexArrayDeleter()); // UniqueVertexArrayState?
-}
-
 } // namespace gl
 } // namespace mbgl

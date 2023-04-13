@@ -3,6 +3,7 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
@@ -111,6 +112,48 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
     MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, size.width, size.height,
                                      Enum<gfx::TexturePixelType>::to(format),
                                      Enum<gfx::TextureChannelDataType>::to(type), data));
+}
+
+
+AttributeBindingArray UploadPass::buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
+                                                         const gfx::VertexAttributeArray& overrides,
+                                                         const gfx::BufferUsageType usage) {
+    
+    AttributeBindingArray bindings;
+    bindings.reserve(defaults.size());
+
+    std::vector<std::uint8_t> allData;
+    constexpr auto ExpectedSize = 32;
+    allData.reserve(defaults.size() * ExpectedSize);
+
+    defaults.resolve(overrides, [&](const std::string& /*name*/,
+                                    const gfx::VertexAttribute& defaultAttr,
+                                    const gfx::VertexAttribute* overrideAttr) {
+        
+        const auto& effectiveAttr = *(overrideAttr ? overrideAttr : &defaultAttr);
+        const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
+        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
+        const auto& rawData = effectiveGL.getRaw();
+        const auto offset = static_cast<uint8_t>(allData.size());
+
+        bindings.emplace_back(gfx::AttributeBinding{
+            gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
+            static_cast<uint8_t>(effectiveGL.getStride()),
+            nullptr,
+            static_cast<uint32_t>(defaultGL.getIndex())
+        });
+
+        allData.insert(allData.begin(), rawData.begin(), rawData.end());
+    });
+
+    auto vertexBuffer = createVertexBufferResource(&allData[0], allData.size(), usage);
+    
+    std::for_each(bindings.begin(), bindings.end(),
+                  [&](auto& binding){ binding->vertexBufferResource = vertexBuffer.get(); });
+
+    // TODO: who owns vertexBuffer?
+
+    return bindings;
 }
 
 void UploadPass::pushDebugGroup(const char* name) {

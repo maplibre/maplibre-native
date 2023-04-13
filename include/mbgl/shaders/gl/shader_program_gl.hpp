@@ -24,8 +24,6 @@ public:
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
-    UniqueVertexArray buildVAO(const gfx::VertexAttributeArray& overrides);
-
 protected:
     UniqueProgram glProgram;
     
