@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
       - opengl-2
     tags:
       - 'macos-*'
@@ -27,7 +26,6 @@ on:
 
   pull_request:
     branches:
-      - main
       - opengl-2
     paths:
       - 'platform/ios/**'
@@ -133,7 +131,6 @@ jobs:
           ctest -VV --test-dir $BUILD_DIR -R mbgl-test-runner
         env:
           BUILD_DIR: ../../../maplibre-gl-native-macostestbuild
-        if: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Check public symbols
         run: make darwin-check-public-symbols
