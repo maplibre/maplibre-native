@@ -52,14 +52,19 @@ protected:
     }
 
 public:
-    int getIndex() const { return index; }
+    ~VertexAttribute() = default;
 
+    int getIndex() const { return index; }
+    std::size_t getCount() const { return items.size(); }
     AttributeDataType getDataType() const { return dataType; }
 
-    std::size_t getCount() const { return items.size(); }
+    const ElementType& get(std::size_t i) const { return items[i]; }
 
-    ElementType& at(std::size_t i) { return items[i]; }
-    const ElementType& at(std::size_t i) const { return items[i]; }
+    template <typename T>
+    const ElementType& set(std::size_t i, T value) {
+        dirty = true;   // need to rebuild the raw data next time
+        return items[i] = value;
+    }
 
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
@@ -70,8 +75,9 @@ protected:
         return *this;
     }
 
-private:
+protected:
     int index;
+    bool dirty = true;
     AttributeDataType dataType;
     std::vector<ElementType> items;
 };

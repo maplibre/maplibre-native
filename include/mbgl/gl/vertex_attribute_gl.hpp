@@ -13,24 +13,32 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-        : VertexAttribute(index_, dataType_, count_) {
+    : VertexAttribute(index_, dataType_, count_) {
     }
     VertexAttributeGL(const VertexAttributeGL& other)
-        : VertexAttribute(other),
-          glType(other.glType) {
+    : VertexAttribute(other),
+    glType(other.glType) {
     }
     VertexAttributeGL(VertexAttributeGL&& other)
-        : VertexAttribute(std::move(other)),
-          glType(other.glType) {
+    : VertexAttribute(std::move(other)),
+    glType(other.glType) {
     }
-
+    
 public:
     platform::GLenum getGLType() const { return glType; }
     void setGLType(platform::GLenum value) { glType = value; }
 
+    bool getNormalized() const { return normalized; }
+    void setNormalized(bool value) { normalized = value; }
+
+    std::size_t getStride() const { return stride; }
+    const std::vector<uint8_t>& getRaw();
 
 private:
     platform::GLenum glType = 0;
+    int stride = 0;
+    bool normalized = false;
+    std::vector<uint8_t> rawData;
 };
 
 /// Stores a collection of vertex attributes by name

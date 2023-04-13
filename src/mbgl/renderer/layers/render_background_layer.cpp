@@ -159,10 +159,13 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
             if (shader) {
                 // Set default values
                 if (auto *attr = shader->getVertexAttributes().get("a")) {
-                    attr->at(0) = 12.3f;
+                    attr->set(0, 12.3f);
                 }
                 if (auto *attr = shader->getVertexAttributes().get("b")) {
-                    attr->at(0) = 123;
+                    attr->set(0, 123);
+                }
+                if (auto *attr = shader->getVertexAttributes().get("f")) {
+                    attr->set(0, gfx::VertexAttribute::matf2{ 1.0f, 2.0f, 3.0f, 4.0f });
                 }
 
                 // Add to the registry

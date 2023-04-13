@@ -126,30 +126,25 @@ UniqueVertexArray ShaderProgramGL::buildVAO(const gfx::VertexAttributeArray& ove
     MBGL_CHECK_ERROR(glGenBuffers(static_cast<GLsizei>(vbos.size()), &vbos[0]));
 
     std::size_t i = 0;
-    for (const auto& kv : vertexAttributes) {
+    for (auto& kv : vertexAttributes) {
         const auto& name = kv.first;
-        const auto& defaultAttr = static_cast<const gl::VertexAttributeGL&>(*kv.second);
-        
+        auto& defaultAttr = static_cast<gl::VertexAttributeGL&>(*kv.second);
+
         auto *effectiveAttr = &defaultAttr;
         if (auto overrideAttr = overrides.get(name)) {
-            effectiveAttr = static_cast<const gl::VertexAttributeGL*>(overrideAttr);
+            effectiveAttr = static_cast<gl::VertexAttributeGL*>(overrideAttr);
         }
 
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vbos[i]));
-        
-        // TODO: prepare buffer
-        const GLvoid* rawData = &effectiveAttr->at(0);
-        const GLint rawDataSize = 0;
-        const GLsizei rawDataStride = 0;
-        constexpr GLboolean normalized = GL_FALSE;  // ?
-        
+
+        const auto& rawData = effectiveAttr->getRaw();
         MBGL_CHECK_ERROR(glVertexAttribPointer(
             static_cast<GLuint>(defaultAttr.getIndex()),
-            rawDataSize,
+            static_cast<GLint>(rawData.size()),
             defaultAttr.getGLType(),
-            normalized,
-            rawDataStride,
-            rawData));
+            effectiveAttr->getNormalized() ? GL_TRUE : GL_FALSE,
+            static_cast<GLsizei>(effectiveAttr->getStride()),
+            &rawData[0]));
     }
     //MBGL_CHECK_ERROR(glDisableVertexAttribArray());
     //MBGL_CHECK_ERROR(glUnbindVertexArray());
