@@ -8,6 +8,8 @@
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 namespace gl {
 
