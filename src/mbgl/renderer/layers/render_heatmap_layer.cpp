@@ -82,20 +82,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         assert(colorRampTexture);
 
         if (!renderTexture || renderTexture->getSize() != size) {
-            renderTexture.reset();
-            if (parameters.context.supportsHalfFloatTextures) {
-                renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::HalfFloat);
-
-                if (!renderTexture->isRenderable()) {
-                    // can't render to a half-float texture; falling back to unsigned byte one
-                    renderTexture.reset();
-                    parameters.context.supportsHalfFloatTextures = false;
-                }
-            }
-
-            if (!renderTexture) {
-                renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte);
-            }
+            renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::HalfFloat);
         }
 
         auto renderPass = parameters.encoder->createRenderPass(

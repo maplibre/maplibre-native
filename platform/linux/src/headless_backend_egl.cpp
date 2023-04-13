@@ -37,9 +37,7 @@ public:
         }
 
         const EGLint attribs[] = {
-#if MBGL_USE_GLES2
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-#endif
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
             EGL_NONE
         };
@@ -77,7 +75,7 @@ public:
         // objects and also to write vertex and fragment shaders in the OpenGL ES
         // Shading Language.
         const EGLint attribs[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 2,
+                EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL_NONE
         };
 

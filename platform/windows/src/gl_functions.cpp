@@ -6,13 +6,8 @@
 #define GL_GLEXT_PROTOTYPES
 #endif
 
-#ifndef MBGL_USE_GLES2
-#include <GL/gl.h>
-#include <GL/glext.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
 
 namespace mbgl {
 namespace platform {
@@ -156,15 +151,6 @@ void (* const glVertexAttrib4f)(GLuint, GLfloat, GLfloat, GLfloat, GLfloat) = ::
 void (* const glVertexAttrib4fv)(GLuint, const GLfloat *) = ::glVertexAttrib4fv;
 void (* const glVertexAttribPointer)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void *) = ::glVertexAttribPointer;
 void (* const glViewport)(GLint, GLint, GLsizei, GLsizei) = ::glViewport;
-
-#ifndef MBGL_USE_GLES2
-void (* const glDrawPixels)(GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = ::glDrawPixels;
-void (* const glGetDoublev)(GLenum, GLdouble *) = ::glGetDoublev;
-void (* const glPixelTransferf)(GLenum, GLfloat) = ::glPixelTransferf;
-void (* const glPixelZoom)(GLfloat, GLfloat) = ::glPixelZoom;
-void (* const glPointSize)(GLfloat) = ::glPointSize;
-void (* const glRasterPos4d)(GLdouble, GLdouble, GLdouble, GLdouble) = ::glRasterPos4d;
-#endif
 
 }  // namespace platform
 }  // namespace mbgl

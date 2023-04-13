@@ -10,7 +10,7 @@ namespace gl {
 class EAGLBackendImpl : public HeadlessBackend::Impl {
 public:
     EAGLBackendImpl() {
-        glContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        glContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
         if (glContext == nil) {
             throw std::runtime_error("Error creating GL context object");
         }
