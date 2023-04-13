@@ -1,5 +1,5 @@
 # Note: this workflow has been copied from node-ci.yml
-# That workflow runs for main, this one runs for gles-2 due to
+# That workflow runs for main, this one runs for opengl-2 due to
 # the lacking OpenGL ES 3.0 support on macOS.
 # Once the Metal backend is completed this workflow can be removed.
 
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - gles-2
+      - opengl-2
     tags:
       - 'node-*'
     paths:
@@ -35,7 +35,7 @@ on:
 
   pull_request:
     branches:
-      - gles-2
+      - opengl-2
     paths:
       - "platform/default/**"
       - 'platform/node/**'
