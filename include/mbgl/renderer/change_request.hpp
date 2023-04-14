@@ -3,6 +3,7 @@
 #include <mbgl/util/identity.hpp>
 
 #include <memory>
+#include <vector>
 
 namespace mbgl {
 
