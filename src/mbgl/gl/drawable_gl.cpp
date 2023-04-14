@@ -16,6 +16,20 @@ void DrawableGL::draw(const PaintParameters &parameters) const
     impl->draw(parameters);
 }
 
+void DrawableGL::setVertData(std::vector<std::uint8_t> vertexData_,
+                             std::vector<std::uint16_t> indexes_) {
+    impl->vertData = std::move(vertexData_);
+    impl->indexes = std::move(indexes_);
+}
+
+std::vector<std::uint16_t>& DrawableGL::getIndexData() const {
+    return impl->indexes;
+}
+
+const gl::VertexArray& DrawableGL::getVertexArray() const {
+    return impl->vertexArray;
+}
+
 void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
                                 gfx::UniqueVertexBufferResource&& attributeBuffer_,
                                 gfx::IndexBuffer&& indexBuffer_) {

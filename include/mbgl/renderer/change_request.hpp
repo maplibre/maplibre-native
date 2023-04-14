@@ -30,6 +30,8 @@ protected:
 };
 
 using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
+using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
+using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 
 
 /**

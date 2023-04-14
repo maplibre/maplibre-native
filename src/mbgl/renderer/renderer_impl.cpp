@@ -100,33 +100,41 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         
         for (const auto& pair : orchestrator.getDrawables()) {
             auto& drawable = *pair.second;
-            
-            // TODO: if (drawable vao is stale ...
-            
-            // TODO: avoid having to do this twice
-            if (!drawable.getShaderID().empty()) {
-                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
-                    
-                    auto& defaults = shader->getVertexAttributes();
-                    auto& overrides = drawable.getVertexAttributes();
-                    
-                    const auto usage = gfx::BufferUsageType::StaticDraw;
-                    auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
-                    auto& attributeBindings = bindingsAndBuffer.first;
-                    auto& attributeBuffer = bindingsAndBuffer.second;
 
-                    std::size_t indexCount = 0;
-                    int indexSize = 0;
-                    void* indexData = nullptr;
-                    auto indexBuffer = gfx::IndexBuffer{ indexCount, uploadPass->createIndexBufferResource(indexData, indexSize, usage) };
+            // Run tweakers to update any dynamic elements
+            for (auto& tweaker : drawable.getTweakers()) {
+                tweaker->execute(drawable, parameters);
+            }
+
+            // Generate a vertex array object for the drawable state, if necessary
+            auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
+            if (!drawableGL.getVertexArray().isValid() && !drawable.getShaderID().empty()) {
+                // TODO: avoid having to do this lookup twice
+                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
+                    const auto usage = gfx::BufferUsageType::StaticDraw;
+
+                    // Build index buffer
+                    const auto& indexData = drawable.getIndexData();
+                    auto indexBuffer = gfx::IndexBuffer {
+                        indexData.size(),
+                        uploadPass->createIndexBufferResource(
+                            &indexData[0],
+                            indexData.size() * sizeof(indexData[0]),
+                            usage)
+                    };
+
+                    // Apply drawable values to shader defaults
+                    const auto& defaults = shader->getVertexAttributes();
+                    const auto& overrides = drawable.getVertexAttributes();
+                    auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
 
                     auto& glContext = static_cast<gl::Context&>(context);
                     auto vertexArray = glContext.createVertexArray();
-                    vertexArray.bind(glContext, indexBuffer, attributeBindings);
-
-                    auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
-                    //gl::VertexArray&&, std::unique_ptr<mbgl::gfx::VertexBufferResource>&&, gfx::IndexBuffer&&
-                    drawableGL.setVertexArray(std::move(vertexArray), std::move(attributeBuffer), std::move(indexBuffer));
+                    vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
+                    
+                    drawableGL.setVertexArray(std::move(vertexArray),
+                                              std::move(bindingsAndBuffer.second),
+                                              std::move(indexBuffer));
                 }
             }
         }
@@ -170,16 +178,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             color = renderTreeParameters.backgroundColor;
         }
         parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
-    }
-
-    // Update drawables
-    {
-        for (const auto& pair : orchestrator.getDrawables()) {
-            auto& drawable = pair.second;
-            for (auto& tweaker : drawable->getTweakers()) {
-                tweaker->execute(*drawable, parameters);
-            }
-        }
     }
 
     // Actually render the layers

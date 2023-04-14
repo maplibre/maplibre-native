@@ -11,7 +11,9 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace mbgl {
 namespace gl {
@@ -38,6 +40,9 @@ public:
     ShaderID shaderId;
     RenderbufferID renderTarget;
     std::vector<TextureID> textures;
+
+    std::vector<std::uint8_t> vertData;
+    std::vector<std::uint16_t> indexes;
 
     VertexArray vertexArray = { { nullptr, false } };
     gfx::IndexBuffer indexBuffer = { 0, nullptr };

@@ -53,10 +53,6 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 }
 
-std::vector<std::unique_ptr<ChangeRequest>> RenderLayer::buildChanges() {
-    return {};
-}
-
 std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }

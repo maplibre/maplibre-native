@@ -113,9 +113,6 @@ public:
 
     virtual void prepare(const LayerPrepareParameters&);
 
-    /// Produce any necessary change requests
-    virtual std::vector<std::unique_ptr<ChangeRequest>> buildChanges();
-
     const LayerPlacementData& getPlacementData() const { return placementData; }
 
     // Latest evaluated properties.

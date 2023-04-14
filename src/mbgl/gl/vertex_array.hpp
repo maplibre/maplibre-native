@@ -71,6 +71,8 @@ public:
         return *this;
     }
 
+    bool isValid() const { return state.operator bool(); }
+
 private:
     UniqueVertexArrayState state;
 };

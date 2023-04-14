@@ -3,6 +3,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -44,6 +45,8 @@ public:
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
+
+    virtual std::vector<std::uint16_t>& getIndexData() const = 0;
 
     /// Attach a tweaker to be run on this drawable for each frame
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }

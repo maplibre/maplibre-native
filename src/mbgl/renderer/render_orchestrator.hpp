@@ -82,6 +82,8 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
 
+    void update(const std::shared_ptr<UpdateParameters>&);
+
     using DrawableMap = std::map<util::SimpleIdentity, gfx::DrawablePtr>;
     const DrawableMap& getDrawables() const { return drawables; }
 

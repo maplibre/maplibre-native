@@ -1,7 +1,5 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gl/drawable_gl_builder.hpp>
-#include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
@@ -57,55 +55,6 @@ void RenderBackgroundLayer::evaluate(
         : RenderPass::Opaque | RenderPass::Translucent;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-}
-
-std::vector<std::unique_ptr<ChangeRequest>> RenderBackgroundLayer::buildChanges() {
-    std::vector<std::unique_ptr<ChangeRequest>> reqs;
-    if (!drawable /* && visible/enabled */) {
-        auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method
-
-        builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across many drawables
-        
-        //gfx::VertexVector<gfx::VertexType<attributes::pos>> tileVertics;
-        //tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());
-        //gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices
-
-        //gfx::VertexVector<gfx::Vertex<TypeList<attributes::pos>>> x;
-        //gfx::VertexVector<gfx::detail::Vertex<TypeList<attributes::pos>>::Type> y;
-
-        //gfx::detail::Vertex<TypeList<attributes::pos>> a;
-        //gfx::VertexVector<gfx::detail::Vertex<TypeList<attributes::pos>>> b;
-        //b.emplace_back(a);
-
-        //using VT = gfx::detail::VertexType<gfx::AttributeType<short,2>>;
-        //gfx::VertexVector<VT> tileVertices = [](){
-        //    gfx::VertexVector<VT> result;
-        //    result.emplace_back(VT({{{            0,            0 }}}));
-        //    result.emplace_back(VT({{{ util::EXTENT,            0 }}}));
-        //    result.emplace_back(VT({{{            0, util::EXTENT }}}));
-        //    result.emplace_back(VT({{{ util::EXTENT, util::EXTENT }}}));
-        //    return result;
-        //}();
-
-        //gfx::IndexVector<gfx::Triangles> result;    // uploadPass.createIndexBuffer(quadTriangleIndices());
-        //result.emplace_back(0, 1, 2);
-        //result.emplace_back(1, 2, 3);
-
-        ////SegmentVector<BackgroundAttributes> segs;   // RenderStaticData::tileTriangleSegments
-        //SegmentVector<TypeList<void>> segs;   // type is actually ignorable here
-        //segs.emplace_back(/*vertexOffset=*/0, /*indexOffset=*/0, /*vertexLength=*/4, /*indexLength=*/6);
-
-        builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
-
-        builder->flush();
-
-        for (auto &draw : builder->clearDrawables()) {
-            reqs.emplace_back(std::make_unique<AddDrawableRequest>(std::move(draw)));
-        }
-    //} else if (drawable && !visible/enabled) {
-    //    return { std::make_unique<RemoveDrawableRequest>(std::move(drawable)) };
-    }
-    return reqs;
 }
 
 bool RenderBackgroundLayer::hasTransition() const {

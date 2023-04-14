@@ -264,11 +264,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
-
-            auto layerChanges = layer.buildChanges();
-            pendingChanges.insert(pendingChanges.end(), std::make_move_iterator(layerChanges.begin()),
-                                                        std::make_move_iterator(layerChanges.end()));
-
         }
     }
 
@@ -729,6 +724,22 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
+void RenderOrchestrator::update(const std::shared_ptr<UpdateParameters>& parameters) {
+    if (!parameters) {
+        return;
+    }
+    
+    // TODO: Removed layers need a chance to remove their drawables
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+    for (auto& layer : *parameters->layers) {
+        layer->update(changes);
+        pendingChanges.insert(pendingChanges.end(),
+                              std::make_move_iterator(changes.begin()),
+                              std::make_move_iterator(changes.end()));
+        changes.clear();
+    }
+}
+
 void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
     if (drawable) {
         const auto id = drawable->getId();
@@ -741,7 +752,8 @@ void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) 
 }
 
 void RenderOrchestrator::processChanges() {
-    for (auto &change : std::move(pendingChanges)) {
+    auto localChanges = std::move(pendingChanges);
+    for (auto &change : localChanges) {
         change->execute(*this);
     }
 }

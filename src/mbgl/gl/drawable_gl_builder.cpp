@@ -17,9 +17,9 @@ void DrawableGLBuilder::init() {
 
     // temp
     const auto vertSize = sizeof(Impl::VT) + 4 * sizeof(float);
-    std::vector<uint8_t> raw(n * vertSize);
+    std::vector<uint8_t> rawVert(n * vertSize);
 
-    auto p = &raw[0];
+    auto p = &rawVert[0];
     for (auto i = 0ULL; i < n; ++i) {
         *(Impl::VT*)p = impl->vertices.at(i); p += sizeof(Impl::VT);
         *(float*)p = impl->colors[i].r; p += sizeof(float);
@@ -27,8 +27,8 @@ void DrawableGLBuilder::init() {
         *(float*)p = impl->colors[i].b; p += sizeof(float);
         *(float*)p = impl->colors[i].a; p += sizeof(float);
     }
-    
-    ((DrawableGL*)currentDrawable.get())->setVertData(std::move(raw));
+
+    ((DrawableGL*)currentDrawable.get())->setVertData(std::move(rawVert), impl->indexes.vector());
 }
 
 } // namespace gl
