@@ -117,9 +117,10 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
 }
 
 
-AttributeBindingArray UploadPass::buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
-                                                         const gfx::VertexAttributeArray& overrides,
-                                                         const gfx::BufferUsageType usage) {
+std::pair<gfx::AttributeBindingArray, std::unique_ptr<gfx::VertexBufferResource>>
+    UploadPass::buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
+                                       const gfx::VertexAttributeArray& overrides,
+                                       const gfx::BufferUsageType usage) {
     
     AttributeBindingArray bindings;
     bindings.reserve(defaults.size());
@@ -135,27 +136,32 @@ AttributeBindingArray UploadPass::buildAttributeBindings(const gfx::VertexAttrib
         const auto& effectiveAttr = *(overrideAttr ? overrideAttr : &defaultAttr);
         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
-        const auto& rawData = effectiveGL.getRaw();
+
+        // Pad to 16 bytes
+        allData.insert(allData.end(), 16 - allData.size() % 16, 0);
+
         const auto offset = static_cast<uint8_t>(allData.size());
 
         bindings.emplace_back(gfx::AttributeBinding{
             gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
             static_cast<uint8_t>(effectiveGL.getStride()),
-            nullptr,
+            nullptr,    // buffer pointer established later
             static_cast<uint32_t>(defaultGL.getIndex())
         });
 
+        const auto& rawData = effectiveGL.getRaw();
         allData.insert(allData.begin(), rawData.begin(), rawData.end());
     });
 
-    auto vertexBuffer = createVertexBufferResource(&allData[0], allData.size(), usage);
-    
-    std::for_each(bindings.begin(), bindings.end(),
-                  [&](auto& binding){ binding->vertexBufferResource = vertexBuffer.get(); });
+    auto vertBuf = createVertexBufferResource(&allData[0], allData.size(), usage);
 
-    // TODO: who owns vertexBuffer?
+    // Assign to each element
+    std::for_each(bindings.begin(), bindings.end(), [&](auto& b){ b->vertexBufferResource = vertBuf.get(); });
 
-    return bindings;
+    gfx::AttributeBindingArray& a = bindings;
+    std::unique_ptr<gfx::VertexBufferResource>& b = vertBuf;
+    return std::make_pair(std::move(a), std::move(b));
+    //return std::make_pair(bindings, vertBuf);
 }
 
 void UploadPass::pushDebugGroup(const char* name) {

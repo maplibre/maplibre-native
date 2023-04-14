@@ -6,11 +6,21 @@
 #include <memory>
 
 namespace mbgl {
+
+namespace gfx {
+
+class IndexBuffer;
+class VertexBufferResource;
+
+using UniqueVertexBufferResource = std::unique_ptr<gfx::VertexBufferResource>;
+
+} // namespace gfx
+
 namespace gl {
 
-class DrawableGL : public gfx::Drawable {
-    // is-a/has-a DrawScopeResource?
+class VertexArray;
 
+class DrawableGL : public gfx::Drawable {
 public:
     DrawableGL();
     virtual ~DrawableGL();
@@ -27,14 +37,16 @@ public:
         vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
     }
 
+    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&, gfx::IndexBuffer&&);
+
 protected:
     std::vector<std::uint8_t> vertData;
 
     class Impl;
-    const std::unique_ptr<const Impl> impl;
+    const std::unique_ptr<Impl> impl;
 
     // For testing only.
-    DrawableGL(std::unique_ptr<const Impl>);
+    DrawableGL(std::unique_ptr<Impl>);
     
 private:
     VertexAttributeArrayGL vertexAttributes;

@@ -34,7 +34,6 @@ public:
 
     }
 
-protected:
     const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
     ShaderID shaderId;
     RenderbufferID renderTarget;
@@ -42,6 +41,8 @@ protected:
 
     VertexArray vertexArray = { { nullptr, false } };
     gfx::IndexBuffer indexBuffer = { 0, nullptr };
+    gfx::UniqueVertexBufferResource attributeBuffer;
+
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
     mat4 matrix;

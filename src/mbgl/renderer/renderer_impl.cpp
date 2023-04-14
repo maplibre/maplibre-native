@@ -9,6 +9,7 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
@@ -110,7 +111,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                     auto& overrides = drawable.getVertexAttributes();
                     
                     const auto usage = gfx::BufferUsageType::StaticDraw;
-                    auto attributeBindings = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+                    auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+                    auto& attributeBindings = bindingsAndBuffer.first;
+                    auto& attributeBuffer = bindingsAndBuffer.second;
 
                     std::size_t indexCount = 0;
                     int indexSize = 0;
@@ -120,8 +123,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                     auto& glContext = static_cast<gl::Context&>(context);
                     auto vertexArray = glContext.createVertexArray();
                     vertexArray.bind(glContext, indexBuffer, attributeBindings);
-                    
-                    // TODO: Store with drawable?
+
+                    auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
+                    //gl::VertexArray&&, std::unique_ptr<mbgl::gfx::VertexBufferResource>&&, gfx::IndexBuffer&&
+                    drawableGL.setVertexArray(std::move(vertexArray), std::move(attributeBuffer), std::move(indexBuffer));
                 }
             }
         }

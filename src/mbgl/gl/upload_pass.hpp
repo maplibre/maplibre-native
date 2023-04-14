@@ -34,9 +34,10 @@ public:
                                                                         gfx::BufferUsageType) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
-    gfx::AttributeBindingArray buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
-                                                      const gfx::VertexAttributeArray& overrides,
-                                                      gfx::BufferUsageType) override;
+    std::pair<gfx::AttributeBindingArray, std::unique_ptr<gfx::VertexBufferResource>>
+        buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
+                               const gfx::VertexAttributeArray& overrides,
+                               gfx::BufferUsageType) override;
 
 public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;

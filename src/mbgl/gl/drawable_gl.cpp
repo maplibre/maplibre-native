@@ -16,5 +16,13 @@ void DrawableGL::draw(const PaintParameters &parameters) const
     impl->draw(parameters);
 }
 
+void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
+                                gfx::UniqueVertexBufferResource&& attributeBuffer_,
+                                gfx::IndexBuffer&& indexBuffer_) {
+    impl->vertexArray = std::move(vertexArray_);
+    impl->attributeBuffer = std::move(attributeBuffer_);
+    impl->indexBuffer = std::move(indexBuffer_);
+}
+
 } // namespace gl
 } // namespace mbgl
