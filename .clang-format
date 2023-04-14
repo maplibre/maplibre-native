@@ -1,15 +1,11 @@
 ---
-BasedOnStyle: Chromium
-ColumnLimit: '100'
-FixNamespaceComments: 'true'
-IncludeBlocks: Preserve
-IndentWidth: '4'
-KeepEmptyLinesAtTheStartOfBlocks: 'false'
 Language: Cpp
-NamespaceIndentation: None
-PointerAlignment: Left
-ReflowComments: 'true'
-SortIncludes: 'true'
-TabWidth: '4'
-
+BasedOnStyle: Google
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Inline
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 120
+IndentWidth: 4
+SpacesBeforeTrailingComments: 1
 ...
