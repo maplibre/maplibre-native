@@ -178,7 +178,6 @@ private:
 
 public:
     VertexArray createVertexArray();
-    bool supportsVertexArrays() const;
 
 private:
     friend detail::ProgramDeleter;

@@ -193,6 +193,7 @@
 #define GL_FIXED                                         0x140C
 
 /* PixelFormat */
+#define GL_STENCIL_INDEX                                 0x1901
 #define GL_DEPTH_COMPONENT                               0x1902
 #define GL_ALPHA                                         0x1906
 #define GL_RGB                                           0x1907
@@ -725,6 +726,6 @@
 #define GL_NUM_SAMPLE_COUNTS                             0x9380
 #define GL_TEXTURE_IMMUTABLE_LEVELS                      0x82DF
 
+/* OpenGL ES Extensions */
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT                    0x84FE
-#define GL_STENCIL_INDEX                                 0x1901
