@@ -259,8 +259,8 @@ struct BindElementBuffer {
 struct BindVertexArray {
     using Type = gl::VertexArrayID;
     static const constexpr Type Default = 0;
-    static void Set(const Type&, const Context&);
-    static Type Get(const Context&);
+    static void Set(const Type&);
+    static Type Get();
 };
 
 struct VertexAttribute {

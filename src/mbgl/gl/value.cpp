@@ -1,7 +1,7 @@
 #include <mbgl/gl/value.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
-#include <mbgl/gl/vertex_array_extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
 
 namespace mbgl {
@@ -378,27 +378,13 @@ BindElementBuffer::Type BindElementBuffer::Get() {
 
 const constexpr BindVertexArray::Type BindVertexArray::Default;
 
-void BindVertexArray::Set(const Type& value, const Context& context) {
-    if (auto vertexArray = context.getVertexArrayExtension()) {
-        if (vertexArray->bindVertexArray) {
-            MBGL_CHECK_ERROR(vertexArray->bindVertexArray(value));
-        }
-    }
+void BindVertexArray::Set(const Type& value) {
+    MBGL_CHECK_ERROR(glBindVertexArray(value));
 }
 
-BindVertexArray::Type BindVertexArray::Get(const Context& context) {
+BindVertexArray::Type BindVertexArray::Get() {
     GLint binding = 0;
-    if (context.getVertexArrayExtension()) {
-#ifdef GL_VERTEX_ARRAY_BINDING
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &binding));
-#elif GL_VERTEX_ARRAY_BINDING_OES
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, &binding));
-#elif GL_VERTEX_ARRAY_BINDING_ARB
-        MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING_ARB, &binding));
-#elif GLVERTEX_ARRAY_BINDING_APPLE
-        MBGL_CHECK_ERROR(glGetIntegerv(GLVERTEX_ARRAY_BINDING_APPLE, &binding));
-#endif
-    }
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &binding));
     return binding;
 }
 
