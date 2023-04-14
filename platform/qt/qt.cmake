@@ -101,10 +101,10 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.hpp>
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/local_glyph_rasterizer.cpp

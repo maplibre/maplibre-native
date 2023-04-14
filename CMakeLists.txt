@@ -1090,19 +1090,11 @@ add_library(
     Mapbox::Map ALIAS mbgl-core
 )
 
-if(MBGL_WITH_PLATFORM_EXTRAS)
-    include(${MBGL_WITH_PLATFORM_EXTRAS})
-endif()
-
 if(MBGL_WITH_CORE_ONLY)
     return()
 endif()
 
 include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
-
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
-    set(MBGL_PUBLIC_BUILD TRUE)
-endif()
 
 if(MBGL_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
@@ -1123,7 +1115,3 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
-
-if(EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
-    include(${PROJECT_SOURCE_DIR}/internal/internal.cmake)
-endif()
