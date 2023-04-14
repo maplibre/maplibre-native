@@ -7,5 +7,7 @@ BinPackArguments: false
 BinPackParameters: false
 ColumnLimit: 120
 IndentWidth: 4
+IncludeBlocks: Preserve
+SortIncludes: false
 SpacesBeforeTrailingComments: 1
 ...
