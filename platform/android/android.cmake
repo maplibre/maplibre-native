@@ -147,7 +147,7 @@ if(ANDROID_NATIVE_API_LEVEL VERSION_LESS 24)
 else()
     target_sources(
         mbgl-test-runner
-        PRIVATE $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
     )
 
     include(${PROJECT_SOURCE_DIR}/vendor/curl.cmake)

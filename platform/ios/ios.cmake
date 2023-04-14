@@ -39,17 +39,11 @@ if(MBGL_WITH_OPENGL)
     )
 endif()
 
-if(MBGL_PUBLIC_BUILD)
-    list(APPEND 
-        PLATFORM_FILES
-            ${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm
-    )
-endif()
-
 list(APPEND 
     PLATFORM_FILES
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/collator.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/image.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/local_glyph_rasterizer.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/logging_nslog.mm
