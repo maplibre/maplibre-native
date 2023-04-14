@@ -138,6 +138,10 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
+    
+    layersAdded.clear();
+    layersRemoved.clear();
+
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     if (!isMapModeContinuous) {
         // Reset zoom history state.
@@ -217,7 +221,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     imageManager->notifyIfMissingImageAdded();
     imageManager->setLoaded(updateParameters->spriteLoaded);
 
-    const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
+    LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
@@ -449,6 +453,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceRenderItems.emplace_back(entry.second->createRenderItem());
         }
     }
+
+    layersAdded = std::move(layerDiff.added);
+    layersRemoved = std::move(layerDiff.removed);
 
     return std::make_unique<RenderTreeImpl>(std::move(renderTreeParameters),
                                             std::move(layerRenderItems),
@@ -733,11 +740,15 @@ void RenderOrchestrator::update(const std::shared_ptr<UpdateParameters>& paramet
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     for (auto& layer : *parameters->layers) {
         layer->update(changes);
-        pendingChanges.insert(pendingChanges.end(),
-                              std::make_move_iterator(changes.begin()),
-                              std::make_move_iterator(changes.end()));
-        changes.clear();
+        addChanges(changes);
     }
+}
+
+void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
+    pendingChanges.insert(pendingChanges.end(),
+                          std::make_move_iterator(changes.begin()),
+                          std::make_move_iterator(changes.end()));
+    changes.clear();
 }
 
 void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
@@ -749,6 +760,18 @@ void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
 
 void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) {
     drawables.erase(drawableId);
+}
+
+void RenderOrchestrator::updateLayers(PaintParameters& parameters) {
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+    for (auto& kv : layersRemoved) {
+        kv.second->layerRemoved(parameters, changes);
+        addChanges(changes);
+    }
+    for (auto& kv : layersAdded) {
+        kv.second->layerAdded(parameters, changes);
+        addChanges(changes);
+    }
 }
 
 void RenderOrchestrator::processChanges() {

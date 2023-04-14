@@ -77,6 +77,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getPatternAtlas()
     };
 
+    orchestrator.updateLayers(parameters);
+
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();

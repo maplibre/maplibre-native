@@ -15,6 +15,8 @@
 namespace mbgl {
 
 class ChangeRequest;
+class PaintParameters;
+
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 
@@ -53,6 +55,9 @@ public:
 
     /// Generate any changes needed by the layer
     virtual void update(UniqueChangeRequestVec&) const { }
+
+    virtual void layerAdded(PaintParameters&, UniqueChangeRequestVec&) const { }
+    virtual void layerRemoved(PaintParameters&, UniqueChangeRequestVec&) const { }
 
     std::string id;
     std::string source;

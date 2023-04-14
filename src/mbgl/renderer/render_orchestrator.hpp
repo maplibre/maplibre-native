@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mbgl {
@@ -41,6 +42,8 @@ namespace gfx {
 namespace style {
     class LayerProperties;
 } // namespace style
+
+using ImmutableLayer = Immutable<style::Layer::Impl>;
 
 class RenderOrchestrator final : public GlyphManagerObserver,
                                  public ImageManagerObserver,
@@ -90,6 +93,8 @@ public:
     void addDrawable(gfx::DrawablePtr);
     void removeDrawable(const util::SimpleIdentity& drawableId);
 
+    void updateLayers(PaintParameters&);
+
     void processChanges();
 
 private:
@@ -119,6 +124,9 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+    /// Move changes into the pending set, clearing the provided collection
+    void addChanges(UniqueChangeRequestVec&);
+
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
@@ -136,6 +144,10 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
+
+    // Layers added and removed in the last update
+    std::unordered_map<std::string, ImmutableLayer> layersAdded;
+    std::unordered_map<std::string, ImmutableLayer> layersRemoved;
 
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;
