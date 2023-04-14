@@ -26,7 +26,7 @@ public:
     bool isConstant() const { return std::holds_alternative<T>(value); }
 
     std::optional<T> constant() const {
-        return std::visit(util::Overload{
+        return std::visit(util::Overloaded{
             [&] (const T& t) { return std::optional<T>(t); },
             [&] (const auto&) { return std::optional<T>(); }},
             value);
@@ -36,7 +36,7 @@ public:
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
-        return std::visit(util::Overload{std::forward<Ts>(ts)...}, value);
+        return std::visit(util::Overloaded{std::forward<Ts>(ts)...}, value);
     }
 
     template <class Feature>
@@ -81,7 +81,7 @@ public:
     }
 
     std::optional<Faded<T>> constant() const {
-        return std::visit(util::Overload{
+        return std::visit(util::Overloaded{
             [&] (const Faded<T>& t) { return std::optional<Faded<T>>(t); },
             [&] (const auto&) { return std::optional<Faded<T>>(); }},
             value);
@@ -91,7 +91,7 @@ public:
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
-        return std::visit(util::Overload{std::forward<Ts>(ts)...}, value);
+        return std::visit(util::Overloaded{std::forward<Ts>(ts)...}, value);
     }
 
     template <class Feature>

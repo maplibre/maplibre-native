@@ -1001,7 +1001,7 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
     std::vector<std::string> overloads;
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();
-        std::visit(util::Overload{
+        std::visit(util::Overloaded{
             [&](const VarargsType& varargs) {
                 std::string overload = "(" + toString(varargs.type) + ")";
                 overloads.push_back(overload);
@@ -1020,8 +1020,13 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
                 } else {
                     availableOverloads.push_back(overload);
                 }
-            }
-        }, signature->params);
+                overload += ")";
+                if (params.size() == args.size()) {
+                    overloads.push_back(overload);
+                } else {
+                    availableOverloads.push_back(overload);
+                }}},
+        signature->params);
     }
     std::string signatures = overloads.empty() ? boost::algorithm::join(availableOverloads, " | ")
                                                : boost::algorithm::join(overloads, " | ");
@@ -1111,7 +1116,7 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
             args.reserve(length - 1);
 
             for (std::size_t i = 1; i < length; i++) {
-                std::optional<type::Type> expected = std::visit(util::Overload{
+                std::optional<type::Type> expected = std::visit(util::Overloaded{
                     [](const VarargsType& varargs) { return varargs.type; },
                     [&](const std::vector<type::Type>& params_) { return params_[i - 1]; }},
                     signature->params
@@ -1176,7 +1181,7 @@ EvaluationResult CompoundExpression::evaluate(const EvaluationContext& evaluatio
 }
 
 std::optional<std::size_t> CompoundExpression::getParameterCount() const {
-    return std::visit(util::Overload{
+    return std::visit(util::Overloaded{
         [&](const VarargsType&) -> std::optional<std::size_t> { return std::nullopt; },
         [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); }},
         signature.params);

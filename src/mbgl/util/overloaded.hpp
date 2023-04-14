@@ -6,12 +6,12 @@ namespace util
 {
     
 template <typename... Ts>
-struct Overload : Ts... {
+struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
 template <class... Ts>
-Overload(Ts...) -> Overload<Ts...>;
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 } // namespace util
 } // namespace mbgl
