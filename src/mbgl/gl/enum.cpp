@@ -265,6 +265,26 @@ platform::GLenum Enum<gfx::TexturePixelType>::to(const gfx::TexturePixelType val
     return GL_INVALID_ENUM;
 }
 
+template <> template<>
+platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixelType value,
+    gfx::TextureChannelDataType type)
+{
+    switch (type) {
+        case gfx::TextureChannelDataType::UnsignedByte: {
+            return Enum<gfx::TexturePixelType>::to(value);
+        }
+        case gfx::TextureChannelDataType::HalfFloat: {
+            switch (value) {
+                case gfx::TexturePixelType::RGBA:
+                    return GL_RGBA16F;
+                default: break;
+            }
+        }
+    }
+
+    return GL_INVALID_ENUM;
+}
+
 template <>
 gfx::TextureChannelDataType Enum<gfx::TextureChannelDataType>::from(const platform::GLint value) {
     switch (value) {
