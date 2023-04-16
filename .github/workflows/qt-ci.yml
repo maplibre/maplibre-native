@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - opengl-2
     tags:
       - 'qt-**'
     paths:
@@ -28,6 +29,7 @@ on:
   pull_request:
     branches:
       - main
+      - opengl-2
     paths:
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"
