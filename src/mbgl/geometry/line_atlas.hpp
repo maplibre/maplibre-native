@@ -2,12 +2,12 @@
 
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/util/image.hpp>
-#include <mbgl/util/variant.hpp>
 
 #include <map>
 #include <memory>
-#include <vector>
 #include <optional>
+#include <variant>
+#include <vector>
 
 namespace mbgl {
 
@@ -54,7 +54,7 @@ public:
 
 private:
     LinePatternPos from, to;
-    variant<AlphaImage, gfx::Texture> texture;
+    std::variant<AlphaImage, gfx::Texture> texture;
 };
 
 class LineAtlas {

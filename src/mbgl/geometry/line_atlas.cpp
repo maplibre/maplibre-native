@@ -5,6 +5,7 @@
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/overloaded.hpp>
 #include <mbgl/util/platform.hpp>
 
 namespace mbgl {
@@ -206,15 +207,15 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 }
 
 void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
-    if (texture.is<AlphaImage>()) {
-        texture = uploadPass.createTexture(texture.get<AlphaImage>());
+    if (std::holds_alternative<AlphaImage>(texture)) {
+        texture = uploadPass.createTexture(std::get<AlphaImage>(texture));
     }
 }
 
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
-    assert(texture.is<gfx::Texture>());
-    return {texture.get<gfx::Texture>().getResource(),
+    assert(std::holds_alternative<gfx::Texture>(texture));
+    return {std::get<gfx::Texture>(texture).getResource(),
             gfx::TextureFilterType::Linear,
             gfx::TextureMipMapType::No,
             gfx::TextureWrapType::Repeat,
@@ -222,7 +223,7 @@ gfx::TextureBinding DashPatternTexture::textureBinding() const {
 }
 
 Size DashPatternTexture::getSize() const {
-    return texture.match([](const auto& obj) { return obj.size; });
+    return std::visit([](const auto& obj) { return obj.size; }, texture);
 }
 
 LineAtlas::LineAtlas() = default;
