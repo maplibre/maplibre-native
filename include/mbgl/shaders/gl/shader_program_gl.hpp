@@ -10,6 +10,7 @@ namespace gl {
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
     ShaderProgramGL(UniqueProgram&& glProgram_);
+    ShaderProgramGL(UniqueProgram&& glProgram_, VertexAttributeArrayGL&& attributes);
     ShaderProgramGL(ShaderProgramGL&& other);
     virtual ~ShaderProgramGL() noexcept = default;
 

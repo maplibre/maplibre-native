@@ -60,6 +60,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     auto& context = backend.getContext();
 
+    // Now that the shader registry is set up, do one-time shader init.
+    // TODO: Both should be done earlier.
+    backend.initShaders(*staticData->shaders);
+
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
