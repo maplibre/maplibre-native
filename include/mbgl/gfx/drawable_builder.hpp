@@ -13,8 +13,10 @@ class Color;
 namespace gfx {
 
 class DrawableTweaker;
+class ShaderProgramBase;
 
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
 /**
     Base class for drawable builders, which construct Drawables from primitives
@@ -54,10 +56,8 @@ public:
     void setColor(const Color& value);
 
     /// Which shader to use when rendering emitted drawables
-    //util::SimpleIdentity getShaderID() const { return shaderID; }
-    //void setShaderID(util::SimpleIdentity value) { shaderID = value; }
-    const std::string& getShaderID() const { return shaderID; }
-    void setShaderID(std::string value) { shaderID = std::move(value); }
+    const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
+    void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
@@ -83,8 +83,7 @@ protected:
 protected:
     DrawPriority drawPriority = 0;
 
-    //util::SimpleIdentity shaderID = util::SimpleIdentity::Empty;
-    std::string shaderID;
+    gfx::ShaderProgramBasePtr shader;
 
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;

@@ -8,9 +8,10 @@
 namespace mbgl {
 namespace gfx {
 
+class BackendScope;
 class Context;
 class Renderable;
-class BackendScope;
+class ShaderRegistry;
 
 // We can make some optimizations if we know that the drawing context is not shared with other code.
 enum class ContextMode : bool {
@@ -39,6 +40,9 @@ public:
 
     /// Returns a reference to the default surface that should be rendered on.
     virtual Renderable& getDefaultRenderable() = 0;
+
+    /// One-time shader initialization
+    virtual void initShaders(gfx::ShaderRegistry&) = 0;
 
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;

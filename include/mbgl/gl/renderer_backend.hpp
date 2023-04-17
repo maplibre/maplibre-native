@@ -19,6 +19,9 @@ public:
     /// Called prior to rendering to update the internally assumed OpenGL state.
     virtual void updateAssumedState() = 0;
 
+    /// One-time shader initialization
+    void initShaders(gfx::ShaderRegistry&) override;
+
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
 
