@@ -5,7 +5,18 @@
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 
+#include <optional>
+#include <memory>
+#include <vector>
+
 namespace mbgl {
+
+namespace gfx {
+    class Drawable;
+    using DrawablePtr = std::shared_ptr<Drawable>;
+}   // namespace gfc
+
+class ChangeRequest;
 
 class RenderBackgroundLayer final : public RenderLayer {
 public:

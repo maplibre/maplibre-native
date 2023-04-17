@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gl/types.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -13,6 +14,7 @@ namespace gl {
 
 class CommandEncoder;
 class Context;
+class VertexArray;
 
 class UploadPass final : public gfx::UploadPass {
 public:
@@ -31,6 +33,11 @@ public:
                                                                         std::size_t size,
                                                                         gfx::BufferUsageType) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
+
+    std::pair<gfx::AttributeBindingArray, std::unique_ptr<gfx::VertexBufferResource>>
+        buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
+                               const gfx::VertexAttributeArray& overrides,
+                               gfx::BufferUsageType) override;
 
 public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,

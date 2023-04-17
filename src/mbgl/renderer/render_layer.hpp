@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -12,6 +13,7 @@
 namespace mbgl {
 
 class Bucket;
+class ChangeRequest;
 class TransitionParameters;
 class PropertyEvaluationParameters;
 class UploadParameters;
@@ -146,6 +148,8 @@ protected:
     RenderPass passes = RenderPass::None;
 
     LayerPlacementData placementData;
+
+    gfx::DrawablePtr drawables;
 
 private:
     // Some layers may not render correctly on some hardware when the vertex
