@@ -2,17 +2,20 @@
 
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/gfx/render_pass.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -73,6 +76,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                                renderTree.getLineAtlas(),
                                renderTree.getPatternAtlas()};
 
+    orchestrator.updateLayers(parameters);
+
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
@@ -93,6 +98,47 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
+        
+        for (const auto& pair : orchestrator.getDrawables()) {
+            auto& drawable = *pair.second;
+
+            // Run tweakers to update any dynamic elements
+            for (auto& tweaker : drawable.getTweakers()) {
+                tweaker->execute(drawable, parameters);
+            }
+
+            // Generate a vertex array object for the drawable state, if necessary
+            auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
+            if (!drawableGL.getVertexArray().isValid() && !drawable.getShaderID().empty()) {
+                // TODO: avoid having to do this lookup twice
+                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
+                    const auto usage = gfx::BufferUsageType::StaticDraw;
+
+                    // Build index buffer
+                    const auto& indexData = drawable.getIndexData();
+                    auto indexBuffer = gfx::IndexBuffer {
+                        indexData.size(),
+                        uploadPass->createIndexBufferResource(
+                            &indexData[0],
+                            indexData.size() * sizeof(indexData[0]),
+                            usage)
+                    };
+
+                    // Apply drawable values to shader defaults
+                    const auto& defaults = shader->getVertexAttributes();
+                    const auto& overrides = drawable.getVertexAttributes();
+                    auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+
+                    auto& glContext = static_cast<gl::Context&>(context);
+                    auto vertexArray = glContext.createVertexArray();
+                    vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
+                    
+                    drawableGL.setVertexArray(std::move(vertexArray),
+                                              std::move(bindingsAndBuffer.second),
+                                              std::move(indexBuffer));
+                }
+            }
+        }
     }
 
     // - 3D PASS
@@ -143,6 +189,27 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
+    // Run changes
+    orchestrator.processChanges();
+    
+    // Draw Drawables
+    {
+        for (const auto &pair : orchestrator.getDrawables()) {
+            const auto& drawable = *pair.second;
+            
+            if (!drawable.getShaderID().empty()) {
+                // if shader != currentShader
+                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
+                    // Context.activate(shader)
+                }
+            }
+
+            // Context.bind(drawable vao)
+
+            drawable.draw(parameters);
+        }
+    }
+    
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {

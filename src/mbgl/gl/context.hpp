@@ -163,8 +163,10 @@ private:
     UniqueFramebuffer createFramebuffer();
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
 
+public:
     VertexArray createVertexArray();
 
+private:
     friend detail::ProgramDeleter;
     friend detail::ShaderDeleter;
     friend detail::BufferDeleter;

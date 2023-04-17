@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/debug_group.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
@@ -8,8 +9,15 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/util/size.hpp>
 
+#include <optional>
+#include <vector>
+
 namespace mbgl {
 namespace gfx {
+
+class VertexAttributeArray;
+
+using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
 
 class UploadPass {
 protected:
@@ -51,12 +59,18 @@ public:
         updateIndexBufferResource(buffer.getResource(), v.data(), v.bytes());
     }
 
+    virtual std::pair<gfx::AttributeBindingArray, std::unique_ptr<gfx::VertexBufferResource>>
+        buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
+                               const gfx::VertexAttributeArray& overrides,
+                               gfx::BufferUsageType) = 0;
+
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,
                                                                              std::size_t size,
                                                                              BufferUsageType) = 0;
     virtual void updateVertexBufferResource(VertexBufferResource&, const void* data, std::size_t size) = 0;
 
+public:
     virtual std::unique_ptr<IndexBufferResource> createIndexBufferResource(const void* data,
                                                                            std::size_t size,
                                                                            BufferUsageType) = 0;

@@ -11,7 +11,7 @@ class Shader;
 // Assert that a type is a valid shader for downcasting.
 // A valid shader must:
 //   * Inherit gfx::Shader
-//   * Declare a public, unique type name (string_view T::Name)
+//   * Have properly called DECLARE_SHADER_TYPEINFO in the class body
 //   * Be a final class
 template <typename T>
 inline constexpr bool is_shader_v = std::is_base_of_v<gfx::Shader, T> &&

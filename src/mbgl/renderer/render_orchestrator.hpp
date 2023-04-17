@@ -15,10 +15,12 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mbgl {
 
+class ChangeRequest;
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -32,11 +34,20 @@ class PatternAtlas;
 class CrossTileSymbolIndex;
 class RenderTree;
 
+namespace gfx {
+    class Drawable;
+    using DrawablePtr = std::shared_ptr<Drawable>;
+}   // namespace gfx
+
 namespace style {
 class LayerProperties;
 } // namespace style
 
-class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
+using ImmutableLayer = Immutable<style::Layer::Impl>;
+
+class RenderOrchestrator final : public GlyphManagerObserver,
+                                 public ImageManagerObserver,
+                                 public RenderSourceObserver {
 public:
     RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
@@ -78,6 +89,18 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
 
+    void update(const std::shared_ptr<UpdateParameters>&);
+
+    using DrawableMap = std::map<util::SimpleIdentity, gfx::DrawablePtr>;
+    const DrawableMap& getDrawables() const { return drawables; }
+
+    void addDrawable(gfx::DrawablePtr);
+    void removeDrawable(const util::SimpleIdentity& drawableId);
+
+    void updateLayers(PaintParameters&);
+
+    void processChanges();
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
@@ -107,6 +130,9 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+    /// Move changes into the pending set, clearing the provided collection
+    void addChanges(UniqueChangeRequestVec&);
+
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
@@ -125,6 +151,10 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
 
+    // Layers added and removed in the last update
+    std::unordered_map<std::string, ImmutableLayer> layersAdded;
+    std::unordered_map<std::string, ImmutableLayer> layersRemoved;
+
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;
 
@@ -137,6 +167,10 @@ private:
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
+
+protected:
+    DrawableMap drawables;
+    std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 };
 
 } // namespace mbgl
