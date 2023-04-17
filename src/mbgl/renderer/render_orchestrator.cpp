@@ -2,6 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -137,6 +138,10 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
+    
+    layersAdded.clear();
+    layersRemoved.clear();
+
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     if (!isMapModeContinuous) {
         // Reset zoom history state.
@@ -217,7 +222,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     imageManager->notifyIfMissingImageAdded();
     imageManager->setLoaded(updateParameters->spriteLoaded);
 
-    const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
+    LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
@@ -451,6 +456,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceRenderItems.emplace_back(entry.second->createRenderItem());
         }
     }
+
+    layersAdded = std::move(layerDiff.added);
+    layersRemoved = std::move(layerDiff.removed);
 
     return std::make_unique<RenderTreeImpl>(std::move(renderTreeParameters),
                                             std::move(layerRenderItems),
@@ -711,13 +719,18 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
 }
 
 bool RenderOrchestrator::isLoaded() const {
-    for (const auto& entry : renderSources) {
+    // do the simple boolean check before iterating over all the tiles in all the sources
+    if (!imageManager->isLoaded()) {
+        return false;
+    }
+    
+    for (const auto& entry: renderSources) {
         if (!entry.second->isLoaded()) {
             return false;
         }
     }
 
-    return imageManager->isLoaded();
+    return true;
 }
 
 void RenderOrchestrator::clearData() {
@@ -737,13 +750,59 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
-void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
-                                       const GlyphRange& glyphRange,
-                                       std::exception_ptr error) {
-    Log::Error(Event::Style,
-               "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" +
-                   std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
-                   util::toString(error));
+void RenderOrchestrator::update(const std::shared_ptr<UpdateParameters>& parameters) {
+    if (!parameters) {
+        return;
+    }
+    
+    // TODO: Removed layers need a chance to remove their drawables
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+    for (auto& layer : *parameters->layers) {
+        layer->update(changes);
+        addChanges(changes);
+    }
+}
+
+void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
+    pendingChanges.insert(pendingChanges.end(),
+                          std::make_move_iterator(changes.begin()),
+                          std::make_move_iterator(changes.end()));
+    changes.clear();
+}
+
+void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
+    if (drawable) {
+        const auto id = drawable->getId();
+        drawables.insert(std::make_pair(id, std::move(drawable)));
+    }
+}
+
+void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) {
+    drawables.erase(drawableId);
+}
+
+void RenderOrchestrator::updateLayers(PaintParameters& parameters) {
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+    for (auto& kv : layersRemoved) {
+        kv.second->layerRemoved(parameters, changes);
+        addChanges(changes);
+    }
+    for (auto& kv : layersAdded) {
+        kv.second->layerAdded(parameters, changes);
+        addChanges(changes);
+    }
+}
+
+void RenderOrchestrator::processChanges() {
+    auto localChanges = std::move(pendingChanges);
+    for (auto &change : localChanges) {
+        change->execute(*this);
+    }
+}
+
+void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
+    Log::Error(Event::Style, "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
+               " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error));
     observer->onResourceError(error);
 }
 

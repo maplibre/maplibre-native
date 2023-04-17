@@ -1,3 +1,4 @@
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
