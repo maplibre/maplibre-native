@@ -60,8 +60,18 @@ public:
     VertexArray(UniqueVertexArrayState state_)
         : state(std::move(state_)) {
     }
+    VertexArray(VertexArray&& other)
+        : state(std::move(other.state)) {
+    }
 
     void bind(Context&, const gfx::IndexBuffer&, const AttributeBindingArray&);
+
+    VertexArray& operator=(VertexArray&& other) {
+        state = std::move(other.state);
+        return *this;
+    }
+
+    bool isValid() const { return state.operator bool(); }
 
 private:
     UniqueVertexArrayState state;

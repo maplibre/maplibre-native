@@ -1,16 +1,19 @@
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/programs/programs.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 
@@ -35,7 +38,8 @@ void RenderBackgroundLayer::transition(const TransitionParameters &parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
-void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters &parameters) {
+void RenderBackgroundLayer::evaluate(
+        const PropertyEvaluationParameters &parameters) {
     auto properties = makeMutable<BackgroundLayerProperties>(
         staticImmutableCast<BackgroundLayer::Impl>(baseImpl),
         parameters.getCrossfadeParameters(),
@@ -163,7 +167,8 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
         return std::nullopt;
     }
 
-    return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    return std::nullopt;
+    //return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
 }
 
 namespace {
@@ -179,7 +184,7 @@ void addPatternIfNeeded(const std::string& id, const LayerPrepareParameters& par
 void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        // Ensures that the pattern bitmap gets copied to atlas bitmap. 
+        // Ensures that the pattern bitmap gets copied to atlas bitmap.
         // Atlas bitmap is uploaded to atlas texture in upload.
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().from.id(), params);
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().to.id(), params);
