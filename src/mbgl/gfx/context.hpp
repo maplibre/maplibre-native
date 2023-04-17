@@ -15,7 +15,12 @@ class ProgramParameters;
 
 namespace gfx {
 
+class Drawable;
 class OffscreenTexture;
+class ShaderProgramBase;
+
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
+
 
 class Context {
 protected:
@@ -81,6 +86,17 @@ public:
 #endif
 
     virtual void clearStencilBuffer(int32_t) = 0;
+    
+    
+public:
+    const gfx::ShaderProgramBasePtr& getCurrentShader() const { return currentShader; }
+    virtual void setCurrentShader(ShaderProgramBasePtr) = 0;
+
+    /// Activate the shader, vertex attributes, etc., specified by the drawable
+    virtual void setupDraw(const gfx::Drawable&) = 0;
+
+protected:
+    ShaderProgramBasePtr currentShader;
 };
 
 } // namespace gfx

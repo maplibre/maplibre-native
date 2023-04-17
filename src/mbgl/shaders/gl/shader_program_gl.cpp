@@ -57,9 +57,17 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
       glProgram(std::move(glProgram_)) {
 }
 
+ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_,
+                                 VertexAttributeArrayGL&& attributes)
+    : ShaderProgramBase(),
+      glProgram(std::move(glProgram_)),
+      vertexAttributes(std::move(attributes)) {
+}
+
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
-      glProgram(std::move(other.glProgram)) {
+      glProgram(std::move(other.glProgram)),
+      vertexAttributes(std::move(other.vertexAttributes)) {
 }
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
@@ -111,7 +119,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         }
     }
 
-    return std::make_shared<ShaderProgramGL>(std::move(program));
+    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs));
 }
 
 } // namespace gl

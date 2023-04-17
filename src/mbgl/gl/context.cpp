@@ -1,4 +1,5 @@
 #include <mbgl/gl/context.hpp>
+#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/texture_resource.hpp>
@@ -9,6 +10,7 @@
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/gl/defines.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -445,7 +447,34 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
+void Context::setupDraw(const gfx::Drawable& drawable) {
+    if (auto &shader = drawable.getShader()) {
+        if (shader != currentShader) {
+            setCurrentShader(shader);
+        }
+    }
+
+    auto& drawableGL = static_cast<const DrawableGL&>(drawable);
+    auto& vao = drawableGL.getVertexArray();
+    if (vao.isValid()) {
+        bindVertexArray = vao.getID();  // glBindVertexArray
+    } else {
+        bindVertexArray = value::BindVertexArray::Default;
+    }
+}
+
+void Context::setCurrentShader(gfx::ShaderProgramBasePtr value) {
+    if ((currentShader = std::move(value))) {
+        auto& shaderGL = static_cast<ShaderProgramGL&>(*currentShader);
+        this->program = shaderGL.getGLProgramID();
+    } else {
+        this->program = value::Program::Default;
+    }
+}
+
+void Context::clear(std::optional<mbgl::Color> color,
+                    std::optional<float> depth,
+                    std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
 
     if (color) {
