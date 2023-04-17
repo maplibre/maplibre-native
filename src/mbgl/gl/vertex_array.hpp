@@ -72,6 +72,8 @@ public:
 
     bool isValid() const { return state.operator bool(); }
 
+    VertexArrayID getID() const { return state->vertexArray; }
+
 private:
     UniqueVertexArrayState state;
 };

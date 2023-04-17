@@ -1,7 +1,10 @@
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/extension.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <cassert>
 
@@ -61,6 +64,68 @@ void RendererBackend::setScissorTest(bool enabled) {
 }
 
 RendererBackend::~RendererBackend() = default;
+
+void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
+    constexpr auto shaderName = "background_generic";
+
+    gl::Context& glContext = static_cast<gl::Context&>(*context);
+
+    auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
+    if (!shader) {
+        constexpr auto vert = R"(
+            #version 300 es
+            precision highp float;
+            uniform float a;
+            uniform int b;
+            uniform mat4 c;
+            layout (location = 0) in vec3 pos;
+            in float d;
+            in int e;
+            in mat2 f;
+            in mat4 g;
+            void main() {
+                gl_Position = vec4(d, float(e), f[0][0], a)/1.0e12;
+                gl_Position = vec4(pos, 1.0);
+            })";
+        constexpr auto frag = R"(
+            #version 300 es
+            precision highp float;
+            in vec4 pos;
+            out vec4 color;
+            void main() {
+                color = vec4(1.0,0.0,0.0,1.0);
+            })";
+
+        try {
+            // Compile
+            shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
+            if (shader) {
+                // Set default values
+                if (auto *attr = shader->getVertexAttributes().get("d")) {
+                    attr->set(0, 12.3f);
+                }
+                if (auto *attr = shader->getVertexAttributes().get("e")) {
+                    attr->set(0, 123);
+                }
+                if (auto *attr = shader->getVertexAttributes().get("f")) {
+                    attr->set(0, gfx::VertexAttribute::matf2{ 1.0f, 2.0f, 3.0f, 4.0f });
+                }
+
+                // Add to the registry
+                if (!shaders.registerShader(shader, shaderName)) {
+                    Log::Warning(Event::General, "Shader conflict - " + std::string(shaderName));
+                    return;
+                }
+            } else {
+                Log::Warning(Event::General, "Shader create failed - " + std::string(shaderName));
+                return;
+            }
+    } catch (const std::runtime_error& ex) {
+            Log::Warning(Event::General, "Shader create exception - " + std::string(ex.what()));
+            return;
+        }
+    }
+}
 
 } // namespace gl
 } // namespace mbgl
