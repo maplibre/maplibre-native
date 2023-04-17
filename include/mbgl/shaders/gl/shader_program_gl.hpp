@@ -25,6 +25,8 @@ public:
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
+    ProgramID getGLProgramID() const { return glProgram; }
+
 protected:
     UniqueProgram glProgram;
     

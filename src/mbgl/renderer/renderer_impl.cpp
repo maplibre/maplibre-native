@@ -196,12 +196,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         for (const auto &pair : orchestrator.getDrawables()) {
             const auto& drawable = *pair.second;
 
-            if (auto &shader = drawable.getShader()) {
-                // if shader != currentShader
-                    // Context.activate(shader)
-            }
-
-            // Context.bind(drawable vao)
+            context.setupDraw(drawable);
 
             drawable.draw(parameters);
         }
