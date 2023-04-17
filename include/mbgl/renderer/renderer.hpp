@@ -101,6 +101,11 @@ public:
      */
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
+    /**
+        Update the layers
+     */
+    void update(const std::shared_ptr<UpdateParameters>&);
+
     // Memory
     void reduceMemoryUse();
     void clearData();
