@@ -45,8 +45,8 @@ private:
 class VertexAttributeArrayGL final : public gfx::VertexAttributeArray {
 public:
     VertexAttributeArrayGL(int initCapacity = 10) : VertexAttributeArray(initCapacity) { }
-    VertexAttributeArrayGL(VertexAttributeArray &&other) : VertexAttributeArray(std::move(other)) { }
-    VertexAttributeArrayGL(const VertexAttributeArray& other) : VertexAttributeArray(other) { }
+    VertexAttributeArrayGL(VertexAttributeArrayGL &&other) : VertexAttributeArray(std::move(other)) { }
+    VertexAttributeArrayGL(const VertexAttributeArrayGL& other) : VertexAttributeArray(other) { }
     ~VertexAttributeArrayGL() = default;
     
     VertexAttributeArrayGL& operator=(VertexAttributeArrayGL &&other) {
