@@ -10,8 +10,8 @@
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
-    static const GLchar *vertexShaderSource = "attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 1, 1); }";
-    static const GLchar *fragmentShaderSource = "void main() { gl_FragColor = vec4(0, 0.5, 0, 0.5); }";
+    static const GLchar *vertexShaderSource = "#version 300 es\nlayout (location = 0) in vec2 a_pos; void main() { gl_Position = vec4(a_pos, 1, 1); }";
+    static const GLchar *fragmentShaderSource = "#version 300 es\nout highp vec4 fragColor; void main() { fragColor = vec4(0, 0.5, 0, 0.5); }";
 
     _program = glCreateProgram();
     _vertexShader = glCreateShader(GL_VERTEX_SHADER);

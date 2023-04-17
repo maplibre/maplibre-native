@@ -122,7 +122,11 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
     tileClippingMaskIDs.clear();
 
-    auto& program = staticData.programs.clippingMask;
+    auto program = staticData.shaders->get<ClippingMaskProgram>();
+    if (!program) {
+        return;
+    }
+    
     const style::Properties<>::PossiblyEvaluated properties {};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
@@ -130,7 +134,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         const int32_t stencilID = nextStencilID++;
         tileClippingMaskIDs.emplace(renderTile.id, stencilID);
 
-        program.draw(context,
+        program->draw(context,
                      *renderPass,
                      gfx::Triangles(),
                      gfx::DepthMode::disabled(),

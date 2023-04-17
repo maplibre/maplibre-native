@@ -10,6 +10,7 @@
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 
 namespace mbgl {
 
@@ -64,6 +65,10 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Note that for bottommost layers without a pattern, the background color is drawn with
     // glClear rather than this method.
 
+    // Ensure programs are available
+    if (!parameters.shaders.populate(backgroundProgram)) return;
+    if (!parameters.shaders.populate(backgroundPatternProgram)) return;
+
     const Properties<>::PossiblyEvaluated properties;
     const BackgroundProgram::Binders paintAttributeData(properties, 0);
 
@@ -117,7 +122,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         uint32_t i = 0;
         for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
             const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
-            draw(parameters.programs.getBackgroundLayerPrograms().backgroundPattern,
+            draw(*backgroundPatternProgram,
                  BackgroundPatternProgram::layoutUniformValues(parameters.matrixForTile(unwrappedTileID),
                                                                evaluated.get<BackgroundOpacity>(),
                                                                parameters.patternAtlas.getPixelSize(),
@@ -140,7 +145,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         }
         uint32_t i = 0;
         for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
-            draw(parameters.programs.getBackgroundLayerPrograms().background,
+            draw(*backgroundProgram,
                  BackgroundProgram::LayoutUniformValues{
                      uniforms::matrix::Value(parameters.matrixForTile(tileID.toUnwrapped())),
                      uniforms::color::Value(evaluated.get<BackgroundColor>()),

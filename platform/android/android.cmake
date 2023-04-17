@@ -4,7 +4,7 @@ endif()
 
 target_compile_definitions(
     mbgl-core
-    PUBLIC MBGL_USE_GLES2
+    PUBLIC
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
@@ -83,7 +83,7 @@ target_link_libraries(
     mbgl-core
     PRIVATE
         EGL
-        GLESv2
+        GLESv3
         Mapbox::Base::jni.hpp
         android
         atomic
@@ -107,7 +107,7 @@ target_include_directories(
 target_link_libraries(
     example-custom-layer
     PRIVATE
-        GLESv2
+        GLESv3
         Mapbox::Base
         Mapbox::Base::optional
         log
@@ -147,7 +147,7 @@ if(ANDROID_NATIVE_API_LEVEL VERSION_LESS 24)
 else()
     target_sources(
         mbgl-test-runner
-        PRIVATE $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
     )
 
     include(${PROJECT_SOURCE_DIR}/vendor/curl.cmake)

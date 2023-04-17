@@ -1,4 +1,4 @@
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <android/log.h>
 #include <jni.h>
 #include <mbgl/gl/custom_layer.hpp>
@@ -109,8 +109,8 @@ void checkCompileStatus(GLuint shader) {
 
 // /DEBUGGING
 
-static const GLchar * vertexShaderSource = "attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0, 1); }";
-static const GLchar * fragmentShaderSource = "uniform highp vec4 fill_color; void main() { gl_FragColor = fill_color; }";
+static const GLchar * vertexShaderSource = "#version 300 es\nlayout (location = 0) in vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0, 1); }";
+static const GLchar * fragmentShaderSource = "#version 300 es\nuniform highp vec4 fill_color; out highp vec4 fragColor; void main() { fragColor = fill_color; }";
 
 class ExampleCustomLayer: mbgl::style::CustomLayerHost {
 public:

@@ -78,6 +78,10 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass != RenderPass::Translucent && parameters.pass != RenderPass::Pass3D)
         return;
+
+    if (!parameters.shaders.populate(hillshadeProgram)) return;
+    if (!parameters.shaders.populate(hillshadePrepareProgram)) return;
+
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;  
     auto draw = [&] (const mat4& matrix,
                      const auto& vertexBuffer,
@@ -85,8 +89,6 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
                      const auto& segments,
                      const UnwrappedTileID& id,
                      const auto& textureBindings) {
-        auto& programInstance = parameters.programs.getHillshadeLayerPrograms().hillshade;
-
         const HillshadeProgram::Binders paintAttributeData{ evaluated, 0 };
 
         const auto allUniformValues = HillshadeProgram::computeAllUniformValues(
@@ -106,7 +108,7 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
 
         checkRenderability(parameters, HillshadeProgram::activeBindingCount(allAttributeBindings));
 
-        programInstance.draw(parameters.context,
+        hillshadeProgram->draw(parameters.context,
                              *parameters.renderPass,
                              gfx::Triangles(),
                              parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
@@ -148,8 +150,6 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
 
             const Properties<>::PossiblyEvaluated properties;
             const HillshadePrepareProgram::Binders paintAttributeData{ properties, 0 };
-            
-            auto& programInstance = parameters.programs.getHillshadeLayerPrograms().hillshadePrepare;
 
             const auto allUniformValues = HillshadePrepareProgram::computeAllUniformValues(
                 HillshadePrepareProgram::LayoutUniformValues{
@@ -170,7 +170,7 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
             // Copy over the segments so that we can create our own DrawScopes that get destroyed
             // after this draw call.
             auto segments = RenderStaticData::rasterSegments();
-            programInstance.draw(parameters.context,
+            hillshadePrepareProgram->draw(parameters.context,
                                  *renderPass,
                                  gfx::Triangles(),
                                  parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),

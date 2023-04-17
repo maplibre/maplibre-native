@@ -95,6 +95,11 @@ void RenderLineLayer::render(PaintParameters& parameters) {
         return;
     }
 
+    if (!parameters.shaders.populate(lineProgram)) return;
+    if (!parameters.shaders.populate(lineGradientProgram)) return;
+    if (!parameters.shaders.populate(lineSDFProgram)) return;
+    if (!parameters.shaders.populate(linePatternProgram)) return;
+
     parameters.renderTileClippingMasks(renderTiles);
 
     for (const RenderTile& tile : *renderTiles) {
@@ -148,7 +153,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
             const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
                 evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
 
-            draw(parameters.programs.getLineLayerPrograms().lineSDF,
+            draw(*lineSDFProgram,
                  LineSDFProgram::layoutUniformValues(evaluated,
                                                      parameters.pixelRatio,
                                                      tile,
@@ -171,7 +176,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
             std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
             std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
 
-            draw(parameters.programs.getLineLayerPrograms().linePattern,
+            draw(*linePatternProgram,
                  LinePatternProgram::layoutUniformValues(
                      evaluated,
                      tile,
@@ -188,7 +193,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             assert(colorRampTexture);
 
-            draw(parameters.programs.getLineLayerPrograms().lineGradient,
+            draw(*lineGradientProgram,
                  LineGradientProgram::layoutUniformValues(
                     evaluated,
                     tile,
@@ -201,7 +206,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                         textures::image::Value{ colorRampTexture->getResource(), gfx::TextureFilterType::Linear },
                     });
         } else {
-            draw(parameters.programs.getLineLayerPrograms().line,
+            draw(*lineProgram,
                  LineProgram::layoutUniformValues(
                      evaluated,
                      tile,

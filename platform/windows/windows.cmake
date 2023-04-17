@@ -40,7 +40,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
@@ -72,8 +72,6 @@ target_compile_definitions(
     mbgl-core
     PRIVATE
         CURL_STATICLIB
-    PUBLIC
-        MBGL_USE_GLES2
 )
 
 if(MBGL_WITH_EGL)
@@ -93,7 +91,7 @@ if(MBGL_WITH_EGL)
         mbgl-core
         PRIVATE
             unofficial::angle::libEGL
-            unofficial::angle::libGLESv2
+            unofficial::angle::libGLESv3
     )
 elseif(MBGL_WITH_OSMESA)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -116,7 +114,7 @@ elseif(MBGL_WITH_OSMESA)
         mbgl-core
         PRIVATE
             OSMesa::osmesa
-            OSMesa::libGLESv2
+            OSMesa::libGLESv3
     )
 else()
     find_package(OpenGL REQUIRED)

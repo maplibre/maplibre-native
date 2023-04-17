@@ -5,7 +5,7 @@
 ### ✨ New features
 
 - Support for GeoJSON feature collections using std::list ([#541](https://github.com/maplibre/maplibre-gl-native/pull/541)).
-- Based on Qt 6.4.2
+- Based on Qt 6.5.0
 
 ### 🐞 Bug fixes
 

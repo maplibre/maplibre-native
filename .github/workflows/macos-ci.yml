@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - opengl-2
     tags:
       - 'macos-*'
     paths:
@@ -26,7 +26,7 @@ on:
 
   pull_request:
     branches:
-      - main
+      - opengl-2
     paths:
       - 'platform/ios/**'
       - 'platform/darwin/**'
@@ -118,7 +118,7 @@ jobs:
 
       - name: Run macOS Objective-C tests
         run: |
-          make macos-test
+          ../macos/scripts/run-in-macos-gui-env.sh "make macos-test"
 
       - name: npm install  # C++ tests are run with root as working directory
         run: npm ci --ignore-scripts

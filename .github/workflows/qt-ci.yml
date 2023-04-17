@@ -64,7 +64,7 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
           - name: macOS
             os: macos-12
@@ -76,9 +76,9 @@ jobs:
           - name: macOS
             os: macos-12
             build_type: RelWithDebInfo
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
-            deployment_target: 10.14
+            deployment_target: 11.0
             deployment_arch: "x86_64;arm64"
           - name: win64_msvc2019
             os: windows-2022
@@ -94,7 +94,7 @@ jobs:
             build_type: "RelWithDebInfo;Debug"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ''
@@ -112,7 +112,7 @@ jobs:
             build_type: RelWithDebInfo
             compiler_type: mingw1120_64
             compiler_version: 11.2.0
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
             qt_arch: win64_mingw
             qt_tools: tools_mingw90
@@ -176,7 +176,8 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: ${{ matrix.name }}_${{ matrix.qt_version }}
+          key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
+          append-timestamp: false
 
       - name: Build maplibre-gl-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
@@ -246,11 +247,11 @@ jobs:
         include:
           - name: Linux
             os: ubuntu-22.04
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
           - name: macOS
             os: macos-12
-            qt_version: 6.4.2
+            qt_version: 6.5.0
             qt_target: desktop
     runs-on: ${{ matrix.os }}
     env:
@@ -302,7 +303,7 @@ jobs:
       max-parallel: 1
       matrix:
         name: [Linux, macOS, win64_msvc2019, win64_mingw]
-        qt_version: [5.15.2, 6.4.2]
+        qt_version: [5.15.2, 6.5.0]
     permissions:
       contents: write
 

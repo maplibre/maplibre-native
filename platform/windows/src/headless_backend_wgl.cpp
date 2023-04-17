@@ -166,14 +166,13 @@ public:
         ARB_multisample = extensionSupportedWGL("WGL_ARB_multisample");
         ARB_create_context = extensionSupportedWGL("WGL_ARB_create_context");
         ARB_create_context_profile = extensionSupportedWGL("WGL_ARB_create_context_profile");
-        EXT_create_context_es2_profile = extensionSupportedWGL("WGL_EXT_create_context_es2_profile");
         EXT_colorspace = extensionSupportedWGL("WGL_EXT_colorspace");
         ARB_pixel_format = extensionSupportedWGL("WGL_ARB_pixel_format");
-        ARB_ES2_compatibility = extensionSupportedWGL("GL_ARB_ES2_compatibility");
+        ARB_ES3_compatibility = extensionSupportedWGL("GL_ARB_ES3_compatibility");
 
-        if (!ARB_create_context || !ARB_create_context_profile || !(EXT_create_context_es2_profile || ARB_ES2_compatibility)) {
-            Log::Error(Event::OpenGL, "OpenGL ES 2.0 is unavailable");
-            throw std::runtime_error("OpenGL ES 2.0 is unavailable");
+        if (!ARB_create_context || !ARB_create_context_profile || !ARB_ES3_compatibility) {
+            Log::Error(Event::OpenGL, "OpenGL ES 3.0 is unavailable");
+            throw std::runtime_error("OpenGL ES 3.0 is unavailable");
         }
 
         DestroyHelperWindow();
@@ -207,10 +206,9 @@ public:
     bool ARB_multisample = false;
     bool ARB_create_context = false;
     bool ARB_create_context_profile = false;
-    bool EXT_create_context_es2_profile = false;
     bool EXT_colorspace = false;
     bool ARB_pixel_format = false;
-    bool ARB_ES2_compatibility = false;
+    bool ARB_ES3_compatibility = false;
     WNDCLASSEXA renderingWindowClass = { sizeof(WNDCLASSEXA) };
 };
 
@@ -316,7 +314,7 @@ private:
         if (wglDisplayConfig->ARB_create_context) {
             renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(renderingWindowDeviceContext, NULL,
                 std::initializer_list<int>({
-                    WGL_CONTEXT_MAJOR_VERSION_ARB, 2,
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
                     WGL_CONTEXT_MINOR_VERSION_ARB, 0,
                     WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
                     NULL

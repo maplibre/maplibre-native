@@ -68,7 +68,7 @@ Outside of the core C++ static library, platform SDKs typically rely on platform
 
 * For iOS and macOS this means Xcode and the xcodebuild command line tool.
 * For Android, Gradle and Android Studio.
-* For Qt, `qmake`.
+* For Qt, plain CMake is used to generate the build system.
 
 See the relevant platform-specific `README.md` / `INSTALL.md` for details.
 

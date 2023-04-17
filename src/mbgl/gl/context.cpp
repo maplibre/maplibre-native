@@ -8,7 +8,7 @@
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/vertex_array_extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -92,36 +92,6 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
         if (!(renderer.find("ANGLE") != std::string::npos
               && renderer.find("Direct3D") != std::string::npos)) {
             debugging = std::make_unique<extension::Debugging>(fn);
-        }
-
-        // Block Adreno 2xx, 3xx as it crashes on glBuffer(Sub)Data
-        // Block Adreno 4xx as it crashes in a driver when VBOs are destructed (Android 5.1.1)
-        // Block ARM Mali-T720 (in some MT8163 chipsets) as it crashes on glBindVertexArray
-        // Block ANGLE on Direct3D as the combination of Qt + Windows + ANGLE leads to crashes
-        if (renderer.find("Adreno (TM) 2") == std::string::npos &&
-            renderer.find("Adreno (TM) 3") == std::string::npos &&
-            renderer.find("Adreno (TM) 4") == std::string::npos &&
-            (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) &&
-            renderer.find("Mali-T720") == std::string::npos && renderer.find("Sapphire 650") == std::string::npos &&
-            !disableVAOExtension) {
-            vertexArray = std::make_unique<extension::VertexArray>(fn);
-        }
-
-#if MBGL_USE_GLES2
-        constexpr const char* halfFloatExtensionName = "OES_texture_half_float";
-        constexpr const char* halfFloatColorBufferExtensionName = "EXT_color_buffer_half_float";
-#else
-        constexpr const char* halfFloatExtensionName = "ARB_half_float_pixel";
-        constexpr const char* halfFloatColorBufferExtensionName = "ARB_color_buffer_float";
-#endif
-        if (strstr(extensions, halfFloatExtensionName) != nullptr &&
-            strstr(extensions, halfFloatColorBufferExtensionName) != nullptr) {
-
-            supportsHalfFloatTextures = true;
-        }
-
-        if (!supportsVertexArrays()) {
-            Log::Warning(Event::OpenGL, "Not using Vertex Array Objects");
         }
     }
 }
@@ -219,25 +189,12 @@ UniqueTexture Context::createUniqueTexture() {
     return UniqueTexture{std::move(id), {this}};
 }
 
-bool Context::supportsVertexArrays() const {
-    return vertexArray &&
-           vertexArray->genVertexArrays &&
-           vertexArray->bindVertexArray &&
-           vertexArray->deleteVertexArrays;
-}
-
 VertexArray Context::createVertexArray() {
-    if (supportsVertexArrays()) {
-        VertexArrayID id = 0;
-        MBGL_CHECK_ERROR(vertexArray->genVertexArrays(1, &id));
-        // NOLINTNEXTLINE(performance-move-const-arg)
-        UniqueVertexArray vao(std::move(id), { this });
-        return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
-    } else {
-        // On GL implementations which do not support vertex arrays, attribute bindings are global state.
-        // So return a VertexArray which shares our global state tracking and whose deleter is a no-op.
-        return { UniqueVertexArrayState(&globalVertexArrayState, VertexArrayStateDeleter { false }) };
-    }
+    VertexArrayID id = 0;
+    MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    UniqueVertexArray vao(std::move(id), { this });
+    return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
 }
 
 UniqueFramebuffer Context::createFramebuffer() {
@@ -261,7 +218,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
 
     // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::to(format),
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::sizedFor(format, type),
                                   size.width, size.height, 0,
                                   Enum<gfx::TexturePixelType>::to(format),
                                   Enum<gfx::TextureChannelDataType>::to(type), nullptr));
@@ -315,18 +272,6 @@ std::unique_ptr<uint8_t[]> Context::readFramebuffer(const Size size, const gfx::
 
     return data;
 }
-
-#if !MBGL_USE_GLES2
-void Context::drawPixels(const Size size, const void* data, gfx::TexturePixelType format) {
-    pixelStoreUnpack = { 1 };
-    // TODO
-    if (format != gfx::TexturePixelType::RGBA) {
-        format = gfx::TexturePixelType::Luminance;
-    }
-    MBGL_CHECK_ERROR(glDrawPixels(size.width, size.height, Enum<gfx::TexturePixelType>::to(format),
-                                  GL_UNSIGNED_BYTE, data));
-}
-#endif // MBGL_USE_GLES2
 
 namespace {
 
@@ -486,13 +431,6 @@ void Context::setDirtyState() {
     activeTextureUnit.setDirty();
     pixelStorePack.setDirty();
     pixelStoreUnpack.setDirty();
-#if !MBGL_USE_GLES2
-    pointSize.setDirty();
-    pixelZoom.setDirty();
-    rasterPos.setDirty();
-    pixelTransferDepth.setDirty();
-    pixelTransferStencil.setDirty();
-#endif // MBGL_USE_GLES2
     for (auto& tex : texture) {
        tex.setDirty();
     }
@@ -610,10 +548,6 @@ void Context::draw(const gfx::DrawMode& drawMode,
                    std::size_t indexLength) {
     switch (drawMode.type) {
     case gfx::DrawModeType::Points:
-#if !MBGL_USE_GLES2
-        // In OpenGL ES 2, the point size is set in the vertex shader.
-        pointSize = drawMode.size;
-#endif // MBGL_USE_GLES2
         break;
     case gfx::DrawModeType::Lines:
     case gfx::DrawModeType::LineLoop:
@@ -686,14 +620,12 @@ void Context::performCleanup() {
     }
 
     if (!abandonedVertexArrays.empty()) {
-        assert(supportsVertexArrays());
         for (const auto id : abandonedVertexArrays) {
             if (bindVertexArray == id) {
                 bindVertexArray.setDirty();
             }
         }
-        MBGL_CHECK_ERROR(vertexArray->deleteVertexArrays(int(abandonedVertexArrays.size()),
-                                                         abandonedVertexArrays.data()));
+        MBGL_CHECK_ERROR(glDeleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
         abandonedVertexArrays.clear();
     }
 
@@ -727,56 +659,12 @@ void Context::reduceMemoryUsage() {
 
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {
-#if !MBGL_USE_GLES2
-    setStencilMode(gfx::StencilMode::disabled());
-    setDepthMode(gfx::DepthMode::disabled());
-    setColorMode(gfx::ColorMode::unblended());
-    program = 0;
-
-    // Reset the value in case someone else changed it, or it's dirty.
-    pixelTransferStencil = gl::value::PixelTransferStencil::Default;
-
-    // Read the stencil buffer
-    const auto viewportValue = viewport.getCurrentValue();
-    auto image = readFramebuffer<AlphaImage, gfx::TexturePixelType::Stencil>(viewportValue.size, false);
-
-    // Scale the Stencil buffer to cover the entire color space.
-    auto it = image.data.get();
-    auto end = it + viewportValue.size.width * viewportValue.size.height;
-    const auto factor = 255.0f / *std::max_element(it, end);
-    for (; it != end; ++it) {
-        *it *= factor;
-    }
-
-    pixelZoom = { 1, 1 };
-    rasterPos = { -1, -1, 0, 1 };
-    drawPixels(image);
-#endif
+    throw std::runtime_error("Not yet implemented");
 }
 
-void Context::visualizeDepthBuffer(const float depthRangeSize) {
-    (void)depthRangeSize;
-#if !MBGL_USE_GLES2
-    setStencilMode(gfx::StencilMode::disabled());
-    setDepthMode(gfx::DepthMode::disabled());
-    setColorMode(gfx::ColorMode::unblended());
-    program = 0;
-
-    // Scales the values in the depth buffer so that they cover the entire grayscale range. This
-    // makes it easier to spot tiny differences.
-    const float base = 1.0f / (1.0f - depthRangeSize);
-    pixelTransferDepth = { base, 1.0f - base };
-
-    // Read the stencil buffer
-    auto viewportValue = viewport.getCurrentValue();
-    auto image = readFramebuffer<AlphaImage, gfx::TexturePixelType::Depth>(viewportValue.size, false);
-
-    pixelZoom = { 1, 1 };
-    rasterPos = { -1, -1, 0, 1 };
-    drawPixels(image);
-#endif
+void Context::visualizeDepthBuffer([[maybe_unused]] const float depthRangeSize) {
+    throw std::runtime_error("Not yet implemented");
 }
-
 #endif
 
 void Context::clearStencilBuffer(const int32_t bits) {

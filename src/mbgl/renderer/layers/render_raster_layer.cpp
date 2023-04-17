@@ -89,6 +89,9 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
     if (parameters.pass != RenderPass::Translucent || (!renderTiles && !imageData)) {
         return;
     }
+
+    if (!parameters.shaders.populate(rasterProgram)) return;
+
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
     RasterProgram::Binders paintAttributeData{ evaluated, 0 };
 
@@ -98,8 +101,6 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
                      const auto& segments,
                      const auto& textureBindings,
                      const std::string& drawScopeID) {
-        auto& programInstance = parameters.programs.getRasterLayerPrograms().raster;
-
         const auto allUniformValues = RasterProgram::computeAllUniformValues(
             RasterProgram::LayoutUniformValues{
                 uniforms::matrix::Value(matrix),
@@ -122,7 +123,7 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
 
         checkRenderability(parameters, RasterProgram::activeBindingCount(allAttributeBindings));
 
-        programInstance.draw(
+        rasterProgram->draw(
             parameters.context,
             *parameters.renderPass,
             gfx::Triangles(),

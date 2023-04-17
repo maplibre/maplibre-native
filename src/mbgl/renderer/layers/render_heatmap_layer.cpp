@@ -72,6 +72,9 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         return;
     }
 
+    if (!parameters.shaders.populate(heatmapProgram)) return;
+    if (!parameters.shaders.populate(heatmapTextureProgram)) return;
+
     if (parameters.pass == RenderPass::Pass3D) {
         const auto& viewportSize = parameters.staticData.backendSize;
         const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
@@ -79,20 +82,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         assert(colorRampTexture);
 
         if (!renderTexture || renderTexture->getSize() != size) {
-            renderTexture.reset();
-            if (parameters.context.supportsHalfFloatTextures) {
-                renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::HalfFloat);
-
-                if (!renderTexture->isRenderable()) {
-                    // can't render to a half-float texture; falling back to unsigned byte one
-                    renderTexture.reset();
-                    parameters.context.supportsHalfFloatTextures = false;
-                }
-            }
-
-            if (!renderTexture) {
-                renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte);
-            }
+            renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::HalfFloat);
         }
 
         auto renderPass = parameters.encoder->createRenderPass(
@@ -110,8 +100,6 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 
             const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
-            auto& programInstance = parameters.programs.getHeatmapLayerPrograms().heatmap;
-
             const auto allUniformValues = HeatmapProgram::computeAllUniformValues(
                 HeatmapProgram::LayoutUniformValues{
                     uniforms::intensity::Value(evaluated.get<style::HeatmapIntensity>()),
@@ -125,7 +113,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 
             checkRenderability(parameters, HeatmapProgram::activeBindingCount(allAttributeBindings));
 
-            programInstance.draw(parameters.context,
+            heatmapProgram->draw(parameters.context,
                                  *renderPass,
                                  gfx::Triangles(),
                                  gfx::DepthMode::disabled(),
@@ -149,8 +137,6 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         const Properties<>::PossiblyEvaluated properties;
         const HeatmapTextureProgram::Binders paintAttributeData{ properties, 0 };
 
-        auto& programInstance = parameters.programs.getHeatmapLayerPrograms().heatmapTexture;
-
         const auto allUniformValues = HeatmapTextureProgram::computeAllUniformValues(
             HeatmapTextureProgram::LayoutUniformValues{
                 uniforms::matrix::Value(viewportMat),
@@ -169,7 +155,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
             // Copy over the segments so that we can create our own DrawScopes.
             segments = RenderStaticData::heatmapTextureSegments();
         }
-        programInstance.draw(
+        heatmapTextureProgram->draw(
             parameters.context,
             *parameters.renderPass,
             gfx::Triangles(),

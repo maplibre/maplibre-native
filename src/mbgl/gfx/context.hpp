@@ -26,7 +26,6 @@ protected:
 public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
     const uint32_t maximumVertexBindingCount;
-    bool supportsHalfFloatTextures = false;
 
 public:
     Context(Context&&) = delete;
@@ -75,12 +74,6 @@ public:
 
 protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
-
-public:
-    template <typename Name>
-    std::unique_ptr<Program<Name>> createProgram(const ProgramParameters& programParameters) {
-        return Backend::Create<Program<Name>, const ProgramParameters&>(programParameters);
-    }
 
 public:
     virtual std::unique_ptr<CommandEncoder> createCommandEncoder() = 0;

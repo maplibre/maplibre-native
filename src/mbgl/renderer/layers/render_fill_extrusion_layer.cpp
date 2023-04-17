@@ -2,6 +2,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/programs/fill_extrusion_program.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
@@ -71,6 +72,9 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
         return;
     }
 
+    if (!parameters.shaders.populate(fillExtrusionProgram)) return;
+    if (!parameters.shaders.populate(fillExtrusionPatternProgram)) return;
+
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
     if (evaluatedProperties->renderPasses == mbgl::underlying_type(RenderPass::None)) {
@@ -133,7 +137,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                 }
                 auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                 draw(
-                    parameters.programs.getFillExtrusionLayerPrograms().fillExtrusion,
+                    *fillExtrusionProgram,
                     evaluated,
                     crossfade,
                     stencilMode_,
@@ -184,7 +188,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                 std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
 
                 draw(
-                    parameters.programs.getFillExtrusionLayerPrograms().fillExtrusionPattern,
+                    *fillExtrusionPatternProgram,
                     evaluated,
                     crossfade,
                     stencilMode_,

@@ -727,21 +727,6 @@ TEST(Map, AddLayer) {
     test::checkImage("test/fixtures/map/add_layer", test.frontend.render(test.map).image);
 }
 
-TEST(Map, WithoutVAOExtension) {
-    if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
-        return;
-    }
-
-    MapTest<MainResourceLoader> test{":memory:", "test/fixtures/api/assets"};
-
-    gfx::BackendScope scope { *test.frontend.getBackend() };
-    static_cast<gl::Context&>(test.frontend.getBackend()->getContext()).disableVAOExtension = true;
-
-    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
-
-    test::checkImage("test/fixtures/map/no_vao", test.frontend.render(test.map).image, 0.002);
-}
-
 TEST(Map, RemoveLayer) {
     MapTest<> test;
 

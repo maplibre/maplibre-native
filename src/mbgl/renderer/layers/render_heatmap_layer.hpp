@@ -39,6 +39,10 @@ private:
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     std::optional<gfx::Texture> colorRampTexture;
     SegmentVector<HeatmapTextureAttributes> segments;
+
+    // Programs
+    std::shared_ptr<HeatmapProgram> heatmapProgram;
+    std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
 };
 
 } // namespace mbgl
