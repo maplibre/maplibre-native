@@ -91,7 +91,8 @@ Checks: >
     -readability-make-member-function-const,
     -readability-redundant-string-init,
     -readability-non-const-parameter,
-    -readability-static-accessed-through-instance
+    -readability-static-accessed-through-instance,
+    -clang-diagnostic-unknown-warning-option
     
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
