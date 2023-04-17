@@ -42,7 +42,7 @@ std::u16string applyArabicShaping(const std::u16string& input) {
 
     std::u16string outputText(outputLength, 0);
 
-    u_shapeArabic(mbgl::utf16char_cast<const UChar*>(input.c_str()), static_cast<int32_t>(input.size()), mbgl::utf16char_cast<UChar*>(&outputText[0]), outputLength,
+    u_shapeArabic(mbgl::utf16char_cast<const UChar*>(input.c_str()), static_cast<int32_t>(input.size()), mbgl::utf16char_cast<UChar*>(outputText.data()), outputLength,
                   (U_SHAPE_LETTERS_SHAPE & U_SHAPE_LETTERS_MASK) |
                       (U_SHAPE_TEXT_DIRECTION_LOGICAL & U_SHAPE_TEXT_DIRECTION_MASK),
                   &errorCode);
@@ -191,7 +191,7 @@ std::u16string BiDi::writeReverse(const std::u16string& input, std::size_t logic
     int32_t outputLength =
         ubidi_writeReverse(mbgl::utf16char_cast<const UChar*>(&input[logicalStart]),
                            logicalLength,
-                           mbgl::utf16char_cast<UChar*>(&outputText[0]),
+                           mbgl::utf16char_cast<UChar*>(outputText.data()),
                            logicalLength + 1, // Extra room for null terminator, although we don't really need to have ICU write it for us
                            UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
                            &errorCode);
@@ -223,7 +223,7 @@ std::u16string BiDi::getLine(std::size_t start, std::size_t end) {
     // UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set, remove control characters so that
     // they don't show up on screen (some fonts have glyphs representing them)
     int32_t finalLength = ubidi_writeReordered(impl->bidiLine,
-                                               mbgl::utf16char_cast<UChar*>(&outputText[0]),
+                                               mbgl::utf16char_cast<UChar*>(outputText.data()),
                                                outputLength,
                                                UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
                                                &errorCode);
