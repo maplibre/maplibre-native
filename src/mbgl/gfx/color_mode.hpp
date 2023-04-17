@@ -1,8 +1,9 @@
 #pragma once
 
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/util/color.hpp>
+
+#include <variant>
 
 namespace mbgl {
 namespace gfx {
@@ -33,7 +34,7 @@ public:
     using Subtract = LinearBlend<ColorBlendEquationType::Subtract>;
     using ReverseSubtract = LinearBlend<ColorBlendEquationType::ReverseSubtract>;
 
-    using BlendFunction = variant<Replace, Add, Subtract, ReverseSubtract>;
+    using BlendFunction = std::variant< Replace, Add, Subtract, ReverseSubtract>;
 
     BlendFunction blendFunction;
     Color blendColor;

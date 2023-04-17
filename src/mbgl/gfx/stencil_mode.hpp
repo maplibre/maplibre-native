@@ -1,7 +1,8 @@
 #pragma once
 
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/util/variant.hpp>
+
+#include <variant>
 
 namespace mbgl {
 namespace gfx {
@@ -29,7 +30,7 @@ public:
     using GreaterEqual = MaskedTest<StencilFunctionType::GreaterEqual>;
     using Always = SimpleTest<StencilFunctionType::Always>;
 
-    using Test = variant<Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always>;
+    using Test = std::variant< Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always>;
 
     Test test;
     int32_t ref;

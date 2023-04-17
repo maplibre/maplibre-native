@@ -10,7 +10,6 @@
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/renderer/paint_property_statistics.hpp>
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
