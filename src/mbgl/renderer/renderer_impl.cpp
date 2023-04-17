@@ -195,6 +195,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     {
         for (const auto &pair : orchestrator.getDrawables()) {
             const auto& drawable = *pair.second;
+            
 
             context.setupDraw(drawable);
 
