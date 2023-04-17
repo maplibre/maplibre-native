@@ -114,34 +114,32 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
             // Generate a vertex array object for the drawable state, if necessary
             auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
-            if (!drawableGL.getVertexArray().isValid() && !drawable.getShaderID().empty()) {
-                // TODO: avoid having to do this lookup twice
-                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
-                    const auto usage = gfx::BufferUsageType::StaticDraw;
+            const auto& shader = drawable.getShader();
+            if (shader && !drawableGL.getVertexArray().isValid()) {
+                const auto usage = gfx::BufferUsageType::StaticDraw;
 
-                    // Build index buffer
-                    const auto& indexData = drawable.getIndexData();
-                    auto indexBuffer = gfx::IndexBuffer {
-                        indexData.size(),
-                        uploadPass->createIndexBufferResource(
-                            &indexData[0],
-                            indexData.size() * sizeof(indexData[0]),
-                            usage)
-                    };
+                // Build index buffer
+                const auto& indexData = drawable.getIndexData();
+                auto indexBuffer = gfx::IndexBuffer {
+                    indexData.size(),
+                    uploadPass->createIndexBufferResource(
+                        &indexData[0],
+                        indexData.size() * sizeof(indexData[0]),
+                        usage)
+                };
 
-                    // Apply drawable values to shader defaults
-                    const auto& defaults = shader->getVertexAttributes();
-                    const auto& overrides = drawable.getVertexAttributes();
-                    auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+                // Apply drawable values to shader defaults
+                const auto& defaults = shader->getVertexAttributes();
+                const auto& overrides = drawable.getVertexAttributes();
+                auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
 
-                    auto& glContext = static_cast<gl::Context&>(context);
-                    auto vertexArray = glContext.createVertexArray();
-                    vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
-                    
-                    drawableGL.setVertexArray(std::move(vertexArray),
-                                              std::move(bindingsAndBuffer.second),
-                                              std::move(indexBuffer));
-                }
+                auto& glContext = static_cast<gl::Context&>(context);
+                auto vertexArray = glContext.createVertexArray();
+                vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
+                
+                drawableGL.setVertexArray(std::move(vertexArray),
+                                          std::move(bindingsAndBuffer.second),
+                                          std::move(indexBuffer));
             }
         }
     }
@@ -197,12 +195,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     {
         for (const auto &pair : orchestrator.getDrawables()) {
             const auto& drawable = *pair.second;
-            
-            if (!drawable.getShaderID().empty()) {
+
+            if (auto &shader = drawable.getShader()) {
                 // if shader != currentShader
-                if (auto shader = parameters.shaders.get<gl::ShaderProgramGL>(drawable.getShaderID())) {
                     // Context.activate(shader)
-                }
             }
 
             // Context.bind(drawable vao)

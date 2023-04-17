@@ -19,6 +19,10 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 constexpr auto shaderName = "background_generic";
 
 void BackgroundLayer::Impl::layerAdded(PaintParameters& parameters, UniqueChangeRequestVec& changes) const {
+    if (!shader) {
+        shader = parameters.shaders.get<gl::ShaderProgramGL>(shaderName);
+    }
+
     buildDrawables(changes);
 }
 
@@ -30,8 +34,13 @@ void BackgroundLayer::Impl::layerRemoved(PaintParameters&, UniqueChangeRequestVe
 }
 
 void BackgroundLayer::Impl::buildDrawables(UniqueChangeRequestVec& changes) const {
+
+    if (!shader) {
+        return;
+    }
+
     auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method?
-    builder->setShaderID(shaderName);
+    builder->setShader(shader);
     builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
     builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
     builder->flush();
