@@ -19,7 +19,7 @@ OpacityState::OpacityState(bool placed_, bool skipFade)
 }
 
 OpacityState::OpacityState(const OpacityState& prevState, float increment, bool placed_) :
-    opacity(::fmax(0.0f, ::fmin(1.0f, prevState.opacity + (prevState.placed ? increment : -increment)))),
+    opacity(std::fmax(0.0f, std::fmin(1.0f, prevState.opacity + (prevState.placed ? increment : -increment)))),
     placed(placed_) {}
 
 bool OpacityState::isHidden() const {
