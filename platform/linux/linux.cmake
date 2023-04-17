@@ -1,10 +1,15 @@
+option(MBGL_WITH_X11 "Build with X11 Support" ON)
+option(MBGL_WITH_WAYLAND "Build with Wayland Support" OFF)
+
 find_package(CURL REQUIRED)
 find_package(ICU OPTIONAL_COMPONENTS i18n)
 find_package(ICU OPTIONAL_COMPONENTS uc)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
-find_package(X11 REQUIRED)
+if (MBGL_WITH_X11)
+    find_package(X11 REQUIRED)
+endif ()
 find_package(Threads REQUIRED)
 
 pkg_search_module(LIBUV libuv REQUIRED)
@@ -64,6 +69,13 @@ if(MBGL_WITH_EGL)
         PRIVATE
             OpenGL::EGL
     )
+    if (MBGL_WITH_WAYLAND)
+        target_compile_definitions(mbgl-core PUBLIC
+                EGL_NO_X11
+                MESA_EGL_NO_X11_HEADERS
+                WL_EGL_PLATFORM
+        )
+    endif()
 else()
     find_package(OpenGL REQUIRED GLX)
     target_sources(
