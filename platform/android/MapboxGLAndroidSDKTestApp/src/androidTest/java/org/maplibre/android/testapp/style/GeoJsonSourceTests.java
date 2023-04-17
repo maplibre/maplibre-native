@@ -192,6 +192,59 @@ public class GeoJsonSourceTests extends EspressoTest {
     });
   }
 
+  @Test
+  public void testFeatureCollectionsConcurrency() {
+    validateTestSetup();
+    MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
+      GeoJsonSource source = new GeoJsonSource("source");
+      source.setSafeSetGeoJson(true);
+
+      // There has a concurrency between worker threads and main thread,
+      // turn GeoJsonSource.safeSetGeoJson could reproduce this issue.
+      // Because the crash happened on the worker thread and can't capture it,
+      // So I just write this test to demonstrate how it happen.
+      // Uncomment next line to reproduce the crash.
+      //source.setSafeSetGeoJson(false);
+
+      mapboxMap.getStyle().addSource(source);
+      mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+
+      // Create a Feature and set to the source
+      Feature feature = Feature.fromGeometry(Point.fromLngLat(20, 55));
+      FeatureCollection collection = FeatureCollection.fromFeature(feature);
+      source.setGeoJson(collection);
+
+      // make the feature heavy
+      int count = 0;
+      for (int i = 0; i < 1000; i++) {
+        feature.removeProperty(String.valueOf(i));
+        feature.addStringProperty(String.valueOf(i), String.valueOf(count));
+        count++;
+      }
+
+      // display the map
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+      assertEquals(1, mapboxMap.queryRenderedFeatures(
+              mapboxMap.getProjection().toScreenLocation(
+                      new LatLng(55, 20)), "layer").size());
+
+      // Update the feature
+      feature.addStringProperty("a key", "a value");
+      source.setGeoJson(collection);
+
+      // Continue manipulate the feature will lead to concurrency if safeSetGeoJson is off.
+      for (int round = 0; round < 1000; ++round) {
+        for (int i = 0; i < 1000; i++) {
+          feature.removeProperty(String.valueOf(i));
+          feature.addStringProperty(String.valueOf(i), String.valueOf(count));
+          count++;
+        }
+      }
+
+      // Should run here if safeSetGeoJson = true
+    });
+  }
+
   protected void testFeatureFromResource(final @RawRes int resource) {
     validateTestSetup();
     MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {

@@ -241,7 +241,7 @@ class GeoJsonSource : Source {
         checkThread()
 
         if (safeSetGeoJson && feature != null) {
-            nativeSetGeoJsonString(feature.toJson())
+            nativeSetFeature(Feature.fromGeometry(feature.geometry(), feature.properties()?.deepCopy() ?: JsonObject(), feature.id(),  feature.bbox()))
         } else {
             nativeSetFeature(feature)
         }
@@ -258,12 +258,7 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-
-        if (safeSetGeoJson && geometry != null) {
-            nativeSetGeoJsonString(geometry.toJson())
-        } else {
-            nativeSetGeometry(geometry)
-        }
+        nativeSetGeometry(geometry)
     }
 
     /**
@@ -278,7 +273,16 @@ class GeoJsonSource : Source {
         }
         checkThread()
         if (safeSetGeoJson && featureCollection != null) {
-            nativeSetGeoJsonString(featureCollection.toJson())
+            if (featureCollection?.features() != null) {
+                val features = featureCollection.features()
+                val featuresCopy: MutableList<Feature> = ArrayList()
+                features?.forEach{
+                    featuresCopy.add(Feature.fromGeometry(it.geometry(), it.properties()?.deepCopy() ?: JsonObject(), it.id(), it.bbox()))
+                }
+                nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+            } else {
+                nativeSetFeatureCollection(featureCollection)
+            }
         } else {
             if (featureCollection?.features() != null) {
                 val features = featureCollection.features()
