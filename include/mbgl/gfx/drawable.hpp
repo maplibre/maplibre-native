@@ -14,6 +14,8 @@ class PaintParameters;
 namespace gfx {
 
 class DrawableTweaker;
+class ShaderProgramBase;
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
@@ -32,10 +34,8 @@ public:
     virtual void draw(const PaintParameters &) const = 0;
 
     /// Which shader to use when rendering this drawable
-    //util::SimpleIdentity getShaderID() const { return shaderID; }
-    //void setShaderID(util::SimpleIdentity value) { shaderID = value; }
-    const std::string& getShaderID() const { return shaderID; }
-    void setShaderID(std::string value) { shaderID = std::move(value); }
+    const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
+    void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// DrawPriority determines the drawing order
     DrawPriority getDrawPriority() const { return drawPriority; }
@@ -58,8 +58,7 @@ public:
 
 protected:
     util::SimpleIdentity uniqueID;
-    //util::SimpleIdentity shaderID = util::SimpleIdentity::Empty;
-    std::string shaderID;
+    gfx::ShaderProgramBasePtr shader;
 
     DrawPriority drawPriority = 0;
 

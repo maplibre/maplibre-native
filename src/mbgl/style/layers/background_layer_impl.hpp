@@ -10,7 +10,9 @@ namespace mbgl {
 namespace gfx {
 
 class Drawable;
+class ShaderProgramBase;
 using DrawablePtr = std::shared_ptr<Drawable>;
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
 } // namespace gfx
 
@@ -27,7 +29,7 @@ public:
     void layerRemoved(PaintParameters&, UniqueChangeRequestVec&) const override;
 
     /// Generate any changes needed by the layer
-    void update(UniqueChangeRequestVec& changes) const override;
+    void update(UniqueChangeRequestVec&) const override;
 
 private:
     void buildDrawables(UniqueChangeRequestVec&) const;
@@ -35,6 +37,7 @@ private:
 public:
     BackgroundPaintProperties::Transitionable paint;
 
+    mutable gfx::ShaderProgramBasePtr shader;
     mutable gfx::DrawablePtr drawable;
     
     DECLARE_LAYER_TYPE_INFO;
