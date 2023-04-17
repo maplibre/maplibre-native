@@ -10,6 +10,7 @@ namespace gl {
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
     ShaderProgramGL(UniqueProgram&& glProgram_);
+    ShaderProgramGL(UniqueProgram&& glProgram_, VertexAttributeArrayGL&& attributes);
     ShaderProgramGL(ShaderProgramGL&& other);
     virtual ~ShaderProgramGL() noexcept = default;
 
@@ -23,6 +24,8 @@ public:
         std::string_view fragmentSource) noexcept(false);
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
+
+    ProgramID getGLProgramID() const { return glProgram; }
 
 protected:
     UniqueProgram glProgram;

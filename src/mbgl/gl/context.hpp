@@ -119,6 +119,10 @@ public:
         cleanupOnDestruction = cleanup;
     }
 
+    void setupDraw(const gfx::Drawable&) override;
+
+    void setCurrentShader(gfx::ShaderProgramBasePtr) override;
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
