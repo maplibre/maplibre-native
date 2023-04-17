@@ -3,16 +3,16 @@
 #include "metadata.hpp"
 
 #include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/variant.hpp>
 
 #include <string>
 #include <tuple>
 #include <vector>
+#include <variant>
 
 class Manifest;
 
 using ErrorMessage = std::string;
-using JSONReply = mbgl::variant<mbgl::JSDocument, ErrorMessage>;
+using JSONReply = std::variant<mbgl::JSDocument, ErrorMessage>;
 
 JSONReply readJson(const mbgl::filesystem::path&);
 std::string serializeJsonValue(const mbgl::JSValue&);

@@ -59,10 +59,10 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
     std::vector<std::pair<std::string, std::string>> ignores;
     for (const auto& path : ignoresPaths) {
         auto maybeIgnores = readJson(path);
-        if (!maybeIgnores.is<mbgl::JSDocument>()) {
+        if (!std::holds_alternative<mbgl::JSDocument>(maybeIgnores)) {
             continue;
         }
-        for (const auto& property : maybeIgnores.get<mbgl::JSDocument>().GetObject()) {
+        for (const auto& property : std::get<mbgl::JSDocument>(maybeIgnores).GetObject()) {
             const std::string ignore = {property.name.GetString(), property.name.GetStringLength()};
             const std::string reason = {property.value.GetString(), property.value.GetStringLength()};
             ignores.emplace_back(std::make_pair(ignore, reason));
@@ -106,13 +106,13 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     manifest.manifestPath = manifestPath.substr(0, manifestPath.find(filePath.filename()));
 
     auto contents = readJson(filePath);
-    if (!contents.is<mbgl::JSDocument>()) {
+    if (!std::holds_alternative<mbgl::JSDocument>(contents)) {
         mbgl::Log::Error(mbgl::Event::General,
                          "Provided manifest file: " + std::string(filePath) + " is not a valid json");
         return std::nullopt;
     }
 
-    auto document = std::move(contents.get<mbgl::JSDocument>());
+    auto document = std::move(std::get<mbgl::JSDocument>(contents));
     if (document.HasMember("result_path")) {
         const auto& resultPathValue = document["result_path"];
         if (!resultPathValue.IsString()) {
