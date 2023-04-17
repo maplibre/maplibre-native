@@ -976,8 +976,8 @@ if (MBGL_WITH_CLANG_TIDY)
     else()
         message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
     endif()
-    
-    set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+
+    set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
 endif()
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
