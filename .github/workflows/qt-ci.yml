@@ -123,6 +123,7 @@ jobs:
       DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
       DEPLOYMENT_ARCH: ${{ matrix.deployment_arch }}
       QT_VERSION: ${{ matrix.qt_version }}
+      CCACHE_LOGFILE: ../ccache.log
 
     steps:
       - name: Checkout
@@ -169,7 +170,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          choco.exe upgrade ccache
+          # version is pinned due to issues with caching MSVC in 4.8
+          choco.exe install ccache --version=4.7.5 --no-progress
           ccache.exe --version
           echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
 
@@ -177,7 +179,6 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
-          append-timestamp: false
 
       - name: Build maplibre-gl-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
@@ -223,6 +224,12 @@ jobs:
             -DMBGL_QT_LIBRARY_ONLY=ON
           ninja.exe
           ninja.exe install
+
+      - name: Upload ccache.log
+        uses: actions/upload-artifact@v3
+        with:
+          name: ccache_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+          path: ccache.log
 
       - name: Create artifacts
         shell: bash
