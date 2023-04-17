@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 
 #include <cassert>
