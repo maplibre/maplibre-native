@@ -19,10 +19,7 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 constexpr auto shaderName = "background_generic";
 
 void BackgroundLayer::Impl::layerAdded(PaintParameters& parameters, UniqueChangeRequestVec& changes) const {
-    if (!shader) {
         shader = parameters.shaders.get<gl::ShaderProgramGL>(shaderName);
-    }
-
     buildDrawables(changes);
 }
 
