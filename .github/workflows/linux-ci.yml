@@ -56,12 +56,14 @@ jobs:
         with:
           name: mbgl-test-runner
           path: build/mbgl-test-runner
+          retention-days: 1
 
       - name: Archive mbgl-render-test-runner
         uses: actions/upload-artifact@v3
         with:
           name: mbgl-render-test-runner
           path: build/mbgl-render-test-runner
+          retention-days: 1
   
   test:
     needs: build
