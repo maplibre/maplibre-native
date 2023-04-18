@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -51,6 +51,12 @@ jobs:
           # INFO: No fallback restore. Only restoring keys that have the same github reference. Rerunning the same workflow
           # will be faster. New workflow invocation with different code, sha1, or head will not be.
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev
+
       - name: Build Maplibre GL Core
         run: |
           cmake --version
@@ -65,7 +71,7 @@ jobs:
   
   render-test:
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download render-test-runner
         uses: actions/download-artifact@v3
