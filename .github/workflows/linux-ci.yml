@@ -27,29 +27,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Get ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+      - uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: 3.24.1
           ninjaVersion: latest
-
-      - name: Clear ccache
-        run: ccache --clear
-
-      - name: Save and restore ccache keys
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-maplibre-core
-        with:
-          path: ~/.ccache
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          # INFO: No fallback restore. Only restoring keys that have the same github reference. Rerunning the same workflow
-          # will be faster. New workflow invocation with different code, sha1, or head will not be.
 
       - name: Install dependencies
         run: |
