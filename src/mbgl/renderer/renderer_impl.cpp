@@ -131,15 +131,20 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 // Apply drawable values to shader defaults
                 const auto& defaults = shader->getVertexAttributes();
                 const auto& overrides = drawable.getVertexAttributes();
-                auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+                const auto& vertexData = drawableGL.getVertexData();
+                std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
+                std::size_t attrOffset = 0;
+                auto bindings = uploadPass->buildAttributeBindings(defaults, overrides, vertexData, usage,
+                                                                   vertexBuffer, attrOffset);
 
                 auto& glContext = static_cast<gl::Context&>(context);
                 auto vertexArray = glContext.createVertexArray();
-                vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
-                
+                vertexArray.bind(glContext, indexBuffer, bindings);
+
                 drawableGL.setVertexArray(std::move(vertexArray),
-                                          std::move(bindingsAndBuffer.second),
-                                          std::move(indexBuffer));
+                                          std::move(vertexBuffer),
+                                          std::move(indexBuffer),
+                                          attrOffset);
             }
         }
     }

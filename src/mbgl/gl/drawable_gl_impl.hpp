@@ -28,11 +28,11 @@ public:
     ~Impl() = default;
 
     void draw(const PaintParameters& /*parameters*/) const {
-            MBGL_CHECK_ERROR(glDrawElements(
-                Enum<gfx::DrawModeType>::to(type),
-                static_cast<GLsizei>(indexLength),
-                GL_UNSIGNED_SHORT,
-                reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
+        MBGL_CHECK_ERROR(glDrawElements(
+            Enum<gfx::DrawModeType>::to(type),
+            static_cast<GLsizei>(indexLength),
+            GL_UNSIGNED_SHORT,
+            reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
 
     }
 
@@ -50,6 +50,7 @@ public:
 
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
+    std::size_t attributeOffset = 0;
     mat4 matrix;
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;

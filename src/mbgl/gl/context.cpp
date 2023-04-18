@@ -448,6 +448,14 @@ void Context::setupDraw(const gfx::Drawable& drawable) {
         }
     }
 
+    // setDepthMode(depthMode);
+    // setStencilMode(stencilMode);
+    // setColorMode(colorMode);
+    // setCullFaceMode(cullFaceMode);
+
+    // uniformStates.bind(uniformValues);
+    // textureStates.bind(context, textureBindings);
+
     auto& drawableGL = static_cast<const DrawableGL&>(drawable);
     auto& vao = drawableGL.getVertexArray();
     if (vao.isValid()) {
