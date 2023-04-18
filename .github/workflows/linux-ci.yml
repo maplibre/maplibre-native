@@ -65,13 +65,22 @@ jobs:
         run: |
           cmake --version
           cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
-          cmake --build build
-      
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner
+
       - name: Archive render-test-runner
         uses: actions/upload-artifact@v3
         with:
           name: render-test-runner
           path: build/render-test-runner
+  
+  test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download mbgl-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: test-runner
   
   render-test:
     needs: build
