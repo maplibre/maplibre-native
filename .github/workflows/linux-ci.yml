@@ -8,9 +8,10 @@ on:
     paths:
       - "src/**"
       - "include/**"
-      - "workflows/core-build.yml"
+      - "workflows/linux-ci.yml"
       - "vendor/**"
       - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
