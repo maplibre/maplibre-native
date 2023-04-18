@@ -9,6 +9,7 @@
 #include <mbgl/gl/program.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
@@ -27,13 +28,10 @@ public:
     }
     ~Impl() = default;
 
-    void draw(const PaintParameters& /*parameters*/) const {
-            MBGL_CHECK_ERROR(glDrawElements(
-                Enum<gfx::DrawModeType>::to(type),
-                static_cast<GLsizei>(indexLength),
-                GL_UNSIGNED_SHORT,
-                reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
-
+    void draw(const PaintParameters& parameters) const {
+        
+        auto& glContext = static_cast<gl::Context&>(parameters.context);
+        glContext.draw(gfx::Triangles(), indexOffset, indexLength);
     }
 
     const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
@@ -50,6 +48,7 @@ public:
 
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
+    std::size_t attributeOffset = 0;
     mat4 matrix;
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
