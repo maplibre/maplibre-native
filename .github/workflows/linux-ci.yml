@@ -86,7 +86,7 @@ jobs:
       - run: chmod +x ./mbgl-test-runner
 
       - name: Run C++ tests
-        run: ./mbgl-test-runner
+        run: xvfb-run -a ./mbgl-test-runner
 
   render-test:
     needs: build
@@ -124,7 +124,7 @@ jobs:
           role-session-name: ${{ github.workflow }}-${{ github.job }}-${{ github.run_id	}}-session
       
       - name: Upload render test results to S3
-        if: ${{ steps.render_test.conclusion == 'failure' }}
+        if: ${{ steps.render_test.outcome == 'failure' }}
         id: upload_render_test_results
         run: >
           aws s3 cp 
@@ -133,7 +133,7 @@ jobs:
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: Make comment with test results
-        if: ${{ steps.upload_render_test_results.conclusion == 'success' }}
+        if: ${{ steps.upload_render_test_results.outcome == 'success' }}
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
