@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/util/pass_types.hpp>
 
 #include <mapbox/std/weak.hpp>
 
@@ -74,7 +73,7 @@ public:
     /// The scheduled tasks might run in parallel on different
     /// threads.
     /// TODO : Rename to GetPool()
-    static PassRefPtr<Scheduler> GetBackground();
+    [[nodiscard]] static std::shared_ptr<Scheduler> GetBackground();
 
     /// Get the *sequenced* scheduler for asynchronous tasks.
     /// Unlike the method above, the returned scheduler
@@ -84,7 +83,7 @@ public:
     ///
     /// Sequenced scheduler can be used for running tasks
     /// on the same thread-unsafe object.
-    static PassRefPtr<Scheduler> GetSequenced();
+    [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
 protected:
     template <typename TaskFn, typename ReplyFn>
