@@ -86,21 +86,21 @@ jobs:
       - name: Download mbgl-test-runner
         uses: actions/download-artifact@v3
         with:
-          name: test-runner
-  
+          name: mbgl-test-runner
+      
+      - name: Run C++ tests
+        run: ./mbgl-test-runner
+
   render-test:
     needs: build
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v3
+
       - name: Download mbgl-render-test-runner
         uses: actions/download-artifact@v3
         with:
           name: mbgl-render-test-runner
-      
-      - name: ls
-        run: ls -R
-
-      - uses: actions/checkout@v3
 
       - name: Run render test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
