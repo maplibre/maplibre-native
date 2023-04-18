@@ -1,4 +1,4 @@
-name: core-build
+name: linux-ci
 
 on:
   workflow_dispatch:
