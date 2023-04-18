@@ -47,6 +47,7 @@ public:
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
     virtual std::vector<std::uint16_t>& getIndexData() const = 0;
+    virtual std::vector<std::uint8_t>& getVertexData() const = 0;
 
     /// Attach a tweaker to be run on this drawable for each frame
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }

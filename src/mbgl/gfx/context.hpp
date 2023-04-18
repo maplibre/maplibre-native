@@ -89,14 +89,8 @@ public:
     
     
 public:
-    const gfx::ShaderProgramBasePtr& getCurrentShader() const { return currentShader; }
-    virtual void setCurrentShader(ShaderProgramBasePtr) = 0;
-
     /// Activate the shader, vertex attributes, etc., specified by the drawable
     virtual void setupDraw(const gfx::Drawable&) = 0;
-
-protected:
-    ShaderProgramBasePtr currentShader;
 };
 
 } // namespace gfx
