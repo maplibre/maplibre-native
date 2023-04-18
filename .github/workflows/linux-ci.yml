@@ -124,7 +124,7 @@ jobs:
         continue-on-error: true
 
       - name: Configure AWS Credentials
-        if: steps.render_test.conclusion == 'failure'
+        if: ${{ steps.render_test.conclusion == 'failure' }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -134,7 +134,7 @@ jobs:
           role-session-name: ${{ github.workflow }}-${{ github.job }}-${{ github.run_id	}}-session
       
       - name: Upload render test results to S3
-        if: steps.render_test.conclusion == 'failure'
+        if: ${{ steps.render_test.conclusion == 'failure' }}
         id: upload_render_test_results
         run: >
           aws s3 cp 
@@ -143,7 +143,7 @@ jobs:
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: Make comment with test results
-        if: steps.upload_render_test_results.conclusion == 'success'
+        if: ${{ steps.upload_render_test_results.conclusion == 'success' }}
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
