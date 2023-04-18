@@ -442,10 +442,13 @@ void Context::setDirtyState() {
 }
 
 void Context::setupDraw(const gfx::Drawable& drawable) {
-    if (auto &shader = drawable.getShader()) {
-        if (shader != currentShader) {
-            setCurrentShader(shader);
+    if (const auto &shader = drawable.getShader()) {
+        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
+        if (shaderGL.getGLProgramID() != program.getCurrentValue()) {
+            program = shaderGL.getGLProgramID();
         }
+    } else if (program != value::Program::Default) {
+        program = value::Program::Default;
     }
 
     // setDepthMode(depthMode);
@@ -462,15 +465,6 @@ void Context::setupDraw(const gfx::Drawable& drawable) {
         bindVertexArray = vao.getID();  // glBindVertexArray
     } else {
         bindVertexArray = value::BindVertexArray::Default;
-    }
-}
-
-void Context::setCurrentShader(gfx::ShaderProgramBasePtr value) {
-    if ((currentShader = std::move(value))) {
-        auto& shaderGL = static_cast<ShaderProgramGL&>(*currentShader);
-        this->program = shaderGL.getGLProgramID();
-    } else {
-        this->program = value::Program::Default;
     }
 }
 
