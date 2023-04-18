@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 name: linux-ci
+=======
+name: core-build
+>>>>>>> 711757a1c (Run render test in linux-ci)
 
 on:
   workflow_dispatch:
@@ -8,6 +12,7 @@ on:
     paths:
       - "src/**"
       - "include/**"
+<<<<<<< HEAD
       - ".github/workflows/linux-ci.yml"
       - "vendor/**"
       - "CMakeLists.txt"
@@ -17,6 +22,11 @@ on:
 permissions:
   id-token: write # This is required for requesting the JWT (AWS)
   contents: read  # This is required for actions/checkout (AWS)
+=======
+      - "workflows/core-build.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+>>>>>>> 711757a1c (Run render test in linux-ci)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
