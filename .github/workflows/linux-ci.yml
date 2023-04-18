@@ -113,7 +113,7 @@ jobs:
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
       - name: Configure AWS Credentials
-        if: ${{ steps.render_test.conclusion == 'failure' }}
+        if: ${{ steps.render_test.outcome == 'failure' }}
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
