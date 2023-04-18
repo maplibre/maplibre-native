@@ -53,5 +53,24 @@ jobs:
       - name: Build Maplibre GL Core
         run: |
           cmake --version
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
           cmake --build build
+      
+      - name: Archive render-test-runner
+        uses: actions/upload-artifact@v3
+        with:
+          name: render-test-runner
+          path: build/render-test-runner
+  
+  render-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download render-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: render-test-runner
+
+      - uses: actions/checkout@v3
+
+      - name: Run render test
+        run: xvfb-run -a ./build/mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
