@@ -96,6 +96,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mbgl-render-test-runner
+      
+      - name: ls
+        run: ls -R
 
       - uses: actions/checkout@v3
 
