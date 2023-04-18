@@ -100,4 +100,4 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Run render test
-        run: xvfb-run -a ./build/mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
