@@ -59,10 +59,13 @@ public:
         updateIndexBufferResource(buffer.getResource(), v.data(), v.bytes());
     }
 
-    virtual std::pair<gfx::AttributeBindingArray, std::unique_ptr<gfx::VertexBufferResource>>
-        buildAttributeBindings(const gfx::VertexAttributeArray& defaults,
-                               const gfx::VertexAttributeArray& overrides,
-                               gfx::BufferUsageType) = 0;
+    virtual gfx::AttributeBindingArray buildAttributeBindings(
+        const gfx::VertexAttributeArray& defaults,
+        const gfx::VertexAttributeArray& overrides,
+        const std::vector<uint8_t>& vertexData,
+        gfx::BufferUsageType,
+        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer,
+        /*out*/ std::size_t& outAttrOffset) = 0;
 
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,

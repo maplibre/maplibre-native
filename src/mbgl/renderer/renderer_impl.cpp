@@ -130,15 +130,20 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 // Apply drawable values to shader defaults
                 const auto& defaults = shader->getVertexAttributes();
                 const auto& overrides = drawable.getVertexAttributes();
-                auto bindingsAndBuffer = uploadPass->buildAttributeBindings(defaults, overrides, usage);
+                const auto& vertexData = drawableGL.getVertexData();
+                std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
+                std::size_t attrOffset = 0;
+                auto bindings = uploadPass->buildAttributeBindings(defaults, overrides, vertexData, usage,
+                                                                   vertexBuffer, attrOffset);
 
                 auto& glContext = static_cast<gl::Context&>(context);
                 auto vertexArray = glContext.createVertexArray();
-                vertexArray.bind(glContext, indexBuffer, bindingsAndBuffer.first);
-                
+                vertexArray.bind(glContext, indexBuffer, bindings);
+
                 drawableGL.setVertexArray(std::move(vertexArray),
-                                          std::move(bindingsAndBuffer.second),
-                                          std::move(indexBuffer));
+                                          std::move(vertexBuffer),
+                                          std::move(indexBuffer),
+                                          attrOffset);
             }
         }
     }
@@ -193,21 +198,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // Run changes
     orchestrator.processChanges();
-    
-    // Draw Drawables
-    {
-        for (const auto &pair : orchestrator.getDrawables()) {
-            const auto& drawable = *pair.second;
 
-            context.setupDraw(drawable);
-
-            drawable.draw(parameters);
-        }
-    }
-    
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {
+            
         parameters.pass = RenderPass::Opaque;
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
 
@@ -239,8 +234,18 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - DEBUG PASS
-    // --------------------------------------------------------------------------------
+    // Draw Drawables
+    {
+        for (const auto &pair : orchestrator.getDrawables()) {
+            const auto& drawable = *pair.second;
+
+            context.setupDraw(drawable);
+
+            drawable.draw(parameters);
+        }
+    }
+
+    // - DEBUG PASS --------------------------------------------------------------------------------
     // Renders debug overlays.
     {
         const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
