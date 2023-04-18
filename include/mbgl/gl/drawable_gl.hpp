@@ -27,7 +27,10 @@ public:
 
     void draw(const PaintParameters &) const override;
 
-    void setVertData(std::vector<std::uint8_t> vertexData_, std::vector<uint16_t> indexes_);
+    void setVertexData(std::vector<std::uint8_t> vertexData, std::vector<uint16_t> indexes,
+                       std::size_t indexOffset, std::size_t indexLength);
+    std::vector<std::uint16_t>& getIndexData() const override;
+    std::vector<std::uint8_t>& getVertexData() const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override {
@@ -38,9 +41,8 @@ public:
     }
 
     const gl::VertexArray& getVertexArray() const;
-    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&, gfx::IndexBuffer&&);
-
-    std::vector<std::uint16_t>& getIndexData() const override;
+    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&,
+                        gfx::IndexBuffer&&, std::size_t attrOffset);
 
 protected:
     class Impl;
