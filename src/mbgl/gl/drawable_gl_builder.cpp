@@ -12,10 +12,8 @@ gfx::DrawablePtr DrawableGLBuilder::createDrawable() const {
 
 void DrawableGLBuilder::init() {
     const auto n = impl->vertices.elements();
-    assert(n <= impl->indexes.elements());
     assert(n == impl->colors.size());
 
-    // temp
     const auto vertSize = sizeof(Impl::VT) + 4 * sizeof(float);
     std::vector<uint8_t> rawVert(n * vertSize);
 
@@ -28,7 +26,10 @@ void DrawableGLBuilder::init() {
         *(float*)p = impl->colors[i].a; p += sizeof(float);
     }
 
-    ((DrawableGL*)currentDrawable.get())->setVertData(std::move(rawVert), impl->indexes.vector());
+    auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
+    constexpr auto indexOffset = 0;
+    const auto indexCount = impl->indexes.elements();
+    drawableGL.setVertexData(std::move(rawVert), impl->indexes.vector(), indexOffset, indexCount);
 }
 
 } // namespace gl
