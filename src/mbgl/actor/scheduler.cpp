@@ -38,7 +38,7 @@ std::shared_ptr<Scheduler> Scheduler::GetBackground() {
         weak = scheduler = std::make_shared<ThreadPool>();
     }
 
-    return std::move(scheduler);
+    return scheduler;
 }
 
 // static
@@ -65,7 +65,7 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
         break;
     }
 
-    return std::move(result);
+    return result;
 }
 
 } //namespace mbgl
