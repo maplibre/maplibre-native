@@ -87,7 +87,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mbgl-test-runner
-      
+
+      - run: chmod +x ./mbgl-render-test-runner
+
       - name: Run C++ tests
         run: ./mbgl-test-runner
 
@@ -101,6 +103,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mbgl-render-test-runner
+      
+      - run: chmod +x ./mbgl-render-test-runner
 
       - name: Run render test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
