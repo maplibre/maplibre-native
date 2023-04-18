@@ -195,22 +195,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // Run changes
     orchestrator.processChanges();
-    
-    // Draw Drawables
-    {
-        for (const auto &pair : orchestrator.getDrawables()) {
-            const auto& drawable = *pair.second;
-            
 
-            context.setupDraw(drawable);
-
-            drawable.draw(parameters);
-        }
-    }
-    
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {
+            
         parameters.pass = RenderPass::Opaque;
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
 
@@ -239,6 +228,17 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
                 renderItem.render(parameters);
             }
+        }
+    }
+
+    // Draw Drawables
+    {
+        for (const auto &pair : orchestrator.getDrawables()) {
+            const auto& drawable = *pair.second;
+
+            context.setupDraw(drawable);
+
+            drawable.draw(parameters);
         }
     }
 

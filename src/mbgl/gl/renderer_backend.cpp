@@ -85,9 +85,17 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
             in int e;
             in mat2 f;
             in mat4 g;
+            //in int gl_VertexID;
             void main() {
                 gl_Position = vec4(d, float(e), f[0][0], a)/1.0e12;
                 gl_Position = vec4(pos, 1.0);
+                switch (gl_VertexID) {
+                case 0: gl_Position = vec4(-1.0, -1.0, 1.0, 1.0); break;
+                case 1: gl_Position = vec4(-1.0, 1.0, 1.0, 1.0); break;
+                case 2: gl_Position = vec4(1.0, -1.0, 1.0, 1.0); break;
+                case 3: gl_Position = vec4(1.0, 1.0, 1.0, 1.0); break;
+                default: gl_Position = vec4(-2.0, -2.0, -1.0, 1.0); break;
+                }
             })";
         constexpr auto frag = R"(
             #version 300 es
