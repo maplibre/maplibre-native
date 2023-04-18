@@ -8,7 +8,7 @@ on:
     paths:
       - "src/**"
       - "include/**"
-      - "workflows/linux-ci.yml"
+      - ".github/workflows/linux-ci.yml"
       - "vendor/**"
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
