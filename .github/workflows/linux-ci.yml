@@ -88,7 +88,7 @@ jobs:
         with:
           name: mbgl-test-runner
 
-      - run: chmod +x ./mbgl-render-test-runner
+      - run: chmod +x ./mbgl-test-runner
 
       - name: Run C++ tests
         run: ./mbgl-test-runner
@@ -97,6 +97,12 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libopengl0
+
       - uses: actions/checkout@v3
 
       - name: Download mbgl-render-test-runner
