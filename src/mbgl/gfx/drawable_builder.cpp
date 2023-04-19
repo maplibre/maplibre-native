@@ -26,7 +26,7 @@ DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
-        auto draw = getCurrentDrawable(/*create=*/true);
+        auto draw = getCurrentDrawable(/*createIfNone=*/true);
         currentDrawable->setDrawPriority(drawPriority);
         currentDrawable->setShader(shader);
         currentDrawable->setVertexAttributes(getVertexAttributes());

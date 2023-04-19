@@ -71,22 +71,25 @@ const std::vector<uint8_t>& VertexAttributeGL::getRaw() const {
     return rawData;
 }
 
-struct ApplyUniform {
-    GLint location;
-    template <typename T> void operator()(const T&);
-    
-    template <> void operator()(const std::int32_t&) { }
-    template <> void operator()(const gfx::VertexAttribute::int2&) { }
-    template <> void operator()(const gfx::VertexAttribute::int3&) { }
-    template <> void operator()(const gfx::VertexAttribute::int4&) { }
-    template <> void operator()(const float& ) { }
-    template <> void operator()(const gfx::VertexAttribute::float2& ) { }
-    template <> void operator()(const gfx::VertexAttribute::float3& ) { }
-    template <> void operator()(const gfx::VertexAttribute::float4& ) { }
-    template <> void operator()(const gfx::VertexAttribute::matf3& ) { }
-    template <> void operator()(const gfx::VertexAttribute::matf4& value) {
+namespace {
+    template <typename T> void applyUniform(GLint, const T&);
+    template <> void applyUniform(GLint, const std::int32_t&) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::int2&) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::int3&) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::int4&) { }
+    template <> void applyUniform(GLint, const float& ) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::float2& ) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::float3& ) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::float4& ) { }
+    template <> void applyUniform(GLint, const gfx::VertexAttribute::matf3& ) { }
+    template <> void applyUniform(GLint location, const gfx::VertexAttribute::matf4& value) {
         MBGL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, &value[0]));
     }
+}
+
+struct ApplyUniform {
+    GLint location;
+    template <typename T> void operator()(const T& value) { applyUniform(location, value); }
 };
 
 void VertexAttributeArrayGL::applyUniforms(const gfx::ShaderProgramBase& shader) {
