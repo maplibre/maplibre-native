@@ -33,7 +33,9 @@ public:
     using int3 = std::array<std::int32_t, 3>;
     using int4 = std::array<std::int32_t, 4>;
 
-    using ElementType = std::variant<std::int32_t, int2, int3, int4, float, float2, float3, matf2, matf4>;
+    using ElementType = std::variant<std::int32_t, int2, int3, int4,
+                                     float, float2, float3, float4,
+                                     matf3, matf4>;
 
     // Can only be created by VertexAttributeArray implementations
 protected:
@@ -75,7 +77,7 @@ public:
 
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
-    VertexAttribute& operator=(const VertexAttribute&& other) {
+    VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
         size = other.size;
         dataType = other.dataType;
@@ -101,7 +103,8 @@ public:
 
     VertexAttributeArray(int initCapacity = 10);
     VertexAttributeArray(VertexAttributeArray &&);
-    VertexAttributeArray(const VertexAttributeArray&);
+    // Would need to use the virtual assignment operator
+    VertexAttributeArray(const VertexAttributeArray&) = delete;
     virtual ~VertexAttributeArray() = default;
 
     std::size_t size() const { return attrs.size(); }
@@ -123,10 +126,11 @@ public:
 
     // Set a value if the element is present
     template <typename T>
-    const VertexAttribute::ElementType& set(const std::string& name, std::size_t i, T value) {
+    bool set(const std::string& name, std::size_t i, T value) {
         if (auto *item = get(name)) {
-            item->set(i, value);
+            return item->set(i, value);
         }
+        return false;
     }
 
     /// Indicates whether any values have changed

@@ -119,13 +119,13 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
 
-    auto name = std::make_unique<GLchar[]>(maxLength);
+    auto name = std::vector<GLchar>(maxLength);
     for (GLint index = 0; index < count; ++index) {
         GLsizei length = 0;
         GLint size = 0;
         GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, name.get()));
-        addAttr(uniforms, name.get(), index, length, size, glType);
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, &name[0]));
+        addAttr(uniforms, &name[0], index, length, size, glType);
     }
 
     VertexAttributeArrayGL attrs;
@@ -133,12 +133,13 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     count = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
+    name.resize(maxLength);
     for (GLint index = 0; index < count; ++index) {
         GLsizei length = 0; // "number of characters actually written in name (excluding the null terminator)"
         GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
         GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, name.get()));
-        addAttr(attrs, name.get(), index, length, size, glType);
+        MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, &name[0]));
+        addAttr(attrs, &name[0], index, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniforms), std::move(attrs));
