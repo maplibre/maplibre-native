@@ -19,7 +19,7 @@ static gfx::AttributeDataType mapType(platform::GLenum attrType) {
         case GL_FLOAT_VEC4:         return T::Float4;
         case GL_FLOAT_MAT2:         return T::Float4;   // does that work ?
         case GL_FLOAT_MAT3:
-        case GL_FLOAT_MAT4:         return T::Invalid;
+        case GL_FLOAT_MAT4:         return T::Float4;
         case GL_INT:                return T::Int;
         case GL_INT_VEC2:           return T::Int2;
         case GL_INT_VEC3:           return T::Int3;
@@ -52,22 +52,47 @@ static gfx::AttributeDataType mapType(platform::GLenum attrType) {
     }
 }
 
+// No `AttributeDataType` for 4x4, so we have to account for it separately...
+static int mapCount(const platform::GLenum attrType) {
+    switch (attrType) {
+        case GL_FLOAT_MAT3:         return 3;
+        case GL_FLOAT_MAT4:         return 4;
+        default:                    return 1;
+    }
+}
+
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
     : ShaderProgramBase(),
       glProgram(std::move(glProgram_)) {
 }
 
-ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_,
-                                 VertexAttributeArrayGL&& attributes)
+ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
+                                 VertexAttributeArrayGL&& uniforms_,
+                                 VertexAttributeArrayGL&& attributes_)
     : ShaderProgramBase(),
-      glProgram(std::move(glProgram_)),
-      vertexAttributes(std::move(attributes)) {
+      glProgram(std::move(program)),
+      uniforms(std::move(uniforms_)),
+      vertexAttributes(std::move(attributes_)) {
 }
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
+      uniforms(std::move(other.uniforms)),
       vertexAttributes(std::move(other.vertexAttributes)) {
+}
+
+using namespace platform;
+
+static void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index,
+                    GLsizei length, GLint count, GLenum glType) {
+    const auto elementType = mapType(glType);
+    const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
+    if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
+        if (auto newAttr = attrs.add(name, index, elementType, elementCount, count)) {
+            static_cast<VertexAttributeGL*>(newAttr)->setGLType(glType);
+        }
+    }
 }
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
@@ -83,14 +108,14 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     auto fragProg = context.createShader(ShaderType::Fragment, std::initializer_list<const char*>{fragmentSource.data()});
     auto program = context.createProgram(vertProg, fragProg, firstAttrib);
 
-    using namespace platform;
-
-    // ES3
+    // GLES3.1
     //GLint numAttribs;
     //glGetProgramInterfaceiv(program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
 
-    GLint count;
-    GLint maxLength;
+    VertexAttributeArrayGL uniforms;
+
+    GLint count = 0;
+    GLint maxLength = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
 
@@ -98,12 +123,14 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     for (GLint index = 0; index < count; ++index) {
         GLsizei length = 0;
         GLint size = 0;
-        GLenum type = 0;
-        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &type, name.get()));
+        GLenum glType = 0;
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, name.get()));
+        addAttr(uniforms, name.get(), index, length, size, glType);
     }
 
     VertexAttributeArrayGL attrs;
 
+    count = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
     for (GLint index = 0; index < count; ++index) {
@@ -111,15 +138,10 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
         GLenum glType = 0;
         MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, name.get()));
-        const auto elementType = mapType(glType);
-        if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-            if (auto newAttr = attrs.add(name.get(), index, elementType, size)) {
-                static_cast<VertexAttributeGL*>(newAttr)->setGLType(glType);
-            }
-        }
+        addAttr(attrs, name.get(), index, length, size, glType);
     }
 
-    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs));
+    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniforms), std::move(attrs));
 }
 
 } // namespace gl
