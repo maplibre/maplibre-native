@@ -130,10 +130,9 @@ jobs:
       - name: Upload render test results to S3
         if: ${{ steps.render_test.outcome == 'failure' }}
         id: upload_render_test_results
-        run: >
-          aws s3 cp 
-            metrics/linux-gcc8-release-style.html
-            s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html
+        run: |
+          aws s3 cp metrics/linux-gcc8-release-style.html \
+            s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html \
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: Make comment with test results
