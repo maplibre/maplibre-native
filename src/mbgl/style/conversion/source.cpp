@@ -16,7 +16,7 @@ namespace style {
 namespace conversion {
 
 // A tile source can either specify a URL to TileJSON, or inline TileJSON.
-static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
+static std::optional<std::variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
     auto urlVal = objectMember(value, "url");
     if (!urlVal) {
         std::optional<Tileset> tileset = convert<Tileset>(value, error);
@@ -38,7 +38,7 @@ static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Co
 static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
                                                                   const Convertible& value,
                                                                   Error& error) {
-    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<std::variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
     }
@@ -60,7 +60,7 @@ static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::str
 static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
                                                                      const Convertible& value,
                                                                      Error& error) {
-    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<std::variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
     }
@@ -82,7 +82,7 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
 static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
                                                                   const Convertible& value,
                                                                   Error& error) {
-    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+    std::optional<std::variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
     }
