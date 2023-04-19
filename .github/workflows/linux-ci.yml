@@ -13,6 +13,10 @@ on:
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
 
+permissions:
+  id-token: write # This is required for requesting the JWT (AWS)
+  contents: read  # This is required for actions/checkout (AWS)
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
@@ -95,11 +99,6 @@ jobs:
   render-test:
     needs: build
     runs-on: ubuntu-22.04
-    # see Error #13 https://betterprogramming.pub/17-troubleshooting-tips-for-github-actions-workflows-43394e4f1a8a
-    # why these permissions are needed
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Install dependencies
         run: |
@@ -126,7 +125,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: us-west-2
-          role-to-assume: ${{ vars.OICD_AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id	}}
       
       - name: Upload render test results to S3
         if: ${{ steps.render_test.outcome == 'failure' }}
