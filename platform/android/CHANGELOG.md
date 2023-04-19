@@ -10,6 +10,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
+* Fix regression in CameraUpdateFactory#zoomOut ([#1035](https://github.com/maplibre/maplibre-gl-native/pull/1035))
+
 ### ⛵ Dependencies
 
 ## 10.0.2 - February 23, 2023
