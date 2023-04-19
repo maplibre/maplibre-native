@@ -145,14 +145,12 @@ public class GeoJsonSourceTests extends EspressoTest {
     validateTestSetup();
     MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
-      source.setSafeSetGeoJson(true);
 
       // There has a concurrency between worker threads and main thread,
       // turn GeoJsonSource.safeSetGeoJson could reproduce this issue.
       // Because the crash happened on the worker thread and can't capture it,
-      // So I just write this test to demonstrate how it happen.
-      // Uncomment next line to reproduce the crash.
-      //source.setSafeSetGeoJson(false);
+      // So I just write this test to demonstrate how it happen, without this
+      // edition the map will crash.
 
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
@@ -197,14 +195,12 @@ public class GeoJsonSourceTests extends EspressoTest {
     validateTestSetup();
     MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
-      source.setSafeSetGeoJson(true);
 
       // There has a concurrency between worker threads and main thread,
       // turn GeoJsonSource.safeSetGeoJson could reproduce this issue.
       // Because the crash happened on the worker thread and can't capture it,
-      // So I just write this test to demonstrate how it happen.
-      // Uncomment next line to reproduce the crash.
-      //source.setSafeSetGeoJson(false);
+      // So I just write this test to demonstrate how it happen, without this
+      // edition the map will crash.
 
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
