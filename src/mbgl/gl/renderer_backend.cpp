@@ -75,8 +75,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
     
     auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
     if (!shader) {
-        constexpr auto vert = R"(
-            #version 300 es
+        constexpr auto vert = R"(#version 300 es
             precision highp float;
             
             in vec2 a_pos;
@@ -94,8 +93,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
                 gl_Position = u_matrix * vec4(gl_Position.xy * 8192.0, 0, 1);
                 //gl_Position = u_matrix * vec4(a_pos, 0, 1);
             })";
-        constexpr auto frag = R"(
-            #version 300 es
+        constexpr auto frag = R"(#version 300 es
             precision highp float;
             in vec4 pos;
             out vec4 color;
