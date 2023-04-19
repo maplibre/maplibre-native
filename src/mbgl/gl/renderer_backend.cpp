@@ -70,28 +70,29 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
 
     gl::Context& glContext = static_cast<gl::Context&>(*context);
 
+//    "layout (location = 0) in vec2 a_pos;\nuniform mat4 u_matrix;\n\nvoid main() {\n
+    // gl_Position = u_matrix * vec4(a_pos, 0, 1);\n}\n", fragment = "uniform vec4 u_color;\nuniform float u_opacity;\n\nvoid main() {\n    fragColor = u_color * u_opacity;\n\n#ifdef OVERDRAW_INSPECTOR\n    fragColor = vec4(1.0);\n#endif\n}\n"
+    
     auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
     if (!shader) {
         constexpr auto vert = R"(
             #version 300 es
             precision highp float;
-            uniform float a;
-            uniform int b;
-            uniform mat4 c;
-            layout (location = 0) in vec3 pos;
-            in float d;
-            in int e;
-            in mat2 f;
-            in mat4 g;
+            
+            in vec2 a_pos;
+            uniform mat4 u_matrix;
+
             void main() {
-                gl_Position = vec4(d, float(e), f[0][0], a)/1.0e12; // optimized away if unused
-                gl_Position = vec4(pos, 1.0);
+                gl_Position = u_matrix * vec4(a_pos, 0, 1);
+
                 switch (gl_VertexID) {  // fake it for now
                 case 0: gl_Position = vec4(-1.0, -1.0, 1.0, 1.0); break;
                 case 1: gl_Position = vec4( 1.0, -1.0, 1.0, 1.0); break;
                 case 2: gl_Position = vec4( 1.0,  1.0, 1.0, 1.0); break;
                 case 3: gl_Position = vec4(-1.0,  1.0, 1.0, 1.0); break;
                 }
+                gl_Position = u_matrix * vec4(gl_Position.xy * 8192.0, 0, 1);
+                //gl_Position = u_matrix * vec4(a_pos, 0, 1);
             })";
         constexpr auto frag = R"(
             #version 300 es
@@ -106,16 +107,14 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
             // Compile
             shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
             if (shader) {
+                // Set uniforms
+                //shader->setUniform("a", 0, 3.21f);
+                //shader->setUniform("b", 0, 4.32f);
+                
                 // Set default values
-                if (auto *attr = shader->getVertexAttributes().get("d")) {
-                    attr->set(0, 12.3f);
-                }
-                if (auto *attr = shader->getVertexAttributes().get("e")) {
-                    attr->set(0, 123);
-                }
-                if (auto *attr = shader->getVertexAttributes().get("f")) {
-                    attr->set(0, gfx::VertexAttribute::matf2{ 1.0f, 2.0f, 3.0f, 4.0f });
-                }
+                //shader->setAttribute("d", 0, 12.3f);
+                //shader->setAttribute("e", 0, 123);
+                //shader->setAttribute("f", 0, gfx::VertexAttribute::matf2{ 1.0f, 2.0f, 3.0f, 4.0f });
 
                 // Add to the registry
                 if (!shaders.registerShader(shader, shaderName)) {
