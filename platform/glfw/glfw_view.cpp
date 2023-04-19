@@ -575,9 +575,9 @@ void GLFWView::updateFreeCameraDemo() {
 }
 
 mbgl::Color GLFWView::makeRandomColor() const {
-    const auto r = static_cast<float>(std::rand()) / RAND_MAX;
-    const auto g = static_cast<float>(std::rand()) / RAND_MAX;
-    const auto b = static_cast<float>(std::rand()) / RAND_MAX;
+    const auto r = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    const auto g = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    const auto b = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     return { r, g, b, 1.0f };
 }
 
