@@ -76,6 +76,8 @@ target_compile_options(
         $<$<CXX_COMPILER_ID:MSVC>:/WX>      # all warnings as errors
         $<$<CXX_COMPILER_ID:MSVC>:/EHsc>    # exceptions
         $<$<CXX_COMPILER_ID:MSVC>:/wd4068>  # pragma
+        $<$<CXX_COMPILER_ID:MSVC>:/D_USE_MATH_DEFINES>
+        $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<PLATFORM_ID:Windows>>:-D_USE_MATH_DEFINES>
         $<$<CXX_COMPILER_ID:MSVC>:/D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS>
         $<$<CXX_COMPILER_ID:MSVC>:/D_CRT_SECURE_NO_WARNINGS>
 )
