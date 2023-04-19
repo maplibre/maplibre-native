@@ -42,14 +42,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 endif()
 
-if(MSVC)
-    add_definitions("/DQT_COMPILING_QIMAGE_COMPAT_CPP")
-    add_definitions("/D_USE_MATH_DEFINES")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions("-DQT_COMPILING_QIMAGE_COMPAT_CPP")
-    add_definitions("-D_USE_MATH_DEFINES")
-endif()
-
+# Debugging & ccache on Windows
 if (MSVC)
     foreach(config DEBUG RELWITHDEBINFO)
         foreach(lang C CXX)
