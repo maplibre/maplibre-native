@@ -13,6 +13,7 @@ on:
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
 
+# https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 permissions:
   id-token: write # This is required for requesting the JWT (AWS)
   contents: read  # This is required for actions/checkout (AWS)
