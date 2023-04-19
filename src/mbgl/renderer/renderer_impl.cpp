@@ -16,6 +16,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -111,9 +112,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 tweaker->execute(drawable, parameters);
             }
 
-            // Generate a vertex array object for the drawable state, if necessary
             auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
-            const auto& shader = drawable.getShader();
+            auto& shader = drawable.getShader();
+
+            // Where should this happen?
+            const mat4 matrix = parameters.matrixForTile({ 0, 0, 0 }); //tileID.toUnwrapped());
+
+            shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
+            shader->updateUniforms();
+
+            // Generate a vertex array object for the drawable state, if necessary
             if (shader && !drawableGL.getVertexArray().isValid()) {
                 const auto usage = gfx::BufferUsageType::StaticDraw;
 
