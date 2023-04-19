@@ -35,10 +35,10 @@ VertexAttribute* VertexAttributeArray::get(const std::string& name) const {
 }
 
 VertexAttribute* VertexAttributeArray::add(std::string name, int index,
-                                           AttributeDataType dataType, std::size_t count) {
+                                           AttributeDataType dataType, int size, std::size_t count) {
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
-        result.first->second = create(index, dataType, count);
+        result.first->second = create(index, dataType, size, count);
         return result.first->second.get();
     } else {
         return nullptr;
@@ -46,16 +46,32 @@ VertexAttribute* VertexAttributeArray::add(std::string name, int index,
 }
 
 VertexAttribute* VertexAttributeArray::getOrAdd(std::string name, int index,
-                                                AttributeDataType dataType, std::size_t count) {
+                                                AttributeDataType dataType, int size, std::size_t count) {
     //attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
-        result.first->second = create(index, dataType, count);
+        result.first->second = create(index, dataType, size, count);
     } else if (result.first->second->getDataType() != dataType ||
+               result.first->second->getSize() != size ||
                result.first->second->getCount() != count) {
         return nullptr;
     }
     return result.first->second.get();
+}
+
+bool VertexAttributeArray::isDirty() const {
+    for (const auto& kv : attrs) {
+        if (kv.second->getDirty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void VertexAttributeArray::resetDirty() {
+    for (auto& kv : attrs) {
+        kv.second->clearDirty();
+    }
 }
 
 void VertexAttributeArray::resolve(const VertexAttributeArray& overrides,

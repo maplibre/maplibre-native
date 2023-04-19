@@ -1,6 +1,8 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 
 #include <mbgl/gl/defines.hpp>
+#include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
 
 #include <cstring>
 
@@ -67,6 +69,43 @@ const std::vector<uint8_t>& VertexAttributeGL::getRaw() const {
         dirty = false;
     }
     return rawData;
+}
+
+struct ApplyUniform {
+    GLint location;
+    template <typename T> void operator()(const T&);
+    
+    template <> void operator()(const std::int32_t&) { }
+    template <> void operator()(const gfx::VertexAttribute::int2&) { }
+    template <> void operator()(const gfx::VertexAttribute::int3&) { }
+    template <> void operator()(const gfx::VertexAttribute::int4&) { }
+    template <> void operator()(const float& ) { }
+    template <> void operator()(const gfx::VertexAttribute::float2& ) { }
+    template <> void operator()(const gfx::VertexAttribute::float3& ) { }
+    template <> void operator()(const gfx::VertexAttribute::float4& ) { }
+    template <> void operator()(const gfx::VertexAttribute::matf3& ) { }
+    template <> void operator()(const gfx::VertexAttribute::matf4& value) {
+        MBGL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, &value[0]));
+    }
+};
+
+void VertexAttributeArrayGL::applyUniforms(const gfx::ShaderProgramBase& shader) {
+    const auto& glShader = static_cast<const ShaderProgramGL&>(shader);
+    const auto program = glShader.getGLProgramID();
+
+    for (auto& kv : attrs) {
+        const auto& name = kv.first;
+        auto& uniform = kv.second;
+
+        if (uniform->getDirty()) {
+            if (uniform->getIndex() < 0) {
+                const auto index = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.c_str()));
+                uniform->setIndex(index);
+            }
+            std::visit(ApplyUniform { uniform->getIndex() }, uniform->get(0));
+            uniform->clearDirty();
+        }
+    }
 }
 
 } // namespace gfx

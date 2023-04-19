@@ -12,8 +12,8 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
     // Can only be created by VertexAttributeArrayGL
 private:
     friend VertexAttributeArrayGL;
-    VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-    : VertexAttribute(index_, dataType_, count_) {
+    VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, int size_, std::size_t count_)
+    : VertexAttribute(index_, dataType_, size_, count_) {
     }
     VertexAttributeGL(const VertexAttributeGL& other)
     : VertexAttribute(other),
@@ -58,9 +58,12 @@ public:
         return *this;
     }
     
+    void applyUniforms(const gfx::ShaderProgramBase&) override;
+
 private:
-    std::unique_ptr<gfx::VertexAttribute> create(int index, gfx::AttributeDataType dataType, std::size_t count) override {
-        return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, count));
+    std::unique_ptr<gfx::VertexAttribute> create(int index, gfx::AttributeDataType dataType,
+                                                 int size, std::size_t count) override {
+        return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, size, count));
     }
     std::unique_ptr<gfx::VertexAttribute> copy(const gfx::VertexAttribute& attr) override {
         return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
