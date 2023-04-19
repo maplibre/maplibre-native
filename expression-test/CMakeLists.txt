@@ -29,6 +29,7 @@ target_link_libraries(
         Mapbox::Base::Extras::args
         Mapbox::Base::Extras::filesystem
         mbgl-core
+        mbgl-compiler-options
 )
 
 set_property(TARGET mbgl-expression-test PROPERTY FOLDER Executables)
