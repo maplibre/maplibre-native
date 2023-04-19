@@ -95,6 +95,11 @@ jobs:
   render-test:
     needs: build
     runs-on: ubuntu-22.04
+    # see Error #13 https://betterprogramming.pub/17-troubleshooting-tips-for-github-actions-workflows-43394e4f1a8a
+    # why these permissions are needed
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Install dependencies
         run: |
