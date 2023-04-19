@@ -11,11 +11,6 @@ VertexAttributeArray::VertexAttributeArray(VertexAttributeArray &&other)
     : attrs(std::move(other.attrs)) {
 }
 
-VertexAttributeArray::VertexAttributeArray(const VertexAttributeArray& other)
-    : attrs(other.attrs.size()) {
-    operator=(other);
-}
-
 VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray &&other) {
     attrs = std::move(other.attrs);
     return *this;

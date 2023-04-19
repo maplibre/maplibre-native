@@ -13,15 +13,15 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, int size_, std::size_t count_)
-    : VertexAttribute(index_, dataType_, size_, count_) {
+        : VertexAttribute(index_, dataType_, size_, count_) {
     }
     VertexAttributeGL(const VertexAttributeGL& other)
-    : VertexAttribute(other),
-    glType(other.glType) {
+        : VertexAttribute(other),
+          glType(other.glType) {
     }
     VertexAttributeGL(VertexAttributeGL&& other)
-    : VertexAttribute(std::move(other)),
-    glType(other.glType) {
+        : VertexAttribute(std::move(other)),
+          glType(other.glType) {
     }
     
 public:
@@ -46,7 +46,7 @@ class VertexAttributeArrayGL final : public gfx::VertexAttributeArray {
 public:
     VertexAttributeArrayGL(int initCapacity = 10) : VertexAttributeArray(initCapacity) { }
     VertexAttributeArrayGL(VertexAttributeArrayGL &&other) : VertexAttributeArray(std::move(other)) { }
-    VertexAttributeArrayGL(const VertexAttributeArrayGL& other) : VertexAttributeArray(other) { }
+    VertexAttributeArrayGL(const VertexAttributeArrayGL&) = delete;
     ~VertexAttributeArrayGL() = default;
     
     VertexAttributeArrayGL& operator=(VertexAttributeArrayGL &&other) {
