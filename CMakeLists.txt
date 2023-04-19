@@ -11,6 +11,16 @@ option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
 
+if (MBGL_WITH_CLANG_TIDY)
+    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+    if(NOT CLANG_TIDY_COMMAND)
+        message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
+    else()
+        message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
+    endif()
+    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
+endif()
+
 if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
@@ -970,14 +980,7 @@ target_sources(
 )
 
 if (MBGL_WITH_CLANG_TIDY)
-    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
-    if(NOT CLANG_TIDY_COMMAND)
-        message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
-    else()
-        message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
-    endif()
-
-    set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
+    set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})

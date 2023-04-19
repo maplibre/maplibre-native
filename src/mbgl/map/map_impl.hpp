@@ -20,7 +20,7 @@ class ResourceTransform;
 
 namespace gfx {
 class ShaderRegistry;
-}
+} // namespace gfx
 
 struct StillImageRequest {
     StillImageRequest(Map::StillImageCallback&& callback_)
