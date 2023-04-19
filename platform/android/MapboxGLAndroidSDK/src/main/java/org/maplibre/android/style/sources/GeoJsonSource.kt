@@ -240,10 +240,10 @@ class GeoJsonSource : Source {
         }
         checkThread()
 
-        if (safeSetGeoJson && feature != null) {
+        if (feature != null) {
             nativeSetFeature(Feature.fromGeometry(feature.geometry(), feature.properties()?.deepCopy() ?: JsonObject(), feature.id(),  feature.bbox()))
         } else {
-            nativeSetFeature(feature)
+            nativeSetFeature(null)
         }
     }
 
@@ -272,7 +272,7 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (safeSetGeoJson && featureCollection != null) {
+        if (featureCollection != null) {
             if (featureCollection?.features() != null) {
                 val features = featureCollection.features()
                 val featuresCopy: MutableList<Feature> = ArrayList()
@@ -284,13 +284,7 @@ class GeoJsonSource : Source {
                 nativeSetFeatureCollection(featureCollection)
             }
         } else {
-            if (featureCollection?.features() != null) {
-                val features = featureCollection.features()
-                val featuresCopy: List<Feature> = ArrayList(features)
-                nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
-            } else {
-                nativeSetFeatureCollection(featureCollection)
-            }
+            nativeSetFeatureCollection(null)
         }
     }
 
@@ -416,15 +410,6 @@ class GeoJsonSource : Source {
             checkThread()
             return nativeGetUrl()
         }
-
-    /**
-     * The flag of prevent concurrency of GeoJson for `func setGeoJson`'s parameters
-     *
-     * If the flag turned into true, then the GeoJson Object will turn itself to json
-     * string and sent the json string to the map to prevent concurrency between main thread
-     * and worker thread.
-     */
-    var safeSetGeoJson: Boolean = true
 
     /**
      * Queries the source for features.
