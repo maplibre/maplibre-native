@@ -630,6 +630,7 @@ class OfflineManager private constructor(context: Context) {
          * @return the single instance of offline manager
          */
         @Synchronized
+        @JvmStatic
         fun getInstance(context: Context): OfflineManager {
             if (instance == null) {
                 instance = OfflineManager(context)
