@@ -73,8 +73,7 @@ std::size_t VertexAttributeGL::getStride() const {
 const std::vector<std::uint8_t>& VertexAttributeGL::getRaw() const {
     if (dirty) {
         const auto count = getCount();
-        const auto size = getSize(getGLType());
-        const auto stride = getStride(getGLType());
+        const auto size_ = getSize(getGLType());
 
         rawData.resize(stride * count);
         std::fill(rawData.begin(), rawData.end(), 0);
@@ -82,7 +81,7 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw() const {
         std::uint8_t* outPtr = &rawData[0];
         for (std::size_t i = 0; i < count; ++i) {
             if (const auto rawPtr = getPtr(items[i], getGLType())) {
-                std::memcpy(outPtr, rawPtr, size);
+                std::memcpy(outPtr, rawPtr, size_);
             }
             outPtr += stride;
         }
