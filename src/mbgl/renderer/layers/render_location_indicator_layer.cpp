@@ -28,12 +28,10 @@
 #include <mbgl/util/mat4.hpp>
 
 #include <mapbox/eternal.hpp>
-#include <mbgl/gl/context.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 
 using namespace mbgl::platform;
