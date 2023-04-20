@@ -303,6 +303,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
     assert(inputType && outputType);
 
     std::optional<std::string> err;
+    // NOLINTNEXTLINE(bugprone-assignment-in-if-condition)
     if ((*input)->getType() != type::Value && (err = type::checkSubtype(*inputType, (*input)->getType()))) {
         ctx.error(*err, 1);
         return ParseResult();

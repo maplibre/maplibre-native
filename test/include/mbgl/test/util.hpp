@@ -53,7 +53,7 @@
 
 namespace httplib {
 class Server;
-}
+} // namespace httplib
 
 namespace mbgl {
 namespace test {
