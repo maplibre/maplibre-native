@@ -16,11 +16,9 @@ void DrawableGL::draw(const PaintParameters &parameters) const
     impl->draw(parameters);
 }
 
-void DrawableGL::setVertexData(std::vector<std::uint8_t> vertexData,
-                               std::vector<std::uint16_t> indexes,
-                               const std::size_t indexOffset,
-                               const std::size_t indexLength) {
-    impl->vertData = std::move(vertexData);
+void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes,
+                              const std::size_t indexOffset,
+                              const std::size_t indexLength) {
     impl->indexes = std::move(indexes);
     impl->indexOffset = indexOffset;
     impl->indexLength = indexLength;
@@ -30,21 +28,31 @@ std::vector<std::uint16_t>& DrawableGL::getIndexData() const {
     return impl->indexes;
 }
 
-std::vector<std::uint8_t>& DrawableGL::getVertexData() const {
-    return impl->vertData;
-}
-
 const gl::VertexArray& DrawableGL::getVertexArray() const {
     return impl->vertexArray;
 }
 
+const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
+    return impl->vertexAttributes;
+}
+
+gfx::VertexAttributeArray& DrawableGL::mutableVertexAttributes() {
+    return impl->vertexAttributes;
+}
+
+void DrawableGL::setVertexAttributes(const gfx::VertexAttributeArray& value) {
+    impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
+}
+void DrawableGL::setVertexAttributes(gfx::VertexAttributeArray&& value) {
+    impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
+}
+
 void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
                                 gfx::UniqueVertexBufferResource&& attributeBuffer_,
-                                gfx::IndexBuffer&& indexBuffer_,
-                                std::size_t attrOffset) {
+                                gfx::IndexBuffer&& indexBuffer_) {
     impl->vertexArray = std::move(vertexArray_);
     impl->attributeBuffer = std::move(attributeBuffer_);
-    impl->attributeOffset = attrOffset;
+    impl->attributeOffset = 0;
     impl->indexBuffer = std::move(indexBuffer_);
 }
 

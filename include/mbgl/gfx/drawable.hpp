@@ -22,8 +22,7 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 class Drawable {
 protected:
-    Drawable() {
-    }
+    Drawable() = default;
 
 public:
     virtual ~Drawable() = default;
@@ -41,13 +40,15 @@ public:
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
+    /// Get the number of vertexes
+    std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
+
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
     virtual std::vector<std::uint16_t>& getIndexData() const = 0;
-    virtual std::vector<std::uint8_t>& getVertexData() const = 0;
 
     /// Attach a tweaker to be run on this drawable for each frame
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
@@ -55,7 +56,7 @@ public:
     void addTweakers(TIter beg, TIter end) { tweakers.insert(tweakers.end(), beg, end); }
 
     /// Get the tweakers attached to this drawable
-    std::vector<DrawableTweakerPtr> getTweakers() const { return tweakers; }
+    const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
 
 protected:
     util::SimpleIdentity uniqueID;
