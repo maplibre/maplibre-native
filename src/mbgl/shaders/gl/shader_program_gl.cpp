@@ -5,6 +5,7 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
+#include <cstring>
 #include <utility>
 
 namespace mbgl {
@@ -90,7 +91,8 @@ static void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index
     const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
         if (auto newAttr = attrs.add(name, index, elementType, elementCount, count)) {
-            static_cast<VertexAttributeGL*>(newAttr)->setGLType(glType);
+            auto* glAttr = static_cast<VertexAttributeGL*>(newAttr);
+            glAttr->setGLType(glType);
         }
     }
 }
@@ -125,7 +127,8 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLint size = 0;
         GLenum glType = 0;
         MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, &name[0]));
-        addAttr(uniforms, &name[0], index, length, size, glType);
+        const GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, &name[0]));
+        addAttr(uniforms, &name[0], location, length, size, glType);
     }
 
     VertexAttributeArrayGL attrs;
@@ -139,7 +142,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
         GLenum glType = 0;
         MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, &name[0]));
-        addAttr(attrs, &name[0], index, length, size, glType);
+        if (!strncmp(&name[0], "gl_", 3)) { // Is there a better way to detect built-in attributes?
+            continue;
+        }
+        const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, &name[0]));
+        addAttr(attrs, &name[0], location, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniforms), std::move(attrs));

@@ -8,7 +8,7 @@ namespace mbgl {
 namespace gfx {
 
 struct DrawableBuilder::Impl {
-    using VT = gfx::detail::VertexType<gfx::AttributeType<short,2>>;
+    using VT = gfx::detail::VertexType<gfx::AttributeType<float,2>>;
     gfx::VertexVector<VT> vertices;
     gfx::IndexVector<gfx::Triangles> indexes;
     SegmentVector<TypeList<void>> segments;

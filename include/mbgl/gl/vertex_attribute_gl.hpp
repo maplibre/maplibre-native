@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/vertex_attribute.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
 namespace mbgl {
@@ -13,7 +14,7 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, int size_, std::size_t count_)
-        : VertexAttribute(index_, dataType_, size_, count_) {
+        : VertexAttribute(index_, dataType_, size_, count_, /*stride_=*/0) {
     }
     VertexAttributeGL(const VertexAttributeGL& other)
         : VertexAttribute(other),
@@ -26,19 +27,23 @@ private:
     
 public:
     platform::GLenum getGLType() const { return glType; }
-    void setGLType(platform::GLenum value) { glType = value; }
+    void setGLType(platform::GLenum value);
 
     bool getNormalized() const { return normalized; }
     void setNormalized(bool value) { normalized = value; }
 
-    std::size_t getStride() const { return stride; }
-    const std::vector<uint8_t>& getRaw() const;
+    std::size_t getStride() const;
+
+    const std::vector<std::uint8_t>& getRaw() const;
+
+private:
+    static int getSize(platform::GLenum glType);
+    static int getStride(platform::GLenum glType);
+    static const void* getPtr(const gfx::VertexAttribute::ElementType&, platform::GLenum glType);
 
 private:
     platform::GLenum glType = 0;
     bool normalized = false;
-    mutable int stride = 0;
-    mutable std::vector<uint8_t> rawData;
 };
 
 /// Stores a collection of vertex attributes by name
