@@ -108,7 +108,7 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
 
     std::optional<std::array<float, 4>> matrix{std::nullopt};
     if (iconRotate) {
-        const float angle = iconRotate * util::DEG2RAD_F;
+        const float angle = util::DEG2RAD_F(iconRotate);
         const float angle_sin = std::sin(angle);
         const float angle_cos = std::cos(angle);
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
@@ -200,7 +200,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const style::SymbolPlacementType placement,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
-    const float textRotate = layout.get<TextRotate>() * util::DEG2RAD_F;
+    const float textRotate = util::DEG2RAD_F(layout.get<TextRotate>());
     const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
 
     SymbolQuads quads;

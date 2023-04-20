@@ -52,8 +52,8 @@ private:
     void calculateCartesian() {
         // We abstract "north"/"up" (compass-wise) to be 0° when really this is 90° (π/2): we
         // correct for that here
-        const float _a = (azimuthal + 90) * util::DEG2RAD_F;
-        const float _p = polar * util::DEG2RAD_F;
+        const float _a = util::DEG2RAD_F(azimuthal + 90);
+        const float _p = util::DEG2RAD_F(polar);
 
         x = radial * std::cos(_a) * std::sin(_p);
         y = radial * std::sin(_a) * std::sin(_p);

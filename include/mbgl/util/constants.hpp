@@ -26,10 +26,10 @@ constexpr uint16_t tileSize_I = 512;
  */
 constexpr int32_t EXTENT = 8192;
 
-constexpr double DEG2RAD_D = M_PI / 180.0;
-constexpr double RAD2DEG_D = 180.0 / M_PI;
-constexpr float DEG2RAD_F = static_cast<float>(M_PI) / 180.0F;
-constexpr float RAD2DEG_F = 180.0F / static_cast<float>(M_PI);
+constexpr double DEG2RAD_D(double deg) { return deg * M_PI / 180.0; }
+constexpr double RAD2DEG_D(double rad) { return rad * 180.0 / M_PI; }
+constexpr float DEG2RAD_F(float deg) { return deg * static_cast<float>(M_PI) / 180.0F; }
+constexpr float RAD2DEG_F(float rad) { return rad * 180.0F / static_cast<float>(M_PI); }
 constexpr double M2PI = M_PI * 2;
 constexpr double EARTH_RADIUS_M = 6378137;
 constexpr double LATITUDE_MAX = 85.051128779806604;

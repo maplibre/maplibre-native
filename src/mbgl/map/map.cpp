@@ -156,7 +156,7 @@ void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animatio
 }
 
 void Map::pitchBy(double pitch, const AnimationOptions& animation) {
-    easeTo(CameraOptions().withPitch((impl->transform.getPitch() * util::RAD2DEG_D) - pitch), animation);
+    easeTo(CameraOptions().withPitch(util::RAD2DEG_D(impl->transform.getPitch()) - pitch), animation);
 }
 
 void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation) {
@@ -246,8 +246,8 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
     }
 
     return mbgl::cameraForLatLngs(latLngs, transform, padding)
-        .withBearing(-transform.getBearing() * util::RAD2DEG_D)
-        .withPitch(transform.getPitch() * util::RAD2DEG_D);
+        .withBearing(util::RAD2DEG_D(-transform.getBearing()))
+        .withPitch(util::RAD2DEG_D(transform.getPitch()));
 }
 
 CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
@@ -346,8 +346,8 @@ BoundOptions Map::getBounds() const {
         .withLatLngBounds(impl->transform.getState().getLatLngBounds())
         .withMinZoom(impl->transform.getState().getMinZoom())
         .withMaxZoom(impl->transform.getState().getMaxZoom())
-        .withMinPitch(impl->transform.getState().getMinPitch() * util::RAD2DEG_D)
-        .withMaxPitch(impl->transform.getState().getMaxPitch() * util::RAD2DEG_D);
+        .withMinPitch(util::RAD2DEG_D(impl->transform.getState().getMinPitch()))
+        .withMaxPitch(util::RAD2DEG_D(impl->transform.getState().getMaxPitch()));
 }
 
 // MARK: - Map options

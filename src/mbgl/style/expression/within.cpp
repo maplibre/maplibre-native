@@ -20,7 +20,7 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
 
     auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
     auto y =
-        (util::LONGITUDE_MAX - (std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)) * util::RAD2DEG_D)) *
+        (util::LONGITUDE_MAX - util::RAD2DEG_D(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
         size / util::DEGREES_MAX;
 
     Point<int64_t> p;

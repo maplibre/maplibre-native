@@ -540,7 +540,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const float symbolSpacing = tilePixelRatio * layout->get<SymbolSpacing>();
     const float textPadding = layout->get<TextPadding>() * tilePixelRatio;
     const float iconPadding = layout->get<IconPadding>() * tilePixelRatio;
-    const float textMaxAngle = layout->get<TextMaxAngle>() * util::DEG2RAD_F;
+    const float textMaxAngle = util::DEG2RAD_F(layout->get<TextMaxAngle>());
     const float iconRotation = layout->evaluate<IconRotate>(zoom, feature, canonicalID);
     const float textRotation = layout->evaluate<TextRotate>(zoom, feature, canonicalID);
     std::array<float, 2> variableTextOffset;

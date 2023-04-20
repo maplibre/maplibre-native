@@ -67,7 +67,7 @@ static float contrastFactor(float contrast) {
 }
 
 static std::array<float, 3> spinWeights(float spin) {
-    spin *= util::DEG2RAD_F;
+    spin = util::DEG2RAD_F(spin);
     float s = std::sin(spin);
     float c = std::cos(spin);
     std::array<float, 3> spin_weights = {{
