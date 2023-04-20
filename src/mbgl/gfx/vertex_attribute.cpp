@@ -1,5 +1,9 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 
+#include <algorithm>
+#include <numeric>
+#include <optional>
+
 namespace mbgl {
 namespace gfx {
 
@@ -47,33 +51,30 @@ VertexAttribute* VertexAttributeArray::getOrAdd(std::string name, int index,
     if (result.second) {
         result.first->second = create(index, dataType, size, count);
     } else if (result.first->second->getDataType() != dataType ||
-               result.first->second->getSize() != size ||
+               result.first->second->getSize() != (std::size_t)size ||
                result.first->second->getCount() != count) {
         return nullptr;
     }
     return result.first->second.get();
 }
 
-bool VertexAttributeArray::isDirty() const {
-    for (const auto& kv : attrs) {
-        if (kv.second->getDirty()) {
-            return true;
-        }
-    }
-    return false;
+std::size_t VertexAttributeArray::getTotalSize() const {
+    return std::accumulate(attrs.begin(), attrs.end(), 0, [](const auto acc, const auto& kv) {
+        return acc + kv.second->getStride();
+    });
 }
 
-void VertexAttributeArray::resetDirty() {
-    for (auto& kv : attrs) {
-        kv.second->clearDirty();
-    }
+std::size_t VertexAttributeArray::getMaxCount() const {
+    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0),
+        [](const auto acc, const auto& kv) {
+            return std::max(acc, kv.second->getCount());
+        });
 }
 
 void VertexAttributeArray::resolve(const VertexAttributeArray& overrides,
                                    ResolveDelegate delegate) const {
     for (auto& kv : attrs) {
-        const auto overrideAttr = overrides.get(kv.first);
-        delegate(kv.first, *kv.second, overrideAttr);
+        delegate(kv.first, *kv.second, overrides.get(kv.first));
     }
 }
 

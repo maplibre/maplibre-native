@@ -35,12 +35,11 @@ public:
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
     gfx::AttributeBindingArray buildAttributeBindings(
+        const std::size_t vertexCount,
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
-        const std::vector<uint8_t>& vertexData,
         gfx::BufferUsageType,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer,
-        /*out*/ std::size_t& outAttrOffset) override;
+        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) override;
 
 public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
