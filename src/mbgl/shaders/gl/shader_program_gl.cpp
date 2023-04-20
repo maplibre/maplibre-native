@@ -5,6 +5,7 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
+#include <cstring>
 #include <utility>
 
 namespace mbgl {
