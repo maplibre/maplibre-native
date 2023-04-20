@@ -39,9 +39,11 @@ public:
 
     // Can only be created by VertexAttributeArray implementations
 protected:
-    VertexAttribute(int index_, AttributeDataType dataType_, int size_, std::size_t count_)
+    VertexAttribute(int index_, AttributeDataType dataType_,
+                    int size_, std::size_t count_, std::size_t stride_)
         : index(index_),
           size(size_),
+          stride((int)stride_),
           dataType(dataType_),
           items(count_) {
     }
@@ -59,7 +61,9 @@ public:
     int getIndex() const { return index; }
     void setIndex(int value) { index = value; }
 
-    int getSize() const { return size; }
+    std::size_t getSize() const { return size; }
+
+    std::size_t getStride() const { return stride; }
 
     std::size_t getCount() const { return items.size(); }
     AttributeDataType getDataType() const { return dataType; }
@@ -69,11 +73,15 @@ public:
     template <typename T>
     const ElementType& set(std::size_t i, T value) {
         dirty = true;   // need to rebuild the raw data next time
+        items.resize(std::max(items.size(), i + 1));
         return items[i] = value;
     }
 
     bool getDirty() const { return dirty; }
-    void clearDirty() { dirty = false; }
+    void clearDirty() {
+        dirty = false;
+        rawData.clear();
+    }
 
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
@@ -88,12 +96,14 @@ protected:
 protected:
     int index;
     int size;
+    int stride;
 
     /// indicates that a value has changed and any cached result should be discarded
     mutable bool dirty = true;
 
     AttributeDataType dataType;
     std::vector<ElementType> items;
+    mutable std::vector<std::uint8_t> rawData;
 };
 
 /// Stores a collection of vertex attributes by name
@@ -107,7 +117,14 @@ public:
     VertexAttributeArray(const VertexAttributeArray&) = delete;
     virtual ~VertexAttributeArray() = default;
 
+    /// Number of elements
     std::size_t size() const { return attrs.size(); }
+
+    /// Sum of element strides, and the total size of a vertex in the buffer
+    std::size_t getTotalSize() const;
+
+    /// Get the largest count value of the attribute elements
+    std::size_t getMaxCount() const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
@@ -117,12 +134,20 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* add(std::string name, int index, AttributeDataType, int size, std::size_t count);
+    VertexAttribute* add(std::string name,
+                         int index = -1,
+                         AttributeDataType = AttributeDataType::Invalid,
+                         int size = 1,
+                         std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* getOrAdd(std::string name, int index, AttributeDataType, int size, std::size_t count);
+    VertexAttribute* getOrAdd(std::string name,
+                              int index = -1,
+                              AttributeDataType = AttributeDataType::Invalid,
+                              int size = 1,
+                              std::size_t count = 1);
 
     // Set a value if the element is present
     template <typename T>
