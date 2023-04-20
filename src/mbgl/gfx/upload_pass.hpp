@@ -60,12 +60,11 @@ public:
     }
 
     virtual gfx::AttributeBindingArray buildAttributeBindings(
+        const std::size_t vertexCount,
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
-        const std::vector<uint8_t>& vertexData,
         gfx::BufferUsageType,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer,
-        /*out*/ std::size_t& outAttrOffset) = 0;
+        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) = 0;
 
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,

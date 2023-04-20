@@ -122,52 +122,58 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                      data));
 }
 
+static std::size_t padSize(std::size_t size, std::size_t padding) {
+    return (padding - (size % padding)) % padding;
+}
 template <typename T>
-static void pad(std::vector<T>& vector, int size) {
-    vector.insert(vector.end(), size - vector.size() % size, 0);
+static void pad(std::vector<T>& vector, std::size_t size, T value) {
+    vector.insert(vector.end(), padSize(vector.size(), size), value);
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
+        const std::size_t vertexCount,
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
-        const std::vector<uint8_t>& vertexData,
         const gfx::BufferUsageType usage,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer,
-        /*out*/ std::size_t& outAttrOffset) {
+        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) {
     
     AttributeBindingArray bindings;
     bindings.reserve(defaults.size());
 
+    constexpr std::size_t align = 16;
+    constexpr std::uint8_t padding = 0;
+
     std::vector<std::uint8_t> allData;
-    constexpr auto ExpectedSize = 32;
-    allData.reserve(vertexData.size() + defaults.size() * ExpectedSize);
+    allData.reserve(defaults.getTotalSize() * vertexCount);
 
-    allData.insert(allData.end(), vertexData.begin(), vertexData.end());
+    // For each attribute in the program, with the corresponding default and optional override...
+    defaults.resolve(overrides, [&](auto& /*name*/, auto& defaultAttr, auto* overrideAttr) {
         
-    pad(allData, 16);
-    outAttrOffset = allData.size();
-
-    defaults.resolve(overrides, [&](const std::string& /*name*/,
-                                    const gfx::VertexAttribute& defaultAttr,
-                                    const gfx::VertexAttribute* overrideAttr) {
-        
-        const auto& effectiveAttr = *(overrideAttr ? overrideAttr : &defaultAttr);
+        const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
-
-        pad(allData, 16);
-
         const auto offset = static_cast<uint8_t>(allData.size());
 
         bindings.emplace_back(gfx::AttributeBinding{
-            gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
-            static_cast<uint8_t>(effectiveGL.getStride()),
-            nullptr,    // buffer pointer established later
-            static_cast<uint32_t>(defaultGL.getIndex())
+            .attribute = gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
+            .vertexStride = static_cast<uint8_t>(defaultAttr.getStride()),
+            .vertexBufferResource = nullptr,    // buffer pointer established later
+            .vertexOffset = static_cast<uint32_t>(defaultGL.getIndex())
         });
 
         const auto& rawData = effectiveGL.getRaw();
-        allData.insert(allData.begin(), rawData.begin(), rawData.end());
+        if (rawData.size() == defaultAttr.getStride()) {
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                allData.insert(allData.begin(), rawData.begin(), rawData.end());
+            }
+        } else if (rawData.size() == defaultAttr.getStride() * vertexCount) {
+            allData.insert(allData.begin(), rawData.begin(), rawData.end());
+        } else {
+            // TODO: log? throw?
+            allData.insert(allData.begin(), defaultAttr.getStride() * vertexCount, 0);
+        }
+
+        pad(allData, align, padding);
     });
 
     auto vertBuf = createVertexBufferResource(&allData[0], allData.size(), usage);

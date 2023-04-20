@@ -13,23 +13,39 @@ class VertexAttributeArrayGL;
 
 using namespace platform;
 
-static std::pair<int,int> getSizeAndStride(GLenum glType) {
+int VertexAttributeGL::getSize(GLenum glType) {
     switch (glType) {
-        case GL_FLOAT:              return { 4*1, 4*1 };
-        case GL_FLOAT_VEC2:         return { 4*2, 4*2 };
-        case GL_FLOAT_VEC3:         return { 4*3, 4*4 };
-        case GL_FLOAT_VEC4:         return { 4*4, 4*4 };
-        case GL_FLOAT_MAT2:         return { 4*4, 4*4 };
-        case GL_INT:                return { 4*1, 4*1 };
-        case GL_UNSIGNED_INT:       return { 4*1, 4*1 };
-        case GL_INT_VEC2:           return { 4*2, 4*2 };
-        case GL_INT_VEC3:           return { 4*3, 4*4 };
-        case GL_INT_VEC4:           return { 4*4, 4*4 };
-        default:                    return { 0, 0 };
+        case GL_FLOAT:              return 4*1;
+        case GL_FLOAT_VEC2:         return 4*2;
+        case GL_FLOAT_VEC3:         return 4*3;
+        case GL_FLOAT_VEC4:         return 4*4;
+        case GL_FLOAT_MAT2:         return 4*4;
+        case GL_INT:                return 4*1;
+        case GL_UNSIGNED_INT:       return 4*1;
+        case GL_INT_VEC2:           return 4*2;
+        case GL_INT_VEC3:           return 4*3;
+        case GL_INT_VEC4:           return 4*4;
+        default:                    return 0;
     }
 }
 
-static const void* getPtr(const gfx::VertexAttribute::ElementType& element, GLenum glType) {
+int VertexAttributeGL::getStride(GLenum glType) {
+    switch (glType) {
+        case GL_FLOAT:              return 4*1;
+        case GL_FLOAT_VEC2:         return 4*2;
+        case GL_FLOAT_VEC3:         return 4*4;
+        case GL_FLOAT_VEC4:         return 4*4;
+        case GL_FLOAT_MAT2:         return 4*4;
+        case GL_INT:                return 4*1;
+        case GL_UNSIGNED_INT:       return 4*1;
+        case GL_INT_VEC2:           return 4*2;
+        case GL_INT_VEC3:           return 4*4;
+        case GL_INT_VEC4:           return 4*4;
+        default:                    return 0;
+    }
+}
+
+const void* VertexAttributeGL::getPtr(const gfx::VertexAttribute::ElementType& element, GLenum glType) {
     switch (glType) {
         case GL_FLOAT:
         case GL_FLOAT_VEC2:
@@ -45,25 +61,29 @@ static const void* getPtr(const gfx::VertexAttribute::ElementType& element, GLen
     }
 }
 
-const std::vector<uint8_t>& VertexAttributeGL::getRaw() const {
+void VertexAttributeGL::setGLType(platform::GLenum value) {
+    glType = value;
+    stride = getStride(glType);
+}
+
+std::size_t VertexAttributeGL::getStride() const {
+    return getStride(getGLType());
+}
+
+const std::vector<std::uint8_t>& VertexAttributeGL::getRaw() const {
     if (dirty) {
         const auto count = getCount();
-        const auto sizes = getSizeAndStride(getGLType());
-
-        stride = sizes.second;
+        const auto size_ = getSize(getGLType());
 
         rawData.resize(stride * count);
         std::fill(rawData.begin(), rawData.end(), 0);
 
-        if (rawData.size() > 0) {
-            std::uint8_t* outPtr = &rawData[0];
-            
-            for (std::size_t i = 0; i < count; ++i) {
-                if (const auto rawPtr = getPtr(items[i], getGLType())) {
-                    std::memcpy(outPtr, rawPtr, sizes.first);
-                }
-                outPtr += stride;
+        std::uint8_t* outPtr = &rawData[0];
+        for (std::size_t i = 0; i < count; ++i) {
+            if (const auto rawPtr = getPtr(items[i], getGLType())) {
+                std::memcpy(outPtr, rawPtr, size_);
             }
+            outPtr += stride;
         }
 
         dirty = false;
