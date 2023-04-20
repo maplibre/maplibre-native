@@ -1004,7 +1004,7 @@ TEST(Transform, FreeCameraOptionsClampPitch) {
     FreeCameraOptions options;
     vec3 right, up, forward;
 
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, -85.0 * util::DEG2RAD_D).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, util::DEG2RAD_D(-85.0)).m;
     transform.setFreeCameraOptions(options);
     EXPECT_DOUBLE_EQ(util::PITCH_MAX, transform.getState().getPitch());
     std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
