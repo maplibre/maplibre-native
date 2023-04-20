@@ -16,7 +16,7 @@ double vec4Dot(const vec4& a, const vec4& b) {
 }
 
 template <size_t N>
-static Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3& origin, const vec3& axis) {
+Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3& origin, const vec3& axis) {
     double min = std::numeric_limits<double>::max();
     double max = -std::numeric_limits<double>::max();
 

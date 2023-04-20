@@ -17,7 +17,7 @@ std::optional<std::string> LayerFactory::getSource(const style::conversion::Conv
         return std::nullopt;
     }
 
-    auto const source = toString(*sourceValue);
+    auto source = toString(*sourceValue);
     if (!source) {
         return std::nullopt;
     }
