@@ -27,22 +27,19 @@ public:
 
     void draw(const PaintParameters &) const override;
 
-    void setVertexData(std::vector<std::uint8_t> vertexData, std::vector<uint16_t> indexes,
-                       std::size_t indexOffset, std::size_t indexLength);
+    void setIndexData(std::vector<uint16_t> indexes,
+                      std::size_t indexOffset = 0,
+                      std::size_t indexLength = 0);
     std::vector<std::uint16_t>& getIndexData() const override;
-    std::vector<std::uint8_t>& getVertexData() const override;
 
-    const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
-    void setVertexAttributes(const gfx::VertexAttributeArray& value) override {
-        vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
-    }
-    void setVertexAttributes(gfx::VertexAttributeArray&& value) override {
-        vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
-    }
+    const gfx::VertexAttributeArray& getVertexAttributes() const override;
+    void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
+    void setVertexAttributes(gfx::VertexAttributeArray&& value) override;
+
+    gfx::VertexAttributeArray& mutableVertexAttributes();
 
     const gl::VertexArray& getVertexArray() const;
-    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&,
-                        gfx::IndexBuffer&&, std::size_t attrOffset);
+    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&, gfx::IndexBuffer&&);
 
 protected:
     class Impl;
@@ -52,7 +49,6 @@ protected:
     DrawableGL(std::unique_ptr<Impl>);
     
 private:
-    VertexAttributeArrayGL vertexAttributes;
 };
 
 } // namespace gl

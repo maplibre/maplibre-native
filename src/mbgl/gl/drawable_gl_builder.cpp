@@ -11,25 +11,19 @@ gfx::DrawablePtr DrawableGLBuilder::createDrawable() const {
 };
 
 void DrawableGLBuilder::init() {
-    const auto n = impl->vertices.elements();
-    assert(n == impl->colors.size());
+    auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
-    const auto vertSize = sizeof(Impl::VT) + 4 * sizeof(float);
-    std::vector<uint8_t> rawVert(n * vertSize);
-
-    auto p = &rawVert[0];
-    for (auto i = 0ULL; i < n; ++i) {
-        *(Impl::VT*)p = impl->vertices.at(i); p += sizeof(Impl::VT);
-        *(float*)p = impl->colors[i].r; p += sizeof(float);
-        *(float*)p = impl->colors[i].g; p += sizeof(float);
-        *(float*)p = impl->colors[i].b; p += sizeof(float);
-        *(float*)p = impl->colors[i].a; p += sizeof(float);
+    auto& attrs = drawableGL.mutableVertexAttributes();
+    if (auto posAttr = attrs.getOrAdd("a_pos")) {
+        std::size_t index = 0;
+        for (const auto& vert : impl->vertices.vector()) {
+            posAttr->set(index++, vert.a1);
+        }
     }
 
-    auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
     constexpr auto indexOffset = 0;
     const auto indexCount = impl->indexes.elements();
-    drawableGL.setVertexData(std::move(rawVert), impl->indexes.vector(), indexOffset, indexCount);
+    drawableGL.setIndexData(impl->indexes.vector(), indexOffset, indexCount);
 }
 
 } // namespace gl

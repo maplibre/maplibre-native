@@ -24,23 +24,25 @@ using namespace platform;
 class DrawableGL::Impl final {
 
 public:
-    Impl() {
-    }
+    Impl() = default;
     ~Impl() = default;
 
     void draw(const PaintParameters& parameters) const {
-        
         auto& glContext = static_cast<gl::Context&>(parameters.context);
-        glContext.draw(gfx::Triangles(), indexOffset, indexLength);
+        glContext.draw(drawMode, indexOffset, indexLength);
     }
 
-    const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
-    ShaderID shaderId;
-    RenderbufferID renderTarget;
+    const gfx::Triangles drawMode;
+    //const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
+
+    //ShaderID shaderId;
+    //RenderbufferID renderTarget;
     std::vector<TextureID> textures;
 
-    std::vector<std::uint8_t> vertData;
+    //std::vector<std::uint8_t> vertData;
     std::vector<std::uint16_t> indexes;
+
+    VertexAttributeArrayGL vertexAttributes;
 
     VertexArray vertexArray = { { nullptr, false } };
     gfx::IndexBuffer indexBuffer = { 0, nullptr };
