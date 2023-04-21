@@ -164,6 +164,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/projection_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/math/angles.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/clamp.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/log2.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/minmax.hpp
@@ -411,7 +412,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/zoom_history.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/math/angles.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
