@@ -25,6 +25,7 @@ on:
       - "!**/*.md"
   
   pull_request_target:
+    types: [assigned, opened, synchronize, reopened]
     branches:
       - main
     paths:
