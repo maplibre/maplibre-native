@@ -147,7 +147,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     allData.reserve(defaults.getTotalSize() * vertexCount);
 
     // For each attribute in the program, with the corresponding default and optional override...
-    defaults.resolve(overrides, [&](auto& /*name*/, auto& defaultAttr, auto* overrideAttr) {
+    defaults.resolve(overrides, [&](const std::string& /*name*/,
+                                    const gfx::VertexAttribute& defaultAttr,
+                                    const gfx::VertexAttribute* overrideAttr)->void {
         
         const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
@@ -155,13 +157,13 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         const auto offset = static_cast<uint8_t>(allData.size());
 
         bindings.emplace_back(gfx::AttributeBinding{
-            .attribute = gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
-            .vertexStride = static_cast<uint8_t>(defaultAttr.getStride()),
-            .vertexBufferResource = nullptr,    // buffer pointer established later
-            .vertexOffset = static_cast<uint32_t>(defaultGL.getIndex())
+            /*.attribute = */           gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
+            /*.vertexStride = */        static_cast<uint8_t>(defaultAttr.getStride()),
+            /*.vertexBufferResource = */nullptr,    // buffer pointer established later
+            /*.vertexOffset = */        static_cast<uint32_t>(defaultGL.getIndex())
         });
 
-        const auto& rawData = effectiveGL.getRaw();
+        const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
         if (rawData.size() == defaultAttr.getStride()) {
             for (std::size_t i = 0; i < vertexCount; ++i) {
                 allData.insert(allData.begin(), rawData.begin(), rawData.end());

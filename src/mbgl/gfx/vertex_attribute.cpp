@@ -59,7 +59,7 @@ VertexAttribute* VertexAttributeArray::getOrAdd(std::string name, int index,
 }
 
 std::size_t VertexAttributeArray::getTotalSize() const {
-    return std::accumulate(attrs.begin(), attrs.end(), 0, [](const auto acc, const auto& kv) {
+    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& kv) {
         return acc + kv.second->getStride();
     });
 }
