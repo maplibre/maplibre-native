@@ -32,7 +32,7 @@ public:
     std::optional<TaggedString> formattedText;
     std::optional<style::expression::Image> icon;
     float sortKey = 0.0f;
-    std::size_t index;
+    std::size_t index = 0;
     bool allowsVerticalWritingMode = false;
 };
 

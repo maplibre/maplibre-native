@@ -178,7 +178,7 @@ function(add_node_module NAME)
 
         if(WIN32)
             target_include_directories(${_TARGET} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/platform/windows/include")
-            target_compile_definitions(${_TARGET} PRIVATE _USE_MATH_DEFINES NOMINMAX)
+            target_compile_definitions(${_TARGET} PRIVATE NOMINMAX)
             target_link_libraries(${_TARGET} PRIVATE "${_CACHE_DIR}/lib/node/${_NODE_VERSION}/win-${_ARCH}/node.lib")
         endif()
 
