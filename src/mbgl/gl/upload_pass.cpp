@@ -155,7 +155,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             .vertexOffset = static_cast<uint32_t>(defaultGL.getIndex())
         });
 
-        const auto& rawData = effectiveGL.getRaw();
+        const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
         if (rawData.size() == defaultAttr.getStride()) {
             for (std::size_t i = 0; i < vertexCount; ++i) {
                 allData.insert(allData.begin(), rawData.begin(), rawData.end());

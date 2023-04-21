@@ -34,15 +34,16 @@ public:
 
     std::size_t getStride() const;
 
-    const std::vector<std::uint8_t>& getRaw() const;
+    const std::vector<std::uint8_t>& getRaw(platform::GLenum) const;
 
 private:
     static int getSize(platform::GLenum glType);
     static int getStride(platform::GLenum glType);
-    static const void* getPtr(const gfx::VertexAttribute::ElementType&, platform::GLenum glType);
+    static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
 
 private:
     platform::GLenum glType = 0;
+    mutable platform::GLenum rawType = 0;
     bool normalized = false;
 };
 

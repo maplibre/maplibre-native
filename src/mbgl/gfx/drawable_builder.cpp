@@ -73,7 +73,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{ (float)x0, (float)y0 }}}));
-    impl->indexes.emplace_back(n-3, n-1, n);
+    impl->indexes.emplace_back(n-2, n-1, n);
     impl->colors.emplace_back(impl->currentColor);
 }
 
