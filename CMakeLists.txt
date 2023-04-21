@@ -1059,7 +1059,6 @@ target_link_libraries(
         Mapbox::Base::Extras::rapidjson
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
-        Mapbox::Base::optional
         Mapbox::Base::variant
 )
 
