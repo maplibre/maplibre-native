@@ -5,6 +5,7 @@
 #include <mbgl/gl/render_custom_layer.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -86,7 +87,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     parameters.latitude = state.getLatLng().latitude();
     parameters.longitude = state.getLatLng().longitude();
     parameters.zoom = state.getZoom();
-    parameters.bearing = util::RAD2DEG_D(-state.getBearing());
+    parameters.bearing = util::rad2deg(-state.getBearing());
     parameters.pitch = state.getPitch();
     parameters.fieldOfView = state.getFieldOfView();
     mat4 projMatrix;

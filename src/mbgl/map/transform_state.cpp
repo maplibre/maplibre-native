@@ -1,4 +1,5 @@
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/tile/tile_id.hpp>
@@ -12,7 +13,7 @@ namespace mbgl {
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
-    return {util::RAD2DEG_D(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
+    return {util::rad2deg(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
@@ -420,8 +421,8 @@ CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& 
         .withCenter(getLatLng())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
-        .withBearing(util::RAD2DEG_D(-bearing))
-        .withPitch(util::RAD2DEG_D(pitch));
+        .withBearing(util::rad2deg(-bearing))
+        .withPitch(util::rad2deg(pitch));
 }
 
 // MARK: - EdgeInsets
@@ -436,7 +437,7 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 // MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
-    return {util::RAD2DEG_D(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
 }
 
 double TransformState::pixel_x() const {
@@ -775,7 +776,7 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
     Cc = newWorldSize / util::M2PI;
 
     const double m = 1 - 1e-15;
-    const double f = util::clamp(std::sin(util::DEG2RAD_D(constrained.latitude())), -m, m);
+    const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
 
     ScreenCoordinate point = {
         -constrained.longitude() * Bc,

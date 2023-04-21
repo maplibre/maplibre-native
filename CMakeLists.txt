@@ -411,6 +411,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/zoom_history.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/math/angles.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp

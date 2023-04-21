@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <mbgl/map/camera.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/geo.hpp>
@@ -34,7 +35,7 @@ static double mercatorYfromLat(double lat) {
 }
 
 static double latFromMercatorY(double y) {
-    return util::RAD2DEG_D(2.0 * std::atan(std::exp(M_PI - y * util::M2PI)) - M_PI_2);
+    return util::rad2deg(2.0 * std::atan(std::exp(M_PI - y * util::M2PI)) - M_PI_2);
 }
 
 static double lngFromMercatorX(double x) {
@@ -113,7 +114,7 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
     // cameraToWorld: (flip * cam^-1 * zScale)^-1 => (zScale^-1 * cam * flip^-1)
     const double worldSize = Projection::worldSize(scale);
     const double latitude = latFromMercatorY(getColumn(transform, 3)[1]);
-    const double pixelsPerMeter = worldSize / (std::cos(util::DEG2RAD_D(latitude)) * util::M2PI * util::EARTH_RADIUS_M);
+    const double pixelsPerMeter = worldSize / (std::cos(util::deg2rad(latitude)) * util::M2PI * util::EARTH_RADIUS_M);
 
     // Compute inverse of the camera matrix
     mat4 result = orientation.conjugate().toRotationMatrix();
@@ -256,7 +257,7 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
 }
 
 void FreeCameraOptions::setPitchBearing(double pitch, double bearing) {
-    orientation = util::orientationFromPitchBearing(util::DEG2RAD_D(pitch), util::DEG2RAD_D(bearing)).m;
+    orientation = util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing)).m;
 }
 
 } // namespace mbgl

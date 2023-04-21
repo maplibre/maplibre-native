@@ -8,6 +8,7 @@
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/map/camera.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/image.hpp>
@@ -467,8 +468,8 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
         } break;
         case GLFW_KEY_U: {
             auto bounds = view->map->getBounds();
-            if (bounds.minPitch == mbgl::util::RAD2DEG_D(mbgl::util::PITCH_MIN) &&
-                bounds.maxPitch == mbgl::util::RAD2DEG_D(mbgl::util::PITCH_MAX)) {
+            if (bounds.minPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MIN) &&
+                bounds.maxPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MAX)) {
                 mbgl::Log::Info(mbgl::Event::General, "Limiting pitch bounds to [30, 40] degrees");
                 view->map->setBounds(mbgl::BoundOptions().withMinPitch(30).withMaxPitch(40));
             } else {

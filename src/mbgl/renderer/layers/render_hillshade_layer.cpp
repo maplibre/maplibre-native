@@ -12,6 +12,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/gfx/render_pass.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
 
 namespace mbgl {
@@ -41,7 +42,7 @@ std::array<float, 2> RenderHillshadeLayer::getLatRange(const UnwrappedTileID& id
 
 std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-    float azimuthal = util::DEG2RAD_F(evaluated.get<HillshadeIlluminationDirection>());
+    float azimuthal = util::deg2radf(evaluated.get<HillshadeIlluminationDirection>());
     if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport) azimuthal = azimuthal - static_cast<float>(parameters.state.getBearing());
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
 }
