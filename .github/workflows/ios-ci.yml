@@ -161,9 +161,53 @@ jobs:
     needs: build
     runs-on: [self-hosted, macOS, ARM64]
     steps:
-       - name: Download render-test-app-and-xctest
-	 uses: actions/download-artifact@v3
-         with:
-           name: render-test-app-and-xctest
+      - name: Download render-test-app-and-xctest
+        uses: actions/download-artifact@v3
+        with:
+          name: render-test-app-and-xctest
       
         - run: ls -R
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 21600
+          role-session-name: session-${{ github.run_id }}
+
+      - name: Prepare upload
+        uses: realm/aws-devicefarm/create-upload@master
+        id: upload-ios-app
+        with:
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          name: RenderTestApp.ipa
+          type: IOS_APP
+
+      - name: Prepare upload
+        uses: realm/aws-devicefarm/create-upload@master
+        id: upload-xctest
+        with:
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          name: RenderTestAppTests.xctest
+          type: XCTEST_TEST_PACKAGE
+
+      - name: Upload iOS render test
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -T RenderTestApp.ipa '${{ steps.upload-ios-app.outputs.url }}'
+          curl -T RenderTestAppTests.xctest '${{ steps.upload-xctest.outputs.url }}'
+
+      - name: Schedule test run
+        uses: realm/aws-devicefarm/test-application@master
+        with:
+          name: MapLibre Native iOS Render Test
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          device_pool_arn: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/d84a2883-0000-44b5-afc4-af22084caf85"
+          app_arn: ${{ steps.upload-ios-app.outputs.arn }}
+          app_type: IOS_APP
+          test_type: XCTEST
+          test_package_arn: ${{ steps.upload-xctest.outputs.arn }}
+          timeout: 28800
