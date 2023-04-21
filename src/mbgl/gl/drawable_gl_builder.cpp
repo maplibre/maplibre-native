@@ -17,7 +17,7 @@ void DrawableGLBuilder::init() {
     if (auto posAttr = attrs.getOrAdd("a_pos")) {
         std::size_t index = 0;
         for (const auto& vert : impl->vertices.vector()) {
-            posAttr->set(index++, vert.a1);
+            posAttr->set(index++, gfx::VertexAttribute::int2{vert.a1[0], vert.a1[1]});
         }
     }
 

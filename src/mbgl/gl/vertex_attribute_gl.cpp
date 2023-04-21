@@ -55,7 +55,7 @@ static bool get(const gfx::VertexAttribute::ElementType& element, uint8_t* buffe
     return false;
 }
 
-// Copy the cast value into the buffer, returning true if it works.
+// Copy the value into the buffer with a simple cast, returning true if it works.
 template <typename T, typename R>
 static bool get(const gfx::VertexAttribute::ElementType& element, uint8_t* buffer) {
     return get<T,T>(element, buffer, [](auto x){ return static_cast<R>(x); });
@@ -75,7 +75,8 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
     switch (glType) {
         case GL_FLOAT:             return gl::get<float>(element, buffer) ||
                                           gl::get<float,std::int32_t>(element, buffer);
-        case GL_FLOAT_VEC2:        return gl::get<float2>(element, buffer);
+        case GL_FLOAT_VEC2:        return gl::get<float2>(element, buffer) ||
+                                          gl::get<int2,float2>(element, buffer, [](auto x){ return float2{(float)x[0],(float)x[1]}; });
         case GL_FLOAT_VEC3:        return gl::get<float3>(element, buffer);
         case GL_FLOAT_VEC4:
         case GL_FLOAT_MAT2:        return gl::get<float4>(element, buffer);
@@ -83,7 +84,8 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
                                           gl::get<float,       std::int32_t> (element, buffer);
         case GL_UNSIGNED_INT:      return gl::get<std::int32_t,std::uint32_t>(element, buffer) ||
                                           gl::get<float,       std::uint32_t>(element, buffer);
-        case GL_INT_VEC2:          return gl::get<int2>(element, buffer);
+        case GL_INT_VEC2:          return gl::get<int2>(element, buffer) ||
+                                          gl::get<float2,int2>(element, buffer, [](auto x){ return int2{(int)x[0],(int)x[1]}; });
         case GL_UNSIGNED_INT_VEC2: return false;    // TODO
         case GL_INT_VEC3:          return gl::get<int3>(element, buffer);
         case GL_UNSIGNED_INT_VEC3: return false;    // TODO
