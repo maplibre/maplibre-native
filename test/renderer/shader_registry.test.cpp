@@ -267,7 +267,7 @@ TEST(ShaderRegistry, GLSLReplacement1) {
                     "",
                     R"(
 void main() {
-    gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+    fragColor = vec4(0.0, 0.0, 1.0, 1.0);
 }
                     )"
                 )
@@ -325,11 +325,11 @@ void main() {
     lowp float opacity = u_opacity;
 #endif
 
-    gl_FragColor = mix(color * opacity,
+    fragColor = mix(color * opacity,
         vec4(0.3, 0.5, 0.0, 1.0), 0.5);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
                     )"
