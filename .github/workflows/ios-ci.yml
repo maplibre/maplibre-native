@@ -166,7 +166,7 @@ jobs:
         with:
           name: render-test-app-and-xctest
       
-        - run: ls -R
+      - run: ls -R
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
