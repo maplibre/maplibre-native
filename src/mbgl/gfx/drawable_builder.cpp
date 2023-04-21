@@ -63,17 +63,17 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
     const auto n = (uint16_t)impl->vertices.elements();
-    impl->vertices.emplace_back(Impl::VT({{{ (float)x0, (float)y0 }}}));
-    impl->vertices.emplace_back(Impl::VT({{{ (float)x1, (float)y1 }}}));
-    impl->vertices.emplace_back(Impl::VT({{{ (float)x2, (float)y2 }}}));
+    impl->vertices.emplace_back(Impl::VT({{{ x0, y0 }}}));
+    impl->vertices.emplace_back(Impl::VT({{{ x1, y1 }}}));
+    impl->vertices.emplace_back(Impl::VT({{{ x2, y2 }}}));
     impl->indexes.emplace_back(n, n+1, n+2);
     impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
 }
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
-    impl->vertices.emplace_back(Impl::VT({{{ (float)x0, (float)y0 }}}));
-    impl->indexes.emplace_back(n-3, n-1, n);
+    impl->vertices.emplace_back(Impl::VT({{{ x0, y0 }}}));
+    impl->indexes.emplace_back(n-2, n-1, n);
     impl->colors.emplace_back(impl->currentColor);
 }
 
