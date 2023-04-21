@@ -118,6 +118,12 @@ jobs:
         env:
           CILAUNCH: true
 
+      - name: Check debug symbols
+        run: make darwin-check-public-symbols
+
+      - name: Lint plist files
+        run: make ios-lint-plist
+
       - name: Build RenderTestApp
         working-directory: platform/ios/build/ios
         run: |
@@ -135,12 +141,6 @@ jobs:
             platform/ios/build/ios/RenderTestApp.ipa
             platform/ios/build/ios/Payload/RenderTestApp.app/PlugIns/RenderTestAppTests.xctest
           retention-days: 1
-
-      - name: Check debug symbols
-        run: make darwin-check-public-symbols
-
-      - name: Lint plist files
-        run: make ios-lint-plist
 
       - name: Running ios unit tests
         run: make ios-test
