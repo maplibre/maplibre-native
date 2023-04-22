@@ -55,7 +55,7 @@ public:
     static constexpr float INVALID_OFFSET_VALUE = std::numeric_limits<float>::max();
     /**
      * @brief Calculates variable text offset.
-     *
+     * 
      * @param anchor text anchor
      * @param textOffset Either `text-offset` or [ `text-radial-offset`, INVALID_OFFSET_VALUE ]
      * @return std::array<float, 2> offset along x- and y- axis correspondingly.
@@ -135,8 +135,7 @@ private:
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     std::vector<SymbolFeature> features;
 
-    BiDi bidi; // Consider moving this up to geometry tile worker to reduce reinstantiation costs; use of
-               // BiDi/ubiditransform object must be constrained to one thread
+    BiDi bidi; // Consider moving this up to geometry tile worker to reduce reinstantiation costs; use of BiDi/ubiditransform object must be constrained to one thread
 };
 
 } // namespace mbgl

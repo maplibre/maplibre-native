@@ -19,6 +19,7 @@ namespace android {
 
 class MapSnapshotter final : public mbgl::MapSnapshotterObserver {
 public:
+
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/snapshotter/MapSnapshotter"; };
 
     static void registerNative(jni::JNIEnv&);
@@ -68,13 +69,13 @@ public:
 private:
     MBGL_STORE_THREAD(tid);
 
-    JavaVM* vm = nullptr;
+    JavaVM *vm = nullptr;
     jni::WeakReference<jni::Object<MapSnapshotter>, jni::EnvAttachingDeleter> javaPeer;
 
     float pixelRatio;
     bool showLogo;
 
-    FileSource* jFileSource;
+    FileSource *jFileSource;
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;

@@ -4,15 +4,20 @@
 
 namespace mbgl {
 
-FixtureLog::Message::Message(EventSeverity severity_, Event event_, int64_t code_, std::string msg_)
-    : severity(severity_), event(event_), code(code_), msg(std::move(msg_)) {}
+FixtureLog::Message::Message(EventSeverity severity_,
+                             Event event_,
+                             int64_t code_,
+                             std::string msg_)
+    : severity(severity_), event(event_), code(code_), msg(std::move(msg_)) {
+}
 
 bool FixtureLog::Message::matches(const Message& rhs, bool substring) const {
     return severity == rhs.severity && event == rhs.event && code == rhs.code &&
            (substring ? msg.find(rhs.msg) != std::string::npos : msg == rhs.msg);
 }
 
-FixtureLog::Observer::Observer(FixtureLog* log_) : log(log_) {}
+FixtureLog::Observer::Observer(FixtureLog* log_) : log(log_) {
+}
 
 FixtureLog::Observer::~Observer() {
     if (log) {
@@ -21,7 +26,10 @@ FixtureLog::Observer::~Observer() {
     std::cerr << unchecked();
 }
 
-bool FixtureLog::Observer::onRecord(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
+bool FixtureLog::Observer::onRecord(EventSeverity severity,
+                                    Event event,
+                                    int64_t code,
+                                    const std::string& msg) {
     std::lock_guard<std::mutex> lock(messagesMutex);
 
     if (severity != EventSeverity::Debug) {

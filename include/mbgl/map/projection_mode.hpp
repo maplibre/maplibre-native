@@ -10,18 +10,9 @@ namespace mbgl {
  * optional.
  */
 struct ProjectionMode {
-    ProjectionMode& withAxonometric(bool o) {
-        axonometric = o;
-        return *this;
-    }
-    ProjectionMode& withXSkew(double o) {
-        xSkew = o;
-        return *this;
-    }
-    ProjectionMode& withYSkew(double o) {
-        ySkew = o;
-        return *this;
-    }
+    ProjectionMode& withAxonometric(bool o) { axonometric = o; return *this; }
+    ProjectionMode& withXSkew(double o) { xSkew = o; return *this; }
+    ProjectionMode& withYSkew(double o) { ySkew = o; return *this; }
 
     /**
      * @brief Set to True to enable axonometric rendering, false otherwise.
@@ -39,4 +30,4 @@ struct ProjectionMode {
     std::optional<double> ySkew;
 };
 
-} // namespace mbgl
+}  // namespace mbgl

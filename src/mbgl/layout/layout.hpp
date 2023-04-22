@@ -26,8 +26,10 @@ public:
 
     virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&){};
 
-    virtual bool hasSymbolInstances() const { return true; };
-
+    virtual bool hasSymbolInstances() const {
+        return true;
+    };
+    
     virtual bool hasDependencies() const = 0;
 };
 

@@ -40,7 +40,10 @@ public:
 
 } // namespace style
 
-enum class ImageType : bool { Icon, Pattern };
+enum class ImageType : bool {
+    Icon,
+    Pattern
+};
 
 using ImageMap = std::unordered_map<std::string, Immutable<style::Image::Impl>>;
 using ImageDependencies = std::unordered_map<std::string, ImageType>;

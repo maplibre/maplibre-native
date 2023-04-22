@@ -32,8 +32,10 @@ struct Input {
 
 struct Compiled {
     bool operator==(const Compiled& other) const {
-        bool typeEqual = success == other.success && isFeatureConstant == other.isFeatureConstant &&
-                         isZoomConstant == other.isZoomConstant && serializedType == other.serializedType &&
+        bool typeEqual = success == other.success &&
+                         isFeatureConstant == other.isFeatureConstant &&
+                         isZoomConstant == other.isZoomConstant &&
+                         serializedType == other.serializedType &&
                          errors == other.errors;
         return typeEqual;
     }
@@ -71,7 +73,9 @@ public:
 };
 
 struct Ignore {
-    Ignore(std::string id_, std::string reason_) : id(std::move(id_)), reason(std::move(reason_)) {}
+    Ignore(std::string id_, std::string reason_)
+        : id(std::move(id_)),
+          reason(std::move(reason_)) {}
 
     std::string id;
     std::string reason;
@@ -95,3 +99,4 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue&,
 std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>&,
                                                                std::optional<PropertySpec>&,
                                                                TestResult&);
+

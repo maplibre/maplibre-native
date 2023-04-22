@@ -152,7 +152,10 @@ enum class TextureChannelDataType : uint8_t {
     HalfFloat,
 };
 
-enum class TextureMipMapType : bool { No, Yes };
+enum class TextureMipMapType : bool {
+    No,
+    Yes
+};
 
 enum class TextureFilterType : bool {
     Nearest,

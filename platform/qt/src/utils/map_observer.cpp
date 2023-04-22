@@ -8,11 +8,17 @@
 
 namespace QMapLibreGL {
 
-MapObserver::MapObserver(MapPrivate* d) : d_ptr(d) {}
+MapObserver::MapObserver(MapPrivate *d)
+    : d_ptr(d)
+{
+}
 
-MapObserver::~MapObserver() {}
+MapObserver::~MapObserver()
+{
+}
 
-void MapObserver::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode) {
+void MapObserver::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode)
+{
     if (mode == mbgl::MapObserver::CameraChangeMode::Immediate) {
         emit mapChanged(Map::MapChangeRegionWillChange);
     } else {
@@ -20,11 +26,13 @@ void MapObserver::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode) {
     }
 }
 
-void MapObserver::onCameraIsChanging() {
+void MapObserver::onCameraIsChanging()
+{
     emit mapChanged(Map::MapChangeRegionIsChanging);
 }
 
-void MapObserver::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode) {
+void MapObserver::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode)
+{
     if (mode == mbgl::MapObserver::CameraChangeMode::Immediate) {
         emit mapChanged(Map::MapChangeRegionDidChange);
     } else {
@@ -32,15 +40,18 @@ void MapObserver::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode) {
     }
 }
 
-void MapObserver::onWillStartLoadingMap() {
+void MapObserver::onWillStartLoadingMap()
+{
     emit mapChanged(Map::MapChangeWillStartLoadingMap);
 }
 
-void MapObserver::onDidFinishLoadingMap() {
+void MapObserver::onDidFinishLoadingMap()
+{
     emit mapChanged(Map::MapChangeDidFinishLoadingMap);
 }
 
-void MapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& what) {
+void MapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& what)
+{
     emit mapChanged(Map::MapChangeDidFailLoadingMap);
 
     Map::MapLoadingFailure type;
@@ -63,11 +74,13 @@ void MapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::strin
     emit mapLoadingFailed(type, description);
 }
 
-void MapObserver::onWillStartRenderingFrame() {
+void MapObserver::onWillStartRenderingFrame()
+{
     emit mapChanged(Map::MapChangeWillStartRenderingFrame);
 }
 
-void MapObserver::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status) {
+void MapObserver::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status)
+{
     if (status.mode == mbgl::MapObserver::RenderMode::Partial) {
         emit mapChanged(Map::MapChangeDidFinishRenderingFrame);
     } else {
@@ -75,11 +88,13 @@ void MapObserver::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus
     }
 }
 
-void MapObserver::onWillStartRenderingMap() {
+void MapObserver::onWillStartRenderingMap()
+{
     emit mapChanged(Map::MapChangeWillStartRenderingMap);
 }
 
-void MapObserver::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode) {
+void MapObserver::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode)
+{
     if (mode == mbgl::MapObserver::RenderMode::Partial) {
         emit mapChanged(Map::MapChangeDidFinishRenderingMap);
     } else {
@@ -87,11 +102,13 @@ void MapObserver::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode) {
     }
 }
 
-void MapObserver::onDidFinishLoadingStyle() {
+void MapObserver::onDidFinishLoadingStyle()
+{
     emit mapChanged(Map::MapChangeDidFinishLoadingStyle);
 }
 
-void MapObserver::onSourceChanged(mbgl::style::Source&) {
+void MapObserver::onSourceChanged(mbgl::style::Source&)
+{
     std::string attribution;
     for (const auto& source : d_ptr->mapObj->getStyle().getSources()) {
         // Avoid duplicates by using the most complete attribution HTML snippet.

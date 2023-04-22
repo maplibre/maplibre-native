@@ -14,9 +14,7 @@ namespace gl {
 class GLXDisplayConfig {
 private:
     // Key for singleton construction.
-    struct Key {
-        explicit Key() = default;
-    };
+    struct Key { explicit Key() = default; };
 
 public:
     explicit GLXDisplayConfig(Key) {
@@ -29,8 +27,8 @@ public:
             throw std::runtime_error("Failed to open X display.");
         }
 
-        const auto* extensions =
-            reinterpret_cast<const char*>(glXQueryServerString(xDisplay, DefaultScreen(xDisplay), GLX_EXTENSIONS));
+        const auto* extensions = reinterpret_cast<const char*>(
+            glXQueryServerString(xDisplay, DefaultScreen(xDisplay), GLX_EXTENSIONS));
         if (!extensions) {
             throw std::runtime_error("Cannot read GLX extensions.");
         }
@@ -42,7 +40,7 @@ public:
         }
 
         // We're creating a dummy pbuffer anyway that we're not using.
-        static int pixelFormat[] = {GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+        static int pixelFormat[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None };
 
         int configs = 0;
         fbConfigs = glXChooseFBConfig(xDisplay, DefaultScreen(xDisplay), pixelFormat, &configs);
@@ -77,7 +75,8 @@ class GLXBackendImpl final : public HeadlessBackend::Impl {
 public:
     GLXBackendImpl() {
         // Try to create a legacy context.
-        glContext = glXCreateNewContext(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], GLX_RGBA_TYPE, None, True);
+        glContext = glXCreateNewContext(glxDisplay->xDisplay, glxDisplay->fbConfigs[0],
+                                        GLX_RGBA_TYPE, None, True);
         if (glContext && !glXIsDirect(glxDisplay->xDisplay, glContext)) {
             Log::Error(Event::OpenGL, "failed to create direct OpenGL Legacy context");
             glXDestroyContext(glxDisplay->xDisplay, glContext);
@@ -89,8 +88,9 @@ public:
 
         // Create a dummy pbuffer. We will render to framebuffers anyway, but we need a pbuffer to
         // activate the context.
-        int pbufferAttributes[] = {GLX_PBUFFER_WIDTH, 8, GLX_PBUFFER_HEIGHT, 8, None};
-        glxPbuffer = glXCreatePbuffer(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], pbufferAttributes);
+        int pbufferAttributes[] = { GLX_PBUFFER_WIDTH, 8, GLX_PBUFFER_HEIGHT, 8, None };
+        glxPbuffer =
+            glXCreatePbuffer(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], pbufferAttributes);
     }
 
     ~GLXBackendImpl() final {

@@ -5,8 +5,7 @@
 
 namespace mbgl {
 
-void SourceFeatureState::updateState(const std::optional<std::string>& sourceLayerID,
-                                     const std::string& featureID,
+void SourceFeatureState::updateState(const std::optional<std::string>& sourceLayerID, const std::string& featureID,
                                      const FeatureState& newState) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
     for (const auto& state : newState) {
@@ -16,8 +15,7 @@ void SourceFeatureState::updateState(const std::optional<std::string>& sourceLay
     }
 }
 
-void SourceFeatureState::getState(FeatureState& result,
-                                  const std::optional<std::string>& sourceLayerID,
+void SourceFeatureState::getState(FeatureState& result, const std::optional<std::string>& sourceLayerID,
                                   const std::string& featureID) const {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
     FeatureState current;
@@ -103,8 +101,7 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
     }
 }
 
-void SourceFeatureState::removeState(const std::optional<std::string>& sourceLayerID,
-                                     const std::optional<std::string>& featureID,
+void SourceFeatureState::removeState(const std::optional<std::string>& sourceLayerID, const std::optional<std::string>& featureID,
                                      const std::optional<std::string>& stateKey) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
 

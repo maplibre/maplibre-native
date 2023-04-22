@@ -16,7 +16,10 @@ class TileLoader {
 public:
     TileLoader(const TileLoader&) = delete;
     TileLoader& operator=(const TileLoader&) = delete;
-    TileLoader(T&, const OverscaledTileID&, const TileParameters&, const Tileset&);
+    TileLoader(T&,
+               const OverscaledTileID&,
+               const TileParameters&,
+               const Tileset&);
     ~TileLoader();
 
     void setNecessity(TileNecessity newNecessity);

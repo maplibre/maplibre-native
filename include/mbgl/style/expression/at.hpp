@@ -10,13 +10,14 @@ namespace expression {
 
 class At : public Expression {
 public:
-    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_)
-        : Expression(Kind::At, input_->getType().get<type::Array>().itemType),
-          index(std::move(index_)),
-          input(std::move(input_)) {}
-
+    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_) :
+        Expression(Kind::At, input_->getType().get<type::Array>().itemType),
+        index(std::move(index_)),
+        input(std::move(input_))
+    {}
+    
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
-
+    
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
@@ -28,8 +29,10 @@ public:
         return false;
     }
 
-    std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
-
+    std::vector<std::optional<Value>> possibleOutputs() const override {
+        return { std::nullopt };
+    }
+    
     std::string getOperator() const override { return "at"; }
 
 private:

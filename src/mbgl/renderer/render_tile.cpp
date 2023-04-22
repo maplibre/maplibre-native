@@ -31,18 +31,16 @@ mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
 
     mat4 vtxMatrix;
 
-    const float angle =
-        inViewportPixelUnits
-            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f)
-            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing()) : 0.0f);
+    const float angle = inViewportPixelUnits ?
+        (anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f) :
+        (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing()) : 0.0f);
 
-    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
+    Point<float> translate = util::rotate(Point<float>{ translation[0], translation[1] }, angle);
 
     if (inViewportPixelUnits) {
         matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
     } else {
-        matrix::translate(vtxMatrix,
-                          tileMatrix,
+        matrix::translate(vtxMatrix, tileMatrix,
                           id.pixelsToTileUnits(translate.x, static_cast<float>(state.getZoom())),
                           id.pixelsToTileUnits(translate.y, static_cast<float>(state.getZoom())),
                           0);
@@ -63,12 +61,8 @@ mat4 RenderTile::translatedClipMatrix(const std::array<float, 2>& translation,
     return translateVtxMatrix(nearClippedMatrix, translation, anchor, state, false);
 }
 
-const OverscaledTileID& RenderTile::getOverscaledTileID() const {
-    return tile.id;
-}
-bool RenderTile::holdForFade() const {
-    return tile.holdForFade();
-}
+const OverscaledTileID& RenderTile::getOverscaledTileID() const { return tile.id; }
+bool RenderTile::holdForFade() const { return tile.holdForFade(); }
 
 Bucket* RenderTile::getBucket(const style::Layer::Impl& impl) const {
     assert(renderData);
@@ -112,11 +106,14 @@ void RenderTile::prepare(const SourcePrepareParameters& parameters) {
     needsRendering = tile.usedByRenderedLayers;
 
     if (parameters.debugOptions != MapDebugOptions::NoDebug &&
-        (!debugBucket || debugBucket->renderable != tile.isRenderable() || debugBucket->complete != tile.isComplete() ||
-         !(debugBucket->modified == tile.modified) || !(debugBucket->expires == tile.expires) ||
+        (!debugBucket || debugBucket->renderable != tile.isRenderable() ||
+         debugBucket->complete != tile.isComplete() ||
+         !(debugBucket->modified == tile.modified) ||
+         !(debugBucket->expires == tile.expires) ||
          debugBucket->debugMode != parameters.debugOptions)) {
         debugBucket = std::make_unique<DebugBucket>(
-            tile.id, tile.isRenderable(), tile.isComplete(), tile.modified, tile.expires, parameters.debugOptions);
+            tile.id, tile.isRenderable(), tile.isComplete(), tile.modified, tile.expires,
+            parameters.debugOptions);
     } else if (parameters.debugOptions == MapDebugOptions::NoDebug) {
         debugBucket.reset();
     }
@@ -131,9 +128,10 @@ void RenderTile::prepare(const SourcePrepareParameters& parameters) {
 }
 
 void RenderTile::finishRender(PaintParameters& parameters) const {
-    if (!needsRendering || parameters.debugOptions == MapDebugOptions::NoDebug) return;
+    if (!needsRendering || parameters.debugOptions == MapDebugOptions::NoDebug)
+        return;
 
-    static const style::Properties<>::PossiblyEvaluated properties{};
+    static const style::Properties<>::PossiblyEvaluated properties {};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
     auto program = parameters.shaders.get<DebugProgram>();
@@ -147,44 +145,44 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
             DebugProgram::computeAllAttributeBindings(*debugBucket->vertexBuffer, paintAttributeData, properties);
 
         program->draw(parameters.context,
-                      *parameters.renderPass,
-                      gfx::Lines{4.0f * parameters.pixelRatio},
-                      gfx::DepthMode::disabled(),
-                      gfx::StencilMode::disabled(),
-                      gfx::ColorMode::unblended(),
-                      gfx::CullFaceMode::disabled(),
-                      *debugBucket->indexBuffer,
-                      debugBucket->segments,
-                      DebugProgram::computeAllUniformValues(
-                          DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                            uniforms::color::Value(Color::white()),
-                                                            uniforms::overlay_scale::Value(1.0f)},
-                          paintAttributeData,
-                          properties,
-                          static_cast<float>(parameters.state.getZoom())),
-                      allAttributeBindings,
-                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
-                      "text-outline");
+                     *parameters.renderPass,
+                     gfx::Lines{4.0f * parameters.pixelRatio},
+                     gfx::DepthMode::disabled(),
+                     gfx::StencilMode::disabled(),
+                     gfx::ColorMode::unblended(),
+                     gfx::CullFaceMode::disabled(),
+                     *debugBucket->indexBuffer,
+                     debugBucket->segments,
+                     DebugProgram::computeAllUniformValues(
+                         DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
+                                                           uniforms::color::Value(Color::white()),
+                                                           uniforms::overlay_scale::Value(1.0f)},
+                         paintAttributeData,
+                         properties,
+                         static_cast<float>(parameters.state.getZoom())),
+                     allAttributeBindings,
+                     DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
+                     "text-outline");
 
         program->draw(parameters.context,
-                      *parameters.renderPass,
-                      gfx::Lines{2.0f * parameters.pixelRatio},
-                      gfx::DepthMode::disabled(),
-                      gfx::StencilMode::disabled(),
-                      gfx::ColorMode::unblended(),
-                      gfx::CullFaceMode::disabled(),
-                      *debugBucket->indexBuffer,
-                      debugBucket->segments,
-                      DebugProgram::computeAllUniformValues(
-                          DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                            uniforms::color::Value(Color::black()),
-                                                            uniforms::overlay_scale::Value(1.0f)},
-                          paintAttributeData,
-                          properties,
-                          static_cast<float>(parameters.state.getZoom())),
-                      allAttributeBindings,
-                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
-                      "text");
+                     *parameters.renderPass,
+                     gfx::Lines{2.0f * parameters.pixelRatio},
+                     gfx::DepthMode::disabled(),
+                     gfx::StencilMode::disabled(),
+                     gfx::ColorMode::unblended(),
+                     gfx::CullFaceMode::disabled(),
+                     *debugBucket->indexBuffer,
+                     debugBucket->segments,
+                     DebugProgram::computeAllUniformValues(
+                         DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
+                                                           uniforms::color::Value(Color::black()),
+                                                           uniforms::overlay_scale::Value(1.0f)},
+                         paintAttributeData,
+                         properties,
+                         static_cast<float>(parameters.state.getZoom())),
+                     allAttributeBindings,
+                     DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
+                     "text");
     }
 
     if (parameters.debugOptions & MapDebugOptions::TileBorders) {
@@ -192,26 +190,27 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
         if (debugBucket->tileBorderSegments.empty()) {
             debugBucket->tileBorderSegments = RenderStaticData::tileBorderSegments();
         }
-        program->draw(parameters.context,
-                      *parameters.renderPass,
-                      gfx::LineStrip{4.0f * parameters.pixelRatio},
-                      gfx::DepthMode::disabled(),
-                      gfx::StencilMode::disabled(),
-                      gfx::ColorMode::unblended(),
-                      gfx::CullFaceMode::disabled(),
-                      *parameters.staticData.tileBorderIndexBuffer,
-                      debugBucket->tileBorderSegments,
-                      DebugProgram::computeAllUniformValues(
-                          DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                            uniforms::color::Value(Color::red()),
-                                                            uniforms::overlay_scale::Value(1.0f)},
-                          paintAttributeData,
-                          properties,
-                          static_cast<float>(parameters.state.getZoom())),
-                      DebugProgram::computeAllAttributeBindings(
-                          *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
-                      DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
-                      "border");
+        program->draw(
+            parameters.context,
+            *parameters.renderPass,
+            gfx::LineStrip{4.0f * parameters.pixelRatio},
+            gfx::DepthMode::disabled(),
+            gfx::StencilMode::disabled(),
+            gfx::ColorMode::unblended(),
+            gfx::CullFaceMode::disabled(),
+            *parameters.staticData.tileBorderIndexBuffer,
+            debugBucket->tileBorderSegments,
+            DebugProgram::computeAllUniformValues(
+                DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
+                                                  uniforms::color::Value(Color::red()),
+                                                  uniforms::overlay_scale::Value(1.0f)},
+                paintAttributeData,
+                properties,
+                static_cast<float>(parameters.state.getZoom())),
+            DebugProgram::computeAllAttributeBindings(
+                *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
+            DebugProgram::TextureBindings{textures::image::Value{debugBucket->texture->getResource()}},
+            "border");
     }
 }
 

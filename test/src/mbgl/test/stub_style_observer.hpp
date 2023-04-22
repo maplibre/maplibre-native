@@ -30,9 +30,9 @@ public:
         if (resourceError) resourceError(error);
     };
 
-    std::function<void(Source&)> sourceLoaded;
-    std::function<void(Source&)> sourceChanged;
-    std::function<void(Source&, std::exception_ptr)> sourceError;
-    std::function<void(Source&)> sourceDescriptionChanged;
-    std::function<void(std::exception_ptr)> resourceError;
+    std::function<void (Source&)> sourceLoaded;
+    std::function<void (Source&)> sourceChanged;
+    std::function<void (Source&, std::exception_ptr)> sourceError;
+    std::function<void (Source&)> sourceDescriptionChanged;
+    std::function<void (std::exception_ptr)> resourceError;
 };

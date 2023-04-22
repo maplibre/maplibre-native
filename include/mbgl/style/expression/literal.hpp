@@ -17,12 +17,14 @@ public:
     Literal(const type::Array& type_, std::vector<Value> value_)
         : Expression(Kind::Literal, type_), value(std::move(value_)) {}
 
-    EvaluationResult evaluate(const EvaluationContext&) const override { return value; }
-
+    EvaluationResult evaluate(const EvaluationContext&) const override {
+        return value;
+    }
+    
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override {}
-
+    
     bool operator==(const Expression& e) const override {
         if (e.getKind() == Kind::Literal) {
             auto rhs = static_cast<const Literal*>(&e);
@@ -31,9 +33,13 @@ public:
         return false;
     }
 
-    std::vector<std::optional<Value>> possibleOutputs() const override { return {{value}}; }
-
-    Value getValue() const { return value; }
+    std::vector<std::optional<Value>> possibleOutputs() const override {
+        return {{ value }};
+    }
+    
+    Value getValue() const {
+        return value;
+    }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "literal"; }

@@ -31,6 +31,7 @@ CustomGeometryTile::~CustomGeometryTile() {
 }
 
 void CustomGeometryTile::setTileData(const GeoJSON& geoJSON) {
+
     auto featureData = mapbox::feature::feature_collection<int16_t>();
     if (geoJSON.is<FeatureCollection>() && !geoJSON.get<FeatureCollection>().empty()) {
         auto scale = util::EXTENT / options->tileSize;
@@ -53,11 +54,11 @@ void CustomGeometryTile::invalidateTileData() {
     observer->onTileChanged(*this);
 }
 
-// Fetching tile data for custom sources is assumed to be an expensive operation.
-//  Only required tiles make fetchTile requests. Attempt to cancel a tile
-//  that is no longer required.
+//Fetching tile data for custom sources is assumed to be an expensive operation.
+// Only required tiles make fetchTile requests. Attempt to cancel a tile
+// that is no longer required.
 void CustomGeometryTile::setNecessity(TileNecessity newNecessity) {
-    if (newNecessity != necessity || stale) {
+   if (newNecessity != necessity || stale ) {
         necessity = newNecessity;
         if (necessity == TileNecessity::Required) {
             loader.invoke(&style::CustomTileLoader::fetchTile, id, actorRef);
@@ -68,7 +69,10 @@ void CustomGeometryTile::setNecessity(TileNecessity newNecessity) {
     }
 }
 
-void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& queryOptions) {
+void CustomGeometryTile::querySourceFeatures(
+    std::vector<Feature>& result,
+    const SourceQueryOptions& queryOptions) {
+
     // Ignore the sourceLayer, there is only one
     auto layer = getData()->getLayer({});
 
@@ -78,8 +82,7 @@ void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result, const
             auto feature = layer->getFeature(i);
 
             // Apply filter, if any
-            if (queryOptions.filter && !(*queryOptions.filter)(style::expression::EvaluationContext{
-                                           static_cast<float>(id.overscaledZ), feature.get()})) {
+            if (queryOptions.filter && !(*queryOptions.filter)(style::expression::EvaluationContext { static_cast<float>(id.overscaledZ), feature.get() })) {
                 continue;
             }
 

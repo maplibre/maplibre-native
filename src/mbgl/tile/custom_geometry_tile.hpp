@@ -14,7 +14,7 @@ namespace style {
 class CustomTileLoader;
 } // namespace style
 
-class CustomGeometryTile : public GeometryTile {
+class CustomGeometryTile: public GeometryTile {
 public:
     CustomGeometryTile(const OverscaledTileID&,
                        std::string sourceID,
@@ -28,7 +28,9 @@ public:
 
     void setNecessity(TileNecessity) final;
 
-    void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
+    void querySourceFeatures(
+        std::vector<Feature>& result,
+        const SourceQueryOptions&) override;
 
 private:
     bool stale = true;

@@ -42,14 +42,14 @@ public:
 
     /// Register a callback that will get called (on the render thread) when all resources have
     /// been loaded and a complete render occurs.
-    using StillImageCallback = std::function<void(std::exception_ptr)>;
+    using StillImageCallback = std::function<void (std::exception_ptr)>;
     void renderStill(StillImageCallback);
     void renderStill(const CameraOptions&, MapDebugOptions, StillImageCallback);
 
     /// Triggers a repaint.
     void triggerRepaint();
 
-    style::Style& getStyle();
+          style::Style& getStyle();
     const style::Style& getStyle() const;
 
     void setStyle(std::unique_ptr<style::Style>);
@@ -103,7 +103,7 @@ public:
     void setSize(Size);
     MapOptions getMapOptions() const;
 
-    // Projection Mode
+    //Projection Mode
     void setProjectionMode(const ProjectionMode&);
     ProjectionMode getProjectionMode() const;
 

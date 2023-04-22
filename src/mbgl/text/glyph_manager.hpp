@@ -28,8 +28,7 @@ class GlyphManager {
 public:
     GlyphManager(const GlyphManager&) = delete;
     GlyphManager& operator=(const GlyphManager&) = delete;
-    explicit GlyphManager(
-        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
+    explicit GlyphManager(std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
     ~GlyphManager();
 
     // Workers send a `getGlyphs` message to the main thread once they have determined
@@ -40,7 +39,9 @@ public:
     void getGlyphs(GlyphRequestor&, GlyphDependencies, FileSource&);
     void removeRequestor(GlyphRequestor&);
 
-    void setURL(const std::string& url) { glyphURL = url; }
+    void setURL(const std::string& url) {
+        glyphURL = url;
+    }
 
     void setObserver(GlyphManagerObserver*);
 
@@ -67,9 +68,9 @@ private:
     void requestRange(GlyphRequest&, const FontStack&, const GlyphRange&, FileSource& fileSource);
     void processResponse(const Response&, const FontStack&, const GlyphRange&);
     void notify(GlyphRequestor&, const GlyphDependencies&);
-
+    
     GlyphManagerObserver* observer = nullptr;
-
+    
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 };
 

@@ -8,7 +8,10 @@ namespace style {
 
 static SourceObserver nullObserver;
 
-Source::Source(Immutable<Impl> impl) : baseImpl(std::move(impl)), observer(&nullObserver) {}
+Source::Source(Immutable<Impl> impl)
+    : baseImpl(std::move(impl)),
+      observer(&nullObserver) {
+}
 
 Source::~Source() = default;
 

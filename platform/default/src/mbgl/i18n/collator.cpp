@@ -60,9 +60,11 @@ public:
 
     int compare(const std::string& lhs, const std::string& rhs) const {
         if (caseSensitive && diacriticSensitive) {
-            return nu_strcoll(lhs.c_str(), rhs.c_str(), nu_utf8_read, nu_utf8_read);
+            return nu_strcoll(lhs.c_str(), rhs.c_str(),
+                              nu_utf8_read, nu_utf8_read);
         } else if (!caseSensitive && diacriticSensitive) {
-            return nu_strcasecoll(lhs.c_str(), rhs.c_str(), nu_utf8_read, nu_utf8_read);
+            return nu_strcasecoll(lhs.c_str(), rhs.c_str(),
+                                  nu_utf8_read, nu_utf8_read);
         } else if (caseSensitive && !diacriticSensitive) {
             return nu_strcoll(unaccent(lhs).c_str(), unaccent(rhs).c_str(), nu_utf8_read, nu_utf8_read);
         } else {
@@ -70,7 +72,9 @@ public:
         }
     }
 
-    std::string resolvedLocale() const { return ""; }
+    std::string resolvedLocale() const {
+        return "";
+    }
 
 private:
     bool caseSensitive;

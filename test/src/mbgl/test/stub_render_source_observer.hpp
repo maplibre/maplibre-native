@@ -13,10 +13,11 @@ public:
         if (tileChanged) tileChanged(source, tileID);
     };
 
-    void onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) override {
+    void
+    onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) override {
         if (tileError) tileError(source, tileID, error);
     }
 
-    std::function<void(RenderSource&, const OverscaledTileID&)> tileChanged;
-    std::function<void(RenderSource&, const OverscaledTileID&, std::exception_ptr)> tileError;
+    std::function<void (RenderSource&, const OverscaledTileID&)> tileChanged;
+    std::function<void (RenderSource&, const OverscaledTileID&, std::exception_ptr)> tileError;
 };

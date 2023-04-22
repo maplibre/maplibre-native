@@ -21,7 +21,9 @@ struct NodeAsyncRequest : public mbgl::AsyncRequest {
 };
 
 class NodeRequest : public Nan::ObjectWrap {
+
 public:
+
     NodeRequest(mbgl::FileSource::Callback, NodeAsyncRequest*);
     ~NodeRequest() override;
 

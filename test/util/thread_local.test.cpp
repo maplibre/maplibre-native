@@ -12,11 +12,17 @@ namespace {
 
 class TestThread {
 public:
-    TestThread(mbgl::ActorRef<TestThread>, int* number_) { number.set(number_); }
+    TestThread(mbgl::ActorRef<TestThread>, int *number_) {
+        number.set(number_);
+    }
 
-    ~TestThread() { number.set(nullptr); }
+    ~TestThread() {
+        number.set(nullptr);
+    }
 
-    void getNumber(std::promise<int> result) { result.set_value(*number.get()); }
+    void getNumber(std::promise<int> result){
+        result.set_value(*number.get());
+    }
 
 private:
     static ThreadLocal<int> number;
@@ -67,9 +73,13 @@ namespace {
 
 class TestThreadDataOwnership {
 public:
-    TestThreadDataOwnership(mbgl::ActorRef<TestThreadDataOwnership>, int* data_) { data.set(data_); }
+    TestThreadDataOwnership(mbgl::ActorRef<TestThreadDataOwnership>, int* data_) {
+        data.set(data_);
+    }
 
-    ~TestThreadDataOwnership() { data.set(nullptr); }
+    ~TestThreadDataOwnership() {
+        data.set(nullptr);
+    }
 
 private:
     static ThreadLocal<int> data;

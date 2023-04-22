@@ -14,15 +14,15 @@
 #include "parser.hpp"
 #include "runner.hpp"
 
-#define ANSI_COLOR_RED "\x1b[31m"
-#define ANSI_COLOR_GREEN "\x1b[32m"
-#define ANSI_COLOR_YELLOW "\x1b[33m"
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN "\x1b[36m"
-#define ANSI_COLOR_GRAY "\x1b[37m"
+#define ANSI_COLOR_RED        "\x1b[31m"
+#define ANSI_COLOR_GREEN      "\x1b[32m"
+#define ANSI_COLOR_YELLOW     "\x1b[33m"
+#define ANSI_COLOR_BLUE       "\x1b[34m"
+#define ANSI_COLOR_MAGENTA    "\x1b[35m"
+#define ANSI_COLOR_CYAN       "\x1b[36m"
+#define ANSI_COLOR_GRAY       "\x1b[37m"
 #define ANSI_COLOR_LIGHT_GRAY "\x1b[90m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_COLOR_RESET      "\x1b[0m"
 
 #if !defined(SANITIZE)
 void* operator new(std::size_t sz) {
@@ -174,8 +174,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         std::string ignoreReason;
 
         const std::string ignoreName = id;
-        const auto it = std::find_if(
-            ignores.cbegin(), ignores.cend(), [&ignoreName](auto pair) { return pair.first == ignoreName; });
+        const auto it = std::find_if(ignores.cbegin(), ignores.cend(), [&ignoreName](auto pair) { return pair.first == ignoreName; });
         if (it != ignores.end()) {
             metadata.ignoredTest = shouldIgnore = true;
             ignoreReason = it->second;
@@ -205,8 +204,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                 status = "ignored failed";
                 color = "#9E9E9E";
                 stats.ignoreFailedTests++;
-                printf(
-                    ANSI_COLOR_LIGHT_GRAY "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
+                printf(ANSI_COLOR_LIGHT_GRAY "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
             }
         } else {
             // Only fail the bots on render errors, this is a CI limitation that we need
@@ -253,29 +251,19 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         stats.erroredTests + stats.failedTests + stats.ignoreFailedTests + stats.ignorePassedTests + stats.passedTests;
 
     if (stats.passedTests) {
-        printf(ANSI_COLOR_GREEN "%u passed (%.1lf%%)" ANSI_COLOR_RESET "\n",
-               stats.passedTests,
-               100.0 * stats.passedTests / count);
+        printf(ANSI_COLOR_GREEN "%u passed (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.passedTests, 100.0 * stats.passedTests / count);
     }
     if (stats.ignorePassedTests) {
-        printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
-               stats.ignorePassedTests,
-               100.0 * stats.ignorePassedTests / count);
+        printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.ignorePassedTests, 100.0 * stats.ignorePassedTests / count);
     }
     if (stats.ignoreFailedTests) {
-        printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
-               stats.ignoreFailedTests,
-               100.0 * stats.ignoreFailedTests / count);
+        printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.ignoreFailedTests, 100.0 * stats.ignoreFailedTests / count);
     }
     if (stats.failedTests) {
-        printf(ANSI_COLOR_RED "%u failed (%.1lf%%)" ANSI_COLOR_RESET "\n",
-               stats.failedTests,
-               100.0 * stats.failedTests / count);
+        printf(ANSI_COLOR_RED "%u failed (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.failedTests, 100.0 * stats.failedTests / count);
     }
     if (stats.erroredTests) {
-        printf(ANSI_COLOR_RED "%u errored (%.1lf%%)" ANSI_COLOR_RESET "\n",
-               stats.erroredTests,
-               100.0 * stats.erroredTests / count);
+        printf(ANSI_COLOR_RED "%u errored (%.1lf%%)" ANSI_COLOR_RESET "\n", stats.erroredTests, 100.0 * stats.erroredTests / count);
     }
 
     printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).c_str());

@@ -7,8 +7,8 @@ namespace style {
 
 /**
  * @brief An interface, wrapping evaluated layer properties.
- *
- *  It is an abstract base class; concrete derived classes that hold the actual data are provided for each layer type.
+ * 
+ *  It is an abstract base class; concrete derived classes that hold the actual data are provided for each layer type. 
  */
 class LayerProperties {
 public:

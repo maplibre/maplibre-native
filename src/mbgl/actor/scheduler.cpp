@@ -68,4 +68,4 @@ PassRefPtr<Scheduler> Scheduler::GetSequenced() {
     return PassRefPtr<Scheduler>(std::move(result));
 }
 
-} // namespace mbgl
+} //namespace mbgl

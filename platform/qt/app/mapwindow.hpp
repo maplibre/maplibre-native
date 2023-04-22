@@ -18,7 +18,8 @@ class QWheelEvent;
 
 QT_END_NAMESPACE
 
-class MapWindow : public QOpenGLWidget {
+class MapWindow : public QOpenGLWidget
+{
     Q_OBJECT
 
 public:

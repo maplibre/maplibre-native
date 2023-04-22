@@ -9,13 +9,12 @@ namespace geojson {
 
 jni::Local<jni::Object<LineString>> LineString::New(jni::JNIEnv& env, const mbgl::LineString<double>& lineString) {
     static auto& javaClass = jni::Class<LineString>::Singleton(env);
-    static auto method =
-        javaClass.GetStaticMethod<jni::Object<LineString>(jni::Object<java::util::List>)>(env, "fromLngLats");
+    static auto method = javaClass.GetStaticMethod<jni::Object<LineString>(jni::Object<java::util::List>)>(env, "fromLngLats");
 
     return javaClass.Call(env, method, asPointsList(env, lineString));
 }
 
-mapbox::geojson::line_string LineString::convert(jni::JNIEnv& env, const jni::Object<LineString>& jLineString) {
+mapbox::geojson::line_string LineString::convert(jni::JNIEnv &env, const jni::Object<LineString>& jLineString) {
     mapbox::geojson::line_string lineString;
 
     if (jLineString) {
@@ -25,8 +24,7 @@ mapbox::geojson::line_string LineString::convert(jni::JNIEnv& env, const jni::Ob
     return lineString;
 }
 
-mapbox::geojson::line_string LineString::convert(jni::JNIEnv& env,
-                                                 const jni::Object<java::util::List /*<Point>*/>& jPointList) {
+mapbox::geojson::line_string LineString::convert(jni::JNIEnv &env, const jni::Object<java::util::List/*<Point>*/>& jPointList) {
     mapbox::geojson::line_string lineString;
 
     if (jPointList) {
@@ -42,14 +40,13 @@ mapbox::geojson::line_string LineString::convert(jni::JNIEnv& env,
     return lineString;
 }
 
-jni::Local<jni::Object<java::util::List>> LineString::coordinates(jni::JNIEnv& env,
-                                                                  const jni::Object<LineString>& jLineString) {
+jni::Local<jni::Object<java::util::List>> LineString::coordinates(jni::JNIEnv &env, const jni::Object<LineString>& jLineString) {
     static auto& javaClass = jni::Class<LineString>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "coordinates");
+    static auto method = javaClass.GetMethod<jni::Object<java::util::List> ()>(env, "coordinates");
     return jLineString.Call(env, method);
 }
 
-void LineString::registerNative(jni::JNIEnv& env) {
+void LineString::registerNative(jni::JNIEnv &env) {
     jni::Class<LineString>::Singleton(env);
 }
 

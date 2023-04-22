@@ -15,22 +15,19 @@ void Collator::registerNative(jni::JNIEnv& env) {
 
 jni::Local<jni::Object<Collator>> Collator::getInstance(jni::JNIEnv& env, const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<Collator>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<Collator>(jni::Object<Locale>)>(env, "getInstance");
+    static auto method = javaClass.GetStaticMethod<jni::Object<Collator> (jni::Object<Locale>)>(env, "getInstance");
     return javaClass.Call(env, method, locale);
 }
 
 void Collator::setStrength(jni::JNIEnv& env, const jni::Object<Collator>& collator, jni::jint strength) {
     static auto& javaClass = jni::Class<Collator>::Singleton(env);
-    static auto method = javaClass.GetMethod<void(jni::jint)>(env, "setStrength");
+    static auto method = javaClass.GetMethod<void (jni::jint)>(env, "setStrength");
     collator.Call(env, method, strength);
 }
 
-jni::jint Collator::compare(jni::JNIEnv& env,
-                            const jni::Object<Collator>& collator,
-                            const jni::String& lhs,
-                            const jni::String& rhs) {
+jni::jint Collator::compare(jni::JNIEnv& env, const jni::Object<Collator>& collator, const jni::String& lhs, const jni::String& rhs) {
     static auto& javaClass = jni::Class<Collator>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::jint(jni::String, jni::String)>(env, "compare");
+    static auto method = javaClass.GetMethod<jni::jint (jni::String, jni::String)>(env, "compare");
     return collator.Call(env, method, lhs, rhs);
 }
 
@@ -40,7 +37,7 @@ void StringUtils::registerNative(jni::JNIEnv& env) {
 
 jni::Local<jni::String> StringUtils::unaccent(jni::JNIEnv& env, const jni::String& value) {
     static auto& javaClass = jni::Class<StringUtils>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::String(jni::String)>(env, "unaccent");
+    static auto method = javaClass.GetStaticMethod<jni::String (jni::String)>(env, "unaccent");
     return javaClass.Call(env, method, value);
 }
 
@@ -66,19 +63,19 @@ jni::String Locale::toLanguageTag(jni::JNIEnv& env, jni::Object<Locale> locale) 
 
 jni::Local<jni::String> Locale::getLanguage(jni::JNIEnv& env, const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<Locale>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::String()>(env, "getLanguage");
+    static auto method = javaClass.GetMethod<jni::String ()>(env, "getLanguage");
     return locale.Call(env, method);
 }
 
 jni::Local<jni::String> Locale::getCountry(jni::JNIEnv& env, const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<Locale>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::String()>(env, "getCountry");
+    static auto method = javaClass.GetMethod<jni::String ()>(env, "getCountry");
     return locale.Call(env, method);
 }
 
 jni::Local<jni::Object<Locale>> Locale::getDefault(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<Locale>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<Locale>()>(env, "getDefault");
+    static auto method = javaClass.GetStaticMethod<jni::Object<Locale> ()>(env, "getDefault");
     return javaClass.Call(env, method);
 }
 
@@ -101,18 +98,21 @@ namespace platform {
 class Collator::Impl {
 public:
     Impl(bool caseSensitive_, bool diacriticSensitive_, std::optional<std::string> locale_)
-        : caseSensitive(caseSensitive_), diacriticSensitive(diacriticSensitive_), env(android::AttachEnv()) {
+        : caseSensitive(caseSensitive_)
+        , diacriticSensitive(diacriticSensitive_)
+        , env(android::AttachEnv())
+    {
         LanguageTag languageTag = locale_ ? LanguageTag::fromBCP47(*locale_) : LanguageTag();
         if (!languageTag.language) {
-            locale = jni::NewGlobal(*env, android::Locale::getDefault(*env));
+            locale = jni::NewGlobal(*env,
+                android::Locale::getDefault(*env));
         } else if (!languageTag.region) {
-            locale =
-                jni::NewGlobal(*env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
+            locale = jni::NewGlobal(*env,
+                android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
         } else {
             locale = jni::NewGlobal(*env,
-                                    android::Locale::New(*env,
-                                                         jni::Make<jni::String>(*env, *languageTag.language),
-                                                         jni::Make<jni::String>(*env, *languageTag.region)));
+                android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language),
+                                           jni::Make<jni::String>(*env, *languageTag.region)));
         }
         collator = jni::NewGlobal(*env, android::Collator::getInstance(*env, locale));
         if (!diacriticSensitive && !caseSensitive) {
@@ -127,8 +127,9 @@ public:
     }
 
     bool operator==(const Impl& other) const {
-        return caseSensitive == other.caseSensitive && diacriticSensitive == other.diacriticSensitive &&
-               resolvedLocale() == other.resolvedLocale();
+        return caseSensitive == other.caseSensitive &&
+                diacriticSensitive == other.diacriticSensitive &&
+                resolvedLocale() == other.resolvedLocale();
     }
 
     int compare(const std::string& lhs, const std::string& rhs) const {

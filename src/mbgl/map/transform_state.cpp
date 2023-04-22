@@ -21,7 +21,7 @@ constexpr double kEpsilon = 1e-9;
 double roundForAccuracy(double x) {
     double round_x = std::round(x);
     double diff = std::abs(round_x - x);
-    if (diff < kEpsilon && diff > 0) {
+    if (diff < kEpsilon && diff > 0 ){
         return round_x;
     } else {
         return x;
@@ -811,10 +811,10 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
+    auto latLng = screenCoordinateToLatLng({ 0, static_cast<float>(getSize().height) });
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
-    vec4 p = {{pt.x, pt.y, 0, 1}};
+    vec4 p = {{ pt.x, pt.y, 0, 1 }};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());
     return static_cast<float>(topPoint[3]) / getCameraToCenterDistance();

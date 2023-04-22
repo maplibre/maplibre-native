@@ -13,7 +13,8 @@ namespace mbgl {
 class Color {
 public:
     Color() = default;
-    Color(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {
+    Color(float r_, float g_, float b_, float a_)
+        : r(r_), g(g_), b(b_), a(a_) {
         assert(r_ >= 0.0f);
         assert(r_ <= 1.0f);
         assert(g_ >= 0.0f);
@@ -29,12 +30,12 @@ public:
     float b = 0.0f;
     float a = 0.0f;
 
-    static Color black() { return {0.0f, 0.0f, 0.0f, 1.0f}; };
-    static Color white() { return {1.0f, 1.0f, 1.0f, 1.0f}; };
+    static Color black() { return { 0.0f, 0.0f, 0.0f, 1.0f }; };
+    static Color white() { return { 1.0f, 1.0f, 1.0f, 1.0f }; };
 
-    static Color red() { return {1.0f, 0.0f, 0.0f, 1.0f}; };
-    static Color green() { return {0.0f, 1.0f, 0.0f, 1.0f}; };
-    static Color blue() { return {0.0f, 0.0f, 1.0f, 1.0f}; };
+    static Color red()   { return { 1.0f, 0.0f, 0.0f, 1.0f }; };
+    static Color green() { return { 0.0f, 1.0f, 0.0f, 1.0f }; };
+    static Color blue()  { return { 0.0f, 0.0f, 1.0f, 1.0f }; };
 
     static std::optional<Color> parse(const std::string&);
     std::string stringify() const;
@@ -54,7 +55,12 @@ inline bool operator!=(const Color& colorA, const Color& colorB) {
 inline Color operator*(const Color& color, float alpha) {
     assert(alpha >= 0.0f);
     assert(alpha <= 1.0f);
-    return {color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha};
+    return {
+        color.r * alpha,
+        color.g * alpha,
+        color.b * alpha,
+        color.a * alpha
+    };
 }
 
 } // namespace mbgl

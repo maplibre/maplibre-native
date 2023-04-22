@@ -18,7 +18,10 @@ namespace mbgl {
 namespace gfx {
 
 BackendScope::BackendScope(RendererBackend& backend_, ScopeType scopeType_)
-    : priorScope(currentScope().get()), nextScope(nullptr), backend(backend_), scopeType(scopeType_) {
+    : priorScope(currentScope().get()),
+      nextScope(nullptr),
+      backend(backend_),
+      scopeType(scopeType_) {
     if (priorScope) {
         assert(priorScope->nextScope == nullptr);
         priorScope->nextScope = this;
@@ -45,8 +48,9 @@ BackendScope::~BackendScope() {
 }
 
 void BackendScope::activate() {
-    if (scopeType == ScopeType::Explicit && !(priorScope && this->backend == priorScope->backend) &&
-        !(nextScope && this->backend == nextScope->backend)) {
+    if (scopeType == ScopeType::Explicit &&
+            !(priorScope && this->backend == priorScope->backend) &&
+            !(nextScope && this->backend == nextScope->backend)) {
         // Only activate when set to Explicit and
         // only once per RenderBackend
         backend.activate();
@@ -55,7 +59,8 @@ void BackendScope::activate() {
 }
 
 void BackendScope::deactivate() {
-    if (activated && !(nextScope && this->backend == nextScope->backend)) {
+    if (activated &&
+        !(nextScope && this->backend == nextScope->backend)) {
         // Only deactivate when set to Explicit and
         // only once per RenderBackend
         backend.deactivate();

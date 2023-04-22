@@ -113,8 +113,7 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
     // cameraToWorld: (flip * cam^-1 * zScale)^-1 => (zScale^-1 * cam * flip^-1)
     const double worldSize = Projection::worldSize(scale);
     const double latitude = latFromMercatorY(getColumn(transform, 3)[1]);
-    const double pixelsPerMeter =
-        worldSize / (std::cos(latitude * util::DEG2RAD_D) * util::M2PI * util::EARTH_RADIUS_M);
+    const double pixelsPerMeter = worldSize / (std::cos(latitude * util::DEG2RAD_D) * util::M2PI * util::EARTH_RADIUS_M);
 
     // Compute inverse of the camera matrix
     mat4 result = orientation.conjugate().toRotationMatrix();

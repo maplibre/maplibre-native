@@ -28,7 +28,9 @@ void FormatExpressionSection::setTextSectionOptions(std::optional<std::unique_pt
 }
 
 FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections_)
-    : Expression(Kind::FormatExpression, type::Formatted), sections(std::move(sections_)) {}
+    : Expression(Kind::FormatExpression, type::Formatted)
+    , sections(std::move(sections_))
+{}
 
 using namespace mbgl::style::conversion;
 
@@ -140,7 +142,7 @@ bool FormatExpression::operator==(const Expression& e) const {
 }
 
 mbgl::Value FormatExpression::serialize() const {
-    std::vector<mbgl::Value> serialized{{getOperator()}};
+    std::vector<mbgl::Value> serialized{{ getOperator() }};
     for (const auto& section : sections) {
         serialized.push_back(section.content->serialize());
         std::unordered_map<std::string, mbgl::Value> options;
@@ -199,7 +201,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             }
             auto textFontValue = ValueConverter<std::vector<std::string>>::fromExpressionValue(*textFontResult);
             if (!textFontValue) {
-                return EvaluationError{"Format text-font option must evaluate to an array of strings"};
+                return EvaluationError { "Format text-font option must evaluate to an array of strings" };
             }
             evaluatedTextFont = *textFontValue;
         }
@@ -213,7 +215,7 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
 
             evaluatedTextColor = fromExpressionValue<Color>(*textColorResult);
             if (!evaluatedTextColor) {
-                return EvaluationError{"Format text-color option must evaluate to Color"};
+                return EvaluationError { "Format text-color option must evaluate to Color" };
             }
         }
         evaluatedSections.emplace_back(*evaluatedText, evaluatedFontScale, evaluatedTextFont, evaluatedTextColor);
@@ -224,3 +226,4 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
 } // namespace expression
 } // namespace style
 } // namespace mbgl
+

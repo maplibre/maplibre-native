@@ -743,8 +743,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
     return std::nullopt;
 }
 
-std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
-                                                  mbgl::style::expression::ParsingContext& ctx) {
+std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
@@ -872,7 +871,7 @@ bool Distance::operator==(const Expression& e) const {
 }
 
 std::vector<std::optional<Value>> Distance::possibleOutputs() const {
-    return {std::nullopt};
+    return { std::nullopt };
 }
 
 std::string Distance::getOperator() const {

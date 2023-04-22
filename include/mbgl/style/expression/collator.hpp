@@ -18,7 +18,6 @@ public:
     int compare(const std::string& lhs, const std::string& rhs) const;
 
     std::string resolvedLocale() const;
-
 private:
     platform::Collator collator;
 };

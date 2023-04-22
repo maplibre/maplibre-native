@@ -25,19 +25,16 @@ class RendererBackend;
 
 class GLFWView : public mbgl::MapObserver {
 public:
-    GLFWView(bool fullscreen,
-             bool benchmark,
-             const mbgl::ResourceOptions &resourceOptions,
-             const mbgl::ClientOptions &clientOptions);
+    GLFWView(bool fullscreen, bool benchmark, const mbgl::ResourceOptions &resourceOptions, const mbgl::ClientOptions &clientOptions);
     ~GLFWView() override;
 
     float getPixelRatio() const;
 
-    void setMap(mbgl::Map *);
+    void setMap(mbgl::Map*);
+    
+    void setRenderFrontend(GLFWRendererFrontend*);
 
-    void setRenderFrontend(GLFWRendererFrontend *);
-
-    mbgl::gfx::RendererBackend &getRendererBackend();
+    mbgl::gfx::RendererBackend& getRendererBackend();
 
     void setTestDirectory(std::string dir) { testDirectory = std::move(dir); };
 
@@ -53,10 +50,10 @@ public:
 
     void setShouldClose();
 
-    void setWindowTitle(const std::string &);
+    void setWindowTitle(const std::string&);
 
     void run();
-
+    
     void invalidate();
 
     mbgl::Size getSize() const;
@@ -83,10 +80,7 @@ private:
 
     mbgl::Color makeRandomColor() const;
     mbgl::Point<double> makeRandomPoint() const;
-    static std::unique_ptr<mbgl::style::Image> makeImage(const std::string &id,
-                                                         int width,
-                                                         int height,
-                                                         float pixelRatio);
+    static std::unique_ptr<mbgl::style::Image> makeImage(const std::string& id, int width, int height, float pixelRatio);
 
     void nextOrientation();
 
@@ -115,8 +109,8 @@ private:
 private:
     void toggle3DExtrusions(bool visible);
 
-    mbgl::Map *map = nullptr;
-    GLFWRendererFrontend *rendererFrontend = nullptr;
+    mbgl::Map* map = nullptr;
+    GLFWRendererFrontend* rendererFrontend = nullptr;
     std::unique_ptr<GLFWBackend> backend;
 
     std::string testDirectory = ".";
@@ -147,7 +141,7 @@ private:
     std::function<void()> pauseResumeCallback;
     std::function<void()> onlineStatusCallback;
     std::function<void()> resetDatabaseCallback;
-    std::function<void(mbgl::Map *)> animateRouteCallback;
+    std::function<void(mbgl::Map*)> animateRouteCallback;
 
     mbgl::util::RunLoop runLoop;
     mbgl::util::Timer frameTick;

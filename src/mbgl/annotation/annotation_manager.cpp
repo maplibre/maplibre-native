@@ -18,15 +18,15 @@
 // at compile time, so that linker (with LTO on) is able
 // to optimize out the unreachable code.
 #define CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG() \
-    if (!LayerManager::annotationsEnabled) {         \
-        assert(false);                               \
-        return;                                      \
-    }
+if (!LayerManager::annotationsEnabled) {             \
+    assert(false);                                   \
+    return;                                          \
+}
 #define CHECK_ANNOTATIONS_ENABLED_AND_RETURN(result) \
-    if (!LayerManager::annotationsEnabled) {         \
-        assert(false);                               \
-        return result;                               \
-    }
+if (!LayerManager::annotationsEnabled) {             \
+    assert(false);                                   \
+    return result;                                   \
+}
 
 namespace mbgl {
 
@@ -36,7 +36,9 @@ const std::string AnnotationManager::SourceID = "com.mapbox.annotations";
 const std::string AnnotationManager::PointLayerID = "com.mapbox.annotations.points";
 const std::string AnnotationManager::ShapeLayerID = "com.mapbox.annotations.shape.";
 
-AnnotationManager::AnnotationManager(Style& style_) : style(style_){};
+AnnotationManager::AnnotationManager(Style& style_)
+        : style(style_) {
+};
 
 AnnotationManager::~AnnotationManager() = default;
 
@@ -54,7 +56,9 @@ AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(nextID++);
     std::lock_guard<std::mutex> lock(mutex);
     AnnotationID id = nextID++;
-    Annotation::visit(annotation, [&](const auto& annotation_) { this->add(id, annotation_); });
+    Annotation::visit(annotation, [&] (const auto& annotation_) {
+        this->add(id, annotation_);
+    });
     dirty = true;
     return id;
 }
@@ -62,7 +66,9 @@ AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
 bool AnnotationManager::updateAnnotation(const AnnotationID& id, const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(true);
     std::lock_guard<std::mutex> lock(mutex);
-    Annotation::visit(annotation, [&](const auto& annotation_) { this->update(id, annotation_); });
+    Annotation::visit(annotation, [&] (const auto& annotation_) {
+        this->update(id, annotation_);
+    });
     return dirty;
 }
 
@@ -80,14 +86,14 @@ void AnnotationManager::add(const AnnotationID& id, const SymbolAnnotation& anno
 }
 
 void AnnotationManager::add(const AnnotationID& id, const LineAnnotation& annotation) {
-    ShapeAnnotationImpl& impl =
-        *shapeAnnotations.emplace(id, std::make_unique<LineAnnotationImpl>(id, annotation)).first->second;
+    ShapeAnnotationImpl& impl = *shapeAnnotations.emplace(id,
+        std::make_unique<LineAnnotationImpl>(id, annotation)).first->second;
     impl.updateStyle(*style.get().impl);
 }
 
 void AnnotationManager::add(const AnnotationID& id, const FillAnnotation& annotation) {
-    ShapeAnnotationImpl& impl =
-        *shapeAnnotations.emplace(id, std::make_unique<FillAnnotationImpl>(id, annotation)).first->second;
+    ShapeAnnotationImpl& impl = *shapeAnnotations.emplace(id,
+        std::make_unique<FillAnnotationImpl>(id, annotation)).first->second;
     impl.updateStyle(*style.get().impl);
 }
 
@@ -147,7 +153,8 @@ void AnnotationManager::remove(const AnnotationID& id) {
 }
 
 std::unique_ptr<AnnotationTileData> AnnotationManager::getTileData(const CanonicalTileID& tileID) {
-    if (symbolAnnotations.empty() && shapeAnnotations.empty()) return nullptr;
+    if (symbolAnnotations.empty() && shapeAnnotations.empty())
+        return nullptr;
 
     auto tileData = std::make_unique<AnnotationTileData>();
 
@@ -160,10 +167,11 @@ std::unique_ptr<AnnotationTileData> AnnotationManager::getTileData(const Canonic
     // The rendering/querying logic will make sure the symbols show up in only one of the tiles
     tileBounds.extend(LatLng(tileBounds.south() - 0.000000001, tileBounds.west() - 0.000000001));
     tileBounds.extend(LatLng(tileBounds.north() + 0.000000001, tileBounds.east() + 0.000000001));
-
-    symbolTree.query(
-        boost::geometry::index::intersects(tileBounds),
-        boost::make_function_output_iterator([&](const auto& val) { val->updateLayer(tileID, *pointLayer); }));
+    
+    symbolTree.query(boost::geometry::index::intersects(tileBounds),
+        boost::make_function_output_iterator([&](const auto& val){
+            val->updateLayer(tileID, *pointLayer);
+        }));
 
     for (const auto& shape : shapeAnnotations) {
         shape.second->updateTileData(tileID, *tileData);
@@ -242,8 +250,8 @@ void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
     std::lock_guard<std::mutex> lock(mutex);
     const std::string id = prefixedImageID(image->getID());
     images.erase(id);
-    auto inserted =
-        images.emplace(id, style::Image(id, image->getImage().clone(), image->getPixelRatio(), image->isSdf()));
+    auto inserted = images.emplace(id, style::Image(id, image->getImage().clone(),
+                                                    image->getPixelRatio(), image->isSdf()));
     style.get().impl->addImage(std::make_unique<style::Image>(inserted.first->second));
 }
 

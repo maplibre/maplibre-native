@@ -30,7 +30,9 @@ public:
     using UniformList = typename Name::UniformList;
     using TextureList = typename Name::TextureList;
 
-    Program(ProgramParameters programParameters_) : programParameters(std::move(programParameters_)) {}
+    Program(ProgramParameters programParameters_)
+        : programParameters(std::move(programParameters_)) {
+    }
 
     const ProgramParameters programParameters;
 
@@ -39,32 +41,36 @@ public:
         Instance(Context& context,
                  const std::initializer_list<const char*>& vertexSource,
                  const std::initializer_list<const char*>& fragmentSource)
-            : program(context.createProgram(context.createShader(ShaderType::Vertex, vertexSource),
-                                            context.createShader(ShaderType::Fragment, fragmentSource),
-                                            attributeLocations.getFirstAttribName())) {
+            : program(context.createProgram(
+                  context.createShader(ShaderType::Vertex, vertexSource),
+                  context.createShader(ShaderType::Fragment, fragmentSource),
+                  attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
             uniformStates.queryLocations(program);
             // Texture units are specified via uniforms as well, so we need query their locations
             textureStates.queryLocations(program);
         }
 
-        static std::unique_ptr<Instance> createInstance(gl::Context& context,
-                                                        const ProgramParameters& programParameters,
-                                                        const std::string& additionalDefines) {
+        static std::unique_ptr<Instance>
+        createInstance(gl::Context& context,
+                       const ProgramParameters& programParameters,
+                       const std::string& additionalDefines) {
             // Compile the shader
             std::initializer_list<const char*> vertexSource = {
                 "#version 300 es\n",
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
-                programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()};
+                programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()
+            };
 
             std::initializer_list<const char*> fragmentSource = {
                 "#version 300 es\n",
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
                 shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
-                programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()};
+                programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()
+            };
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);
         }
@@ -100,12 +106,12 @@ public:
         auto it = instances.find(key);
         if (it == instances.end()) {
             try {
-                it = instances
-                         .emplace(key,
-                                  Instance::createInstance(context,
-                                                           programParameters,
-                                                           gl::AttributeKey<AttributeList>::defines(attributeBindings)))
-                         .first;
+                it = instances.emplace(key,
+                    Instance::createInstance(
+                        context,
+                        programParameters,
+                        gl::AttributeKey<AttributeList>::defines(attributeBindings)
+                )).first;
             } catch (const std::runtime_error& e) {
                 Log::Error(Event::OpenGL, e.what());
                 return;
@@ -120,9 +126,13 @@ public:
         instance.textureStates.bind(context, textureBindings);
 
         auto& vertexArray = drawScope.getResource<gl::DrawScopeResource>().vertexArray;
-        vertexArray.bind(context, indexBuffer, instance.attributeLocations.toBindingArray(attributeBindings));
+        vertexArray.bind(context,
+                        indexBuffer,
+                        instance.attributeLocations.toBindingArray(attributeBindings));
 
-        context.draw(drawMode, indexOffset, indexLength);
+        context.draw(drawMode,
+                     indexOffset,
+                     indexLength);
     }
 
 private:

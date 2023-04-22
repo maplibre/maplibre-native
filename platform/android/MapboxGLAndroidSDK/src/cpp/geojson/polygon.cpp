@@ -10,13 +10,12 @@ namespace geojson {
 
 jni::Local<jni::Object<Polygon>> Polygon::New(jni::JNIEnv& env, const mbgl::Polygon<double>& polygon) {
     static auto& javaClass = jni::Class<Polygon>::Singleton(env);
-    static auto method =
-        javaClass.GetStaticMethod<jni::Object<Polygon>(jni::Object<java::util::List>)>(env, "fromLngLats");
+    static auto method = javaClass.GetStaticMethod<jni::Object<Polygon> (jni::Object<java::util::List>)>(env, "fromLngLats");
 
     return javaClass.Call(env, method, asPointsListsList(env, polygon));
 }
 
-mapbox::geojson::polygon Polygon::convert(jni::JNIEnv& env, const jni::Object<Polygon>& jPolygon) {
+mapbox::geojson::polygon Polygon::convert(jni::JNIEnv &env, const jni::Object<Polygon>& jPolygon) {
     mapbox::geojson::polygon polygon;
 
     if (jPolygon) {
@@ -26,8 +25,7 @@ mapbox::geojson::polygon Polygon::convert(jni::JNIEnv& env, const jni::Object<Po
     return polygon;
 }
 
-mapbox::geojson::polygon Polygon::convert(
-    jni::JNIEnv& env, const jni::Object<java::util::List /*<java::util::List<Point>>*/>& jPointListsList) {
+mapbox::geojson::polygon Polygon::convert(jni::JNIEnv &env, const jni::Object<java::util::List/*<java::util::List<Point>>*/>& jPointListsList) {
     mapbox::geojson::polygon polygon;
 
     if (jPointListsList) {
@@ -41,13 +39,14 @@ mapbox::geojson::polygon Polygon::convert(
     return polygon;
 }
 
-jni::Local<jni::Object<java::util::List>> Polygon::coordinates(jni::JNIEnv& env, const jni::Object<Polygon>& jPolygon) {
+
+jni::Local<jni::Object<java::util::List>> Polygon::coordinates(jni::JNIEnv &env, const jni::Object<Polygon>& jPolygon) {
     static auto& javaClass = jni::Class<Polygon>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "coordinates");
+    static auto method = javaClass.GetMethod<jni::Object<java::util::List> ()>(env, "coordinates");
     return jPolygon.Call(env, method);
 }
 
-void Polygon::registerNative(jni::JNIEnv& env) {
+void Polygon::registerNative(jni::JNIEnv &env) {
     jni::Class<Polygon>::Singleton(env);
 }
 

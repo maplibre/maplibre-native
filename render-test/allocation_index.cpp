@@ -18,7 +18,8 @@ std::mutex indexMutex;
 
 class FlagGuard {
 public:
-    explicit FlagGuard(std::atomic_bool& flag_) : flag(flag_) { flag = true; }
+    explicit FlagGuard(std::atomic_bool& flag_)
+        : flag(flag_) { flag = true; }
     ~FlagGuard() { flag = false; }
 
 private:
@@ -73,7 +74,7 @@ void AllocationIndex::reset() {
 
 // static
 void* AllocationIndex::allocate(size_t size) {
-    void* ptr = std::malloc(size);
+    void *ptr = std::malloc(size);
     if (ptr && canModifyIndex()) addToIndex(size, ptr);
     return ptr;
 }

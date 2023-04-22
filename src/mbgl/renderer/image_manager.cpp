@@ -277,7 +277,8 @@ void ImageManager::dumpDebugLogs() const {
     Log::Info(Event::General, ss.str());
 }
 
-ImageRequestor::ImageRequestor(ImageManager& imageManager_) : imageManager(imageManager_) {}
+ImageRequestor::ImageRequestor(ImageManager& imageManager_) : imageManager(imageManager_) {
+}
 
 ImageRequestor::~ImageRequestor() {
     imageManager.removeRequestor(*this);

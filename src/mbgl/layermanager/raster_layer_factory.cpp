@@ -10,8 +10,7 @@ const style::LayerTypeInfo* RasterLayerFactory::getTypeInfo() const noexcept {
     return style::RasterLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> RasterLayerFactory::createLayer(const std::string& id,
-                                                              const style::conversion::Convertible& value) noexcept {
+std::unique_ptr<style::Layer> RasterLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
     auto const source = getSource(value);
     if (!source) {
         return nullptr;

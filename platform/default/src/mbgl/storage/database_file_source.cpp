@@ -19,8 +19,10 @@ namespace mbgl {
 class DatabaseFileSourceThread {
 public:
     DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
-        : db(std::make_unique<OfflineDatabase>(cachePath, onlineFileSource_->getResourceOptions().tileServerOptions())),
-          onlineFileSource(std::move(onlineFileSource_)) {}
+        : db(std::make_unique<OfflineDatabase>(
+            cachePath,
+            onlineFileSource_->getResourceOptions().tileServerOptions())
+        ), onlineFileSource(std::move(onlineFileSource_)) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
         std::optional<Response> offlineResponse =
@@ -153,16 +155,14 @@ private:
 
 class DatabaseFileSource::Impl {
 public:
-    Impl(std::shared_ptr<FileSource> onlineFileSource,
-         const ResourceOptions& resourceOptions_,
-         const ClientOptions& clientOptions_)
-        : thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
+    Impl(std::shared_ptr<FileSource> onlineFileSource, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_) :
+        thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
               resourceOptions_.cachePath())),
-          resourceOptions(resourceOptions_.clone()),
-          clientOptions(clientOptions_.clone()) {}
+              resourceOptions(resourceOptions_.clone()),
+              clientOptions(clientOptions_.clone()) {}
 
     ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
 
@@ -199,9 +199,9 @@ private:
 
 DatabaseFileSource::DatabaseFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<Impl>(
-          FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
-          resourceOptions,
-          clientOptions)) {}
+            FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
+            resourceOptions,
+            clientOptions)) {}
 
 DatabaseFileSource::~DatabaseFileSource() = default;
 

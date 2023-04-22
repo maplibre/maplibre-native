@@ -17,30 +17,12 @@ namespace mbgl {
     center point when both are set.
     */
 struct CameraOptions {
-    CameraOptions& withCenter(const std::optional<LatLng>& o) {
-        center = o;
-        return *this;
-    }
-    CameraOptions& withPadding(const std::optional<EdgeInsets>& p) {
-        padding = p;
-        return *this;
-    }
-    CameraOptions& withAnchor(const std::optional<ScreenCoordinate>& o) {
-        anchor = o;
-        return *this;
-    }
-    CameraOptions& withZoom(const std::optional<double>& o) {
-        zoom = o;
-        return *this;
-    }
-    CameraOptions& withBearing(const std::optional<double>& o) {
-        bearing = o;
-        return *this;
-    }
-    CameraOptions& withPitch(const std::optional<double>& o) {
-        pitch = o;
-        return *this;
-    }
+    CameraOptions& withCenter(const std::optional<LatLng>& o) { center = o; return *this; }
+    CameraOptions& withPadding(const std::optional<EdgeInsets>& p) { padding = p; return *this; }
+    CameraOptions& withAnchor(const std::optional<ScreenCoordinate>& o) { anchor = o; return *this; }
+    CameraOptions& withZoom(const std::optional<double>& o) { zoom = o; return *this; }
+    CameraOptions& withBearing(const std::optional<double>& o) { bearing = o; return *this; }
+    CameraOptions& withPitch(const std::optional<double>& o) { pitch = o; return *this; }
 
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
@@ -66,8 +48,12 @@ struct CameraOptions {
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
-    return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch;
+    return a.center == b.center
+        && a.padding == b.padding
+        && a.anchor == b.anchor
+        && a.zoom == b.zoom
+        && a.bearing == b.bearing
+        && a.pitch == b.pitch;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
@@ -108,7 +94,8 @@ struct AnimationOptions {
     AnimationOptions() = default;
 
     /** Creates an animation with the specified duration. */
-    AnimationOptions(Duration d) : duration(d) {}
+    AnimationOptions(Duration d)
+        : duration(d) {}
 };
 
 /** Various options for accessing physical properties of the underlying camera entity.

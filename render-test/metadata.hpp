@@ -80,8 +80,7 @@ struct MemoryProbe {
     }
 
     static std::tuple<bool, float> checkAllocations(const MemoryProbe& expected, const MemoryProbe& actual) {
-        return checkValue(
-            static_cast<float>(expected.allocations), static_cast<float>(actual.allocations), actual.tolerance);
+        return checkValue(static_cast<float>(expected.allocations), static_cast<float>(actual.allocations), actual.tolerance);
     }
 };
 
@@ -145,7 +144,7 @@ struct TestMetadata {
     // to prevent the unit test fail, and just verify the render result.
     bool ignoreProbing = false;
 
-    mbgl::Size size{512u, 512u};
+    mbgl::Size size{ 512u, 512u };
     float pixelRatio = 1.0f;
     double allowed = 0.00015; // diff
     std::string description;
@@ -186,6 +185,7 @@ struct TestMetadata {
 
     std::string errorMessage;
     double difference = 0.0;
+
 };
 
 class TestContext {

@@ -8,11 +8,10 @@
 
 #if defined(__APPLE__) && defined(__MACH__)
 #include <mach/mach.h>
-#include <mach/message.h> // for mach_port_t
+#include <mach/message.h>  // for mach_port_t
 #include <mach/task_info.h>
 
-#elif (defined(_AIX) || defined(__TOS__AIX__)) || \
-    (defined(__sun__) || defined(__sun) || defined(sun) && (defined(__SVR4) || defined(__svr4__)))
+#elif (defined(_AIX) || defined(__TOS__AIX__)) || (defined(__sun__) || defined(__sun) || defined(sun) && (defined(__SVR4) || defined(__svr4__)))
 #include <fcntl.h>
 #include <procfs.h>
 
@@ -27,6 +26,7 @@
 
 namespace mbgl {
 namespace test {
+        
 
 /**
  * Returns the peak (maximum so far) resident set size (physical

@@ -29,6 +29,7 @@ public:
     static jni::Local<jni::Object<Locale>> New(jni::JNIEnv&, const jni::String&);
     static jni::Local<jni::Object<Locale>> New(jni::JNIEnv&, const jni::String&, const jni::String&);
 
+
     static void registerNative(jni::JNIEnv&);
 };
 
@@ -42,14 +43,17 @@ public:
 
     static jni::jint compare(jni::JNIEnv&, const jni::Object<Collator>&, const jni::String&, const jni::String&);
 
+
     static void registerNative(jni::JNIEnv&);
 };
+
 
 class StringUtils {
 public:
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/utils/StringUtils"; };
 
     static jni::Local<jni::String> unaccent(jni::JNIEnv&, const jni::String&);
+
 
     static void registerNative(jni::JNIEnv&);
 };

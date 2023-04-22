@@ -108,8 +108,9 @@ std::size_t CollectionBase<T>::size() const {
 
 template <class T>
 std::size_t CollectionBase<T>::index(const std::string& id) const {
-    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) { return e->getID() == id; }) -
-           wrappers.begin();
+    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) {
+        return e->getID() == id;
+    }) - wrappers.begin();
 }
 
 template <class T>
@@ -132,7 +133,9 @@ std::vector<T*> CollectionBase<T>::getWrappers() const {
 
 template <class T>
 void CollectionBase<T>::clear() {
-    mutate(impls, [&](auto& impls_) { impls_.clear(); });
+    mutate(impls, [&] (auto& impls_) {
+        impls_.clear();
+    });
 
     wrappers.clear();
 }

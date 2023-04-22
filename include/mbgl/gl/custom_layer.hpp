@@ -63,7 +63,8 @@ public:
 
 class CustomLayer final : public Layer {
 public:
-    CustomLayer(const std::string& id, std::unique_ptr<CustomLayerHost> host);
+    CustomLayer(const std::string& id,
+                std::unique_ptr<CustomLayerHost> host);
 
     CustomLayer(const CustomLayer&) = delete;
     ~CustomLayer() final;

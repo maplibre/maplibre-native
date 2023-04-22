@@ -9,10 +9,12 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-class Any : public Expression {
+class Any : public Expression  {
 public:
-    Any(std::vector<std::unique_ptr<Expression>> inputs_)
-        : Expression(Kind::Any, type::Boolean), inputs(std::move(inputs_)) {}
+    Any(std::vector<std::unique_ptr<Expression>> inputs_) :
+        Expression(Kind::Any, type::Boolean),
+        inputs(std::move(inputs_))
+    {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
@@ -22,15 +24,16 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "any"; }
-
 private:
     std::vector<std::unique_ptr<Expression>> inputs;
 };
 
-class All : public Expression {
+class All : public Expression  {
 public:
-    All(std::vector<std::unique_ptr<Expression>> inputs_)
-        : Expression(Kind::All, type::Boolean), inputs(std::move(inputs_)) {}
+    All(std::vector<std::unique_ptr<Expression>> inputs_) :
+        Expression(Kind::All, type::Boolean),
+        inputs(std::move(inputs_))
+    {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
@@ -40,7 +43,6 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "all"; }
-
 private:
     std::vector<std::unique_ptr<Expression>> inputs;
 };

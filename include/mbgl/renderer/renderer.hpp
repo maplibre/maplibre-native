@@ -42,9 +42,7 @@ struct PlacedSymbolData {
 
 class Renderer {
 public:
-    Renderer(gfx::RendererBackend&,
-             float pixelRatio_,
-             const std::optional<std::string>& localFontFamily = std::nullopt);
+    Renderer(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily = std::nullopt);
     ~Renderer();
 
     void markContextLost();
@@ -55,8 +53,7 @@ public:
 
     /// Feature queries
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions& options = {}) const;
-    std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point,
-                                               const RenderedQueryOptions& options = {}) const;
+    std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
@@ -64,17 +61,14 @@ public:
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;
 
     /// Feature extension query
-    FeatureExtensionValue queryFeatureExtensions(
-        const std::string& sourceID,
-        const Feature& feature,
-        const std::string& extension,
-        const std::string& extensionField,
-        const std::optional<std::map<std::string, Value>>& args = std::nullopt) const;
+    FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,
+                                                 const Feature& feature,
+                                                 const std::string& extension,
+                                                 const std::string& extensionField,
+                                                 const std::optional<std::map<std::string, Value>>& args = std::nullopt) const;
 
-    void setFeatureState(const std::string& sourceID,
-                         const std::optional<std::string>& sourceLayerID,
-                         const std::string& featureID,
-                         const FeatureState& state);
+    void setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
+                         const std::string& featureID, const FeatureState& state);
 
     void getFeatureState(FeatureState& state,
                          const std::string& sourceID,

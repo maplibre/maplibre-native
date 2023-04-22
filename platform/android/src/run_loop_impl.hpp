@@ -18,8 +18,7 @@ namespace util {
 
 using WatchCallback = std::function<void(int, RunLoop::Event)>;
 
-template <typename T>
-class Thread;
+template <typename T> class Thread;
 class Alarm;
 
 class RunLoop::Impl {

@@ -14,11 +14,15 @@
 
 namespace mbgl {
 
-RasterTile::RasterTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
+RasterTile::RasterTile(const OverscaledTileID& id_,
+                       const TileParameters& parameters,
+                       const Tileset& tileset)
     : Tile(Kind::Raster, id_),
       loader(*this, id_, parameters, tileset),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(), ActorRef<RasterTile>(*this, mailbox)) {}
+      worker(Scheduler::GetBackground(),
+             ActorRef<RasterTile>(*this, mailbox)) {
+}
 
 RasterTile::~RasterTile() = default;
 

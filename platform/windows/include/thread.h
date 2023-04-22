@@ -21,21 +21,22 @@ extern "C" {
 //
 const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
-#pragma pack(push, 8)
-typedef struct tagTHREADNAME_INFO {
-    DWORD dwType;     // Must be 0x1000.
-    LPCSTR szName;    // Pointer to name (in user addr space).
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+    DWORD dwType; // Must be 0x1000.
+    LPCSTR szName; // Pointer to name (in user addr space).
     DWORD dwThreadID; // Thread ID (-1=caller thread).
-    DWORD dwFlags;    // Reserved for future use, must be zero.
+    DWORD dwFlags; // Reserved for future use, must be zero.
 } THREADNAME_INFO;
 #pragma pack(pop)
 
 void SetThreadName(DWORD dwThreadID, const char* threadName);
 
 typedef struct structTHREAD_INFO {
-    DWORD id;
-    DWORD key;
-    char* name;
+	DWORD id;
+	DWORD key;
+	char* name;
 } THREAD_INFO;
 
 #ifdef __cplusplus
@@ -46,9 +47,13 @@ extern DWORD selfThreadKey;
 
 class DummyClassThread {
 public:
-    DummyClassThread() { selfThreadKey = TlsAlloc(); }
+	DummyClassThread() {
+		selfThreadKey = TlsAlloc();
+	}
 
-    ~DummyClassThread() { TlsFree(selfThreadKey); }
+	~DummyClassThread() {
+		TlsFree(selfThreadKey);
+	}
 };
 
 extern DummyClassThread dummyClassThread;
@@ -61,7 +66,7 @@ std::string getCurrentThreadName();
 void setCurrentThreadName(const std::string& name);
 void makeThreadLowPriority();
 void setCurrentThreadPriority(double priority);
-} // namespace platform
-} // namespace mbgl
+}
+}
 
 #endif

@@ -23,7 +23,9 @@ class ShaderRegistry;
 }
 
 struct StillImageRequest {
-    StillImageRequest(Map::StillImageCallback&& callback_) : callback(std::move(callback_)) {}
+    StillImageRequest(Map::StillImageCallback&& callback_)
+        : callback(std::move(callback_)) {
+    }
 
     Map::StillImageCallback callback;
 };
@@ -63,7 +65,7 @@ public:
     const float pixelRatio;
     const bool crossSourceCollisions;
 
-    MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
+    MapDebugOptions debugOptions { MapDebugOptions::NoDebug };
 
     std::shared_ptr<FileSource> fileSource;
 

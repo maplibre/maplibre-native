@@ -11,16 +11,15 @@ using namespace mbgl::style::conversion;
 TEST(GeoJSONOptions, Basic) {
     Error error;
     std::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>("{}", error);
-    ASSERT_TRUE((bool)converted);
+    ASSERT_TRUE((bool) converted);
 }
 
 TEST(GeoJSONOptions, ErrorHandling) {
     Error error;
     std::optional<GeoJSONOptions> converted = convertJSON<GeoJSONOptions>(R"JSON({
         "maxzoom": "should not be a string"
-    })JSON",
-                                                                          error);
-    ASSERT_FALSE((bool)converted);
+    })JSON", error);
+    ASSERT_FALSE((bool) converted);
 }
 
 TEST(GeoJSONOptions, RetainsDefaults) {
@@ -57,8 +56,7 @@ TEST(GeoJSONOptions, FullConversion) {
             "sum": [["+", ["accumulated"], ["get", "sum"]], ["get", "scalerank"]],
             "has_island": ["any", ["==", ["get", "featureclass"], "island"]]
         }
-    })JSON",
-                                                            error);
+    })JSON", error);
 
     // GeoJSON-VT
     ASSERT_EQ(converted.minzoom, 0);

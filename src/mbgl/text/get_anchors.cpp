@@ -7,9 +7,11 @@
 #include <cmath>
 
 namespace mbgl {
-
+  
 float getAngleWindowSize(const float textLeft, const float textRight, const float glyphSize, const float boxScale) {
-    return (textLeft - textRight) != 0.0f ? 3.0f / 5.0f * glyphSize * boxScale : 0;
+    return (textLeft - textRight) != 0.0f ?
+        3.0f / 5.0f * glyphSize * boxScale :
+        0;
 }
 
 float getLineLength(const GeometryCoordinates& line) {
@@ -56,8 +58,9 @@ static Anchors resample(const GeometryCoordinates& line,
             // Check that the point is within the tile boundaries and that
             // the label would fit before the beginning and end of the line
             // if placed at this point.
-            if (x >= 0 && x < util::EXTENT && y >= 0 && y < util::EXTENT && markedDistance - halfLabelLength >= 0.0f &&
-                markedDistance + halfLabelLength <= lineLength) {
+            if (x >= 0 && x < util::EXTENT && y >= 0 && y < util::EXTENT &&
+                    markedDistance - halfLabelLength >= 0.0f &&
+                    markedDistance + halfLabelLength <= lineLength) {
                 Anchor anchor(std::round(x), std::round(y), angle, i);
 
                 if (!angleWindowSize || checkMaxAngle(line, anchor, labelLength, angleWindowSize, maxAngle)) {
@@ -105,8 +108,7 @@ Anchors getAnchors(const GeometryCoordinates& line,
     const float labelLength = shapedLabelLength * boxScale;
 
     // Is the line continued from outside the tile boundary?
-    const bool continuedLine =
-        (line[0].x == 0 || line[0].x == util::EXTENT || line[0].y == 0 || line[0].y == util::EXTENT);
+    const bool continuedLine = (line[0].x == 0 || line[0].x == util::EXTENT || line[0].y == 0 || line[0].y == util::EXTENT);
 
     // Is the label long, relative to the spacing?
     // If so, adjust the spacing so there is always a minimum space of `spacing / 4` between label edges.
@@ -121,25 +123,25 @@ Anchors getAnchors(const GeometryCoordinates& line,
     // For non-continued lines, add a bit of fixed extra offset to avoid collisions at T intersections.
     const float fixedExtraOffset = glyphSize * 2;
 
-    const float offset = !continuedLine
-                             ? std::fmod((shapedLabelLength / 2 + fixedExtraOffset) * boxScale * overscaling, spacing)
-                             : std::fmod(spacing / 2 * overscaling, spacing);
+    const float offset = !continuedLine ?
+    std::fmod((shapedLabelLength / 2 + fixedExtraOffset) * boxScale * overscaling, spacing) :
+    std::fmod(spacing / 2 * overscaling, spacing);
 
     return resample(line, offset, spacing, angleWindowSize, maxAngle, labelLength, continuedLine, false);
 }
 
 std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
-                                      const float maxAngle,
-                                      const float textLeft,
-                                      const float textRight,
-                                      const float iconLeft,
-                                      const float iconRight,
-                                      const float glyphSize,
-                                      const float boxScale) {
+                                 const float maxAngle,
+                                 const float textLeft,
+                                 const float textRight,
+                                 const float iconLeft,
+                                 const float iconRight,
+                                 const float glyphSize,
+                                 const float boxScale) {
     if (line.empty()) {
         return {};
     }
-
+    
     const float angleWindowSize = getAngleWindowSize(textLeft, textRight, glyphSize, boxScale);
     const float labelLength = std::fmax(textRight - textLeft, iconRight - iconLeft) * boxScale;
 
@@ -150,9 +152,9 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
     for (auto it = line.begin(), end = line.end() - 1; it != end; it++, i++) {
         const GeometryCoordinate& a = *(it);
         const GeometryCoordinate& b = *(it + 1);
-
+        
         const auto segmentDistance = util::dist<float>(a, b);
-
+        
         if (prevDistance + segmentDistance > centerDistance) {
             // The center is on this segment
             float t = (centerDistance - prevDistance) / segmentDistance;
@@ -167,7 +169,7 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
 
             return std::nullopt;
         }
-
+        
         prevDistance += segmentDistance;
     }
     return {};

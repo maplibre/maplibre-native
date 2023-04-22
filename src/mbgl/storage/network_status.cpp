@@ -24,7 +24,7 @@ NetworkStatus::Status NetworkStatus::Get() {
 void NetworkStatus::Set(Status status) {
     if (status == Status::Offline) {
         online = false;
-    } else if (!online) {
+    } else if(!online) {
         online = true;
         Reachable();
     }

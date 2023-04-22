@@ -96,18 +96,18 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
 
         bottom = util::clamp(*bottom, -90.0, 90.0);
         top = util::clamp(*top, -90.0, 90.0);
-        if (*top < *bottom) {
+        if (*top < *bottom){
             error.message = "bounds bottom latitude must be less than or equal to top latitude";
             return std::nullopt;
         }
 
-        if (*left > *right) {
+        if(*left > *right) {
             error.message = "bounds left longitude must be less than or equal to right longitude";
             return std::nullopt;
         }
         left = util::max(-180.0, *left);
         right = util::min(180.0, *right);
-        result.bounds = LatLngBounds::hull({*bottom, *left}, {*top, *right});
+        result.bounds = LatLngBounds::hull({ *bottom, *left }, { *top, *right });
     }
 
     return result;

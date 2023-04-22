@@ -15,12 +15,15 @@ namespace expression {
 class Let : public Expression {
 public:
     using Bindings = std::map<std::string, std::shared_ptr<Expression>>;
-
-    Let(Bindings bindings_, std::unique_ptr<Expression> result_)
-        : Expression(Kind::Let, result_->getType()), bindings(std::move(bindings_)), result(std::move(result_)) {}
-
+    
+    Let(Bindings bindings_, std::unique_ptr<Expression> result_) :
+        Expression(Kind::Let, result_->getType()),
+        bindings(std::move(bindings_)),
+        result(std::move(result_))
+    {}
+    
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
-
+    
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
@@ -34,11 +37,12 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    Expression* getResult() const { return result.get(); }
+    Expression* getResult() const {
+        return result.get();
+    }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "let"; }
-
 private:
     Bindings bindings;
     std::unique_ptr<Expression> result;
@@ -66,9 +70,9 @@ public:
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "var"; }
-
+    
     const std::shared_ptr<Expression>& getBoundExpression() const { return value; }
-
+    
 private:
     std::string name;
     std::shared_ptr<Expression> value;

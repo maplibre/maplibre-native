@@ -10,8 +10,8 @@
 #include <cmath>
 
 namespace {
-// Zero width space that is used to suggest break points for Japanese labels.
-char16_t ZWSP = u'\u200b';
+    // Zero width space that is used to suggest break points for Japanese labels.
+    char16_t ZWSP = u'\u200b';
 } // namespace
 
 namespace mbgl {
@@ -21,33 +21,33 @@ AnchorAlignment AnchorAlignment::getAnchorAlignment(style::SymbolAnchorType anch
     AnchorAlignment result(0.5f, 0.5f);
 
     switch (anchor) {
-        case style::SymbolAnchorType::Right:
-        case style::SymbolAnchorType::TopRight:
-        case style::SymbolAnchorType::BottomRight:
-            result.horizontalAlign = 1.0f;
-            break;
-        case style::SymbolAnchorType::Left:
-        case style::SymbolAnchorType::TopLeft:
-        case style::SymbolAnchorType::BottomLeft:
-            result.horizontalAlign = 0.0f;
-            break;
-        default:
-            break;
+    case style::SymbolAnchorType::Right:
+    case style::SymbolAnchorType::TopRight:
+    case style::SymbolAnchorType::BottomRight:
+        result.horizontalAlign = 1.0f;
+        break;
+    case style::SymbolAnchorType::Left:
+    case style::SymbolAnchorType::TopLeft:
+    case style::SymbolAnchorType::BottomLeft:
+        result.horizontalAlign = 0.0f;
+        break;
+    default:
+        break;
     }
 
     switch (anchor) {
-        case style::SymbolAnchorType::Bottom:
-        case style::SymbolAnchorType::BottomLeft:
-        case style::SymbolAnchorType::BottomRight:
-            result.verticalAlign = 1.0f;
-            break;
-        case style::SymbolAnchorType::Top:
-        case style::SymbolAnchorType::TopLeft:
-        case style::SymbolAnchorType::TopRight:
-            result.verticalAlign = 0.0f;
-            break;
-        default:
-            break;
+    case style::SymbolAnchorType::Bottom:
+    case style::SymbolAnchorType::BottomLeft:
+    case style::SymbolAnchorType::BottomRight:
+        result.verticalAlign = 1.0f;
+        break;
+    case style::SymbolAnchorType::Top:
+    case style::SymbolAnchorType::TopLeft:
+    case style::SymbolAnchorType::TopRight:
+        result.verticalAlign = 0.0f;
+        break;
+    default:
+        break;
     }
 
     return result;
@@ -55,16 +55,16 @@ AnchorAlignment AnchorAlignment::getAnchorAlignment(style::SymbolAnchorType anch
 
 style::TextJustifyType getAnchorJustification(style::SymbolAnchorType anchor) {
     switch (anchor) {
-        case style::SymbolAnchorType::Right:
-        case style::SymbolAnchorType::TopRight:
-        case style::SymbolAnchorType::BottomRight:
-            return style::TextJustifyType::Right;
-        case style::SymbolAnchorType::Left:
-        case style::SymbolAnchorType::TopLeft:
-        case style::SymbolAnchorType::BottomLeft:
-            return style::TextJustifyType::Left;
-        default:
-            return style::TextJustifyType::Center;
+    case style::SymbolAnchorType::Right:
+    case style::SymbolAnchorType::TopRight:
+    case style::SymbolAnchorType::BottomRight:
+        return style::TextJustifyType::Right;
+    case style::SymbolAnchorType::Left:
+    case style::SymbolAnchorType::TopLeft:
+    case style::SymbolAnchorType::BottomLeft:
+        return style::TextJustifyType::Left;
+    default:
+        return style::TextJustifyType::Center;
     }
 }
 
@@ -192,8 +192,7 @@ float getGlyphAdvance(char16_t codePoint,
         if (image == imagePositions.end()) {
             return 0.0f;
         }
-        return image->second.displaySize()[0] * static_cast<float>(section.scale) * util::ONE_EM / layoutTextSize +
-               spacing;
+        return image->second.displaySize()[0] * static_cast<float>(section.scale) * util::ONE_EM / layoutTextSize + spacing;
     }
 }
 
@@ -204,13 +203,13 @@ float determineAverageLineWidth(const TaggedString& logicalInput,
                                 const ImagePositions& imagePositions,
                                 float layoutTextSize) {
     float totalWidth = 0;
-
+    
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
         char16_t codePoint = logicalInput.getCharCodeAt(i);
         totalWidth += getGlyphAdvance(codePoint, section, glyphMap, imagePositions, layoutTextSize, spacing);
     }
-
+    
     auto targetLineCount = static_cast<int32_t>(::fmax(1, std::ceil(totalWidth / maxWidth)));
     return totalWidth / targetLineCount;
 }
@@ -242,7 +241,7 @@ float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penaliza
     if (codePoint == 0x28 || codePoint == 0xff08) {
         penalty += 50;
     }
-
+    
     // Penalize close parenthesis at beginning of line
     if (nextCodePoint == 0x29 || nextCodePoint == 0xff09) {
         penalty += 50;
@@ -258,34 +257,29 @@ float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penaliza
 }
 
 struct PotentialBreak {
-    PotentialBreak(const std::size_t p_index,
-                   const float p_x,
-                   const PotentialBreak* p_priorBreak,
-                   const float p_badness)
-        : index(p_index), x(p_x), priorBreak(p_priorBreak), badness(p_badness) {}
-
+    PotentialBreak(const std::size_t p_index, const float p_x, const PotentialBreak* p_priorBreak, const float p_badness)
+    : index(p_index), x(p_x), priorBreak(p_priorBreak), badness(p_badness)
+    {}
+    
     const std::size_t index;
     const float x;
     const PotentialBreak* priorBreak;
     const float badness;
 };
 
-PotentialBreak evaluateBreak(const std::size_t breakIndex,
-                             const float breakX,
-                             const float targetWidth,
-                             const std::list<PotentialBreak>& potentialBreaks,
-                             const float penalty,
-                             const bool isLastBreak) {
+
+PotentialBreak evaluateBreak(const std::size_t breakIndex, const float breakX, const float targetWidth, const std::list<PotentialBreak>& potentialBreaks, const float penalty, const bool isLastBreak) {
     // We could skip evaluating breaks where the line length (breakX - priorBreak.x) > maxWidth
     //  ...but in fact we allow lines longer than maxWidth (if there's no break points)
     //  ...and when targetWidth and maxWidth are close, strictly enforcing maxWidth can give
     //     more lopsided results.
-
+    
     const PotentialBreak* bestPriorBreak = nullptr;
     float bestBreakBadness = calculateBadness(breakX, targetWidth, penalty, isLastBreak);
     for (const auto& potentialBreak : potentialBreaks) {
         const float lineWidth = breakX - potentialBreak.x;
-        float breakBadness = calculateBadness(lineWidth, targetWidth, penalty, isLastBreak) + potentialBreak.badness;
+        float breakBadness =
+        calculateBadness(lineWidth, targetWidth, penalty, isLastBreak) + potentialBreak.badness;
         if (breakBadness <= bestBreakBadness) {
             bestPriorBreak = &potentialBreak;
             bestBreakBadness = breakBadness;
@@ -296,7 +290,7 @@ PotentialBreak evaluateBreak(const std::size_t breakIndex,
 }
 
 std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
-    std::set<std::size_t> leastBadBreaks = {lastLineBreak.index};
+    std::set<std::size_t> leastBadBreaks = { lastLineBreak.index };
     const PotentialBreak* priorBreak = lastLineBreak.priorBreak;
     while (priorBreak) {
         leastBadBreaks.insert(priorBreak->index);
@@ -304,6 +298,7 @@ std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
     }
     return leastBadBreaks;
 }
+
 
 // We determine line breaks based on shaped text in logical order. Working in visual order would be
 //  more intuitive, but we can't do that because the visual order may be changed by line breaks!
@@ -316,7 +311,7 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
     if (!maxWidth) {
         return {};
     }
-
+    
     if (logicalInput.empty()) {
         return {};
     }
@@ -327,7 +322,7 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
     std::list<PotentialBreak> potentialBreaks;
     float currentX = 0;
     // Find first occurance of zero width space (ZWSP) character.
-    const bool hasServerSuggestedBreaks = logicalInput.rawText().find_first_of(ZWSP) != std::string::npos;
+    const bool hasServerSuggestedBreaks = logicalInput.rawText().find_first_of(ZWSP) !=  std::string::npos;
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
@@ -343,17 +338,13 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
             if (section.imageID || allowsIdeographicBreak || util::i18n::allowsWordBreaking(codePoint)) {
                 const bool penalizableIdeographicBreak = allowsIdeographicBreak && hasServerSuggestedBreaks;
                 const std::size_t nextIndex = i + 1;
-                potentialBreaks.push_back(evaluateBreak(
-                    nextIndex,
-                    currentX,
-                    targetWidth,
-                    potentialBreaks,
-                    calculatePenalty(codePoint, logicalInput.getCharCodeAt(nextIndex), penalizableIdeographicBreak),
-                    false));
+                potentialBreaks.push_back(evaluateBreak(nextIndex, currentX, targetWidth, potentialBreaks,
+                                                        calculatePenalty(codePoint, logicalInput.getCharCodeAt(nextIndex), penalizableIdeographicBreak),
+                                                        false));
             }
         }
     }
-
+    
     return leastBadBreaks(evaluateBreak(logicalInput.length(), currentX, targetWidth, potentialBreaks, 0, true));
 }
 
@@ -375,14 +366,13 @@ void shapeLines(Shaping& shaping,
     float maxLineLength = 0.0f;
     float maxLineHeight = 0.0f;
 
-    const float justify = textJustify == style::TextJustifyType::Right  ? 1.0f
-                          : textJustify == style::TextJustifyType::Left ? 0.0f
-                                                                        : 0.5f;
+    const float justify =
+        textJustify == style::TextJustifyType::Right ? 1.0f : textJustify == style::TextJustifyType::Left ? 0.0f : 0.5f;
 
     for (TaggedString& line : lines) {
         // Collapse whitespace so it doesn't throw off justification
         line.trim();
-
+        
         const double lineMaxScale = line.getMaxScale();
         const double maxLineOffset = (lineMaxScale - 1.0) * util::ONE_EM;
         double lineOffset = 0.0;
@@ -394,7 +384,7 @@ void shapeLines(Shaping& shaping,
             y += lineHeight; // Still need a line feed after empty line
             continue;
         }
-
+        
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);

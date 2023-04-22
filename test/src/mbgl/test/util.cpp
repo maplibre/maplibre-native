@@ -15,6 +15,7 @@
 #pragma warning(pop)
 #endif
 
+
 namespace mbgl {
 namespace test {
 
@@ -38,7 +39,8 @@ void checkImage(const std::string& base,
     }
 
     PremultipliedImage expected = decodeImage(expected_image);
-    PremultipliedImage diff{expected.size};
+    PremultipliedImage diff { expected.size };
+
 
 #if !TEST_READ_ONLY
     util::write_file(base + "/actual.png", encodePNG(actual));

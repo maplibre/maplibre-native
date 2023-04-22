@@ -9,11 +9,14 @@
 namespace mbgl {
 namespace util {
 
-stopwatch::stopwatch(Event event_) : event(event_), start(Clock::now()) {}
+stopwatch::stopwatch(Event event_)
+    : event(event_), start(Clock::now()) {}
 
-stopwatch::stopwatch(EventSeverity severity_, Event event_) : severity(severity_), event(event_), start(Clock::now()) {}
+stopwatch::stopwatch(EventSeverity severity_, Event event_)
+    : severity(severity_), event(event_), start(Clock::now()) {}
 
-stopwatch::stopwatch(std::string name_, Event event_) : name(std::move(name_)), event(event_), start(Clock::now()) {}
+stopwatch::stopwatch(std::string name_, Event event_)
+    : name(std::move(name_)), event(event_), start(Clock::now()) {}
 
 stopwatch::stopwatch(std::string name_, EventSeverity severity_, Event event_)
     : name(std::move(name_)), severity(severity_), event(event_), start(Clock::now()) {}
@@ -21,9 +24,7 @@ stopwatch::stopwatch(std::string name_, EventSeverity severity_, Event event_)
 void stopwatch::report(const std::string &name_) {
     Duration duration = Clock::now() - start;
 
-    const auto logMsg =
-        name_ + ": " +
-        std::to_string(std::chrono::duration<float, std::chrono::milliseconds::period>(duration).count());
+    const auto logMsg = name_ + ": " +  std::to_string(std::chrono::duration<float, std::chrono::milliseconds::period>(duration).count());
 
     Log::Record(severity, event, logMsg);
     start += duration;

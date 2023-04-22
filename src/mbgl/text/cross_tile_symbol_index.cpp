@@ -23,19 +23,17 @@ Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstan
     // Round anchor positions to roughly 4 pixel grid
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;
     const double scale = roundingFactor / std::pow(2, childTileCoord.canonical.z - coord.canonical.z);
-    return {static_cast<int64_t>(
-                std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
-            static_cast<int64_t>(
-                std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))};
+    return {
+        static_cast<int64_t>(std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
+        static_cast<int64_t>(std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))
+    };
 }
 
 void TileLayerIndex::findMatches(SymbolBucket& bucket,
                                  const OverscaledTileID& newCoord,
                                  std::set<uint32_t>& zoomCrossTileIDs) const {
     auto& symbolInstances = bucket.symbolInstances;
-    float tolerance = coord.canonical.z < newCoord.canonical.z
-                          ? 1.0f
-                          : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
+    float tolerance = coord.canonical.z < newCoord.canonical.z ? 1.0f : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
 
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
@@ -80,9 +78,9 @@ CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_) 
 void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
     const auto wrapDelta = static_cast<int>(std::round((newLng - lng) / 360.0f));
     if (wrapDelta != 0) {
-        std::map<uint8_t, std::map<OverscaledTileID, TileLayerIndex>> newIndexes;
+        std::map<uint8_t, std::map<OverscaledTileID,TileLayerIndex>> newIndexes;
         for (auto& zoomIndex : indexes) {
-            std::map<OverscaledTileID, TileLayerIndex> newZoomIndex;
+            std::map<OverscaledTileID,TileLayerIndex> newZoomIndex;
             for (auto& index : zoomIndex.second) {
                 // change the tileID's wrap and move its index
                 index.second.coord = index.second.coord.unwrapTo(index.second.coord.wrap + wrapDelta);
@@ -256,3 +254,4 @@ void CrossTileSymbolIndex::reset() {
 }
 
 } // namespace mbgl
+

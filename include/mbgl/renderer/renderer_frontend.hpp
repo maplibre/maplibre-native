@@ -14,6 +14,7 @@ class UpdateParameters;
 /// the original thread.
 class RendererFrontend {
 public:
+
     virtual ~RendererFrontend() = default;
 
     /// Must synchronously clean up the Renderer if set

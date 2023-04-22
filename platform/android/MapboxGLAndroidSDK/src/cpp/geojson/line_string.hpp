@@ -13,6 +13,7 @@ namespace mbgl {
 namespace android {
 namespace geojson {
 
+
 class LineString {
 public:
     using SuperTag = Geometry;
@@ -23,7 +24,7 @@ public:
 
     static mapbox::geojson::line_string convert(jni::JNIEnv&, const jni::Object<LineString>&);
 
-    static mapbox::geojson::line_string convert(jni::JNIEnv&, const jni::Object<java::util::List /*<Point>*/>&);
+    static mapbox::geojson::line_string convert(jni::JNIEnv&, const jni::Object<java::util::List/*<Point>*/>&);
 
     static jni::Local<jni::Object<java::util::List>> coordinates(jni::JNIEnv&, const jni::Object<LineString>&);
 

@@ -7,9 +7,8 @@
 namespace mbgl {
 namespace http {
 
-Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
-                           uint32_t failedRequests,
-                           std::optional<Timestamp> retryAfter) {
+Duration errorRetryTimeout(Response::Error::Reason failedRequestReason, uint32_t failedRequests, std::optional<Timestamp> retryAfter) {
+
     if (failedRequestReason == Response::Error::Reason::Server) {
         // Retry after one second three times, then start exponential backoff.
         return Seconds(failedRequests <= 3 ? 1 : 1u << std::min(failedRequests - 3, 31u));

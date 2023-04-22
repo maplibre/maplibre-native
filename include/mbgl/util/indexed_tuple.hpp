@@ -16,8 +16,7 @@ struct TypeIndex<T, T, Ts...> : std::integral_constant<std::size_t, 0> {};
 template <class T, class U, class... Ts>
 struct TypeIndex<T, U, Ts...> : std::integral_constant<std::size_t, 1 + TypeIndex<T, Ts...>::value> {};
 
-template <class...>
-class IndexedTuple;
+template <class...> class IndexedTuple;
 
 /// A tuple of Ts, where individual members can be accessed via `t.get<I>()` for I ∈ Is.
 ///
@@ -39,12 +38,15 @@ public:
     }
 
     template <class... Us>
-    IndexedTuple(Us&&... other) : std::tuple<Ts...>(std::forward<Us>(other)...){};
+    IndexedTuple(Us&&... other) : std::tuple<Ts...>(std::forward<Us>(other)...) {};
 
     template <class... Js, class... Us>
-    IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> concat(
-        const IndexedTuple<TypeList<Js...>, TypeList<Us...>>& other) const {
-        return IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>>{get<Is>()..., other.template get<Js>()...};
+    IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>>
+    concat(const IndexedTuple<TypeList<Js...>, TypeList<Us...>>& other) const {
+        return IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> {
+            get<Is>()...,
+            other.template get<Js>()...
+        };
     }
 
     // Help out MSVC++
@@ -52,7 +54,9 @@ public:
         return static_cast<const std::tuple<Ts...>&>(*this) == static_cast<const std::tuple<Ts...>&>(other);
     }
 
-    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const { return !(*this == other); }
+    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
+        return !(*this == other);
+    }
 };
 
 template <class, class T>

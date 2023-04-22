@@ -59,4 +59,5 @@ public:
     std::function<void(gfx::ShaderRegistry&)> onRegisterShadersCallback;
 };
 
+
 } // namespace mbgl

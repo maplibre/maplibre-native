@@ -155,8 +155,8 @@ public:
               localFileSource,
               onlineFileSource,
               mbtilesFileSource)),
-          resourceOptions(resourceOptions_.clone()),
-          clientOptions(clientOptions_.clone()) {}
+          resourceOptions (resourceOptions_.clone()),
+          clientOptions (clientOptions_.clone()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -226,15 +226,14 @@ private:
     ClientOptions clientOptions;
 };
 
-MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
-    : impl(std::make_unique<Impl>(
-          resourceOptions.clone(),
-          clientOptions.clone(),
-          FileSourceManager::get()->getFileSource(FileSourceType::Asset, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
+MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions):
+    impl(std::make_unique<Impl>(resourceOptions.clone(),
+                                clientOptions.clone(),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Asset, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
+                                FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 

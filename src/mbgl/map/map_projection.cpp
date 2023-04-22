@@ -4,7 +4,8 @@
 
 namespace mbgl {
 
-MapProjection::MapProjection(const Map& map) : transform(std::make_unique<Transform>(map.getTransfromState())) {}
+MapProjection::MapProjection(const Map& map)
+    : transform(std::make_unique<Transform>(map.getTransfromState())) {}
 
 MapProjection::~MapProjection() = default;
 
@@ -28,10 +29,11 @@ CameraOptions MapProjection::getCamera() const {
     return transform->getCameraOptions(std::nullopt);
 }
 
-void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs, const EdgeInsets& padding) {
+void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs,
+                                          const EdgeInsets& padding) {
     transform->jumpTo(mbgl::cameraForLatLngs(latLngs, *transform, padding)
-                          .withBearing(-transform->getBearing() * util::RAD2DEG_D)
-                          .withPitch(transform->getPitch() * util::RAD2DEG_D));
+                      .withBearing(-transform->getBearing() * util::RAD2DEG_D)
+                      .withPitch(transform->getPitch() * util::RAD2DEG_D));
 }
 
 } // namespace mbgl

@@ -24,7 +24,8 @@ inline const CustomLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) 
 } // namespace
 
 RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
-    : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))), host(impl(baseImpl).host) {
+    : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))),
+      host(impl(baseImpl).host) {
     assert(gfx::BackendScope::exists());
     MBGL_CHECK_ERROR(host->initialize());
 }
@@ -54,11 +55,12 @@ void RenderCustomLayer::markContextDestroyed() {
     contextDestroyed = true;
 }
 
-void RenderCustomLayer::prepare(const LayerPrepareParameters&) {}
+void RenderCustomLayer::prepare(const LayerPrepareParameters&) {
+}
 
 void RenderCustomLayer::render(PaintParameters& paintParameters) {
     if (host != impl(baseImpl).host) {
-        // If the context changed, deinitialize the previous one before initializing the new one.
+        //If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
             MBGL_CHECK_ERROR(host->deinitialize());
         }

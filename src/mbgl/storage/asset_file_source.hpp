@@ -7,8 +7,7 @@
 namespace mbgl {
 
 namespace util {
-template <typename T>
-class Thread;
+template <typename T> class Thread;
 } // namespace util
 
 class AssetFileSource : public FileSource {

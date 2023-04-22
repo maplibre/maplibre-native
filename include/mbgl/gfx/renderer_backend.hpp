@@ -35,7 +35,9 @@ public:
         return static_cast<T&>(getContext());
     }
 
-    bool contextIsShared() const { return contextMode == ContextMode::Shared; }
+    bool contextIsShared() const {
+        return contextMode == ContextMode::Shared;
+    }
 
     /// Returns a reference to the default surface that should be rendered on.
     virtual Renderable& getDefaultRenderable() = 0;

@@ -52,12 +52,7 @@ public:
  */
 class OfflineGeometryRegionDefinition {
 public:
-    OfflineGeometryRegionDefinition(std::string styleURL,
-                                    Geometry<double>,
-                                    double minZoom,
-                                    double maxZoom,
-                                    float pixelRatio,
-                                    bool includeIdeographs);
+    OfflineGeometryRegionDefinition(std::string styleURL, Geometry<double>, double minZoom, double maxZoom, float pixelRatio, bool includeIdeographs);
 
     /* Private */
     std::string styleURL;
@@ -97,7 +92,10 @@ using OfflineRegionMetadata = std::vector<uint8_t>;
  * is currently available for offline use. To check if that is the case, use
  * `OfflineRegionStatus::complete()`.
  */
-enum class OfflineRegionDownloadState { Inactive, Active };
+enum class OfflineRegionDownloadState {
+    Inactive,
+    Active
+};
 
 /*
  * A region's status includes its active/inactive state as well as counts
@@ -158,7 +156,9 @@ public:
      */
     bool requiredResourceCountIsPrecise = false;
 
-    bool complete() const { return completedResourceCount >= requiredResourceCount; }
+    bool complete() const {
+        return completedResourceCount >= requiredResourceCount;
+    }
 };
 
 /*
@@ -220,7 +220,9 @@ public:
 private:
     friend class OfflineDatabase;
 
-    OfflineRegion(int64_t id, OfflineRegionDefinition, OfflineRegionMetadata);
+    OfflineRegion(int64_t id,
+                  OfflineRegionDefinition,
+                  OfflineRegionMetadata);
 
     int64_t id;
     OfflineRegionDefinition definition;

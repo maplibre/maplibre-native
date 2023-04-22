@@ -14,7 +14,9 @@ std::u16string applyArabicShaping(const std::u16string& input) {
     return input;
 }
 
-BiDi::BiDi() : impl(std::make_unique<BiDiImpl>()) {}
+BiDi::BiDi() : impl(std::make_unique<BiDiImpl>())
+{
+}
 
 BiDi::~BiDi() = default;
 

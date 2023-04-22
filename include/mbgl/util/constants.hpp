@@ -39,8 +39,8 @@ constexpr double PITCH_MIN = 0.0;
 constexpr double PITCH_MAX = M_PI / 3;
 constexpr double MIN_ZOOM = 0.0;
 constexpr double MAX_ZOOM = 25.5;
-constexpr float MIN_ZOOM_F = MIN_ZOOM;
-constexpr float MAX_ZOOM_F = MAX_ZOOM;
+constexpr float  MIN_ZOOM_F = MIN_ZOOM;
+constexpr float  MAX_ZOOM_F = MAX_ZOOM;
 constexpr uint8_t DEFAULT_MAX_ZOOM = 22;
 
 // ONE_EM constant used to go between "em" units used in style spec and "points" used internally for layout.
@@ -55,9 +55,9 @@ constexpr uint64_t DEFAULT_MAX_CACHE_SIZE = 50 * 1024 * 1024;
 constexpr std::size_t DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE = 100 * 8192;
 
 constexpr Duration DEFAULT_TRANSITION_DURATION = Milliseconds(300);
-constexpr Seconds CLOCK_SKEW_RETRY_TIMEOUT{30};
+constexpr Seconds CLOCK_SKEW_RETRY_TIMEOUT { 30 };
 
-constexpr UnitBezier DEFAULT_TRANSITION_EASE = {0, 0, 0.25, 1};
+constexpr UnitBezier DEFAULT_TRANSITION_EASE = { 0, 0, 0.25, 1 };
 
 constexpr int DEFAULT_RATE_LIMIT_TIMEOUT = 5;
 

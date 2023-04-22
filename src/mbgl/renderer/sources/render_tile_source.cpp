@@ -17,7 +17,8 @@ using namespace style;
 class TileSourceRenderItem : public RenderItem {
 public:
     TileSourceRenderItem(Immutable<std::vector<RenderTile>> renderTiles_, std::string name_)
-        : renderTiles(std::move(renderTiles_)), name(std::move(name_)) {}
+        : renderTiles(std::move(renderTiles_))
+        , name(std::move(name_)) {}
 
 private:
     void upload(gfx::UploadPass&) const override;
@@ -42,7 +43,8 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 }
 
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_)
-    : RenderSource(std::move(impl_)), renderTiles(makeMutable<std::vector<RenderTile>>()) {
+    : RenderSource(std::move(impl_))
+    , renderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
 
@@ -119,12 +121,12 @@ const Tile* RenderTileSource::getRenderedTile(const UnwrappedTileID& tileID) con
     return tilePyramid.getRenderedTile(tileID);
 }
 
-std::unordered_map<std::string, std::vector<Feature>> RenderTileSource::queryRenderedFeatures(
-    const ScreenLineString& geometry,
-    const TransformState& transformState,
-    const std::unordered_map<std::string, const RenderLayer*>& layers,
-    const RenderedQueryOptions& options,
-    const mat4& projMatrix) const {
+std::unordered_map<std::string, std::vector<Feature>>
+RenderTileSource::queryRenderedFeatures(const ScreenLineString& geometry,
+                                          const TransformState& transformState,
+                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
+                                          const RenderedQueryOptions& options,
+                                          const mat4& projMatrix) const {
     return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, featureState);
 }
 
@@ -132,14 +134,12 @@ std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOpti
     return tilePyramid.querySourceFeatures(options);
 }
 
-void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID,
-                                       const std::string& featureID,
+void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID, const std::string& featureID,
                                        const FeatureState& state) {
     featureState.updateState(sourceLayerID, featureID, state);
 }
 
-void RenderTileSource::getFeatureState(FeatureState& state,
-                                       const std::optional<std::string>& sourceLayerID,
+void RenderTileSource::getFeatureState(FeatureState& state, const std::optional<std::string>& sourceLayerID,
                                        const std::string& featureID) const {
     featureState.getState(state, sourceLayerID, featureID);
 }
@@ -160,7 +160,9 @@ void RenderTileSource::dumpDebugLogs() const {
 
 // RenderTileSetSource implementation
 
-RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_) : RenderTileSource(std::move(impl_)) {}
+RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_)
+    : RenderTileSource(std::move(impl_)) {
+}
 
 RenderTileSetSource::~RenderTileSetSource() = default;
 
@@ -169,10 +171,10 @@ uint8_t RenderTileSetSource::getMaxZoom() const {
 }
 
 void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
-                                 const std::vector<Immutable<style::LayerProperties>>& layers,
-                                 const bool needsRendering,
-                                 const bool needsRelayout,
-                                 const TileParameters& parameters) {
+                                const std::vector<Immutable<style::LayerProperties>>& layers,
+                                const bool needsRendering,
+                                const bool needsRelayout,
+                                const TileParameters& parameters) {
     std::swap(baseImpl, baseImpl_);
 
     enabled = needsRendering;

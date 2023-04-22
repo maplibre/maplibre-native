@@ -12,10 +12,7 @@
 
 namespace node_mbgl {
 
-namespace util {
-template <typename T>
-class AsyncQueue;
-}
+namespace util { template <typename T> class AsyncQueue; }
 
 class NodeLogObserver : public mbgl::Log::Observer {
 public:

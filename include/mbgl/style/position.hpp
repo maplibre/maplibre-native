@@ -9,17 +9,19 @@ namespace style {
 class Position {
 public:
     Position() = default;
-    Position(std::array<float, 3>& position_) : radial(position_[0]), azimuthal(position_[1]), polar(position_[2]) {
+    Position(std::array<float, 3>& position_)
+        : radial(position_[0]), azimuthal(position_[1]), polar(position_[2]) {
         calculateCartesian();
     };
 
     friend bool operator==(const Position& lhs, const Position& rhs) {
         return lhs.radial == rhs.radial && lhs.azimuthal == rhs.azimuthal && lhs.polar == rhs.polar;
-        // TODO this doesn't address wrapping, which would be better addressed by comparing cartesian coordinates but
-        // being calculated floats are ont to be trusted.
+        // TODO this doesn't address wrapping, which would be better addressed by comparing cartesian coordinates but being calculated floats are ont to be trusted.
     }
 
-    friend bool operator!=(const Position& lhs, const Position& rhs) { return !(lhs == rhs); }
+    friend bool operator!=(const Position& lhs, const Position& rhs) {
+        return !(lhs == rhs);
+    }
 
     std::array<float, 3> getCartesian() const { return {{x, y, z}}; };
 

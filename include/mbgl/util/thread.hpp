@@ -62,7 +62,7 @@ public:
 
                 loop->run();
 
-                (void)establishedActor;
+                (void) establishedActor;
 
                 loop = nullptr;
             }
@@ -85,12 +85,14 @@ public:
         }
 
         std::promise<void> stoppable;
-
+        
         running.wait();
 
         // Invoke a noop task on the run loop to ensure that we're executing
         // run() before we call stop()
-        loop->invoke([&] { stoppable.set_value(); });
+        loop->invoke([&] {
+            stoppable.set_value();
+        });
 
         stoppable.get_future().get();
 
@@ -102,7 +104,9 @@ public:
     /// can be used to send messages to `Object`. It is safe
     /// to the non-owning reference to outlive this object
     /// and be used after the `Thread<>` gets destroyed.
-    ActorRef<std::decay_t<Object>> actor() { return object.self(); }
+    ActorRef<std::decay_t<Object>> actor() {
+        return object.self();
+    }
 
     /// Pauses the `Object` thread. It will prevent the object to wake
     /// up from events such as timers and file descriptor I/O. Messages
@@ -149,7 +153,7 @@ private:
     std::thread thread;
 
     std::future<void> running;
-
+    
     std::unique_ptr<std::promise<void>> paused;
     std::unique_ptr<std::promise<void>> resumed;
 

@@ -28,27 +28,29 @@ using namespace std::literals;
 namespace {
 
 void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match([&](const NullValue&) { writer.Null(); },
-                [&](bool b) { writer.Bool(b); },
-                [&](uint64_t u) { writer.Uint64(u); },
-                [&](int64_t i) { writer.Int64(i); },
-                [&](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
-                [&](const std::string& s) { writer.String(s); },
-                [&](const std::vector<Value>& arr) {
-                    writer.StartArray();
-                    for (const auto& item : arr) {
-                        writeJSON(writer, item);
-                    }
-                    writer.EndArray();
-                },
-                [&](const std::unordered_map<std::string, Value>& obj) {
-                    writer.StartObject();
-                    for (const auto& entry : obj) {
-                        writer.Key(entry.first.c_str());
-                        writeJSON(writer, entry.second);
-                    }
-                    writer.EndObject();
-                });
+    value.match(
+        [&] (const NullValue&) { writer.Null(); },
+        [&] (bool b) { writer.Bool(b); },
+        [&] (uint64_t u) { writer.Uint64(u); },
+        [&] (int64_t i) { writer.Int64(i); },
+        [&] (double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
+        [&] (const std::string& s) { writer.String(s); },
+        [&] (const std::vector<Value>& arr) {
+            writer.StartArray();
+            for(const auto& item : arr) {
+                writeJSON(writer, item);
+            }
+            writer.EndArray();
+        },
+        [&] (const std::unordered_map<std::string, Value>& obj) {
+            writer.StartObject();
+            for(const auto& entry : obj) {
+                writer.Key(entry.first.c_str());
+                writeJSON(writer, entry.second);
+            }
+            writer.EndObject();
+        }
+    );
 }
 
 using ErrorMessage = std::string;
@@ -56,21 +58,21 @@ using JSONReply = variant<JSDocument, ErrorMessage>;
 JSONReply readJson(const filesystem::path& jsonPath) {
     auto maybeJSON = util::readFile(jsonPath);
     if (!maybeJSON) {
-        return {"Unable to open file "s + jsonPath.string()};
+        return { "Unable to open file "s + jsonPath.string() };
     }
 
     JSDocument document;
     document.Parse<rapidjson::kParseFullPrecisionFlag>(*maybeJSON);
     if (document.HasParseError()) {
-        return {formatJSONParseError(document)};
+        return { formatJSONParseError(document) };
     }
 
-    return {std::move(document)};
+    return { std::move(document) };
 }
 
 std::string toString(const JSValue& value) {
     assert(value.IsString());
-    return {value.GetString(), value.GetStringLength()};
+    return { value.GetString(), value.GetStringLength() };
 }
 
 std::optional<Value> toValue(const JSValue& jsvalue) {
@@ -312,9 +314,10 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
 std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> parseArguments(int argc, char** argv) {
     args::ArgumentParser argumentParser("Mapbox GL Expression Test Runner");
 
-    args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
+    args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", { 'h', "help" });
     args::Flag shuffleFlag(argumentParser, "shuffle", "Toggle shuffling the tests order", {'s', "shuffle"});
-    args::ValueFlag<uint32_t> seedValue(argumentParser, "seed", "Shuffle seed (default: random)", {"seed"});
+    args::ValueFlag<uint32_t> seedValue(argumentParser, "seed", "Shuffle seed (default: random)",
+                                        { "seed" });
     args::PositionalList<std::string> testNameValues(argumentParser, "URL", "Test name(s)");
     args::ValueFlag<std::string> testFilterValue(argumentParser, "filter", "Test filter regex", {'f', "filter"});
 
@@ -339,7 +342,7 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         exit(2);
     }
 
-    filesystem::path rootPath{std::string(TEST_RUNNER_ROOT_PATH).append("/metrics/integration/expression-tests")};
+    filesystem::path rootPath {std::string(TEST_RUNNER_ROOT_PATH).append("/metrics/integration/expression-tests")};
     if (!filesystem::exists(rootPath)) {
         Log::Error(Event::General, "Test path '" + rootPath.string() + "' does not exist.");
         exit(3);
@@ -374,10 +377,10 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         }
     }
 
-    return Arguments{std::move(rootPath),
-                     std::move(testPaths),
-                     shuffleFlag ? args::get(shuffleFlag) : false,
-                     seedValue ? args::get(seedValue) : 1u};
+    return Arguments{ std::move(rootPath),
+                      std::move(testPaths),
+                      shuffleFlag ? args::get(shuffleFlag) : false,
+                      seedValue ? args::get(seedValue) : 1u };
 }
 
 Ignores parseExpressionIgnores() {
@@ -389,12 +392,12 @@ Ignores parseExpressionIgnores() {
     }
 
     for (const auto& property : maybeIgnores.get<JSDocument>().GetObject()) {
-        std::string id{toString(property.name)};
+        std::string id{ toString(property.name) };
         // Keep only expression-test ignores
         if (id.rfind("expression-tests", 0) != 0) {
             continue;
         }
-        std::string reason{toString(property.value)};
+        std::string reason{ toString(property.value) };
         ignores.emplace_back(std::move(id), std::move(reason));
     }
 
@@ -471,8 +474,7 @@ Value toValue(const Compiled& compiled) {
 std::optional<Value> toValue(const expression::Value& exprValue) {
     return exprValue.match(
         [](const Color& c) -> std::optional<Value> {
-            std::vector<Value> color{
-                static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a)};
+            std::vector<Value> color { static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a) };
             return {Value{std::move(color)}};
         },
         [](const expression::Formatted& formatted) -> std::optional<Value> { return {formatted.toObject()}; },
@@ -501,10 +503,11 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& va
                                                                std::optional<PropertySpec>& spec,
                                                                TestResult& result) {
     std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : std::nullopt;
-    expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) : expression::ParsingContext();
+    expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) :
+                                                expression::ParsingContext();
     Convertible convertible(&value);
     expression::ParseResult parsed;
-    if (value.IsObject() && !value.IsArray() && expected) {
+    if (value.IsObject() && !value.IsArray() && expected){
         Error error;
         parsed = convertFunctionToExpression(*expected, convertible, error, false /*convert tokens*/);
         if (!parsed) {

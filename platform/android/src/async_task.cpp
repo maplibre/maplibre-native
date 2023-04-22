@@ -11,7 +11,9 @@ namespace util {
 
 class AsyncTask::Impl : public RunLoop::Impl::Runnable {
 public:
-    Impl(std::function<void()>&& fn) : queued(true), task(std::move(fn)) {}
+    Impl(std::function<void()>&& fn)
+        : queued(true), task(std::move(fn)) {
+    }
 
     ~Impl() {
         queued = true;
@@ -25,7 +27,9 @@ public:
         }
     }
 
-    TimePoint dueTime() const override { return due; }
+    TimePoint dueTime() const override {
+        return due;
+    }
 
     void runTask() override {
         if (!queued) {
@@ -47,7 +51,9 @@ private:
     std::function<void()> task;
 };
 
-AsyncTask::AsyncTask(std::function<void()>&& fn) : impl(std::make_unique<Impl>(std::move(fn))) {}
+AsyncTask::AsyncTask(std::function<void()>&& fn)
+    : impl(std::make_unique<Impl>(std::move(fn))) {
+}
 
 AsyncTask::~AsyncTask() = default;
 

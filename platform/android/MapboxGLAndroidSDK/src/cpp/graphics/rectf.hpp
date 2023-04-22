@@ -9,6 +9,7 @@ namespace android {
 
 class RectF : private mbgl::util::noncopyable {
 public:
+
     static constexpr auto Name() { return "android/graphics/RectF"; };
 
     static float getLeft(jni::JNIEnv&, const jni::Object<RectF>&);
@@ -21,6 +22,7 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 };
+
 
 } // namespace android
 } // namespace mbgl

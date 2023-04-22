@@ -14,6 +14,7 @@ namespace android {
 
 class Source : private mbgl::util::noncopyable {
 public:
+
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/sources/Source"; };
 
     static void registerNative(jni::JNIEnv&);
@@ -53,11 +54,11 @@ public:
 
     void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style);
 
-    jni::Local<jni::Boolean> isVolatile(JNIEnv&);
+    jni::Local<jni::Boolean > isVolatile(JNIEnv&);
 
     void setVolatile(JNIEnv&, jni::Boolean&);
 
-    void setMinimumTileUpdateInterval(JNIEnv&, jni::Long&);
+    void setMinimumTileUpdateInterval(JNIEnv&, jni::Long &);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
@@ -72,7 +73,7 @@ protected:
     jni::Global<jni::Object<Source>> javaPeer;
 
     // RendererFrontend pointer is valid only when added to the map.
-    AndroidRendererFrontend* rendererFrontend{nullptr};
+    AndroidRendererFrontend* rendererFrontend { nullptr };
 };
 
 } // namespace android

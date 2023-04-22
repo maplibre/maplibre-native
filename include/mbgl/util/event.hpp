@@ -52,6 +52,8 @@ constexpr Event disabledEvents[] = {
     Event(-1) // Avoid zero size array
 };
 
-constexpr EventPermutation disabledEventPermutations[] = {{EventSeverity::Debug, Event::Shader}};
+constexpr EventPermutation disabledEventPermutations[] = {
+    { EventSeverity::Debug, Event::Shader }
+};
 
 } // namespace mbgl

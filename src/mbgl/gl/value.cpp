@@ -22,7 +22,7 @@ ClearDepth::Type ClearDepth::Get() {
     return clearDepth;
 }
 
-const ClearColor::Type ClearColor::Default{0, 0, 0, 0};
+const ClearColor::Type ClearColor::Default { 0, 0, 0, 0 };
 
 void ClearColor::Set(const Type& value) {
     MBGL_CHECK_ERROR(glClearColor(value.r, value.g, value.b, value.a));
@@ -31,7 +31,7 @@ void ClearColor::Set(const Type& value) {
 ClearColor::Type ClearColor::Get() {
     GLfloat clearColor[4];
     MBGL_CHECK_ERROR(glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor));
-    return {clearColor[0], clearColor[1], clearColor[2], clearColor[3]};
+    return { clearColor[0], clearColor[1], clearColor[2], clearColor[3] };
 }
 
 const constexpr ClearStencil::Type ClearStencil::Default;
@@ -79,10 +79,8 @@ void ColorMask::Set(const Type& value) {
 ColorMask::Type ColorMask::Get() {
     GLboolean bools[4];
     MBGL_CHECK_ERROR(glGetBooleanv(GL_COLOR_WRITEMASK, bools));
-    return {static_cast<bool>(bools[0]),
-            static_cast<bool>(bools[1]),
-            static_cast<bool>(bools[2]),
-            static_cast<bool>(bools[3])};
+    return { static_cast<bool>(bools[0]), static_cast<bool>(bools[1]), static_cast<bool>(bools[2]),
+             static_cast<bool>(bools[3]) };
 }
 
 const constexpr StencilFunc::Type StencilFunc::Default;
@@ -98,7 +96,7 @@ StencilFunc::Type StencilFunc::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_FUNC, &func));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_REF, &ref));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_VALUE_MASK, &mask));
-    return {Enum<gfx::StencilFunctionType>::from(func), ref, static_cast<uint32_t>(mask)};
+    return { Enum<gfx::StencilFunctionType>::from(func), ref, static_cast<uint32_t>(mask) };
 }
 
 const constexpr StencilTest::Type StencilTest::Default;
@@ -128,9 +126,9 @@ StencilOp::Type StencilOp::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_FAIL, &sfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &dpfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &dppass));
-    return {Enum<gfx::StencilOpType>::from(sfail),
-            Enum<gfx::StencilOpType>::from(dpfail),
-            Enum<gfx::StencilOpType>::from(dppass)};
+    return { Enum<gfx::StencilOpType>::from(sfail),
+             Enum<gfx::StencilOpType>::from(dpfail),
+             Enum<gfx::StencilOpType>::from(dppass) };
 }
 
 const constexpr DepthRange::Type DepthRange::Default;
@@ -142,7 +140,7 @@ void DepthRange::Set(const Type& value) {
 DepthRange::Type DepthRange::Get() {
     GLfloat floats[2];
     MBGL_CHECK_ERROR(glGetFloatv(GL_DEPTH_RANGE, floats));
-    return {floats[0], floats[1]};
+    return { floats[0], floats[1] };
 }
 
 const constexpr DepthTest::Type DepthTest::Default;
@@ -205,10 +203,11 @@ BlendFunc::Type BlendFunc::Get() {
     GLint dfactor;
     MBGL_CHECK_ERROR(glGetIntegerv(GL_BLEND_SRC_ALPHA, &sfactor));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_BLEND_DST_ALPHA, &dfactor));
-    return {Enum<gfx::ColorBlendFactorType>::from(sfactor), Enum<gfx::ColorBlendFactorType>::from(dfactor)};
+    return { Enum<gfx::ColorBlendFactorType>::from(sfactor),
+             Enum<gfx::ColorBlendFactorType>::from(dfactor) };
 }
 
-const BlendColor::Type BlendColor::Default{0, 0, 0, 0};
+const BlendColor::Type BlendColor::Default { 0, 0, 0, 0 };
 
 void BlendColor::Set(const Type& value) {
     MBGL_CHECK_ERROR(glBlendColor(value.r, value.g, value.b, value.a));
@@ -217,7 +216,7 @@ void BlendColor::Set(const Type& value) {
 BlendColor::Type BlendColor::Get() {
     GLfloat floats[4];
     MBGL_CHECK_ERROR(glGetFloatv(GL_BLEND_COLOR, floats));
-    return {floats[0], floats[1], floats[2], floats[3]};
+    return { floats[0], floats[1], floats[2], floats[3] };
 }
 
 const constexpr Program::Type Program::Default;
@@ -265,9 +264,8 @@ void Viewport::Set(const Type& value) {
 Viewport::Type Viewport::Get() {
     GLint viewport[4];
     MBGL_CHECK_ERROR(glGetIntegerv(GL_VIEWPORT, viewport));
-    return {static_cast<int32_t>(viewport[0]),
-            static_cast<int32_t>(viewport[1]),
-            {static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3])}};
+    return { static_cast<int32_t>(viewport[0]), static_cast<int32_t>(viewport[1]),
+             { static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3]) } };
 }
 
 const constexpr ScissorTest::Type ScissorTest::Default;
@@ -404,7 +402,7 @@ BindVertexArray::Type BindVertexArray::Get(const Context& context) {
     return binding;
 }
 
-const VertexAttribute::Type VertexAttribute::Default{};
+const VertexAttribute::Type VertexAttribute::Default {};
 
 namespace {
 
@@ -493,7 +491,7 @@ GLint components(const gfx::AttributeDataType type) {
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable : 4312) // reinterpret_cast different size
+#pragma warning(disable: 4312) // reinterpret_cast different size
 #endif
 
 void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocation location) {
@@ -519,7 +517,8 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
 const constexpr PixelStorePack::Type PixelStorePack::Default;
 
 void PixelStorePack::Set(const Type& value) {
-    assert(value.alignment == 1 || value.alignment == 2 || value.alignment == 4 || value.alignment == 8);
+    assert(value.alignment == 1 || value.alignment == 2 || value.alignment == 4 ||
+           value.alignment == 8);
     MBGL_CHECK_ERROR(glPixelStorei(GL_PACK_ALIGNMENT, value.alignment));
 }
 
@@ -532,7 +531,8 @@ PixelStorePack::Type PixelStorePack::Get() {
 const constexpr PixelStoreUnpack::Type PixelStoreUnpack::Default;
 
 void PixelStoreUnpack::Set(const Type& value) {
-    assert(value.alignment == 1 || value.alignment == 2 || value.alignment == 4 || value.alignment == 8);
+    assert(value.alignment == 1 || value.alignment == 2 || value.alignment == 4 ||
+           value.alignment == 8);
     MBGL_CHECK_ERROR(glPixelStorei(GL_UNPACK_ALIGNMENT, value.alignment));
 }
 

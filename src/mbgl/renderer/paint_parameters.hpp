@@ -33,6 +33,7 @@ class RenderPass;
 class ShaderRegistry;
 } // namespace gfx
 
+
 class TransformParameters {
 public:
     TransformParameters(const TransformState&);

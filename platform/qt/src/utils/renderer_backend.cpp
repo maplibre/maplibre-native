@@ -10,7 +10,8 @@ namespace QMapLibreGL {
 
 class RenderableResource final : public mbgl::gl::RenderableResource {
 public:
-    RenderableResource(RendererBackend& backend_) : backend(backend_) {}
+    RenderableResource(RendererBackend& backend_) : backend(backend_) {
+    }
 
     void bind() override {
         assert(mbgl::gfx::BackendScope::exists());
@@ -24,7 +25,8 @@ private:
 
 RendererBackend::RendererBackend(const mbgl::gfx::ContextMode contextMode_)
     : mbgl::gl::RendererBackend(contextMode_),
-      mbgl::gfx::Renderable({0, 0}, std::make_unique<RenderableResource>(*this)) {}
+      mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<RenderableResource>(*this)) {
+}
 
 RendererBackend::~RendererBackend() = default;
 

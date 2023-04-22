@@ -47,7 +47,9 @@ public:
 
 class JointPlacement {
 public:
-    JointPlacement(bool text_, bool icon_, bool skipFade_) : text(text_), icon(icon_), skipFade(skipFade_) {}
+    JointPlacement(bool text_, bool icon_, bool skipFade_)
+        : text(text_), icon(icon_), skipFade(skipFade_)
+    {}
 
     bool placed() const { return text || icon; }
 
@@ -59,7 +61,7 @@ public:
     // visible right away.
     const bool skipFade;
 };
-
+  
 struct RetainedQueryData {
     uint32_t bucketInstanceId;
     std::shared_ptr<FeatureIndex> featureIndex;
@@ -69,16 +71,19 @@ struct RetainedQueryData {
     RetainedQueryData(uint32_t bucketInstanceId_, std::shared_ptr<FeatureIndex> featureIndex_, OverscaledTileID tileID_)
         : bucketInstanceId(bucketInstanceId_), featureIndex(std::move(featureIndex_)), tileID(tileID_) {}
 };
-
+    
 class CollisionGroups {
 public:
     using Predicate = std::function<bool(const IndexedSubfeature&)>;
     using CollisionGroup = std::pair<uint16_t, std::optional<Predicate>>;
-
-    CollisionGroups(const bool crossSourceCollisions_) : maxGroupID(0), crossSourceCollisions(crossSourceCollisions_) {}
-
+    
+    CollisionGroups(const bool crossSourceCollisions_)
+        : maxGroupID(0)
+        , crossSourceCollisions(crossSourceCollisions_)
+    {}
+    
     const CollisionGroup& get(const std::string& sourceID);
-
+    
 private:
     std::map<std::string, CollisionGroup> collisionGroups;
     uint16_t maxGroupID;

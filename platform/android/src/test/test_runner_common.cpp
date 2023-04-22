@@ -115,7 +115,8 @@ bool copyFile(JNIEnv* env,
         } else {
             auto res = static_cast<off_t>(std::fwrite(fileData, sizeof(char), fileLen, newFile.get()));
             if (fileLen != res) {
-                mbgl::Log::Warning(mbgl::Event::General, "Failed to generate file entry" + fileName + "from assets");
+                mbgl::Log::Warning(
+                    mbgl::Event::General, "Failed to generate file entry" + fileName + "from assets");
             }
         }
     }
@@ -182,8 +183,8 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
                     jstringToStdString(env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
 
                 if (!success) {
-                    mbgl::Log::Warning(mbgl::Event::General,
-                                       "Failed to create folder entry " + fileNameStr + " from zip");
+                    mbgl::Log::Warning(
+                        mbgl::Event::General, "Failed to create folder entry " + fileNameStr + " from zip");
                 }
             }
         } else if (!(env->CallBooleanMethod(f, fileExists))) {
@@ -192,7 +193,8 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
                 jstringToStdString(env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
 
             if (!success) {
-                mbgl::Log::Warning(mbgl::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
+                mbgl::Log::Warning(
+                    mbgl::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
                 continue;
             }
 

@@ -1,6 +1,7 @@
 #include <mbgl/style/expression/is_constant.hpp>
 #include <mbgl/style/expression/collator_expression.hpp>
 
+
 namespace mbgl {
 namespace style {
 namespace expression {

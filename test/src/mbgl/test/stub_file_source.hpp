@@ -14,7 +14,10 @@ namespace mbgl {
 
 class StubFileSource : public FileSource {
 public:
-    enum class ResponseType { Asynchronous = 0, Synchronous };
+    enum class ResponseType {
+        Asynchronous = 0,
+        Synchronous
+    };
 
     StubFileSource(const ResourceOptions&, const ClientOptions&, ResponseType = ResponseType::Asynchronous);
     StubFileSource(ResponseType = ResponseType::Asynchronous);
@@ -26,10 +29,12 @@ public:
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;
 
-    using ResponseFunction = std::function<std::optional<Response>(const Resource&)>;
+    using ResponseFunction = std::function<std::optional<Response> (const Resource&)>;
 
     // You can set the response callback on a global level by assigning this callback:
-    ResponseFunction response = [this](const Resource& resource) { return defaultResponse(resource); };
+    ResponseFunction response = [this] (const Resource& resource) {
+        return defaultResponse(resource);
+    };
 
     // Or set per-kind responses by setting these callbacks:
     ResponseFunction styleResponse;

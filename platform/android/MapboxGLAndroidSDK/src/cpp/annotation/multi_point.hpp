@@ -10,22 +10,24 @@ namespace mbgl {
 namespace android {
 
 class MultiPoint : protected mbgl::util::noncopyable {
+
 protected:
-    template <class Geometry>
-    static Geometry toGeometry(JNIEnv& env, const jni::Object<java::util::List>& pointsList) {
-        auto jarray = java::util::List::toArray<LatLng>(env, pointsList);
 
-        std::size_t size = jarray.Length(env);
+  template <class Geometry>
+  static Geometry toGeometry(JNIEnv& env, const jni::Object<java::util::List>& pointsList) {
+      auto jarray = java::util::List::toArray<LatLng>(env, pointsList);
 
-        Geometry geometry;
-        geometry.reserve(size);
+      std::size_t size = jarray.Length(env);
 
-        for (std::size_t i = 0; i < size; i++) {
-            geometry.push_back(LatLng::getGeometry(env, jarray.Get(env, i)));
-        }
+      Geometry geometry;
+      geometry.reserve(size);
 
-        return geometry;
-    }
+      for (std::size_t i = 0; i < size; i++) {
+          geometry.push_back(LatLng::getGeometry(env, jarray.Get(env, i)));
+      }
+
+      return geometry;
+  }
 };
 
 } // namespace android

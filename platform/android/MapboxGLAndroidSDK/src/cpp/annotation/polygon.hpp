@@ -16,5 +16,6 @@ public:
     static void registerNative(jni::JNIEnv&);
 };
 
+
 } // namespace android
 } // namespace mbgl
