@@ -9,7 +9,7 @@ public:
     ViewportMode viewportMode = ViewportMode::Default;
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
-    Size size = { 64, 64 };
+    Size size = {64, 64};
     float pixelRatio = 1.0;
 };
 
@@ -81,4 +81,4 @@ float MapOptions::pixelRatio() const {
     return impl_->pixelRatio;
 }
 
-}  // namespace mbgl
+} // namespace mbgl

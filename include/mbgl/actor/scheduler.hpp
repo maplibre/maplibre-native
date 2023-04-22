@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
@@ -101,4 +100,4 @@ protected:
     }
 };
 
-} /// namespace mbgl
+} // namespace mbgl

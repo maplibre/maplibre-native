@@ -19,8 +19,8 @@ public:
         Response response;
         auto it = assets.find(resource.url);
         if (it == assets.end()) {
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::NotFound, std::string{ "Not Found: " } + resource.url);
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               std::string{"Not Found: "} + resource.url);
         } else {
             response.data = it->second;
         }
@@ -41,11 +41,9 @@ private:
 TEST(SyncFileSource, LoadSyncRender) {
     util::RunLoop loop;
     auto fs = std::make_shared<SyncFileSource>();
-    fs->add("maptiler://maps/streets",
-            util::read_file("test/fixtures/resources/source_vector.json"));
-    fs->add("maptiler://sprites/streets/sprite",
-            util::read_file("test/fixtures/resources/sprite.png"));
-    HeadlessFrontend frontend{ { 512, 512 }, 1.0 };
-    MapAdapter map{ frontend, MapObserver::nullObserver(), fs, MapOptions() };
+    fs->add("maptiler://maps/streets", util::read_file("test/fixtures/resources/source_vector.json"));
+    fs->add("maptiler://sprites/streets/sprite", util::read_file("test/fixtures/resources/sprite.png"));
+    HeadlessFrontend frontend{{512, 512}, 1.0};
+    MapAdapter map{frontend, MapObserver::nullObserver(), fs, MapOptions()};
     map.getStyle().loadJSON(util::read_file("test/fixtures/resources/style_vector.json"));
 }

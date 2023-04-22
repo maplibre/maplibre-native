@@ -13,9 +13,7 @@ namespace mbgl {
 using namespace style;
 
 ShapeAnnotationImpl::ShapeAnnotationImpl(const AnnotationID id_)
-    : id(id_),
-      layerID(AnnotationManager::ShapeLayerID + util::toString(id)) {
-}
+    : id(id_), layerID(AnnotationManager::ShapeLayerID + util::toString(id)) {}
 
 void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, AnnotationTileData& data) {
     static const double baseTolerance = 4;
@@ -35,8 +33,7 @@ void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, Annotati
     }
 
     const auto& shapeTile = shapeTiler->getTile(tileID.z, tileID.x, tileID.y);
-    if (shapeTile.features.empty())
-        return;
+    if (shapeTile.features.empty()) return;
 
     auto layer = data.addLayer(layerID);
 

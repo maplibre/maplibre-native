@@ -32,11 +32,8 @@ struct GlyphMetrics {
 };
 
 inline bool operator==(const GlyphMetrics& lhs, const GlyphMetrics& rhs) {
-    return lhs.width == rhs.width &&
-        lhs.height == rhs.height &&
-        lhs.left == rhs.left &&
-        lhs.top == rhs.top &&
-        lhs.advance == rhs.advance;
+    return lhs.width == rhs.width && lhs.height == rhs.height && lhs.left == rhs.left && lhs.top == rhs.top &&
+           lhs.advance == rhs.advance;
 }
 
 class Glyph {
@@ -101,7 +98,7 @@ struct PositionedLine {
 };
 
 class Shaping {
-    public:
+public:
     Shaping() = default;
     explicit Shaping(float x, float y, WritingModeType writingMode_)
         : top(y), bottom(y), left(x), right(x), writingMode(writingMode_) {}

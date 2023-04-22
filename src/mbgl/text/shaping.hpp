@@ -12,9 +12,7 @@
 namespace mbgl {
 
 struct AnchorAlignment {
-    AnchorAlignment(float horizontal, float vertical)
-        : horizontalAlign(horizontal), verticalAlign(vertical) {
-    }
+    AnchorAlignment(float horizontal, float vertical) : horizontalAlign(horizontal), verticalAlign(vertical) {}
 
     static AnchorAlignment getAnchorAlignment(style::SymbolAnchorType anchor);
 

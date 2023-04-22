@@ -20,6 +20,6 @@ struct Converter<mbgl::style::Position, jni::Object<Position>> {
     Result<mbgl::style::Position> operator()(jni::JNIEnv &env, const jni::Object<Position> &value) const;
 };
 
-}
-}
-}
+} // namespace conversion
+} // namespace android
+} // namespace mbgl

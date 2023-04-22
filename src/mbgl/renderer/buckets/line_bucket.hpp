@@ -70,10 +70,13 @@ private:
                           std::vector<LineBucket::TriangleElement>& triangleStore,
                           std::optional<Distances> distances);
 
-    void addPieSliceVertex(const GeometryCoordinate& currentVertex, double distance,
-            const Point<double>& extrude, bool lineTurnsLeft, std::size_t startVertex,
-            std::vector<TriangleElement>& triangleStore,
-            std::optional<Distances> distances);
+    void addPieSliceVertex(const GeometryCoordinate& currentVertex,
+                           double distance,
+                           const Point<double>& extrude,
+                           bool lineTurnsLeft,
+                           std::size_t startVertex,
+                           std::vector<TriangleElement>& triangleStore,
+                           std::optional<Distances> distances);
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;

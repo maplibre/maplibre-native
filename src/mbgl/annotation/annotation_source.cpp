@@ -6,13 +6,9 @@ namespace mbgl {
 
 using namespace style;
 
-AnnotationSource::AnnotationSource()
-    : Source(makeMutable<Impl>()) {
-}
+AnnotationSource::AnnotationSource() : Source(makeMutable<Impl>()) {}
 
-AnnotationSource::Impl::Impl()
-    : Source::Impl(SourceType::Annotations, AnnotationManager::SourceID) {
-}
+AnnotationSource::Impl::Impl() : Source::Impl(SourceType::Annotations, AnnotationManager::SourceID) {}
 
 const AnnotationSource::Impl& AnnotationSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);

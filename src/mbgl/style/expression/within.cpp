@@ -19,13 +19,15 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
     const double size = util::EXTENT * std::pow(2, canonical.z);
 
     auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
-    auto y =
-        (util::LONGITUDE_MAX - (std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)) * util::RAD2DEG_D)) *
-        size / util::DEGREES_MAX;
+    auto y = (util::LONGITUDE_MAX -
+              (std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)) * util::RAD2DEG_D)) *
+             size / util::DEGREES_MAX;
 
     Point<int64_t> p;
-    p.x = (util::clamp<int64_t>(static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
-    p.y = (util::clamp<int64_t>(static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.x = (util::clamp<int64_t>(
+        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.y = (util::clamp<int64_t>(
+        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
 
     return p;
 };
@@ -170,7 +172,7 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
 }
 
 std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
-                                         mbgl::style::expression::ParsingContext& ctx) {
+                                        mbgl::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
         mbgl::style::conversion::Error error;
         auto geojson = toGeoJSON(value_, error);
@@ -185,7 +187,7 @@ std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertib
 }
 
 std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
-                                                      mbgl::style::expression::ParsingContext& ctx) {
+                                                     mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;

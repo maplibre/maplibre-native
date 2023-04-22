@@ -45,10 +45,12 @@ enum class BuiltIn {
 /// @tparam T One of the built-in shader types available in the BuiltIn enum
 /// @tparam The desired graphics API to request shader code for. One of
 /// gfx::Backend::Type enums.
-template <BuiltIn T, gfx::Backend::Type> struct ShaderSource;
+template <BuiltIn T, gfx::Backend::Type>
+struct ShaderSource;
 
 /// @brief A specialization of the ShaderSource template for no shader code.
-template <> struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = "";
     static constexpr const char* fragment = "";
 };

@@ -31,14 +31,12 @@ namespace detail {
 
 class Scope {
 public:
-    Scope(const std::map<std::string, std::shared_ptr<Expression>>& bindings_, std::shared_ptr<Scope> parent_ = nullptr) :
-        bindings(bindings_),
-        parent(std::move(parent_))
-    {}
+    Scope(const std::map<std::string, std::shared_ptr<Expression>>& bindings_, std::shared_ptr<Scope> parent_ = nullptr)
+        : bindings(bindings_), parent(std::move(parent_)) {}
 
     const std::map<std::string, std::shared_ptr<Expression>>& bindings;
     std::shared_ptr<Scope> parent;
-    
+
     std::optional<std::shared_ptr<Expression>> get(const std::string& name) {
         auto it = bindings.find(name);
         if (it != bindings.end()) {
@@ -66,22 +64,16 @@ public:
       * The "coalesce" operator, which needs to omit type annotations.
       * String-valued properties (e.g. `text-field`), where coercion is more convenient than assertion.
 */
-enum class TypeAnnotationOption {
-    coerce,
-    assert,
-    omit
-};
+enum class TypeAnnotationOption { coerce, assert, omit };
 
 class ParsingContext {
 public:
     ParsingContext() : errors(std::make_shared<std::vector<ParsingError>>()) {}
     ParsingContext(std::string key_) : key(std::move(key_)), errors(std::make_shared<std::vector<ParsingError>>()) {}
     explicit ParsingContext(type::Type expected_)
-        : expected(std::move(expected_)),
-          errors(std::make_shared<std::vector<ParsingError>>())
-    {}
+        : expected(std::move(expected_)), errors(std::make_shared<std::vector<ParsingError>>()) {}
     ParsingContext(ParsingContext&&) = default;
-    
+
     ParsingContext(const ParsingContext&) = delete;
     ParsingContext& operator=(const ParsingContext&) = delete;
 
@@ -134,41 +126,35 @@ public:
     void error(std::string message, std::size_t child) {
         errors->push_back({std::move(message), key + "[" + util::toString(child) + "]"});
     }
-    
+
     void error(std::string message, std::size_t child, std::size_t grandchild) {
         errors->push_back(
             {std::move(message), key + "[" + util::toString(child) + "][" + util::toString(grandchild) + "]"});
     }
-    
+
     void appendErrors(ParsingContext&& ctx) {
         errors->reserve(errors->size() + ctx.errors->size());
         std::move(ctx.errors->begin(), ctx.errors->end(), std::inserter(*errors, errors->end()));
         ctx.errors->clear();
     }
-    
-    void clearErrors() {
-        errors->clear();
-    }
-    
+
+    void clearErrors() { errors->clear(); }
+
 private:
     ParsingContext(std::string key_,
                    std::shared_ptr<std::vector<ParsingError>> errors_,
                    std::optional<type::Type> expected_,
                    std::shared_ptr<detail::Scope> scope_)
-        : key(std::move(key_)),
-          expected(std::move(expected_)),
-          scope(std::move(scope_)),
-        errors(std::move(errors_))
-    {}
-    
-    
+        : key(std::move(key_)), expected(std::move(expected_)), scope(std::move(scope_)), errors(std::move(errors_)) {}
+
     /**
         Parse the given style-spec JSON value into an Expression object.
         Specifically, this function is responsible for determining the expression
         type (either Literal, or the one named in value[0]) and dispatching to the
         appropriate ParseXxxx::parse(const V&, ParsingContext) method.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = std::nullopt);
+    ParseResult parse(const mbgl::style::conversion::Convertible& value,
+                      const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     std::string key;
     std::optional<type::Type> expected;

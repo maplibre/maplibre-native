@@ -56,12 +56,10 @@ public:
         switch (gfx::Backend::GetType()) {
 #ifdef MBGL_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
-                program = std::make_unique<gl::Program<Name>>(programParameters
-                    .withDefaultSource({
-                        gfx::Backend::Type::OpenGL,
-                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
-                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment
-                    }));
+                program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
+                    {gfx::Backend::Type::OpenGL,
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}));
                 break;
             }
 #endif
@@ -71,13 +69,11 @@ public:
         }
     }
 
-    static UniformValues computeAllUniformValues(
-        const LayoutUniformValues& layoutUniformValues,
-        const Binders& paintPropertyBinders,
-        const typename PaintProperties::PossiblyEvaluated& currentProperties,
-        float currentZoom) {
-        return layoutUniformValues
-            .concat(paintPropertyBinders.uniformValues(currentZoom, currentProperties));
+    static UniformValues computeAllUniformValues(const LayoutUniformValues& layoutUniformValues,
+                                                 const Binders& paintPropertyBinders,
+                                                 const typename PaintProperties::PossiblyEvaluated& currentProperties,
+                                                 float currentZoom) {
+        return layoutUniformValues.concat(paintPropertyBinders.uniformValues(currentZoom, currentProperties));
     }
 
     static AttributeBindings computeAllAttributeBindings(
@@ -160,21 +156,20 @@ public:
                 drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
             }
 
-            program->draw(
-                context,
-                renderPass,
-                drawMode,
-                depthMode,
-                stencilMode,
-                colorMode,
-                cullFaceMode,
-                uniformValues,
-                drawScopeIt->second,
-                allAttributeBindings.offset(segment.vertexOffset),
-                textureBindings,
-                indexBuffer,
-                segment.indexOffset,
-                segment.indexLength);
+            program->draw(context,
+                          renderPass,
+                          drawMode,
+                          depthMode,
+                          stencilMode,
+                          colorMode,
+                          cullFaceMode,
+                          uniformValues,
+                          drawScopeIt->second,
+                          allAttributeBindings.offset(segment.vertexOffset),
+                          textureBindings,
+                          indexBuffer,
+                          segment.indexOffset,
+                          segment.indexLength);
         }
     }
 };

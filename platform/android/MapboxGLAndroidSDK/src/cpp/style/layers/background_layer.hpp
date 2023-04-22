@@ -40,7 +40,7 @@ public:
 
 }; // class BackgroundLayer
 
-class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::BackgroundLayerFactory {
+class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::BackgroundLayerFactory {
 public:
     ~BackgroundJavaLayerPeerFactory() override;
 
@@ -52,7 +52,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class BackgroundJavaLayerPeerFactory
+}; // class BackgroundJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

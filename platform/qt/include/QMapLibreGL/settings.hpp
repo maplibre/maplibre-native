@@ -11,46 +11,25 @@
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
 // TODO: this will be wrapped at some point
-namespace mbgl
-{
-    class TileServerOptions;
+namespace mbgl {
+class TileServerOptions;
 }
-
 
 namespace QMapLibreGL {
 
-class Q_MAPLIBREGL_EXPORT Settings
-{
+class Q_MAPLIBREGL_EXPORT Settings {
 public:
     Settings();
 
-    enum GLContextMode {
-        UniqueGLContext = 0,
-        SharedGLContext
-    };
+    enum GLContextMode { UniqueGLContext = 0, SharedGLContext };
 
-    enum MapMode {
-        Continuous = 0,
-        Static
-    };
+    enum MapMode { Continuous = 0, Static };
 
-    enum ConstrainMode {
-        NoConstrain = 0,
-        ConstrainHeightOnly,
-        ConstrainWidthAndHeight
-    };
+    enum ConstrainMode { NoConstrain = 0, ConstrainHeightOnly, ConstrainWidthAndHeight };
 
-    enum ViewportMode {
-        DefaultViewport = 0,
-        FlippedYViewport
-    };
+    enum ViewportMode { DefaultViewport = 0, FlippedYViewport };
 
-    enum SettingsTemplate {
-        DefaultSettings = 0,
-        MapLibreSettings,
-        MapTilerSettings,
-        MapboxSettings
-    };
+    enum SettingsTemplate { DefaultSettings = 0, MapLibreSettings, MapTilerSettings, MapboxSettings };
 
     GLContextMode contextMode() const;
     void setContextMode(GLContextMode);

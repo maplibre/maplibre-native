@@ -13,10 +13,7 @@ class RendererObserver {
 public:
     virtual ~RendererObserver() = default;
 
-    enum class RenderMode : uint32_t {
-        Partial,
-        Full
-    };
+    enum class RenderMode : uint32_t { Partial, Full };
 
     /// Signals that a repaint is required
     virtual void onInvalidate() {}
@@ -42,7 +39,7 @@ public:
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 };
 
 } // namespace mbgl

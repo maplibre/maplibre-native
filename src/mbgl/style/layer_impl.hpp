@@ -58,9 +58,11 @@ protected:
 };
 
 // To be used in the inherited classes.
-#define DECLARE_LAYER_TYPE_INFO \
-const LayerTypeInfo* getTypeInfo() const noexcept final { return staticTypeInfo(); } \
-static const LayerTypeInfo* staticTypeInfo() noexcept
+#define DECLARE_LAYER_TYPE_INFO                               \
+    const LayerTypeInfo* getTypeInfo() const noexcept final { \
+        return staticTypeInfo();                              \
+    }                                                         \
+    static const LayerTypeInfo* staticTypeInfo() noexcept
 
 } // namespace style
 } // namespace mbgl

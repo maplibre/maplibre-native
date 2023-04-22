@@ -11,11 +11,7 @@ namespace mbgl {
 
 class ProjectedCollisionBox {
 public:
-    enum class Type : char {
-        Unknown,
-        Box,
-        Circle
-    };
+    enum class Type : char { Unknown, Box, Circle };
 
     ProjectedCollisionBox() = default;
     ProjectedCollisionBox(float x1, float y1, float x2, float y2) : geometry(x1, y1, x2, y2), type(Type::Box) {}
@@ -69,7 +65,6 @@ public:
 
 class CollisionFeature {
 public:
-
     // for text
     CollisionFeature(const GeometryCoordinates& line,
                      const Anchor& anchor,

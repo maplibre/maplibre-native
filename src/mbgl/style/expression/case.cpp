@@ -16,7 +16,7 @@ EvaluationResult Case::evaluate(const EvaluationContext& params) const {
             return branch.second->evaluate(params);
         }
     }
-    
+
     return otherwise->evaluate(params);
 }
 
@@ -81,7 +81,7 @@ ParseResult Case::parse(const Convertible& value, ParsingContext& ctx) {
         if (!output) {
             return output;
         }
-        
+
         if (!outputType) {
             outputType = (*output)->getType();
         }
@@ -96,9 +96,7 @@ ParseResult Case::parse(const Convertible& value, ParsingContext& ctx) {
         return otherwise;
     }
 
-    return ParseResult(std::make_unique<Case>(*outputType,
-                                  std::move(branches),
-                                  std::move(*otherwise)));
+    return ParseResult(std::make_unique<Case>(*outputType, std::move(branches), std::move(*otherwise)));
 }
 
 } // namespace expression

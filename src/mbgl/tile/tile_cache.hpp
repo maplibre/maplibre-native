@@ -3,7 +3,6 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile.hpp>
 
-
 #include <list>
 #include <memory>
 #include <map>

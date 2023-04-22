@@ -2,10 +2,10 @@
 
 namespace {
 
-    // Dummy initializer (We don't support initializing this from the JVM)
-    std::unique_ptr<mbgl::android::UnknownSource> init(jni::JNIEnv&) {
-        throw std::runtime_error("UnknownSource should not be initialized from the JVM");
-    }
+// Dummy initializer (We don't support initializing this from the JVM)
+std::unique_ptr<mbgl::android::UnknownSource> init(jni::JNIEnv&) {
+    throw std::runtime_error("UnknownSource should not be initialized from the JVM");
+}
 
 } // namespace
 
@@ -21,20 +21,15 @@ jni::Local<jni::Object<Source>> UnknownSource::createJavaPeer(jni::JNIEnv& env) 
     return javaClass.New(env, constructor, reinterpret_cast<jni::jlong>(this));
 }
 
-    void UnknownSource::registerNative(jni::JNIEnv& env) {
-        // Lookup the class
-        static auto& javaClass = jni::Class<UnknownSource>::Singleton(env);
+void UnknownSource::registerNative(jni::JNIEnv& env) {
+    // Lookup the class
+    static auto& javaClass = jni::Class<UnknownSource>::Singleton(env);
 
-        #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
+#define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
-        // Register the peer
-        jni::RegisterNativePeer<UnknownSource>(
-            env, javaClass, "nativePtr",
-            init,
-            "initialize",
-            "finalize"
-        );
-    }
+    // Register the peer
+    jni::RegisterNativePeer<UnknownSource>(env, javaClass, "nativePtr", init, "initialize", "finalize");
+}
 
 } // namespace android
 } // namespace mbgl

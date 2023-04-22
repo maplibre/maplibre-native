@@ -17,8 +17,7 @@ struct TestRunOutput {
 class TestStats {
 public:
     std::size_t testCount() const {
-        return passed.size() + failed.size() + errored.size() +
-               ignorePassed.size() + ignoreFailed.size();
+        return passed.size() + failed.size() + errored.size() + ignorePassed.size() + ignoreFailed.size();
     }
 
     std::vector<TestRunOutput> passed;

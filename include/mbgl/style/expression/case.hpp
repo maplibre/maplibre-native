@@ -23,12 +23,13 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    
+
     bool operator==(const Expression& e) const override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "case"; }
+
 private:
     std::vector<Branch> branches;
     std::unique_ptr<Expression> otherwise;

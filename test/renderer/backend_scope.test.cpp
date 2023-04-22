@@ -9,8 +9,7 @@ using namespace mbgl;
 
 class StubRendererBackend : public gl::RendererBackend {
 public:
-    StubRendererBackend() : gl::RendererBackend(gfx::ContextMode::Unique) {
-    }
+    StubRendererBackend() : gl::RendererBackend(gfx::ContextMode::Unique) {}
 
     void activate() override {
         if (activateFunction) activateFunction();
@@ -34,9 +33,9 @@ public:
         return reinterpret_cast<gfx::Renderable&>(*this);
     }
 
-    std::function<void ()> activateFunction;
-    std::function<void ()> deactivateFunction;
-    std::function<void ()> updateAssumedStateFunction;
+    std::function<void()> activateFunction;
+    std::function<void()> deactivateFunction;
+    std::function<void()> updateAssumedStateFunction;
 };
 
 // A scope should activate on construction
@@ -50,9 +49,7 @@ TEST(BackendScope, SingleScope) {
     backend.activateFunction = [&] { activated = true; };
     backend.deactivateFunction = [&] { deactivated = true; };
 
-    {
-        gfx::BackendScope test { backend };
-    }
+    { gfx::BackendScope test{backend}; }
 
     ASSERT_TRUE(activated);
     ASSERT_TRUE(deactivated);
@@ -69,10 +66,10 @@ TEST(BackendScope, NestedScopes) {
     backend.deactivateFunction = [&] { deactivated++; };
 
     {
-        gfx::BackendScope outer { backend };
+        gfx::BackendScope outer{backend};
         ASSERT_EQ(1, activated);
         {
-            gfx::BackendScope inner { backend };
+            gfx::BackendScope inner{backend};
             ASSERT_EQ(1, activated);
         }
         ASSERT_EQ(0, deactivated);
@@ -98,10 +95,10 @@ TEST(BackendScope, ChainedScopes) {
     backendB.deactivateFunction = [&] { activatedB = false; };
 
     {
-        gfx::BackendScope scopeA { backendA };
+        gfx::BackendScope scopeA{backendA};
         ASSERT_TRUE(activatedA);
         {
-            gfx::BackendScope scopeB { backendB };
+            gfx::BackendScope scopeB{backendB};
             ASSERT_FALSE(activatedA);
             ASSERT_TRUE(activatedB);
         }

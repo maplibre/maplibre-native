@@ -62,7 +62,7 @@ namespace android {
 
 void RegisterNativeHTTPRequest(JNIEnv&);
 
-void registerNatives(JavaVM *vm) {
+void registerNatives(JavaVM* vm) {
     theJVM = vm;
 
     jni::JNIEnv& env = jni::GetEnv(*vm, jni::jni_version_1_6);
@@ -101,7 +101,7 @@ void registerNatives(JavaVM *vm) {
     gson::JsonObject::registerNative(env);
     gson::JsonPrimitive::registerNative(env);
 
-    //Annotation
+    // Annotation
     Marker::registerNative(env);
     Polygon::registerNative(env);
     Polyline::registerNative(env);

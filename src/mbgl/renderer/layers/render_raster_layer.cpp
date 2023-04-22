@@ -34,9 +34,8 @@ void RenderRasterLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<RasterLayerProperties>(
-        staticImmutableCast<RasterLayer::Impl>(baseImpl),
-        unevaluated.evaluate(parameters));
+    auto properties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(baseImpl),
+                                                         unevaluated.evaluate(parameters));
     passes = properties->evaluated.get<style::RasterOpacity>() > 0 ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
@@ -70,11 +69,8 @@ static std::array<float, 3> spinWeights(float spin) {
     spin *= util::DEG2RAD_F;
     float s = std::sin(spin);
     float c = std::cos(spin);
-    std::array<float, 3> spin_weights = {{
-        (2 * c + 1) / 3,
-        (-std::sqrt(3.0f) * s - c + 1) / 3,
-        (std::sqrt(3.0f) * s - c + 1) / 3
-    }};
+    std::array<float, 3> spin_weights = {
+        {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3}};
     return spin_weights;
 }
 
@@ -93,14 +89,14 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.populate(rasterProgram)) return;
 
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
-    RasterProgram::Binders paintAttributeData{ evaluated, 0 };
+    RasterProgram::Binders paintAttributeData{evaluated, 0};
 
-    auto draw = [&] (const mat4& matrix,
-                     const auto& vertexBuffer,
-                     const auto& indexBuffer,
-                     const auto& segments,
-                     const auto& textureBindings,
-                     const std::string& drawScopeID) {
+    auto draw = [&](const mat4& matrix,
+                    const auto& vertexBuffer,
+                    const auto& indexBuffer,
+                    const auto& segments,
+                    const auto& textureBindings,
+                    const std::string& drawScopeID) {
         const auto allUniformValues = RasterProgram::computeAllUniformValues(
             RasterProgram::LayoutUniformValues{
                 uniforms::matrix::Value(matrix),
@@ -123,24 +119,24 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
 
         checkRenderability(parameters, RasterProgram::activeBindingCount(allAttributeBindings));
 
-        rasterProgram->draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::Triangles(),
-            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-            gfx::StencilMode::disabled(),
-            parameters.colorModeForRenderPass(),
-            gfx::CullFaceMode::disabled(),
-            indexBuffer,
-            segments,
-            allUniformValues,
-            allAttributeBindings,
-            textureBindings,
-            getID() + "/" + drawScopeID
-        );
+        rasterProgram->draw(parameters.context,
+                            *parameters.renderPass,
+                            gfx::Triangles(),
+                            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                            gfx::StencilMode::disabled(),
+                            parameters.colorModeForRenderPass(),
+                            gfx::CullFaceMode::disabled(),
+                            indexBuffer,
+                            segments,
+                            allUniformValues,
+                            allAttributeBindings,
+                            textureBindings,
+                            getID() + "/" + drawScopeID);
     };
 
-    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
+    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest
+                                              ? gfx::TextureFilterType::Nearest
+                                              : gfx::TextureFilterType::Linear;
 
     if (imageData && !imageData->bucket->needsUpload()) {
         RasterBucket& bucket = *imageData->bucket;
@@ -166,8 +162,7 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
             }
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
-            if (!bucket.hasData())
-                continue;
+            if (!bucket.hasData()) continue;
 
             assert(bucket.texture);
             if (bucket.vertexBuffer && bucket.indexBuffer) {

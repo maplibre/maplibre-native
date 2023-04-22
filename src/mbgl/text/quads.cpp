@@ -201,7 +201,8 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
     const float textRotate = layout.get<TextRotate>() * util::DEG2RAD_F;
-    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
+    const bool alongLine =
+        layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
 
     SymbolQuads quads;
 

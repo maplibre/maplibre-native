@@ -9,9 +9,9 @@
 #include <string>
 
 // Required for art / libsigchain
-extern "C" JNIEXPORT void EnsureFrontOfChain(int, struct sigaction*) { }
-extern "C" JNIEXPORT void AddSpecialSignalHandlerFn(int, void*) { }
-extern "C" JNIEXPORT void RemoveSpecialSignalHandlerFn(int, bool (*) (int, siginfo_t*, void*)) { }
+extern "C" JNIEXPORT void EnsureFrontOfChain(int, struct sigaction*) {}
+extern "C" JNIEXPORT void AddSpecialSignalHandlerFn(int, void*) {}
+extern "C" JNIEXPORT void RemoveSpecialSignalHandlerFn(int, bool (*)(int, siginfo_t*, void*)) {}
 
 namespace {
 const std::string kClassPathCommand{"--class_path="};
@@ -22,11 +22,11 @@ const std::string kDefaultDex{"/data/local/tmp/core-tests/classes.dex"};
 namespace mbgl {
 namespace android {
 
-bool initRuntime(int argc, char *argv[]) {
+bool initRuntime(int argc, char* argv[]) {
     void* vmHandle = dlopen("libart.so", RTLD_NOW);
     assert(vmHandle != nullptr);
 
-    using CreateJavaVMFn = jint (*)(JavaVM** vm, JNIEnv** env, void* vmArgs);
+    using CreateJavaVMFn = jint (*)(JavaVM * *vm, JNIEnv * *env, void* vmArgs);
     CreateJavaVMFn createJavaVMFn = reinterpret_cast<CreateJavaVMFn>(dlsym(vmHandle, "JNI_CreateJavaVM"));
     assert(createJavaVMFn != nullptr);
 
@@ -58,8 +58,9 @@ bool initRuntime(int argc, char *argv[]) {
     void* runtimeHandle = dlopen("libandroid_runtime.so", RTLD_NOW);
     assert(runtimeHandle != nullptr);
 
-    using RegisterNativesFn = jint (*)(JNIEnv* env);
-    RegisterNativesFn registerNativesFn = reinterpret_cast<RegisterNativesFn>(dlsym(runtimeHandle, "registerFrameworkNatives"));
+    using RegisterNativesFn = jint (*)(JNIEnv * env);
+    RegisterNativesFn registerNativesFn =
+        reinterpret_cast<RegisterNativesFn>(dlsym(runtimeHandle, "registerFrameworkNatives"));
     assert(registerNativesFn != nullptr);
 
     if (registerNativesFn(env) != JNI_OK) {

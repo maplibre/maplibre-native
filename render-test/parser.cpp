@@ -172,13 +172,13 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
 JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
     auto maybeJSON = mbgl::util::readFile(jsonPath);
     if (!maybeJSON) {
-        return { std::string("Unable to open file ") + jsonPath.string() };
+        return {std::string("Unable to open file ") + jsonPath.string()};
     }
 
     mbgl::JSDocument document;
     document.Parse<0>(*maybeJSON);
     if (document.HasParseError()) {
-        return { mbgl::formatJSONParseError(document) };
+        return {mbgl::formatJSONParseError(document)};
     }
 
     return {std::move(document)};
@@ -485,8 +485,8 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         } else if (mapModeStr == "static")
             metadata.mapMode = mbgl::MapMode::Static;
         else {
-            mbgl::Log::Warning(
-                mbgl::Event::ParseStyle, "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
+            mbgl::Log::Warning(mbgl::Event::ParseStyle,
+                               "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
             metadata.mapMode = mbgl::MapMode::Static;
         }
     }
@@ -568,7 +568,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         }
         metadata.renderTest = false;
     }
-    
+
     if (testValue.HasMember("ignoreProbing")) {
         if (testValue["ignoreProbing"].IsBool()) {
             metadata.ignoreProbing = testValue["ignoreProbing"].GetBool();
@@ -1318,7 +1318,8 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
 
     std::string html;
     html.append("<div class=\"test " + metadata.status + (shouldHide ? " hide" : "") + "\">\n");
-    html.append(R"(<h2><span class="label" style="background: )" + metadata.color + "\">" + metadata.status + "</span> " + metadata.id + "</h2>\n");
+    html.append(R"(<h2><span class="label" style="background: )" + metadata.color + "\">" + metadata.status +
+                "</span> " + metadata.id + "</h2>\n");
 
     if (!metadata.renderErrored) {
         if (metadata.outputsImage) {
@@ -1361,7 +1362,10 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
     return html;
 }
 
-std::string createResultPage(const TestStatistics& stats, const std::vector<TestMetadata>& metadatas, bool shuffle, uint32_t seed) {
+std::string createResultPage(const TestStatistics& stats,
+                             const std::vector<TestMetadata>& metadatas,
+                             bool shuffle,
+                             uint32_t seed) {
     const uint32_t unsuccessful = stats.erroredTests + stats.failedTests;
     std::string resultsPage;
 

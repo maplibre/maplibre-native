@@ -38,7 +38,7 @@ namespace mbgl {
 
 class HTTPFileSource::Impl {
 public:
-    Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_);
+    Impl(const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_);
     ~Impl();
 
     static int handleSocket(CURL *handle, curl_socket_t s, int action, void *userp, void *socketp);
@@ -79,7 +79,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl*, Resource, FileSource::Callback);
+    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
@@ -88,7 +88,7 @@ private:
     static size_t headerCallback(char *buffer, size_t size, size_t nmemb, void *userp);
     static size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
-    HTTPFileSource::Impl* context = nullptr;
+    HTTPFileSource::Impl *context = nullptr;
     Resource resource;
     FileSource::Callback callback;
 
@@ -102,11 +102,11 @@ private:
     CURL *handle = nullptr;
     curl_slist *headers = nullptr;
 
-    char error[CURL_ERROR_SIZE] = { 0 };
+    char error[CURL_ERROR_SIZE] = {0};
 };
 
-HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
-    : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {
+HTTPFileSource::Impl::Impl(const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_)
+    : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         throw std::runtime_error("Could not init cURL");
     }
@@ -156,16 +156,16 @@ void HTTPFileSource::Impl::checkMultiInfo() {
 
     while ((message = curl_multi_info_read(multi, &pending))) {
         switch (message->msg) {
-        case CURLMSG_DONE: {
-            HTTPRequest *baton = nullptr;
-            curl_easy_getinfo(message->easy_handle, CURLINFO_PRIVATE, (char *)&baton);
-            assert(baton);
-            baton->handleResult(message->data.result);
-        } break;
+            case CURLMSG_DONE: {
+                HTTPRequest *baton = nullptr;
+                curl_easy_getinfo(message->easy_handle, CURLINFO_PRIVATE, (char *)&baton);
+                assert(baton);
+                baton->handleResult(message->data.result);
+            } break;
 
-        default:
-            // This should never happen, because there are no other message types.
-            throw std::runtime_error("CURLMsg returned unknown message type");
+            default:
+                // This should never happen, because there are no other message types.
+                throw std::runtime_error("CURLMsg returned unknown message type");
         }
     }
 }
@@ -180,35 +180,34 @@ void HTTPFileSource::Impl::perform(curl_socket_t s, util::RunLoop::Event events)
         flags |= CURL_CSELECT_OUT;
     }
 
-
     int running_handles = 0;
     curl_multi_socket_action(multi, s, flags, &running_handles);
     checkMultiInfo();
 }
 
-int HTTPFileSource::Impl::handleSocket(CURL * /* handle */, curl_socket_t s, int action, void *userp,
-                              void * /* socketp */) {
+int HTTPFileSource::Impl::handleSocket(
+    CURL * /* handle */, curl_socket_t s, int action, void *userp, void * /* socketp */) {
     assert(userp);
     auto context = reinterpret_cast<Impl *>(userp);
 
     switch (action) {
-    case CURL_POLL_IN: {
-        using namespace std::placeholders;
-        util::RunLoop::Get()->addWatch(static_cast<int>(s), util::RunLoop::Event::Read,
-                std::bind(&Impl::perform, context, _1, _2));
-        break;
-    }
-    case CURL_POLL_OUT: {
-        using namespace std::placeholders;
-        util::RunLoop::Get()->addWatch(static_cast<int>(s), util::RunLoop::Event::Write,
-                std::bind(&Impl::perform, context, _1, _2));
-        break;
-    }
-    case CURL_POLL_REMOVE:
-        util::RunLoop::Get()->removeWatch(static_cast<int>(s));
-        break;
-    default:
-        throw std::runtime_error("Unhandled CURL socket action");
+        case CURL_POLL_IN: {
+            using namespace std::placeholders;
+            util::RunLoop::Get()->addWatch(
+                static_cast<int>(s), util::RunLoop::Event::Read, std::bind(&Impl::perform, context, _1, _2));
+            break;
+        }
+        case CURL_POLL_OUT: {
+            using namespace std::placeholders;
+            util::RunLoop::Get()->addWatch(
+                static_cast<int>(s), util::RunLoop::Event::Write, std::bind(&Impl::perform, context, _1, _2));
+            break;
+        }
+        case CURL_POLL_REMOVE:
+            util::RunLoop::Get()->removeWatch(static_cast<int>(s));
+            break;
+        default:
+            throw std::runtime_error("Unhandled CURL socket action");
     }
 
     return 0;
@@ -233,8 +232,7 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
     }
 
     context->timeout.stop();
-    context->timeout.start(mbgl::Milliseconds(timeout_ms), Duration::zero(),
-        std::bind(&Impl::onTimeout, context));
+    context->timeout.start(mbgl::Milliseconds(timeout_ms), Duration::zero(), std::bind(&Impl::onTimeout, context));
 
     return 0;
 }
@@ -259,20 +257,15 @@ ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
-    : context(context_),
-      resource(std::move(resource_)),
-      callback(std::move(callback_)),
-      handle(context->getHandle()) {
-
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
+    : context(context_), resource(std::move(resource_)), callback(std::move(callback_)), handle(context->getHandle()) {
     // If there's already a response, set the correct etags/modified headers to make sure we are
     // getting a 304 response if possible. This avoids redownloading unchanged data.
     if (resource.priorEtag) {
         const std::string header = std::string("If-None-Match: ") + *resource.priorEtag;
         headers = curl_slist_append(headers, header.c_str());
     } else if (resource.priorModified) {
-        const std::string time =
-            std::string("If-Modified-Since: ") + util::rfc1123(*resource.priorModified);
+        const std::string time = std::string("If-Modified-Since: ") + util::rfc1123(*resource.priorModified);
         headers = curl_slist_append(headers, time.c_str());
     }
 
@@ -363,17 +356,17 @@ size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const 
     if ((begin = headerMatches("last-modified: ", buffer, length)) != std::string::npos) {
         // Always overwrite the modification date; We might already have a value here from the
         // Date header, but this one is more accurate.
-        const std::string value { buffer + begin, length - begin - 2 }; // remove \r\n
+        const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         baton->response->modified = Timestamp{Seconds(curl_getdate(value.c_str(), nullptr))};
     } else if ((begin = headerMatches("etag: ", buffer, length)) != std::string::npos) {
         baton->response->etag = std::string(buffer + begin, length - begin - 2); // remove \r\n
     } else if ((begin = headerMatches("cache-control: ", buffer, length)) != std::string::npos) {
-        const std::string value { buffer + begin, length - begin - 2 }; // remove \r\n
+        const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         const auto cc = http::CacheControl::parse(value);
         baton->response->expires = cc.toTimePoint();
         baton->response->mustRevalidate = cc.mustRevalidate;
     } else if ((begin = headerMatches("expires: ", buffer, length)) != std::string::npos) {
-        const std::string value { buffer + begin, length - begin - 2 }; // remove \r\n
+        const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         baton->response->expires = Timestamp{Seconds(curl_getdate(value.c_str(), nullptr))};
     } else if ((begin = headerMatches("retry-after: ", buffer, length)) != std::string::npos) {
         baton->retryAfter = std::string(buffer + begin, length - begin - 2); // remove \r\n
@@ -396,19 +389,19 @@ void HTTPRequest::handleResult(CURLcode code) {
     // Add human-readable error code
     if (code != CURLE_OK) {
         switch (code) {
-        case CURLE_COULDNT_RESOLVE_PROXY:
-        case CURLE_COULDNT_RESOLVE_HOST:
-        case CURLE_COULDNT_CONNECT:
-        case CURLE_OPERATION_TIMEDOUT:
+            case CURLE_COULDNT_RESOLVE_PROXY:
+            case CURLE_COULDNT_RESOLVE_HOST:
+            case CURLE_COULDNT_CONNECT:
+            case CURLE_OPERATION_TIMEDOUT:
 
-            response->error = std::make_unique<Error>(Error::Reason::Connection,
-                                                      std::string{curl_easy_strerror(code)} + ": " + error);
-            break;
+                response->error = std::make_unique<Error>(Error::Reason::Connection,
+                                                          std::string{curl_easy_strerror(code)} + ": " + error);
+                break;
 
-        default:
-            response->error =
-                std::make_unique<Error>(Error::Reason::Other, std::string{curl_easy_strerror(code)} + ": " + error);
-            break;
+            default:
+                response->error =
+                    std::make_unique<Error>(Error::Reason::Other, std::string{curl_easy_strerror(code)} + ": " + error);
+                break;
         }
     } else {
         long responseCode = 0;
@@ -425,20 +418,16 @@ void HTTPRequest::handleResult(CURLcode code) {
         } else if (responseCode == 304) {
             response->notModified = true;
         } else if (responseCode == 404) {
-            response->error =
-                std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
+            response->error = std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
         } else if (responseCode == 429) {
-            response->error =
-                std::make_unique<Error>(Error::Reason::RateLimit, "HTTP status code 429",
-                                        http::parseRetryHeaders(retryAfter, xRateLimitReset));
+            response->error = std::make_unique<Error>(
+                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset));
         } else if (responseCode >= 500 && responseCode < 600) {
-            response->error =
-                std::make_unique<Error>(Error::Reason::Server, std::string{ "HTTP status code " } +
-                                                                   util::toString(responseCode));
+            response->error = std::make_unique<Error>(Error::Reason::Server,
+                                                      std::string{"HTTP status code "} + util::toString(responseCode));
         } else {
-            response->error =
-                std::make_unique<Error>(Error::Reason::Other, std::string{ "HTTP status code " } +
-                                                                  util::toString(responseCode));
+            response->error = std::make_unique<Error>(Error::Reason::Other,
+                                                      std::string{"HTTP status code "} + util::toString(responseCode));
         }
     }
 
@@ -448,13 +437,12 @@ void HTTPRequest::handleResult(CURLcode code) {
     callback_(response_);
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
-    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {
-}
+HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions)
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {}
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 

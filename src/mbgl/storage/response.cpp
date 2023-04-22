@@ -19,7 +19,6 @@ Response& Response::operator=(const Response& res) {
 }
 
 Response::Error::Error(Reason reason_, std::string message_, std::optional<Timestamp> retryAfter_)
-    : reason(reason_), message(std::move(message_)), retryAfter(std::move(retryAfter_)) {
-}
+    : reason(reason_), message(std::move(message_)), retryAfter(std::move(retryAfter_)) {}
 
 } // namespace mbgl

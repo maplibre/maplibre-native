@@ -9,6 +9,7 @@ namespace gfx {
 class VertexBufferResource {
 protected:
     VertexBufferResource() = default;
+
 public:
     virtual ~VertexBufferResource() = default;
 };
@@ -19,8 +20,7 @@ template <class>
 class VertexBuffer {
 public:
     VertexBuffer(const std::size_t elements_, std::unique_ptr<VertexBufferResource>&& resource_)
-        : elements(elements_), resource(std::move(resource_)) {
-    }
+        : elements(elements_), resource(std::move(resource_)) {}
 
     std::size_t elements;
 

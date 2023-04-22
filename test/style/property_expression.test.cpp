@@ -35,13 +35,11 @@ float evaluate(PropertyValue<float> value, float zoom) {
     return value.evaluate(PropertyEvaluator<float>(PropertyEvaluationParameters(zoom), 0));
 }
 
-template<typename T>
+template <typename T>
 auto createOverride(expression::type::Type exprType,
                     PossiblyEvaluatedPropertyValue<T> propValue,
                     std::string propName) {
-    return std::make_unique<FormatSectionOverride<T>>(std::move(exprType),
-                                                      std::move(propValue),
-                                                      std::move(propName));
+    return std::make_unique<FormatSectionOverride<T>>(std::move(exprType), std::move(propValue), std::move(propName));
 }
 
 TEST(PropertyExpression, Constant) {
@@ -63,74 +61,96 @@ TEST(PropertyExpression, Expression) {
 }
 
 TEST(PropertyExpression, Defaults) {
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f)
-        .evaluate(oneInteger, 2.0f));
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f)
-        .evaluate(oneDouble, 2.0f));
-    EXPECT_EQ(0.0f, PropertyExpression<float>(number(get("property")), 0.0f)
-        .evaluate(oneString, 2.0f));
-    EXPECT_EQ(2.0f, PropertyExpression<float>(number(get("property")))
-        .evaluate(oneString, 2.0f));
+    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneInteger, 2.0f));
+    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneDouble, 2.0f));
+    EXPECT_EQ(0.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneString, 2.0f));
+    EXPECT_EQ(2.0f, PropertyExpression<float>(number(get("property"))).evaluate(oneString, 2.0f));
 }
 
 TEST(PropertyExpression, ZoomInterpolation) {
-    EXPECT_EQ(40.0f, PropertyExpression<float>(
-        interpolate(linear(), zoom(),
-            0.0, interpolate(linear(), number(get("property")), 1.0, literal(24.0)),
-            1.5, interpolate(linear(), number(get("property")), 1.0, literal(36.0)),
-            3.0, interpolate(linear(), number(get("property")), 1.0, literal(48.0))
-        ), 0.0f)
-    .evaluate(2.0f, oneInteger, -1.0f)) << "Should interpolate between stops";
-    
-    EXPECT_EQ(33.0, PropertyExpression<float>(
-        interpolate(linear(), zoom(),
-            5.0, interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
-            10.0, interpolate(linear(), number(get("property")), 1.0, literal(66.0))
-        ), 0.0f)
-    .evaluate(0.0f, oneInteger, -1.0f)) << "Use first stop output for input values from -inf to first stop";
-    
-    EXPECT_EQ(66.0, PropertyExpression<float>(
-        interpolate(linear(), zoom(),
-            0.0, interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
-            10.0, interpolate(linear(), number(get("property")), 1.0, literal(66.0))
-        ), 0.0f)
-    .evaluate(20.0f, oneInteger, -1.0f)) << "Use last stop output for input values from last stop to +inf";
+    EXPECT_EQ(40.0f,
+              PropertyExpression<float>(interpolate(linear(),
+                                                    zoom(),
+                                                    0.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(24.0)),
+                                                    1.5,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(36.0)),
+                                                    3.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(48.0))),
+                                        0.0f)
+                  .evaluate(2.0f, oneInteger, -1.0f))
+        << "Should interpolate between stops";
 
-    EXPECT_EQ(66.0f, PropertyExpression<float>(
-        interpolate(linear(), zoom(),
-            0.0, interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
-            10.0, interpolate(linear(), number(get("property")), 1.0, literal(66.0))
-        ), 0.0f)
-    .evaluate(10.0f, oneInteger, -1.0f)) << "Should interpolate TO the last stop.";
-    
-    EXPECT_EQ(33.0f, PropertyExpression<float>(
-        interpolate(linear(), zoom(),
-            0.0, interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
-            10.0, interpolate(linear(), number(get("property")), 1.0, literal(66.0))
-        ), 0.0f)
-    .evaluate(0.0f, oneInteger, -1.0f)) << "Should interpolate TO the first stop";
+    EXPECT_EQ(33.0,
+              PropertyExpression<float>(interpolate(linear(),
+                                                    zoom(),
+                                                    5.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
+                                                    10.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(66.0))),
+                                        0.0f)
+                  .evaluate(0.0f, oneInteger, -1.0f))
+        << "Use first stop output for input values from -inf to first stop";
+
+    EXPECT_EQ(66.0,
+              PropertyExpression<float>(interpolate(linear(),
+                                                    zoom(),
+                                                    0.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
+                                                    10.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(66.0))),
+                                        0.0f)
+                  .evaluate(20.0f, oneInteger, -1.0f))
+        << "Use last stop output for input values from last stop to +inf";
+
+    EXPECT_EQ(66.0f,
+              PropertyExpression<float>(interpolate(linear(),
+                                                    zoom(),
+                                                    0.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
+                                                    10.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(66.0))),
+                                        0.0f)
+                  .evaluate(10.0f, oneInteger, -1.0f))
+        << "Should interpolate TO the last stop.";
+
+    EXPECT_EQ(33.0f,
+              PropertyExpression<float>(interpolate(linear(),
+                                                    zoom(),
+                                                    0.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(33.0)),
+                                                    10.0,
+                                                    interpolate(linear(), number(get("property")), 1.0, literal(66.0))),
+                                        0.0f)
+                  .evaluate(0.0f, oneInteger, -1.0f))
+        << "Should interpolate TO the first stop";
 }
 
 TEST(PropertyExpression, Issue8460) {
-    PropertyExpression<float> fn1(
-        interpolate(linear(), zoom(),
-            15.0, interpolate(linear(), number(get("property")), 1.0, literal(0.0)),
-            15.2, interpolate(linear(), number(get("property")), 1.0, literal(600.0))
-        ), 0.0f);
+    PropertyExpression<float> fn1(interpolate(linear(),
+                                              zoom(),
+                                              15.0,
+                                              interpolate(linear(), number(get("property")), 1.0, literal(0.0)),
+                                              15.2,
+                                              interpolate(linear(), number(get("property")), 1.0, literal(600.0))),
+                                  0.0f);
 
-    EXPECT_NEAR(  0.0f, fn1.evaluate(15.0f, oneInteger, -1.0f), 0.00);
+    EXPECT_NEAR(0.0f, fn1.evaluate(15.0f, oneInteger, -1.0f), 0.00);
     EXPECT_NEAR(300.0f, fn1.evaluate(15.1f, oneInteger, -1.0f), 0.01);
     EXPECT_NEAR(600.0f, fn1.evaluate(15.2f, oneInteger, -1.0f), 0.00);
     EXPECT_NEAR(600.0f, fn1.evaluate(16.0f, oneInteger, -1.0f), 0.00);
 
-    PropertyExpression<float> fn2(
-        interpolate(linear(), zoom(),
-            15.0, interpolate(linear(), number(get("property")), 1.0, literal(0.0)),
-            15.2, interpolate(linear(), number(get("property")), 1.0, literal(300.0)),
-            18.0, interpolate(linear(), number(get("property")), 1.0, literal(600.0))
-        ), 0.0f);
+    PropertyExpression<float> fn2(interpolate(linear(),
+                                              zoom(),
+                                              15.0,
+                                              interpolate(linear(), number(get("property")), 1.0, literal(0.0)),
+                                              15.2,
+                                              interpolate(linear(), number(get("property")), 1.0, literal(300.0)),
+                                              18.0,
+                                              interpolate(linear(), number(get("property")), 1.0, literal(600.0))),
+                                  0.0f);
 
-    EXPECT_NEAR(  0.0f, fn2.evaluate(15.0f, oneInteger, -1.0f), 0.00);
+    EXPECT_NEAR(0.0f, fn2.evaluate(15.0f, oneInteger, -1.0f), 0.00);
     EXPECT_NEAR(150.0f, fn2.evaluate(15.1f, oneInteger, -1.0f), 0.01);
     EXPECT_NEAR(300.0f, fn2.evaluate(15.2f, oneInteger, -1.0f), 0.00);
     EXPECT_NEAR(385.71f, fn2.evaluate(16.0f, oneInteger, -1.0f), 0.01);
@@ -140,8 +160,7 @@ TEST(PropertyExpression, Issue8460) {
 
 TEST(PropertyExpression, FormatSectionOverride) {
     using Value = expression::Value;
-    Value formattedSection =
-            std::unordered_map<std::string, Value>{ {"text-color", Value{Color::blue()}} };
+    Value formattedSection = std::unordered_map<std::string, Value>{{"text-color", Value{Color::blue()}}};
     auto ctx = expression::EvaluationContext(&oneDouble).withFormattedSection(&formattedSection);
     PossiblyEvaluatedPropertyValue<Color> constantValueRed(Color::red());
     PossiblyEvaluatedPropertyValue<Color> constantValueGreen(Color::green());
@@ -302,7 +321,7 @@ TEST(PropertyExpression, WithinExpression) {
 
     // evaluation test with valid geojson source and valid point features
     {
-        auto getPointFeature = [&canonicalTileID](const Point<double>& testPoint) -> StubGeometryTileFeature {
+        auto getPointFeature = [&canonicalTileID](const Point<double> &testPoint) -> StubGeometryTileFeature {
             auto geoPoint = convertGeometry(testPoint, canonicalTileID);
             StubGeometryTileFeature pointFeature(FeatureType::Point, geoPoint);
             return pointFeature;
@@ -439,7 +458,7 @@ TEST(PropertyExpression, WithinExpressionAntiMeridian) {
         ASSERT_TRUE(expression);
         PropertyExpression<bool> propExpr(std::move(expression));
 
-        auto getPointFeature = [&canonicalTileID](const Point<double>& testPoint) -> StubGeometryTileFeature {
+        auto getPointFeature = [&canonicalTileID](const Point<double> &testPoint) -> StubGeometryTileFeature {
             auto geoPoint = convertGeometry(testPoint, canonicalTileID);
             StubGeometryTileFeature pointFeature(FeatureType::Point, geoPoint);
             return pointFeature;
@@ -520,7 +539,6 @@ TEST(PropertyExpression, DistanceExpression) {
         auto evaluatedResult =
             propExpr.evaluate(EvaluationContext(&pointFeature).withCanonicalTileID(&canonicalTileID), invalidResult);
         EXPECT_NEAR(491.307, evaluatedResult, 0.01);
-
     }
 
     // Evaluation test with Point to MultiPoint distance

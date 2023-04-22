@@ -18,12 +18,11 @@ namespace mbgl {
 
 class HTTPRequest;
 
-class HTTPFileSource::Impl : public QObject
-{
+class HTTPFileSource::Impl : public QObject {
     Q_OBJECT
 
 public:
-    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
+    Impl(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions);
     virtual ~Impl() = default;
 
     void request(HTTPRequest *);
