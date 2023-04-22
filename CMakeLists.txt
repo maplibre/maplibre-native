@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
+option(MBGL_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
 option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
@@ -9,6 +10,19 @@ option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
 option(MBGL_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
+
+if (MBGL_WITH_CLANG_TIDY)
+    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+    if(NOT CLANG_TIDY_COMMAND)
+        message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
+    else()
+        message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
+    endif()
+    # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized), 
+    # that's why we need to disable this `unknown-warning-option` here. 
+    # We could check if current compiler supports particular flag before enabling it.
+    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
+endif()
 
 if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
@@ -969,6 +983,11 @@ target_sources(
     ${INCLUDE_FILES}
     ${SRC_FILES}
 )
+
+if (MBGL_WITH_CLANG_TIDY)
+    set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()
+
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
 source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
 

@@ -90,7 +90,7 @@ public:
         auto &allocator = doc.GetAllocator();
 
         std::map<std::string, std::string> values;
-        auto db = mapbox::sqlite::Database::open(path.c_str(), mapbox::sqlite::ReadOnly);
+        auto db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
 
         mapbox::sqlite::Statement meta(db, "SELECT * from metadata");
         for (mapbox::sqlite::Query q(meta); q.run();) {
@@ -268,7 +268,7 @@ private:
             return ptr->second;
         };
 
-        auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(path, mapbox::sqlite::Database::open(path.c_str(), mapbox::sqlite::ReadOnly)));
+        auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)));
         return ptr2.first->second;
     }
 

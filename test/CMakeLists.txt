@@ -238,3 +238,7 @@ if(WIN32)
 endif()
 
 set_property(TARGET mbgl-test PROPERTY FOLDER Core)
+
+if (MBGL_WITH_CLANG_TIDY)
+    set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()

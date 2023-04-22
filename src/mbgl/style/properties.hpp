@@ -5,7 +5,6 @@
 #include <mbgl/renderer/transition_parameters.hpp>
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
-#include <mbgl/renderer/transition_parameters.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
 
