@@ -6,16 +6,12 @@ namespace gfx {
 
 ShaderRegistry::ShaderRegistry() {}
 
-bool ShaderRegistry::isShader(const std::string& shaderName)
-    const noexcept
-{
+bool ShaderRegistry::isShader(const std::string& shaderName) const noexcept {
     std::shared_lock<std::shared_mutex> readerLock(programLock);
     return programs.find(shaderName) != programs.end();
 }
 
-const std::shared_ptr<gfx::Shader> ShaderRegistry::getShader(const std::string& shaderName)
-    const noexcept
-{
+const std::shared_ptr<gfx::Shader> ShaderRegistry::getShader(const std::string& shaderName) const noexcept {
     std::shared_lock<std::shared_mutex> readerLock(programLock);
     const auto it = programs.find(shaderName);
     if (it == programs.end()) {
@@ -25,15 +21,11 @@ const std::shared_ptr<gfx::Shader> ShaderRegistry::getShader(const std::string& 
     return it->second;
 }
 
-bool ShaderRegistry::replaceShader(
-    std::shared_ptr<gfx::Shader>&& shader) noexcept
-{
+bool ShaderRegistry::replaceShader(std::shared_ptr<gfx::Shader>&& shader) noexcept {
     return replaceShader(std::move(shader), std::string{shader->typeName()});
 }
 
-bool ShaderRegistry::replaceShader(std::shared_ptr<Shader>&& shader,
-    const std::string& shaderName) noexcept
-{
+bool ShaderRegistry::replaceShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(programLock);
     if (programs.find(shaderName) == programs.end()) {
         return false;
@@ -43,15 +35,11 @@ bool ShaderRegistry::replaceShader(std::shared_ptr<Shader>&& shader,
     return true;
 }
 
-bool ShaderRegistry::registerShader(
-    std::shared_ptr<gfx::Shader>&& shader) noexcept
-{
+bool ShaderRegistry::registerShader(std::shared_ptr<gfx::Shader>&& shader) noexcept {
     return registerShader(std::move(shader), std::string{shader->typeName()});
 }
 
-bool ShaderRegistry::registerShader(std::shared_ptr<Shader>&& shader,
-    const std::string& shaderName) noexcept
-{
+bool ShaderRegistry::registerShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(programLock);
     if (programs.find(shaderName) != programs.end()) {
         return false;
@@ -61,5 +49,5 @@ bool ShaderRegistry::registerShader(std::shared_ptr<Shader>&& shader,
     return true;
 }
 
-} // namespace gl
+} // namespace gfx
 } // namespace mbgl

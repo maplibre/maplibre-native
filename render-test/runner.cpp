@@ -101,7 +101,8 @@ void TestRunner::registerProxyFileSource() {
 
         auto resourceLoaderFactory =
             fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::ResourceLoader);
-        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions,
+                                                                           const mbgl::ClientOptions& clientOptions) {
             assert(defaultFactory);
             std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
             return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
@@ -257,13 +258,12 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
             expectedImage = mbgl::decodeImage(*maybeExpectedImage);
 
-            pixels = static_cast<double>(
-                mapbox::pixelmatch(actualImage.data.get(),
-                                   expectedImage.data.get(),
-                                   expectedImage.size.width,
-                                   expectedImage.size.height,
-                                   imageDiff.data.get(),
-                                   0.1285) // Defined in GL JS
+            pixels = static_cast<double>(mapbox::pixelmatch(actualImage.data.get(),
+                                                            expectedImage.data.get(),
+                                                            expectedImage.size.width,
+                                                            expectedImage.size.height,
+                                                            imageDiff.data.get(),
+                                                            0.1285) // Defined in GL JS
             );
 
             metadata.diff = mbgl::encodePNG(imageDiff);
@@ -350,7 +350,9 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
                 return;
             }
 
-            auto result = checkValue(static_cast<float>(expected.second.size), static_cast<float>(actual->second.size), actual->second.tolerance);
+            auto result = checkValue(static_cast<float>(expected.second.size),
+                                     static_cast<float>(actual->second.size),
+                                     actual->second.tolerance);
             if (!std::get<bool>(result)) {
                 std::stringstream ss;
                 ss << "File size does not match at probe \"" << expected.first << "\" for file \""
@@ -658,7 +660,8 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
 
 LatLng getTileCenterCoordinates(const UnwrappedTileID& tileId) {
     double scale = (1 << tileId.canonical.z);
-    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D, (tileId.canonical.y + 0.5) * util::tileSize_D};
+    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D,
+                             (tileId.canonical.y + 0.5) * util::tileSize_D};
     return Projection::unproject(tileCenter, scale);
 }
 
@@ -677,10 +680,13 @@ uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float 
 
 } // namespace
 
-TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions)
+TestRunner::Impl::Impl(const TestMetadata& metadata,
+                       const mbgl::ResourceOptions& resourceOptions,
+                       const mbgl::ClientOptions& clientOptions)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
+      fileSource(mbgl::FileSourceManager::get()->getFileSource(
+          mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
           *observer.get(),
           mbgl::MapOptions()

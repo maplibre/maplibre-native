@@ -13,13 +13,11 @@ size_t mergeFromRight(std::vector<SymbolFeature>& features,
                       Index::iterator left,
                       size_t rightKey,
                       GeometryCollection& geom) {
-
     const size_t index = left->second;
     rightIndex.erase(left);
     rightIndex[rightKey] = index;
     features[index].geometry[0].pop_back();
-    features[index].geometry[0].insert(
-        features[index].geometry[0].end(), geom[0].begin(), geom[0].end());
+    features[index].geometry[0].insert(features[index].geometry[0].end(), geom[0].begin(), geom[0].end());
     geom[0].clear();
     return index;
 }
@@ -29,13 +27,11 @@ size_t mergeFromLeft(std::vector<SymbolFeature>& features,
                      Index::iterator right,
                      size_t leftKey,
                      GeometryCollection& geom) {
-
     const size_t index = right->second;
     leftIndex.erase(right);
     leftIndex[leftKey] = index;
     geom[0].pop_back();
-    geom[0].insert(
-        geom[0].end(), features[index].geometry[0].begin(), features[index].geometry[0].end());
+    geom[0].insert(geom[0].end(), features[index].geometry[0].begin(), features[index].geometry[0].end());
     features[index].geometry[0].clear();
     std::swap(features[index].geometry[0], geom[0]);
     return index;
@@ -56,7 +52,7 @@ void mergeLines(std::vector<SymbolFeature>& features) {
         if (!feature.formattedText || geometry.empty() || geometry[0].empty()) {
             continue;
         }
-        
+
         // TODO: Key should include formatting options (see https://github.com/mapbox/mapbox-gl-js/issues/3645)
 
         const size_t leftKey = getKey(feature.formattedText->rawText(), geometry[0].front());

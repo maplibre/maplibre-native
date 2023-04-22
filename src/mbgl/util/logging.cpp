@@ -60,11 +60,11 @@ std::unique_ptr<Log::Observer> Log::removeObserver() {
     return observer;
 }
 
-void Log::record(EventSeverity severity, Event event, const std::string &msg) {
+void Log::record(EventSeverity severity, Event event, const std::string& msg) {
     get()->impl->record(severity, event, -1, msg);
 }
 
-void Log::record(EventSeverity severity, Event event, int64_t code, const std::string &msg) {
+void Log::record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
     get()->impl->record(severity, event, code, msg);
 }
 
@@ -74,8 +74,7 @@ void Log::record(EventSeverity severity,
                  const std::string& msg,
                  const std::optional<std::string>& threadName) {
     std::lock_guard<std::mutex> lock(mutex);
-    if (currentObserver && severity != EventSeverity::Debug &&
-        currentObserver->onRecord(severity, event, code, msg)) {
+    if (currentObserver && severity != EventSeverity::Debug && currentObserver->onRecord(severity, event, code, msg)) {
         return;
     }
 

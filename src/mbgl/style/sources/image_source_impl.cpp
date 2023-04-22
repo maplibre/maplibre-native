@@ -10,10 +10,7 @@ ImageSource::Impl::Impl(const Impl& other, std::array<LatLng, 4> coords_)
     : Source::Impl(other), coords(coords_), image(other.image) {}
 
 ImageSource::Impl::Impl(const Impl& rhs, PremultipliedImage&& image_)
-    : Source::Impl(rhs),
-    coords(rhs.coords),
-    image(std::make_shared<PremultipliedImage>(std::move(image_))) {
-}
+    : Source::Impl(rhs), coords(rhs.coords), image(std::make_shared<PremultipliedImage>(std::move(image_))) {}
 
 ImageSource::Impl::~Impl() = default;
 

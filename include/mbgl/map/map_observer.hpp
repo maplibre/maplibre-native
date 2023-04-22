@@ -28,15 +28,9 @@ public:
         return mapObserver;
     }
 
-    enum class CameraChangeMode : uint32_t {
-        Immediate,
-        Animated
-    };
+    enum class CameraChangeMode : uint32_t { Immediate, Animated };
 
-    enum class RenderMode : uint32_t {
-        Partial,
-        Full
-    };
+    enum class RenderMode : uint32_t { Partial, Full };
 
     struct RenderFrameStatus {
         RenderMode mode;
@@ -63,7 +57,7 @@ public:
     virtual bool onCanRemoveUnusedStyleImage(const std::string&) { return true; }
     // Observe this event to easily mutate or observe shaders as soon
     // as the registry becomes available.
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 };
 
 } // namespace mbgl

@@ -25,28 +25,22 @@ public:
 };
 
 struct LightAnchor : LightProperty<LightAnchorType> {
-    static LightAnchorType defaultValue() {
-        return LightAnchorType::Viewport;
-    }
+    static LightAnchorType defaultValue() { return LightAnchorType::Viewport; }
 };
 
 struct LightPosition : LightProperty<Position> {
     static Position defaultValue() {
-        std::array<float, 3> default_ = { { 1.15f, 210.f, 30.f } };
-        return Position{ { default_ } };
+        std::array<float, 3> default_ = {{1.15f, 210.f, 30.f}};
+        return Position{{default_}};
     }
 };
 
 struct LightColor : LightProperty<Color> {
-    static Color defaultValue() {
-        return Color::white();
-    }
+    static Color defaultValue() { return Color::white(); }
 };
 
 struct LightIntensity : LightProperty<float> {
-    static float defaultValue() {
-        return 0.5;
-    }
+    static float defaultValue() { return 0.5; }
 };
 
 using LightProperties = Properties<LightAnchor, LightPosition, LightColor, LightIntensity>;

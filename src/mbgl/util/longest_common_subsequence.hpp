@@ -24,10 +24,7 @@ namespace mbgl {
     TODO: implement the O(N) space refinement presented in the paper.
 */
 template <class InIt, class OutIt, class Equal>
-OutIt longest_common_subsequence(InIt a, InIt endA,
-                                 InIt b, InIt endB,
-                                 OutIt outIt,
-                                 Equal eq) {
+OutIt longest_common_subsequence(InIt a, InIt endA, InIt b, InIt endB, OutIt outIt, Equal eq) {
     const std::ptrdiff_t N = endA - a;
     const std::ptrdiff_t M = endB - b;
     const std::ptrdiff_t D = N + M;
@@ -39,7 +36,7 @@ OutIt longest_common_subsequence(InIt a, InIt endA,
     std::vector<std::vector<std::ptrdiff_t>> vs;
 
     // Self-executing lambda to allow `return` to break from inner loop, and avoid shadowing `v`.
-    [&] () {
+    [&]() {
         std::vector<std::ptrdiff_t> v;
         v.resize(2 * D + 1);
         v[1] = 0;
@@ -50,8 +47,8 @@ OutIt longest_common_subsequence(InIt a, InIt endA,
         for (std::ptrdiff_t d = 0; d <= D; ++d) {
             for (std::ptrdiff_t k = -d; k <= d; k += 2) {
                 std::ptrdiff_t x = (k == -d || (k != d && v.at(k - 1 + D) < v.at(k + 1 + D)))
-                    ? v.at(k + 1 + D)       // moving down
-                    : v.at(k - 1 + D) + 1;  // moving right
+                                       ? v.at(k + 1 + D)      // moving down
+                                       : v.at(k - 1 + D) + 1; // moving right
 
                 std::ptrdiff_t y = x - k;
 
@@ -96,10 +93,8 @@ OutIt longest_common_subsequence(InIt a, InIt endA,
     return std::copy(lcsReverse.rbegin(), lcsReverse.rend(), outIt);
 }
 
-template < typename InIt, typename OutIt >
-OutIt longest_common_subsequence(InIt a, InIt endA,
-                                 InIt b, InIt endB,
-                                 OutIt outIt) {
+template <typename InIt, typename OutIt>
+OutIt longest_common_subsequence(InIt a, InIt endA, InIt b, InIt endB, OutIt outIt) {
     return longest_common_subsequence(a, endA, b, endB, outIt, std::equal_to<>());
 }
 

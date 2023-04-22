@@ -36,11 +36,11 @@ bool LocalGlyphRasterizer::Impl::isConfigured() const {
 LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fontFamily)
     : impl(std::make_unique<Impl>(fontFamily)) {}
 
-LocalGlyphRasterizer::~LocalGlyphRasterizer() {
-}
+LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
-    return impl->isConfigured() && impl->metrics->inFont(glyphID) && util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
+    return impl->isConfigured() && impl->metrics->inFont(glyphID) &&
+           util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
 }
 
 Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
@@ -80,7 +80,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     memcpy(img.get(), image.constBits(), image.byteCount());
 #endif
 
-    glyph.bitmap = AlphaImage { size, std::move(img) };
+    glyph.bitmap = AlphaImage{size, std::move(img)};
 
     return glyph;
 }

@@ -33,9 +33,7 @@ class GeoJSONVTData final : public GeoJSONData {
 
     Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final { return {}; }
 
-    std::uint8_t getClusterExpansionZoom(std::uint32_t) final {
-        return 0;
-    }
+    std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
 
     std::shared_ptr<Scheduler> getScheduler() final { return scheduler; }
 

@@ -41,7 +41,7 @@ public:
     std::array<uint16_t, 4> tlbr() const {
         const auto _tl = tl();
         const auto _br = br();
-        return {{ _tl[0], _tl[1], _br[0], _br[1] }};
+        return {{_tl[0], _tl[1], _br[0], _br[1]}};
     }
 
     std::array<float, 2> displaySize() const {
@@ -72,6 +72,8 @@ public:
     std::vector<ImagePatch> getImagePatchesAndUpdateVersions(const ImageManager&);
 };
 
-ImageAtlas makeImageAtlas(const ImageMap&, const ImageMap&, const std::unordered_map<std::string, uint32_t>& versionMap);
+ImageAtlas makeImageAtlas(const ImageMap&,
+                          const ImageMap&,
+                          const std::unordered_map<std::string, uint32_t>& versionMap);
 
 } // namespace mbgl

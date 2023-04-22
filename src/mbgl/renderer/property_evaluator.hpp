@@ -11,8 +11,7 @@ public:
     using ResultType = T;
 
     PropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
-        : parameters(parameters_),
-          defaultValue(std::move(defaultValue_)) {}
+        : parameters(parameters_), defaultValue(std::move(defaultValue_)) {}
 
     T operator()(const style::Undefined&) const { return defaultValue; }
     T operator()(const T& constant) const { return constant; }

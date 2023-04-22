@@ -13,9 +13,7 @@ namespace mbgl {
 static GlyphManagerObserver nullObserver;
 
 GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_)
-    : observer(&nullObserver),
-      localGlyphRasterizer(std::move(localGlyphRasterizer_)) {
-}
+    : observer(&nullObserver), localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
 
 GlyphManager::~GlyphManager() = default;
 
@@ -65,7 +63,10 @@ Glyph GlyphManager::generateLocalSDF(const FontStack& fontStack, GlyphID glyphID
     return local;
 }
 
-void GlyphManager::requestRange(GlyphRequest& request, const FontStack& fontStack, const GlyphRange& range, FileSource& fileSource) {
+void GlyphManager::requestRange(GlyphRequest& request,
+                                const FontStack& fontStack,
+                                const GlyphRange& range,
+                                FileSource& fileSource) {
     if (request.req) {
         return;
     }
@@ -158,9 +159,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
 }
 
 void GlyphManager::evict(const std::set<FontStack>& keep) {
-    util::erase_if(entries, [&] (const auto& entry) {
-        return keep.count(entry.first) == 0;
-    });
+    util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
 } // namespace mbgl

@@ -6,13 +6,13 @@
 using namespace mbgl;
 using SourceType = mbgl::style::SourceType;
 
-
 TEST(OfflineTilePyramidRegionDefinition, EncodeDecode) {
-    OfflineTilePyramidRegionDefinition region("maptiler://style", LatLngBounds::hull({ 37.6609, -122.5744 }, { 37.8271, -122.3204 }), 0, 20, 1.0, true);
+    OfflineTilePyramidRegionDefinition region(
+        "maptiler://style", LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204}), 0, 20, 1.0, true);
 
     auto encoded = encodeOfflineRegionDefinition(region);
     auto decoded = decodeOfflineRegionDefinition(encoded).get<OfflineTilePyramidRegionDefinition>();
-    
+
     EXPECT_EQ(decoded.styleURL, region.styleURL);
     EXPECT_EQ(decoded.minZoom, region.minZoom);
     EXPECT_EQ(decoded.maxZoom, region.maxZoom);
@@ -27,7 +27,7 @@ TEST(OfflineGeometryRegionDefinition, EncodeDecode) {
 
     auto encoded = encodeOfflineRegionDefinition(region);
     auto decoded = decodeOfflineRegionDefinition(encoded).get<OfflineGeometryRegionDefinition>();
-    
+
     EXPECT_EQ(decoded.styleURL, region.styleURL);
     EXPECT_EQ(decoded.minZoom, region.minZoom);
     EXPECT_EQ(decoded.maxZoom, region.maxZoom);

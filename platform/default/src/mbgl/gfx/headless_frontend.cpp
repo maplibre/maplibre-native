@@ -32,7 +32,7 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
       asyncInvalidate([this] {
           if (renderer && updateParameters) {
               auto startTime = mbgl::util::MonotonicTimer::now();
-              gfx::BackendScope guard {*getBackend()};
+              gfx::BackendScope guard{*getBackend()};
 
               // onStyleImageMissing might be called during a render. The user implemented method
               // could trigger a call to MLNRenderFrontend#update which overwrites `updateParameters`.
@@ -82,8 +82,7 @@ gfx::RendererBackend* HeadlessFrontend::getBackend() {
 }
 
 CameraOptions HeadlessFrontend::getCameraOptions() {
-    if (updateParameters)
-        return RendererState::getCameraOptions(*updateParameters);
+    if (updateParameters) return RendererState::getCameraOptions(*updateParameters);
 
     static CameraOptions nullCamera;
     return nullCamera;
@@ -117,7 +116,7 @@ ScreenCoordinate HeadlessFrontend::pixelForLatLng(const LatLng& coordinate) {
         return RendererState::pixelForLatLng(*updateParameters, coordinate);
     }
 
-    return ScreenCoordinate {};
+    return ScreenCoordinate{};
 }
 
 LatLng HeadlessFrontend::latLngForPixel(const ScreenCoordinate& point) {
@@ -125,14 +124,14 @@ LatLng HeadlessFrontend::latLngForPixel(const ScreenCoordinate& point) {
         return RendererState::latLngForPixel(*updateParameters, point);
     }
 
-    return LatLng {};
+    return LatLng{};
 }
 
 void HeadlessFrontend::setSize(Size size_) {
     if (size != size_) {
         size = size_;
-        backend->setSize({ static_cast<uint32_t>(size_.width * pixelRatio),
-                           static_cast<uint32_t>(size_.height * pixelRatio) });
+        backend->setSize(
+            {static_cast<uint32_t>(size_.width * pixelRatio), static_cast<uint32_t>(size_.height * pixelRatio)});
     }
 }
 
@@ -143,7 +142,7 @@ PremultipliedImage HeadlessFrontend::readStillImage() {
 HeadlessFrontend::RenderResult HeadlessFrontend::render(Map& map) {
     HeadlessFrontend::RenderResult result;
     std::exception_ptr error;
-    gfx::BackendScope guard { *getBackend() };
+    gfx::BackendScope guard{*getBackend()};
 
     map.renderStill([&](const std::exception_ptr& e) {
         if (e) {

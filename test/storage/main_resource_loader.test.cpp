@@ -376,7 +376,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorEtag.emplace("snowfall");
 
@@ -413,7 +413,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorEtag.emplace("sunshine");
 
@@ -450,7 +450,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheFull)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
 
     using namespace std::chrono_literals;
@@ -487,7 +487,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorModified.emplace(Seconds(1420070400)); // January 1, 2015
 
@@ -525,7 +525,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorModified.emplace(Seconds(1417392000)); // December 1, 2014
 
@@ -627,7 +627,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
 
     // using namespace std::chrono_literals;
@@ -693,7 +693,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
         EXPECT_LE(util::now(), *res.expires);
         EXPECT_TRUE(res.mustRevalidate);
         ASSERT_TRUE(res.modified);
-        EXPECT_EQ(Timestamp{ Seconds(1417392000) }, *res.modified);
+        EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
         ASSERT_TRUE(res.etag);
         EXPECT_EQ("snowfall", *res.etag);
         loop.stop();
@@ -827,25 +827,17 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoDoubleDispatch)) {
 }
 
 TEST(MainResourceLoader, ResourceOptions) {
-    MainResourceLoader fs(
-        ResourceOptions().withTileServerOptions(
-                TileServerOptions()
-                    .withBaseURL("originalBaseURL")
-                    .withUriSchemeAlias("originalAlias")
-                ),
-        ClientOptions()
-    );
-    
-    fs.setResourceOptions(ResourceOptions()
-        .withTileServerOptions(
-              TileServerOptions()
-                  .withBaseURL("updatedBaseURL")
-                  .withUriSchemeAlias("updatedAlias")
-              ).clone()
-    );
-    
+    MainResourceLoader fs(ResourceOptions().withTileServerOptions(
+                              TileServerOptions().withBaseURL("originalBaseURL").withUriSchemeAlias("originalAlias")),
+                          ClientOptions());
+
+    fs.setResourceOptions(
+        ResourceOptions()
+            .withTileServerOptions(TileServerOptions().withBaseURL("updatedBaseURL").withUriSchemeAlias("updatedAlias"))
+            .clone());
+
     auto updatedOptions = fs.getResourceOptions().tileServerOptions();
-    
+
     EXPECT_EQ(updatedOptions.baseURL(), "updatedBaseURL");
-    EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");  
+    EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");
 }

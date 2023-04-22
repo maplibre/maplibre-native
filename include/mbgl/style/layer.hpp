@@ -84,7 +84,7 @@ struct LayerTypeInfo {
  */
 class Layer {
 public:
-    Layer(const Layer& ) = delete;
+    Layer(const Layer&) = delete;
     Layer& operator=(const Layer&) = delete;
 
     virtual ~Layer();
@@ -126,7 +126,6 @@ public:
     // Create a layer, copying all properties except id and paint properties from this layer.
     virtual std::unique_ptr<Layer> cloneRef(const std::string& id) const = 0;
 
-    
     void setObserver(LayerObserver*);
 
     // For use in SDK bindings, which store a reference to a platform-native peer
@@ -137,17 +136,15 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept;
 
-    mapbox::base::WeakPtr<Layer> makeWeakPtr() {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Layer> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
 
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
     virtual std::optional<conversion::Error> setPropertyInternal(const std::string& name,
-                                                            const conversion::Convertible& value) = 0;
+                                                                 const conversion::Convertible& value) = 0;
     LayerObserver* observer;
-    mapbox::base::WeakPtrFactory<Layer> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Layer> weakFactory{this};
 
 private:
     std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);

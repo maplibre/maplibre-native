@@ -14,5 +14,5 @@ public:
         if (layerChanged) layerChanged(layer);
     }
 
-    std::function<void (Layer&)> layerChanged;
+    std::function<void(Layer&)> layerChanged;
 };

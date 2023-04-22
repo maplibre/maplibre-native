@@ -77,7 +77,7 @@ mbgl::Value Formatted::toObject() const {
 } // namespace expression
 
 namespace conversion {
-    
+
 using namespace mbgl::style::expression;
 
 std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& value, Error& error) const {
@@ -180,4 +180,3 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
-

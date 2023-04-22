@@ -31,24 +31,22 @@ RenderBackgroundLayer::RenderBackgroundLayer(Immutable<style::BackgroundLayer::I
 
 RenderBackgroundLayer::~RenderBackgroundLayer() = default;
 
-void RenderBackgroundLayer::transition(const TransitionParameters &parameters) {
+void RenderBackgroundLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
-void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters &parameters) {
-    auto properties = makeMutable<BackgroundLayerProperties>(
-        staticImmutableCast<BackgroundLayer::Impl>(baseImpl),
-        parameters.getCrossfadeParameters(),
-        unevaluated.evaluate(parameters));
+void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    auto properties = makeMutable<BackgroundLayerProperties>(staticImmutableCast<BackgroundLayer::Impl>(baseImpl),
+                                                             parameters.getCrossfadeParameters(),
+                                                             unevaluated.evaluate(parameters));
 
-    passes = properties->evaluated.get<style::BackgroundOpacity>() == 0.0f
-        ? RenderPass::None
-        : (!unevaluated.get<style::BackgroundPattern>().isUndefined()
-           || properties->evaluated.get<style::BackgroundOpacity>() < 1.0f
-           || properties->evaluated.get<style::BackgroundColor>().a < 1.0f)
-        ? RenderPass::Translucent
-        // Supply both - evaluated based on opaquePassCutoff in render().
-        : RenderPass::Opaque | RenderPass::Translucent;
+    passes = properties->evaluated.get<style::BackgroundOpacity>() == 0.0f ? RenderPass::None
+             : (!unevaluated.get<style::BackgroundPattern>().isUndefined() ||
+                properties->evaluated.get<style::BackgroundOpacity>() < 1.0f ||
+                properties->evaluated.get<style::BackgroundColor>().a < 1.0f)
+                 ? RenderPass::Translucent
+                 // Supply both - evaluated based on opaquePassCutoff in render().
+                 : RenderPass::Opaque | RenderPass::Translucent;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 }
@@ -79,10 +77,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
                                             properties,
                                             static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings = program.computeAllAttributeBindings(
-            *parameters.staticData.tileVertexBuffer,
-            paintAttributeData,
-            properties
-        );
+            *parameters.staticData.tileVertexBuffer, paintAttributeData, properties);
 
         checkRenderability(parameters, program.activeBindingCount(allAttributeBindings));
 
@@ -116,8 +111,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         std::optional<ImagePosition> imagePosB =
             parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().to.id());
 
-        if (!imagePosA || !imagePosB)
-            return;
+        if (!imagePosA || !imagePosB) return;
 
         uint32_t i = 0;
         for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
@@ -137,9 +131,11 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
                  i++);
         }
     } else {
-        auto backgroundRenderPass = (evaluated.get<BackgroundColor>().a >= 1.0f
-            && evaluated.get<BackgroundOpacity>() >= 1.0f
-            && parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
+        auto backgroundRenderPass =
+            (evaluated.get<BackgroundColor>().a >= 1.0f && evaluated.get<BackgroundOpacity>() >= 1.0f &&
+             parameters.currentLayer >= parameters.opaquePassCutoff)
+                ? RenderPass::Opaque
+                : RenderPass::Translucent;
         if (parameters.pass != backgroundRenderPass) {
             return;
         }
@@ -163,7 +159,7 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
         return std::nullopt;
     }
 
-    return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    return {evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>()};
 }
 
 namespace {
@@ -172,14 +168,14 @@ void addPatternIfNeeded(const std::string& id, const LayerPrepareParameters& par
         if (auto* image = params.imageManager.getImage(id)) {
             params.patternAtlas.addPattern(*image);
         }
-    }  
+    }
 }
 } // namespace
 
 void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
     if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        // Ensures that the pattern bitmap gets copied to atlas bitmap. 
+        // Ensures that the pattern bitmap gets copied to atlas bitmap.
         // Atlas bitmap is uploaded to atlas texture in upload.
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().from.id(), params);
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().to.id(), params);

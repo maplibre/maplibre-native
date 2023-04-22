@@ -147,9 +147,7 @@ template bool segmentIntersectSegment(const Point<int64_t>& a,
 template bool rayIntersect(const Point<int64_t>& p, const Point<int64_t>& p1, const Point<int64_t>& p2);
 template bool pointOnBoundary(const Point<int64_t>& p, const Point<int64_t>& p1, const Point<int64_t>& p2);
 template bool lineIntersectPolygon(const Point<int64_t>& p1, const Point<int64_t>& p2, const Polygon<int64_t>& polygon);
-template bool pointWithinPolygon(const Point<int64_t>& point,
-                                 const Polygon<int64_t>& polygon,
-                                 bool trueOnBoundary);
+template bool pointWithinPolygon(const Point<int64_t>& point, const Polygon<int64_t>& polygon, bool trueOnBoundary);
 template bool pointWithinPolygons(const Point<int64_t>& point,
                                   const MultiPolygon<int64_t>& polygons,
                                   bool trueOnBoundary);
@@ -162,8 +160,6 @@ template bool segmentIntersectSegment(const Point<double>& a,
                                       const Point<double>& b,
                                       const Point<double>& c,
                                       const Point<double>& d);
-template bool pointWithinPolygon(const Point<double>& point,
-                                 const Polygon<double>& polygon,
-                                 bool trueOnBoundary);
+template bool pointWithinPolygon(const Point<double>& point, const Polygon<double>& polygon, bool trueOnBoundary);
 
 } // namespace mbgl

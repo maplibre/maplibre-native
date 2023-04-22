@@ -15,7 +15,7 @@ struct ShapedTextOrientations {
     Shaping horizontal;
     Shaping vertical;
     // The following are used with variable text placement on.
-    Shaping& right = horizontal; 
+    Shaping& right = horizontal;
     Shaping center;
     Shaping left;
     bool singleLine = false;

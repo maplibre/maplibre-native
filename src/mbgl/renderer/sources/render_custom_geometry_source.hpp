@@ -14,7 +14,7 @@ public:
                 bool needsRendering,
                 bool needsRelayout,
                 const TileParameters&) override;
-    
+
 private:
     const style::CustomGeometrySource::Impl& impl() const;
 };

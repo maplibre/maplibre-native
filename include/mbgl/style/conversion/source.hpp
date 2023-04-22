@@ -13,7 +13,9 @@ namespace conversion {
 template <>
 struct Converter<std::unique_ptr<Source>> {
 public:
-    std::optional<std::unique_ptr<Source>> operator()(const Convertible& value, Error& error, const std::string& id) const;
+    std::optional<std::unique_ptr<Source>> operator()(const Convertible& value,
+                                                      Error& error,
+                                                      const std::string& id) const;
 };
 
 } // namespace conversion

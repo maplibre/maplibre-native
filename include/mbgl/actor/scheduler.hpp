@@ -102,4 +102,4 @@ protected:
     }
 };
 
-} /// namespace mbgl
+} // namespace mbgl

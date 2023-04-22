@@ -161,7 +161,7 @@ void Style::Impl::addSource(std::unique_ptr<Source> source) {
 
 std::unique_ptr<Source> Style::Impl::removeSource(const std::string& id) {
     // Check if source is in use
-    for (const auto& layer: layers) {
+    for (const auto& layer : layers) {
         if (layer->getSourceID() == id) {
             Log::Warning(Event::General, "Source '" + id + "' is in use, cannot remove");
             return nullptr;
@@ -264,7 +264,7 @@ bool Style::Impl::isLoaded() const {
         return false;
     }
 
-    for (const auto& source: sources) {
+    for (const auto& source : sources) {
         if (!source->loaded) {
             return false;
         }

@@ -29,15 +29,15 @@ static auto *getScheduler() {
 
 } // namespace
 
-
 namespace QMapLibreGL {
 
 MapRenderer::MapRenderer(qreal pixelRatio, Settings::GLContextMode mode, const QString &localFontFamily)
     : m_backend(static_cast<mbgl::gfx::ContextMode>(mode)),
-      m_renderer(std::make_unique<mbgl::Renderer>(m_backend, pixelRatio,
-                 localFontFamily.isEmpty() ? std::nullopt : std::optional<std::string> { localFontFamily.toStdString() }))
-    , m_forceScheduler(needsToForceScheduler())
-{
+      m_renderer(std::make_unique<mbgl::Renderer>(
+          m_backend,
+          pixelRatio,
+          localFontFamily.isEmpty() ? std::nullopt : std::optional<std::string>{localFontFamily.toStdString()})),
+      m_forceScheduler(needsToForceScheduler()) {
     // If we don't have a Scheduler on this thread, which
     // is usually the case for render threads, use a shared
     // dummy scheduler that needs to be explicitly forced to
@@ -53,26 +53,22 @@ MapRenderer::MapRenderer(qreal pixelRatio, Settings::GLContextMode mode, const Q
     }
 }
 
-MapRenderer::~MapRenderer()
-{
+MapRenderer::~MapRenderer() {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void MapRenderer::updateParameters(std::shared_ptr<mbgl::UpdateParameters> newParameters)
-{
+void MapRenderer::updateParameters(std::shared_ptr<mbgl::UpdateParameters> newParameters) {
     std::lock_guard<std::mutex> lock(m_updateMutex);
     m_updateParameters = std::move(newParameters);
 }
 
-void MapRenderer::updateFramebuffer(quint32 fbo, const mbgl::Size &size)
-{
+void MapRenderer::updateFramebuffer(quint32 fbo, const mbgl::Size &size) {
     MBGL_VERIFY_THREAD(tid);
 
     m_backend.updateFramebuffer(fbo, size);
 }
 
-void MapRenderer::render()
-{
+void MapRenderer::render() {
     MBGL_VERIFY_THREAD(tid);
 
     std::shared_ptr<mbgl::UpdateParameters> params;
@@ -97,8 +93,7 @@ void MapRenderer::render()
     }
 }
 
-void MapRenderer::setObserver(std::shared_ptr<mbgl::RendererObserver> observer)
-{
+void MapRenderer::setObserver(std::shared_ptr<mbgl::RendererObserver> observer) {
     m_renderer->setObserver(observer.get());
 }
 

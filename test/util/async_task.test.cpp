@@ -16,8 +16,7 @@ namespace {
 
 class TestWorker {
 public:
-    TestWorker(AsyncTask *async_)
-        : async(async_) {}
+    TestWorker(AsyncTask *async_) : async(async_) {}
 
     void run() {
         for (unsigned i = 0; i < 100000; ++i) {
@@ -33,9 +32,7 @@ public:
         cb();
     }
 
-    void sync(std::promise<void> barrier) {
-        barrier.set_value();
-    }
+    void sync(std::promise<void> barrier) { barrier.set_value(); }
 
 private:
     AsyncTask *async;
@@ -142,7 +139,9 @@ TEST(AsyncTask, ThreadSafety) {
 
     for (unsigned i = 0; i < numThreads; ++i) {
         // The callback runs on the worker, thus the atomic type.
-        workerRef.invoke(&TestWorker::runWithCallback, [&] { if (!--completed) loop.stop(); });
+        workerRef.invoke(&TestWorker::runWithCallback, [&] {
+            if (!--completed) loop.stop();
+        });
     }
 
     loop.run();

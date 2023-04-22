@@ -12,26 +12,11 @@ namespace mbgl {
 
 class Resource {
 public:
-    enum Kind : uint8_t {
-        Unknown = 0,
-        Style,
-        Source,
-        Tile,
-        Glyphs,
-        SpriteImage,
-        SpriteJSON,
-        Image
-    };
+    enum Kind : uint8_t { Unknown = 0, Style, Source, Tile, Glyphs, SpriteImage, SpriteJSON, Image };
 
-    enum class Priority : bool {
-        Regular,
-        Low
-    };
+    enum class Priority : bool { Regular, Low };
 
-    enum class Usage : bool {
-        Online,
-        Offline
-    };
+    enum class Usage : bool { Online, Offline };
 
     enum class StoragePolicy : bool { Permanent, Volatile };
 
@@ -44,24 +29,20 @@ public:
     };
 
     enum class LoadingMethod : uint8_t {
-        None        = 0b00,
-        Cache       = 0b01,
-        Network     = 0b10,
+        None = 0b00,
+        Cache = 0b01,
+        Network = 0b10,
 
-        CacheOnly   = Cache,
+        CacheOnly = Cache,
         NetworkOnly = Network,
-        All         = Cache | Network,
+        All = Cache | Network,
     };
 
     Resource(Kind kind_,
              std::string url_,
              std::optional<TileData> tileData_ = std::nullopt,
              LoadingMethod loadingMethod_ = LoadingMethod::All)
-        : kind(kind_),
-          loadingMethod(loadingMethod_),
-          url(std::move(url_)),
-          tileData(std::move(tileData_)) {
-    }
+        : kind(kind_), loadingMethod(loadingMethod_), url(std::move(url_)), tileData(std::move(tileData_)) {}
 
     void setPriority(Priority p) { priority = p; }
     void setUsage(Usage u) { usage = u; }
@@ -86,8 +67,8 @@ public:
 
     Kind kind;
     LoadingMethod loadingMethod;
-    Usage usage{ Usage::Online };
-    Priority priority{ Priority::Regular };
+    Usage usage{Usage::Online};
+    Priority priority{Priority::Regular};
     std::string url;
 
     // Includes auxiliary data if this is a tile request.

@@ -31,7 +31,7 @@ void* ThreadLocalBase::get() {
 }
 
 void ThreadLocalBase::set(void* ptr) {
-    reinterpret_cast<StorageType&>(storage).setLocalData({{ ptr }});
+    reinterpret_cast<StorageType&>(storage).setLocalData({{ptr}});
 }
 
 } // namespace impl

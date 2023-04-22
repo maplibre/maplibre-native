@@ -104,7 +104,9 @@ protected:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) * util::RAD2DEG_F;
+            return util::wrap<float>(
+                       static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) *
+                   util::RAD2DEG_F;
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -485,12 +487,14 @@ protected:
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
-        const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
+        const float bearingStep =
+            360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
 
-        const auto mapBearing = static_cast<float>(util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
+        const auto mapBearing =
+            static_cast<float>(util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
         for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
             const float bearing_ = static_cast<float>(i - 1) * bearingStep - mapBearing;
             Point<double> poc = ruler.destination(centerPoint, params.errorRadiusMeters, bearing_);
@@ -598,8 +602,7 @@ protected:
         for (unsigned long i = 0; i < 4; ++i) {
             const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b),
-                                                -std::cos(util::DEG2RAD_D * b)};
+            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b), -std::cos(util::DEG2RAD_D * b)};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
@@ -659,11 +662,17 @@ protected:
         texturedShader.detach();
     }
 
-    void drawShadow() { drawQuad(shadowBuffer, shadowGeometry, texShadow); }
+    void drawShadow() {
+        drawQuad(shadowBuffer, shadowGeometry, texShadow);
+    }
 
-    void drawPuck() { drawQuad(puckBuffer, puckGeometry, texPuck); }
+    void drawPuck() {
+        drawQuad(puckBuffer, puckGeometry, texPuck);
+    }
 
-    void drawHat() { drawQuad(hatBuffer, hatGeometry, texPuckHat); }
+    void drawHat() {
+        drawQuad(hatBuffer, hatGeometry, texPuckHat);
+    }
 
     static LatLng screenCoordinateToLatLng(const ScreenCoordinate& p,
                                            const TransformState& s,

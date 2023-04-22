@@ -19,7 +19,7 @@ class UnwrappedTileID;
 
 using ScreenCoordinate = mapbox::geometry::point<double>;
 using ScreenLineString = mapbox::geometry::line_string<double>;
-using ScreenBox        = mapbox::geometry::box<double>;
+using ScreenBox = mapbox::geometry::box<double>;
 
 class LatLng {
 private:
@@ -29,8 +29,7 @@ private:
 public:
     enum WrapMode : bool { Unwrapped, Wrapped };
 
-    LatLng(double lat_ = 0, double lon_ = 0, WrapMode mode = Unwrapped)
-        : lat(lat_), lon(lon_) {
+    LatLng(double lat_ = 0, double lon_ = 0, WrapMode mode = Unwrapped) : lat(lat_), lon(lon_) {
         if (std::isnan(lat)) {
             throw std::domain_error("latitude must not be NaN");
         }
@@ -51,32 +50,28 @@ public:
     double latitude() const { return lat; }
     double longitude() const { return lon; }
 
-    LatLng wrapped() const { return { lat, lon, Wrapped }; }
+    LatLng wrapped() const { return {lat, lon, Wrapped}; }
 
-    void wrap() {
-        lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
-    }
+    void wrap() { lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX); }
 
     // If the distance from start to end longitudes is between half and full
     // world, unwrap the start longitude to ensure the shortest path is taken.
     void unwrapForShortestPath(const LatLng& end) {
         const double delta = std::abs(end.lon - lon);
         if (delta <= util::LONGITUDE_MAX || delta >= util::DEGREES_MAX) return;
-        if (lon > 0 && end.lon < 0) lon -= util::DEGREES_MAX;
-        else if (lon < 0 && end.lon > 0) lon += util::DEGREES_MAX;
+        if (lon > 0 && end.lon < 0)
+            lon -= util::DEGREES_MAX;
+        else if (lon < 0 && end.lon > 0)
+            lon += util::DEGREES_MAX;
     }
 
     // Constructs a LatLng object with the top left position of the specified tile.
     LatLng(const CanonicalTileID& id);
     LatLng(const UnwrappedTileID& id);
 
-    friend bool operator==(const LatLng& a, const LatLng& b) {
-        return a.lat == b.lat && a.lon == b.lon;
-    }
+    friend bool operator==(const LatLng& a, const LatLng& b) { return a.lat == b.lat && a.lon == b.lon; }
 
-    friend bool operator!=(const LatLng& a, const LatLng& b) {
-        return !(a == b);
-    }
+    friend bool operator!=(const LatLng& a, const LatLng& b) { return !(a == b); }
 };
 
 class LatLngBounds {
@@ -111,14 +106,12 @@ public:
     // Constructs a LatLngBounds object with the tile's exact boundaries.
     LatLngBounds(const CanonicalTileID&);
 
-    bool valid() const {
-        return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude());
-    }
+    bool valid() const { return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude()); }
 
     double south() const { return sw.latitude(); }
-    double west()  const { return sw.longitude(); }
+    double west() const { return sw.longitude(); }
     double north() const { return ne.latitude(); }
-    double east()  const { return ne.longitude(); }
+    double east() const { return ne.longitude(); }
 
     LatLng southwest() const { return sw; }
     LatLng northeast() const { return ne; }
@@ -130,10 +123,8 @@ public:
     LatLng constrain(const LatLng& p) const;
 
     void extend(const LatLng& point) {
-        sw = LatLng(std::min(point.latitude(), sw.latitude()),
-                    std::min(point.longitude(), sw.longitude()));
-        ne = LatLng(std::max(point.latitude(), ne.latitude()),
-                    std::max(point.longitude(), ne.longitude()));
+        sw = LatLng(std::min(point.latitude(), sw.latitude()), std::min(point.longitude(), sw.longitude()));
+        ne = LatLng(std::max(point.latitude(), ne.latitude()), std::max(point.longitude(), ne.longitude()));
     }
 
     void extend(const LatLngBounds& bounds) {
@@ -141,14 +132,9 @@ public:
         extend(bounds.ne);
     }
 
-    bool isEmpty() const {
-        return sw.latitude() > ne.latitude() ||
-               sw.longitude() > ne.longitude();
-    }
+    bool isEmpty() const { return sw.latitude() > ne.latitude() || sw.longitude() > ne.longitude(); }
 
-    bool crossesAntimeridian() const {
-        return (sw.wrapped().longitude() > ne.wrapped().longitude());
-    }
+    bool crossesAntimeridian() const { return (sw.wrapped().longitude() > ne.wrapped().longitude()); }
 
     bool contains(const CanonicalTileID& tileID) const;
     bool contains(const LatLng& point, LatLng::WrapMode wrap = LatLng::Unwrapped) const;
@@ -170,9 +156,7 @@ private:
         return (!a.bounded && !b.bounded) || (a.bounded && b.bounded && a.sw == b.sw && a.ne == b.ne);
     }
 
-    friend bool operator!=(const LatLngBounds& a, const LatLngBounds& b) {
-        return !(a == b);
-    }
+    friend bool operator!=(const LatLngBounds& a, const LatLngBounds& b) { return !(a == b); }
 };
 
 // Determines the orientation of the map.
@@ -213,9 +197,7 @@ public:
     double bottom() const { return _bottom; }
     double right() const { return _right; }
 
-    bool isFlush() const {
-        return _top == 0 && _left == 0 && _bottom == 0 && _right == 0;
-    }
+    bool isFlush() const { return _top == 0 && _left == 0 && _bottom == 0 && _right == 0; }
 
     void operator+=(const EdgeInsets& o) {
         _top += o._top;
@@ -226,7 +208,10 @@ public:
 
     EdgeInsets operator+(const EdgeInsets& o) const {
         return {
-            _top + o._top, _left + o._left, _bottom + o._bottom, _right + o._right,
+            _top + o._top,
+            _left + o._left,
+            _bottom + o._bottom,
+            _right + o._right,
         };
     }
 
@@ -236,9 +221,7 @@ public:
         return a._top == b._top && a._left == b._left && a._bottom == b._bottom && a._right == b._right;
     }
 
-    friend bool operator!=(const EdgeInsets& a, const EdgeInsets& b) {
-        return !(a == b);
-    }
+    friend bool operator!=(const EdgeInsets& a, const EdgeInsets& b) { return !(a == b); }
 };
 
 struct LatLngAltitude {

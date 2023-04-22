@@ -7,9 +7,9 @@ namespace mbgl {
 /**
  * `Mutable<T>` is a non-nullable uniquely owning reference to a `T`. It can be efficiently converted
  * to `Immutable<T>`.
- * 
+ *
  * The lifecycle of `Mutable<T>` and `Immutable<T>` is as follows:
- * 
+ *
  *   1. Create a `Mutable<T>` using `makeMutable(...)`
  *   2. Mutate it freely
  *   3. When you're ready to freeze its state and enable safe cross-thread sharing, move assign or
@@ -32,16 +32,18 @@ public:
     T& operator*() { return *ptr; }
 
 private:
-    Mutable(std::shared_ptr<T>&& s)
-        : ptr(std::move(s)) {}
+    Mutable(std::shared_ptr<T>&& s) : ptr(std::move(s)) {}
 
     std::shared_ptr<T> ptr;
 
-    template <class S> friend class Immutable;
+    template <class S>
+    friend class Immutable;
     // NOLINTNEXTLINE(readability-redundant-declaration)
-    template <class S, class... Args> friend Mutable<S> makeMutable(Args&&...);
+    template <class S, class... Args>
+    friend Mutable<S> makeMutable(Args&&...);
     // NOLINTNEXTLINE(readability-redundant-declaration)
-    template <class S, class U> friend Mutable<S> staticMutableCast(const Mutable<U>&);
+    template <class S, class U>
+    friend Mutable<S> staticMutableCast(const Mutable<U>&);
 };
 
 template <class T, class... Args>
@@ -67,12 +69,10 @@ template <class T>
 class Immutable {
 public:
     template <class S>
-    Immutable(Mutable<S>&& s)
-        : ptr(std::const_pointer_cast<const S>(std::move(s.ptr))) {}
+    Immutable(Mutable<S>&& s) : ptr(std::const_pointer_cast<const S>(std::move(s.ptr))) {}
 
     template <class S>
-    Immutable(Immutable<S> s)
-        : ptr(std::move(s.ptr)) {}
+    Immutable(Immutable<S> s) : ptr(std::move(s.ptr)) {}
 
     Immutable(Immutable&&) noexcept = default;
     Immutable(const Immutable&) = default;
@@ -90,24 +90,21 @@ public:
     const T* operator->() const { return ptr.get(); }
     const T& operator*() const { return *ptr; }
 
-    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) {
-        return lhs.ptr == rhs.ptr;
-    }
+    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr == rhs.ptr; }
 
-    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) {
-        return lhs.ptr != rhs.ptr;
-    }
+    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr != rhs.ptr; }
 
 private:
-    Immutable(std::shared_ptr<const T>&& s)
-        : ptr(std::move(s)) {}
+    Immutable(std::shared_ptr<const T>&& s) : ptr(std::move(s)) {}
 
     std::shared_ptr<const T> ptr;
 
-    template <class S> friend class Immutable;
+    template <class S>
+    friend class Immutable;
 
     // NOLINTNEXTLINE(readability-redundant-declaration)
-    template <class S, class U> friend Immutable<S> staticImmutableCast(const Immutable<U>&);
+    template <class S, class U>
+    friend Immutable<S> staticImmutableCast(const Immutable<U>&);
 };
 
 template <class S, class U>

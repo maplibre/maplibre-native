@@ -20,8 +20,9 @@ public:
     ~VectorSource();
 
 private:
-    jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&, const jni::Array<jni::String>&,
-                                                                  const jni::Array<jni::Object<>>& jfilter);
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
+                                                                              const jni::Array<jni::String>&,
+                                                                              const jni::Array<jni::Object<>>& jfilter);
 
     jni::Local<jni::String> getURL(jni::JNIEnv&);
 

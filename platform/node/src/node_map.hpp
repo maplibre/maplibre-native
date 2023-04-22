@@ -94,7 +94,7 @@ public:
     std::unique_ptr<RenderRequest> req;
 
     // Async for delivering the notifications of render completion.
-    uv_async_t *async;
+    uv_async_t* async;
 
     bool loaded = false;
 };

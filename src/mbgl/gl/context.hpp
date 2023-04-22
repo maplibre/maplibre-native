@@ -15,7 +15,6 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-
 #include <functional>
 #include <memory>
 #include <vector>
@@ -62,30 +61,24 @@ public:
     Framebuffer createFramebuffer(const gfx::Texture&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
+    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
 
     template <typename Image,
               gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
-                                                          : gfx::TexturePixelType::Alpha>
+                                                                  : gfx::TexturePixelType::Alpha>
     Image readFramebuffer(const Size size, bool flip = true) {
-        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1),
-                      "image format mismatch");
-        return { size, readFramebuffer(size, format, flip) };
+        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
+        return {size, readFramebuffer(size, format, flip)};
     }
 
-    void clear(std::optional<mbgl::Color> color,
-               std::optional<float> depth,
-               std::optional<int32_t> stencil);
+    void clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
 
     void setDepthMode(const gfx::DepthMode&);
     void setStencilMode(const gfx::StencilMode&);
     void setColorMode(const gfx::ColorMode&);
     void setCullFaceMode(const gfx::CullFaceMode&);
 
-    void draw(const gfx::DrawMode&,
-              std::size_t indexOffset,
-              std::size_t indexLength);
+    void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
     void finish();
 
@@ -100,28 +93,18 @@ public:
     void reset();
 
     bool empty() const {
-        return pooledTextures.empty()
-            && abandonedPrograms.empty()
-            && abandonedShaders.empty()
-            && abandonedBuffers.empty()
-            && abandonedTextures.empty()
-            && abandonedVertexArrays.empty()
-            && abandonedFramebuffers.empty();
+        return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
+               abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
+               abandonedFramebuffers.empty();
     }
 
     void setDirtyState();
 
-    extension::Debugging* getDebuggingExtension() const {
-        return debugging.get();
-    }
+    extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
-    extension::VertexArray* getVertexArrayExtension() const {
-        return vertexArray.get();
-    }
+    extension::VertexArray* getVertexArrayExtension() const { return vertexArray.get(); }
 
-    void setCleanupOnDestruction(bool cleanup) {
-        cleanupOnDestruction = cleanup;
-    }
+    void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
 private:
     RendererBackend& backend;
@@ -140,8 +123,8 @@ public:
     State<value::Program> program;
     State<value::BindVertexBuffer> vertexBuffer;
 
-    State<value::BindVertexArray, const Context&> bindVertexArray { *this };
-    VertexArrayState globalVertexArrayState { UniqueVertexArray(0, { const_cast<Context*>(this) }) };
+    State<value::BindVertexArray, const Context&> bindVertexArray{*this};
+    VertexArrayState globalVertexArrayState{UniqueVertexArray(0, {const_cast<Context*>(this)})};
 
     State<value::PixelStorePack> pixelStorePack;
     State<value::PixelStoreUnpack> pixelStoreUnpack;
@@ -171,10 +154,12 @@ private:
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::TextureResource>
-        createTextureResource(Size, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
+    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
+                                                                gfx::TexturePixelType,
+                                                                gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size size) override;
+    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
+                                                                          Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 

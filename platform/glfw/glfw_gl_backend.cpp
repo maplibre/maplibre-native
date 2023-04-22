@@ -14,9 +14,7 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
-    void swap() override {
-        backend.swap();
-    }
+    void swap() override { backend.swap(); }
 
 private:
     GLFWGLBackend& backend;
@@ -29,7 +27,7 @@ GLFWGLBackend::GLFWGLBackend(GLFWwindow* window_, const bool capFrameRate)
               int fbWidth;
               int fbHeight;
               glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
-              return mbgl::Size{ static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight) };
+              return mbgl::Size{static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight)};
           }(),
           std::make_unique<GLFWGLRenderableResource>(*this)),
       window(window_) {
@@ -77,8 +75,7 @@ namespace mbgl {
 namespace gfx {
 
 template <>
-std::unique_ptr<GLFWBackend>
-Backend::Create<mbgl::gfx::Backend::Type::OpenGL>(GLFWwindow* window, bool capFrameRate) {
+std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::OpenGL>(GLFWwindow* window, bool capFrameRate) {
     return std::make_unique<GLFWGLBackend>(window, capFrameRate);
 }
 

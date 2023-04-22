@@ -11,11 +11,12 @@ namespace mbgl {
 namespace android {
 namespace conversion {
 
-template<>
+template <>
 struct Converter<jni::Local<jni::Object<TransitionOptions>>, mbgl::style::TransitionOptions> {
-    Result<jni::Local<jni::Object<TransitionOptions>>> operator()(jni::JNIEnv&, const mbgl::style::TransitionOptions&) const;
+    Result<jni::Local<jni::Object<TransitionOptions>>> operator()(jni::JNIEnv&,
+                                                                  const mbgl::style::TransitionOptions&) const;
 };
 
-}
-}
-}
+} // namespace conversion
+} // namespace android
+} // namespace mbgl

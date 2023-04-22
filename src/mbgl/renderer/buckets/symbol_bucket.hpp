@@ -149,7 +149,7 @@ public:
 
     Buffer icon;
     Buffer sdfIcon;
-    
+
     struct CollisionBuffer {
         gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>> vertices;
         gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>> dynamicVertices;

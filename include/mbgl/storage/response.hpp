@@ -37,15 +37,11 @@ public:
     std::optional<Timestamp> expires;
     std::optional<std::string> etag;
 
-    bool isFresh() const {
-        return expires ? *expires > util::now() : !error;
-    }
+    bool isFresh() const { return expires ? *expires > util::now() : !error; }
 
     // Indicates whether we are allowed to use this response according to HTTP caching rules.
     // It may or may not be stale.
-    bool isUsable() const {
-        return !mustRevalidate || (expires && *expires > util::now());
-    }
+    bool isUsable() const { return !mustRevalidate || (expires && *expires > util::now()); }
 };
 
 class Response::Error {
