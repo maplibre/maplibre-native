@@ -11,7 +11,7 @@ set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[vari
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
 
-if(MBGL_WITH_OPENGL)
+if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
 
     target_compile_definitions(

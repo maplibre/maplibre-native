@@ -53,7 +53,7 @@ jobs:
       - name: Build Maplibre GL Core
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner
 
       - name: Archive mbgl-test-runner

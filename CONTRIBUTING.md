@@ -17,11 +17,11 @@ MapLibre GL Native shares a single C++ core library with all platforms. To build
 
 To build, run the following from the root directory
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
 ```
 
 `CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
-`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+`MLN_WITH_CORE_ONLY=ON` will build only the core libraries.
 Built artifacts should be available on `build` folder.
 
 
