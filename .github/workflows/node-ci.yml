@@ -8,6 +8,7 @@ on:
     tags:
       - 'node-*'
     paths:
+      - CMakeLists.txt
       - "platform/linux/**"
       - "platform/default/**"
       - 'platform/node/**'
@@ -33,6 +34,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - "platform/linux/**"
       - "platform/default/**"
       - 'platform/node/**'

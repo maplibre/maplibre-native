@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - 'platform/android/**'
       - ".github/workflows/android-ci.yml"
       - "bin/**"

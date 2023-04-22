@@ -8,6 +8,7 @@ on:
     tags:
       - 'android-*'
     paths:
+      - CMakeLists.txt
       - 'platform/android/**'
       - ".github/workflows/android-ci.yml"
       - "bin/**"

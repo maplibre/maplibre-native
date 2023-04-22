@@ -9,6 +9,7 @@ on:
     tags:
       - 'macos-*'
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
@@ -30,6 +31,7 @@ on:
       - main
       - opengl-2
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
