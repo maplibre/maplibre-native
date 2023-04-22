@@ -31,13 +31,9 @@ public:
 #endif
     }
 
-    static std::size_t arrayLength(const QVariant& value) {
-        return value.toList().size();
-    }
+    static std::size_t arrayLength(const QVariant& value) { return value.toList().size(); }
 
-    static QVariant arrayMember(const QVariant& value, std::size_t i) {
-        return value.toList()[static_cast<int>(i)];
-    }
+    static QVariant arrayMember(const QVariant& value, std::size_t i) { return value.toList()[static_cast<int>(i)]; }
 
     static bool isObject(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

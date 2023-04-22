@@ -26,7 +26,7 @@ bool initRuntime(int argc, char* argv[]) {
     void* vmHandle = dlopen("libart.so", RTLD_NOW);
     assert(vmHandle != nullptr);
 
-    using CreateJavaVMFn = jint (*)(JavaVM * *vm, JNIEnv * *env, void* vmArgs);
+    using CreateJavaVMFn = jint (*)(JavaVM** vm, JNIEnv** env, void* vmArgs);
     CreateJavaVMFn createJavaVMFn = reinterpret_cast<CreateJavaVMFn>(dlsym(vmHandle, "JNI_CreateJavaVM"));
     assert(createJavaVMFn != nullptr);
 
@@ -58,7 +58,7 @@ bool initRuntime(int argc, char* argv[]) {
     void* runtimeHandle = dlopen("libandroid_runtime.so", RTLD_NOW);
     assert(runtimeHandle != nullptr);
 
-    using RegisterNativesFn = jint (*)(JNIEnv * env);
+    using RegisterNativesFn = jint (*)(JNIEnv* env);
     RegisterNativesFn registerNativesFn =
         reinterpret_cast<RegisterNativesFn>(dlsym(runtimeHandle, "registerFrameworkNatives"));
     assert(registerNativesFn != nullptr);

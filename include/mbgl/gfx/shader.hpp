@@ -14,8 +14,9 @@ class Shader;
 //   * Declare a public, unique type name (string_view T::Name)
 //   * Be a final class
 template <typename T>
-inline constexpr bool is_shader_v = std::is_base_of_v<gfx::Shader, T>&&
-    std::is_same_v<std::remove_cv_t<decltype(T::Name)>, std::string_view>&& std::is_final_v<T>;
+inline constexpr bool is_shader_v =
+    std::is_base_of_v<gfx::Shader, T> && std::is_same_v<std::remove_cv_t<decltype(T::Name)>, std::string_view> &&
+    std::is_final_v<T>;
 
 /// @brief A shader is used as the base class for all programs across any supported
 /// backend API. Shaders are registered with a `gfx::ShaderRegistry` instance.
