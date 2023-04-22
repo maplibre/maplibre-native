@@ -27,7 +27,7 @@ static void init_source(j_decompress_ptr cinfo) {
 
 static boolean fill_input_buffer(j_decompress_ptr cinfo) {
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
-    wrap->stream->read(reinterpret_cast<char*>(&wrap->buffer[0]), BUF_SIZE);
+    wrap->stream->read(reinterpret_cast<char*>(wrap->buffer.data()), BUF_SIZE);
     std::streamsize size = wrap->stream->gcount();
     wrap->manager.next_input_byte = wrap->buffer.data();
     wrap->manager.bytes_in_buffer = BUF_SIZE;
