@@ -1,7 +1,7 @@
 #include <mbgl/util/bounding_volumes.hpp>
 
 #include <gtest/gtest.h>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 
 using namespace mbgl;

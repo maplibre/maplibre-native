@@ -19,7 +19,7 @@ OpacityState::OpacityState(bool placed_, bool skipFade)
 }
 
 OpacityState::OpacityState(const OpacityState& prevState, float increment, bool placed_) :
-    opacity(::fmax(0.0f, ::fmin(1.0f, prevState.opacity + (prevState.placed ? increment : -increment)))),
+    opacity(std::fmax(0.0f, std::fmin(1.0f, prevState.opacity + (prevState.placed ? increment : -increment)))),
     placed(placed_) {}
 
 bool OpacityState::isHidden() const {
@@ -394,6 +394,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 const size_t anchorsSize = variableTextAnchors.size();
                 const size_t placementAttempts = ctx.textAllowOverlap ? anchorsSize * 2 : anchorsSize;
                 for (size_t i = 0u; i < placementAttempts; ++i) {
+                    // when anchorsSize is 0, placementAttempts is also 0, so this code would not be reached
+                    // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,

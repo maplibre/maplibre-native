@@ -65,7 +65,6 @@ if(WIN32)
     target_compile_definitions(
         mbgl-glfw
         PRIVATE
-            _USE_MATH_DEFINES
             NOMINMAX
             CURL_STATICLIB
     )

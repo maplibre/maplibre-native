@@ -9,7 +9,7 @@ endif()
 execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER})
 unset(_RENDERER)
 
-add_compile_definitions(NOMINMAX _USE_MATH_DEFINES GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
+add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
 
 target_compile_options(
     mbgl-compiler-options
@@ -40,7 +40,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
@@ -183,7 +183,9 @@ target_link_libraries(
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+if(MLN_WITH_NODE)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
 
 add_executable(
     mbgl-test-runner

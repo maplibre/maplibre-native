@@ -1,10 +1,15 @@
+option(MBGL_WITH_X11 "Build with X11 Support" ON)
+option(MBGL_WITH_WAYLAND "Build with Wayland Support" OFF)
+
 find_package(CURL REQUIRED)
 find_package(ICU OPTIONAL_COMPONENTS i18n)
 find_package(ICU OPTIONAL_COMPONENTS uc)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
-find_package(X11 REQUIRED)
+if (MBGL_WITH_X11)
+    find_package(X11 REQUIRED)
+endif ()
 find_package(Threads REQUIRED)
 
 pkg_search_module(LIBUV libuv REQUIRED)
@@ -23,7 +28,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
@@ -64,6 +69,13 @@ if(MBGL_WITH_EGL)
         PRIVATE
             OpenGL::EGL
     )
+    if (MBGL_WITH_WAYLAND)
+        target_compile_definitions(mbgl-core PUBLIC
+                EGL_NO_X11
+                MESA_EGL_NO_X11_HEADERS
+                WL_EGL_PLATFORM
+        )
+    endif()
 else()
     find_package(OpenGL REQUIRED GLX)
     target_sources(
@@ -125,7 +137,9 @@ target_link_libraries(
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+if(MLN_WITH_NODE)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
 
 add_executable(
     mbgl-test-runner

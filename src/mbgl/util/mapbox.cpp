@@ -64,7 +64,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
                              i != std::sregex_iterator();
                              ++i)
     {
-        std::smatch m = *i;
+        const std::smatch& m = *i;
         if (m.size() > 0) {
             auto captureGroupValue = m[1].str();
             if (!captureGroupValue.empty()){
@@ -86,7 +86,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
                              i != std::sregex_iterator();
                              ++i)
     {
-        std::smatch m = *i;
+        const std::smatch& m = *i;
         if (m.size() > 0) {
             auto captureGroupValue = m[1].str();
             if (!captureGroupValue.empty()){
@@ -152,7 +152,7 @@ bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::stri
 }
 
 std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
-    const std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty() || apiKey.empty()) ?
+    std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty() || apiKey.empty()) ?
         "" : "?" + tileServerOptions.apiKeyParameterName() +  "=" + apiKey;
     return queryString;
 }

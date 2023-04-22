@@ -13,6 +13,7 @@ on:
     tags:
       - 'node-*'
     paths:
+      - CMakeLists.txt
       - "platform/default/**"
       - 'platform/node/**'
       - 'platform/windows/**'
@@ -37,6 +38,7 @@ on:
     branches:
       - opengl-2
     paths:
+      - CMakeLists.txt
       - "platform/default/**"
       - 'platform/node/**'
       - 'platform/windows/**'

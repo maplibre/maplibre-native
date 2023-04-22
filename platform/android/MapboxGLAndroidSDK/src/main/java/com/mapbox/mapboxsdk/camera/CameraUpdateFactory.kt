@@ -7,7 +7,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
-import java.lang.Double.min
+import java.lang.Double.max
 import java.util.Arrays
 
 /**
@@ -448,7 +448,7 @@ object CameraUpdateFactory {
             return when (type) {
                 ZOOM_IN -> currentZoomArg + 1
                 ZOOM_OUT -> {
-                    min(currentZoomArg - 1, 0.0)
+                    max(currentZoomArg - 1, 0.0)
                 }
 
                 ZOOM_TO -> zoom

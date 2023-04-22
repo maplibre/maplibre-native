@@ -42,14 +42,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 endif()
 
-if(MSVC)
-    add_definitions("/DQT_COMPILING_QIMAGE_COMPAT_CPP")
-    add_definitions("/D_USE_MATH_DEFINES")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions("-DQT_COMPILING_QIMAGE_COMPAT_CPP")
-    add_definitions("-D_USE_MATH_DEFINES")
-endif()
-
+# Debugging & ccache on Windows
 if (MSVC)
     foreach(config DEBUG RELWITHDEBINFO)
         foreach(lang C CXX)
@@ -101,10 +94,10 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp>
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.hpp>
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/local_glyph_rasterizer.cpp

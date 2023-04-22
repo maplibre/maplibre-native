@@ -17,7 +17,6 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/util/math.hpp>
 
 #include <cmath>

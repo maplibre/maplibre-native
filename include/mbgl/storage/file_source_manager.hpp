@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/storage/file_source.hpp>
-#include <mbgl/util/pass_types.hpp>
 
 namespace mbgl {
 
@@ -31,7 +30,7 @@ public:
     // Returns shared instance of a file source for (type, options) tuple.
     // Creates new instance via registered factory if needed. If new instance cannot be
     // created, nullptr would be returned.
-    PassRefPtr<FileSource> getFileSource(FileSourceType, const ResourceOptions&, const ClientOptions& = ClientOptions()) noexcept;
+    [[nodiscard]] std::shared_ptr<FileSource> getFileSource(FileSourceType, const ResourceOptions&, const ClientOptions& = ClientOptions()) noexcept;
 
     // Registers file source factory for a provided FileSourceType type. If factory for the
     // same type was already registered, will unregister previously registered factory.

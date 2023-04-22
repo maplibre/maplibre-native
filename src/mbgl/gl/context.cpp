@@ -8,7 +8,7 @@
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/vertex_array_extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -92,23 +92,6 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
         if (!(renderer.find("ANGLE") != std::string::npos
               && renderer.find("Direct3D") != std::string::npos)) {
             debugging = std::make_unique<extension::Debugging>(fn);
-        }
-
-        // Block Adreno 2xx, 3xx as it crashes on glBuffer(Sub)Data
-        // Block Adreno 4xx as it crashes in a driver when VBOs are destructed (Android 5.1.1)
-        // Block ARM Mali-T720 (in some MT8163 chipsets) as it crashes on glBindVertexArray
-        // Block ANGLE on Direct3D as the combination of Qt + Windows + ANGLE leads to crashes
-        if (renderer.find("Adreno (TM) 2") == std::string::npos &&
-            renderer.find("Adreno (TM) 3") == std::string::npos &&
-            renderer.find("Adreno (TM) 4") == std::string::npos &&
-            (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) &&
-            renderer.find("Mali-T720") == std::string::npos && renderer.find("Sapphire 650") == std::string::npos &&
-            !disableVAOExtension) {
-            vertexArray = std::make_unique<extension::VertexArray>(fn);
-        }
-
-        if (!supportsVertexArrays()) {
-            Log::Warning(Event::OpenGL, "Not using Vertex Array Objects");
         }
     }
 }
@@ -206,25 +189,12 @@ UniqueTexture Context::createUniqueTexture() {
     return UniqueTexture{std::move(id), {this}};
 }
 
-bool Context::supportsVertexArrays() const {
-    return vertexArray &&
-           vertexArray->genVertexArrays &&
-           vertexArray->bindVertexArray &&
-           vertexArray->deleteVertexArrays;
-}
-
 VertexArray Context::createVertexArray() {
-    if (supportsVertexArrays()) {
-        VertexArrayID id = 0;
-        MBGL_CHECK_ERROR(vertexArray->genVertexArrays(1, &id));
-        // NOLINTNEXTLINE(performance-move-const-arg)
-        UniqueVertexArray vao(std::move(id), { this });
-        return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
-    } else {
-        // On GL implementations which do not support vertex arrays, attribute bindings are global state.
-        // So return a VertexArray which shares our global state tracking and whose deleter is a no-op.
-        return { UniqueVertexArrayState(&globalVertexArrayState, VertexArrayStateDeleter { false }) };
-    }
+    VertexArrayID id = 0;
+    MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    UniqueVertexArray vao(std::move(id), { this });
+    return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
 }
 
 UniqueFramebuffer Context::createFramebuffer() {
@@ -248,7 +218,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
 
     // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::to(format),
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::sizedFor(format, type),
                                   size.width, size.height, 0,
                                   Enum<gfx::TexturePixelType>::to(format),
                                   Enum<gfx::TextureChannelDataType>::to(type), nullptr));
@@ -650,14 +620,12 @@ void Context::performCleanup() {
     }
 
     if (!abandonedVertexArrays.empty()) {
-        assert(supportsVertexArrays());
         for (const auto id : abandonedVertexArrays) {
             if (bindVertexArray == id) {
                 bindVertexArray.setDirty();
             }
         }
-        MBGL_CHECK_ERROR(vertexArray->deleteVertexArrays(int(abandonedVertexArrays.size()),
-                                                         abandonedVertexArrays.data()));
+        MBGL_CHECK_ERROR(glDeleteVertexArrays(int(abandonedVertexArrays.size()), abandonedVertexArrays.data()));
         abandonedVertexArrays.clear();
     }
 

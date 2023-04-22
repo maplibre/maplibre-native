@@ -1,8 +1,9 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
-// Pointers to OpenGL ES 2.0 functions. They must be
+// Pointers to OpenGL ES functions. They must be
 // initialized by the platform at linking time.
 
 #ifndef NDEBUG
@@ -10,6 +11,8 @@
 #else
 #define MBGL_CHECK_ERROR(cmd) (cmd)
 #endif
+
+struct __GLsync;
 
 namespace mbgl {
 namespace platform {
@@ -25,6 +28,9 @@ using GLsizei = int;
 using GLubyte = unsigned char;
 using GLuint = unsigned int;
 using GLvoid = void;
+using GLint64 = int64_t;
+using GLuint64 = uint64_t;
+using GLsync = ::__GLsync *;
 
 #if defined(_WIN32)
 using GLintptr = long long;
@@ -33,6 +39,8 @@ using GLsizeiptr = long long;
 using GLintptr = long;
 using GLsizeiptr = long;
 #endif
+
+/* OpenGL ES 2.0 */
 
 /// Pointer to glActiveTexture OpenGL function.
 extern void (* const glActiveTexture)(GLenum);
@@ -172,6 +180,8 @@ extern void (* const glGetRenderbufferParameteriv)(GLenum, GLenum, GLint *);
 extern void (* const glGetShaderInfoLog)(GLuint, GLsizei, GLsizei *, GLchar *);
 /// Pointer to glGetShaderiv OpenGL function.
 extern void (* const glGetShaderiv)(GLuint, GLenum, GLint *);
+/// Pointer to glGetShaderPrecisionFormat OpenGL function.
+extern void (* const glGetShaderPrecisionFormat)(GLenum, GLenum, GLint *, GLint *);
 /// Pointer to glGetShaderSource OpenGL function.
 extern void (* const glGetShaderSource)(GLuint, GLsizei, GLsizei *, GLchar *);
 /// Pointer to glGetString OpenGL function.
@@ -218,12 +228,16 @@ extern void (* const glPixelStorei)(GLenum, GLint);
 extern void (* const glPolygonOffset)(GLfloat, GLfloat);
 /// Pointer to glReadPixels OpenGL function.
 extern void (* const glReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void *);
+/// Pointer to glReleaseShaderCompiler OpenGL function.
+extern void (* const glReleaseShaderCompiler)();
 /// Pointer to glRenderbufferStorage OpenGL function.
 extern void (* const glRenderbufferStorage)(GLenum, GLenum, GLsizei, GLsizei);
 /// Pointer to glSampleCoverage OpenGL function.
 extern void (* const glSampleCoverage)(GLfloat, GLboolean);
 /// Pointer to glScissor OpenGL function.
 extern void (* const glScissor)(GLint, GLint, GLsizei, GLsizei);
+/// Pointer to glShaderBinary OpenGL function.
+extern void (* const glShaderBinary)(GLsizei, const GLuint *, GLenum, const GLvoid *, GLsizei);
 /// Pointer to glShaderSource OpenGL function.
 extern void (* const glShaderSource)(GLuint, GLsizei, const GLchar * const*, const GLint *);
 /// Pointer to glStencilFunc OpenGL function.
@@ -312,6 +326,217 @@ extern void (* const glVertexAttrib4fv)(GLuint, const GLfloat *);
 extern void (* const glVertexAttribPointer)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void *);
 /// Pointer to glViewport OpenGL function.
 extern void (* const glViewport)(GLint, GLint, GLsizei, GLsizei);
+
+/* OpenGL ES 3.0 */
+
+/// Pointer to glReadBuffer OpenGL function.
+extern void (* const glReadBuffer)(GLenum);
+/// Pointer to glDrawRangeElements OpenGL function.
+extern void (* const glDrawRangeElements)(GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid *);
+/// Pointer to glTexImage3D OpenGL function.
+extern void (* const glTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+/// Pointer to glTexSubImage3D OpenGL function.
+extern void (* const glTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *);
+/// Pointer to glCopyTexSubImage3D OpenGL function.
+extern void (* const glCopyTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei);
+/// Pointer to glCompressedTexImage3D OpenGL function.
+extern void (* const glCompressedTexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *);
+/// Pointer to glCompressedTexSubImage3D OpenGL function.
+extern void (* const glCompressedTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid *);
+/// Pointer to glGenQueries OpenGL function.
+extern void (* const glGenQueries)(GLsizei, GLuint *);
+/// Pointer to glDeleteQueries OpenGL function.
+extern void (* const glDeleteQueries)(GLsizei, const GLuint *);
+/// Pointer to glIsQuery OpenGL function.
+extern GLboolean (* const glIsQuery)(GLuint);
+/// Pointer to glBeginQuery OpenGL function.
+extern void (* const glBeginQuery)(GLenum, GLuint);
+/// Pointer to glEndQuery OpenGL function.
+extern void (* const glEndQuery)(GLenum);
+/// Pointer to glGetQueryiv OpenGL function.
+extern void (* const glGetQueryiv)(GLenum, GLenum, GLint *);
+/// Pointer to glGetQueryObjectuiv OpenGL function.
+extern void (* const glGetQueryObjectuiv)(GLuint, GLenum, GLuint *);
+/// Pointer to glUnmapBuffer OpenGL function.
+extern GLboolean (* const glUnmapBuffer)(GLenum);
+/// Pointer to glGetBufferPointerv OpenGL function.
+extern void (* const glGetBufferPointerv)(GLenum, GLenum, GLvoid **);
+/// Pointer to glDrawBuffers OpenGL function.
+extern void (* const glDrawBuffers)(GLsizei, const GLenum *);
+/// Pointer to glUniformMatrix2x3fv OpenGL function.
+extern void (* const glUniformMatrix2x3fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glUniformMatrix3x2fv OpenGL function.
+extern void (* const glUniformMatrix3x2fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glUniformMatrix2x4fv OpenGL function.
+extern void (* const glUniformMatrix2x4fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glUniformMatrix4x2fv OpenGL function.
+extern void (* const glUniformMatrix4x2fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glUniformMatrix3x4fv OpenGL function.
+extern void (* const glUniformMatrix3x4fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glUniformMatrix4x3fv OpenGL function.
+extern void (* const glUniformMatrix4x3fv)(GLint, GLsizei, GLboolean, const GLfloat *);
+/// Pointer to glBlitFramebuffer OpenGL function.
+extern void (* const glBlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum);
+/// Pointer to glRenderbufferStorageMultisample OpenGL function.
+extern void (* const glRenderbufferStorageMultisample)(GLenum, GLsizei, GLenum, GLsizei, GLsizei);
+/// Pointer to glFramebufferTextureLayer OpenGL function.
+extern void (* const glFramebufferTextureLayer)(GLenum, GLenum, GLuint, GLint, GLint);
+/// Pointer to glMapBufferRange OpenGL function.
+extern GLvoid* (* const glMapBufferRange)(GLenum, GLintptr, GLsizeiptr, GLbitfield);
+/// Pointer to glMapBufferRange OpenGL function.
+extern void (* const glFlushMappedBufferRange)(GLenum, GLintptr, GLsizeiptr);
+/// Pointer to glBindVertexArray OpenGL function.
+extern void (* const glBindVertexArray)(GLuint);
+/// Pointer to glDeleteVertexArrays OpenGL function.
+extern void (* const glDeleteVertexArrays)(GLsizei, const GLuint *);
+/// Pointer to glGenVertexArrays OpenGL function.
+extern void (* const glGenVertexArrays)(GLsizei, GLuint *);
+/// Pointer to glIsVertexArray OpenGL function.
+extern GLboolean (* const glIsVertexArray)(GLuint);
+/// Pointer to glGetIntegeri_v OpenGL function.
+extern void (* const glGetIntegeri_v)(GLenum, GLuint, GLint *);
+/// Pointer to glBeginTransformFeedback OpenGL function.
+extern void (* const glBeginTransformFeedback)(GLenum);
+/// Pointer to glEndTransformFeedback OpenGL function.
+extern void (* const glEndTransformFeedback)();
+/// Pointer to glBindBufferRange OpenGL function.
+extern void (* const glBindBufferRange)(GLenum, GLuint, GLuint, GLintptr, GLsizeiptr);
+/// Pointer to glBindBufferBase OpenGL function.
+extern void (* const glBindBufferBase)(GLenum, GLuint, GLuint);
+/// Pointer to glTransformFeedbackVaryings OpenGL function.
+extern void (* const glTransformFeedbackVaryings)(GLuint, GLsizei, const GLchar * const*, GLenum);
+/// Pointer to glGetTransformFeedbackVarying OpenGL function.
+extern void (* const glGetTransformFeedbackVarying)(GLuint, GLuint, GLsizei, GLsizei *, GLsizei *, GLenum *, GLchar *);
+/// Pointer to glVertexAttribIPointer OpenGL function.
+extern void (* const glVertexAttribIPointer)(GLuint, GLint, GLenum, GLsizei, const GLvoid *);
+/// Pointer to glGetVertexAttribIiv OpenGL function.
+extern void (* const glGetVertexAttribIiv)(GLuint, GLenum, GLint *);
+/// Pointer to glGetVertexAttribIiv OpenGL function.
+extern void (* const glGetVertexAttribIuiv)(GLuint, GLenum, GLuint *);
+/// Pointer to glVertexAttribI4i OpenGL function.
+extern void (* const glVertexAttribI4i)(GLuint, GLint, GLint, GLint, GLint);
+/// Pointer to glVertexAttribI4ui OpenGL function.
+extern void (* const glVertexAttribI4ui)(GLuint, GLuint, GLuint, GLuint, GLuint);
+/// Pointer to glVertexAttribI4iv OpenGL function.
+extern void (* const glVertexAttribI4iv)(GLuint, const GLint *);
+/// Pointer to glVertexAttribI4uiv OpenGL function.
+extern void (* const glVertexAttribI4uiv)(GLuint, const GLuint *);
+/// Pointer to glGetUniformuiv OpenGL function.
+extern void (* const glGetUniformuiv)(GLuint, GLint, GLuint *);
+/// Pointer to glGetFragDataLocation OpenGL function.
+extern GLint (* const glGetFragDataLocation)(GLuint, const GLchar *);
+/// Pointer to glUniform1ui OpenGL function.
+extern void (* const glUniform1ui)(GLint, GLuint);
+/// Pointer to glUniform2ui OpenGL function.
+extern void (* const glUniform2ui)(GLint, GLuint, GLuint);
+/// Pointer to glUniform3ui OpenGL function.
+extern void (* const glUniform3ui)(GLint, GLuint, GLuint, GLuint);
+/// Pointer to glUniform4ui OpenGL function.
+extern void (* const glUniform4ui)(GLint, GLuint, GLuint, GLuint, GLuint);
+/// Pointer to glUniform1uiv OpenGL function.
+extern void (* const glUniform1uiv)(GLint, GLsizei, const GLuint *);
+/// Pointer to glUniform2uiv OpenGL function.
+extern void (* const glUniform2uiv)(GLint, GLsizei, const GLuint *);
+/// Pointer to glUniform3uiv OpenGL function.
+extern void (* const glUniform3uiv)(GLint, GLsizei, const GLuint *);
+/// Pointer to glUniform4uiv OpenGL function.
+extern void (* const glUniform4uiv)(GLint, GLsizei, const GLuint *);
+/// Pointer to glClearBufferiv OpenGL function.
+extern void (* const glClearBufferiv)(GLenum, GLint, const GLint *);
+/// Pointer to glClearBufferuiv OpenGL function.
+extern void (* const glClearBufferuiv)(GLenum, GLint, const GLuint *);
+/// Pointer to glClearBufferfv OpenGL function.
+extern void (* const glClearBufferfv)(GLenum, GLint, const GLfloat *);
+/// Pointer to glClearBufferfi OpenGL function.
+extern void (* const glClearBufferfi)(GLenum, GLint, GLfloat, GLint);
+/// Pointer to glGetStringi OpenGL function.
+extern const GLubyte* (* const glGetStringi)(GLenum, GLuint);
+/// Pointer to glCopyBufferSubData OpenGL function.
+extern void (* const glCopyBufferSubData)(GLenum, GLenum, GLintptr, GLintptr, GLsizeiptr);
+/// Pointer to glGetUniformIndices OpenGL function.
+extern void (* const glGetUniformIndices)(GLuint, GLsizei, const GLchar * const*, GLuint *);
+/// Pointer to glGetActiveUniformsiv OpenGL function.
+extern void (* const glGetActiveUniformsiv)(GLuint, GLsizei, const GLuint *, GLenum, GLint *);
+/// Pointer to glGetUniformBlockIndex OpenGL function.
+extern GLuint (* const glGetUniformBlockIndex)(GLuint, const GLchar *);
+/// Pointer to glGetActiveUniformBlockiv OpenGL function.
+extern void (* const glGetActiveUniformBlockiv)(GLuint, GLuint, GLenum, GLint *);
+/// Pointer to glGetActiveUniformBlockName OpenGL function.
+extern void (* const glGetActiveUniformBlockName)(GLuint, GLuint, GLsizei, GLsizei *, GLchar *);
+/// Pointer to glUniformBlockBinding OpenGL function.
+extern void (* const glUniformBlockBinding)(GLuint, GLuint, GLuint);
+/// Pointer to glDrawArraysInstanced OpenGL function.
+extern void (* const glDrawArraysInstanced)(GLenum, GLint, GLsizei, GLsizei);
+/// Pointer to glDrawElementsInstanced OpenGL function.
+extern void (* const glDrawElementsInstanced)(GLenum, GLsizei, GLenum, const GLvoid *, GLsizei);
+/// Pointer to glFenceSync OpenGL function.
+extern GLsync (* const glFenceSync)(GLenum, GLbitfield);
+/// Pointer to glIsSync OpenGL function.
+extern GLboolean (* const glIsSync)(GLsync);
+/// Pointer to glDeleteSync OpenGL function.
+extern void (* const glDeleteSync)(GLsync);
+/// Pointer to glClientWaitSync OpenGL function.
+extern GLenum (* const glClientWaitSync)(GLsync, GLbitfield, GLuint64);
+/// Pointer to glWaitSync OpenGL function.
+extern void (* const glWaitSync)(GLsync, GLbitfield, GLuint64);
+/// Pointer to glGetInteger64v OpenGL function.
+extern void (* const glGetInteger64v)(GLenum, GLint64 *);
+/// Pointer to glGetSynciv OpenGL function.
+extern void (* const glGetSynciv)(GLsync, GLenum, GLsizei, GLsizei *, GLint *);
+/// Pointer to glGetInteger64i_v OpenGL function.
+extern void (* const glGetInteger64i_v)(GLenum, GLuint, GLint64 *);
+/// Pointer to glGetBufferParameteri64v OpenGL function.
+extern void (* const glGetBufferParameteri64v)(GLenum, GLenum, GLint64 *);
+/// Pointer to glGenSamplers OpenGL function.
+extern void (* const glGenSamplers)(GLsizei, GLuint *);
+/// Pointer to glDeleteSamplers OpenGL function.
+extern void (* const glDeleteSamplers)(GLsizei, const GLuint *);
+/// Pointer to glIsSampler OpenGL function.
+extern GLboolean (* const glIsSampler)(GLuint);
+/// Pointer to glBindSampler OpenGL function.
+extern void (* const glBindSampler)(GLuint, GLuint);
+/// Pointer to glSamplerParameteri OpenGL function.
+extern void (* const glSamplerParameteri)(GLuint, GLenum, GLint);
+/// Pointer to glSamplerParameteriv OpenGL function.
+extern void (* const glSamplerParameteriv)(GLuint, GLenum, const GLint *);
+/// Pointer to glSamplerParameterf OpenGL function.
+extern void (* const glSamplerParameterf)(GLuint, GLenum, GLfloat);
+/// Pointer to glSamplerParameterfv OpenGL function.
+extern void (* const glSamplerParameterfv)(GLuint, GLenum, const GLfloat *);
+/// Pointer to glGetSamplerParameteriv OpenGL function.
+extern void (* const glGetSamplerParameteriv)(GLuint, GLenum, GLint *);
+/// Pointer to glGetSamplerParameterfv OpenGL function.
+extern void (* const glGetSamplerParameterfv)(GLuint, GLenum, GLfloat *);
+/// Pointer to glVertexAttribDivisor OpenGL function.
+extern void (* const glVertexAttribDivisor)(GLuint, GLuint);
+/// Pointer to glBindTransformFeedback OpenGL function.
+extern void (* const glBindTransformFeedback)(GLenum, GLuint);
+/// Pointer to glDeleteTransformFeedbacks OpenGL function.
+extern void (* const glDeleteTransformFeedbacks)(GLsizei, const GLuint *);
+/// Pointer to glGenTransformFeedbacks OpenGL function.
+extern void (* const glGenTransformFeedbacks)(GLsizei, GLuint *);
+/// Pointer to glIsTransformFeedback OpenGL function.
+extern GLboolean (* const glIsTransformFeedback)(GLuint);
+/// Pointer to glPauseTransformFeedback OpenGL function.
+extern void (* const glPauseTransformFeedback)();
+/// Pointer to glResumeTransformFeedback OpenGL function.
+extern void (* const glResumeTransformFeedback)();
+/// Pointer to glGetProgramBinary OpenGL function.
+extern void (* const glGetProgramBinary)(GLuint, GLsizei, GLsizei *, GLenum *, GLvoid *);
+/// Pointer to glProgramBinary OpenGL function.
+extern void (* const glProgramBinary)(GLuint, GLenum, const GLvoid *, GLsizei);
+/// Pointer to glProgramParameteri OpenGL function.
+extern void (* const glProgramParameteri)(GLuint, GLenum, GLint);
+/// Pointer to glInvalidateFramebuffer OpenGL function.
+extern void (* const glInvalidateFramebuffer)(GLenum, GLsizei, const GLenum *);
+/// Pointer to glInvalidateSubFramebuffer OpenGL function.
+extern void (* const glInvalidateSubFramebuffer)(GLenum, GLsizei, const GLenum *, GLint, GLint, GLsizei, GLsizei);
+/// Pointer to glTexStorage2D OpenGL function.
+extern void (* const glTexStorage2D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei);
+/// Pointer to glTexStorage3D OpenGL function.
+extern void (* const glTexStorage3D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei);
+/// Pointer to glGetInternalformativ OpenGL function.
+extern void (* const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint *);
 
 #ifndef NDEBUG
 /// Check for GL errors and print on the console.
