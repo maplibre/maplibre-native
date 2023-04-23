@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 // Pointers to OpenGL ES functions. They must be
 // initialized by the platform at linking time.

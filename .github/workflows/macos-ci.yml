@@ -8,6 +8,7 @@ on:
     tags:
       - 'macos-*'
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
@@ -28,6 +29,7 @@ on:
     branches:
       - opengl-2
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/macos-ci.yml"
