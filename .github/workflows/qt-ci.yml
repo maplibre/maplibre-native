@@ -9,6 +9,7 @@ on:
     tags:
       - 'qt-**'
     paths:
+      - CMakeLists.txt
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
@@ -31,6 +32,7 @@ on:
       - main
       - opengl-2
     paths:
+      - CMakeLists.txt
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
