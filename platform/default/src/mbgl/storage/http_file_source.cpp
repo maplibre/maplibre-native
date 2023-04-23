@@ -357,6 +357,7 @@ size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const 
         baton->response = std::make_unique<Response>();
     }
 
+    // NOLINTBEGIN(bugprone-assignment-in-if-condition)
     const size_t length = size * nmemb;
     size_t begin = std::string::npos;
     if ((begin = headerMatches("last-modified: ", buffer, length)) != std::string::npos) {
@@ -379,6 +380,7 @@ size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const 
     } else if ((begin = headerMatches("x-rate-limit-reset: ", buffer, length)) != std::string::npos) {
         baton->xRateLimitReset = std::string(buffer + begin, length - begin - 2); // remove \r\n
     }
+    // NOLINTEND(bugprone-assignment-in-if-condition)
 
     return length;
 }
