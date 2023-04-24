@@ -129,10 +129,6 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
     return impl->orchestrator.getPlacedSymbolsData();
 }
 
-void Renderer::update(const std::shared_ptr<UpdateParameters>& parameters) {
-    impl->orchestrator.update(parameters);
-}
-
 void Renderer::reduceMemoryUse() {
     gfx::BackendScope guard{impl->backend};
     impl->reduceMemoryUse();

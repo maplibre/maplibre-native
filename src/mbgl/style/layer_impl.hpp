@@ -56,7 +56,7 @@ public:
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
     /// Generate any changes needed by the layer
-    virtual void update(UniqueChangeRequestVec&) const { }
+    virtual void update(PaintParameters&, UniqueChangeRequestVec&) const { }
 
     virtual void layerAdded(PaintParameters&, UniqueChangeRequestVec&) const { }
     virtual void layerRemoved(PaintParameters&, UniqueChangeRequestVec&) const { }

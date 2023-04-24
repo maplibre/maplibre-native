@@ -53,7 +53,6 @@ public:
     VertexAttributeArrayGL(int initCapacity = 10) : VertexAttributeArray(initCapacity) { }
     VertexAttributeArrayGL(VertexAttributeArrayGL &&other) : VertexAttributeArray(std::move(other)) { }
     VertexAttributeArrayGL(const VertexAttributeArrayGL&) = delete;
-    ~VertexAttributeArrayGL() = default;
     
     VertexAttributeArrayGL& operator=(VertexAttributeArrayGL &&other) {
         VertexAttributeArray::operator=(std::move(other));

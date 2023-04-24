@@ -35,9 +35,6 @@ public:
         } else {
             [nativeView setNeedsRerender];
         }
-        if (renderer) {
-            renderer->update(updateParameters);
-        }
     }
     
     void setObserver(mbgl::RendererObserver& observer) override {

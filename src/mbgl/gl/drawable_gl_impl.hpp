@@ -51,7 +51,6 @@ public:
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
     std::size_t attributeOffset = 0;
-    mat4 matrix;
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
     gfx::ColorMode colorMode;
