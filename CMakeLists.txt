@@ -295,6 +295,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/compression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/constants.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/convert.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/enum.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/event.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/exception.hpp
@@ -319,7 +320,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp

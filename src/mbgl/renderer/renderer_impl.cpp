@@ -115,12 +115,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
             auto& shader = drawable.getShader();
 
-            // Where should this happen?
-            const mat4 matrix = parameters.matrixForTile({ 0, 0, 0 }); //tileID.toUnwrapped());
-
-            shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
-            shader->updateUniforms();
-
             // Generate a vertex array object for the drawable state, if necessary
             if (shader && !drawableGL.getVertexArray().isValid()) {
                 const auto usage = gfx::BufferUsageType::StaticDraw;
@@ -245,6 +239,18 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             const auto& drawable = *pair.second;
 
             context.setupDraw(drawable);
+
+            mat4 matrix = drawable.getMatrix();
+            if (drawable.getTileID()) {
+                const UnwrappedTileID tileID = {0,0,0};//drawable.getTileID()->toUnwrapped();
+                const auto tileMat = parameters.matrixForTile(tileID);
+                matrix::multiply(matrix, drawable.getMatrix(), tileMat);
+            }
+
+            if (auto& shader = drawable.getShader()) {
+                shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
+                shader->updateUniforms();
+            }
 
             drawable.draw(parameters);
         }

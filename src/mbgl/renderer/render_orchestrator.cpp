@@ -750,19 +750,6 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
-void RenderOrchestrator::update(const std::shared_ptr<UpdateParameters>& parameters) {
-    if (!parameters) {
-        return;
-    }
-    
-    // TODO: Removed layers need a chance to remove their drawables
-    std::vector<std::unique_ptr<ChangeRequest>> changes;
-    for (auto& layer : *parameters->layers) {
-        layer->update(changes);
-        addChanges(changes);
-    }
-}
-
 void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
     pendingChanges.insert(pendingChanges.end(),
                           std::make_move_iterator(changes.begin()),
@@ -783,14 +770,19 @@ void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) 
 
 void RenderOrchestrator::updateLayers(PaintParameters& parameters) {
     std::vector<std::unique_ptr<ChangeRequest>> changes;
+    
     for (auto& kv : layersRemoved) {
         kv.second->layerRemoved(parameters, changes);
-        addChanges(changes);
     }
     for (auto& kv : layersAdded) {
         kv.second->layerAdded(parameters, changes);
-        addChanges(changes);
     }
+    
+    for (auto& impl : *layerImpls) {
+        impl->update(parameters, changes);
+    }
+
+    addChanges(changes);
 }
 
 void RenderOrchestrator::processChanges() {
