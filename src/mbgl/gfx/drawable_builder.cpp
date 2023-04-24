@@ -29,6 +29,7 @@ void DrawableBuilder::flush() {
         auto draw = getCurrentDrawable(/*createIfNone=*/true);
         currentDrawable->setDrawPriority(drawPriority);
         currentDrawable->setShader(shader);
+        currentDrawable->setMatrix(matrix);
         currentDrawable->setVertexAttributes(getVertexAttributes());
         currentDrawable->addTweakers(tweakers.begin(), tweakers.end());
         init();
