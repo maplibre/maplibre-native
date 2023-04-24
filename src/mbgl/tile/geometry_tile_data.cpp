@@ -118,7 +118,7 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
         double y2 = 180 - (p.y + y0) * 360 / size;
         return Point<double>(
             (p.x + x0) * 360 / size - 180,
-            360.0 / M_PI * std::atan(std::exp(y2 * M_PI / 180)) - 90.0
+            std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0
         );
     };
 

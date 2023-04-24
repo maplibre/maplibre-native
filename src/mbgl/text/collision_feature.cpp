@@ -1,5 +1,6 @@
 #include <mbgl/text/collision_feature.hpp>
 #include <mbgl/util/math.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/log2.hpp>
 
 namespace mbgl {
@@ -46,7 +47,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
         if (rotate) {
             // Account for *-rotate in point collision boxes
             // Doesn't account for icon-text-fit
-            const float rotateRadians = rotate * util::DEG2RAD_F;
+            const float rotateRadians = util::deg2radf(rotate);
 
             const Point<float> tl = util::rotate(Point<float>(x1, y1), rotateRadians);
             const Point<float> tr = util::rotate(Point<float>(x2, y1), rotateRadians);

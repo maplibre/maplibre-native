@@ -1,18 +1,19 @@
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/layout/merge_lines.hpp>
 #include <mbgl/layout/clip_lines.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/text/get_anchors.hpp>
 #include <mbgl/text/shaping.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/tile/tile.hpp>
 #include <mbgl/util/utf.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/platform.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/tile/tile.hpp>
 
 #include <mapbox/polylabel.hpp>
 
@@ -540,7 +541,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const float symbolSpacing = tilePixelRatio * layout->get<SymbolSpacing>();
     const float textPadding = layout->get<TextPadding>() * tilePixelRatio;
     const float iconPadding = layout->get<IconPadding>() * tilePixelRatio;
-    const float textMaxAngle = layout->get<TextMaxAngle>() * util::DEG2RAD_F;
+    const float textMaxAngle = util::deg2radf(layout->get<TextMaxAngle>());
     const float iconRotation = layout->evaluate<IconRotate>(zoom, feature, canonicalID);
     const float textRotation = layout->evaluate<TextRotate>(zoom, feature, canonicalID);
     std::array<float, 2> variableTextOffset;

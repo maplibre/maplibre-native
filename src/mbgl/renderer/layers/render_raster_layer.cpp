@@ -8,6 +8,7 @@
 #include <mbgl/programs/raster_program.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 
 namespace mbgl {
@@ -67,7 +68,7 @@ static float contrastFactor(float contrast) {
 }
 
 static std::array<float, 3> spinWeights(float spin) {
-    spin *= util::DEG2RAD_F;
+    spin = util::deg2radf(spin);
     float s = std::sin(spin);
     float c = std::cos(spin);
     std::array<float, 3> spin_weights = {{
