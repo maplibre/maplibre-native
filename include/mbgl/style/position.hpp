@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/math/angles.hpp>
 #include <mbgl/util/constants.hpp>
 
 #include <array>
@@ -52,8 +53,8 @@ private:
     void calculateCartesian() {
         // We abstract "north"/"up" (compass-wise) to be 0° when really this is 90° (π/2): we
         // correct for that here
-        const float _a = (azimuthal + 90) * util::DEG2RAD_F;
-        const float _p = polar * util::DEG2RAD_F;
+        const float _a = util::deg2radf(azimuthal + 90);
+        const float _p = util::deg2radf(polar);
 
         x = radial * std::cos(_a) * std::sin(_p);
         y = radial * std::sin(_a) * std::sin(_p);

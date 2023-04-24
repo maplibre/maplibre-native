@@ -18,6 +18,7 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
@@ -94,15 +95,15 @@ protected:
         }
         float dot(const vec2& v2) const { return x * v2.x + y * v2.y; }
         vec2 rotated(float degrees) const {
-            const float cs = std::cos(degrees * util::DEG2RAD_F);
-            const float sn = std::sin(degrees * util::DEG2RAD_F);
+            const float cs = std::cos(util::deg2radf(degrees));
+            const float sn = std::sin(util::deg2radf(degrees));
             return vec2{x * cs + y * sn, x * sn + y * cs}.normalized();
         }
         float bearing() const {
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) * util::RAD2DEG_F;
+            return util::rad2degf(util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)));
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -488,7 +489,7 @@ protected:
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
 
-        const auto mapBearing = static_cast<float>(util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
+        const auto mapBearing = static_cast<float>(util::wrap(util::rad2deg(params.bearing), 0.0, util::DEGREES_MAX));
         for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
             const float bearing_ = static_cast<float>(i - 1) * bearingStep - mapBearing;
             Point<double> poc = ruler.destination(centerPoint, params.errorRadiusMeters, bearing_);
@@ -596,8 +597,8 @@ protected:
         for (unsigned long i = 0; i < 4; ++i) {
             const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b),
-                                                -std::cos(util::DEG2RAD_D * b)};
+            const Point<double> cornerDirection{std::sin(util::deg2rad(b)),
+                                                -std::cos(util::deg2rad(b))};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
@@ -816,7 +817,7 @@ void RenderLocationIndicatorLayer::prepare(const LayerPrepareParameters& p) {
     renderImpl->parameters.latitude = state.getLatLng().latitude();
     renderImpl->parameters.longitude = state.getLatLng().longitude();
     renderImpl->parameters.zoom = state.getZoom();
-    renderImpl->parameters.bearing = -state.getBearing() * util::RAD2DEG_D;
+    renderImpl->parameters.bearing = util::rad2deg(-state.getBearing());
     renderImpl->parameters.pitch = state.getPitch();
     mat4 projMatrix;
     state.getProjMatrix(projMatrix);
