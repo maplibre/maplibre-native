@@ -62,6 +62,8 @@ public:
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
+    void setMatrix(mat4 value) { matrix = value; }
+
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
     /// Add another triangle based on the previous two points
@@ -84,6 +86,8 @@ protected:
     DrawPriority drawPriority = 0;
 
     gfx::ShaderProgramBasePtr shader;
+
+    mat4 matrix;
 
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;

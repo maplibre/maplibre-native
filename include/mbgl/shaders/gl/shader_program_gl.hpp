@@ -14,7 +14,6 @@ public:
                     VertexAttributeArrayGL&& uniforms,
                     VertexAttributeArrayGL&& attributes);
     ShaderProgramGL(ShaderProgramGL&& other);
-    virtual ~ShaderProgramGL() noexcept = default;
 
     static constexpr std::string_view Name{"GenericGLShader"};
     const std::string_view typeName() const noexcept override { return Name; }

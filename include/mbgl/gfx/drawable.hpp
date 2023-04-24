@@ -1,10 +1,12 @@
 #pragma once
 
-#include <mbgl/util/identity.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/identity.hpp>
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace mbgl {
@@ -22,7 +24,7 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 class Drawable {
 protected:
-    Drawable() = default;
+    Drawable();
 
 public:
     virtual ~Drawable() = default;
@@ -40,6 +42,12 @@ public:
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
+    std::optional<OverscaledTileID> getTileID() const { return tileID; }
+    void setTileID(OverscaledTileID value) { tileID = value; }
+
+    mat4 getMatrix() const { return matrix; }
+    void setMatrix(mat4 value) { matrix = value; }
+    
     /// Get the number of vertexes
     std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
 
@@ -61,7 +69,8 @@ public:
 protected:
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
-
+    mat4 matrix; //= matrix::identity4();
+    std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
 
     std::vector<DrawableTweakerPtr> tweakers;

@@ -25,8 +25,6 @@ protected:
     }
 
 public:
-    virtual ~ShaderProgramBase() noexcept = default;
-
     const util::SimpleIdentity& getID() const { return shaderProgramID; }
 
     /// Get the available vertex attributes and their default values
