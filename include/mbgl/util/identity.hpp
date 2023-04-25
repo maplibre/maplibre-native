@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/string.hpp>
+
 #include <cstdint>
 
 namespace mbgl {
@@ -22,8 +24,11 @@ public:
     bool operator==(const SimpleIdentity& other) const { return uniqueID == other.uniqueID; }
     bool operator!=(const SimpleIdentity& other) const { return uniqueID != other.uniqueID; }
 
-    operator bool() const { return uniqueID != emptyID; }
-    bool operator!() const { return uniqueID == emptyID; }
+    std::int64_t id() const { return uniqueID; }
+    bool isEmpty() const { return uniqueID != emptyID; }
+
+    operator bool() const { return isEmpty(); }
+    bool operator!() const { return !isEmpty(); }
 
 private:
     static constexpr std::int64_t emptyID = 0;
@@ -46,6 +51,9 @@ protected:
     util::SimpleIdentity uniqueID;
 };
 
+inline std::string toString(const util::SimpleIdentity& ident) {
+    return "{"+std::to_string(ident.id())+"}";
+}
 
 } // namespace util
 } // namespace mbgl

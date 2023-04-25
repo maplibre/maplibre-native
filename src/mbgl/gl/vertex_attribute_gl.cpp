@@ -5,6 +5,8 @@
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 
 #include <cstring>
+#include <sstream>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -158,14 +160,12 @@ void VertexAttributeArrayGL::applyUniforms(const gfx::ShaderProgramBase& shader)
         const auto& name = kv.first;
         auto& uniform = kv.second;
 
-        if (uniform->getDirty()) {
-            if (uniform->getIndex() < 0) {
-                const auto index = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.c_str()));
-                uniform->setIndex(index);
-            }
-            std::visit(ApplyUniform { uniform->getIndex() }, uniform->get(0));
-            uniform->clearDirty();
+        if (uniform->getIndex() < 0) {
+            const auto index = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.c_str()));
+            Log::Warning(Event::General, "Uniform '" + name + "' = " + std::to_string(index));
+            uniform->setIndex(index);
         }
+        std::visit(ApplyUniform { uniform->getIndex() }, uniform->get(0));
     }
 }
 

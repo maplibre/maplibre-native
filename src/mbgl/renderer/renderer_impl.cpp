@@ -125,7 +125,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 auto indexBuffer = gfx::IndexBuffer {
                     indexData.size(),
                     uploadPass->createIndexBufferResource(
-                        &indexData[0],
+                        indexData.data(),
                         indexData.size() * sizeof(indexData[0]),
                         usage)
                 };
@@ -239,9 +239,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
             mat4 matrix = drawable.getMatrix();
             if (drawable.getTileID()) {
-                const UnwrappedTileID tileID = {0,0,0};//drawable.getTileID()->toUnwrapped();
+                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
                 const auto tileMat = parameters.matrixForTile(tileID);
                 matrix::multiply(matrix, drawable.getMatrix(), tileMat);
+                matrix = tileMat;
             }
 
             if (auto& shader = drawable.getShader()) {
@@ -250,6 +251,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
 
             drawable.draw(parameters);
+            
+            //static_cast<gl::Context&>(context).program = 0;
+            //static_cast<gl::Context&>(context).bindVertexArray = 0;
+            //static_cast<gl::Context&>(context).vertexBuffer = 0;
+            //static_cast<gl::Context&>(context).globalVertexArrayState.indexBuffer = 0;
         }
     }
 

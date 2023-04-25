@@ -58,7 +58,7 @@ void BackgroundLayer::Impl::layerRemoved(PaintParameters&, UniqueChangeRequestVe
 void BackgroundLayer::Impl::update(PaintParameters& parameters, UniqueChangeRequestVec& changes) const {
     std::unique_lock<std::mutex> guard(mutex);
 
-    auto builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method on ...Context?
+    std::unique_ptr<gfx::DrawableBuilder> builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method on ...Context?
     builder->setShader(shader);
     builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
 

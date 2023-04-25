@@ -26,7 +26,7 @@ inline constexpr bool is_shader_v =
 /// backend API. Shaders are registered with a `gfx::ShaderRegistry` instance.
 class Shader {
     public:
-        virtual ~Shader() = default;
+        virtual ~Shader() noexcept = default;
 
         /// @brief Get the type name of this shader
         /// @return Shader type name
