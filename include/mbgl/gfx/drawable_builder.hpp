@@ -38,7 +38,7 @@ public:
     const std::vector<DrawablePtr>& getDrawables() const { return drawables; }
 
     /// Get all the completed drawables and release ownership
-    std::vector<DrawablePtr> clearDrawables() const { return std::move(drawables); }
+    std::vector<DrawablePtr> clearDrawables() { auto v = std::move(drawables); return v; }
 
     /// Get the ID of the drawable we're currently working on, if any
     util::SimpleIdentity getDrawableId();

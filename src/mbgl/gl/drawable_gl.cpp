@@ -1,5 +1,6 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/vertex_buffer_resource.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -9,6 +10,9 @@ DrawableGL::DrawableGL()
 }
 
 DrawableGL::~DrawableGL() {
+    impl->vertexArray =  { { nullptr, false } };
+    impl->indexBuffer = { 0, nullptr };
+    impl->attributeBuffer.reset();
 }
 
 void DrawableGL::draw(const PaintParameters &parameters) const
@@ -30,6 +34,14 @@ std::vector<std::uint16_t>& DrawableGL::getIndexData() const {
 
 const gl::VertexArray& DrawableGL::getVertexArray() const {
     return impl->vertexArray;
+}
+
+const gfx::IndexBuffer& DrawableGL::getIndexBuffer() const {
+    return impl->indexBuffer;
+}
+
+const gfx::UniqueVertexBufferResource& DrawableGL::getBuffer() const {
+    return impl->attributeBuffer;
 }
 
 const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {

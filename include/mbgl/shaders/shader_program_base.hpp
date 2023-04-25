@@ -13,6 +13,7 @@ class ShaderProgramBase : public gfx::Shader {
 protected:
     ShaderProgramBase() { }
     ShaderProgramBase(ShaderProgramBase&&) { }
+    ~ShaderProgramBase() noexcept override = default;
 
     template <typename T>
     bool set(gfx::VertexAttributeArray& attrs, const std::string& name, std::size_t i, T value) {

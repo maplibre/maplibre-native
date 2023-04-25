@@ -24,6 +24,9 @@ void DrawableGLBuilder::init() {
     constexpr auto indexOffset = 0;
     const auto indexCount = impl->indexes.elements();
     drawableGL.setIndexData(impl->indexes.vector(), indexOffset, indexCount);
+    
+    impl->indexes.clear();
+    impl->vertices.clear();
 }
 
 } // namespace gl

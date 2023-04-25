@@ -15,6 +15,8 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <mbgl/gl/index_buffer_resource.hpp>
+
 #include <cstring>
 #include <iterator>
 
@@ -457,10 +459,10 @@ void Context::setupDraw(const gfx::Drawable& drawable) {
         program = value::Program::Default;
     }
 
-    // setDepthMode(depthMode);
-    // setStencilMode(stencilMode);
-    // setColorMode(colorMode);
-    // setCullFaceMode(cullFaceMode);
+    //setDepthMode(...);
+    setStencilMode(gfx::StencilMode::disabled());
+    setColorMode(gfx::ColorMode::alphaBlended());
+    setCullFaceMode(gfx::CullFaceMode::disabled());
 
     // uniformStates.bind(uniformValues);
     // textureStates.bind(context, textureBindings);
@@ -469,6 +471,9 @@ void Context::setupDraw(const gfx::Drawable& drawable) {
     auto& vao = drawableGL.getVertexArray();
     if (vao.isValid()) {
         bindVertexArray = vao.getID();  // glBindVertexArray
+        //vertexBuffer = static_cast<gl::VertexBufferResource&>(*drawableGL.getBuffer()).buffer.get();
+        //globalVertexArrayState.indexBuffer =
+        //    drawableGL.getIndexBuffer().getResource<gl::IndexBufferResource>().buffer;
     } else {
         bindVertexArray = value::BindVertexArray::Default;
     }
