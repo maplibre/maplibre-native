@@ -23,7 +23,7 @@ class VertexArray;
 class DrawableGL : public gfx::Drawable {
 public:
     DrawableGL();
-    virtual ~DrawableGL();
+    ~DrawableGL() override;
 
     void draw(const PaintParameters &) const override;
 
@@ -41,6 +41,9 @@ public:
     const gl::VertexArray& getVertexArray() const;
     void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&, gfx::IndexBuffer&&);
 
+    const gfx::UniqueVertexBufferResource& getBuffer() const;
+    const gfx::IndexBuffer& getIndexBuffer() const;
+    
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;

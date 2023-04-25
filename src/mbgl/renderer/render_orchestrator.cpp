@@ -759,8 +759,10 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
 
 void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
     if (drawable) {
-        const auto id = drawable->getId();
-        drawables.insert(std::make_pair(id, std::move(drawable)));
+        const auto& id = drawable->getId();
+        if (!drawables.insert(std::make_pair(id, std::move(drawable))).second) {
+            Log::Warning(Event::General, "Duplicate drawable " + std::to_string(id) + " ignored");
+        }
     }
 }
 

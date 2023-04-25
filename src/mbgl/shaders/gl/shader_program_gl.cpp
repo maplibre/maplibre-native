@@ -126,9 +126,9 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLsizei length = 0;
         GLint size = 0;
         GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, &name[0]));
-        const GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, &name[0]));
-        addAttr(uniforms, &name[0], location, length, size, glType);
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, name.data()));
+        const GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
+        addAttr(uniforms, name.data(), location, length, size, glType);
     }
 
     VertexAttributeArrayGL attrs;
@@ -141,12 +141,12 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLsizei length = 0; // "number of characters actually written in name (excluding the null terminator)"
         GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
         GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, &name[0]));
-        if (!strncmp(&name[0], "gl_", 3)) { // Is there a better way to detect built-in attributes?
+        MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, name.data()));
+        if (!strncmp(name.data(), "gl_", 3)) { // Is there a better way to detect built-in attributes?
             continue;
         }
-        const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, &name[0]));
-        addAttr(attrs, &name[0], location, length, size, glType);
+        const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
+        addAttr(attrs, name.data(), location, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniforms), std::move(attrs));
