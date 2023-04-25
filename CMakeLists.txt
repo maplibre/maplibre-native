@@ -165,6 +165,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/projection_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/math/angles.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/clamp.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/log2.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/minmax.hpp
@@ -1059,7 +1060,6 @@ target_link_libraries(
         Mapbox::Base::Extras::rapidjson
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
-        Mapbox::Base::optional
         Mapbox::Base::variant
 )
 

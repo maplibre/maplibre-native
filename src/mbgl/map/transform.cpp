@@ -7,6 +7,7 @@
 #include <mbgl/util/interpolate.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/projection.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
@@ -96,8 +97,8 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
     double zoom = camera.zoom.value_or(getZoom());
-    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD_D : getBearing();
-    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD_D : getPitch();
+    double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
+    double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
         if (animation.transitionFinishFn) {
@@ -178,8 +179,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
     double zoom = camera.zoom.value_or(getZoom());
-    double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD_D : getBearing();
-    double pitch = camera.pitch ? *camera.pitch * util::DEG2RAD_D : getPitch();
+    double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
+    double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
         if (animation.transitionFinishFn) {
@@ -382,22 +383,22 @@ void Transform::setMaxZoom(const double maxZoom) {
 
 void Transform::setMinPitch(const double minPitch) {
     if (std::isnan(minPitch)) return;
-    if (minPitch * util::DEG2RAD_D < util::PITCH_MIN) {
+    if (util::deg2rad(minPitch) < util::PITCH_MIN) {
         Log::Warning(Event::General,
-                     "Trying to set minimum pitch below the limit (" + std::to_string(util::PITCH_MIN * util::RAD2DEG_D) + 
+                     "Trying to set minimum pitch below the limit (" + std::to_string(util::rad2deg(util::PITCH_MIN)) +
                      " degrees), the value will be clamped.");
     }
-    state.setMinPitch(minPitch * util::DEG2RAD_D);
+    state.setMinPitch(util::deg2rad(minPitch));
 }
 
 void Transform::setMaxPitch(const double maxPitch) {
     if (std::isnan(maxPitch)) return;
-    if (maxPitch * util::DEG2RAD_D > util::PITCH_MAX) {
+    if (util::deg2rad(maxPitch) > util::PITCH_MAX) {
         Log::Warning(Event::General,
-                     "Trying to set maximum pitch above the limit (" + std::to_string(util::PITCH_MAX * util::RAD2DEG_D) +
+                     "Trying to set maximum pitch above the limit (" + std::to_string(util::rad2deg(util::PITCH_MAX)) +
                      " degrees), the value will be clamped.");
     }
-    state.setMaxPitch(maxPitch * util::DEG2RAD_D);
+    state.setMaxPitch(util::deg2rad(maxPitch));
 }
 
 // MARK: - Bearing
@@ -418,7 +419,7 @@ void Transform::rotateBy(const ScreenCoordinate& first,
         center.y = first.y + std::sin(rotateBearing) * heightOffset;
     }
 
-    const double bearing = -(state.getBearing() + util::angle_between(first - center, second - center)) * util::RAD2DEG_D;
+    const double bearing = -util::rad2deg(state.getBearing() + util::angle_between(first - center, second - center));
     easeTo(CameraOptions().withBearing(bearing), animation);
 }
 
