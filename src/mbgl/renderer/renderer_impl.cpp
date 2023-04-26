@@ -88,6 +88,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
     const auto& layerRenderItems = renderTree.getLayerRenderItems();
 
+    // Run changes
+    orchestrator.processChanges();
+
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
@@ -139,6 +142,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 auto& glContext = static_cast<gl::Context&>(context);
                 auto vertexArray = glContext.createVertexArray();
                 vertexArray.bind(glContext, indexBuffer, bindings);
+                glContext.bindVertexArray = gl::value::BindVertexArray::Default;
 
                 drawableGL.setVertexArray(std::move(vertexArray),
                                           std::move(vertexBuffer),
@@ -195,9 +199,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
-    // Run changes
-    orchestrator.processChanges();
-
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {
@@ -238,7 +239,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         for (const auto &pair : orchestrator.getDrawables()) {
             const auto& drawable = *pair.second;
 
-            context.setupDraw(drawable);
+            if (!context.setupDraw(drawable)) {
+                continue;
+            }
 
             mat4 matrix = drawable.getMatrix();
             if (drawable.getTileID()) {
@@ -254,11 +257,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
 
             drawable.draw(parameters);
-            
-            //static_cast<gl::Context&>(context).program = 0;
-            //static_cast<gl::Context&>(context).bindVertexArray = 0;
-            //static_cast<gl::Context&>(context).vertexBuffer = 0;
-            //static_cast<gl::Context&>(context).globalVertexArrayState.indexBuffer = 0;
         }
     }
 

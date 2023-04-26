@@ -18,9 +18,9 @@ public:
     DrawableGLTweaker() = default;
 
 public:
-    virtual ~DrawableGLTweaker() = default;
+    ~DrawableGLTweaker() override = default;
 
-    virtual void execute(gfx::Drawable&, const PaintParameters&) override;
+    void execute(gfx::Drawable&, const PaintParameters&) override;
 };
 
 } // namespace gl
