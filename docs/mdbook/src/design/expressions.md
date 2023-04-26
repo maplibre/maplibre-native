@@ -77,7 +77,7 @@ implementation evaluates both inputs because they are expressions too.
 Expressions can be nested.
 
 **Although it looks like JavaScript, for MapLibre Native GL**, **the
-parser for any expression is written in MapLibre GL Native Core**. Each
+parser for any expression is written in MapLibre Native Core**. Each
 platform such as iOS, Android has their own Expression class which
 provides builders to build an expression and add it to a layer. When an
 expression is added to a layer, the rendering part of the code picks it
@@ -146,8 +146,8 @@ fillLayer.setProperties(
 );
 ```
 
-**To render the built expression, MapLibre GL Native uses expression
-parsers.** **Expression parsers are written in MapLibre GL Native Core
+**To render the built expression, MapLibre Native uses expression
+parsers.** **Expression parsers are written in MapLibre Native Core
 (in C++).** Each expression outputs an *EvaluationResult* class.
 Resolving an *EvaluationResult* can be deferred. As in, the result of an
 expression can be computed only when its necessary to be computed in

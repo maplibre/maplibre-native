@@ -1,6 +1,6 @@
 # Contributing
 
-If you have a usage question for a product built on Maplibre GL Native (such as our iOS or Android SDKs), please create a discussion thread on [GitHub Discussions](https://github.com/maplibre/maplibre-gl-native/discussions/categories/q-a).
+If you have a usage question for a product built on MapLibre Native (such as our iOS or Android SDKs), please create a discussion thread on [GitHub Discussions](https://github.com/maplibre/maplibre-gl-native/discussions/categories/q-a).
 
 If you want to contribute code:
 
