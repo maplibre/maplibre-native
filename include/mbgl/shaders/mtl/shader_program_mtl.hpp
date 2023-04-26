@@ -8,7 +8,7 @@ namespace mtl {
 class ShaderProgramMTL : public gfx::ShaderProgramBase {
 public:
     ShaderProgramMTL() : ShaderProgramBase() { }
-    virtual ~ShaderProgramMTL() = default;
+    ~ShaderProgramMTL() noexcept override = default;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }

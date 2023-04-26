@@ -90,7 +90,7 @@ public:
     
 public:
     /// Activate the shader, vertex attributes, etc., specified by the drawable
-    virtual void setupDraw(const gfx::Drawable&) = 0;
+    virtual bool setupDraw(const gfx::Drawable&) = 0;
 };
 
 } // namespace gfx
