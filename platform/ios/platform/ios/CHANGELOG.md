@@ -1,4 +1,4 @@
-# Changelog for MapLibre GL Native for iOS 
+# Changelog for MapLibre Native for iOS 
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-gl-native/blob/master/CONTRIBUTING.md) to get started.
 

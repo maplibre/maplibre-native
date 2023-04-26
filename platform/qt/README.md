@@ -1,4 +1,4 @@
-# MapLibre GL Native for Qt
+# MapLibre Native for Qt
 
 [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/qt-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/qt-ci.yml) 
 
