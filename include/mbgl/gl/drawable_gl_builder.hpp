@@ -13,7 +13,7 @@ class DrawableGLBuilder final : public gfx::DrawableBuilder {
 public:
     DrawableGLBuilder() {
     }
-    virtual ~DrawableGLBuilder() = default;
+    ~DrawableGLBuilder() override = default;
     
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     void setVertexAttributes(const VertexAttributeArrayGL& value) { vertexAttributes = value; }

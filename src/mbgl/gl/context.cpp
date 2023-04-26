@@ -443,7 +443,7 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-void Context::setupDraw(const gfx::Drawable& drawable) {
+bool Context::setupDraw(const gfx::Drawable& drawable) {
     if (const auto &shader = drawable.getShader()) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         if (shaderGL.getGLProgramID() != program.getCurrentValue()) {
@@ -465,11 +465,10 @@ void Context::setupDraw(const gfx::Drawable& drawable) {
     auto& vao = drawableGL.getVertexArray();
     if (vao.isValid()) {
         bindVertexArray = vao.getID();  // glBindVertexArray
-        //vertexBuffer = static_cast<gl::VertexBufferResource&>(*drawableGL.getBuffer()).buffer.get();
-        //globalVertexArrayState.indexBuffer =
-        //    drawableGL.getIndexBuffer().getResource<gl::IndexBufferResource>().buffer;
+        return true;
     } else {
         bindVertexArray = value::BindVertexArray::Default;
+        return false;
     }
 }
 

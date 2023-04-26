@@ -119,7 +119,7 @@ public:
         cleanupOnDestruction = cleanup;
     }
 
-    void setupDraw(const gfx::Drawable&) override;
+    bool setupDraw(const gfx::Drawable&) override;
 
 private:
     RendererBackend& backend;
