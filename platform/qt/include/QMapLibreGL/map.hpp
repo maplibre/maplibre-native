@@ -174,6 +174,8 @@ public:
 
     const QVector<QPair<QString, QString>> &defaultStyles() const;
 
+    std::vector<Feature> queryRenderedFeatures(const QPointF &point, QVector<QString> layerIds);
+
 public slots:
     void render();
     void connectionEstablished();

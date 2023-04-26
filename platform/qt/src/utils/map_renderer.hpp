@@ -38,6 +38,8 @@ public:
     // Thread-safe, called by the Frontend
     void updateParameters(std::shared_ptr<mbgl::UpdateParameters>);
 
+    std::vector<mbgl::Feature> queryRenderedFeatures(const mbgl::ScreenCoordinate &point, const mbgl::RenderedQueryOptions &options = {}) const;
+
 signals:
     void needsRendering();
 
