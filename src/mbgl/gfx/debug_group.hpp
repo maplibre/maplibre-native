@@ -6,9 +6,13 @@ namespace gfx {
 template <typename T>
 class DebugGroup {
 public:
-    DebugGroup(T& scope_, const char* name) : scope(&scope_) { scope->pushDebugGroup(name); }
+    DebugGroup(T& scope_, const char* name) : scope(&scope_) {
+        scope->pushDebugGroup(name);
+    }
 
-    DebugGroup(DebugGroup&& rhs) noexcept : scope(rhs.scope) { rhs.scope = nullptr; }
+    DebugGroup(DebugGroup&& rhs) noexcept : scope(rhs.scope) {
+        rhs.scope = nullptr;
+    }
 
     ~DebugGroup() {
         if (scope) {

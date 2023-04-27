@@ -90,7 +90,9 @@ public:
     static constexpr bool IsDataDriven = false;
     static constexpr bool IsOverridable = false;
 
-    static Color defaultValue() { return {}; }
+    static Color defaultValue() {
+        return {};
+    }
 };
 
 } // namespace style

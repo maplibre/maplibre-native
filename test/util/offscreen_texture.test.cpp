@@ -70,7 +70,9 @@ struct Buffer {
         MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW));
     }
 
-    ~Buffer() { MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer)); }
+    ~Buffer() {
+        MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer));
+    }
 
     GLuint buffer = 0;
 };

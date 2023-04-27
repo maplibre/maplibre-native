@@ -27,8 +27,12 @@ public:
         return geometry.circle;
     }
 
-    bool isCircle() const { return type == Type::Circle; }
-    bool isBox() const { return type == Type::Box; }
+    bool isCircle() const {
+        return type == Type::Circle;
+    }
+    bool isBox() const {
+        return type == Type::Box;
+    }
 
 private:
     union Geometry {

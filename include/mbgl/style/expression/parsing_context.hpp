@@ -22,7 +22,9 @@ class Expression;
 struct ParsingError {
     std::string message;
     std::string key;
-    bool operator==(const ParsingError& rhs) const { return message == rhs.message && key == rhs.key; }
+    bool operator==(const ParsingError& rhs) const {
+        return message == rhs.message && key == rhs.key;
+    }
 };
 
 using ParseResult = std::optional<std::unique_ptr<Expression>>;
@@ -77,9 +79,15 @@ public:
     ParsingContext(const ParsingContext&) = delete;
     ParsingContext& operator=(const ParsingContext&) = delete;
 
-    std::string getKey() const { return key; }
-    std::optional<type::Type> getExpected() const { return expected; }
-    const std::vector<ParsingError>& getErrors() const { return *errors; }
+    std::string getKey() const {
+        return key;
+    }
+    std::optional<type::Type> getExpected() const {
+        return expected;
+    }
+    const std::vector<ParsingError>& getErrors() const {
+        return *errors;
+    }
     std::string getCombinedErrors() const;
 
     /**
@@ -121,7 +129,9 @@ public:
         return scope->get(name);
     }
 
-    void error(std::string message) { errors->push_back({std::move(message), key}); }
+    void error(std::string message) {
+        errors->push_back({std::move(message), key});
+    }
 
     void error(std::string message, std::size_t child) {
         errors->push_back({std::move(message), key + "[" + util::toString(child) + "]"});
@@ -138,7 +148,9 @@ public:
         ctx.errors->clear();
     }
 
-    void clearErrors() { errors->clear(); }
+    void clearErrors() {
+        errors->clear();
+    }
 
 private:
     ParsingContext(std::string key_,

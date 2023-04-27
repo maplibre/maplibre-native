@@ -7,7 +7,9 @@ using namespace mbgl;
 class FakeTile {
 public:
     FakeTile(TileMask mask_) : mask(std::move(mask_)) {}
-    void setMask(TileMask mask_) { mask = std::move(mask_); }
+    void setMask(TileMask mask_) {
+        mask = std::move(mask_);
+    }
 
     const bool usedByRenderedLayers = true;
     TileMask mask;

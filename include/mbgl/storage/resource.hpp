@@ -44,8 +44,12 @@ public:
              LoadingMethod loadingMethod_ = LoadingMethod::All)
         : kind(kind_), loadingMethod(loadingMethod_), url(std::move(url_)), tileData(std::move(tileData_)) {}
 
-    void setPriority(Priority p) { priority = p; }
-    void setUsage(Usage u) { usage = u; }
+    void setPriority(Priority p) {
+        priority = p;
+    }
+    void setUsage(Usage u) {
+        usage = u;
+    }
 
     bool hasLoadingMethod(LoadingMethod method) const;
 

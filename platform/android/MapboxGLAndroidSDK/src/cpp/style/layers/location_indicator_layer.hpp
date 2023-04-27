@@ -14,7 +14,9 @@ namespace android {
 class LocationIndicatorLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/location/LocationIndicatorLayer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/location/LocationIndicatorLayer";
+    };
 
     LocationIndicatorLayer(jni::JNIEnv&, jni::String&);
 
@@ -79,7 +81,9 @@ public:
 
     void registerNative(jni::JNIEnv&) final;
 
-    LayerFactory* getLayerFactory() final { return this; }
+    LayerFactory* getLayerFactory() final {
+        return this;
+    }
 
 }; // class LocationIndicatorJavaLayerPeerFactory
 

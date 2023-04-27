@@ -19,6 +19,8 @@ struct Rect {
         return x == r.x && y == r.y && w == r.w && h == r.h;
     }
 
-    bool hasArea() const { return w != 0 && h != 0; }
+    bool hasArea() const {
+        return w != 0 && h != 0;
+    }
 };
 } // namespace mbgl

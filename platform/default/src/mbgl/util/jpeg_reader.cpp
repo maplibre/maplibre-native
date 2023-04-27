@@ -77,7 +77,9 @@ static void on_error_message(j_common_ptr cinfo) {
 struct jpeg_info_guard {
     explicit jpeg_info_guard(jpeg_decompress_struct* cinfo) : i_(cinfo) {}
 
-    ~jpeg_info_guard() { jpeg_destroy_decompress(i_); }
+    ~jpeg_info_guard() {
+        jpeg_destroy_decompress(i_);
+    }
 
     jpeg_decompress_struct* i_;
 };

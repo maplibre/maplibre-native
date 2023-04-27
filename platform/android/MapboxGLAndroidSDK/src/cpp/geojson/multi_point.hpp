@@ -16,8 +16,12 @@ namespace geojson {
 class MultiPoint {
 public:
     using SuperTag = Geometry;
-    static constexpr auto Name() { return "com/mapbox/geojson/MultiPoint"; };
-    static constexpr auto Type() { return "MultiPoint"; };
+    static constexpr auto Name() {
+        return "com/mapbox/geojson/MultiPoint";
+    };
+    static constexpr auto Type() {
+        return "MultiPoint";
+    };
 
     static jni::Local<jni::Object<MultiPoint>> New(jni::JNIEnv&, const mbgl::MultiPoint<double>&);
 

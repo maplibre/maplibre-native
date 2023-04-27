@@ -19,10 +19,14 @@ public:
 
     bool operator==(const Expression& e) const override;
 
-    std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
+    std::vector<std::optional<Value>> possibleOutputs() const override {
+        return {std::nullopt};
+    }
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "image"; }
+    std::string getOperator() const override {
+        return "image";
+    }
 
 private:
     std::shared_ptr<Expression> imageID;

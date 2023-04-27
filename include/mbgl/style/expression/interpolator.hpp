@@ -21,7 +21,9 @@ public:
             static_cast<float>(input));
     }
 
-    bool operator==(const ExponentialInterpolator& rhs) const { return base == rhs.base; }
+    bool operator==(const ExponentialInterpolator& rhs) const {
+        return base == rhs.base;
+    }
 };
 
 class CubicBezierInterpolator {
@@ -36,7 +38,9 @@ public:
                         1e-6);
     }
 
-    bool operator==(const CubicBezierInterpolator& rhs) const { return ub == rhs.ub; }
+    bool operator==(const CubicBezierInterpolator& rhs) const {
+        return ub == rhs.ub;
+    }
 
     util::UnitBezier ub;
 };

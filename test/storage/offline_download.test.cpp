@@ -72,7 +72,9 @@ public:
         return db.createRegion(definition, metadata);
     }
 
-    auto invalidateRegion(int64_t region) { return db.invalidateRegion(region); }
+    auto invalidateRegion(int64_t region) {
+        return db.invalidateRegion(region);
+    }
 
     Response response(const std::string& path) {
         Response result;

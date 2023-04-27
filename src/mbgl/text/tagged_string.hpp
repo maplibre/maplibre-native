@@ -50,19 +50,33 @@ struct TaggedString {
     TaggedString(StyledText styledText_, std::vector<SectionOptions> sections_)
         : styledText(std::move(styledText_)), sections(std::move(sections_)) {}
 
-    std::size_t length() const { return styledText.first.length(); }
+    std::size_t length() const {
+        return styledText.first.length();
+    }
 
-    std::size_t sectionCount() const { return sections.size(); }
+    std::size_t sectionCount() const {
+        return sections.size();
+    }
 
-    bool empty() const { return styledText.first.empty(); }
+    bool empty() const {
+        return styledText.first.empty();
+    }
 
-    const SectionOptions& getSection(std::size_t index) const { return sections.at(styledText.second.at(index)); }
+    const SectionOptions& getSection(std::size_t index) const {
+        return sections.at(styledText.second.at(index));
+    }
 
-    char16_t getCharCodeAt(std::size_t index) const { return styledText.first[index]; }
+    char16_t getCharCodeAt(std::size_t index) const {
+        return styledText.first[index];
+    }
 
-    const std::u16string& rawText() const { return styledText.first; }
+    const std::u16string& rawText() const {
+        return styledText.first;
+    }
 
-    const StyledText& getStyledText() const { return styledText; }
+    const StyledText& getStyledText() const {
+        return styledText;
+    }
 
     void addTextSection(const std::u16string& text,
                         double scale,
@@ -71,11 +85,17 @@ struct TaggedString {
 
     void addImageSection(const std::string& imageID);
 
-    const SectionOptions& sectionAt(std::size_t index) const { return sections.at(index); }
+    const SectionOptions& sectionAt(std::size_t index) const {
+        return sections.at(index);
+    }
 
-    const std::vector<SectionOptions>& getSections() const { return sections; }
+    const std::vector<SectionOptions>& getSections() const {
+        return sections;
+    }
 
-    uint8_t getSectionIndex(std::size_t characterIndex) const { return styledText.second.at(characterIndex); }
+    uint8_t getSectionIndex(std::size_t characterIndex) const {
+        return styledText.second.at(characterIndex);
+    }
 
     double getMaxScale() const;
     void trim();

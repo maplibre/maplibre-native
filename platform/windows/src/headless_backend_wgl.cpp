@@ -193,7 +193,9 @@ public:
         }
     }
 
-    ~WGLDisplayConfig() { UnregisterClassA(renderingWindowClass.lpszClassName, renderingWindowClass.hInstance); }
+    ~WGLDisplayConfig() {
+        UnregisterClassA(renderingWindowClass.lpszClassName, renderingWindowClass.hInstance);
+    }
 
     static std::shared_ptr<WGLDisplayConfig> create() {
         static std::weak_ptr<WGLDisplayConfig> instance;
@@ -399,7 +401,9 @@ private:
     }
 
 public:
-    WGLBackendImpl() { auto renderingContext = GetContext(); }
+    WGLBackendImpl() {
+        auto renderingContext = GetContext();
+    }
 
     ~WGLBackendImpl() final {
         if (renderingWindowRenderingContext) {

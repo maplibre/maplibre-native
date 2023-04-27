@@ -84,13 +84,23 @@ public:
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
           avoidEdges(std::move(avoidEdges_)) {}
 
-    const SymbolBucket& getBucket() const { return bucket.get(); }
-    const style::SymbolLayoutProperties::PossiblyEvaluated& getLayout() const { return *getBucket().layout; }
-    const RenderTile& getRenderTile() const { return renderTile.get(); }
+    const SymbolBucket& getBucket() const {
+        return bucket.get();
+    }
+    const style::SymbolLayoutProperties::PossiblyEvaluated& getLayout() const {
+        return *getBucket().layout;
+    }
+    const RenderTile& getRenderTile() const {
+        return renderTile.get();
+    }
 
-    const OverscaledTileID& getOverscaledID() const { return renderTile.get().getOverscaledTileID(); }
+    const OverscaledTileID& getOverscaledID() const {
+        return renderTile.get().getOverscaledTileID();
+    }
 
-    const TransformState& getTransformState() const { return state; }
+    const TransformState& getTransformState() const {
+        return state;
+    }
 
     const std::vector<style::TextVariableAnchorType>& getVariableTextAnchors() const {
         return getLayout().get<style::TextVariableAnchor>();
@@ -1287,9 +1297,15 @@ public:
 
 protected:
     void commit() override;
-    float symbolFadeChange(TimePoint) const override { return 1.0f; }
-    bool hasTransitions(TimePoint) const override { return false; }
-    bool transitionsEnabled() const override { return false; }
+    float symbolFadeChange(TimePoint) const override {
+        return 1.0f;
+    }
+    bool hasTransitions(TimePoint) const override {
+        return false;
+    }
+    bool transitionsEnabled() const override {
+        return false;
+    }
 };
 
 void StaticPlacement::commit() {
@@ -1320,8 +1336,12 @@ public:
 private:
     void placeLayers(const RenderLayerReferences&) override;
     void placeSymbolBucket(const BucketPlacementData&, std::set<uint32_t>&) override;
-    void collectPlacedSymbolData(bool enable) override { collectData = enable; }
-    const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const override { return placedSymbolsData; }
+    void collectPlacedSymbolData(bool enable) override {
+        collectData = enable;
+    }
+    const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const override {
+        return placedSymbolsData;
+    }
 
     std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4&) override;
     bool canPlaceAtVariableAnchor(const CollisionBox& box,

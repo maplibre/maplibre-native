@@ -17,9 +17,13 @@ class ExtensionFunction<R(Args...)> {
 public:
     ExtensionFunction(const ProcAddress ptr_) : ptr(ptr_) {}
 
-    explicit operator bool() const { return ptr; }
+    explicit operator bool() const {
+        return ptr;
+    }
 
-    R operator()(Args... args) const { return (*reinterpret_cast<R (*)(Args...)>(ptr))(std::forward<Args>(args)...); }
+    R operator()(Args... args) const {
+        return (*reinterpret_cast<R (*)(Args...)>(ptr))(std::forward<Args>(args)...);
+    }
 
 private:
     const ProcAddress ptr;

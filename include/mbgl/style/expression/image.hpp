@@ -40,7 +40,9 @@ public:
 
 template <>
 struct ValueFactory<expression::Image> {
-    static Value make(const expression::Image& image) { return image.toValue(); }
+    static Value make(const expression::Image& image) {
+        return image.toValue();
+    }
 };
 
 } // namespace conversion

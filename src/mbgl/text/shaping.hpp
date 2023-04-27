@@ -33,7 +33,9 @@ public:
     float right = 0;
     float bottom = 0;
 
-    explicit operator bool() const { return left != 0 || top != 0 || right != 0 || bottom != 0; }
+    explicit operator bool() const {
+        return left != 0 || top != 0 || right != 0 || bottom != 0;
+    }
 
     bool operator==(const Padding& rhs) const {
         return left == rhs.left && top == rhs.top && right == rhs.right && bottom == rhs.bottom;
@@ -71,12 +73,24 @@ public:
                        const std::array<float, 2>& iconOffset,
                        float fontScale);
 
-    const ImagePosition& image() const { return _image; }
-    float top() const { return _top; }
-    float bottom() const { return _bottom; }
-    float left() const { return _left; }
-    float right() const { return _right; }
-    const Padding& collisionPadding() const { return _collisionPadding; }
+    const ImagePosition& image() const {
+        return _image;
+    }
+    float top() const {
+        return _top;
+    }
+    float bottom() const {
+        return _bottom;
+    }
+    float left() const {
+        return _left;
+    }
+    float right() const {
+        return _right;
+    }
+    const Padding& collisionPadding() const {
+        return _collisionPadding;
+    }
 };
 
 Shaping getShaping(const TaggedString& string,

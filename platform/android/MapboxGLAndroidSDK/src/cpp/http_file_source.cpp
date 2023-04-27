@@ -23,11 +23,19 @@ public:
 
     android::UniqueEnv env{android::AttachEnv()};
 
-    void setResourceOptions(ResourceOptions options) { resourceOptions = options; };
-    ResourceOptions getResourceOptions() { return resourceOptions.clone(); };
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    };
+    ResourceOptions getResourceOptions() {
+        return resourceOptions.clone();
+    };
 
-    void setClientOptions(ClientOptions options) { clientOptions = options; };
-    ClientOptions getClientOptions() { return clientOptions.clone(); };
+    void setClientOptions(ClientOptions options) {
+        clientOptions = options;
+    };
+    ClientOptions getClientOptions() {
+        return clientOptions.clone();
+    };
 
 private:
     ResourceOptions resourceOptions;
@@ -36,7 +44,9 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/http/NativeHttpRequest"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/http/NativeHttpRequest";
+    };
 
     HTTPRequest(jni::JNIEnv&, const Resource&, FileSource::Callback);
     ~HTTPRequest();

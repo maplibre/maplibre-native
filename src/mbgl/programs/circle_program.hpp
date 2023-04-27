@@ -26,7 +26,9 @@ class CircleProgram final : public Program<CircleProgram,
                                            style::CirclePaintProperties> {
 public:
     static constexpr std::string_view Name{"CircleProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

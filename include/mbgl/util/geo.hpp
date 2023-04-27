@@ -47,12 +47,20 @@ public:
         }
     }
 
-    double latitude() const { return lat; }
-    double longitude() const { return lon; }
+    double latitude() const {
+        return lat;
+    }
+    double longitude() const {
+        return lon;
+    }
 
-    LatLng wrapped() const { return {lat, lon, Wrapped}; }
+    LatLng wrapped() const {
+        return {lat, lon, Wrapped};
+    }
 
-    void wrap() { lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX); }
+    void wrap() {
+        lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
+    }
 
     // If the distance from start to end longitudes is between half and full
     // world, unwrap the start longitude to ensure the shortest path is taken.
@@ -69,18 +77,26 @@ public:
     LatLng(const CanonicalTileID& id);
     LatLng(const UnwrappedTileID& id);
 
-    friend bool operator==(const LatLng& a, const LatLng& b) { return a.lat == b.lat && a.lon == b.lon; }
+    friend bool operator==(const LatLng& a, const LatLng& b) {
+        return a.lat == b.lat && a.lon == b.lon;
+    }
 
-    friend bool operator!=(const LatLng& a, const LatLng& b) { return !(a == b); }
+    friend bool operator!=(const LatLng& a, const LatLng& b) {
+        return !(a == b);
+    }
 };
 
 class LatLngBounds {
 public:
     // Return a bounds covering the entire (unwrapped) world.
-    static LatLngBounds world() { return {{-90, -180}, {90, 180}}; }
+    static LatLngBounds world() {
+        return {{-90, -180}, {90, 180}};
+    }
 
     // Return the bounds consisting of the single point.
-    static LatLngBounds singleton(const LatLng& a) { return {a, a}; }
+    static LatLngBounds singleton(const LatLng& a) {
+        return {a, a};
+    }
 
     // Return the convex hull of two points; the smallest bounds that contains both.
     static LatLngBounds hull(const LatLng& a, const LatLng& b) {
@@ -106,19 +122,39 @@ public:
     // Constructs a LatLngBounds object with the tile's exact boundaries.
     LatLngBounds(const CanonicalTileID&);
 
-    bool valid() const { return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude()); }
+    bool valid() const {
+        return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude());
+    }
 
-    double south() const { return sw.latitude(); }
-    double west() const { return sw.longitude(); }
-    double north() const { return ne.latitude(); }
-    double east() const { return ne.longitude(); }
+    double south() const {
+        return sw.latitude();
+    }
+    double west() const {
+        return sw.longitude();
+    }
+    double north() const {
+        return ne.latitude();
+    }
+    double east() const {
+        return ne.longitude();
+    }
 
-    LatLng southwest() const { return sw; }
-    LatLng northeast() const { return ne; }
-    LatLng southeast() const { return {south(), east()}; }
-    LatLng northwest() const { return {north(), west()}; }
+    LatLng southwest() const {
+        return sw;
+    }
+    LatLng northeast() const {
+        return ne;
+    }
+    LatLng southeast() const {
+        return {south(), east()};
+    }
+    LatLng northwest() const {
+        return {north(), west()};
+    }
 
-    LatLng center() const { return {(sw.latitude() + ne.latitude()) / 2, (sw.longitude() + ne.longitude()) / 2}; }
+    LatLng center() const {
+        return {(sw.latitude() + ne.latitude()) / 2, (sw.longitude() + ne.longitude()) / 2};
+    }
 
     LatLng constrain(const LatLng& p) const;
 
@@ -132,9 +168,13 @@ public:
         extend(bounds.ne);
     }
 
-    bool isEmpty() const { return sw.latitude() > ne.latitude() || sw.longitude() > ne.longitude(); }
+    bool isEmpty() const {
+        return sw.latitude() > ne.latitude() || sw.longitude() > ne.longitude();
+    }
 
-    bool crossesAntimeridian() const { return (sw.wrapped().longitude() > ne.wrapped().longitude()); }
+    bool crossesAntimeridian() const {
+        return (sw.wrapped().longitude() > ne.wrapped().longitude());
+    }
 
     bool contains(const CanonicalTileID& tileID) const;
     bool contains(const LatLng& point, LatLng::WrapMode wrap = LatLng::Unwrapped) const;
@@ -156,7 +196,9 @@ private:
         return (!a.bounded && !b.bounded) || (a.bounded && b.bounded && a.sw == b.sw && a.ne == b.ne);
     }
 
-    friend bool operator!=(const LatLngBounds& a, const LatLngBounds& b) { return !(a == b); }
+    friend bool operator!=(const LatLngBounds& a, const LatLngBounds& b) {
+        return !(a == b);
+    }
 };
 
 // Determines the orientation of the map.
@@ -192,12 +234,22 @@ public:
         }
     }
 
-    double top() const { return _top; }
-    double left() const { return _left; }
-    double bottom() const { return _bottom; }
-    double right() const { return _right; }
+    double top() const {
+        return _top;
+    }
+    double left() const {
+        return _left;
+    }
+    double bottom() const {
+        return _bottom;
+    }
+    double right() const {
+        return _right;
+    }
 
-    bool isFlush() const { return _top == 0 && _left == 0 && _bottom == 0 && _right == 0; }
+    bool isFlush() const {
+        return _top == 0 && _left == 0 && _bottom == 0 && _right == 0;
+    }
 
     void operator+=(const EdgeInsets& o) {
         _top += o._top;
@@ -221,7 +273,9 @@ public:
         return a._top == b._top && a._left == b._left && a._bottom == b._bottom && a._right == b._right;
     }
 
-    friend bool operator!=(const EdgeInsets& a, const EdgeInsets& b) { return !(a == b); }
+    friend bool operator!=(const EdgeInsets& a, const EdgeInsets& b) {
+        return !(a == b);
+    }
 };
 
 struct LatLngAltitude {

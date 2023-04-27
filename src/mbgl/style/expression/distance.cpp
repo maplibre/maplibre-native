@@ -302,7 +302,9 @@ double polygonToPolygonDistance(const mapbox::geometry::polygon<double>& polygon
 // <distance, range1, range2>
 using DistPair = std::tuple<double, IndexRange, IndexRange>;
 struct Comparator {
-    bool operator()(DistPair& left, DistPair& right) { return std::get<0>(left) < std::get<0>(right); }
+    bool operator()(DistPair& left, DistPair& right) {
+        return std::get<0>(left) < std::get<0>(right);
+    }
 };
 // The priority queue will ensure the top element would always be the pair that has the biggest distance
 using DistQueue = std::priority_queue<DistPair, std::deque<DistPair>, Comparator>;

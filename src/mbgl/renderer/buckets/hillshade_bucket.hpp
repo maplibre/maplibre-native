@@ -35,9 +35,13 @@ public:
     const DEMData& getDEMData() const;
     DEMData& getDEMData();
 
-    bool isPrepared() const { return prepared; }
+    bool isPrepared() const {
+        return prepared;
+    }
 
-    void setPrepared(bool preparedState) { prepared = preparedState; }
+    void setPrepared(bool preparedState) {
+        prepared = preparedState;
+    }
 
     // Raster-DEM Tile Sources use the default buffers from Painter
     gfx::VertexVector<HillshadeLayoutVertex> vertices;

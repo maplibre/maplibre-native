@@ -48,7 +48,9 @@ public:
     class Impl;
     const Impl& impl() const;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;

@@ -32,7 +32,9 @@ public:
         cb();
     }
 
-    void sync(std::promise<void> barrier) { barrier.set_value(); }
+    void sync(std::promise<void> barrier) {
+        barrier.set_value();
+    }
 
 private:
     AsyncTask *async;

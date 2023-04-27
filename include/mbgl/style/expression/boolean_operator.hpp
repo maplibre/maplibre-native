@@ -21,7 +21,9 @@ public:
     bool operator==(const Expression& e) const override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::string getOperator() const override { return "any"; }
+    std::string getOperator() const override {
+        return "any";
+    }
 
 private:
     std::vector<std::unique_ptr<Expression>> inputs;
@@ -39,7 +41,9 @@ public:
     bool operator==(const Expression& e) const override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::string getOperator() const override { return "all"; }
+    std::string getOperator() const override {
+        return "all";
+    }
 
 private:
     std::vector<std::unique_ptr<Expression>> inputs;

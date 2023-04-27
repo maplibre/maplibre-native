@@ -82,17 +82,23 @@ protected:
         vec2(vec2&& o) = default;
         vec2& operator=(vec2&& o) = default;
         vec2& operator=(const vec2& o) = default;
-        float length() const { return std::sqrt(x * x + y * y); }
+        float length() const {
+            return std::sqrt(x * x + y * y);
+        }
         vec2 normalized() const {
             const float size = length();
             return {x / size, y / size};
         }
-        void normalize() { *this = normalized(); }
+        void normalize() {
+            *this = normalized();
+        }
         vec2 mirrored(const vec2& mirror) const {
             float k = dot(mirror) / mirror.length();
             return 2.0 * k * mirror - (*this);
         }
-        float dot(const vec2& v2) const { return x * v2.x + y * v2.y; }
+        float dot(const vec2& v2) const {
+            return x * v2.x + y * v2.y;
+        }
         vec2 rotated(float degrees) const {
             const float cs = std::cos(degrees * util::DEG2RAD_F);
             const float sn = std::sin(degrees * util::DEG2RAD_F);
@@ -106,16 +112,28 @@ protected:
                        static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) *
                    util::RAD2DEG_F;
         }
-        Point<double> toPoint() const { return {x, y}; }
+        Point<double> toPoint() const {
+            return {x, y};
+        }
 
-        friend vec2 operator-(const vec2& v) { return {-v.x, -v.y}; }
-        friend vec2 operator*(double a, const vec2& v) { return {GLfloat(v.x * a), GLfloat(v.y * a)}; }
-        friend vec2 operator+(const vec2& v1, const vec2& v2) { return {v1.x + v2.x, v1.y + v2.y}; }
-        friend vec2 operator-(const vec2& v1, const vec2& v2) { return {v1.x - v2.x, v1.y - v2.y}; }
+        friend vec2 operator-(const vec2& v) {
+            return {-v.x, -v.y};
+        }
+        friend vec2 operator*(double a, const vec2& v) {
+            return {GLfloat(v.x * a), GLfloat(v.y * a)};
+        }
+        friend vec2 operator+(const vec2& v1, const vec2& v2) {
+            return {v1.x + v2.x, v1.y + v2.y};
+        }
+        friend vec2 operator-(const vec2& v1, const vec2& v2) {
+            return {v1.x - v2.x, v1.y - v2.y};
+        }
     };
 
     struct Shader {
-        virtual ~Shader() { release(); }
+        virtual ~Shader() {
+            release();
+        }
         void release() {
             if (!program) return;
             MBGL_CHECK_ERROR(glDetachShader(program, vertexShader));
@@ -139,8 +157,12 @@ protected:
             MBGL_CHECK_ERROR(glLinkProgram(program));
             pullLocations();
         }
-        virtual void bind() { MBGL_CHECK_ERROR(glUseProgram(program)); }
-        void detach() { MBGL_CHECK_ERROR(glUseProgram(0)); }
+        virtual void bind() {
+            MBGL_CHECK_ERROR(glUseProgram(program));
+        }
+        void detach() {
+            MBGL_CHECK_ERROR(glUseProgram(0));
+        }
         virtual void pullLocations(){};
 
         GLuint program = 0;
@@ -174,7 +196,9 @@ void main() {
 }
 )MBGL_SHADER";
 
-        void initialize() { Shader::initialize(SimpleShader::vertexShaderSource, SimpleShader::fragmentShaderSource); }
+        void initialize() {
+            Shader::initialize(SimpleShader::vertexShaderSource, SimpleShader::fragmentShaderSource);
+        }
 
         void pullLocations() override {
             a_pos = MBGL_CHECK_ERROR(glGetAttribLocation(program, "a_pos"));
@@ -220,7 +244,9 @@ void main() {
 }
 )MBGL_SHADER";
 
-        void initialize() { Shader::initialize(vertexShaderSource, fragmentShaderSource); }
+        void initialize() {
+            Shader::initialize(vertexShaderSource, fragmentShaderSource);
+        }
 
         void pullLocations() override {
             a_pos = MBGL_CHECK_ERROR(glGetAttribLocation(program, "a_pos"));
@@ -240,7 +266,9 @@ void main() {
     };
 
     struct Buffer {
-        virtual ~Buffer() { release(); }
+        virtual ~Buffer() {
+            release();
+        }
         void release() {
             if (!bufferId) return;
             MBGL_CHECK_ERROR(glDeleteBuffers(1, &bufferId));
@@ -253,7 +281,9 @@ void main() {
             initialize();
             MBGL_CHECK_ERROR(glBindBuffer(target, bufferId));
         }
-        void detach(const GLenum target = GL_ARRAY_BUFFER) { MBGL_CHECK_ERROR(glBindBuffer(target, 0)); }
+        void detach(const GLenum target = GL_ARRAY_BUFFER) {
+            MBGL_CHECK_ERROR(glBindBuffer(target, 0));
+        }
         template <typename T, std::size_t N>
         void upload(const std::array<T, N>& data) {
             bind();
@@ -276,7 +306,9 @@ void main() {
 
 public:
     struct Texture {
-        ~Texture() { release(); }
+        ~Texture() {
+            release();
+        }
         void release() {
             MBGL_CHECK_ERROR(glDeleteTextures(1, &texId));
             texId = 0;
@@ -341,8 +373,12 @@ public:
             if (textureUnit >= 0) MBGL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + textureUnit));
             MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texId));
         }
-        void detach() { MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0)); }
-        bool isValid() { return imageDirty || image; }
+        void detach() {
+            MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+        }
+        bool isValid() {
+            return imageDirty || image;
+        }
         GLuint texId = 0;
         const mbgl::PremultipliedImage* image = nullptr;
         std::optional<Immutable<style::Image::Impl>> sharedImage;
@@ -660,11 +696,17 @@ protected:
         texturedShader.detach();
     }
 
-    void drawShadow() { drawQuad(shadowBuffer, shadowGeometry, texShadow); }
+    void drawShadow() {
+        drawQuad(shadowBuffer, shadowGeometry, texShadow);
+    }
 
-    void drawPuck() { drawQuad(puckBuffer, puckGeometry, texPuck); }
+    void drawPuck() {
+        drawQuad(puckBuffer, puckGeometry, texPuck);
+    }
 
-    void drawHat() { drawQuad(hatBuffer, hatGeometry, texPuckHat); }
+    void drawHat() {
+        drawQuad(hatBuffer, hatGeometry, texPuckHat);
+    }
 
     static LatLng screenCoordinateToLatLng(const ScreenCoordinate& p,
                                            const TransformState& s,

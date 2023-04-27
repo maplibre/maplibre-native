@@ -60,7 +60,9 @@ public:
 
     Actor(const Actor&) = delete;
 
-    ActorRef<std::decay_t<Object>> self() { return parent.self(); }
+    ActorRef<std::decay_t<Object>> self() {
+        return parent.self();
+    }
 
 private:
     std::shared_ptr<Scheduler> retainer;

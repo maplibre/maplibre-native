@@ -11,7 +11,9 @@ class Bitmap {
 public:
     class Config {
     public:
-        static constexpr auto Name() { return "android/graphics/Bitmap$Config"; };
+        static constexpr auto Name() {
+            return "android/graphics/Bitmap$Config";
+        };
 
         enum Value {
             ALPHA_8,
@@ -23,7 +25,9 @@ public:
         static jni::Local<jni::Object<Config>> Create(jni::JNIEnv&, Value);
     };
 
-    static constexpr auto Name() { return "android/graphics/Bitmap"; };
+    static constexpr auto Name() {
+        return "android/graphics/Bitmap";
+    };
     static void registerNative(jni::JNIEnv&);
 
     static jni::Local<jni::Object<Bitmap>> CreateBitmap(jni::JNIEnv&,

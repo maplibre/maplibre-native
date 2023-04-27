@@ -48,7 +48,9 @@ public:
         loop.run();
     }
 
-    void end() { loop.stop(); }
+    void end() {
+        loop.stop();
+    }
 };
 
 Response successfulSpriteImageResponse(const Resource& resource) {

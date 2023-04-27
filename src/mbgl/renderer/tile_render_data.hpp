@@ -48,7 +48,9 @@ public:
 
 private:
     // TileRenderData overrides.
-    Bucket* getBucket(const style::Layer::Impl&) const override { return bucket ? bucket.get() : nullptr; }
+    Bucket* getBucket(const style::Layer::Impl&) const override {
+        return bucket ? bucket.get() : nullptr;
+    }
     void upload(gfx::UploadPass& uploadPass) override {
         if (bucket) bucket->upload(uploadPass);
     }

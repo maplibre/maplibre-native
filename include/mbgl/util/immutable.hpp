@@ -27,9 +27,15 @@ public:
     Mutable(const Mutable&) = delete;
     Mutable& operator=(const Mutable&) = delete;
 
-    T* get() { return ptr.get(); }
-    T* operator->() { return ptr.get(); }
-    T& operator*() { return *ptr; }
+    T* get() {
+        return ptr.get();
+    }
+    T* operator->() {
+        return ptr.get();
+    }
+    T& operator*() {
+        return *ptr;
+    }
 
 private:
     Mutable(std::shared_ptr<T>&& s) : ptr(std::move(s)) {}
@@ -86,13 +92,23 @@ public:
     Immutable& operator=(Immutable&&) noexcept = default;
     Immutable& operator=(const Immutable&) = default;
 
-    const T* get() const { return ptr.get(); }
-    const T* operator->() const { return ptr.get(); }
-    const T& operator*() const { return *ptr; }
+    const T* get() const {
+        return ptr.get();
+    }
+    const T* operator->() const {
+        return ptr.get();
+    }
+    const T& operator*() const {
+        return *ptr;
+    }
 
-    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr == rhs.ptr; }
+    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) {
+        return lhs.ptr == rhs.ptr;
+    }
 
-    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr != rhs.ptr; }
+    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) {
+        return lhs.ptr != rhs.ptr;
+    }
 
 private:
     Immutable(std::shared_ptr<const T>&& s) : ptr(std::move(s)) {}

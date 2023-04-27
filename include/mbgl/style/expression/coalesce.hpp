@@ -26,11 +26,17 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::size_t getLength() const { return args.size(); }
+    std::size_t getLength() const {
+        return args.size();
+    }
 
-    Expression* getChild(std::size_t i) const { return args.at(i).get(); }
+    Expression* getChild(std::size_t i) const {
+        return args.at(i).get();
+    }
 
-    std::string getOperator() const override { return "coalesce"; }
+    std::string getOperator() const override {
+        return "coalesce";
+    }
 
 private:
     Args args;

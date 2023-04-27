@@ -14,7 +14,9 @@ public:
 
     ResourceTransform(TransformCallback = {});
     void transform(Resource::Kind, const std::string& url, FinishedCallback);
-    explicit operator bool() const { return bool(transformCallback); }
+    explicit operator bool() const {
+        return bool(transformCallback);
+    }
 
 private:
     TransformCallback transformCallback;

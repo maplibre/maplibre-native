@@ -22,7 +22,9 @@ struct MockGLObject {
         getFlag = true;
         return true;
     }
-    static void Set(const Type&) { setFlag = true; }
+    static void Set(const Type&) {
+        setFlag = true;
+    }
 };
 
 const bool MockGLObject::Default = false;

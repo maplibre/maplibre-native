@@ -22,14 +22,20 @@ public:
         }
     }
 
-    double northing() const { return _northing; }
-    double easting() const { return _easting; }
+    double northing() const {
+        return _northing;
+    }
+    double easting() const {
+        return _easting;
+    }
 
     friend bool operator==(const ProjectedMeters& a, const ProjectedMeters& b) {
         return a._northing == b._northing && a._easting == b._easting;
     }
 
-    friend bool operator!=(const ProjectedMeters& a, const ProjectedMeters& b) { return !(a == b); }
+    friend bool operator!=(const ProjectedMeters& a, const ProjectedMeters& b) {
+        return !(a == b);
+    }
 };
 
 /// Spherical Mercator projection
@@ -37,7 +43,9 @@ public:
 class Projection {
 public:
     // Map pixel width at given scale.
-    static double worldSize(double scale) { return scale * util::tileSize_D; }
+    static double worldSize(double scale) {
+        return scale * util::tileSize_D;
+    }
 
     static double getMetersPerPixelAtLatitude(double lat, double zoom) {
         const double constrainedZoom = util::clamp(zoom, util::MIN_ZOOM, util::MAX_ZOOM);
@@ -71,10 +79,14 @@ public:
         return {latitude, longitude};
     }
 
-    static Point<double> project(const LatLng& latLng, double scale) { return project_(latLng, worldSize(scale)); }
+    static Point<double> project(const LatLng& latLng, double scale) {
+        return project_(latLng, worldSize(scale));
+    }
 
     /// Returns point on tile
-    static Point<double> project(const LatLng& latLng, int32_t zoom) { return project_(latLng, 1 << zoom); }
+    static Point<double> project(const LatLng& latLng, int32_t zoom) {
+        return project_(latLng, 1 << zoom);
+    }
 
     static LatLng unproject(const Point<double>& p, double scale, LatLng::WrapMode wrapMode = LatLng::Unwrapped) {
         auto p2 = p * util::DEGREES_MAX / worldSize(scale);

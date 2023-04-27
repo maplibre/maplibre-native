@@ -20,14 +20,18 @@ public:
     PossiblyEvaluatedPropertyValue() = default;
     PossiblyEvaluatedPropertyValue(Value v) : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<T>(); }
+    bool isConstant() const {
+        return value.template is<T>();
+    }
 
     std::optional<T> constant() const {
         return value.match([&](const T& t) { return std::optional<T>(t); },
                            [&](const auto&) { return std::optional<T>(); });
     }
 
-    T constantOr(const T& t) const { return constant().value_or(t); }
+    T constantOr(const T& t) const {
+        return constant().value_or(t);
+    }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
@@ -70,14 +74,18 @@ public:
     PossiblyEvaluatedPropertyValue() = default;
     PossiblyEvaluatedPropertyValue(Value v) : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<Faded<T>>(); }
+    bool isConstant() const {
+        return value.template is<Faded<T>>();
+    }
 
     std::optional<Faded<T>> constant() const {
         return value.match([&](const Faded<T>& t) { return std::optional<Faded<T>>(t); },
                            [&](const auto&) { return std::optional<Faded<T>>(); });
     }
 
-    Faded<T> constantOr(const Faded<T>& t) const { return constant().value_or(t); }
+    Faded<T> constantOr(const Faded<T>& t) const {
+        return constant().value_or(t);
+    }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {

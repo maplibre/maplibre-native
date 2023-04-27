@@ -134,7 +134,9 @@ public:
     CameraOptions getCameraOptions(const std::optional<EdgeInsets>&) const;
 
     // EdgeInsects
-    EdgeInsets getEdgeInsets() const { return edgeInsets; }
+    EdgeInsets getEdgeInsets() const {
+        return edgeInsets;
+    }
     void setEdgeInsets(const EdgeInsets&);
 
     // Position
@@ -187,13 +189,21 @@ public:
     // State
     bool isChanging() const;
     bool isRotating() const;
-    void setRotatingInProgress(bool val) { rotating = val; }
+    void setRotatingInProgress(bool val) {
+        rotating = val;
+    }
     bool isScaling() const;
-    void setScalingInProgress(bool val) { scaling = val; }
+    void setScalingInProgress(bool val) {
+        scaling = val;
+    }
     bool isPanning() const;
-    void setPanningInProgress(bool val) { panning = val; }
+    void setPanningInProgress(bool val) {
+        panning = val;
+    }
     bool isGestureInProgress() const;
-    void setGestureInProgress(bool val) { gestureInProgress = val; }
+    void setGestureInProgress(bool val) {
+        gestureInProgress = val;
+    }
 
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
@@ -205,7 +215,9 @@ public:
     double zoomScale(double zoom) const;
     double scaleZoom(double scale) const;
 
-    bool valid() const { return !size.isEmpty() && (scale >= min_scale && scale <= max_scale); }
+    bool valid() const {
+        return !size.isEmpty() && (scale >= min_scale && scale <= max_scale);
+    }
 
     float getCameraToTileDistance(const UnwrappedTileID&) const;
     float maxPitchScaleFactor() const;
@@ -250,7 +262,9 @@ private:
     void setScalePoint(double scale, const ScreenCoordinate& point);
 
     void updateMatricesIfNeeded() const;
-    bool needsMatricesUpdate() const { return requestMatricesUpdate; }
+    bool needsMatricesUpdate() const {
+        return requestMatricesUpdate;
+    }
 
     bool setCameraPosition(const vec3& position);
     bool setCameraOrientation(const Quaternion& orientation);

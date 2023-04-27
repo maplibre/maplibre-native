@@ -16,68 +16,112 @@ std::string toString(const T& t);
 
 struct NullType {
     constexpr NullType() = default;
-    std::string getName() const { return "null"; }
-    bool operator==(const NullType&) const { return true; }
+    std::string getName() const {
+        return "null";
+    }
+    bool operator==(const NullType&) const {
+        return true;
+    }
 };
 
 struct NumberType {
     constexpr NumberType() = default;
-    std::string getName() const { return "number"; }
-    bool operator==(const NumberType&) const { return true; }
+    std::string getName() const {
+        return "number";
+    }
+    bool operator==(const NumberType&) const {
+        return true;
+    }
 };
 
 struct BooleanType {
     constexpr BooleanType() = default;
-    std::string getName() const { return "boolean"; }
-    bool operator==(const BooleanType&) const { return true; }
+    std::string getName() const {
+        return "boolean";
+    }
+    bool operator==(const BooleanType&) const {
+        return true;
+    }
 };
 
 struct StringType {
     constexpr StringType() = default;
-    std::string getName() const { return "string"; }
-    bool operator==(const StringType&) const { return true; }
+    std::string getName() const {
+        return "string";
+    }
+    bool operator==(const StringType&) const {
+        return true;
+    }
 };
 
 struct ColorType {
     constexpr ColorType() = default;
-    std::string getName() const { return "color"; }
-    bool operator==(const ColorType&) const { return true; }
+    std::string getName() const {
+        return "color";
+    }
+    bool operator==(const ColorType&) const {
+        return true;
+    }
 };
 
 struct ObjectType {
     constexpr ObjectType() = default;
-    std::string getName() const { return "object"; }
-    bool operator==(const ObjectType&) const { return true; }
+    std::string getName() const {
+        return "object";
+    }
+    bool operator==(const ObjectType&) const {
+        return true;
+    }
 };
 
 struct ErrorType {
     constexpr ErrorType() = default;
-    std::string getName() const { return "error"; }
-    bool operator==(const ErrorType&) const { return true; }
+    std::string getName() const {
+        return "error";
+    }
+    bool operator==(const ErrorType&) const {
+        return true;
+    }
 };
 
 struct ValueType {
     constexpr ValueType() = default;
-    std::string getName() const { return "value"; }
-    bool operator==(const ValueType&) const { return true; }
+    std::string getName() const {
+        return "value";
+    }
+    bool operator==(const ValueType&) const {
+        return true;
+    }
 };
 
 struct CollatorType {
     constexpr CollatorType() = default;
-    std::string getName() const { return "collator"; }
-    bool operator==(const CollatorType&) const { return true; }
+    std::string getName() const {
+        return "collator";
+    }
+    bool operator==(const CollatorType&) const {
+        return true;
+    }
 };
 
 struct FormattedType {
     constexpr FormattedType() = default;
-    std::string getName() const { return "formatted"; }
-    bool operator==(const FormattedType&) const { return true; }
+    std::string getName() const {
+        return "formatted";
+    }
+    bool operator==(const FormattedType&) const {
+        return true;
+    }
 };
 
 struct ImageType {
     constexpr ImageType() = default;
-    std::string getName() const { return "resolvedImage"; }
-    bool operator==(const ImageType&) const { return true; }
+    std::string getName() const {
+        return "resolvedImage";
+    }
+    bool operator==(const ImageType&) const {
+        return true;
+    }
 };
 
 constexpr NullType Null;
@@ -121,7 +165,9 @@ struct Array {
         }
     }
 
-    bool operator==(const Array& rhs) const { return itemType == rhs.itemType && N == rhs.N; }
+    bool operator==(const Array& rhs) const {
+        return itemType == rhs.itemType && N == rhs.N;
+    }
 
     Type itemType;
     std::optional<std::size_t> N;

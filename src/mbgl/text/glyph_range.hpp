@@ -20,7 +20,9 @@ namespace std {
 
 template <>
 struct hash<mbgl::GlyphRange> {
-    std::size_t operator()(const mbgl::GlyphRange& range) const { return mbgl::util::hash(range.first, range.second); }
+    std::size_t operator()(const mbgl::GlyphRange& range) const {
+        return mbgl::util::hash(range.first, range.second);
+    }
 };
 
 } // namespace std

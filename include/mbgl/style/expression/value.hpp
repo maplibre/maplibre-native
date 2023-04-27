@@ -41,11 +41,19 @@ struct Value : ValueBase {
     VARIANT_INLINE Value(T&& val) : ValueBase(val) {}
 
     // Javascript's Number.MAX_SAFE_INTEGER
-    static uint64_t maxSafeInteger() { return 9007199254740991ULL; }
+    static uint64_t maxSafeInteger() {
+        return 9007199254740991ULL;
+    }
 
-    static bool isSafeInteger(uint64_t x) { return x <= maxSafeInteger(); };
-    static bool isSafeInteger(int64_t x) { return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger(); }
-    static bool isSafeInteger(double x) { return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger(); }
+    static bool isSafeInteger(uint64_t x) {
+        return x <= maxSafeInteger();
+    };
+    static bool isSafeInteger(int64_t x) {
+        return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger();
+    }
+    static bool isSafeInteger(double x) {
+        return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger();
+    }
 };
 
 constexpr NullValue Null = NullValue();
@@ -69,7 +77,9 @@ type::Type valueTypeToExpressionType();
 
 template <class T, class Enable = void>
 struct ValueConverter {
-    static Value toExpressionValue(const T& value) { return Value(value); }
+    static Value toExpressionValue(const T& value) {
+        return Value(value);
+    }
 
     static std::optional<T> fromExpressionValue(const Value& value) {
         return value.template is<T>() ? value.template get<T>() : std::optional<T>();
@@ -78,9 +88,15 @@ struct ValueConverter {
 
 template <>
 struct ValueConverter<Value> {
-    static type::Type expressionType() { return type::Value; }
-    static Value toExpressionValue(const Value& value) { return value; }
-    static std::optional<Value> fromExpressionValue(const Value& value) { return value; }
+    static type::Type expressionType() {
+        return type::Value;
+    }
+    static Value toExpressionValue(const Value& value) {
+        return value;
+    }
+    static std::optional<Value> fromExpressionValue(const Value& value) {
+        return value;
+    }
 };
 
 template <>
@@ -91,35 +107,45 @@ struct ValueConverter<mbgl::Value> {
 
 template <>
 struct ValueConverter<float> {
-    static type::Type expressionType() { return type::Number; }
+    static type::Type expressionType() {
+        return type::Number;
+    }
     static Value toExpressionValue(float value);
     static std::optional<float> fromExpressionValue(const Value& value);
 };
 
 template <typename T, std::size_t N>
 struct ValueConverter<std::array<T, N>> {
-    static type::Type expressionType() { return type::Array(valueTypeToExpressionType<T>(), N); }
+    static type::Type expressionType() {
+        return type::Array(valueTypeToExpressionType<T>(), N);
+    }
     static Value toExpressionValue(const std::array<T, N>& value);
     static std::optional<std::array<T, N>> fromExpressionValue(const Value& value);
 };
 
 template <typename T>
 struct ValueConverter<std::vector<T>> {
-    static type::Type expressionType() { return type::Array(valueTypeToExpressionType<T>()); }
+    static type::Type expressionType() {
+        return type::Array(valueTypeToExpressionType<T>());
+    }
     static Value toExpressionValue(const std::vector<T>& value);
     static std::optional<std::vector<T>> fromExpressionValue(const Value& value);
 };
 
 template <>
 struct ValueConverter<Position> {
-    static type::Type expressionType() { return type::Array(type::Number, 3); }
+    static type::Type expressionType() {
+        return type::Array(type::Number, 3);
+    }
     static Value toExpressionValue(const mbgl::style::Position& value);
     static std::optional<Position> fromExpressionValue(const Value& v);
 };
 
 template <typename T>
 struct ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>> {
-    static type::Type expressionType() { return type::String; }
+    static type::Type expressionType() {
+        return type::String;
+    }
     static Value toExpressionValue(const T& value);
     static std::optional<T> fromExpressionValue(const Value& value);
 };
@@ -146,7 +172,9 @@ std::vector<std::optional<T>> fromExpressionValues(const std::vector<std::option
 
 template <>
 struct ValueConverter<Rotation> {
-    static type::Type expressionType() { return type::Number; }
+    static type::Type expressionType() {
+        return type::Number;
+    }
     static Value toExpressionValue(const mbgl::style::Rotation& value);
     static std::optional<Rotation> fromExpressionValue(const Value& v);
 };

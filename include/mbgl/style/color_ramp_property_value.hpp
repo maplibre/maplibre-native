@@ -27,7 +27,9 @@ public:
     ColorRampPropertyValue() : value(nullptr) {}
     ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_) : value(std::move(value_)) {}
 
-    bool isUndefined() const { return value == nullptr; }
+    bool isUndefined() const {
+        return value == nullptr;
+    }
 
     // noop, needed for batch evaluation of paint property values to compile
     template <typename Evaluator>
@@ -40,10 +42,16 @@ public:
         return *expression::fromExpressionValue<Color>(*result);
     }
 
-    bool isDataDriven() const { return false; }
-    bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const { return false; }
+    bool isDataDriven() const {
+        return false;
+    }
+    bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const {
+        return false;
+    }
 
-    const expression::Expression& getExpression() const { return *value; }
+    const expression::Expression& getExpression() const {
+        return *value;
+    }
 };
 
 } // namespace style

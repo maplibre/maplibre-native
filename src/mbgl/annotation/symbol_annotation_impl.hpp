@@ -52,11 +52,15 @@ struct coordinate_system<mbgl::LatLng> {
 
 template <>
 struct access<mbgl::LatLng, 0> {
-    static inline double get(mbgl::LatLng const& p) { return p.longitude(); }
+    static inline double get(mbgl::LatLng const& p) {
+        return p.longitude();
+    }
 };
 template <>
 struct access<mbgl::LatLng, 1> {
-    static inline double get(mbgl::LatLng const& p) { return p.latitude(); }
+    static inline double get(mbgl::LatLng const& p) {
+        return p.latitude();
+    }
 };
 
 template <>
@@ -71,15 +75,23 @@ struct point_type<mbgl::LatLngBounds> {
 template <size_t D>
 struct indexed_access<mbgl::LatLngBounds, min_corner, D> {
     using ct = coordinate_type<mbgl::LatLng>::type;
-    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.southwest()); }
-    static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.southwest(), value); }
+    static inline ct get(mbgl::LatLngBounds const& b) {
+        return geometry::get<D>(b.southwest());
+    }
+    static inline void set(mbgl::LatLngBounds& b, ct const& value) {
+        geometry::set<D>(b.southwest(), value);
+    }
 };
 
 template <size_t D>
 struct indexed_access<mbgl::LatLngBounds, max_corner, D> {
     using ct = coordinate_type<mbgl::LatLng>::type;
-    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.northeast()); }
-    static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.northeast(), value); }
+    static inline ct get(mbgl::LatLngBounds const& b) {
+        return geometry::get<D>(b.northeast());
+    }
+    static inline void set(mbgl::LatLngBounds& b, ct const& value) {
+        geometry::set<D>(b.northeast(), value);
+    }
 };
 
 } // namespace traits

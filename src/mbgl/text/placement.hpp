@@ -49,7 +49,9 @@ class JointPlacement {
 public:
     JointPlacement(bool text_, bool icon_, bool skipFade_) : text(text_), icon(icon_), skipFade(skipFade_) {}
 
-    bool placed() const { return text || icon; }
+    bool placed() const {
+        return text || icon;
+    }
 
     const bool text;
     const bool icon;
@@ -91,8 +93,12 @@ class PlacementController {
 public:
     PlacementController();
     void setPlacement(Immutable<Placement>);
-    const Immutable<Placement>& getPlacement() const { return placement; }
-    void setPlacementStale() { stale = true; }
+    const Immutable<Placement>& getPlacement() const {
+        return placement;
+    }
+    void setPlacementStale() {
+        stale = true;
+    }
     bool placementIsRecent(TimePoint now, float zoom, std::optional<Duration> periodOverride = std::nullopt) const;
     bool hasTransitions(TimePoint now) const;
 
@@ -122,7 +128,9 @@ public:
     virtual const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     const CollisionIndex& getCollisionIndex() const;
-    TimePoint getCommitTime() const { return commitTime; }
+    TimePoint getCommitTime() const {
+        return commitTime;
+    }
     Duration getUpdatePeriod(float zoom) const;
 
     float zoomAdjustment(float zoom) const;
@@ -168,7 +176,9 @@ protected:
                                const SymbolInstance&,
                                style::TextWritingModeType orientation) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
-    const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
+    const Placement* getPrevPlacement() const {
+        return prevPlacement ? prevPlacement->get() : nullptr;
+    }
     bool isTiltedView() const;
 
     std::shared_ptr<const UpdateParameters> updateParameters;

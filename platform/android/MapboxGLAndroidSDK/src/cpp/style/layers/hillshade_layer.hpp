@@ -14,7 +14,9 @@ namespace android {
 class HillshadeLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/HillshadeLayer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/style/layers/HillshadeLayer";
+    };
 
     HillshadeLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -58,7 +60,9 @@ public:
 
     void registerNative(jni::JNIEnv&) final;
 
-    LayerFactory* getLayerFactory() final { return this; }
+    LayerFactory* getLayerFactory() final {
+        return this;
+    }
 
 }; // class HillshadeJavaLayerPeerFactory
 

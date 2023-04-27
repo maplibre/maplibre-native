@@ -33,7 +33,9 @@ private:
         return traits_type::to_int_type(*--current_);
     }
 
-    std::streamsize showmanyc() final { return end_ - current_; }
+    std::streamsize showmanyc() final {
+        return end_ - current_;
+    }
 
     pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode) final {
         if (dir == std::ios_base::beg)

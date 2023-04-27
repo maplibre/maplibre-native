@@ -40,11 +40,15 @@ class FillProgram final : public Program<FillProgram,
                                          style::FillPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
-    static LayoutVertex layoutVertex(Point<int16_t> p) { return LayoutVertex{{{p.x, p.y}}}; }
+    static LayoutVertex layoutVertex(Point<int16_t> p) {
+        return LayoutVertex{{{p.x, p.y}}};
+    }
 };
 
 class FillPatternProgram final : public Program<FillPatternProgram,
@@ -56,7 +60,9 @@ class FillPatternProgram final : public Program<FillPatternProgram,
                                                 style::FillPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillPatternProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -78,7 +84,9 @@ class FillOutlineProgram final : public Program<FillOutlineProgram,
                                                 style::FillPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillOutlineProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 };
@@ -92,7 +100,9 @@ class FillOutlinePatternProgram final : public Program<FillOutlinePatternProgram
                                                        style::FillPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillOutlinePatternProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 };

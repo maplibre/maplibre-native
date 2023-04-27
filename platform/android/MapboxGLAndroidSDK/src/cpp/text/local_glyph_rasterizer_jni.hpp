@@ -17,7 +17,9 @@ namespace android {
 
 class LocalGlyphRasterizer {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/text/LocalGlyphRasterizer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/text/LocalGlyphRasterizer";
+    };
 
     static void registerNative(jni::JNIEnv&);
 

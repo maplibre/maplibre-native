@@ -13,7 +13,9 @@ public:
     ~ProxyFileSource();
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
-    bool canRequest(const Resource&) const override { return true; }
+    bool canRequest(const Resource&) const override {
+        return true;
+    }
 
     /**
      * @brief Flag to change the networking mode of the file source.

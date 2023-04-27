@@ -26,7 +26,9 @@ public:
         return {duration ? duration : defaults.duration, delay ? delay : defaults.delay, enablePlacementTransitions};
     }
 
-    bool isDefined() const { return duration || delay; }
+    bool isDefined() const {
+        return duration || delay;
+    }
 
     mapbox::base::Value serialize() const {
         mapbox::base::ValueObject result;

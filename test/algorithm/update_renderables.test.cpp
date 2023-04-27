@@ -17,7 +17,9 @@ struct GetTileDataAction {
     const OverscaledTileID tileID;
     const LookupResult found;
 
-    bool operator==(const GetTileDataAction& rhs) const { return tileID == rhs.tileID && found == rhs.found; }
+    bool operator==(const GetTileDataAction& rhs) const {
+        return tileID == rhs.tileID && found == rhs.found;
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const GetTileDataAction& action) {
@@ -29,7 +31,9 @@ std::ostream& operator<<(std::ostream& os, const GetTileDataAction& action) {
 struct CreateTileDataAction {
     const OverscaledTileID tileID;
 
-    bool operator==(const CreateTileDataAction& rhs) const { return tileID == rhs.tileID; }
+    bool operator==(const CreateTileDataAction& rhs) const {
+        return tileID == rhs.tileID;
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const CreateTileDataAction& action) {
@@ -58,7 +62,9 @@ struct RenderTileAction {
     const UnwrappedTileID tileID;
     const MockTileData& tileData;
 
-    bool operator==(const RenderTileAction& rhs) const { return tileID == rhs.tileID && &tileData == &rhs.tileData; }
+    bool operator==(const RenderTileAction& rhs) const {
+        return tileID == rhs.tileID && &tileData == &rhs.tileData;
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const RenderTileAction& action) {

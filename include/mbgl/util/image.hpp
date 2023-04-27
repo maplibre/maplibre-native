@@ -34,7 +34,9 @@ public:
 
     Image(Size size_, std::unique_ptr<uint8_t[]> data_) : size(size_), data(std::move(data_)) {}
 
-    Image(Image&& o) noexcept : size(o.size), data(std::move(o.data)) { o.size.width = o.size.height = 0; }
+    Image(Image&& o) noexcept : size(o.size), data(std::move(o.data)) {
+        o.size.width = o.size.height = 0;
+    }
 
     Image& operator=(Image&& o) noexcept {
         size = o.size;
@@ -47,9 +49,13 @@ public:
         return std::equal(lhs.data.get(), lhs.data.get() + lhs.bytes(), rhs.data.get(), rhs.data.get() + rhs.bytes());
     }
 
-    friend bool operator!=(const Image& lhs, const Image& rhs) { return !(lhs == rhs); }
+    friend bool operator!=(const Image& lhs, const Image& rhs) {
+        return !(lhs == rhs);
+    }
 
-    bool valid() const { return !size.isEmpty() && data != nullptr; }
+    bool valid() const {
+        return !size.isEmpty() && data != nullptr;
+    }
 
     template <typename T = Image>
     T clone() const {
@@ -58,10 +64,16 @@ public:
         return copy_;
     }
 
-    size_t stride() const { return channels * size.width; }
-    size_t bytes() const { return stride() * size.height; }
+    size_t stride() const {
+        return channels * size.width;
+    }
+    size_t bytes() const {
+        return stride() * size.height;
+    }
 
-    void fill(uint8_t value) { std::fill(data.get(), data.get() + bytes(), value); }
+    void fill(uint8_t value) {
+        std::fill(data.get(), data.get() + bytes(), value);
+    }
 
     void resize(Size size_) {
         if (size == size_) {

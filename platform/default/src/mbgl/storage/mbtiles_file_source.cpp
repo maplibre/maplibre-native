@@ -68,9 +68,13 @@ public:
         return std::string(buffer.GetString(), buffer.GetSize());
     }
 
-    std::string db_path(const std::string &path) { return path.substr(0, path.find('?')); }
+    std::string db_path(const std::string &path) {
+        return path.substr(0, path.find('?'));
+    }
 
-    bool is_compressed(const std::string &v) { return (((uint8_t)v[0]) == 0x1f) && (((uint8_t)v[1]) == 0x8b); }
+    bool is_compressed(const std::string &v) {
+        return (((uint8_t)v[0]) == 0x1f) && (((uint8_t)v[1]) == 0x8b);
+    }
 
     // Generate a tilejson resource from .mbtiles file
     void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
@@ -246,7 +250,9 @@ private:
         }
     }
 
-    void close_all() { db_cache.clear(); }
+    void close_all() {
+        db_cache.clear();
+    }
 
     // Multiple databases open simultaneoulsy, to effectively support multiple .mbtiles maps
     mapbox::sqlite::Database &get_db(const std::string &path) {

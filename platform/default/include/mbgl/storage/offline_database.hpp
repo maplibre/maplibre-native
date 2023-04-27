@@ -90,7 +90,9 @@ public:
     bool exceedsOfflineMapboxTileCountLimit(const Resource&);
     void markUsedResources(int64_t regionID, const std::list<Resource>&);
     std::exception_ptr pack();
-    void runPackDatabaseAutomatically(bool autopack_) { autopack = autopack_; }
+    void runPackDatabaseAutomatically(bool autopack_) {
+        autopack = autopack_;
+    }
 
     void reopenDatabaseReadOnly(bool readOnly);
 

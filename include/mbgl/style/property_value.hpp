@@ -14,9 +14,13 @@ private:
 
     Value value;
 
-    friend bool operator==(const PropertyValue& lhs, const PropertyValue& rhs) { return lhs.value == rhs.value; }
+    friend bool operator==(const PropertyValue& lhs, const PropertyValue& rhs) {
+        return lhs.value == rhs.value;
+    }
 
-    friend bool operator!=(const PropertyValue& lhs, const PropertyValue& rhs) { return !(lhs == rhs); }
+    friend bool operator!=(const PropertyValue& lhs, const PropertyValue& rhs) {
+        return !(lhs == rhs);
+    }
 
 public:
     PropertyValue() = default;
@@ -25,11 +29,17 @@ public:
 
     PropertyValue(PropertyExpression<T> expression) : value(std::move(expression)) {}
 
-    bool isUndefined() const { return value.template is<Undefined>(); }
+    bool isUndefined() const {
+        return value.template is<Undefined>();
+    }
 
-    bool isConstant() const { return value.template is<T>(); }
+    bool isConstant() const {
+        return value.template is<T>();
+    }
 
-    bool isExpression() const { return value.template is<PropertyExpression<T>>(); }
+    bool isExpression() const {
+        return value.template is<PropertyExpression<T>>();
+    }
 
     bool isDataDriven() const {
         return value.match([](const Undefined&) { return false; },
@@ -43,9 +53,13 @@ public:
                            [](const PropertyExpression<T>& fn) { return fn.isZoomConstant(); });
     }
 
-    const T& asConstant() const { return value.template get<T>(); }
+    const T& asConstant() const {
+        return value.template get<T>();
+    }
 
-    const PropertyExpression<T>& asExpression() const { return value.template get<PropertyExpression<T>>(); }
+    const PropertyExpression<T>& asExpression() const {
+        return value.template get<PropertyExpression<T>>();
+    }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {

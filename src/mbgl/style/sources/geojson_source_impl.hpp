@@ -19,7 +19,9 @@ public:
 
     Range<uint8_t> getZoomRange() const;
     std::weak_ptr<GeoJSONData> getData() const;
-    const Immutable<GeoJSONOptions>& getOptions() const { return options; }
+    const Immutable<GeoJSONOptions>& getOptions() const {
+        return options;
+    }
 
     std::optional<std::string> getAttribution() const final;
 

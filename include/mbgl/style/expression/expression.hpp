@@ -81,7 +81,9 @@ public:
     template <typename U>
     VARIANT_INLINE Result(U&& val) : variant<EvaluationError, T>(val) {}
 
-    explicit operator bool() const { return this->template is<T>(); }
+    explicit operator bool() const {
+        return this->template is<T>();
+    }
 
     // optional does some type trait magic for this one, so this might
     // be problematic as is.
@@ -120,7 +122,9 @@ public:
     EvaluationResult(const std::array<double, 4>& arr) : Result(toExpressionValue(arr)) {}
 
     // used only for the special (private) "error" expression
-    EvaluationResult(const type::ErrorType&) { assert(false); }
+    EvaluationResult(const type::ErrorType&) {
+        assert(false);
+    }
 };
 
 /**
@@ -178,10 +182,16 @@ public:
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
     virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const { return !operator==(rhs); }
+    bool operator!=(const Expression& rhs) const {
+        return !operator==(rhs);
+    }
 
-    Kind getKind() const { return kind; };
-    type::Type getType() const { return type; };
+    Kind getKind() const {
+        return kind;
+    };
+    type::Type getType() const {
+        return type;
+    };
 
     EvaluationResult evaluate(std::optional<float> zoom,
                               const Feature& feature,

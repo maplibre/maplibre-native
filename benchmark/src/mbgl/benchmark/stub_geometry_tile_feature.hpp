@@ -20,13 +20,19 @@ public:
     FeatureType type = FeatureType::Point;
     GeometryCollection geometry;
 
-    FeatureType getType() const override { return type; }
+    FeatureType getType() const override {
+        return type;
+    }
 
-    FeatureIdentifier getID() const override { return id; }
+    FeatureIdentifier getID() const override {
+        return id;
+    }
 
     std::optional<Value> getValue(const std::string& key) const override {
         return properties.count(key) ? properties.at(key) : std::optional<Value>();
     }
 
-    const GeometryCollection& getGeometries() const override { return geometry; }
+    const GeometryCollection& getGeometries() const override {
+        return geometry;
+    }
 };

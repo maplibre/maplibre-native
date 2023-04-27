@@ -95,19 +95,33 @@ public:
     // Transitions
     bool inTransition() const;
     void updateTransitions(const TimePoint& now);
-    TimePoint getTransitionStart() const { return transitionStart; }
-    Duration getTransitionDuration() const { return transitionDuration; }
+    TimePoint getTransitionStart() const {
+        return transitionStart;
+    }
+    Duration getTransitionDuration() const {
+        return transitionDuration;
+    }
     void cancelTransitions();
 
     // Gesture
     void setGestureInProgress(bool);
-    bool isGestureInProgress() const { return state.isGestureInProgress(); }
+    bool isGestureInProgress() const {
+        return state.isGestureInProgress();
+    }
 
     // Transform state
-    const TransformState& getState() const { return state; }
-    bool isRotating() const { return state.isRotating(); }
-    bool isScaling() const { return state.isScaling(); }
-    bool isPanning() const { return state.isPanning(); }
+    const TransformState& getState() const {
+        return state;
+    }
+    bool isRotating() const {
+        return state.isRotating();
+    }
+    bool isScaling() const {
+        return state.isScaling();
+    }
+    bool isPanning() const {
+        return state.isPanning();
+    }
 
     // Conversion and projection
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;

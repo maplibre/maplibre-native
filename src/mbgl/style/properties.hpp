@@ -60,11 +60,17 @@ public:
         }
     }
 
-    bool hasTransition() const { return bool(prior); }
+    bool hasTransition() const {
+        return bool(prior);
+    }
 
-    bool isUndefined() const { return value.isUndefined(); }
+    bool isUndefined() const {
+        return value.isUndefined();
+    }
 
-    const Value& getValue() const { return value; }
+    const Value& getValue() const {
+        return value;
+    }
 
 private:
     mutable std::optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
@@ -238,7 +244,9 @@ public:
             return Evaluated{evaluate<Ps>(z, feature)...};
         }
 
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+        unsigned long constantsMask() const {
+            return ConstantsMask<DataDrivenProperties>::getMask(*this);
+        }
     };
 
     class Unevaluated : public Tuple<UnevaluatedTypes> {

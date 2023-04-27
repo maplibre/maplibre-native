@@ -13,7 +13,9 @@ class Timer::Impl : public RunLoop::Impl::Runnable {
 public:
     Impl() : active(false) {}
 
-    ~Impl() { stop(); }
+    ~Impl() {
+        stop();
+    }
 
     void start(Duration timeout, Duration repeat_, std::function<void()>&& task_) {
         stop();
@@ -40,7 +42,9 @@ public:
         }
     }
 
-    TimePoint dueTime() const override { return due; }
+    TimePoint dueTime() const override {
+        return due;
+    }
 
     void runTask() override {
         if (active) {

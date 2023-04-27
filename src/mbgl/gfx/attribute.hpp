@@ -123,7 +123,9 @@ public:
                lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset;
     }
 
-    bool operator!=(const AttributeBinding& rhs) const { return !(*this == rhs); }
+    bool operator!=(const AttributeBinding& rhs) const {
+        return !(*this == rhs);
+    }
 };
 
 // Attribute binding requires member offsets. The only standard way to

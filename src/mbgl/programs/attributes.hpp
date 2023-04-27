@@ -26,7 +26,9 @@ MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 template <typename T, std::size_t N>
 struct data {
     using Type = gfx::AttributeType<T, N>;
-    static constexpr auto name() { return "data"; }
+    static constexpr auto name() {
+        return "data";
+    }
 };
 
 // Paint attributes

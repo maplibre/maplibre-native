@@ -32,7 +32,9 @@ public:
     }
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "collator"; }
+    std::string getOperator() const override {
+        return "collator";
+    }
 
 private:
     std::unique_ptr<Expression> caseSensitive;

@@ -25,7 +25,9 @@ public:
         }
     }
 
-    TimePoint dueTime() const override { return due; }
+    TimePoint dueTime() const override {
+        return due;
+    }
 
     void runTask() override {
         if (!queued) {

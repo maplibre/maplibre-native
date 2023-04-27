@@ -108,7 +108,9 @@ public:
             zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
     }
 
-    Range<float> getVertexSizeData(const GeometryTileFeature&) override { return {0.0f, 0.0f}; };
+    Range<float> getVertexSizeData(const GeometryTileFeature&) override {
+        return {0.0f, 0.0f};
+    };
 
     ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float size = layoutSize;
@@ -398,7 +400,9 @@ class SymbolIconProgram final : public SymbolProgram<SymbolIconProgram,
                                                      style::IconPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolIconProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using SymbolProgram::SymbolProgram;
 
@@ -477,7 +481,9 @@ class SymbolTextAndIconProgram final
                            style::TextPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolTextAndIconProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using BaseProgram = SymbolProgram<SymbolTextAndIconProgram,
                                       shaders::BuiltIn::SymbolTextAndIconProgram,
@@ -509,7 +515,9 @@ class SymbolSDFIconProgram final : public SymbolSDFProgram<SymbolSDFIconProgram,
                                                            style::IconPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolSDFIconProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using SymbolSDFProgram::SymbolSDFProgram;
 };
@@ -519,7 +527,9 @@ class SymbolSDFTextProgram final : public SymbolSDFProgram<SymbolSDFTextProgram,
                                                            style::TextPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolSDFTextProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using SymbolSDFProgram::SymbolSDFProgram;
 };

@@ -13,15 +13,25 @@ namespace conversion {
 template <>
 class ConversionTraits<const JSValue*> {
 public:
-    static bool isUndefined(const JSValue* value) { return value->IsNull(); }
+    static bool isUndefined(const JSValue* value) {
+        return value->IsNull();
+    }
 
-    static bool isArray(const JSValue* value) { return value->IsArray(); }
+    static bool isArray(const JSValue* value) {
+        return value->IsArray();
+    }
 
-    static std::size_t arrayLength(const JSValue* value) { return value->Size(); }
+    static std::size_t arrayLength(const JSValue* value) {
+        return value->Size();
+    }
 
-    static const JSValue* arrayMember(const JSValue* value, std::size_t i) { return &(*value)[rapidjson::SizeType(i)]; }
+    static const JSValue* arrayMember(const JSValue* value, std::size_t i) {
+        return &(*value)[rapidjson::SizeType(i)];
+    }
 
-    static bool isObject(const JSValue* value) { return value->IsObject(); }
+    static bool isObject(const JSValue* value) {
+        return value->IsObject();
+    }
 
     static std::optional<const JSValue*> objectMember(const JSValue* value, const char* name) {
         if (!value->HasMember(name)) {

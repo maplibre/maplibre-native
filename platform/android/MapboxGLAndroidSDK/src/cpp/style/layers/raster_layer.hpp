@@ -14,7 +14,9 @@ namespace android {
 class RasterLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/RasterLayer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/style/layers/RasterLayer";
+    };
 
     RasterLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -66,7 +68,9 @@ public:
 
     void registerNative(jni::JNIEnv&) final;
 
-    LayerFactory* getLayerFactory() final { return this; }
+    LayerFactory* getLayerFactory() final {
+        return this;
+    }
 
 }; // class RasterJavaLayerPeerFactory
 

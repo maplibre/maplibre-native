@@ -83,7 +83,9 @@ public:
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
 
-    ~OnlineFileSourceThread() { NetworkStatus::Unsubscribe(&reachability); }
+    ~OnlineFileSourceThread() {
+        NetworkStatus::Unsubscribe(&reachability);
+    }
 
     void request(AsyncRequest* req, Resource resource, const ActorRef<FileSourceRequest>& ref) {
         auto callback = [ref](const Response& res) { ref.invoke(&FileSourceRequest::setResponse, res); };
@@ -132,7 +134,9 @@ public:
         }
     }
 
-    void queueRequest(OnlineFileRequest* req) { pendingRequests.insert(req); }
+    void queueRequest(OnlineFileRequest* req) {
+        pendingRequests.insert(req);
+    }
 
     void activateRequest(OnlineFileRequest* req) {
         auto callback = [=](const Response& response) {
@@ -162,19 +166,33 @@ public:
         }
     }
 
-    bool isPending(OnlineFileRequest* req) { return pendingRequests.contains(req); }
+    bool isPending(OnlineFileRequest* req) {
+        return pendingRequests.contains(req);
+    }
 
-    bool isActive(OnlineFileRequest* req) { return activeRequests.find(req) != activeRequests.end(); }
+    bool isActive(OnlineFileRequest* req) {
+        return activeRequests.find(req) != activeRequests.end();
+    }
 
-    void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
+    void setResourceTransform(ResourceTransform transform) {
+        resourceTransform = std::move(transform);
+    }
 
-    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    }
 
-    const ResourceOptions& getResourceOptions() const { return resourceOptions; }
+    const ResourceOptions& getResourceOptions() const {
+        return resourceOptions;
+    }
 
-    void setClientOptions(ClientOptions options) { clientOptions = options; }
+    void setClientOptions(ClientOptions options) {
+        clientOptions = options;
+    }
 
-    const ClientOptions& getClientOptions() const { return clientOptions; }
+    const ClientOptions& getClientOptions() const {
+        return clientOptions;
+    }
 
     void setOnlineStatus(bool status) {
         online = status;
@@ -183,7 +201,9 @@ public:
         }
     }
 
-    uint32_t getMaximumConcurrentRequests() const { return maximumConcurrentRequests; }
+    uint32_t getMaximumConcurrentRequests() const {
+        return maximumConcurrentRequests;
+    }
 
     void setMaximumConcurrentRequests(uint32_t maximumConcurrentRequests_) {
         maximumConcurrentRequests = maximumConcurrentRequests_;
@@ -193,10 +213,16 @@ public:
         resourceOptions.withTileServerOptions(TileServerOptions().withBaseURL(std::move(t)));
     }
 
-    const std::string& getAPIBaseURL() const { return resourceOptions.tileServerOptions().baseURL(); }
+    const std::string& getAPIBaseURL() const {
+        return resourceOptions.tileServerOptions().baseURL();
+    }
 
-    void setApiKey(std::string t) { resourceOptions.withApiKey(std::move(t)); }
-    const std::string& getApiKey() const { return resourceOptions.apiKey(); }
+    void setApiKey(std::string t) {
+        resourceOptions.withApiKey(std::move(t));
+    }
+    const std::string& getApiKey() const {
+        return resourceOptions.apiKey();
+    }
 
 private:
     friend struct OnlineFileRequest;
@@ -324,9 +350,13 @@ public:
         return req;
     }
 
-    void pause() { thread->pause(); }
+    void pause() {
+        thread->pause();
+    }
 
-    void resume() { thread->resume(); }
+    void resume() {
+        thread->resume();
+    }
 
     void setResourceTransform(ResourceTransform transform) {
         thread->actor().invoke(&OnlineFileSourceThread::setResourceTransform, std::move(transform));
@@ -358,7 +388,9 @@ public:
         return cachedClientOptions.clone();
     }
 
-    void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
+    void setOnlineStatus(bool status) {
+        thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status);
+    }
 
     void setMaximumConcurrentRequests(const mapbox::base::Value& value) {
         if (auto* maximumConcurrentRequests = value.getUint()) {

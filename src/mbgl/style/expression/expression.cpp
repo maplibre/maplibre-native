@@ -21,10 +21,16 @@ public:
         }
     }
 
-    FeatureType getType() const override { return getTypeImpl(); }
+    FeatureType getType() const override {
+        return getTypeImpl();
+    }
 
-    const PropertyMap& getProperties() const override { return feature.properties; }
-    FeatureIdentifier getID() const override { return feature.id; }
+    const PropertyMap& getProperties() const override {
+        return feature.properties;
+    }
+    FeatureIdentifier getID() const override {
+        return feature.id;
+    }
     std::optional<mbgl::Value> getValue(const std::string& key) const override {
         auto it = feature.properties.find(key);
         if (it != feature.properties.end()) {
@@ -39,7 +45,9 @@ public:
     }
 
 private:
-    FeatureType getTypeImpl() const { return apply_visitor(ToFeatureType(), feature.geometry); }
+    FeatureType getTypeImpl() const {
+        return apply_visitor(ToFeatureType(), feature.geometry);
+    }
 };
 
 EvaluationResult Expression::evaluate(std::optional<float> zoom,

@@ -21,7 +21,9 @@ public:
     ~StubFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
-    bool canRequest(const Resource&) const override { return true; }
+    bool canRequest(const Resource&) const override {
+        return true;
+    }
     void remove(AsyncRequest*);
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;

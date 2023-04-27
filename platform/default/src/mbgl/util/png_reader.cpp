@@ -54,7 +54,9 @@ static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length
 struct png_struct_guard {
     png_struct_guard(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr) : p_(png_ptr_ptr), i_(info_ptr_ptr) {}
 
-    ~png_struct_guard() { png_destroy_read_struct(p_, i_, nullptr); }
+    ~png_struct_guard() {
+        png_destroy_read_struct(p_, i_, nullptr);
+    }
 
     png_structpp p_;
     png_infopp i_;

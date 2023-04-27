@@ -107,7 +107,9 @@ public:
         vtable->move(std::move(v.storage), storage);
     }
 
-    ~Convertible() { vtable->destroy(storage); }
+    ~Convertible() {
+        vtable->destroy(storage);
+    }
 
     Convertible& operator=(Convertible&& v) noexcept {
         if (this != &v) {
@@ -279,27 +281,37 @@ std::optional<T> convert(const Convertible& value, Error& error, Args&&... args)
 
 template <>
 struct ValueFactory<ColorRampPropertyValue> {
-    static Value make(const ColorRampPropertyValue& value) { return value.getExpression().serialize(); }
+    static Value make(const ColorRampPropertyValue& value) {
+        return value.getExpression().serialize();
+    }
 };
 
 template <>
 struct ValueFactory<TransitionOptions> {
-    static Value make(const TransitionOptions& value) { return value.serialize(); }
+    static Value make(const TransitionOptions& value) {
+        return value.serialize();
+    }
 };
 
 template <>
 struct ValueFactory<Color> {
-    static Value make(const Color& color) { return color.serialize(); }
+    static Value make(const Color& color) {
+        return color.serialize();
+    }
 };
 
 template <typename T>
 struct ValueFactory<T, typename std::enable_if_t<(!std::is_enum_v<T> && !is_linear_container<T>::value)>> {
-    static Value make(const T& arg) { return {arg}; }
+    static Value make(const T& arg) {
+        return {arg};
+    }
 };
 
 template <typename T>
 struct ValueFactory<T, typename std::enable_if_t<std::is_enum_v<T>>> {
-    static Value make(T arg) { return {Enum<T>::toString(arg)}; }
+    static Value make(T arg) {
+        return {Enum<T>::toString(arg)};
+    }
 };
 
 template <typename T>
@@ -323,12 +335,16 @@ struct ValueFactory<Position> {
 
 template <>
 struct ValueFactory<Rotation> {
-    static Value make(const Rotation& rotation) { return {rotation.getAngle()}; }
+    static Value make(const Rotation& rotation) {
+        return {rotation.getAngle()};
+    }
 };
 
 template <>
 struct ValueFactory<float> {
-    static Value make(float f) { return f; }
+    static Value make(float f) {
+        return f;
+    }
 };
 
 template <typename T>

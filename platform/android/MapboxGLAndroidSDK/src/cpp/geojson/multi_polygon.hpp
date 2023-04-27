@@ -15,8 +15,12 @@ namespace geojson {
 class MultiPolygon {
 public:
     using SuperTag = Geometry;
-    static constexpr auto Name() { return "com/mapbox/geojson/MultiPolygon"; };
-    static constexpr auto Type() { return "MultiPolygon"; };
+    static constexpr auto Name() {
+        return "com/mapbox/geojson/MultiPolygon";
+    };
+    static constexpr auto Type() {
+        return "MultiPolygon";
+    };
 
     static jni::Local<jni::Object<MultiPolygon>> New(jni::JNIEnv&, const mbgl::MultiPolygon<double>&);
 

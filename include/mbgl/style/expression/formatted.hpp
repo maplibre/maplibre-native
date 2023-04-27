@@ -68,7 +68,9 @@ public:
 
 template <>
 struct ValueFactory<expression::Formatted> {
-    static Value make(const expression::Formatted& formatted) { return formatted.toObject(); }
+    static Value make(const expression::Formatted& formatted) {
+        return formatted.toObject();
+    }
 };
 
 } // namespace conversion

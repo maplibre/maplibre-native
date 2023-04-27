@@ -49,8 +49,12 @@ public:
     // It is possible run only edge cases that were not covered in intersects()
     IntersectionResult intersectsPrecise(const AABB& aabb, bool edgeCasesOnly = false) const;
 
-    const std::array<vec3, 8>& getPoints() const { return points; }
-    const std::array<vec4, 6>& getPlanes() const { return planes; }
+    const std::array<vec3, 8>& getPoints() const {
+        return points;
+    }
+    const std::array<vec4, 6>& getPlanes() const {
+        return planes;
+    }
 
 private:
     struct Projection {

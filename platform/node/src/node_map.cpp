@@ -429,7 +429,9 @@ public:
     explicit RenderRequest(v8::Local<v8::Function> callback_) : AsyncResource("mbgl:RenderRequest") {
         callback.Reset(callback_);
     }
-    ~RenderRequest() { callback.Reset(); }
+    ~RenderRequest() {
+        callback.Reset();
+    }
 
     Nan::Persistent<v8::Function> callback;
 };

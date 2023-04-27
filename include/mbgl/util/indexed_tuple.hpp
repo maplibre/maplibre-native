@@ -52,7 +52,9 @@ public:
         return static_cast<const std::tuple<Ts...>&>(*this) == static_cast<const std::tuple<Ts...>&>(other);
     }
 
-    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const { return !(*this == other); }
+    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
+        return !(*this == other);
+    }
 };
 
 template <class, class T>

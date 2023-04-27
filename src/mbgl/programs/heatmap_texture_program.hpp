@@ -18,11 +18,15 @@ class HeatmapTextureProgram final : public Program<HeatmapTextureProgram,
                                                    style::Properties<>> {
 public:
     static constexpr std::string_view Name{"HeatmapTextureProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
-    static LayoutVertex layoutVertex(Point<int16_t> p) { return LayoutVertex{{{p.x, p.y}}}; }
+    static LayoutVertex layoutVertex(Point<int16_t> p) {
+        return LayoutVertex{{{p.x, p.y}}};
+    }
 };
 
 using HeatmapTextureLayoutVertex = HeatmapTextureProgram::LayoutVertex;

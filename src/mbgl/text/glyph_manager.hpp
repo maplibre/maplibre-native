@@ -40,7 +40,9 @@ public:
     void getGlyphs(GlyphRequestor&, GlyphDependencies, FileSource&);
     void removeRequestor(GlyphRequestor&);
 
-    void setURL(const std::string& url) { glyphURL = url; }
+    void setURL(const std::string& url) {
+        glyphURL = url;
+    }
 
     void setObserver(GlyphManagerObserver*);
 

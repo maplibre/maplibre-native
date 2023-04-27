@@ -48,8 +48,12 @@ public:
     // Returns the size of the texture image.
     Size getSize() const;
 
-    const LinePatternPos& getFrom() const { return from; }
-    const LinePatternPos& getTo() const { return to; }
+    const LinePatternPos& getFrom() const {
+        return from;
+    }
+    const LinePatternPos& getTo() const {
+        return to;
+    }
 
 private:
     LinePatternPos from, to;
@@ -69,7 +73,9 @@ public:
     // Uploads the textures to the GPU to be available when we need it.
     void upload(gfx::UploadPass&);
 
-    bool isEmpty() const { return textures.empty(); }
+    bool isEmpty() const {
+        return textures.empty();
+    }
 
 private:
     std::map<size_t, DashPatternTexture> textures;

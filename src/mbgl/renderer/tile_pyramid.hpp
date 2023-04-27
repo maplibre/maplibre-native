@@ -44,7 +44,9 @@ public:
                 std::optional<LatLngBounds> bounds,
                 std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
 
-    const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
+    const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const {
+        return renderedTiles;
+    }
     Tile* getTile(const OverscaledTileID&);
     const Tile* getRenderedTile(const UnwrappedTileID&) const;
 
@@ -66,11 +68,15 @@ public:
     void setObserver(TileObserver*);
     void dumpDebugLogs() const;
 
-    const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const { return tiles; }
+    const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const {
+        return tiles;
+    }
     void clearAll();
 
     void updateFadingTiles();
-    bool hasFadingTiles() const { return fadingTiles; }
+    bool hasFadingTiles() const {
+        return fadingTiles;
+    }
 
 private:
     void addRenderTile(const UnwrappedTileID& tileID, Tile& tile);

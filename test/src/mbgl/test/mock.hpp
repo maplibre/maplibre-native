@@ -25,11 +25,17 @@ struct MockBucket {};
 struct MockTileData {
     MockTileData(const mbgl::OverscaledTileID& tileID_) : tileID(tileID_) {}
 
-    bool hasTriedCache() const { return triedOptional; }
+    bool hasTriedCache() const {
+        return triedOptional;
+    }
 
-    bool isRenderable() const { return renderable; }
+    bool isRenderable() const {
+        return renderable;
+    }
 
-    bool isLoaded() const { return loaded; }
+    bool isLoaded() const {
+        return loaded;
+    }
 
     bool renderable = false;
     bool triedOptional = false;

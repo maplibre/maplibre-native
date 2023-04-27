@@ -25,7 +25,9 @@ public:
 };
 
 struct LightAnchor : LightProperty<LightAnchorType> {
-    static LightAnchorType defaultValue() { return LightAnchorType::Viewport; }
+    static LightAnchorType defaultValue() {
+        return LightAnchorType::Viewport;
+    }
 };
 
 struct LightPosition : LightProperty<Position> {
@@ -36,11 +38,15 @@ struct LightPosition : LightProperty<Position> {
 };
 
 struct LightColor : LightProperty<Color> {
-    static Color defaultValue() { return Color::white(); }
+    static Color defaultValue() {
+        return Color::white();
+    }
 };
 
 struct LightIntensity : LightProperty<float> {
-    static float defaultValue() { return 0.5; }
+    static float defaultValue() {
+        return 0.5;
+    }
 };
 
 using LightProperties = Properties<LightAnchor, LightPosition, LightColor, LightIntensity>;

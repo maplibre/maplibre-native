@@ -66,14 +66,22 @@ public:
     virtual bool hasFadingTiles() const = 0;
     // If supported, returns a shared list of RenderTiles, sorted by tile id and excluding tiles hold for fade;
     // returns nullptr otherwise.
-    virtual RenderTiles getRenderTiles() const { return nullptr; }
+    virtual RenderTiles getRenderTiles() const {
+        return nullptr;
+    }
     // If supported, returns a shared list of RenderTiles, sorted in opposite y position, so tiles with overlapping
     // symbols are drawn on top of each other, with lower symbols being drawn on top of higher symbols;
     // returns nullptr otherwise.
-    virtual RenderTiles getRenderTilesSortedByYPosition() const { return nullptr; }
+    virtual RenderTiles getRenderTilesSortedByYPosition() const {
+        return nullptr;
+    }
     // If supported, returns pointer to image data; returns nullptr otherwise.
-    virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
-    virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
+    virtual const ImageSourceRenderData* getImageRenderData() const {
+        return nullptr;
+    }
+    virtual const Tile* getRenderedTile(const UnwrappedTileID&) const {
+        return nullptr;
+    }
 
     virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,

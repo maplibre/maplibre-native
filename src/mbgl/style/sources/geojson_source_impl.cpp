@@ -29,13 +29,21 @@ class GeoJSONVTData final : public GeoJSONData {
             [id, impl = this->impl]() -> TileFeatures { return impl->getTile(id.z, id.x, id.y).features; }, fn);
     }
 
-    Features getChildren(const std::uint32_t) final { return {}; }
+    Features getChildren(const std::uint32_t) final {
+        return {};
+    }
 
-    Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final { return {}; }
+    Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final {
+        return {};
+    }
 
-    std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
+    std::uint8_t getClusterExpansionZoom(std::uint32_t) final {
+        return 0;
+    }
 
-    std::shared_ptr<Scheduler> getScheduler() final { return scheduler; }
+    std::shared_ptr<Scheduler> getScheduler() final {
+        return scheduler;
+    }
 
     friend GeoJSONData;
     GeoJSONVTData(const GeoJSON& geoJSON,
@@ -55,7 +63,9 @@ class SuperclusterData final : public GeoJSONData {
         fn(impl.getTile(id.z, id.x, id.y));
     }
 
-    Features getChildren(const std::uint32_t cluster_id) final { return impl.getChildren(cluster_id); }
+    Features getChildren(const std::uint32_t cluster_id) final {
+        return impl.getChildren(cluster_id);
+    }
 
     Features getLeaves(const std::uint32_t cluster_id, const std::uint32_t limit, const std::uint32_t offset) final {
         return impl.getLeaves(cluster_id, limit, offset);

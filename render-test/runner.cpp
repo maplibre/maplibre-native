@@ -724,7 +724,9 @@ void TestRunner::run(TestMetadata& metadata) {
             assert(runnerImpl);
             return *runnerImpl->observer;
         }
-        TestMetadata& getMetadata() override { return metadata; }
+        TestMetadata& getMetadata() override {
+            return metadata;
+        }
 
         TestRunner::Impl* runnerImpl = nullptr;
         TestMetadata& metadata;

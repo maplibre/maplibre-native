@@ -17,18 +17,26 @@ namespace conversion {
 template <>
 class ConversionTraits<mbgl::android::Value> {
 public:
-    static bool isUndefined(const mbgl::android::Value& value) { return value.isNull(); }
+    static bool isUndefined(const mbgl::android::Value& value) {
+        return value.isNull();
+    }
 
-    static bool isArray(const mbgl::android::Value& value) { return value.isArray(); }
+    static bool isArray(const mbgl::android::Value& value) {
+        return value.isArray();
+    }
 
-    static bool isObject(const mbgl::android::Value& value) { return value.isObject(); }
+    static bool isObject(const mbgl::android::Value& value) {
+        return value.isObject();
+    }
 
     static std::size_t arrayLength(const mbgl::android::Value& value) {
         return value.getLength();
         ;
     }
 
-    static mbgl::android::Value arrayMember(const mbgl::android::Value& value, std::size_t i) { return value.get(i); }
+    static mbgl::android::Value arrayMember(const mbgl::android::Value& value, std::size_t i) {
+        return value.get(i);
+    }
 
     static std::optional<mbgl::android::Value> objectMember(const mbgl::android::Value& value, const char* key) {
         mbgl::android::Value member = value.get(key);

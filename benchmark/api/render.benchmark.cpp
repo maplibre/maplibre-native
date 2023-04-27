@@ -28,7 +28,9 @@ constexpr Size size{1000, 1000};
 
 class RenderBenchmark {
 public:
-    RenderBenchmark() { NetworkStatus::Set(NetworkStatus::Status::Offline); }
+    RenderBenchmark() {
+        NetworkStatus::Set(NetworkStatus::Status::Offline);
+    }
 
     util::RunLoop loop;
 };

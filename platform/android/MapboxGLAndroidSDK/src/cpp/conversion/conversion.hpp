@@ -19,7 +19,9 @@ class Result : private variant<T, Error> {
 public:
     using variant<T, Error>::variant;
 
-    explicit operator bool() const { return this->template is<T>(); }
+    explicit operator bool() const {
+        return this->template is<T>();
+    }
 
     T& operator*() {
         assert(this->template is<T>());

@@ -15,13 +15,17 @@ struct TestMetadata;
 class TestRunnerMapObserver : public mbgl::MapObserver {
 public:
     TestRunnerMapObserver() = default;
-    void onDidFailLoadingMap(mbgl::MapLoadError, const std::string&) override { mapLoadFailure = true; }
+    void onDidFailLoadingMap(mbgl::MapLoadError, const std::string&) override {
+        mapLoadFailure = true;
+    }
 
     void onDidFinishRenderingMap(RenderMode mode) override final {
         if (!finishRenderingMap) finishRenderingMap = mode == RenderMode::Full;
     }
 
-    void onDidBecomeIdle() override final { idle = true; }
+    void onDidBecomeIdle() override final {
+        idle = true;
+    }
 
     void reset() {
         mapLoadFailure = false;

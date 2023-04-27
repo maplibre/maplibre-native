@@ -73,7 +73,9 @@ class FeatureIndex {
 public:
     FeatureIndex(std::unique_ptr<const GeometryTileData> tileData_);
 
-    const GeometryTileData* getData() { return tileData.get(); }
+    const GeometryTileData* getData() {
+        return tileData.get();
+    }
 
     void insert(const GeometryCollection&,
                 std::size_t index,

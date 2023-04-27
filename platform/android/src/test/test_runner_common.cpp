@@ -33,7 +33,9 @@ public:
         env = nullptr;
         obj = NULL;
     }
-    T& get() { return obj; }
+    T& get() {
+        return obj;
+    }
 
 private:
     JavaWrapper() = delete;

@@ -60,9 +60,13 @@ public:
         return false;
     }
 
-    std::vector<std::optional<Value>> possibleOutputs() const final { return {std::nullopt}; }
+    std::vector<std::optional<Value>> possibleOutputs() const final {
+        return {std::nullopt};
+    }
 
-    std::string getOperator() const final { return "format-section-override"; }
+    std::string getOperator() const final {
+        return "format-section-override";
+    }
 
 private:
     PossiblyEvaluatedPropertyValue<T> defaultValue;

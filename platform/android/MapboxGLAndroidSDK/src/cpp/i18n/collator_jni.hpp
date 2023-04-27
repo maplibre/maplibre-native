@@ -16,7 +16,9 @@ namespace android {
 
 class Locale {
 public:
-    static constexpr auto Name() { return "java/util/Locale"; };
+    static constexpr auto Name() {
+        return "java/util/Locale";
+    };
 
     /* Requires API level 21+ in order to support script/variant
     static jni::Object<Locale> forLanguageTag(jni::JNIEnv&, jni::String);
@@ -34,7 +36,9 @@ public:
 
 class Collator {
 public:
-    static constexpr auto Name() { return "java/text/Collator"; };
+    static constexpr auto Name() {
+        return "java/text/Collator";
+    };
 
     static jni::Local<jni::Object<Collator>> getInstance(jni::JNIEnv&, const jni::Object<Locale>&);
 
@@ -47,7 +51,9 @@ public:
 
 class StringUtils {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/utils/StringUtils"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/utils/StringUtils";
+    };
 
     static jni::Local<jni::String> unaccent(jni::JNIEnv&, const jni::String&);
 

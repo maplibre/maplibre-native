@@ -87,9 +87,13 @@ public:
         transformState = transform.getState();
     }
 
-    void run() { loop.run(); }
+    void run() {
+        loop.run();
+    }
 
-    void end() { loop.stop(); }
+    void end() {
+        loop.stop();
+    }
 };
 
 TEST(Source, LoadingFail) {
@@ -760,9 +764,13 @@ public:
     }
     void setNecessity(TileNecessity necessity) override;
     void setUpdateParameters(const TileUpdateParameters&) override;
-    bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override { return true; }
+    bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override {
+        return true;
+    }
 
-    std::unique_ptr<TileRenderData> createRenderData() override { return nullptr; }
+    std::unique_ptr<TileRenderData> createRenderData() override {
+        return nullptr;
+    }
 
 private:
     FakeTileSource& source;

@@ -51,13 +51,21 @@ public:
         }
     }
 
-    void resetDatabase(const std::function<void(std::exception_ptr)>& callback) { callback(db->resetDatabase()); }
+    void resetDatabase(const std::function<void(std::exception_ptr)>& callback) {
+        callback(db->resetDatabase());
+    }
 
-    void packDatabase(const std::function<void(std::exception_ptr)>& callback) { callback(db->pack()); }
+    void packDatabase(const std::function<void(std::exception_ptr)>& callback) {
+        callback(db->pack());
+    }
 
-    void runPackDatabaseAutomatically(bool autopack) { db->runPackDatabaseAutomatically(autopack); }
+    void runPackDatabaseAutomatically(bool autopack) {
+        db->runPackDatabaseAutomatically(autopack);
+    }
 
-    void put(const Resource& resource, const Response& response) { db->put(resource, response); }
+    void put(const Resource& resource, const Response& response) {
+        db->put(resource, response);
+    }
 
     void invalidateAmbientCache(const std::function<void(std::exception_ptr)>& callback) {
         callback(db->invalidateAmbientCache());
@@ -122,9 +130,13 @@ public:
         }
     }
 
-    void setOfflineMapboxTileCountLimit(uint64_t limit) { db->setOfflineMapboxTileCountLimit(limit); }
+    void setOfflineMapboxTileCountLimit(uint64_t limit) {
+        db->setOfflineMapboxTileCountLimit(limit);
+    }
 
-    void reopenDatabaseReadOnly(bool readOnly) { db->reopenDatabaseReadOnly(readOnly); }
+    void reopenDatabaseReadOnly(bool readOnly) {
+        db->reopenDatabaseReadOnly(readOnly);
+    }
 
 private:
     expected<OfflineDownload*, std::exception_ptr> getDownload(int64_t regionID) {
@@ -164,10 +176,16 @@ public:
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
-    ActorRef<DatabaseFileSourceThread> actor() const { return thread->actor(); }
+    ActorRef<DatabaseFileSourceThread> actor() const {
+        return thread->actor();
+    }
 
-    void pause() { thread->pause(); }
-    void resume() { thread->resume(); }
+    void pause() {
+        thread->pause();
+    }
+    void resume() {
+        thread->resume();
+    }
 
     void setResourceOptions(ResourceOptions options) {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);

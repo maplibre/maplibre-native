@@ -26,7 +26,9 @@ public:
                    float sortKey_ = 0.0f)
         : i(i_), feature(std::move(feature_)), patterns(std::move(patterns_)), sortKey(sortKey_) {}
 
-    friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
+    friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) {
+        return lhs.sortKey < rhs.sortKey;
+    }
 
     std::size_t i;
     std::unique_ptr<GeometryTileFeature> feature;
@@ -162,7 +164,9 @@ public:
         }
     };
 
-    bool hasDependencies() const override { return hasPattern; }
+    bool hasDependencies() const override {
+        return hasPattern;
+    }
 
     void createBucket(const ImagePositions& patternPositions,
                       std::unique_ptr<FeatureIndex>& featureIndex,

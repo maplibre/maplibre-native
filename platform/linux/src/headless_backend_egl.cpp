@@ -47,7 +47,9 @@ public:
         }
     }
 
-    ~EGLDisplayConfig() { eglTerminate(display); }
+    ~EGLDisplayConfig() {
+        eglTerminate(display);
+    }
 
     static std::shared_ptr<const EGLDisplayConfig> create() {
         static std::weak_ptr<const EGLDisplayConfig> instance;
@@ -105,7 +107,9 @@ public:
         }
     }
 
-    gl::ProcAddress getExtensionFunctionPointer(const char* name) final { return eglGetProcAddress(name); }
+    gl::ProcAddress getExtensionFunctionPointer(const char* name) final {
+        return eglGetProcAddress(name);
+    }
 
     void activateContext() final {
         if (!eglMakeCurrent(eglDisplay->display, eglSurface, eglSurface, eglContext)) {

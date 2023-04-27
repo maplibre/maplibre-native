@@ -53,11 +53,17 @@ public:
         fn(features);
     }
 
-    Features getChildren(const std::uint32_t) final { return {}; }
+    Features getChildren(const std::uint32_t) final {
+        return {};
+    }
 
-    Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final { return {}; }
+    Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final {
+        return {};
+    }
 
-    std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
+    std::uint8_t getClusterExpansionZoom(std::uint32_t) final {
+        return 0;
+    }
 
 private:
     TileFeatures features;

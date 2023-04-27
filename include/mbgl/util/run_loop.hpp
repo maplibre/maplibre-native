@@ -52,7 +52,9 @@ public:
     /// loop. It will be called from any thread and is up to the platform
     /// to, after receiving the callback, call RunLoop::runOnce() from the
     /// same thread as the Map object lives.
-    void setPlatformCallback(std::function<void()> callback) { platformCallback = std::move(callback); }
+    void setPlatformCallback(std::function<void()> callback) {
+        platformCallback = std::move(callback);
+    }
 
     // So far only needed by the libcurl backend.
     void addWatch(int fd, Event, std::function<void(int, Event)>&& callback);
@@ -78,8 +80,12 @@ public:
         return std::make_unique<WorkRequest>(task);
     }
 
-    void schedule(std::function<void()> fn) override { invoke(std::move(fn)); }
-    ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    void schedule(std::function<void()> fn) override {
+        invoke(std::move(fn));
+    }
+    ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
     class Impl;
 

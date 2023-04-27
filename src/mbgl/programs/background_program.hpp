@@ -45,7 +45,9 @@ class BackgroundProgram final : public Program<BackgroundProgram,
                                                style::Properties<>> {
 public:
     static constexpr std::string_view Name{"BackgroundProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 };
@@ -59,7 +61,9 @@ class BackgroundPatternProgram final : public Program<BackgroundPatternProgram,
                                                       style::Properties<>> {
 public:
     static constexpr std::string_view Name{"BackgroundPatternProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

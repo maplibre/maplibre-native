@@ -9,11 +9,17 @@ class Collator::Impl {
 public:
     Impl(std::optional<std::string>) {}
 
-    bool operator==(const Impl&) const { return true; }
+    bool operator==(const Impl&) const {
+        return true;
+    }
 
-    int compare(const std::string&, const std::string&) const { return 0; }
+    int compare(const std::string&, const std::string&) const {
+        return 0;
+    }
 
-    std::string resolvedLocale() const { return ""; }
+    std::string resolvedLocale() const {
+        return "";
+    }
 };
 
 Collator::Collator(bool, bool, const std::optional<std::string>& locale_) : impl(std::make_shared<Impl>(locale_)) {}

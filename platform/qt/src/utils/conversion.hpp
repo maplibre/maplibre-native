@@ -21,7 +21,9 @@ std::string convertColor(const QColor& color);
 template <>
 class ConversionTraits<QVariant> {
 public:
-    static bool isUndefined(const QVariant& value) { return value.isNull() || !value.isValid(); }
+    static bool isUndefined(const QVariant& value) {
+        return value.isNull() || !value.isValid();
+    }
 
     static bool isArray(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -31,9 +33,13 @@ public:
 #endif
     }
 
-    static std::size_t arrayLength(const QVariant& value) { return value.toList().size(); }
+    static std::size_t arrayLength(const QVariant& value) {
+        return value.toList().size();
+    }
 
-    static QVariant arrayMember(const QVariant& value, std::size_t i) { return value.toList()[static_cast<int>(i)]; }
+    static QVariant arrayMember(const QVariant& value, std::size_t i) {
+        return value.toList()[static_cast<int>(i)];
+    }
 
     static bool isObject(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

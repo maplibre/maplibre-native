@@ -14,13 +14,21 @@ public:
 
     void eachChild(const std::function<void(const Expression&)>&) const override {}
 
-    bool operator==(const Expression& e) const override { return e.getKind() == Kind::Error; }
+    bool operator==(const Expression& e) const override {
+        return e.getKind() == Kind::Error;
+    }
 
-    EvaluationResult evaluate(const EvaluationContext&) const override { return EvaluationError{message}; }
+    EvaluationResult evaluate(const EvaluationContext&) const override {
+        return EvaluationError{message};
+    }
 
-    std::vector<std::optional<Value>> possibleOutputs() const override { return {}; }
+    std::vector<std::optional<Value>> possibleOutputs() const override {
+        return {};
+    }
 
-    std::string getOperator() const override { return "error"; }
+    std::string getOperator() const override {
+        return "error";
+    }
 
 private:
     std::string message;

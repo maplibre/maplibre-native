@@ -216,7 +216,9 @@ struct BuildBoundsMap {
             buildTable(ring, et, true);
         }
     }
-    BoundsMap operator()(const EmptyGeometry&) const { return {}; }
+    BoundsMap operator()(const EmptyGeometry&) const {
+        return {};
+    }
 
     BoundsMap operator()(const Point<double>& p) const {
         Bound bnd;
@@ -276,7 +278,9 @@ struct BuildBoundsMap {
         return et;
     }
 
-    BoundsMap operator()(const mapbox::geometry::geometry_collection<double>&) const { return {}; }
+    BoundsMap operator()(const mapbox::geometry::geometry_collection<double>&) const {
+        return {};
+    }
 };
 
 TileCover::Impl::Impl(int32_t z, const Geometry<double>& geom, bool project) : zoom(z) {

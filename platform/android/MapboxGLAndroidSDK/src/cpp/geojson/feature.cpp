@@ -35,11 +35,17 @@ public:
         return util::toString(i);
     }
 
-    std::string operator()(const std::string& i) const { return i; }
+    std::string operator()(const std::string& i) const {
+        return i;
+    }
 
-    std::string operator()(const std::nullptr_t&) const { return {}; }
+    std::string operator()(const std::nullptr_t&) const {
+        return {};
+    }
 
-    std::string operator()(const mapbox::feature::null_value_t&) const { return {}; }
+    std::string operator()(const mapbox::feature::null_value_t&) const {
+        return {};
+    }
 };
 
 jni::Local<jni::Object<Feature>> convertFeature(jni::JNIEnv& env, const mbgl::GeoJSONFeature& value) {

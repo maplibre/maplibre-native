@@ -32,7 +32,9 @@ class HillshadeProgram final : public Program<HillshadeProgram,
                                               style::HillshadePaintProperties> {
 public:
     static constexpr std::string_view Name{"HillshadeProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

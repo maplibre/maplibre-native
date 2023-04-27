@@ -20,7 +20,9 @@ public:
 
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()> scheduled) final;
-    mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
     void processEvents();
 

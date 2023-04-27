@@ -161,7 +161,9 @@ public:
         loop.run();
     }
 
-    void end() { loop.stop(); }
+    void end() {
+        loop.stop();
+    }
 };
 
 TEST(GlyphManager, LoadingSuccess) {
@@ -411,7 +413,9 @@ TEST(GlyphManager, ImmediateFileSource) {
             loop.run();
         }
 
-        void end() { loop.stop(); }
+        void end() {
+            loop.stop();
+        }
     };
 
     GlyphManagerTestSynchronous test;

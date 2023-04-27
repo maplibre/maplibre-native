@@ -11,7 +11,9 @@ class StubFileRequest : public AsyncRequest {
 public:
     StubFileRequest(StubFileSource& fileSource_) : fileSource(fileSource_) {}
 
-    ~StubFileRequest() override { fileSource.remove(this); }
+    ~StubFileRequest() override {
+        fileSource.remove(this);
+    }
 
     StubFileSource& fileSource;
 };

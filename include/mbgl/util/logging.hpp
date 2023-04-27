@@ -22,7 +22,9 @@ public:
     };
 
     class NullObserver : public Observer {
-        bool onRecord(EventSeverity, Event, int64_t, const std::string&) override { return true; }
+        bool onRecord(EventSeverity, Event, int64_t, const std::string&) override {
+            return true;
+        }
     };
 
     static void setObserver(std::unique_ptr<Observer> Observer);

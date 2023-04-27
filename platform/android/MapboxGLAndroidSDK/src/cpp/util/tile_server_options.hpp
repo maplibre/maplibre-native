@@ -13,7 +13,9 @@ namespace android {
 
 class TileServerOptions : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/util/TileServerOptions"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/util/TileServerOptions";
+    };
 
     static jni::Local<jni::Object<TileServerOptions>> New(jni::JNIEnv&, const mbgl::TileServerOptions&);
 

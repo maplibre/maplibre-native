@@ -22,7 +22,9 @@ public:
         }
     }
 
-    auto* get() { return address; }
+    auto* get() {
+        return address;
+    }
 
 private:
     jni::JNIEnv& env;

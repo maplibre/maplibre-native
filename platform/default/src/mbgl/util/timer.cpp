@@ -38,9 +38,13 @@ public:
     }
 
 private:
-    static void timerCallback(uv_timer_t* handle) { reinterpret_cast<Impl*>(handle->data)->cb(); }
+    static void timerCallback(uv_timer_t* handle) {
+        reinterpret_cast<Impl*>(handle->data)->cb();
+    }
 
-    uv_handle_t* handle() { return reinterpret_cast<uv_handle_t*>(timer); }
+    uv_handle_t* handle() {
+        return reinterpret_cast<uv_handle_t*>(timer);
+    }
 
     uv_timer_t* timer;
 

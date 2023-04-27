@@ -30,7 +30,9 @@ public:
 
     bool operator()(const expression::EvaluationContext& context) const;
 
-    operator bool() const { return expression || legacyFilter; }
+    operator bool() const {
+        return expression || legacyFilter;
+    }
 
     friend bool operator==(const Filter& lhs, const Filter& rhs) {
         if (!lhs.expression || !rhs.expression) {
@@ -40,7 +42,9 @@ public:
         }
     }
 
-    friend bool operator!=(const Filter& lhs, const Filter& rhs) { return !(lhs == rhs); }
+    friend bool operator!=(const Filter& lhs, const Filter& rhs) {
+        return !(lhs == rhs);
+    }
 
     mbgl::Value serialize() const {
         if (legacyFilter) {

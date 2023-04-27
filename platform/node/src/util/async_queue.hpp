@@ -45,9 +45,13 @@ public:
                  [](uv_handle_t *handle) { delete reinterpret_cast<AsyncQueue *>(handle->data); });
     }
 
-    void ref() { uv_ref(reinterpret_cast<uv_handle_t *>(&async)); }
+    void ref() {
+        uv_ref(reinterpret_cast<uv_handle_t *>(&async));
+    }
 
-    void unref() { uv_unref(reinterpret_cast<uv_handle_t *>(&async)); }
+    void unref() {
+        uv_unref(reinterpret_cast<uv_handle_t *>(&async));
+    }
 
 private:
     void process() {

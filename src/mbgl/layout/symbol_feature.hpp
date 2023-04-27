@@ -17,13 +17,25 @@ public:
           geometry(feature->getGeometries().clone()) // we need a mutable copy of the geometry for mergeLines()
     {}
 
-    FeatureType getType() const override { return feature->getType(); }
-    std::optional<Value> getValue(const std::string& key) const override { return feature->getValue(key); }
-    const PropertyMap& getProperties() const override { return feature->getProperties(); }
-    FeatureIdentifier getID() const override { return feature->getID(); };
-    const GeometryCollection& getGeometries() const override { return feature->getGeometries(); }
+    FeatureType getType() const override {
+        return feature->getType();
+    }
+    std::optional<Value> getValue(const std::string& key) const override {
+        return feature->getValue(key);
+    }
+    const PropertyMap& getProperties() const override {
+        return feature->getProperties();
+    }
+    FeatureIdentifier getID() const override {
+        return feature->getID();
+    };
+    const GeometryCollection& getGeometries() const override {
+        return feature->getGeometries();
+    }
 
-    friend bool operator<(const SymbolFeature& lhs, const SymbolFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
+    friend bool operator<(const SymbolFeature& lhs, const SymbolFeature& rhs) {
+        return lhs.sortKey < rhs.sortKey;
+    }
 
     std::unique_ptr<GeometryTileFeature> feature;
     GeometryCollection geometry;

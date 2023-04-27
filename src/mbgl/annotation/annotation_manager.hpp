@@ -50,7 +50,9 @@ public:
     static const std::string PointLayerID;
     static const std::string ShapeLayerID;
 
-    mapbox::base::WeakPtr<AnnotationManager> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<AnnotationManager> makeWeakPtr() {
+        return weakFactory.makeWeakPtr();
+    }
 
 private:
     void add(const AnnotationID&, const SymbolAnnotation&);

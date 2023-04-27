@@ -24,7 +24,9 @@ public:
     vec3 right() const;
     vec3 up() const;
 
-    const Quaternion& getOrientation() const { return orientation; }
+    const Quaternion& getOrientation() const {
+        return orientation;
+    }
     void getOrientation(double& pitch, double& bearing) const;
     void setOrientation(double pitch, double bearing);
     void setOrientation(const Quaternion& orientation_);

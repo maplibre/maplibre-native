@@ -65,14 +65,18 @@ public:
     };
 
     struct FileSourceCallback {
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$FileSourceCallback"; }
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/offline/OfflineManager$FileSourceCallback";
+        }
 
         static void onSuccess(jni::JNIEnv&, const jni::Object<OfflineManager::FileSourceCallback>&);
 
         static void onError(jni::JNIEnv&, const jni::Object<OfflineManager::FileSourceCallback>&, const jni::String&);
     };
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/offline/OfflineManager";
+    };
 
     static void registerNative(jni::JNIEnv&);
 

@@ -17,9 +17,13 @@ public:
     DataDrivenPropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_), defaultValue(std::move(defaultValue_)) {}
 
-    ResultType operator()(const style::Undefined&) const { return ResultType(defaultValue); }
+    ResultType operator()(const style::Undefined&) const {
+        return ResultType(defaultValue);
+    }
 
-    ResultType operator()(const T& constant) const { return ResultType(constant); }
+    ResultType operator()(const T& constant) const {
+        return ResultType(constant);
+    }
 
     ResultType operator()(const style::PropertyExpression<T>& expression) const {
         if (useIntegerZoom) { // Compiler will optimize out the unused branch.
@@ -50,7 +54,9 @@ public:
     DataDrivenPropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_), defaultValue(std::move(defaultValue_)) {}
 
-    ResultType operator()(const T& constant) const { return ResultType(calculate(constant, constant, constant)); }
+    ResultType operator()(const T& constant) const {
+        return ResultType(calculate(constant, constant, constant));
+    }
 
     ResultType operator()(const style::Undefined&) const {
         return ResultType(calculate(defaultValue, defaultValue, defaultValue));

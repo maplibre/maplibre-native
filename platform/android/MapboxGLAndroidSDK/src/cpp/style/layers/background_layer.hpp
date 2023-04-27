@@ -14,7 +14,9 @@ namespace android {
 class BackgroundLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/BackgroundLayer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/style/layers/BackgroundLayer";
+    };
 
     BackgroundLayer(jni::JNIEnv&, jni::String&);
 
@@ -50,7 +52,9 @@ public:
 
     void registerNative(jni::JNIEnv&) final;
 
-    LayerFactory* getLayerFactory() final { return this; }
+    LayerFactory* getLayerFactory() final {
+        return this;
+    }
 
 }; // class BackgroundJavaLayerPeerFactory
 

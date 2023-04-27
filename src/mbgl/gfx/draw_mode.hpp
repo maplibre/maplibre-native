@@ -23,7 +23,9 @@ struct PrimitiveTypeOf;
 
 class Points : public DrawMode {
 public:
-    explicit Points(float pointSize_) : DrawMode(DrawModeType::Points, pointSize_) { assert(size > 0); }
+    explicit Points(float pointSize_) : DrawMode(DrawModeType::Points, pointSize_) {
+        assert(size > 0);
+    }
 };
 
 template <>
@@ -33,7 +35,9 @@ struct PrimitiveTypeOf<Points> : std::integral_constant<PrimitiveType, Primitive
 
 class Lines : public DrawMode {
 public:
-    explicit Lines(float lineWidth_) : DrawMode(DrawModeType::Lines, lineWidth_) { assert(size > 0); }
+    explicit Lines(float lineWidth_) : DrawMode(DrawModeType::Lines, lineWidth_) {
+        assert(size > 0);
+    }
 };
 
 template <>
@@ -45,7 +49,9 @@ struct PrimitiveTypeOf<Lines> : std::integral_constant<PrimitiveType, PrimitiveT
 // cannot be grouped into logical elements beyond a single Point.
 class LineStrip : public DrawMode {
 public:
-    explicit LineStrip(float lineWidth_) : DrawMode(DrawModeType::LineStrip, lineWidth_) { assert(size > 0); }
+    explicit LineStrip(float lineWidth_) : DrawMode(DrawModeType::LineStrip, lineWidth_) {
+        assert(size > 0);
+    }
 };
 
 template <>

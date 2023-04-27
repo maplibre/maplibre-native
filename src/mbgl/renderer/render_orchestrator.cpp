@@ -42,17 +42,27 @@ class LayerRenderItem final : public RenderItem {
 public:
     LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_)
         : layer(layer_), source(source_), index(index_) {}
-    bool operator<(const LayerRenderItem& other) const { return index < other.index; }
+    bool operator<(const LayerRenderItem& other) const {
+        return index < other.index;
+    }
 
     std::reference_wrapper<RenderLayer> layer;
     RenderSource* source;
     const uint32_t index;
 
 private:
-    bool hasRenderPass(RenderPass pass) const override { return layer.get().hasRenderPass(pass); }
-    void upload(gfx::UploadPass& pass) const override { layer.get().upload(pass); }
-    void render(PaintParameters& parameters) const override { layer.get().render(parameters); }
-    const std::string& getName() const override { return layer.get().getID(); }
+    bool hasRenderPass(RenderPass pass) const override {
+        return layer.get().hasRenderPass(pass);
+    }
+    void upload(gfx::UploadPass& pass) const override {
+        layer.get().upload(pass);
+    }
+    void render(PaintParameters& parameters) const override {
+        layer.get().render(parameters);
+    }
+    const std::string& getName() const override {
+        return layer.get().getID();
+    }
 };
 
 class RenderTreeImpl final : public RenderTree {
@@ -80,15 +90,21 @@ public:
         }
     }
 
-    RenderItems getLayerRenderItems() const override { return {layerRenderItems.begin(), layerRenderItems.end()}; }
+    RenderItems getLayerRenderItems() const override {
+        return {layerRenderItems.begin(), layerRenderItems.end()};
+    }
     RenderItems getSourceRenderItems() const override {
         RenderItems result;
         result.reserve(sourceRenderItems.size());
         for (const auto& item : sourceRenderItems) result.emplace_back(*item);
         return result;
     }
-    LineAtlas& getLineAtlas() const override { return lineAtlas; }
-    PatternAtlas& getPatternAtlas() const override { return patternAtlas; }
+    LineAtlas& getLineAtlas() const override {
+        return lineAtlas;
+    }
+    PatternAtlas& getPatternAtlas() const override {
+        return patternAtlas;
+    }
 
     std::set<LayerRenderItem> layerRenderItems;
     std::vector<std::unique_ptr<RenderItem>> sourceRenderItems;

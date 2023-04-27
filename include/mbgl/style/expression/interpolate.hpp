@@ -24,8 +24,12 @@ public:
                 std::unique_ptr<Expression> input_,
                 std::map<double, std::unique_ptr<Expression>> stops_);
 
-    const std::unique_ptr<Expression>& getInput() const { return input; }
-    const Interpolator& getInterpolator() const { return interpolator; }
+    const std::unique_ptr<Expression>& getInput() const {
+        return input;
+    }
+    const Interpolator& getInterpolator() const {
+        return interpolator;
+    }
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override {
         visit(*input);
@@ -64,7 +68,9 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "interpolate"; }
+    std::string getOperator() const override {
+        return "interpolate";
+    }
 
 protected:
     const Interpolator interpolator;

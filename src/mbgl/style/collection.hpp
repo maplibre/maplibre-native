@@ -34,10 +34,16 @@ public:
     T* get(const std::string&) const;
 
     std::vector<T*> getWrappers() const;
-    ImmutableVector getImpls() const { return impls; }
+    ImmutableVector getImpls() const {
+        return impls;
+    }
 
-    auto begin() const { return wrappers.begin(); }
-    auto end() const { return wrappers.end(); }
+    auto begin() const {
+        return wrappers.begin();
+    }
+    auto end() const {
+        return wrappers.end();
+    }
 
     void clear();
 
@@ -70,7 +76,9 @@ public:
         std::size_t idx = Base::index(id);
         return Base::remove(idx, idx);
     }
-    void update(const T& wrapper) { Base::update(Base::index(wrapper.getID()), wrapper); }
+    void update(const T& wrapper) {
+        Base::update(Base::index(wrapper.getID()), wrapper);
+    }
 };
 
 template <class T>
@@ -83,9 +91,13 @@ public:
         return Base::add(Base::size(), i, std::move(wrapper));
     }
 
-    std::unique_ptr<T> remove(const std::string& id) { return Base::remove(Base::index(id), implsIndex(id)); }
+    std::unique_ptr<T> remove(const std::string& id) {
+        return Base::remove(Base::index(id), implsIndex(id));
+    }
 
-    void update(const T& wrapper) { Base::update(implsIndex(wrapper.getID()), wrapper); }
+    void update(const T& wrapper) {
+        Base::update(implsIndex(wrapper.getID()), wrapper);
+    }
 
 private:
     std::size_t implsIndex(const std::string& id) const {

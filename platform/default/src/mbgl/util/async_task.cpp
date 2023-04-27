@@ -34,9 +34,13 @@ public:
     }
 
 private:
-    static void asyncCallback(uv_async_t* handle) { reinterpret_cast<Impl*>(handle->data)->task(); }
+    static void asyncCallback(uv_async_t* handle) {
+        reinterpret_cast<Impl*>(handle->data)->task();
+    }
 
-    uv_handle_t* handle() { return reinterpret_cast<uv_handle_t*>(async); }
+    uv_handle_t* handle() {
+        return reinterpret_cast<uv_handle_t*>(async);
+    }
 
     uv_async_t* async;
 

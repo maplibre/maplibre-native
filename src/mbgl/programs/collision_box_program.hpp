@@ -24,7 +24,9 @@ class CollisionBoxProgram final
                      style::Properties<>> {
 public:
     static constexpr std::string_view Name{"CollisionBoxProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -104,7 +106,9 @@ class CollisionCircleProgram final
                      style::Properties<>> {
 public:
     static constexpr std::string_view Name{"CollisionCircleProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

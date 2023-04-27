@@ -47,9 +47,13 @@ public:
 
     Mask mask;
 
-    static ColorMode disabled() { return {Replace{}, {}, {false, false, false, false}}; }
+    static ColorMode disabled() {
+        return {Replace{}, {}, {false, false, false, false}};
+    }
 
-    static ColorMode unblended() { return {Replace{}, {}, {true, true, true, true}}; }
+    static ColorMode unblended() {
+        return {Replace{}, {}, {true, true, true, true}};
+    }
 
     static ColorMode alphaBlended() {
         return {Add{ColorBlendFactorType::One, ColorBlendFactorType::OneMinusSrcAlpha}, {}, {true, true, true, true}};

@@ -60,7 +60,9 @@ class FillExtrusionProgram final : public Program<FillExtrusionProgram,
                                                   style::FillExtrusionPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillExtrusionProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -91,7 +93,9 @@ class FillExtrusionPatternProgram final : public Program<FillExtrusionPatternPro
                                                          style::FillExtrusionPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillExtrusionPatternProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

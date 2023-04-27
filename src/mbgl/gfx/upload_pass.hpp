@@ -24,7 +24,9 @@ public:
     UploadPass(const UploadPass&) = delete;
     UploadPass& operator=(const UploadPass&) = delete;
 
-    DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
+    DebugGroup<UploadPass> createDebugGroup(const char* name) {
+        return {*this, name};
+    }
 
 public:
     template <class Vertex>

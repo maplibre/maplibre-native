@@ -41,7 +41,9 @@ public:
     RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
-    void markContextLost() { contextLost = true; };
+    void markContextLost() {
+        contextLost = true;
+    };
     // TODO: Introduce RenderOrchestratorObserver.
     void setObserver(RendererObserver*);
 

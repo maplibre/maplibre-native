@@ -10,7 +10,9 @@ namespace android {
 
 class ProjectedMeters : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/geometry/ProjectedMeters"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/geometry/ProjectedMeters";
+    };
 
     static jni::Local<jni::Object<ProjectedMeters>> New(jni::JNIEnv&, double, double);
 

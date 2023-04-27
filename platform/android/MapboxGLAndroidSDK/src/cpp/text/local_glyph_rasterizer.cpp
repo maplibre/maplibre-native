@@ -69,7 +69,9 @@ class LocalGlyphRasterizer::Impl {
 public:
     Impl(const std::optional<std::string> fontFamily_) : fontFamily(fontFamily_) {}
 
-    bool isConfigured() const { return bool(fontFamily); }
+    bool isConfigured() const {
+        return bool(fontFamily);
+    }
 
     PremultipliedImage drawGlyphBitmap(const FontStack& fontStack, GlyphID glyphID) {
         bool bold = false;

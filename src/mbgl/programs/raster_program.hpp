@@ -40,7 +40,9 @@ class RasterProgram final : public Program<RasterProgram,
                                            style::RasterPaintProperties> {
 public:
     static constexpr std::string_view Name{"RasterProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

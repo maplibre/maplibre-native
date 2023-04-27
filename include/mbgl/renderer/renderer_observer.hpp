@@ -35,7 +35,9 @@ public:
 
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;
-    virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
+    virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) {
+        done();
+    }
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration

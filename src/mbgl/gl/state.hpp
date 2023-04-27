@@ -28,9 +28,13 @@ public:
         return *this;
     }
 
-    bool operator==(const typename T::Type& value) const { return !(*this != value); }
+    bool operator==(const typename T::Type& value) const {
+        return !(*this != value);
+    }
 
-    bool operator!=(const typename T::Type& value) const { return dirty || currentValue != value; }
+    bool operator!=(const typename T::Type& value) const {
+        return dirty || currentValue != value;
+    }
 
     void setCurrentValue(const typename T::Type& value) {
         dirty = false;
@@ -39,11 +43,17 @@ public:
 
     // Mark the state as dirty. This means that the next time we are assigning a value to this
     // piece of OpenGL state will always result in an actual OpenGL call.
-    void setDirty() { dirty = true; }
+    void setDirty() {
+        dirty = true;
+    }
 
-    typename T::Type getCurrentValue() const { return currentValue; }
+    typename T::Type getCurrentValue() const {
+        return currentValue;
+    }
 
-    bool isDirty() const { return dirty; }
+    bool isDirty() const {
+        return dirty;
+    }
 
 private:
     template <std::size_t... I>

@@ -63,7 +63,9 @@ protected:
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
 
 public:
-    DrawScope createDrawScope() { return DrawScope{createDrawScopeResource()}; }
+    DrawScope createDrawScope() {
+        return DrawScope{createDrawScopeResource()};
+    }
 
 protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;

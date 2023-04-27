@@ -20,7 +20,9 @@ public:
     MessageImpl(Object& object_, MemberFn memberFn_, ArgsTuple argsTuple_)
         : object(object_), memberFn(memberFn_), argsTuple(std::move(argsTuple_)) {}
 
-    void operator()() override { invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()); }
+    void operator()() override {
+        invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
+    }
 
     template <std::size_t... I>
     void invoke(std::index_sequence<I...>) {
@@ -38,7 +40,9 @@ public:
     AskMessageImpl(std::promise<ResultType> promise_, Object& object_, MemberFn memberFn_, ArgsTuple argsTuple_)
         : object(object_), memberFn(memberFn_), argsTuple(std::move(argsTuple_)), promise(std::move(promise_)) {}
 
-    void operator()() override { promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>())); }
+    void operator()() override {
+        promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()));
+    }
 
     template <std::size_t... I>
     ResultType ask(std::index_sequence<I...>) {

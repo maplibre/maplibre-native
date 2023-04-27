@@ -11,7 +11,9 @@ namespace android {
 class CustomLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/CustomLayer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/style/layers/CustomLayer";
+    };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -33,7 +35,9 @@ public:
 
     void registerNative(jni::JNIEnv&) final;
 
-    LayerFactory* getLayerFactory() final { return this; }
+    LayerFactory* getLayerFactory() final {
+        return this;
+    }
 
 }; // class CustomJavaLayerPeerFactory
 

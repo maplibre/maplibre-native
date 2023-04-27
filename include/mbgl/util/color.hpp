@@ -29,12 +29,22 @@ public:
     float b = 0.0f;
     float a = 0.0f;
 
-    static Color black() { return {0.0f, 0.0f, 0.0f, 1.0f}; };
-    static Color white() { return {1.0f, 1.0f, 1.0f, 1.0f}; };
+    static Color black() {
+        return {0.0f, 0.0f, 0.0f, 1.0f};
+    };
+    static Color white() {
+        return {1.0f, 1.0f, 1.0f, 1.0f};
+    };
 
-    static Color red() { return {1.0f, 0.0f, 0.0f, 1.0f}; };
-    static Color green() { return {0.0f, 1.0f, 0.0f, 1.0f}; };
-    static Color blue() { return {0.0f, 0.0f, 1.0f, 1.0f}; };
+    static Color red() {
+        return {1.0f, 0.0f, 0.0f, 1.0f};
+    };
+    static Color green() {
+        return {0.0f, 1.0f, 0.0f, 1.0f};
+    };
+    static Color blue() {
+        return {0.0f, 0.0f, 1.0f, 1.0f};
+    };
 
     static std::optional<Color> parse(const std::string&);
     std::string stringify() const;

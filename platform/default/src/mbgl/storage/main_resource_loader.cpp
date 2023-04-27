@@ -176,11 +176,17 @@ public:
                (mbtilesFileSource && mbtilesFileSource->canRequest(resource));
     }
 
-    bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
+    bool supportsCacheOnlyRequests() const {
+        return supportsCacheOnlyRequests_;
+    }
 
-    void pause() { thread->pause(); }
+    void pause() {
+        thread->pause();
+    }
 
-    void resume() { thread->resume(); }
+    void resume() {
+        thread->resume();
+    }
 
     void setResourceOptions(ResourceOptions options) {
         std::lock_guard<std::mutex> lock(resourceOptionsMutex);

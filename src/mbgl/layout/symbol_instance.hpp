@@ -120,7 +120,9 @@ public:
     bool singleLine;
     uint32_t crossTileID = 0;
 
-    static constexpr uint32_t invalidCrossTileID() { return std::numeric_limits<uint32_t>::max(); }
+    static constexpr uint32_t invalidCrossTileID() {
+        return std::numeric_limits<uint32_t>::max();
+    }
 };
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;

@@ -20,21 +20,33 @@ public:
     ForwardingRendererObserver(util::RunLoop& mapRunLoop, RendererObserver& delegate_)
         : mailbox(std::make_shared<Mailbox>(mapRunLoop)), delegate(delegate_, mailbox) {}
 
-    ~ForwardingRendererObserver() { mailbox->close(); }
+    ~ForwardingRendererObserver() {
+        mailbox->close();
+    }
 
-    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
+    void onInvalidate() override {
+        delegate.invoke(&RendererObserver::onInvalidate);
+    }
 
-    void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
+    void onResourceError(std::exception_ptr err) override {
+        delegate.invoke(&RendererObserver::onResourceError, err);
+    }
 
-    void onWillStartRenderingMap() override { delegate.invoke(&RendererObserver::onWillStartRenderingMap); }
+    void onWillStartRenderingMap() override {
+        delegate.invoke(&RendererObserver::onWillStartRenderingMap);
+    }
 
-    void onWillStartRenderingFrame() override { delegate.invoke(&RendererObserver::onWillStartRenderingFrame); }
+    void onWillStartRenderingFrame() override {
+        delegate.invoke(&RendererObserver::onWillStartRenderingFrame);
+    }
 
     void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
         delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
     }
 
-    void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
+    void onDidFinishRenderingMap() override {
+        delegate.invoke(&RendererObserver::onDidFinishRenderingMap);
+    }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);

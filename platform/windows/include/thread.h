@@ -46,9 +46,13 @@ extern DWORD selfThreadKey;
 
 class DummyClassThread {
 public:
-    DummyClassThread() { selfThreadKey = TlsAlloc(); }
+    DummyClassThread() {
+        selfThreadKey = TlsAlloc();
+    }
 
-    ~DummyClassThread() { TlsFree(selfThreadKey); }
+    ~DummyClassThread() {
+        TlsFree(selfThreadKey);
+    }
 };
 
 extern DummyClassThread dummyClassThread;

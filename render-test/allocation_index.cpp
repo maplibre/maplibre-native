@@ -18,8 +18,12 @@ std::mutex indexMutex;
 
 class FlagGuard {
 public:
-    explicit FlagGuard(std::atomic_bool& flag_) : flag(flag_) { flag = true; }
-    ~FlagGuard() { flag = false; }
+    explicit FlagGuard(std::atomic_bool& flag_) : flag(flag_) {
+        flag = true;
+    }
+    ~FlagGuard() {
+        flag = false;
+    }
 
 private:
     std::atomic_bool& flag;

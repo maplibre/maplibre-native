@@ -154,7 +154,9 @@ public:
         return {};
     }
 
-    std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
+    std::tuple<float> interpolationFactor(float) const override {
+        return std::tuple<float>{0.0f};
+    }
 
     std::tuple<T> uniformValue(const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
         return std::tuple<T>{currentValue.constantOr(constant)};
@@ -197,7 +199,9 @@ public:
         return {};
     }
 
-    std::tuple<float, float> interpolationFactor(float) const override { return std::tuple<float, float>{0.0f, 0.0f}; }
+    std::tuple<float, float> interpolationFactor(float) const override {
+        return std::tuple<float, float>{0.0f, 0.0f};
+    }
 
     std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>> uniformValue(
         const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
@@ -290,7 +294,9 @@ public:
         }
     }
 
-    std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
+    std::tuple<float> interpolationFactor(float) const override {
+        return std::tuple<float>{0.0f};
+    }
 
     std::tuple<T> uniformValue(const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
         if (currentValue.isConstant()) {
@@ -516,7 +522,9 @@ public:
         }
     }
 
-    std::tuple<float, float> interpolationFactor(float) const override { return std::tuple<float, float>{0.0f, 0.0f}; }
+    std::tuple<float, float> interpolationFactor(float) const override {
+        return std::tuple<float, float>{0.0f, 0.0f};
+    }
 
     std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>> uniformValue(
         const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
@@ -594,7 +602,9 @@ struct ZoomInterpolatedAttribute : public Attr {
 template <class Attr>
 struct InterpolationUniform {
     using Value = float;
-    static constexpr auto name() { return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value(); }
+    static constexpr auto name() {
+        return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value();
+    }
 };
 
 template <class Ps>
@@ -658,7 +668,9 @@ public:
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
 
-    void upload(gfx::UploadPass& uploadPass) { util::ignore({(binders.template get<Ps>()->upload(uploadPass), 0)...}); }
+    void upload(gfx::UploadPass& uploadPass) {
+        util::ignore({(binders.template get<Ps>()->upload(uploadPass), 0)...});
+    }
 
     template <class P>
     using ZoomInterpolatedAttributeList = typename Property<P>::ZoomInterpolatedAttributeList;

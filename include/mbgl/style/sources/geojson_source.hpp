@@ -52,7 +52,9 @@ public:
     virtual Features getLeaves(std::uint32_t, std::uint32_t limit, std::uint32_t offset) = 0;
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
 
-    virtual std::shared_ptr<Scheduler> getScheduler() { return nullptr; }
+    virtual std::shared_ptr<Scheduler> getScheduler() {
+        return nullptr;
+    }
 };
 
 class GeoJSONSource final : public Source {
@@ -74,7 +76,9 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;

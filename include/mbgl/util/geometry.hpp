@@ -42,7 +42,9 @@ Point<S> convertPoint(const Point<T> &p) {
 }
 
 struct ToFeatureType {
-    FeatureType operator()(const EmptyGeometry &) const { return FeatureType::Unknown; }
+    FeatureType operator()(const EmptyGeometry &) const {
+        return FeatureType::Unknown;
+    }
     template <class T>
     FeatureType operator()(const Point<T> &) const {
         return FeatureType::Point;

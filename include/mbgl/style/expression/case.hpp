@@ -28,7 +28,9 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::string getOperator() const override { return "case"; }
+    std::string getOperator() const override {
+        return "case";
+    }
 
 private:
     std::vector<Branch> branches;

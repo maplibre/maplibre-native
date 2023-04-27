@@ -28,7 +28,9 @@ public:
         return nullptr;
     }
 
-    bool canRequest(const Resource&) const override { return true; }
+    bool canRequest(const Resource&) const override {
+        return true;
+    }
 
     void add(std::string const& key, std::string const& data) {
         assets.emplace(key, std::make_shared<std::string>(data));

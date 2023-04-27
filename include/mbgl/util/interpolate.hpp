@@ -32,12 +32,16 @@ T interpolate(const T& a, const T& b, const float t) {
 
 template <class T, class Enabled>
 struct Interpolator {
-    T operator()(const T& a, const T& b, const double t) const { return a * (1.0 - t) + b * t; }
+    T operator()(const T& a, const T& b, const double t) const {
+        return a * (1.0 - t) + b * t;
+    }
 };
 
 template <>
 struct Interpolator<float> {
-    float operator()(const float& a, const float& b, const float t) const { return a * (1.0f - t) + b * t; }
+    float operator()(const float& a, const float& b, const float t) const {
+        return a * (1.0f - t) + b * t;
+    }
 
     float operator()(const float& a, const float& b, const double t) const {
         return static_cast<float>(a * (1.0 - t) + b * t);

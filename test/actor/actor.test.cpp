@@ -15,7 +15,9 @@ using namespace std::chrono_literals;
 
 TEST(Actor, Construction) {
     struct TestActor {
-        TestActor(ActorRef<TestActor>, bool& constructed) { constructed = true; };
+        TestActor(ActorRef<TestActor>, bool& constructed) {
+            constructed = true;
+        };
     };
 
     bool constructed = false;
@@ -27,7 +29,9 @@ TEST(Actor, Construction) {
 TEST(Actor, Destruction) {
     struct TestActor {
         TestActor(ActorRef<TestActor>, bool& destructed_) : destructed(destructed_){};
-        ~TestActor() { destructed = true; }
+        ~TestActor() {
+            destructed = true;
+        }
 
         bool& destructed;
     };
@@ -49,7 +53,9 @@ TEST(Actor, DestructionBlocksOnReceive) {
         TestActor(ActorRef<TestActor>, std::promise<void> promise_, std::future<void> future_)
             : promise(std::move(promise_)), future(std::move(future_)), waited(false) {}
 
-        ~TestActor() { EXPECT_TRUE(waited.load()); }
+        ~TestActor() {
+            EXPECT_TRUE(waited.load());
+        }
 
         void wait() {
             promise.set_value();
@@ -84,7 +90,9 @@ TEST(Actor, DestructionBlocksOnSend) {
         TestScheduler(std::promise<void> promise_, std::future<void> future_)
             : promise(std::move(promise_)), future(std::move(future_)), waited(false) {}
 
-        ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
+        ~TestScheduler() override {
+            EXPECT_TRUE(waited.load());
+        }
 
         void schedule(std::function<void()>) final {
             promise.set_value();
@@ -92,7 +100,9 @@ TEST(Actor, DestructionBlocksOnSend) {
             std::this_thread::sleep_for(1ms);
             waited = true;
         }
-        mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+        mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override {
+            return weakFactory.makeWeakPtr();
+        }
     };
 
     struct TestActor {
@@ -128,7 +138,9 @@ TEST(Actor, DestructionAllowedInReceiveOnSameThread) {
     struct TestActor {
         TestActor(ActorRef<TestActor>){};
 
-        void callMeBack(std::function<void()> callback) { callback(); }
+        void callMeBack(std::function<void()> callback) {
+            callback();
+        }
     };
 
     std::promise<void> callbackFiredPromise;
@@ -154,7 +166,9 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
     struct TestActor {
         TestActor(ActorRef<TestActor>){};
 
-        void callMeBack(std::function<void()> callback) { callback(); }
+        void callMeBack(std::function<void()> callback) {
+            callback();
+        }
     };
 
     std::promise<void> actorClosedPromise;
@@ -204,7 +218,9 @@ TEST(Actor, OrderedMailbox) {
             last = i;
         }
 
-        void end() { promise.set_value(); }
+        void end() {
+            promise.set_value();
+        }
     };
 
     std::promise<void> endedPromise;
@@ -234,7 +250,9 @@ TEST(Actor, NonConcurrentMailbox) {
             std::this_thread::sleep_for(1ms);
         }
 
-        void end() { promise.set_value(); }
+        void end() {
+            promise.set_value();
+        }
     };
 
     std::promise<void> endedPromise;
@@ -255,7 +273,9 @@ TEST(Actor, Ask) {
     struct TestActor {
         TestActor(ActorRef<TestActor>) {}
 
-        int doubleIt(int i) { return i * 2; }
+        int doubleIt(int i) {
+            return i * 2;
+        }
     };
 
     Actor<TestActor> test(Scheduler::GetBackground());
@@ -277,7 +297,9 @@ TEST(Actor, AskVoid) {
 
         TestActor(bool& executed_) : executed(executed_) {}
 
-        void doIt() { executed = true; }
+        void doIt() {
+            executed = true;
+        }
     };
 
     bool executed = false;
@@ -301,7 +323,9 @@ TEST(Actor, NoSelfActorRef) {
 
         WithArguments(std::promise<void> promise_) : promise(std::move(promise_)) {}
 
-        void receive() { promise.set_value(); }
+        void receive() {
+            promise.set_value();
+        }
     };
 
     std::promise<void> promise;
@@ -320,11 +344,17 @@ TEST(Actor, TwoPhaseConstruction) {
     struct TestActor {
         TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_) : destroyed(std::move(destroyed_)){};
 
-        ~TestActor() { *destroyed = true; }
+        ~TestActor() {
+            *destroyed = true;
+        }
 
-        void callMe(std::promise<void> p) { p.set_value(); }
+        void callMe(std::promise<void> p) {
+            p.set_value();
+        }
 
-        void stop() { util::RunLoop::Get()->stop(); }
+        void stop() {
+            util::RunLoop::Get()->stop();
+        }
 
         std::shared_ptr<bool> destroyed;
     };

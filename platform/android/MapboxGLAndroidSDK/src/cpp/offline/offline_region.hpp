@@ -14,7 +14,9 @@ class OfflineRegion {
 public:
     class OfflineRegionObserver {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionObserver"; };
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionObserver";
+        };
     };
 
     class OfflineRegionStatusCallback {
@@ -65,7 +67,9 @@ public:
                              std::optional<mbgl::OfflineRegionMetadata>);
     };
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/offline/OfflineRegion";
+    };
 
     OfflineRegion(jni::JNIEnv&, jni::jlong, const jni::Object<FileSource>&);
 

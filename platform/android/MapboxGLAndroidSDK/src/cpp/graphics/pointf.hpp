@@ -9,7 +9,9 @@ namespace android {
 
 class PointF : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "android/graphics/PointF"; };
+    static constexpr auto Name() {
+        return "android/graphics/PointF";
+    };
 
     static jni::Local<jni::Object<PointF>> New(jni::JNIEnv&, float, float);
 

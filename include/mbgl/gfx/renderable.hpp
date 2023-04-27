@@ -25,7 +25,9 @@ protected:
     virtual ~Renderable() = default;
 
 public:
-    Size getSize() const { return size; }
+    Size getSize() const {
+        return size;
+    }
 
     template <typename T>
     T& getResource() const {

@@ -136,7 +136,9 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept;
 
-    mapbox::base::WeakPtr<Layer> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Layer> makeWeakPtr() {
+        return weakFactory.makeWeakPtr();
+    }
 
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;

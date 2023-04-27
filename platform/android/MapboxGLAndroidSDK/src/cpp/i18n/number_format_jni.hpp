@@ -14,7 +14,9 @@ namespace android {
 
 class NumberFormat {
 public:
-    static constexpr auto Name() { return "java/text/NumberFormat"; };
+    static constexpr auto Name() {
+        return "java/text/NumberFormat";
+    };
 
     static jni::Local<jni::Object<NumberFormat>> getInstance(jni::JNIEnv&, const jni::Object<Locale>&);
     static jni::Local<jni::Object<NumberFormat>> getCurrencyInstance(jni::JNIEnv&, const jni::Object<Locale>&);

@@ -11,7 +11,9 @@ namespace gson {
 class JsonElement {
 public:
     using SuperTag = jni::ObjectTag;
-    static constexpr auto Name() { return "com/google/gson/JsonElement"; };
+    static constexpr auto Name() {
+        return "com/google/gson/JsonElement";
+    };
 
     static jni::Local<jni::Object<JsonElement>> New(jni::JNIEnv&, const mbgl::Value&);
     static mbgl::Value convert(JNIEnv&, const jni::Object<JsonElement>&);

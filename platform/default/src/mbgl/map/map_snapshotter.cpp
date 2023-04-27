@@ -29,11 +29,17 @@ public:
     explicit ForwardingRendererObserver(RendererObserver& delegate_)
         : mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())), delegate(delegate_, mailbox) {}
 
-    ~ForwardingRendererObserver() override { mailbox->close(); }
+    ~ForwardingRendererObserver() override {
+        mailbox->close();
+    }
 
-    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
+    void onInvalidate() override {
+        delegate.invoke(&RendererObserver::onInvalidate);
+    }
 
-    void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
+    void onResourceError(std::exception_ptr err) override {
+        delegate.invoke(&RendererObserver::onResourceError, err);
+    }
 
     void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
         delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
@@ -62,7 +68,9 @@ public:
         frontend.reset();
     }
 
-    void onInvalidate() override { rendererObserver->onInvalidate(); }
+    void onInvalidate() override {
+        rendererObserver->onInvalidate();
+    }
 
     void onResourceError(std::exception_ptr err) override {
         hasPendingStillImageRequest = false;
@@ -92,7 +100,9 @@ public:
         frontend.update(std::move(params));
     }
 
-    void setSize(Size size) { frontend.setSize(size); }
+    void setSize(Size size) {
+        frontend.setSize(size);
+    }
 
     PremultipliedImage takeImage() {
         assert(stillImage.valid());
@@ -114,7 +124,9 @@ public:
 
     ~SnapshotterRendererFrontend() override = default;
 
-    void reset() override { renderer->actor().invoke(&SnapshotterRenderer::reset); }
+    void reset() override {
+        renderer->actor().invoke(&SnapshotterRenderer::reset);
+    }
 
     void setObserver(RendererObserver& observer) override {
         renderer->actor().invoke(&SnapshotterRenderer::setObserver,
@@ -126,7 +138,9 @@ public:
         renderer->actor().invoke(&SnapshotterRenderer::update, updateParameters);
     }
 
-    void setSize(Size size) { renderer->actor().invoke(&SnapshotterRenderer::setSize, size); }
+    void setSize(Size size) {
+        renderer->actor().invoke(&SnapshotterRenderer::setSize, size);
+    }
 
     const TransformState& getTransformState() const {
         assert(updateParameters);
@@ -135,7 +149,9 @@ public:
         return defaultTransformState;
     }
 
-    PremultipliedImage takeImage() { return renderer->actor().ask(&SnapshotterRenderer::takeImage).get(); }
+    PremultipliedImage takeImage() {
+        return renderer->actor().ask(&SnapshotterRenderer::takeImage).get();
+    }
 
 private:
     std::shared_ptr<UpdateParameters> updateParameters;
@@ -231,14 +247,28 @@ public:
     }
 
     // MapObserver overrides
-    void onDidFailLoadingMap(MapLoadError, const std::string& error) override { observer.onDidFailLoadingStyle(error); }
-    void onDidFinishLoadingStyle() override { observer.onDidFinishLoadingStyle(); }
-    void onStyleImageMissing(const std::string& image) override { observer.onStyleImageMissing(image); }
+    void onDidFailLoadingMap(MapLoadError, const std::string& error) override {
+        observer.onDidFailLoadingStyle(error);
+    }
+    void onDidFinishLoadingStyle() override {
+        observer.onDidFinishLoadingStyle();
+    }
+    void onStyleImageMissing(const std::string& image) override {
+        observer.onStyleImageMissing(image);
+    }
 
-    Map& getMap() { return map; }
-    const Map& getMap() const { return map; }
-    SnapshotterRendererFrontend& getRenderer() { return frontend; }
-    void cancel() { renderStillCallback.reset(); }
+    Map& getMap() {
+        return map;
+    }
+    const Map& getMap() const {
+        return map;
+    }
+    SnapshotterRendererFrontend& getRenderer() {
+        return frontend;
+    }
+    void cancel() {
+        renderStillCallback.reset();
+    }
 
 private:
     std::unique_ptr<Actor<MapSnapshotter::Callback>> renderStillCallback;

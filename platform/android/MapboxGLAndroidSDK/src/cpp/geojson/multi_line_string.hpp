@@ -15,8 +15,12 @@ namespace geojson {
 class MultiLineString {
 public:
     using SuperTag = Geometry;
-    static constexpr auto Name() { return "com/mapbox/geojson/MultiLineString"; };
-    static constexpr auto Type() { return "MultiLineString"; };
+    static constexpr auto Name() {
+        return "com/mapbox/geojson/MultiLineString";
+    };
+    static constexpr auto Type() {
+        return "MultiLineString";
+    };
 
     static jni::Local<jni::Object<MultiLineString>> New(jni::JNIEnv&, const mbgl::MultiLineString<double>&);
 

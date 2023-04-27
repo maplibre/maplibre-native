@@ -10,7 +10,9 @@ namespace android {
 class UnknownSource : public Source {
 public:
     using SuperTag = Source;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/sources/UnknownSource"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/style/sources/UnknownSource";
+    };
 
     static void registerNative(jni::JNIEnv&);
 

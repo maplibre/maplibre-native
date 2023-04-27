@@ -21,13 +21,21 @@ public:
     virtual std::optional<std::string> getAttribution() const = 0;
     void setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept;
     std::optional<uint8_t> getPrefetchZoomDelta() const noexcept;
-    void setMinimumTileUpdateInterval(Duration interval) { minimumTileUpdateInterval = interval; }
-    Duration getMinimumTileUpdateInterval() const { return minimumTileUpdateInterval; }
+    void setMinimumTileUpdateInterval(Duration interval) {
+        minimumTileUpdateInterval = interval;
+    }
+    Duration getMinimumTileUpdateInterval() const {
+        return minimumTileUpdateInterval;
+    }
     void setMaxOverscaleFactorForParentTiles(std::optional<uint8_t> overscaleFactor) noexcept;
     std::optional<uint8_t> getMaxOverscaleFactorForParentTiles() const noexcept;
 
-    bool isVolatile() const { return volatileFlag; }
-    void setVolatile(bool set) { volatileFlag = set; }
+    bool isVolatile() const {
+        return volatileFlag;
+    }
+    void setVolatile(bool set) {
+        volatileFlag = set;
+    }
     const SourceType type;
     const std::string id;
 

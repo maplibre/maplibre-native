@@ -536,9 +536,13 @@ TEST(Transform, IsPanning) {
 
 TEST(Transform, DefaultTransform) {
     struct TransformObserver : public mbgl::MapObserver {
-        void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
+        void onCameraWillChange(MapObserver::CameraChangeMode) final {
+            cameraWillChangeCallback();
+        };
 
-        void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };
+        void onCameraDidChange(MapObserver::CameraChangeMode) final {
+            cameraDidChangeCallback();
+        };
 
         std::function<void()> cameraWillChangeCallback;
         std::function<void()> cameraDidChangeCallback;

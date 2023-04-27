@@ -11,7 +11,9 @@ namespace gson {
 class JsonPrimitive {
 public:
     using SuperTag = JsonElement;
-    static constexpr auto Name() { return "com/google/gson/JsonPrimitive"; };
+    static constexpr auto Name() {
+        return "com/google/gson/JsonPrimitive";
+    };
 
     static void registerNative(jni::JNIEnv&);
 };

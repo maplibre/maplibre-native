@@ -11,7 +11,9 @@ namespace util {
 
 class List : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "java/util/List"; };
+    static constexpr auto Name() {
+        return "java/util/List";
+    };
 
     template <class T>
     static jni::Local<jni::Array<jni::Object<T>>> toArray(jni::JNIEnv& env, const jni::Object<List>& list) {
@@ -24,7 +26,9 @@ public:
 
 class Arrays : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "java/util/Arrays"; };
+    static constexpr auto Name() {
+        return "java/util/Arrays";
+    };
 
     template <class T>
     static jni::Local<jni::Object<List>> asList(jni::JNIEnv& env, const jni::Array<jni::Object<T>>& array) {
@@ -38,7 +42,9 @@ public:
 
 class Set : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "java/util/Set"; };
+    static constexpr auto Name() {
+        return "java/util/Set";
+    };
 
     template <class T>
     static jni::Local<jni::Array<jni::Object<T>>> toArray(jni::JNIEnv& env, const jni::Object<Set>& list) {
@@ -51,11 +57,15 @@ public:
 
 class Map : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "java/util/Map"; };
+    static constexpr auto Name() {
+        return "java/util/Map";
+    };
 
     class Entry : private mbgl::util::noncopyable {
     public:
-        static constexpr auto Name() { return "java/util/Map$Entry"; };
+        static constexpr auto Name() {
+            return "java/util/Map$Entry";
+        };
 
         template <class T>
         static jni::Local<jni::Object<T>> getKey(jni::JNIEnv& env, const jni::Object<Entry>& entry) {

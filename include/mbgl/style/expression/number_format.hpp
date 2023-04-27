@@ -25,7 +25,9 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "number-format"; }
+    std::string getOperator() const override {
+        return "number-format";
+    }
 
 private:
     std::unique_ptr<Expression> number;

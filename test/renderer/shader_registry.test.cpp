@@ -32,9 +32,13 @@ public:
     class ShaderAndStyleObserver : public MapObserver {
     public:
     public:
-        void onDidFinishLoadingStyle() override { styleLoaded(); }
+        void onDidFinishLoadingStyle() override {
+            styleLoaded();
+        }
 
-        void onRegisterShaders(gfx::ShaderRegistry& registry) override { registerShaders(registry); };
+        void onRegisterShaders(gfx::ShaderRegistry& registry) override {
+            registerShaders(registry);
+        };
 
         std::function<void()> styleLoaded;
         std::function<void(gfx::ShaderRegistry&)> registerShaders;
@@ -58,7 +62,9 @@ template <uint32_t token_value>
 class StubProgramBase : public gfx::Shader {
 public:
     static constexpr auto Token = token_value;
-    virtual uint32_t draw() { return token; }
+    virtual uint32_t draw() {
+        return token;
+    }
 
 protected:
     uint32_t token{token_value};
@@ -67,15 +73,21 @@ protected:
 class StubProgram_1 final : public StubProgramBase<10> {
 public:
     static constexpr std::string_view Name{"StubProgram_1"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
-    void setToken(uint32_t tok) { token = tok; }
+    void setToken(uint32_t tok) {
+        token = tok;
+    }
 };
 
 class StubProgram_2 final : public StubProgramBase<20> {
 public:
     static constexpr std::string_view Name{"StubProgram_2"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 };
 
 class StubShaderConsumer {

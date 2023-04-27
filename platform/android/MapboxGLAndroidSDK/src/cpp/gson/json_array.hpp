@@ -11,7 +11,9 @@ namespace gson {
 class JsonArray {
 public:
     using SuperTag = JsonElement;
-    static constexpr auto Name() { return "com/google/gson/JsonArray"; };
+    static constexpr auto Name() {
+        return "com/google/gson/JsonArray";
+    };
 
     static jni::Local<jni::Object<JsonArray>> New(jni::JNIEnv&, const std::vector<mbgl::Value>&);
     static std::vector<mbgl::Value> convert(JNIEnv&, const jni::Object<JsonArray>&);

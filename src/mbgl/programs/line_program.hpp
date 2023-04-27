@@ -39,7 +39,9 @@ class LineProgram final
           style::LinePaintProperties> {
 public:
     static constexpr std::string_view Name{"LineProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -103,7 +105,9 @@ class LinePatternProgram final : public Program<LinePatternProgram,
                                                 style::LinePaintProperties> {
 public:
     static constexpr std::string_view Name{"LinePatternProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -134,7 +138,9 @@ class LineSDFProgram final : public Program<LineSDFProgram,
                                             style::LinePaintProperties> {
 public:
     static constexpr std::string_view Name{"LineSDFProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 
@@ -160,7 +166,9 @@ class LineGradientProgram final
           style::LinePaintProperties> {
 public:
     static constexpr std::string_view Name{"LineGradientProgram"};
-    const std::string_view typeName() const noexcept override { return Name; }
+    const std::string_view typeName() const noexcept override {
+        return Name;
+    }
 
     using Program::Program;
 

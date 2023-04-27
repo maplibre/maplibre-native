@@ -31,7 +31,9 @@ public:
 
 class SortKeyRange {
 public:
-    bool isFirstRange() const { return start == 0u; }
+    bool isFirstRange() const {
+        return start == 0u;
+    }
     float sortKey;
     size_t start;
     size_t end;
@@ -81,7 +83,9 @@ public:
     virtual bool hasCrossfade() const = 0;
 
     // Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
-    virtual bool is3D() const { return false; }
+    virtual bool is3D() const {
+        return false;
+    }
 
     // Returns true is the layer is subject to placement.
     bool needsPlacement() const;
@@ -116,7 +120,9 @@ public:
 
     virtual void prepare(const LayerPrepareParameters&);
 
-    const LayerPlacementData& getPlacementData() const { return placementData; }
+    const LayerPlacementData& getPlacementData() const {
+        return placementData;
+    }
 
     // Latest evaluated properties.
     Immutable<style::LayerProperties> evaluatedProperties;

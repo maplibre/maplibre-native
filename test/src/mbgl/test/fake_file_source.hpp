@@ -36,7 +36,9 @@ public:
               list(list_),
               link((list.push_back(this), std::prev(list.end()))) {}
 
-        ~FakeFileRequest() override { list.erase(link); }
+        ~FakeFileRequest() override {
+            list.erase(link);
+        }
     };
 
     FakeFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
@@ -47,7 +49,9 @@ public:
         return std::make_unique<FakeFileRequest>(resource, callback, requests);
     }
 
-    bool canRequest(const Resource&) const override { return true; }
+    bool canRequest(const Resource&) const override {
+        return true;
+    }
 
     bool respond(Resource::Kind kind, const Response& response) {
         auto it = std::find_if(requests.begin(), requests.end(), [&](FakeFileRequest* fakeRequest) {
@@ -67,11 +71,19 @@ public:
 
     std::list<FakeFileRequest*> requests;
 
-    void setResourceOptions(ResourceOptions options) override { resourceOptions = options; }
-    ResourceOptions getResourceOptions() override { return resourceOptions.clone(); }
+    void setResourceOptions(ResourceOptions options) override {
+        resourceOptions = options;
+    }
+    ResourceOptions getResourceOptions() override {
+        return resourceOptions.clone();
+    }
 
-    void setClientOptions(ClientOptions options) override { clientOptions = options; }
-    ClientOptions getClientOptions() override { return clientOptions.clone(); }
+    void setClientOptions(ClientOptions options) override {
+        clientOptions = options;
+    }
+    ClientOptions getClientOptions() override {
+        return clientOptions.clone();
+    }
 
 private:
     ResourceOptions resourceOptions;
@@ -88,7 +100,9 @@ public:
         return FakeFileSource::request(resource, callback);
     }
 
-    bool respond(Resource::Kind kind, const Response& response) { return FakeFileSource::respond(kind, response); }
+    bool respond(Resource::Kind kind, const Response& response) {
+        return FakeFileSource::respond(kind, response);
+    }
 
     mapbox::base::Value getProperty(const std::string& property) const override {
         return onlineFs->getProperty(property);

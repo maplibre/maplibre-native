@@ -28,13 +28,17 @@ public:
                                              NULL);
     }
 
-    ~OSMesaBackendImpl() final { OSMesaDestroyContext(context); }
+    ~OSMesaBackendImpl() final {
+        OSMesaDestroyContext(context);
+    }
 
     gl::ProcAddress getExtensionFunctionPointer(const char* name) final {
         return (ProcAddress)::OSMesaGetProcAddress(name);
     }
 
-    void activateContext() final { OSMesaMakeCurrent(context, buffer.get(), GL_UNSIGNED_BYTE, 2048, 2048); }
+    void activateContext() final {
+        OSMesaMakeCurrent(context, buffer.get(), GL_UNSIGNED_BYTE, 2048, 2048);
+    }
 
     void deactivateContext() final {}
 

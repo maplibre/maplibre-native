@@ -53,7 +53,9 @@ public:
         }
     }
 
-    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
 private:
     std::array<std::thread, N> threads;

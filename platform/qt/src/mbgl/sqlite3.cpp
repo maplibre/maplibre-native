@@ -68,7 +68,9 @@ public:
         }
     }
 
-    ~StatementImpl() { query.clear(); }
+    ~StatementImpl() {
+        query.clear();
+    }
 
     QSqlQuery query;
     int64_t lastInsertRowId = 0;

@@ -39,17 +39,25 @@ public:
 
     mbgl::gfx::RendererBackend &getRendererBackend();
 
-    void setTestDirectory(std::string dir) { testDirectory = std::move(dir); };
+    void setTestDirectory(std::string dir) {
+        testDirectory = std::move(dir);
+    };
 
     // Callback called when the user presses the key mapped to style change.
     // The expected action is to set a new style, different to the current one.
     void setChangeStyleCallback(std::function<void()> callback);
 
-    void setPauseResumeCallback(std::function<void()> callback) { pauseResumeCallback = std::move(callback); };
+    void setPauseResumeCallback(std::function<void()> callback) {
+        pauseResumeCallback = std::move(callback);
+    };
 
-    void setOnlineStatusCallback(std::function<void()> callback) { onlineStatusCallback = std::move(callback); }
+    void setOnlineStatusCallback(std::function<void()> callback) {
+        onlineStatusCallback = std::move(callback);
+    }
 
-    void setResetCacheCallback(std::function<void()> callback) { resetDatabaseCallback = std::move(callback); };
+    void setResetCacheCallback(std::function<void()> callback) {
+        resetDatabaseCallback = std::move(callback);
+    };
 
     void setShouldClose();
 

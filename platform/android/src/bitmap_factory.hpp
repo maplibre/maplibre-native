@@ -9,7 +9,9 @@ namespace android {
 
 class BitmapFactory {
 public:
-    static constexpr auto Name() { return "android/graphics/BitmapFactory"; };
+    static constexpr auto Name() {
+        return "android/graphics/BitmapFactory";
+    };
     static void registerNative(jni::JNIEnv&);
 
     static jni::Local<jni::Object<Bitmap>> DecodeByteArray(jni::JNIEnv&,

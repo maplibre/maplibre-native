@@ -34,10 +34,14 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    Expression* getResult() const { return result.get(); }
+    Expression* getResult() const {
+        return result.get();
+    }
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "let"; }
+    std::string getOperator() const override {
+        return "let";
+    }
 
 private:
     Bindings bindings;
@@ -65,9 +69,13 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "var"; }
+    std::string getOperator() const override {
+        return "var";
+    }
 
-    const std::shared_ptr<Expression>& getBoundExpression() const { return value; }
+    const std::shared_ptr<Expression>& getBoundExpression() const {
+        return value;
+    }
 
 private:
     std::string name;

@@ -24,7 +24,9 @@ public:
         }
     }
 
-    static Type GetType() { return Value(DefaultType); }
+    static Type GetType() {
+        return Value(DefaultType);
+    }
 
     template <typename T, typename... Args>
     static std::unique_ptr<T> Create(Args... args) {

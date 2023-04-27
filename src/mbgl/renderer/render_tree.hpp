@@ -65,7 +65,9 @@ public:
     virtual LineAtlas& getLineAtlas() const = 0;
     virtual PatternAtlas& getPatternAtlas() const = 0;
     // Parameters
-    const RenderTreeParameters& getParameters() const { return *parameters; }
+    const RenderTreeParameters& getParameters() const {
+        return *parameters;
+    }
 
 protected:
     RenderTree(std::unique_ptr<RenderTreeParameters> parameters_) : parameters(std::move(parameters_)) {

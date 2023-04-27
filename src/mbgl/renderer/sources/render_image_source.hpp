@@ -20,8 +20,12 @@ public:
 private:
     void upload(gfx::UploadPass&) const override;
     void render(PaintParameters&) const override;
-    bool hasRenderPass(RenderPass) const override { return false; }
-    const std::string& getName() const override { return name; }
+    bool hasRenderPass(RenderPass) const override {
+        return false;
+    }
+    const std::string& getName() const override {
+        return name;
+    }
     std::string name;
     mutable std::optional<gfx::Texture> debugTexture;
 };
@@ -36,7 +40,9 @@ public:
     std::unique_ptr<RenderItem> createRenderItem() override;
     void prepare(const SourcePrepareParameters&) final;
     void updateFadingTiles() final {}
-    bool hasFadingTiles() const final { return false; }
+    bool hasFadingTiles() const final {
+        return false;
+    }
 
     void update(Immutable<style::Source::Impl>,
                 const std::vector<Immutable<style::LayerProperties>>&,
@@ -44,7 +50,9 @@ public:
                 bool needsRelayout,
                 const TileParameters&) final;
 
-    const ImageSourceRenderData* getImageRenderData() const override { return renderData.get(); }
+    const ImageSourceRenderData* getImageRenderData() const override {
+        return renderData.get();
+    }
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,

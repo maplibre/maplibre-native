@@ -123,7 +123,9 @@ struct GfxProbe {
 
 class TestMetrics {
 public:
-    bool isEmpty() const { return fileSize.empty() && memory.empty() && network.empty() && fps.empty() && gfx.empty(); }
+    bool isEmpty() const {
+        return fileSize.empty() && memory.empty() && network.empty() && fps.empty() && gfx.empty();
+    }
     std::map<std::string, FileSizeProbe> fileSize;
     std::map<std::string, MemoryProbe> memory;
     std::map<std::string, NetworkProbe> network;

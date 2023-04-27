@@ -42,13 +42,21 @@ public:
         req.invoke(&FileSourceRequest::setResponse, response);
     }
 
-    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
+    void setResourceOptions(ResourceOptions options) {
+        resourceOptions = options;
+    }
 
-    ResourceOptions getResourceOptions() { return resourceOptions.clone(); }
+    ResourceOptions getResourceOptions() {
+        return resourceOptions.clone();
+    }
 
-    void setClientOptions(ClientOptions options) { clientOptions = options; }
+    void setClientOptions(ClientOptions options) {
+        clientOptions = options;
+    }
 
-    ClientOptions getClientOptions() { return clientOptions.clone(); }
+    ClientOptions getClientOptions() {
+        return clientOptions.clone();
+    }
 
 private:
     AAssetManager* assetManager;

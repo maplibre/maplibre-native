@@ -8,7 +8,9 @@ namespace android {
 
 class OfflineRegionDefinition {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegionDefinition"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/offline/OfflineRegionDefinition";
+    };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -19,7 +21,9 @@ public:
 class OfflineTilePyramidRegionDefinition {
 public:
     using SuperTag = OfflineRegionDefinition;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineTilePyramidRegionDefinition"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/offline/OfflineTilePyramidRegionDefinition";
+    };
 
     static jni::Local<jni::Object<OfflineRegionDefinition>> New(jni::JNIEnv&,
                                                                 const mbgl::OfflineTilePyramidRegionDefinition&);
@@ -33,7 +37,9 @@ public:
 class OfflineGeometryRegionDefinition {
 public:
     using SuperTag = OfflineRegionDefinition;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineGeometryRegionDefinition"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/offline/OfflineGeometryRegionDefinition";
+    };
 
     static jni::Local<jni::Object<OfflineRegionDefinition>> New(jni::JNIEnv&,
                                                                 const mbgl::OfflineGeometryRegionDefinition&);

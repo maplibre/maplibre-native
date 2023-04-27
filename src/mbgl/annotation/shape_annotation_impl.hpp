@@ -31,8 +31,12 @@ public:
 };
 
 struct CloseShapeAnnotation {
-    ShapeAnnotationGeometry operator()(const mbgl::LineString<double> &geom) const { return geom; }
-    ShapeAnnotationGeometry operator()(const mbgl::MultiLineString<double> &geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mbgl::LineString<double> &geom) const {
+        return geom;
+    }
+    ShapeAnnotationGeometry operator()(const mbgl::MultiLineString<double> &geom) const {
+        return geom;
+    }
     ShapeAnnotationGeometry operator()(const mbgl::Polygon<double> &geom) const {
         mbgl::Polygon<double> closed = geom;
         for (auto &ring : closed) {

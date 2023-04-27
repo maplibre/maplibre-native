@@ -100,9 +100,13 @@ public:
 
     void setDirtyState();
 
-    extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
+    extension::Debugging* getDebuggingExtension() const {
+        return debugging.get();
+    }
 
-    void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
+    void setCleanupOnDestruction(bool cleanup) {
+        cleanupOnDestruction = cleanup;
+    }
 
 private:
     RendererBackend& backend;

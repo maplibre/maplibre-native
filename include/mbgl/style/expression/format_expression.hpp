@@ -40,10 +40,14 @@ public:
         return {std::nullopt};
     }
 
-    const std::vector<FormatExpressionSection>& getSections() const { return sections; }
+    const std::vector<FormatExpressionSection>& getSections() const {
+        return sections;
+    }
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override { return "format"; }
+    std::string getOperator() const override {
+        return "format";
+    }
 
 private:
     std::vector<FormatExpressionSection> sections;

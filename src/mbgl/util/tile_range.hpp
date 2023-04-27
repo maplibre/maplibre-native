@@ -33,7 +33,9 @@ public:
     }
 
     // Compute the range of tiles covered by the bounds.
-    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t z) { return fromLatLngBounds(bounds, z, z); }
+    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t z) {
+        return fromLatLngBounds(bounds, z, z);
+    }
 
     bool contains(const CanonicalTileID& tileID) {
         if (tileID.z <= zoomRange.max && tileID.z >= zoomRange.min) {

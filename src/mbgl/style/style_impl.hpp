@@ -49,7 +49,9 @@ public:
 
     bool isLoaded() const;
 
-    std::exception_ptr getLastError() const { return lastError; }
+    std::exception_ptr getLastError() const {
+        return lastError;
+    }
 
     std::vector<Source*> getSources();
     std::vector<const Source*> getSources() const;

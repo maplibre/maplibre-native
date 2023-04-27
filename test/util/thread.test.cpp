@@ -47,9 +47,13 @@ public:
         EXPECT_EQ(string, "test");
     }
 
-    void checkContext(std::promise<bool> result) const { result.set_value(tid == std::this_thread::get_id()); }
+    void checkContext(std::promise<bool> result) const {
+        result.set_value(tid == std::this_thread::get_id());
+    }
 
-    void sync(std::promise<void> result) const { result.set_value(); }
+    void sync(std::promise<void> result) const {
+        result.set_value();
+    }
 
     const std::thread::id tid;
 };
@@ -88,7 +92,9 @@ class TestWorker {
 public:
     TestWorker(ActorRef<TestWorker>) {}
 
-    void send(std::function<void()> cb) { cb(); }
+    void send(std::function<void()> cb) {
+        cb();
+    }
 
     void sendDelayed(std::function<void()> cb) {
         timer.start(Milliseconds(300), mbgl::Duration::zero(), [cb] { cb(); });
@@ -270,9 +276,13 @@ TEST(Thread, PauseResume) {
 
 class TestWorkerDelayedConstruction {
 public:
-    TestWorkerDelayedConstruction(ActorRef<TestWorkerDelayedConstruction>, std::future<void> start) { start.get(); }
+    TestWorkerDelayedConstruction(ActorRef<TestWorkerDelayedConstruction>, std::future<void> start) {
+        start.get();
+    }
 
-    void send(std::function<void()> cb) { cb(); }
+    void send(std::function<void()> cb) {
+        cb();
+    }
 
 private:
     Timer timer;

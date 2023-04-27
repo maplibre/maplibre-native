@@ -70,7 +70,9 @@ public:
         }
     }
 
-    std::string resolvedLocale() const { return ""; }
+    std::string resolvedLocale() const {
+        return "";
+    }
 
 private:
     bool caseSensitive;

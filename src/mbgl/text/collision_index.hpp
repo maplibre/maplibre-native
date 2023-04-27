@@ -57,9 +57,13 @@ public:
 
     CollisionBoundaries projectTileBoundaries(const mat4& posMatrix) const;
 
-    const TransformState& getTransformState() const { return transformState; }
+    const TransformState& getTransformState() const {
+        return transformState;
+    }
 
-    float getViewportPadding() const { return viewportPadding; }
+    float getViewportPadding() const {
+        return viewportPadding;
+    }
 
 private:
     bool isOffscreen(const CollisionBoundaries&) const;

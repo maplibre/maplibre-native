@@ -48,7 +48,9 @@ public:
         }
     }
 
-    bool hasDependencies() const override { return false; }
+    bool hasDependencies() const override {
+        return false;
+    }
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>& featureIndex,
@@ -78,7 +80,9 @@ public:
 
 private:
     struct CircleFeature {
-        friend bool operator<(const CircleFeature& lhs, const CircleFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
+        friend bool operator<(const CircleFeature& lhs, const CircleFeature& rhs) {
+            return lhs.sortKey < rhs.sortKey;
+        }
 
         size_t i;
         std::unique_ptr<GeometryTileFeature> feature;

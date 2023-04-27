@@ -226,7 +226,9 @@ struct ToValue {
         return scope.Escape(result);
     }
 
-    v8::Local<v8::Value> operator()(const Image& image) { return toJS(image.toValue()); }
+    v8::Local<v8::Value> operator()(const Image& image) {
+        return toJS(image.toValue());
+    }
 };
 
 v8::Local<v8::Value> toJS(const Value& value) {

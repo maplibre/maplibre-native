@@ -34,7 +34,9 @@ class AndroidRendererBackend;
  */
 class MapRenderer : public Scheduler {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/renderer/MapRenderer"; };
+    static constexpr auto Name() {
+        return "com/mapbox/mapboxsdk/maps/renderer/MapRenderer";
+    };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -67,7 +69,9 @@ public:
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
     void schedule(std::function<void()> scheduled) override;
-    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override {
+        return weakFactory.makeWeakPtr();
+    }
 
     void requestRender();
 

@@ -158,7 +158,9 @@ public:
      */
     bool requiredResourceCountIsPrecise = false;
 
-    bool complete() const { return completedResourceCount >= requiredResourceCount; }
+    bool complete() const {
+        return completedResourceCount >= requiredResourceCount;
+    }
 };
 
 /*
