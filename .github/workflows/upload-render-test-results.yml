@@ -52,7 +52,7 @@ jobs:
         run: |
           aws s3 cp linux-gcc8-release-style.html \
             s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html \
-            --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')
+            --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')"
 
       - name: 'Leave comment on PR with test results'
         uses: actions/github-script@v6
