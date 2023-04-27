@@ -2,7 +2,7 @@
 Language: Cpp
 BasedOnStyle: Google
 AccessModifierOffset: -4
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: Empty
 BinPackArguments: false
 BinPackParameters: false
 ColumnLimit: 120
