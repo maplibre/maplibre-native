@@ -1,6 +1,6 @@
-# Developing the Maplibre GL Native Node.js module
+# Developing the MapLibre Native Node.js module
 
-This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Maplibre GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
+This document explains how to build the [Node.js](https://nodejs.org/) bindings for [MapLibre Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
 
 ## Building
 

@@ -1,6 +1,6 @@
 # Doxygen documentation
 
-This directory contains the files needed to generate the documentation of MapLibre GL Native Core using [Doxygen](https://www.doxygen.nl).
+This directory contains the files needed to generate the documentation of MapLibre Native Core using [Doxygen](https://www.doxygen.nl).
 
 [Doxygen Awesome](https://jothepro.github.io/doxygen-awesome-css/index.html) is used as a theme and is included as a submodule. To update, simply check out a new version of the submodule.
 
