@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/types.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 
 #include <memory>
@@ -59,6 +60,9 @@ public:
     const Color& getColor() const;
     void setColor(const Color& value);
 
+    DepthMaskType getDepthType() const { return depthType; }
+    void setDepthType(DepthMaskType value) { depthType = value; }
+
     /// Which shader to use when rendering emitted drawables
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
@@ -88,14 +92,11 @@ protected:
 
 protected:
     DrawPriority drawPriority = 0;
-
+    DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
-
     mat4 matrix;
-
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
-
     std::vector<DrawableTweakerPtr> tweakers;
 
     struct Impl;

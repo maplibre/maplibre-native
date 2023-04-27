@@ -10,12 +10,11 @@
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/gl/defines.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
-
-#include <mbgl/gl/index_buffer_resource.hpp>
 
 #include <cstring>
 #include <iterator>
@@ -449,7 +448,7 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-bool Context::setupDraw(const gfx::Drawable& drawable) {
+bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& drawable) {
     if (const auto &shader = drawable.getShader()) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         if (shaderGL.getGLProgramID() != program.getCurrentValue()) {
@@ -459,7 +458,7 @@ bool Context::setupDraw(const gfx::Drawable& drawable) {
         program = value::Program::Default;
     }
 
-    //setDepthMode(...);
+    setDepthMode(parameters.depthModeForSublayer(0, drawable.getDepthType()));
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(gfx::ColorMode::alphaBlended());
     setCullFaceMode(gfx::CullFaceMode::disabled());
