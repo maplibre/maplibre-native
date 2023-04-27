@@ -17,7 +17,7 @@
   "types": "platform/node/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maplibre/maplibre-gl-native.git"
+    "url": "git+https://github.com/maplibre/maplibre-native.git"
   },
   "license": "BSD-2-Clause",
   "dependencies": {

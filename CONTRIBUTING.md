@@ -8,7 +8,7 @@
 ## Source code checkout
 
 ```bash
-git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
 ```
 
 ## Building
