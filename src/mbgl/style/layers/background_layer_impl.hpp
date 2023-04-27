@@ -14,6 +14,8 @@ namespace gfx {
 
 class Drawable;
 class ShaderProgramBase;
+class ShaderRegistry;
+
 using DrawablePtr = std::shared_ptr<Drawable>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
@@ -29,11 +31,16 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
-    void layerAdded(PaintParameters&, UniqueChangeRequestVec&) const override;
-    void layerRemoved(PaintParameters&, UniqueChangeRequestVec&) const override;
+    void layerAdded(gfx::ShaderRegistry&,
+                    const TransformState&,
+                    const PropertyEvaluationParameters&,
+                    UniqueChangeRequestVec&) const override;
+    void layerRemoved(UniqueChangeRequestVec&) const override;
 
     /// Generate any changes needed by the layer
-    void update(PaintParameters&, UniqueChangeRequestVec&) const override;
+    void update(const TransformState&,
+                const PropertyEvaluationParameters&,
+                UniqueChangeRequestVec&) const override;
 
 private:
     mutable std::mutex mutex;

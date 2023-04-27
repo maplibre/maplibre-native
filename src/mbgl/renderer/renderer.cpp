@@ -2,7 +2,9 @@
 
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/renderer_impl.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/annotation/annotation_manager.hpp>
 
@@ -29,6 +31,24 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
+
+        const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
+        const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions : style::TransitionOptions();
+        //const TransitionParameters transitionParameters{updateParameters->timePoint, transitionOptions};
+        const auto defDuration = isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero();
+        const PropertyEvaluationParameters evalParameters {
+            impl->orchestrator.getZoomHistory(),
+            updateParameters->timePoint,
+            transitionOptions.duration.value_or(defDuration),
+        };
+
+        const auto& renderTreeParameters = renderTree->getParameters();
+        const auto& state = renderTreeParameters.transformParams.state;
+
+        if (impl->staticData && impl->staticData->shaders) {
+            impl->orchestrator.updateLayers(*impl->staticData->shaders, state, evalParameters);
+        }
+
         impl->render(*renderTree);
     }
 }

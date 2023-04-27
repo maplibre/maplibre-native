@@ -28,6 +28,7 @@ void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         auto draw = getCurrentDrawable(/*createIfNone=*/true);
         currentDrawable->setDrawPriority(drawPriority);
+        currentDrawable->setDepthType(depthType);
         currentDrawable->setShader(shader);
         currentDrawable->setMatrix(matrix);
         currentDrawable->setVertexAttributes(getVertexAttributes());

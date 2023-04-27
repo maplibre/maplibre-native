@@ -11,6 +11,7 @@
 
 namespace mbgl {
 
+class PaintParameters;
 class ProgramParameters;
 
 namespace gfx {
@@ -96,7 +97,7 @@ public:
     
 public:
     /// Activate the shader, vertex attributes, etc., specified by the drawable
-    virtual bool setupDraw(const gfx::Drawable&) = 0;
+    virtual bool setupDraw(const PaintParameters&, const gfx::Drawable&) = 0;
 };
 
 } // namespace gfx

@@ -15,6 +15,8 @@ class PaintParameters;
 
 namespace gfx {
 
+enum class DepthMaskType : bool;
+
 class DrawableTweaker;
 class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
@@ -47,6 +49,9 @@ public:
 
     mat4 getMatrix() const { return matrix; }
     void setMatrix(mat4 value) { matrix = value; }
+
+    DepthMaskType getDepthType() const { return depthType; }
+    void setDepthType(DepthMaskType value) { depthType = value; }
     
     /// Get the number of vertexes
     std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
@@ -72,6 +77,7 @@ protected:
     mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
+    DepthMaskType depthType;// = DepthMaskType::ReadOnly;
 
     std::vector<DrawableTweakerPtr> tweakers;
 };

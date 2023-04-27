@@ -103,7 +103,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         std::string_view vertexSource,
         std::string_view fragmentSource) noexcept(false) {
     
-    const auto firstAttrib = "pos";
+    const auto firstAttrib = "a_pos";
 
     // throws on compile error
     auto vertProg = context.createShader(ShaderType::Vertex, std::initializer_list<const char*>{vertexSource.data()});
