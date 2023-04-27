@@ -13,8 +13,8 @@
 ### ✨ Technical Improvements
 
 - *...Add new stuff here...*
-- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-gl-native/pull/397), [#406](https://github.com/maplibre/maplibre-gl-native/pull/406))
-- Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-gl-native/pull/398)
+- Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-native/pull/397), [#406](https://github.com/maplibre/maplibre-native/pull/406))
+- Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-native/pull/398)
 - Bump [eternal](https://github.com/mapbox/eternal.git) from 1.0.0 to 1.0.1
 - Bump [protozero](https://github.com/mapbox/protozero.git) from 1.7.0 to 1.7.1
 - Bump [vector-tile](https://github.com/mapbox/vector-tile.git) from 1.0.3 to 1.0.4
@@ -26,9 +26,9 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
-- [core] Fix memory access violation exception in vector_tile_data.cpp [#632](https://github.com/maplibre/maplibre-gl-native/pull/632)
-- [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-gl-native/pull/498).
-- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-gl-native/pull/198).
+- [core] Fix memory access violation exception in vector_tile_data.cpp [#632](https://github.com/maplibre/maplibre-native/pull/632)
+- [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-native/pull/498).
+- [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-native/pull/198).
 
 ## maps-v1.6.0
 

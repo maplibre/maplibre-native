@@ -65,7 +65,7 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
   * node
   * `JAVA_HOME="/Applications/Android Studio.app/Contents/jre/Contents/Home"`
   * `ANDROID_SDK_ROOT=~/Library/Android/sdk`
-  * In Android Studio, go to Tools > [SDK Manager](https://developer.android.com/studio/projects/install-ndk#specific-version) to install CMake and the specific NDK version specified in [`dependencies.gradle`](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/android/gradle/dependencies.gradle).
+  * In Android Studio, go to Tools > [SDK Manager](https://developer.android.com/studio/projects/install-ndk#specific-version) to install CMake and the specific NDK version specified in [`dependencies.gradle`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/gradle/dependencies.gradle).
 
 Open `platform/android` with Android Studio.
 

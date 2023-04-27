@@ -16,4 +16,4 @@ Beside merging in platform specific SDKs, the following changes were made compar
 
 We'd like to acknowledge the amazing work Mapbox has contributed to open source. The open source community is sad to part ways with them, but we simultaneously feel grateful for everything they already contributed. We're proud to develop on the shoulders of giants, thank you Mapbox 🙇🏽‍♀️.
 
-Please keep in mind: Unauthorized backports are the biggest threat to the MapLibre project. It is unacceptable to backport code from any Mapbox project with a non-free license. If you are unsure about this issue, [please ask](https://github.com/maplibre/maplibre-gl-native/discussions)!
+Please keep in mind: Unauthorized backports are the biggest threat to the MapLibre project. It is unacceptable to backport code from any Mapbox project with a non-free license. If you are unsure about this issue, [please ask](https://github.com/maplibre/maplibre-native/discussions)!
