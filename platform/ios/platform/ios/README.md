@@ -18,7 +18,7 @@ A library based on [MapLibre Native](https://github.com/maplibre/maplibre-gl-nat
 
 ## Documentation
 
-- [MapLibre Native for iOS API Reference](https://maplibre.org/maplibre-gl-native/ios/api/)
+- [MapLibre Native for iOS API Reference](https://maplibre.org/maplibre-native/ios/api/)
 
 ## Contributing
 

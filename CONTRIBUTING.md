@@ -2,7 +2,7 @@
 
 ## Documentation
 
-- For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/).
+- For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/).
 - See [`DEVELOPING.md`](DEVELOPING.md) for getting started with development.
 
 ## Source code checkout
