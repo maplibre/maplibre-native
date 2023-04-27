@@ -226,14 +226,14 @@ pre code {
   text-overflow: ellipsis;
   color: #3887BE; }
 
-.nav-group-task[data-name="MGLForegroundStyleLayer"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLMultiPoint"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLShape"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLSource"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLStyleFunction"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLStyleLayer"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLTileSource"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLVectorStyleLayer"] .nav-group-task-link::after, .nav-group-task[data-url^="Protocols/"] > .nav-group-task-link::after {
+.nav-group-task[data-name="MLNForegroundStyleLayer"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNMultiPoint"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNShape"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNSource"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNStyleFunction"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNStyleLayer"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNTileSource"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNVectorStyleLayer"] .nav-group-task-link::after, .nav-group-task[data-url^="Protocols/"] > .nav-group-task-link::after {
   color: #999;
   font-size: 90%;
   margin-left: 0.5em; }
@@ -241,14 +241,14 @@ pre code {
 .nav-group-task[data-url^="Protocols/"] > .nav-group-task-link::after {
   content: "(Protocol)"; }
 
-.nav-group-task[data-name="MGLForegroundStyleLayer"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLMultiPoint"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLShape"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLSource"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLStyleFunction"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLStyleLayer"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLTileSource"] .nav-group-task-link::after,
-.nav-group-task[data-name="MGLVectorStyleLayer"] .nav-group-task-link::after {
+.nav-group-task[data-name="MLNForegroundStyleLayer"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNMultiPoint"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNShape"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNSource"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNStyleFunction"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNStyleLayer"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNTileSource"] .nav-group-task-link::after,
+.nav-group-task[data-name="MLNVectorStyleLayer"] .nav-group-task-link::after {
   content: "(Abstract Class)"; }
 
 .nav-group-name > .small-heading,
