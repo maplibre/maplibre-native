@@ -81,8 +81,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                                renderTree.getLineAtlas(),
                                renderTree.getPatternAtlas()};
 
-    orchestrator.updateLayers(parameters);
-
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
@@ -195,6 +193,39 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
     }
 
+    // Draw Drawables
+    {
+        // TODO: figure out how to make drawables participate in the depth system
+        // Maybe make it a function mapping draw priority to the depth range (always (0,1)?)
+        parameters.pass = RenderPass::Opaque;
+        parameters.currentLayer = parameters.opaquePassCutoff;
+        parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
+        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
+
+        for (const auto &pair : orchestrator.getDrawables()) {
+            const auto& drawable = *pair.second;
+
+            if (!context.setupDraw(parameters, drawable)) {
+                continue;
+            }
+
+            mat4 matrix = drawable.getMatrix();
+            if (drawable.getTileID()) {
+                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+                const auto tileMat = parameters.matrixForTile(tileID);
+                matrix::multiply(matrix, drawable.getMatrix(), tileMat);
+                matrix = tileMat;
+            }
+
+            if (auto& shader = drawable.getShader()) {
+                shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
+                shader->updateUniforms();
+            }
+
+            drawable.draw(parameters);
+        }
+    }
+
     // Actually render the layers
 
     parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
@@ -210,6 +241,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
             parameters.currentLayer = i;
             const RenderItem& renderItem = it->get();
+            if (renderItem.getName() == "background") { // Replaced by drawables, above
+                continue;
+            }
             if (renderItem.hasRenderPass(parameters.pass)) {
                 const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
                 renderItem.render(parameters);
@@ -231,32 +265,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
                 renderItem.render(parameters);
             }
-        }
-    }
-
-    // Draw Drawables
-    {
-        for (const auto &pair : orchestrator.getDrawables()) {
-            const auto& drawable = *pair.second;
-
-            if (!context.setupDraw(drawable)) {
-                continue;
-            }
-
-            mat4 matrix = drawable.getMatrix();
-            if (drawable.getTileID()) {
-                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-                const auto tileMat = parameters.matrixForTile(tileID);
-                matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-                matrix = tileMat;
-            }
-
-            if (auto& shader = drawable.getShader()) {
-                shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
-                shader->updateUniforms();
-            }
-
-            drawable.draw(parameters);
         }
     }
 

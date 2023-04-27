@@ -770,18 +770,20 @@ void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) 
     drawables.erase(drawableId);
 }
 
-void RenderOrchestrator::updateLayers(PaintParameters& parameters) {
+void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
+                                      const TransformState& state,
+                                      const PropertyEvaluationParameters& evalParameters) {
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     
     for (auto& kv : layersRemoved) {
-        kv.second->layerRemoved(parameters, changes);
+        kv.second->layerRemoved(changes);
     }
     for (auto& kv : layersAdded) {
-        kv.second->layerAdded(parameters, changes);
+        kv.second->layerAdded(shaders, state, evalParameters, changes);
     }
     
     for (auto& impl : *layerImpls) {
-        impl->update(parameters, changes);
+        impl->update(state, evalParameters, changes);
     }
 
     addChanges(changes);

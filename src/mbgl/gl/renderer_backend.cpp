@@ -70,40 +70,35 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
 
     gl::Context& glContext = static_cast<gl::Context&>(*context);
 
-//    "layout (location = 0) in vec2 a_pos;\nuniform mat4 u_matrix;\n\nvoid main() {\n
-    // gl_Position = u_matrix * vec4(a_pos, 0, 1);\n}\n", fragment = "uniform vec4 u_color;\nuniform float u_opacity;\n\nvoid main() {\n    fragColor = u_color * u_opacity;\n\n#ifdef OVERDRAW_INSPECTOR\n    fragColor = vec4(1.0);\n#endif\n}\n"
-    
     auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
     if (!shader) {
         constexpr auto vert = R"(#version 300 es
             precision highp float;
             
-            layout (location = 0) in vec2 a_pos;
             uniform mat4 u_matrix;
+            layout (location = 0) in vec2 a_pos;
+            layout (location = 1) in vec4 a_color;
+            out vec4 v_color;
 
             void main() {
+                v_color = a_color;
                 gl_Position = u_matrix * vec4(a_pos, 0, 1);
             })";
         constexpr auto frag = R"(#version 300 es
             precision highp float;
-            in vec4 pos;
-            out vec4 color;
+            in vec4 v_color;
+            out vec4 fragColor;
+
             void main() {
-                color = vec4(0.5,0.0,0.0,0.5);
+                fragColor = v_color;
             })";
 
         try {
             // Compile
             shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
             if (shader) {
-                // Set uniforms
-                //shader->setUniform("a", 0, 3.21f);
-                //shader->setUniform("b", 0, 4.32f);
-                
                 // Set default values
-                //shader->setAttribute("d", 0, 12.3f);
-                //shader->setAttribute("e", 0, 123);
-                //shader->setAttribute("f", 0, gfx::VertexAttribute::matf2{ 1.0f, 2.0f, 3.0f, 4.0f });
+                //shader->setAttribute("a_color", gfx::VertexAttribute::matf4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
                 // Add to the registry
                 if (!shaders.registerShader(shader, shaderName)) {

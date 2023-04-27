@@ -16,9 +16,15 @@ namespace mbgl {
 
 class ChangeRequest;
 class PaintParameters;
+class PropertyEvaluationParameters;
+class TransformState;
 
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
+
+namespace gfx {
+class ShaderRegistry;
+} // namespace gfx
 
 namespace style {
 
@@ -56,10 +62,15 @@ public:
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
     /// Generate any changes needed by the layer
-    virtual void update(PaintParameters&, UniqueChangeRequestVec&) const { }
+    virtual void update(const TransformState&,
+                        const PropertyEvaluationParameters&,
+                        UniqueChangeRequestVec&) const { }
 
-    virtual void layerAdded(PaintParameters&, UniqueChangeRequestVec&) const { }
-    virtual void layerRemoved(PaintParameters&, UniqueChangeRequestVec&) const { }
+    virtual void layerAdded(gfx::ShaderRegistry&,
+                            const TransformState&,
+                            const PropertyEvaluationParameters&,
+                            UniqueChangeRequestVec&) const { }
+    virtual void layerRemoved(UniqueChangeRequestVec&) const { }
 
     std::string id;
     std::string source;

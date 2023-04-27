@@ -7,6 +7,7 @@
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/tile_cover.hpp>
 
@@ -29,19 +30,22 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 
 constexpr auto shaderName = "background_generic";
 
-void BackgroundLayer::Impl::layerAdded(PaintParameters& parameters, UniqueChangeRequestVec& changes) const {
+void BackgroundLayer::Impl::layerAdded(gfx::ShaderRegistry& shaders,
+                                       const TransformState& state,
+                                       const PropertyEvaluationParameters& evalParameters,
+                                       UniqueChangeRequestVec& changes) const {
     {
         std::unique_lock<std::mutex> guard(mutex);
         if (!shader) {
-            shader = parameters.shaders.get<gl::ShaderProgramGL>(shaderName);
+            shader = shaders.get<gl::ShaderProgramGL>(shaderName);
         }
     }
 
     // Add all the tiles
-    update(parameters, changes);
+    update(state, evalParameters, changes);
 }
 
-void BackgroundLayer::Impl::layerRemoved(PaintParameters&, UniqueChangeRequestVec& changes) const {
+void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const {
     // Remove everything
     decltype(tileDrawables) localDrawables;
     {
@@ -55,20 +59,43 @@ void BackgroundLayer::Impl::layerRemoved(PaintParameters&, UniqueChangeRequestVe
     }
 }
 
-void BackgroundLayer::Impl::update(PaintParameters& parameters, UniqueChangeRequestVec& changes) const {
+void BackgroundLayer::Impl::update(const TransformState& state,
+                                   const PropertyEvaluationParameters& evalParameters,
+                                   UniqueChangeRequestVec& changes) const {
     std::unique_lock<std::mutex> guard(mutex);
 
-    std::unique_ptr<gfx::DrawableBuilder> builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method on ...Context?
-    builder->setShader(shader);
-    builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
+    const auto uneval = paint.untransitioned();
+    const auto eval = uneval.evaluate(evalParameters);
 
-    const auto zoom = parameters.state.getIntegerZoom();
-    const auto tileCover = util::tileCover(parameters.state, zoom);
+    //const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
+    //    ? RenderPass::None
+    //    : (!uneval.get<style::BackgroundPattern>().isUndefined()
+    //       || eval.get<style::BackgroundOpacity>() < 1.0f
+    //       || eval.get<style::BackgroundColor>().a < 1.0f)
+    //    ? RenderPass::Translucent
+    //    : RenderPass::Opaque | RenderPass::Translucent;   // evaluated based on opaquePassCutoff in render()
+
+    //unevaluated.hasTransition();
+    //getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
+
+    std::optional<Color> color;
+    if (eval.get<BackgroundPattern>().from.empty()) {
+        const auto opacity = eval.get<style::BackgroundOpacity>();
+        if (opacity > 0.0f) {
+            color = eval.get<BackgroundColor>() * eval.get<BackgroundOpacity>();
+        }
+    }
+
+    const auto zoom = state.getIntegerZoom();
+    const auto tileCover = util::tileCover(state, zoom);
 
     // Drawables per overscaled or canonical tile?
     //const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
 
-    std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
+    // Put the tile cover into a searchable form.
+    // TODO: Likely better to sort and `std::binary_search` the vector.
+    // If it's returned in a well-defined order, we might not even need to sort.
+    const std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
 
     // For each existing tile drawable...
     for (auto iter = tileDrawables.begin(); iter != tileDrawables.end(); ) {
@@ -85,27 +112,38 @@ void BackgroundLayer::Impl::update(PaintParameters& parameters, UniqueChangeRequ
         }
     }
 
+    if (!color) {
+        return;
+    }
+
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.
     // We currently assume only one drawable per tile.
     for (const auto& tileID : tileCover) {
         const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
         if (!result.second) {
             // Already present
-            // TODO: Update matrix uniform here or in the tweaker?
+            // TODO: Update matrix here or in the tweaker?
             continue;
+        }
+
+        // We actually need to build things, so set up a builder if we haven't already
+        if (!builder) {
+            builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method on ...Context?
+            builder->setShader(shader);
+            builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
+            builder->setColor(*color);
+            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
         }
 
         // Tile coordinates are fixed...
         builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
         
-        // ... they're placed with the matrix in the uniforms
+        // ... they're placed with the matrix in the uniforms, which changes with the view
         builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
-        //builder->setUniform("u_matrix", matrix);
 
         builder->flush();
-
-        // TODO: Store Tile ID with drawable?
-        // Drawables aren't always tile-specific, but it may be needed sometimes.
 
         auto drawables = builder->clearDrawables();
         if (!drawables.empty()) {
