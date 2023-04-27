@@ -13,5 +13,5 @@ fi
 cmake "$1" \
   -G Ninja \
   -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
-  -DMBGL_WITH_QT=ON \
+  -DMLN_WITH_QT=ON \
   -DCMAKE_INSTALL_PREFIX="$2"

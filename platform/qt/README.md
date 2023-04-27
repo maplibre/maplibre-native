@@ -33,7 +33,7 @@ cmake ../maplibre-gl-native/ \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=<installation_prefix> \
-  -DMBGL_WITH_QT=ON
+  -DMLN_WITH_QT=ON
 ninja
 ninja install
 ```

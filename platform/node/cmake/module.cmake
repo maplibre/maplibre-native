@@ -211,7 +211,7 @@ function(add_node_module NAME)
         )
 
         if(WIN32)
-            if(MBGL_WITH_OSMESA)
+            if(MLN_WITH_OSMESA)
                 get_filename_component(_OUTPUT_PATH "${_OUTPUT_PATH}" DIRECTORY "${CMAKE_CURRENT_SOURCE_PATH}")
 
                 add_custom_command(
