@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Ten Thousand Foot View - MapLibre GL Native Documentation</title>
+        <title>Ten Thousand Foot View - MapLibre Native Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../design/ten-thousand-foot-view.html" class="active"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="../design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="../design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="../design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="../design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="../design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="../android/index.html"><strong aria-hidden="true">2.</strong> MapLibre GL Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../design/ten-thousand-foot-view.html" class="active"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="../design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="../design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="../design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="../design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="../design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="../android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -113,7 +113,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MapLibre GL Native Documentation</h1>
+                    <h1 class="menu-title">MapLibre Native Documentation</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -224,7 +224,7 @@ raster tile set, or GeoJSON data</p>
 <p><em>To complete initialization of a map component, we need to initialize a
 map, style with source and layers, and observers.</em></p>
 <h3 id="layer"><a class="header" href="#layer">Layer</a></h3>
-<p><em>Layer</em> is an overloaded terminology in the MapLibre GL Native's
+<p><em>Layer</em> is an overloaded terminology in the MapLibre Native's
 context. <em>Layer</em> can mean any of the following:</p>
 <ol>
 <li>
@@ -264,8 +264,8 @@ a black and white atlas of all the <em>glyphs</em> inside.</p>
 <p>This document currently does not have a dedicated section on text rendering.
 When it does, we will dive more into <em>glyph</em> rendering.</p>
 <h3 id="actor-framework"><a class="header" href="#actor-framework">Actor Framework</a></h3>
-<p>MapLibre GL Native is used in mobile platforms. To be performant in
-underpowered environments, MapLibre GL Native tries to leverage message
+<p>MapLibre Native is used in mobile platforms. To be performant in
+underpowered environments, MapLibre Native tries to leverage message
 passing across threads to render frames asynchronously. The threading
 architecture in implementation realizes this using the Actor
 interface<sup class="footnote-reference"><a href="#6">6</a></sup>. In reality the messages are raw pointers. This ranges
@@ -280,9 +280,9 @@ rendering events that render layers, sources, and subsequently tiles. An
 <h3 id="renderer"><a class="header" href="#renderer">Renderer</a></h3>
 <p>A <em>Map Renderer</em> translates geospatial features in a vector or raster
 tile to rendered or rasterized map tiles shown in a <em>slippy map.</em>
-MapLibre GL Native uses a <em>Renderer</em> component to translate map tiles
+MapLibre Native uses a <em>Renderer</em> component to translate map tiles
 fetched from a tile server to a rendered map.</p>
-<p>MapLibre GL Native uses a pool of <em>workers</em>. These workers are
+<p>MapLibre Native uses a pool of <em>workers</em>. These workers are
 responsible for background tile generation. A render thread continuously
 renders the current state of the map with available tiles at the time of
 rendering. In Javascript and iOS, the render thread is the same as the
@@ -298,7 +298,7 @@ platform code is also free to use its own threading model. For example,
 Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK uses
 <em>Grand Central Dispatch</em> for running asynchronous tasks.</p>
 <h3 id="tile-worker"><a class="header" href="#tile-worker">Tile Worker</a></h3>
-<p>We have noted early in this document that MapLibre GL Native uses message
+<p>We have noted early in this document that MapLibre Native uses message
 passing to communicate with the renderer. These messages are <em>immutable</em>
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,

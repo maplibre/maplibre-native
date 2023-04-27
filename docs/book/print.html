@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>MapLibre GL Native Documentation</title>
+        <title>MapLibre Native Documentation</title>
         <meta name="robots" content="noindex" />
 
 
@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre GL Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -114,7 +114,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MapLibre GL Native Documentation</h1>
+                    <h1 class="menu-title">MapLibre Native Documentation</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -147,11 +147,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><em><a href="https://github.com/maplibre/maplibre-gl-native">MapLibre GL Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers 
+<p><em><a href="https://github.com/maplibre/maplibre-gl-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers 
 vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em>MapLibre Style Specification,</em> a fork of the 
 Mapbox Style Specification. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="design"><a class="header" href="#design">Design</a></h1>
-<p>This section is dedicated to documenting current state of MapLibre GL Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
+<p>This section is dedicated to documenting current state of MapLibre Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
 <p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" /><br />
 <em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
@@ -231,7 +231,7 @@ raster tile set, or GeoJSON data</p>
 <p><em>To complete initialization of a map component, we need to initialize a
 map, style with source and layers, and observers.</em></p>
 <h3 id="layer"><a class="header" href="#layer">Layer</a></h3>
-<p><em>Layer</em> is an overloaded terminology in the MapLibre GL Native's
+<p><em>Layer</em> is an overloaded terminology in the MapLibre Native's
 context. <em>Layer</em> can mean any of the following:</p>
 <ol>
 <li>
@@ -271,8 +271,8 @@ a black and white atlas of all the <em>glyphs</em> inside.</p>
 <p>This document currently does not have a dedicated section on text rendering.
 When it does, we will dive more into <em>glyph</em> rendering.</p>
 <h3 id="actor-framework"><a class="header" href="#actor-framework">Actor Framework</a></h3>
-<p>MapLibre GL Native is used in mobile platforms. To be performant in
-underpowered environments, MapLibre GL Native tries to leverage message
+<p>MapLibre Native is used in mobile platforms. To be performant in
+underpowered environments, MapLibre Native tries to leverage message
 passing across threads to render frames asynchronously. The threading
 architecture in implementation realizes this using the Actor
 interface<sup class="footnote-reference"><a href="#6">6</a></sup>. In reality the messages are raw pointers. This ranges
@@ -287,9 +287,9 @@ rendering events that render layers, sources, and subsequently tiles. An
 <h3 id="renderer"><a class="header" href="#renderer">Renderer</a></h3>
 <p>A <em>Map Renderer</em> translates geospatial features in a vector or raster
 tile to rendered or rasterized map tiles shown in a <em>slippy map.</em>
-MapLibre GL Native uses a <em>Renderer</em> component to translate map tiles
+MapLibre Native uses a <em>Renderer</em> component to translate map tiles
 fetched from a tile server to a rendered map.</p>
-<p>MapLibre GL Native uses a pool of <em>workers</em>. These workers are
+<p>MapLibre Native uses a pool of <em>workers</em>. These workers are
 responsible for background tile generation. A render thread continuously
 renders the current state of the map with available tiles at the time of
 rendering. In Javascript and iOS, the render thread is the same as the
@@ -305,7 +305,7 @@ platform code is also free to use its own threading model. For example,
 Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK uses
 <em>Grand Central Dispatch</em> for running asynchronous tasks.</p>
 <h3 id="tile-worker"><a class="header" href="#tile-worker">Tile Worker</a></h3>
-<p>We have noted early in this document that MapLibre GL Native uses message
+<p>We have noted early in this document that MapLibre Native uses message
 passing to communicate with the renderer. These messages are <em>immutable</em>
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,
@@ -384,7 +384,7 @@ which we all live in and make map tiles for. This document uses the word
 <em>World</em> to denote the world MapLibre Native GL renders. The word <em>world</em>
 in rendering terms mean the <em>world</em> to render. It could be a set of
 cones and boxes, a modeled city, anything composed of 3D objects.
-MapLibre GL Native renders map tiles in a range of zoom levels on a 3D
+MapLibre Native renders map tiles in a range of zoom levels on a 3D
 plane. Map tiles are already produced from a WGS84 ellipsoid. Therefore,
 when this document uses the word <em>World,</em> it means the 3D plane
 containing a set of map tiles to be rendered, not the <em>Earth</em>.</p>
@@ -420,7 +420,7 @@ Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="
 applying viewport transform matrix.</p>
 </li>
 </ol>
-<p>Going forward, scoping our discussion only to MapLibre GL Native, we
+<p>Going forward, scoping our discussion only to MapLibre Native, we
 will talk mostly about two categories of coordinate systems:</p>
 <ol>
 <li>
@@ -458,7 +458,7 @@ this case, the map.</p>
 specific, projections are used to translate a location on the ellipsoid
 to a two-dimensional square. EPSG:3857<sup class="footnote-reference"><a href="#11">4</a></sup> or projected
 <em>Pseudo-Mercator Coordinate System</em> is such a coordinate system.
-EPSG:3857 is used by MapLibre GL Native as a default coordinate system
+EPSG:3857 is used by MapLibre Native as a default coordinate system
 to display maps. This system takes WGS84 coordinates and projects them
 into sphere. This stretches out the landmass in the hemispheres but
 mathematically makes it simpler to project a location back to a 2D
@@ -518,7 +518,7 @@ tile's X, Y, and Z.</p>
 <p>To reach our goal of translating a location to a coordinate inside a
 tile, we need to know what is the <em>extent</em> of the tile. MapLibre GL
 Native follows Mapbox Vector Tile (MVT) spec. Following said spec,
-MapLibre GL Native internally normalizes each tile to an <em>extent</em> of
+MapLibre Native internally normalizes each tile to an <em>extent</em> of
 8192. Tile extent describes the width and height of the tile in integer
 coordinates. This means a tile coordinate can have higher precision than
 a pixel. Because normally a tile has a height and width of 512 pixels.
@@ -551,9 +551,9 @@ being rendered in a single 3D horizontal plane, then the World Space has
 only one object. And in MapLibre GL, this plane has an origin of (0,0),
 positioned on the top left.</p>
 <h2 id="device-coordinates"><a class="header" href="#device-coordinates">Device Coordinates</a></h2>
-<p>World space for MapLibre GL Native contains a plane in 3D with all the
+<p>World space for MapLibre Native contains a plane in 3D with all the
 tiles for any specific zoom level. Map tiles are hierarchical in nature.
-As in they have different zoom levels. MapLibre GL Native internally
+As in they have different zoom levels. MapLibre Native internally
 stores a tree object that mimics a tile pyramid. However, it does not
 create a hierarchy of 3D planes where each plane mimics one zoom level.
 It reuses the same 3D plane to re-render the tiles in the requested zoom
@@ -563,7 +563,7 @@ world space starts with <em>View Matrix</em>, as defined in the world space.
 The key part here is the <em>camera</em>. A <em>view matrix</em> is a matrix that
 scales, rotates, and translates<sup class="footnote-reference"><a href="#14">7</a></sup> the world space from the view of
 the camera. To add the perspective of the camera, we apply the
-<em>Projection Matrix</em>. In MapLibre GL Native, a camera initialization
+<em>Projection Matrix</em>. In MapLibre Native, a camera initialization
 requires map center, bearing, and pitch.</p>
 <p><em>Initializing the map with a center (lon, lat) does not translate or
 move the 3D plane with tiles, rather moves the camera atop the defined
@@ -577,7 +577,7 @@ coordinates to move the camera to a particular tile in a zoom level.
 Once a tile is built, the GPU can quickly draw the same tile with different 
 bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
 <p>If we keep following Figure 2, we see we need to also add a projection
-matrix. And MapLibre GL Native uses a <em>perspective projection</em>.
+matrix. And MapLibre Native uses a <em>perspective projection</em>.
 Perspective projection matrix introduces the sense of depth perspective
 through the camera. As in objects further from the camera will look
 smaller and objects closer to the camera will look bigger. This
@@ -594,7 +594,7 @@ bearing: -23.2 degrees
 pitch: 45 degrees
 tile: 585/783/11
 </code></pre>
-<p>On top of this, MapLibre GL Native uses a field of view of 36.87 degrees
+<p>On top of this, MapLibre Native uses a field of view of 36.87 degrees
 or 0.6435011087932844 radians. This is somewhat arbitrary. The altitude
 of the camera used to be defined as 1.5 screen heights above the ground.
 The ground is the 3D plane that paints the map tiles. The field of view
@@ -634,7 +634,7 @@ with perspective component <em>w</em>.</p>
 = (x: 0.4481, y: -0.1688, z: 0.9993)
 </code></pre>
 <p>Doing this will take us into <em>clip space.</em> Clip coordinates contain all
-the tile coordinates we wish to render in MapLibre GL Native but only in
+the tile coordinates we wish to render in MapLibre Native but only in
 a normalized coordinate space of <code>[-1.0, 1.0]</code>.</p>
 <p>All that is left now is to translate this to viewport coordinates.
 Following Figure 2, we use <em>viewport transform</em> to produce these
@@ -663,7 +663,7 @@ WGS84 is such a Datum or reference ellipsoid.</p>
 <div class="footnote-definition" id="11"><sup class="footnote-definition-label">4</sup>
 <p>There are other coordinate systems such as EPSG:54001 that uses
 equirectangles over squares to project the WGS84 coordinates. This
-document focuses on EPSG:3857 because MapLibre GL Native uses it by
+document focuses on EPSG:3857 because MapLibre Native uses it by
 default.</p>
 </div>
 <div class="footnote-definition" id="12"><sup class="footnote-definition-label">5</sup>
@@ -685,7 +685,7 @@ so order of operation matters.</p>
 </div>
 <div class="footnote-definition" id="15"><sup class="footnote-definition-label">8</sup>
 <p>The piece of code we run on GPU is called a shader. We will see
-more how shaders influence MapLibre GL Native rendering later in the
+more how shaders influence MapLibre Native rendering later in the
 document.</p>
 </div>
 <div class="footnote-definition" id="16"><sup class="footnote-definition-label">9</sup>
@@ -757,7 +757,7 @@ implementation follows right after. Another part to notice here is the
 implementation evaluates both inputs because they are expressions too.
 Expressions can be nested.</p>
 <p><strong>Although it looks like JavaScript, for MapLibre Native GL</strong>, <strong>the
-parser for any expression is written in MapLibre GL Native Core</strong>. Each
+parser for any expression is written in MapLibre Native Core</strong>. Each
 platform such as iOS, Android has their own Expression class which
 provides builders to build an expression and add it to a layer. When an
 expression is added to a layer, the rendering part of the code picks it
@@ -811,8 +811,8 @@ from Android will look like:</p>
     )
 );
 </code></pre>
-<p><strong>To render the built expression, MapLibre GL Native uses expression
-parsers.</strong> <strong>Expression parsers are written in MapLibre GL Native Core
+<p><strong>To render the built expression, MapLibre Native uses expression
+parsers.</strong> <strong>Expression parsers are written in MapLibre Native Core
 (in C++).</strong> Each expression outputs an <em>EvaluationResult</em> class.
 Resolving an <em>EvaluationResult</em> can be deferred. As in, the result of an
 expression can be computed only when its necessary to be computed in
@@ -826,7 +826,7 @@ evaluation result will result in a new style load in the rendering loop.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="architectural-problems--recommendations"><a class="header" href="#architectural-problems--recommendations">Architectural Problems &amp; Recommendations</a></h1>
 <p>Up until now, this document focused solely on the state of MapLibre GL
 Native at the time of writing. This section speaks of possible future
-improvements for MapLibre GL Native from an architectural point of view.
+improvements for MapLibre Native from an architectural point of view.
 Before that, let's look into the architectural challenges MapLibre GL
 Native is facing<sup class="footnote-reference"><a href="#18">1</a></sup>:</p>
 <h2 id="renderer-coupled-with-opengl"><a class="header" href="#renderer-coupled-with-opengl">Renderer coupled with OpenGL</a></h2>
@@ -846,35 +846,35 @@ such as OpenGL.</p>
 </ol>
 <p>The current rendering loop is only implemented for OpenGL. In 2018,
 Apple deprecated OpenGL for both iOS 12 and macOS in favour of Metal.
-Metal is Apple's own 3D graphics API. MapLibre GL Native's sole
+Metal is Apple's own 3D graphics API. MapLibre Native's sole
 dependency on OpenGL ES puts it in a risk of deprecation for iOS
 customers.</p>
 <h2 id="lack-of-support-for-other-map-projections-except-web-mercator"><a class="header" href="#lack-of-support-for-other-map-projections-except-web-mercator">Lack of support for other map projections except Web Mercator</a></h2>
-<p>MapLibre GL Native supports Web Mercator (EPSG:3857) as its only
+<p>MapLibre Native supports Web Mercator (EPSG:3857) as its only
 supported projection. This fulfills most of the web and device map
 needs. At the time of writing, modern map renderers such as Google Maps
 and Mapbox GL offers 3D globe, conic, and rectangular projections too.
-At the time of writing, MapLibre GL Native renderer component does not
+At the time of writing, MapLibre Native renderer component does not
 have an architectural separation for supporting multiple projections and
 coordinate reference systems.</p>
 <h2 id="inconsistency-among-platforms"><a class="header" href="#inconsistency-among-platforms">Inconsistency among platforms</a></h2>
-<p>Each MapLibre GL Native platform has a Map View and Map Renderer
+<p>Each MapLibre Native platform has a Map View and Map Renderer
 component. The inconsistency introduced due to differences in
 concurrency model and programming language is unavoidable. But from an
 abstractions point of view there are inconsistencies that can be
 mitigated:</p>
 <ol>
 <li>
-<p>Map Configuration is modeled inside MapLibre GL Native Core, the
+<p>Map Configuration is modeled inside MapLibre Native Core, the
 shared cross platform codebase. Each platform creates its own
 configuration class and creates a shadow native object. The native
 configuration object is consistent across platforms but the platform
 specific configuration is not.</p>
 </li>
 <li>
-<p>MapLibre GL Native has a sister repository named MapLibre GL JS. At
+<p>MapLibre Native has a sister repository named MapLibre GL JS. At
 the time of writing, MapLibre GL JS does not share any code with
-MapLibre GL Native except shaders, the style specification, and
+MapLibre Native except shaders, the style specification, and
 render test fixtures. This creates a feature inconsistency across
 web and device experience for customers. The rendering architecture
 is also different between Web and Mobile. MapLibre GL JS currently
@@ -890,11 +890,11 @@ has promise, but the API at the time of writing only supports
 ChromeOS, macOS, and Windows 10. Technically, it can be used with
 Android and iOS but these platforms do not provide out of the box
 support for it. This also has created a divergent experience for
-customers when it comes to using MapLibre GL Native.</p>
+customers when it comes to using MapLibre Native.</p>
 </li>
 </ol>
 <h2 id="lack-of-documentation"><a class="header" href="#lack-of-documentation">Lack of documentation</a></h2>
-<p>Last but not the least, MapLibre GL Native suffers from a general lack
+<p>Last but not the least, MapLibre Native suffers from a general lack
 of documentation. This includes current state of the code architecture,
 continuous integration and development, testing strategy, and a roadmap
 for future improvement. This document intends to address the first.</p>
@@ -902,8 +902,8 @@ for future improvement. This document intends to address the first.</p>
 <p>This document proposes the following component architecture for MapLibre
 GL Native to address the architectural shortcomings.</p>
 <p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="" /><br />
-<em>Figure 4: Proposed Architecture of MapLibre GL Native</em></p>
-<p>Proposed architecture of MapLibre GL Native in Figure 4 addresses the 
+<em>Figure 4: Proposed Architecture of MapLibre Native</em></p>
+<p>Proposed architecture of MapLibre Native in Figure 4 addresses the 
 aforementioned problems by:</p>
 <h4 id="modular-rendering"><a class="header" href="#modular-rendering">Modular Rendering</a></h4>
 <p>Introducing modularized rendering through <em>Unified Rendering Interface</em>.
@@ -931,7 +931,7 @@ reference system. Projected world coordinates will then be translated to
 native device coordinates.</p>
 <p>One example of introducing new component is supporting 3D maps in the
 future. This could mean rendering map tiles on a spherical globe instead
-of a flat 3D plane. At the time of writing MapLibre GL Native supports
+of a flat 3D plane. At the time of writing MapLibre Native supports
 2.5D extrusion for buildings and terrain tiles. Supporting confidential
 datums like <em>GCJ-02</em> can also be achieved through this.</p>
 <h4 id="future-convergence-with-maplibre-rust"><a class="header" href="#future-convergence-with-maplibre-rust">Future Convergence with MapLibre Rust</a></h4>
@@ -949,7 +949,7 @@ done in sequence:</p>
 <ol>
 <li>
 <p>At first, this document proposes to implement <em><strong>Modularized
-Rendering</strong></em> in C++ for MapLibre GL Native. This document also
+Rendering</strong></em> in C++ for MapLibre Native. This document also
 proposes that Unified Rendering Interface will keep the door open
 for a <em>WebGPU</em> backed renderer in MapLibre Rust. This will address
 the divergence of web and native platforms in the future. The Rust
@@ -965,7 +965,7 @@ Projector, Tile Worker, and Map</em> component to be migrated to Rust.</p>
 <li>
 <p>Finally, this document proposes to migrate Unified Rendering
 Interface and its implementations to Rust. This will completely
-transform MapLibre GL Native from a C++ ecosystem to a Rust
+transform MapLibre Native from a C++ ecosystem to a Rust
 ecosystem.</p>
 </li>
 </ol>
@@ -974,7 +974,7 @@ implementation for web and native.</p>
 <hr />
 <div class="footnote-definition" id="18"><sup class="footnote-definition-label">1</sup>
 <p>This document deliberately does not speak of problems regarding
-build and infrastructure of MapLibre GL Native. They will be handled
+build and infrastructure of MapLibre Native. They will be handled
 in individual design PR requests / documents.</p>
 </div>
 <div class="footnote-definition" id="19"><sup class="footnote-definition-label">2</sup>
@@ -987,7 +987,7 @@ languages.</p>
 <em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
 <p>Figure 5 shows a simplified data flow diagram of initializing a map. The
 device section of this data flow diagram is based on Android platform.</p>
-<p>Before the map initialization request makes it to MapLibre GL Native
+<p>Before the map initialization request makes it to MapLibre Native
 Core, the request initializes a set of peer components in the platform
 or device runtime. Especially for Android, we have parts written in C++
 using <em>Android Native Development Kit</em> and parts written in Java.</p>
@@ -1004,11 +1004,11 @@ the generic Map Component. For Android, this maintains the JNI method
 contract established from the Java runtime. The render thread this
 document talked about before is seen in the form of <em>MapRenderer</em>. This
 is an Actor that passes the rendering events from the device runtime to
-<em>MapLibre GL Native</em> renderer.</p>
+<em>MapLibre Native</em> renderer.</p>
 <p><img src="design/media/workflow-of-rendering-tiles.jpg" alt="" /><br />
 <em>Figure 6: Workflow of rendering tiles</em></p>
 <p>Before the frame-by-frame map rendering
-starts with <em>MapLibre GL Native</em> renderer, the generic map component
+starts with <em>MapLibre Native</em> renderer, the generic map component
 gets initialized. Rendering each frame of a map tile or initializing the
 map view requires a set of <em>Transforms.</em> Through transform basic
 mutations like rotation, tilt, projection is accomplished. Transforms
@@ -1023,7 +1023,7 @@ like other components inside MapLibre works as a state machine. The
 to the map. To simplify to change the camera orientation, zoom, or pitch
 a Map View will update the state of the Transform class. And the
 Transform class will use observers to send a transform event to
-<em>MapLibre GL Native</em> renderer. This overall transform directive, such as
+<em>MapLibre Native</em> renderer. This overall transform directive, such as
 change camera location from point A to point B will translate to a set
 of transformations deduced by the <em>Renderer</em> component.</p>
 <p>Along initializing the <em>Transform</em> state, the Map View will also
@@ -1045,9 +1045,9 @@ rendering, MapLibre Native GL only renders <em>dirty</em> tiles. A dirty tile
 is a tile rendered in the viewport that has changed due to user
 interaction. To initiate this process, MapLibre Native GL loads the
 tileset to be rendered first. In a rendering request, if the tileset is
-already loaded, MapLibre GL Native will use a cached tile set.</p>
+already loaded, MapLibre Native will use a cached tile set.</p>
 <p>The next decision to make here is which tiles are to be rendered on the
-viewport. To deduce this, MapLibre GL Native translates the device
+viewport. To deduce this, MapLibre Native translates the device
 viewport coordinates<sup class="footnote-reference"><a href="#20">1</a></sup> to a tile cover. A tile cover loads all the
 tiles that will rendered to current viewport. If the viewport already
 has all the tiles that is needed to be rendered by the deduced tile
@@ -1188,8 +1188,8 @@ understanding.</p>
 will be fired from GlyphManager and ImageManger instances. For
 brevity, this document does not speak of these classes.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-gl-native-for-android"><a class="header" href="#maplibre-gl-native-for-android">MapLibre GL Native for Android</a></h1>
-<p>MapLibre GL Native for Android is a library for embedding interactive map views with scalable, customizable vector maps onto Android devices.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-native-for-android"><a class="header" href="#maplibre-native-for-android">MapLibre Native for Android</a></h1>
+<p>MapLibre Native for Android is a library for embedding interactive map views with scalable, customizable vector maps onto Android devices.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
 <ol>
 <li>
@@ -1203,7 +1203,7 @@ brevity, this document does not speak of these classes.</p>
 </code></pre>
 </li>
 <li>
-<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre GL Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre GL Native for android. </p>
+<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre Native for android. </p>
 <pre><code class="language-gradle">dependencies {
     ...
     implementation 'org.maplibre.gl:android-sdk:&lt;version&gt;'

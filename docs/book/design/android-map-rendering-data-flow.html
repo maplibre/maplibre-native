@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Android Map Rendering Data Flow - MapLibre GL Native Documentation</title>
+        <title>Android Map Rendering Data Flow - MapLibre Native Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="../design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="../design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="../design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="../design/android-map-rendering-data-flow.html" class="active"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="../design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="../android/index.html"><strong aria-hidden="true">2.</strong> MapLibre GL Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="../design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="../design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="../design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="../design/android-map-rendering-data-flow.html" class="active"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="../design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="../android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -113,7 +113,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MapLibre GL Native Documentation</h1>
+                    <h1 class="menu-title">MapLibre Native Documentation</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -150,7 +150,7 @@
 <em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
 <p>Figure 5 shows a simplified data flow diagram of initializing a map. The
 device section of this data flow diagram is based on Android platform.</p>
-<p>Before the map initialization request makes it to MapLibre GL Native
+<p>Before the map initialization request makes it to MapLibre Native
 Core, the request initializes a set of peer components in the platform
 or device runtime. Especially for Android, we have parts written in C++
 using <em>Android Native Development Kit</em> and parts written in Java.</p>
@@ -167,11 +167,11 @@ the generic Map Component. For Android, this maintains the JNI method
 contract established from the Java runtime. The render thread this
 document talked about before is seen in the form of <em>MapRenderer</em>. This
 is an Actor that passes the rendering events from the device runtime to
-<em>MapLibre GL Native</em> renderer.</p>
+<em>MapLibre Native</em> renderer.</p>
 <p><img src="media/workflow-of-rendering-tiles.jpg" alt="" /><br />
 <em>Figure 6: Workflow of rendering tiles</em></p>
 <p>Before the frame-by-frame map rendering
-starts with <em>MapLibre GL Native</em> renderer, the generic map component
+starts with <em>MapLibre Native</em> renderer, the generic map component
 gets initialized. Rendering each frame of a map tile or initializing the
 map view requires a set of <em>Transforms.</em> Through transform basic
 mutations like rotation, tilt, projection is accomplished. Transforms
@@ -186,7 +186,7 @@ like other components inside MapLibre works as a state machine. The
 to the map. To simplify to change the camera orientation, zoom, or pitch
 a Map View will update the state of the Transform class. And the
 Transform class will use observers to send a transform event to
-<em>MapLibre GL Native</em> renderer. This overall transform directive, such as
+<em>MapLibre Native</em> renderer. This overall transform directive, such as
 change camera location from point A to point B will translate to a set
 of transformations deduced by the <em>Renderer</em> component.</p>
 <p>Along initializing the <em>Transform</em> state, the Map View will also
@@ -208,9 +208,9 @@ rendering, MapLibre Native GL only renders <em>dirty</em> tiles. A dirty tile
 is a tile rendered in the viewport that has changed due to user
 interaction. To initiate this process, MapLibre Native GL loads the
 tileset to be rendered first. In a rendering request, if the tileset is
-already loaded, MapLibre GL Native will use a cached tile set.</p>
+already loaded, MapLibre Native will use a cached tile set.</p>
 <p>The next decision to make here is which tiles are to be rendered on the
-viewport. To deduce this, MapLibre GL Native translates the device
+viewport. To deduce this, MapLibre Native translates the device
 viewport coordinates<sup class="footnote-reference"><a href="#20">1</a></sup> to a tile cover. A tile cover loads all the
 tiles that will rendered to current viewport. If the viewport already
 has all the tiles that is needed to be rendered by the deduced tile
