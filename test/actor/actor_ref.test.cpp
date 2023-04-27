@@ -104,7 +104,7 @@ TEST(ActorRef, AskOnDestroyedActor) {
     // the problem is that the ActorRef has a pointer to the actor
     // whose memory is managed by AspiringActor, which has been destroyed
     // mitigation would require getting rid of the raw pointer
-    // See https://github.com/maplibre/maplibre-gl-native/issues/876
+    // See https://github.com/maplibre/maplibre-native/issues/876
 
     // auto result = ref.ask(&TestActorRef::receive);
     // EXPECT_ANY_THROW(result.get());

@@ -60,7 +60,7 @@ The products of these build commands can be found in the `build/ios/pkg` folder 
 
 ## Documentation
 
-We are moving away from the legacy Jazzy documentation towards Apple's documentation generator [DocC](https://developer.apple.com/documentation/docc). DocC has great Xcode intergration. See the [open issues](https://github.com/maplibre/maplibre-gl-native/issues?q=is%3Aissue+is%3Aopen+label%3Aios+label%3Adocumentation) if you want to help.
+We are moving away from the legacy Jazzy documentation towards Apple's documentation generator [DocC](https://developer.apple.com/documentation/docc). DocC has great Xcode intergration. See the [open issues](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3Aios+label%3Adocumentation) if you want to help.
 
 - For a general introduction to DocC, including for example a demonstration of the custom Markdown that DocC uses that allows for cross-linking, see this WWDC video: https://developer.apple.com/videos/play/wwdc2021/10166/
 - For instructions of how to write a tutorial in DooC format: https://developer.apple.com/documentation/docc/building-an-interactive-tutorial

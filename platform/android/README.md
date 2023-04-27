@@ -1,6 +1,6 @@
 # MapLibre Native for Android
 
-[![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/android-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/android-release.yml)
+[![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/android-ci/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/android-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/android-release/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/android-release.yml)
 
 MapLibre Native for Android is a library for embedding interactive map views with scalable, customizable vector maps onto Android devices.
 
