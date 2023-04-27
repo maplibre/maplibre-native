@@ -76,7 +76,7 @@ or any of the platform make files:
 * iOS developers can use [Xcode](https://developer.apple.com/support/debugging/).  See also [Advanced Debugging with Xcode and LLDB](https://developer.apple.com/videos/play/wwdc2018/412/).
 
 ## Static Analysis
-We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMBGL_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
+We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMLN_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
  [`.clang-tidy`](.clang-tidy) and [`test/.clang-tidy`](test/.clang-tidy)(for tests we are less strict and use different set of checks).
 
 ## Logging in C++

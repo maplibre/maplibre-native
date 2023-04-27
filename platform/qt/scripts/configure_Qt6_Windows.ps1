@@ -5,4 +5,4 @@ qt-cmake -S "$path" `
   -GNinja `
   -DCMAKE_BUILD_TYPE="Release" `
   -DCMAKE_INSTALL_PREFIX="$install" `
-  -DMBGL_WITH_QT=ON
+  -DMLN_WITH_QT=ON

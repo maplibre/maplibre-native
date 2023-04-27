@@ -14,5 +14,5 @@ cmake "$1" \
   -G Ninja \
   -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
   -DCMAKE_OSX_DEPLOYMENT_TARGET="10.13" \
-  -DMBGL_WITH_QT=ON \
+  -DMLN_WITH_QT=ON \
   -DCMAKE_INSTALL_PREFIX="$2"
