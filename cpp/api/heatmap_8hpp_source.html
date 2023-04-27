@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/shaders/gl/heatmap.hpp Source File</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/shaders/gl/heatmap.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('heatmap_8hpp_source.html',''); initRes
 </div><!--header-->
 <div class="contents">
 <a href="heatmap_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">// Generated code, do not modify this file!</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="shader__source_8hpp.html">mbgl/shaders/shader_source.hpp</a>&gt;</span></div>
@@ -98,113 +98,111 @@ $(document).ready(function(){initNavTree('heatmap_8hpp_source.html',''); initRes
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span>shaders {</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
 <div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html">   10</a></span>&#160;<span class="keyword">template</span> &lt;&gt; <span class="keyword">struct </span><a class="code" href="structmbgl_1_1shaders_1_1ShaderSource.html">ShaderSource</a>&lt;<a class="code" href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1">BuiltIn</a>::<a class="code" href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1ab95b98afb6f38a92183f79b5fab58209">HeatmapProgram</a>, <a class="code" href="classmbgl_1_1gfx_1_1Backend.html#acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be">gfx::Backend::Type::OpenGL</a>&gt; {</div>
-<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a55f7e543c8c7713c3a28b9bf7447ba6a">   11</a></span>&#160;    <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* vertex = R<span class="stringliteral">&quot;(</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="stringliteral">uniform mat4 u_matrix;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="stringliteral">uniform float u_extrude_scale;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="stringliteral">uniform float u_opacity;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="stringliteral">uniform float u_intensity;</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="stringliteral">attribute vec2 a_pos;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a55f7e543c8c7713c3a28b9bf7447ba6a">   11</a></span>&#160;    <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* vertex = R<span class="stringliteral">&quot;(uniform mat4 u_matrix;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="stringliteral">uniform float u_extrude_scale;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="stringliteral">uniform float u_opacity;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="stringliteral">uniform float u_intensity;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="stringliteral">layout (location = 0) in vec2 a_pos;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="stringliteral">out vec2 v_extrude;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="stringliteral">varying vec2 v_extrude;</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_weight</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="stringliteral">uniform lowp float u_weight_t;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral">attribute highp vec2 a_weight;</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">varying highp float weight;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral">#else</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">uniform highp float u_weight;</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_radius</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">uniform lowp float u_radius_t;</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">attribute mediump vec2 a_radius;</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">#else</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral">uniform mediump float u_radius;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral">// Effective &quot;0&quot; in the kernel density texture to adjust the kernel size to;</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">// this empirically chosen number minimizes artifacts on overlapping kernels</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral">// for typical heatmap cases (assuming clustered source)</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral">const highp float ZERO = 1.0 / 255.0 / 16.0;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="stringliteral">// Gaussian kernel coefficient: 1 / sqrt(2 * PI)</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="stringliteral">#define GAUSS_COEF 0.3989422804014327</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="stringliteral">void main(void) {</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="stringliteral">    #ifndef HAS_UNIFORM_u_weight</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">weight = unpack_mix_vec2(a_weight, u_weight_t);</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">#else</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="stringliteral">highp float weight = u_weight;</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="stringliteral">    #ifndef HAS_UNIFORM_u_radius</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="stringliteral">mediump float radius = unpack_mix_vec2(a_radius, u_radius_t);</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="stringliteral">#else</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral">mediump float radius = u_radius;</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="stringliteral">    // unencode the extrusion vector that we snuck into the a_pos vector</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="stringliteral">    vec2 unscaled_extrude = vec2(mod(a_pos, 2.0) * 2.0 - 1.0);</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">    // This &#39;extrude&#39; comes in ranging from [-1, -1], to [1, 1].  We&#39;ll use</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="stringliteral">    // it to produce the vertices of a square mesh framing the point feature</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="stringliteral">    // we&#39;re adding to the kernel density texture.  We&#39;ll also pass it as</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="stringliteral">    // a varying, so that the fragment shader can determine the distance of</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="stringliteral">    // each fragment from the point feature.</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="stringliteral">    // Before we do so, we need to scale it up sufficiently so that the</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="stringliteral">    // kernel falls effectively to zero at the edge of the mesh.</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="stringliteral">    // That is, we want to know S such that</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="stringliteral">    // weight * u_intensity * GAUSS_COEF * exp(-0.5 * 3.0^2 * S^2) == ZERO</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="stringliteral">    // Which solves to:</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="stringliteral">    // S = sqrt(-2.0 * log(ZERO / (weight * u_intensity * GAUSS_COEF))) / 3.0</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="stringliteral">    float S = sqrt(-2.0 * log(ZERO / weight / u_intensity / GAUSS_COEF)) / 3.0;</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="stringliteral">    // Pass the varying in units of radius</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="stringliteral">    v_extrude = S * unscaled_extrude;</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="stringliteral">    // Scale by radius and the zoom-based scale factor to produce actual</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="stringliteral">    // mesh position</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="stringliteral">    vec2 extrude = v_extrude * radius * u_extrude_scale;</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="stringliteral">    // multiply a_pos by 0.5, since we had it * 2 in order to sneak</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="stringliteral">    // in extrusion data</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="stringliteral">    vec4 pos = vec4(floor(a_pos * 0.5) + extrude, 0, 1);</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="stringliteral">    gl_Position = u_matrix * pos;</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="stringliteral">}</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="stringliteral">)&quot;;</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a5c0b2d204882b2c7e429839cb92e7b1a">   85</a></span>&#160;<span class="stringliteral">    </span><span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* fragment = R<span class="stringliteral">&quot;(uniform highp float u_intensity;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_weight</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="stringliteral">uniform lowp float u_weight_t;</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="stringliteral">layout (location = 1) in highp vec2 a_weight;</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="stringliteral">out highp float weight;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral">#else</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">uniform highp float u_weight;</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_radius</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral">uniform lowp float u_radius_t;</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">layout (location = 2) in mediump vec2 a_radius;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">#else</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">uniform mediump float u_radius;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">// Effective &quot;0&quot; in the kernel density texture to adjust the kernel size to;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">// this empirically chosen number minimizes artifacts on overlapping kernels</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral">// for typical heatmap cases (assuming clustered source)</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">const highp float ZERO = 1.0 / 255.0 / 16.0;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral">// Gaussian kernel coefficient: 1 / sqrt(2 * PI)</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral">#define GAUSS_COEF 0.3989422804014327</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="stringliteral">void main(void) {</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="stringliteral">    #ifndef HAS_UNIFORM_u_weight</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="stringliteral">weight = unpack_mix_vec2(a_weight, u_weight_t);</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="stringliteral">#else</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">highp float weight = u_weight;</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="stringliteral">    #ifndef HAS_UNIFORM_u_radius</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="stringliteral">mediump float radius = unpack_mix_vec2(a_radius, u_radius_t);</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="stringliteral">#else</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="stringliteral">mediump float radius = u_radius;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="stringliteral">    // unencode the extrusion vector that we snuck into the a_pos vector</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="stringliteral">    vec2 unscaled_extrude = vec2(mod(a_pos, 2.0) * 2.0 - 1.0);</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="stringliteral">    // This &#39;extrude&#39; comes in ranging from [-1, -1], to [1, 1].  We&#39;ll use</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="stringliteral">    // it to produce the vertices of a square mesh framing the point feature</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">    // we&#39;re adding to the kernel density texture.  We&#39;ll also pass it as</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="stringliteral">    // a varying, so that the fragment shader can determine the distance of</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="stringliteral">    // each fragment from the point feature.</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="stringliteral">    // Before we do so, we need to scale it up sufficiently so that the</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="stringliteral">    // kernel falls effectively to zero at the edge of the mesh.</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="stringliteral">    // That is, we want to know S such that</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="stringliteral">    // weight * u_intensity * GAUSS_COEF * exp(-0.5 * 3.0^2 * S^2) == ZERO</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="stringliteral">    // Which solves to:</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="stringliteral">    // S = sqrt(-2.0 * log(ZERO / (weight * u_intensity * GAUSS_COEF))) / 3.0</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="stringliteral">    float S = sqrt(-2.0 * log(ZERO / weight / u_intensity / GAUSS_COEF)) / 3.0;</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="stringliteral">    // Pass the varying in units of radius</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="stringliteral">    v_extrude = S * unscaled_extrude;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="stringliteral">    // Scale by radius and the zoom-based scale factor to produce actual</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="stringliteral">    // mesh position</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="stringliteral">    vec2 extrude = v_extrude * radius * u_extrude_scale;</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="stringliteral">    // multiply a_pos by 0.5, since we had it * 2 in order to sneak</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="stringliteral">    // in extrusion data</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="stringliteral">    vec4 pos = vec4(floor(a_pos * 0.5) + extrude, 0, 1);</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="stringliteral">    gl_Position = u_matrix * pos;</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="stringliteral">}</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="stringliteral">)&quot;;</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a5c0b2d204882b2c7e429839cb92e7b1a">   83</a></span>&#160;<span class="stringliteral">    </span><span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* fragment = R<span class="stringliteral">&quot;(uniform highp float u_intensity;</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="stringliteral">in vec2 v_extrude;</span></div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="stringliteral">varying vec2 v_extrude;</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_weight</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="stringliteral">varying highp float weight;</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="stringliteral">#else</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="stringliteral">uniform highp float u_weight;</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="stringliteral">// Gaussian kernel coefficient: 1 / sqrt(2 * PI)</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="stringliteral">#define GAUSS_COEF 0.3989422804014327</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="stringliteral">void main() {</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="stringliteral">    #ifdef HAS_UNIFORM_u_weight</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="stringliteral">highp float weight = u_weight;</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="stringliteral">    // Kernel density estimation with a Gaussian kernel of size 5x5</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="stringliteral">    float d = -0.5 * 3.0 * 3.0 * dot(v_extrude, v_extrude);</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="stringliteral">    float val = weight * u_intensity * GAUSS_COEF * exp(d);</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_weight</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="stringliteral">in highp float weight;</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="stringliteral">#else</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="stringliteral">uniform highp float u_weight;</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="stringliteral">// Gaussian kernel coefficient: 1 / sqrt(2 * PI)</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="stringliteral">#define GAUSS_COEF 0.3989422804014327</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="stringliteral">void main() {</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="stringliteral">    #ifdef HAS_UNIFORM_u_weight</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="stringliteral">highp float weight = u_weight;</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="stringliteral">    // Kernel density estimation with a Gaussian kernel of size 5x5</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="stringliteral">    float d = -0.5 * 3.0 * 3.0 * dot(v_extrude, v_extrude);</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="stringliteral">    float val = weight * u_intensity * GAUSS_COEF * exp(d);</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="stringliteral">    fragColor = vec4(val, 1.0, 1.0, 1.0);</span></div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="stringliteral">    gl_FragColor = vec4(val, 1.0, 1.0, 1.0);</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="stringliteral">    gl_FragColor = vec4(1.0);</span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="stringliteral">}</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="stringliteral">)&quot;;</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="stringliteral">};</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="stringliteral">} </span><span class="comment">// namespace shaders</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="stringliteral">    fragColor = vec4(1.0);</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="stringliteral">}</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="stringliteral">)&quot;;</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="stringliteral">};</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="stringliteral">} </span><span class="comment">// namespace shaders</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;} <span class="comment">// namespace mbgl</span></div>
 <div class="ttc" id="aclassmbgl_1_1gfx_1_1Backend_html_acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be"><div class="ttname"><a href="classmbgl_1_1gfx_1_1Backend.html#acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be">mbgl::gfx::Backend::Type::OpenGL</a></div><div class="ttdeci">@ OpenGL</div><div class="ttdoc">The OpenGL API backend.</div></div>
 <div class="ttc" id="anamespacembgl_1_1shaders_html_ab2df5937eba2f29629380430179ee7e1"><div class="ttname"><a href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1">mbgl::shaders::BuiltIn</a></div><div class="ttdeci">BuiltIn</div><div class="ttdoc">This enum is used with the ShaderSource template to select source code for the desired program and gr...</div><div class="ttdef"><b>Definition:</b> <a href="shader__source_8hpp_source.html#l00012">shader_source.hpp:12</a></div></div>
 <div class="ttc" id="anamespacembgl_1_1shaders_html_ab2df5937eba2f29629380430179ee7e1ab95b98afb6f38a92183f79b5fab58209"><div class="ttname"><a href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1ab95b98afb6f38a92183f79b5fab58209">mbgl::shaders::BuiltIn::HeatmapProgram</a></div><div class="ttdeci">@ HeatmapProgram</div></div>

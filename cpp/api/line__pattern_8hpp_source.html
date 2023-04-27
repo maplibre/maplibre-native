@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/shaders/gl/line_pattern.hpp Source File</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/shaders/gl/line_pattern.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('line__pattern_8hpp_source.html',''); i
 </div><!--header-->
 <div class="contents">
 <a href="line__pattern_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">// Generated code, do not modify this file!</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="shader__source_8hpp.html">mbgl/shaders/shader_source.hpp</a>&gt;</span></div>
@@ -110,62 +110,62 @@ $(document).ready(function(){initNavTree('line__pattern_8hpp_source.html',''); i
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="stringliteral">// long distances for long segments. Use this value to unscale the distance.</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="stringliteral">#define LINE_DISTANCE_SCALE 2.0</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral">attribute vec2 a_pos_normal;</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">attribute vec4 a_data;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral">layout (location = 0) in vec2 a_pos_normal;</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">layout (location = 1) in vec4 a_data;</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">uniform mat4 u_matrix;</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral">uniform vec2 u_units_to_pixels;</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">uniform mediump float u_ratio;</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">uniform lowp float u_device_pixel_ratio;</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">varying vec2 v_normal;</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral">varying vec2 v_width2;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">varying float v_linesofar;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">varying float v_gamma_scale;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">out vec2 v_normal;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral">out vec2 v_width2;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">out float v_linesofar;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">out float v_gamma_scale;</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_blur</span></div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral">uniform lowp float u_blur_t;</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral">attribute lowp vec2 a_blur;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral">varying lowp float blur;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral">layout (location = 2) in lowp vec2 a_blur;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral">out lowp float blur;</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="stringliteral">uniform lowp float u_blur;</span></div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_opacity</span></div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="stringliteral">uniform lowp float u_opacity_t;</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">attribute lowp vec2 a_opacity;</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">varying lowp float opacity;</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">layout (location = 3) in lowp vec2 a_opacity;</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">out lowp float opacity;</span></div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="stringliteral">uniform lowp float u_opacity;</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_offset</span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="stringliteral">uniform lowp float u_offset_t;</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral">attribute lowp vec2 a_offset;</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral">layout (location = 4) in lowp vec2 a_offset;</span></div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="stringliteral">uniform lowp float u_offset;</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_gapwidth</span></div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="stringliteral">uniform lowp float u_gapwidth_t;</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">attribute mediump vec2 a_gapwidth;</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">layout (location = 5) in mediump vec2 a_gapwidth;</span></div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="stringliteral">uniform mediump float u_gapwidth;</span></div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_width</span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="stringliteral">uniform lowp float u_width_t;</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="stringliteral">attribute mediump vec2 a_width;</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="stringliteral">layout (location = 6) in mediump vec2 a_width;</span></div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="stringliteral">uniform mediump float u_width;</span></div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_pattern_from</span></div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="stringliteral">uniform lowp float u_pattern_from_t;</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="stringliteral">attribute lowp vec4 a_pattern_from;</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="stringliteral">varying lowp vec4 pattern_from;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="stringliteral">layout (location = 7) in lowp vec4 a_pattern_from;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="stringliteral">out lowp vec4 pattern_from;</span></div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="stringliteral">uniform lowp vec4 u_pattern_from;</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_pattern_to</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="stringliteral">uniform lowp float u_pattern_to_t;</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="stringliteral">attribute lowp vec4 a_pattern_to;</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="stringliteral">varying lowp vec4 pattern_to;</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="stringliteral">layout (location = 8) in lowp vec4 a_pattern_to;</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="stringliteral">out lowp vec4 pattern_to;</span></div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="stringliteral">uniform lowp vec4 u_pattern_to;</span></div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="stringliteral">#endif</span></div>
@@ -264,28 +264,28 @@ $(document).ready(function(){initNavTree('line__pattern_8hpp_source.html',''); i
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="stringliteral">uniform sampler2D u_image;</span></div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="stringliteral">varying vec2 v_normal;</span></div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="stringliteral">varying vec2 v_width2;</span></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="stringliteral">varying float v_linesofar;</span></div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="stringliteral">varying float v_gamma_scale;</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="stringliteral">in vec2 v_normal;</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="stringliteral">in vec2 v_width2;</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="stringliteral">in float v_linesofar;</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="stringliteral">in float v_gamma_scale;</span></div>
 <div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_pattern_from</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="stringliteral">varying lowp vec4 pattern_from;</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="stringliteral">in lowp vec4 pattern_from;</span></div>
 <div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="stringliteral">uniform lowp vec4 u_pattern_from;</span></div>
 <div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_pattern_to</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="stringliteral">varying lowp vec4 pattern_to;</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="stringliteral">in lowp vec4 pattern_to;</span></div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="stringliteral">uniform lowp vec4 u_pattern_to;</span></div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_blur</span></div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="stringliteral">varying lowp float blur;</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="stringliteral">in lowp float blur;</span></div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="stringliteral">uniform lowp float u_blur;</span></div>
 <div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="stringliteral">#ifndef HAS_UNIFORM_u_opacity</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="stringliteral">varying lowp float opacity;</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="stringliteral">in lowp float opacity;</span></div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="stringliteral">#else</span></div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="stringliteral">uniform lowp float u_opacity;</span></div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="stringliteral">#endif</span></div>
@@ -343,12 +343,12 @@ $(document).ready(function(){initNavTree('line__pattern_8hpp_source.html',''); i
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="stringliteral">    vec2 pos_a = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, vec2(x_a, y_a));</span></div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="stringliteral">    vec2 pos_b = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, vec2(x_b, y_b));</span></div>
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="stringliteral">    vec4 color = mix(texture2D(u_image, pos_a), texture2D(u_image, pos_b), u_fade);</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="stringliteral">    vec4 color = mix(texture(u_image, pos_a), texture(u_image, pos_b), u_fade);</span></div>
 <div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;<span class="stringliteral">    gl_FragColor = color * alpha * opacity;</span></div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;<span class="stringliteral">    fragColor = color * alpha * opacity;</span></div>
 <div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;<span class="stringliteral">    gl_FragColor = vec4(1.0);</span></div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;<span class="stringliteral">    fragColor = vec4(1.0);</span></div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="stringliteral">}</span></div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;<span class="stringliteral">)&quot;;</span></div>

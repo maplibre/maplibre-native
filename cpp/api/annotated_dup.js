@@ -304,7 +304,6 @@ var annotated_dup =
       [ "IndexedTuple", "classmbgl_1_1IndexedTuple.html", null ],
       [ "IndexedTuple< TypeList< Is... >, TypeList< Ts... > >", "classmbgl_1_1IndexedTuple_3_01TypeList_3_01Is_8_8_8_01_4_00_01TypeList_3_01Ts_8_8_8_01_4_01_4.html", "classmbgl_1_1IndexedTuple_3_01TypeList_3_01Is_8_8_8_01_4_00_01TypeList_3_01Ts_8_8_8_01_4_01_4" ],
       [ "Log", "classmbgl_1_1Log.html", "classmbgl_1_1Log" ],
-      [ "Pass", "classmbgl_1_1Pass.html", "classmbgl_1_1Pass" ],
       [ "ProjectedMeters", "classmbgl_1_1ProjectedMeters.html", "classmbgl_1_1ProjectedMeters" ],
       [ "Projection", "classmbgl_1_1Projection.html", null ],
       [ "Range", "classmbgl_1_1Range.html", "classmbgl_1_1Range" ],

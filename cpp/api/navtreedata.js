@@ -24,8 +24,8 @@
 */
 var NAVTREE =
 [
-  [ "MapLibre GL Native Core", "index.html", [
-    [ "MapLibre GL Native Core Documentation", "index.html", null ],
+  [ "MapLibre Native Core", "index.html", [
+    [ "MapLibre Native Core Documentation", "index.html", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -64,24 +64,24 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "actor_8hpp.html",
-"classmbgl_1_1FileSource.html#aee93a9d679099ef51a9d7b77b5d88b2f",
-"classmbgl_1_1MapOptions.html#a746ee3e68dab1bd501e938fcc01ce8d9",
+"classmbgl_1_1FileSource.html#a90576c537277aa429a81b674fc833418",
+"classmbgl_1_1MapOptions.html#a0a863ff1cf6ba499d091bbdf7276b4b7",
 "classmbgl_1_1Response.html#a94647214898db709acf650218608bd1b",
-"classmbgl_1_1style_1_1CircleLayer.html#a576d5598d962d5a7094c93c07ffb902d",
-"classmbgl_1_1style_1_1HillshadeLayer.html#af3a5981b3c660baa4e2bb7a0a7799b74",
-"classmbgl_1_1style_1_1RasterLayer.html#a06d052f5989bb7e3988434f7fece5bbc",
-"classmbgl_1_1style_1_1TransitionOptions.html#a00250900f172977c80035d795476f1de",
-"classmbgl_1_1style_1_1expression_1_1In.html#a9ee0e95d89bcbbad5c5bc76f40de4fb1",
+"classmbgl_1_1style_1_1CircleLayer.html#a3fa79741ec684aa8dc02236a6f7971ee",
+"classmbgl_1_1style_1_1HillshadeLayer.html#acd7b407079ad8139d0f55fe2fdaa7da2",
+"classmbgl_1_1style_1_1RasterDEMSource.html#a072a24d89ac72176cdb9af174b87912e",
+"classmbgl_1_1style_1_1SymbolLayer.html#afc2f6bb7476bc2dead08c9dceba3314c",
+"classmbgl_1_1style_1_1expression_1_1ImageExpression.html#af1516f82b851aa837bbbc283bbac2882",
 "constants_8hpp.html#aa8f2af430f247d81fca05c064f0ba117",
 "find__zoom__curve_8hpp.html#aa367a1c79df01f6134e1068b1f68d5b1",
-"gl__functions_8hpp.html#aa191175bb4fe5d3153a0cc079fc18052",
-"namespacembgl.html#a252018403a3ef71467e52b804c1469e9a198d167ebb04c8c4ef9d7a51a3275b2d",
-"namespacembgl_1_1platform.html#a51ec82f4e5801c59a8023f506b6bc7ab",
-"namespacembgl_1_1style_1_1expression.html#a01fc776e5439634829dffd06e6c050b1",
-"namespaces.html",
-"structmbgl_1_1Resource_1_1TileData.html#aa5a9eb2cc587b8f11bcabed5fce575a3",
-"structmbgl_1_1util_1_1Interpolator.html#addc1b2b56bf2c6f24cb561ee4f873670",
-"value_8hpp_source.html"
+"gl__functions_8hpp.html#a56f3da6b1c95c2e7aadf03e72d1db786",
+"line__layer_8hpp.html",
+"namespacembgl.html#ae07887ef074be3832bf74ab53c5d93a1",
+"namespacembgl_1_1platform.html#ac261b49442f401bf1ede318000b8ebcd",
+"namespacembgl_1_1style_1_1expression.html#a83069cd8cbaf52aba15e843187443ef5",
+"prelude_8hpp_source.html",
+"structmbgl_1_1is__linear__container.html",
+"style_2expression_2image_8hpp.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

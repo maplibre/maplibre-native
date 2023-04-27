@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/shaders/gl/background_pattern.hpp Source File</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/shaders/gl/background_pattern.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('background__pattern_8hpp_source.html',
 </div><!--header-->
 <div class="contents">
 <a href="background__pattern_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">// Generated code, do not modify this file!</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="shader__source_8hpp.html">mbgl/shaders/shader_source.hpp</a>&gt;</span></div>
@@ -107,51 +107,50 @@ $(document).ready(function(){initNavTree('background__pattern_8hpp_source.html',
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="stringliteral">uniform float u_scale_b;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="stringliteral">uniform float u_tile_units_to_pixels;</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="stringliteral">attribute vec2 a_pos;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="stringliteral">varying vec2 v_pos_a;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral">varying vec2 v_pos_b;</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral">void main() {</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">    gl_Position = u_matrix * vec4(a_pos, 0, 1);</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">    v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_a * u_pattern_size_a, u_tile_units_to_pixels, a_pos);</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">    v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_b * u_pattern_size_b, u_tile_units_to_pixels, a_pos);</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">}</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">)&quot;;</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1BackgroundPatternProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a44bbaee6da50e0cb0b64e673e1f7f032">   32</a></span>&#160;<span class="stringliteral">    </span><span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* fragment = R<span class="stringliteral">&quot;(uniform vec2 u_pattern_tl_a;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_br_a;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_tl_b;</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_br_b;</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">uniform vec2 u_texsize;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral">uniform float u_mix;</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral">uniform float u_opacity;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="stringliteral">uniform sampler2D u_image;</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="stringliteral">varying vec2 v_pos_a;</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="stringliteral">varying vec2 v_pos_b;</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">void main() {</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">    vec2 imagecoord = mod(v_pos_a, 1.0);</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="stringliteral">    vec2 pos = mix(u_pattern_tl_a / u_texsize, u_pattern_br_a / u_texsize, imagecoord);</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="stringliteral">    vec4 color1 = texture2D(u_image, pos);</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="stringliteral">    vec2 imagecoord_b = mod(v_pos_b, 1.0);</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="stringliteral">    vec2 pos2 = mix(u_pattern_tl_b / u_texsize, u_pattern_br_b / u_texsize, imagecoord_b);</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral">    vec4 color2 = texture2D(u_image, pos2);</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="stringliteral">    gl_FragColor = mix(color1, color2, u_mix) * u_opacity;</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="stringliteral">    gl_FragColor = vec4(1.0);</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">#endif</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="stringliteral">}</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="stringliteral">)&quot;;</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="stringliteral">};</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="stringliteral"></span> </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="stringliteral">} </span><span class="comment">// namespace shaders</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} <span class="comment">// namespace mbgl</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="stringliteral">layout (location = 0) in vec2 a_pos;</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="stringliteral">out vec2 v_pos_a;</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="stringliteral">out vec2 v_pos_b;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">void main() {</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral">    gl_Position = u_matrix * vec4(a_pos, 0, 1);</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral">    v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_a * u_pattern_size_a, u_tile_units_to_pixels, a_pos);</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">    v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, u_scale_b * u_pattern_size_b, u_tile_units_to_pixels, a_pos);</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">}</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">)&quot;;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1BackgroundPatternProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a44bbaee6da50e0cb0b64e673e1f7f032">   31</a></span>&#160;<span class="stringliteral">    </span><span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* fragment = R<span class="stringliteral">&quot;(uniform vec2 u_pattern_tl_a;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_br_a;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_tl_b;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">uniform vec2 u_pattern_br_b;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral">uniform vec2 u_texsize;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">uniform float u_mix;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral">uniform float u_opacity;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="stringliteral">uniform sampler2D u_image;</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="stringliteral">in vec2 v_pos_a;</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="stringliteral">in vec2 v_pos_b;</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="stringliteral">void main() {</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="stringliteral">    vec2 imagecoord = mod(v_pos_a, 1.0);</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="stringliteral">    vec2 pos = mix(u_pattern_tl_a / u_texsize, u_pattern_br_a / u_texsize, imagecoord);</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="stringliteral">    vec4 color1 = texture(u_image, pos);</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="stringliteral">    vec2 imagecoord_b = mod(v_pos_b, 1.0);</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="stringliteral">    vec2 pos2 = mix(u_pattern_tl_b / u_texsize, u_pattern_br_b / u_texsize, imagecoord_b);</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="stringliteral">    vec4 color2 = texture(u_image, pos2);</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="stringliteral">    fragColor = mix(color1, color2, u_mix) * u_opacity;</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="stringliteral">    fragColor = vec4(1.0);</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="stringliteral">#endif</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="stringliteral">}</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="stringliteral">)&quot;;</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="stringliteral">};</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="stringliteral"></span> </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="stringliteral">} </span><span class="comment">// namespace shaders</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;} <span class="comment">// namespace mbgl</span></div>
 <div class="ttc" id="aclassmbgl_1_1gfx_1_1Backend_html_acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be"><div class="ttname"><a href="classmbgl_1_1gfx_1_1Backend.html#acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be">mbgl::gfx::Backend::Type::OpenGL</a></div><div class="ttdeci">@ OpenGL</div><div class="ttdoc">The OpenGL API backend.</div></div>
 <div class="ttc" id="anamespacembgl_1_1shaders_html_ab2df5937eba2f29629380430179ee7e1"><div class="ttname"><a href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1">mbgl::shaders::BuiltIn</a></div><div class="ttdeci">BuiltIn</div><div class="ttdoc">This enum is used with the ShaderSource template to select source code for the desired program and gr...</div><div class="ttdef"><b>Definition:</b> <a href="shader__source_8hpp_source.html#l00012">shader_source.hpp:12</a></div></div>
 <div class="ttc" id="anamespacembgl_1_1shaders_html_ab2df5937eba2f29629380430179ee7e1a460984d72be08c2efb4e0d0a4809ba50"><div class="ttname"><a href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1a460984d72be08c2efb4e0d0a4809ba50">mbgl::shaders::BuiltIn::BackgroundPatternProgram</a></div><div class="ttdeci">@ BackgroundPatternProgram</div></div>

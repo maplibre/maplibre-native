@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: mbgl::shaders::ShaderSource&lt; BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL &gt; Struct Reference</title>
+<title>MapLibre Native Core: mbgl::shaders::ShaderSource&lt; BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL &gt; Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -127,15 +127,15 @@ Static Public Attributes</h2></td></tr>
 <b>Initial value:</b><div class="fragment"><div class="line">= R<span class="stringliteral">&quot;(uniform sampler2D u_image;</span></div>
 <div class="line"><span class="stringliteral">uniform sampler2D u_color_ramp;</span></div>
 <div class="line"><span class="stringliteral">uniform float u_opacity;</span></div>
-<div class="line"><span class="stringliteral">varying vec2 v_pos;</span></div>
+<div class="line"><span class="stringliteral">in vec2 v_pos;</span></div>
 <div class="line"><span class="stringliteral"></span> </div>
 <div class="line"><span class="stringliteral">void main() {</span></div>
-<div class="line"><span class="stringliteral">    float t = texture2D(u_image, v_pos).r;</span></div>
-<div class="line"><span class="stringliteral">    vec4 color = texture2D(u_color_ramp, vec2(t, 0.5));</span></div>
-<div class="line"><span class="stringliteral">    gl_FragColor = color * u_opacity;</span></div>
+<div class="line"><span class="stringliteral">    float t = texture(u_image, v_pos).r;</span></div>
+<div class="line"><span class="stringliteral">    vec4 color = texture(u_color_ramp, vec2(t, 0.5));</span></div>
+<div class="line"><span class="stringliteral">    fragColor = color * u_opacity;</span></div>
 <div class="line"><span class="stringliteral"></span> </div>
 <div class="line"><span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
-<div class="line"><span class="stringliteral">    gl_FragColor = vec4(0.0);</span></div>
+<div class="line"><span class="stringliteral">    fragColor = vec4(0.0);</span></div>
 <div class="line"><span class="stringliteral">#endif</span></div>
 <div class="line"><span class="stringliteral">}</span></div>
 <div class="line"><span class="stringliteral">)&quot;</span></div>
@@ -165,8 +165,8 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= R<span class="stringliteral">&quot;(uniform mat4 u_matrix;</span></div>
 <div class="line"><span class="stringliteral">uniform vec2 u_world;</span></div>
-<div class="line"><span class="stringliteral">attribute vec2 a_pos;</span></div>
-<div class="line"><span class="stringliteral">varying vec2 v_pos;</span></div>
+<div class="line"><span class="stringliteral">layout (location = 0) in vec2 a_pos;</span></div>
+<div class="line"><span class="stringliteral">out vec2 v_pos;</span></div>
 <div class="line"><span class="stringliteral"></span> </div>
 <div class="line"><span class="stringliteral">void main() {</span></div>
 <div class="line"><span class="stringliteral">    gl_Position = u_matrix * vec4(a_pos * u_world, 0, 1);</span></div>
@@ -181,7 +181,7 @@ Static Public Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/shaders/gl/<a class="el" href="heatmap__texture_8hpp_source.html">heatmap_texture.hpp</a></li>
+<li>/home/runner/work/maplibre-native/maplibre-native/include/mbgl/shaders/gl/<a class="el" href="heatmap__texture_8hpp_source.html">heatmap_texture.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

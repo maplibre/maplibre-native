@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/shaders/gl/heatmap_texture.hpp Source File</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/shaders/gl/heatmap_texture.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('heatmap__texture_8hpp_source.html','')
 </div><!--header-->
 <div class="contents">
 <a href="heatmap__texture_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">// Generated code, do not modify this file!</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="shader__source_8hpp.html">mbgl/shaders/shader_source.hpp</a>&gt;</span></div>
@@ -100,8 +100,8 @@ $(document).ready(function(){initNavTree('heatmap__texture_8hpp_source.html','')
 <div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapTextureProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html">   10</a></span>&#160;<span class="keyword">template</span> &lt;&gt; <span class="keyword">struct </span><a class="code" href="structmbgl_1_1shaders_1_1ShaderSource.html">ShaderSource</a>&lt;<a class="code" href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1">BuiltIn</a>::<a class="code" href="namespacembgl_1_1shaders.html#ab2df5937eba2f29629380430179ee7e1a93444c7f3fad895c9600e308cc331cf6">HeatmapTextureProgram</a>, <a class="code" href="classmbgl_1_1gfx_1_1Backend.html#acf257eeecee7a194d105f63275a1e04ba760716b590ee7c0adc25f434f577d8be">gfx::Backend::Type::OpenGL</a>&gt; {</div>
 <div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapTextureProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#ab0a25bfe7d7d80b21d4b6fa0932a8a46">   11</a></span>&#160;    <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* vertex = R<span class="stringliteral">&quot;(uniform mat4 u_matrix;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="stringliteral">uniform vec2 u_world;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="stringliteral">attribute vec2 a_pos;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="stringliteral">varying vec2 v_pos;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="stringliteral">layout (location = 0) in vec2 a_pos;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="stringliteral">out vec2 v_pos;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="stringliteral">void main() {</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="stringliteral">    gl_Position = u_matrix * vec4(a_pos * u_world, 0, 1);</span></div>
@@ -113,15 +113,15 @@ $(document).ready(function(){initNavTree('heatmap__texture_8hpp_source.html','')
 <div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="structmbgl_1_1shaders_1_1ShaderSource_3_01BuiltIn_1_1HeatmapTextureProgram_00_01gfx_1_1Backend_1_1Type_1_1OpenGL_01_4.html#a22f1f8422f3ae2edf743b155a156210e">   23</a></span>&#160;<span class="stringliteral">    </span><span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">char</span>* fragment = R<span class="stringliteral">&quot;(uniform sampler2D u_image;</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="stringliteral">uniform sampler2D u_color_ramp;</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="stringliteral">uniform float u_opacity;</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">varying vec2 v_pos;</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="stringliteral">in vec2 v_pos;</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="stringliteral">void main() {</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">    float t = texture2D(u_image, v_pos).r;</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">    vec4 color = texture2D(u_color_ramp, vec2(t, 0.5));</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">    gl_FragColor = color * u_opacity;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="stringliteral">    float t = texture(u_image, v_pos).r;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="stringliteral">    vec4 color = texture(u_color_ramp, vec2(t, 0.5));</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="stringliteral">    fragColor = color * u_opacity;</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="stringliteral">#ifdef OVERDRAW_INSPECTOR</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">    gl_FragColor = vec4(0.0);</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="stringliteral">    fragColor = vec4(0.0);</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="stringliteral">#endif</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="stringliteral">}</span></div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="stringliteral">)&quot;;</span></div>

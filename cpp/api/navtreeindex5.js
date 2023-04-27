@@ -1,5 +1,9 @@
 var NAVTREEINDEX5 =
 {
+"classmbgl_1_1style_1_1HillshadeLayer.html#acd7b407079ad8139d0f55fe2fdaa7da2":[2,0,0,5,15,17],
+"classmbgl_1_1style_1_1HillshadeLayer.html#ae874e4dc78d41852ddfb031d08b577a0":[2,0,0,5,15,19],
+"classmbgl_1_1style_1_1HillshadeLayer.html#aea939597263c205ce2f9ddf525d8e715":[2,0,0,5,15,21],
+"classmbgl_1_1style_1_1HillshadeLayer.html#af272bb5d89bfb7e73d94f637b512532b":[2,0,0,5,15,28],
 "classmbgl_1_1style_1_1HillshadeLayer.html#af3a5981b3c660baa4e2bb7a0a7799b74":[2,0,0,5,15,27],
 "classmbgl_1_1style_1_1HillshadeLayer.html#afb9d732c35add590486b481f0483a3b3":[2,0,0,5,15,16],
 "classmbgl_1_1style_1_1HillshadeLayer.html#afc46739101b24dc4dc7ed42771d908f2":[2,0,0,5,15,8],
@@ -245,9 +249,5 @@ var NAVTREEINDEX5 =
 "classmbgl_1_1style_1_1PropertyValue.html#adbaeef5460fd3599393a83c173f69ed5":[2,0,0,5,24,7],
 "classmbgl_1_1style_1_1PropertyValue.html#af8c47455cfecce2a621f02ebbdb00065":[2,0,0,5,24,4],
 "classmbgl_1_1style_1_1PropertyValue.html#af9d143e6b3f9f25a7a1449839cee3322":[2,0,0,5,24,5],
-"classmbgl_1_1style_1_1RasterDEMSource.html":[2,0,0,5,31],
-"classmbgl_1_1style_1_1RasterDEMSource.html#a072a24d89ac72176cdb9af174b87912e":[2,0,0,5,31,1],
-"classmbgl_1_1style_1_1RasterDEMSource.html#af3f2cc1a61e516a6211bca39b53d856a":[2,0,0,5,31,0],
-"classmbgl_1_1style_1_1RasterLayer.html":[2,0,0,5,18],
-"classmbgl_1_1style_1_1RasterLayer.html#a047694de7c3e2b1fb649c049e73582bc":[2,0,0,5,18,7]
+"classmbgl_1_1style_1_1RasterDEMSource.html":[2,0,0,5,31]
 };

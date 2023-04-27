@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/util/pass_types.hpp File Reference</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/math/angles.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -65,7 +65,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('pass__types_8hpp.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('angles_8hpp.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -85,33 +85,37 @@ $(document).ready(function(){initNavTree('pass__types_8hpp.html',''); initResiza
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">pass_types.hpp File Reference</div>  </div>
+<div class="title">angles.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;memory&gt;</code><br />
+<div class="textblock"><code>#include &lt;cmath&gt;</code><br />
 </div>
-<p><a href="pass__types_8hpp_source.html">Go to the source code of this file.</a></p>
+<p><a href="angles_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Pass.html">mbgl::Pass&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using this type as a return type enforces the client to retain the returned object.  <a href="classmbgl_1_1Pass.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacembgl"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl.html">mbgl</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacembgl_1_1util"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1util.html">mbgl::util</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:ae41741d32534d894827c96c194e7f16f"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ae41741d32534d894827c96c194e7f16f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacembgl.html#ae41741d32534d894827c96c194e7f16f">mbgl::PassRefPtr</a> = Pass&lt; std::shared_ptr&lt; T &gt; &gt;</td></tr>
-<tr class="separator:ae41741d32534d894827c96c194e7f16f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a226c0723012fd6fcabef364d53cd251a"><td class="memItemLeft" align="right" valign="top">constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1util.html#a226c0723012fd6fcabef364d53cd251a">mbgl::util::deg2rad</a> (double deg) noexcept</td></tr>
+<tr class="memdesc:a226c0723012fd6fcabef364d53cd251a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts degrees to radians.  <a href="namespacembgl_1_1util.html#a226c0723012fd6fcabef364d53cd251a">More...</a><br /></td></tr>
+<tr class="separator:a226c0723012fd6fcabef364d53cd251a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3967915491492ec9f42a32523b896ea"><td class="memItemLeft" align="right" valign="top">constexpr float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1util.html#ad3967915491492ec9f42a32523b896ea">mbgl::util::deg2radf</a> (float deg) noexcept</td></tr>
+<tr class="memdesc:ad3967915491492ec9f42a32523b896ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts degrees to radians.  <a href="namespacembgl_1_1util.html#ad3967915491492ec9f42a32523b896ea">More...</a><br /></td></tr>
+<tr class="separator:ad3967915491492ec9f42a32523b896ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a640322929ef3f0de93da0338a8a30719"><td class="memItemLeft" align="right" valign="top">constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1util.html#a640322929ef3f0de93da0338a8a30719">mbgl::util::rad2deg</a> (double rad) noexcept</td></tr>
+<tr class="memdesc:a640322929ef3f0de93da0338a8a30719"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts radians to degrees.  <a href="namespacembgl_1_1util.html#a640322929ef3f0de93da0338a8a30719">More...</a><br /></td></tr>
+<tr class="separator:a640322929ef3f0de93da0338a8a30719"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dbaeea628c5e462b84a90cc030c5a52"><td class="memItemLeft" align="right" valign="top">constexpr float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacembgl_1_1util.html#a8dbaeea628c5e462b84a90cc030c5a52">mbgl::util::rad2degf</a> (float rad) noexcept</td></tr>
+<tr class="memdesc:a8dbaeea628c5e462b84a90cc030c5a52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts radians to degrees.  <a href="namespacembgl_1_1util.html#a8dbaeea628c5e462b84a90cc030c5a52">More...</a><br /></td></tr>
+<tr class="separator:a8dbaeea628c5e462b84a90cc030c5a52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -119,7 +123,7 @@ Typedefs</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_006efcc3de1e770e39741f045a1afebc.html">mbgl</a></li><li class="navelem"><a class="el" href="dir_07e4eb750e5bf7de6cf6964589d792b6.html">util</a></li><li class="navelem"><a class="el" href="pass__types_8hpp.html">pass_types.hpp</a></li>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_006efcc3de1e770e39741f045a1afebc.html">mbgl</a></li><li class="navelem"><a class="el" href="dir_cd31db1f35e698261be024dc3637c631.html">math</a></li><li class="navelem"><a class="el" href="angles_8hpp.html">angles.hpp</a></li>
 		<li class="footer"><a href="https://maplibre.org/">MapLibre website</a> | <a href="https://github.com/maplibre/maplibre-gl-native">GitHub repository</a></li>
   </ul>
 </div>

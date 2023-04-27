@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: mbgl::gfx::Shader Class Reference</title>
+<title>MapLibre Native Core: mbgl::gfx::Shader Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -101,9 +101,9 @@ $(document).ready(function(){initNavTree('classmbgl_1_1gfx_1_1Shader.html',''); 
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab056035239214049f990e3c1f68ea815"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1Shader.html#ab056035239214049f990e3c1f68ea815">~Shader</a> ()=default</td></tr>
 <tr class="separator:ab056035239214049f990e3c1f68ea815"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a69742999562f2894e35eb0a9981d4b55"><td class="memItemLeft" align="right" valign="top">virtual const std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1Shader.html#a69742999562f2894e35eb0a9981d4b55">name</a> () const noexcept=0</td></tr>
-<tr class="memdesc:a69742999562f2894e35eb0a9981d4b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of this shader.  <a href="classmbgl_1_1gfx_1_1Shader.html#a69742999562f2894e35eb0a9981d4b55">More...</a><br /></td></tr>
-<tr class="separator:a69742999562f2894e35eb0a9981d4b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a026928a2cf485e785ea7882df82cce38"><td class="memItemLeft" align="right" valign="top">virtual const std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1Shader.html#a026928a2cf485e785ea7882df82cce38">typeName</a> () const noexcept=0</td></tr>
+<tr class="memdesc:a026928a2cf485e785ea7882df82cce38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the type name of this shader.  <a href="classmbgl_1_1gfx_1_1Shader.html#a026928a2cf485e785ea7882df82cce38">More...</a><br /></td></tr>
+<tr class="separator:a026928a2cf485e785ea7882df82cce38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36f625ac129440b6050fb8bdd86b8b30"><td class="memTemplParams" colspan="2">template&lt;typename T , typename std::enable_if_t&lt; is_shader_v&lt; T &gt;, bool &gt; *  = nullptr&gt; </td></tr>
 <tr class="memitem:a36f625ac129440b6050fb8bdd86b8b30"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmbgl_1_1gfx_1_1Shader.html#a36f625ac129440b6050fb8bdd86b8b30">to</a> () noexcept</td></tr>
 <tr class="memdesc:a36f625ac129440b6050fb8bdd86b8b30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Downcast to a type.  <a href="classmbgl_1_1gfx_1_1Shader.html#a36f625ac129440b6050fb8bdd86b8b30">More...</a><br /></td></tr>
@@ -140,34 +140,6 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a69742999562f2894e35eb0a9981d4b55"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a69742999562f2894e35eb0a9981d4b55">&#9670;&nbsp;</a></span>name()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual const std::string_view mbgl::gfx::Shader::name </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the name of this shader. </p>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmbgl_1_1gfx_1_1Shader.html" title="A shader is used as the base class for all programs across any supported backend API....">Shader</a> name </dd></dl>
-
-</div>
-</div>
 <a id="a36f625ac129440b6050fb8bdd86b8b30"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a36f625ac129440b6050fb8bdd86b8b30">&#9670;&nbsp;</a></span>to()</h2>
 
@@ -206,8 +178,36 @@ template&lt;typename T , typename std::enable_if_t&lt; is_shader_v&lt; T &gt;, b
 
 </div>
 </div>
+<a id="a026928a2cf485e785ea7882df82cce38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a026928a2cf485e785ea7882df82cce38">&#9670;&nbsp;</a></span>typeName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const std::string_view mbgl::gfx::Shader::typeName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the type name of this shader. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmbgl_1_1gfx_1_1Shader.html" title="A shader is used as the base class for all programs across any supported backend API....">Shader</a> type name </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/gfx/<a class="el" href="shader_8hpp_source.html">shader.hpp</a></li>
+<li>/home/runner/work/maplibre-native/maplibre-native/include/mbgl/gfx/<a class="el" href="shader_8hpp_source.html">shader.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

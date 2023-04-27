@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: mbgl::Scheduler Class Reference</title>
+<title>MapLibre Native Core: mbgl::Scheduler Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -128,10 +128,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a0d8e8ba930577fae1343de10167280fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad42d7aaef9f6034e3165b6395456ff80"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">SetCurrent</a> (<a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> *)</td></tr>
 <tr class="separator:ad42d7aaef9f6034e3165b6395456ff80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af942fce51457eb10379a0af1456e01bf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacembgl.html#ae41741d32534d894827c96c194e7f16f">PassRefPtr</a>&lt; <a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Scheduler.html#af942fce51457eb10379a0af1456e01bf">GetBackground</a> ()</td></tr>
-<tr class="separator:af942fce51457eb10379a0af1456e01bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9f6346e9221e8a3cf849849e79d1b732"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacembgl.html#ae41741d32534d894827c96c194e7f16f">PassRefPtr</a>&lt; <a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Scheduler.html#a9f6346e9221e8a3cf849849e79d1b732">GetSequenced</a> ()</td></tr>
-<tr class="separator:a9f6346e9221e8a3cf849849e79d1b732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7d8dd48a6cc51b30fa6b03ba06f9cef"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; <a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Scheduler.html#ae7d8dd48a6cc51b30fa6b03ba06f9cef">GetBackground</a> ()</td></tr>
+<tr class="separator:ae7d8dd48a6cc51b30fa6b03ba06f9cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfdcb5eb439db947beb9a6991f351f98"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; <a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmbgl_1_1Scheduler.html#adfdcb5eb439db947beb9a6991f351f98">GetSequenced</a> ()</td></tr>
+<tr class="separator:adfdcb5eb439db947beb9a6991f351f98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -149,7 +149,7 @@ Protected Member Functions</h2></td></tr>
 <p>Subject to these constraints, processing can happen on whatever thread in the pool is available.</p>
 <p><code><a class="el" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd" title="Set/Get the current Scheduler for this thread.">Scheduler::GetCurrent()</a></code> is typically used to create a mailbox and <code><a class="el" href="classmbgl_1_1ActorRef.html">ActorRef</a></code> for an object that lives on the main thread and is not itself wrapped an <code><a class="el" href="classmbgl_1_1Actor.html">Actor</a></code>. The underlying implementation of this <a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a> should usually be a <code>RunLoop</code> auto mailbox = std::make_shared&lt;Mailbox&gt;(*Scheduler::Get()); Actor&lt;Worker&gt; worker(threadPool, ActorRef&lt;Foo&gt;(*this, mailbox)); </p>
 
-<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00036">36</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00035">35</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4bcb597aee74f8fa0cedc2777d559bcb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4bcb597aee74f8fa0cedc2777d559bcb">&#9670;&nbsp;</a></span>~Scheduler()</h2>
@@ -198,8 +198,8 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="af942fce51457eb10379a0af1456e01bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af942fce51457eb10379a0af1456e01bf">&#9670;&nbsp;</a></span>GetBackground()</h2>
+<a id="ae7d8dd48a6cc51b30fa6b03ba06f9cef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7d8dd48a6cc51b30fa6b03ba06f9cef">&#9670;&nbsp;</a></span>GetBackground()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -208,7 +208,7 @@ Protected Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="namespacembgl.html#ae41741d32534d894827c96c194e7f16f">PassRefPtr</a>&lt;<a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a>&gt; mbgl::Scheduler::GetBackground </td>
+          <td class="memname">static std::shared_ptr&lt;<a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a>&gt; mbgl::Scheduler::GetBackground </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -251,8 +251,8 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a9f6346e9221e8a3cf849849e79d1b732"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f6346e9221e8a3cf849849e79d1b732">&#9670;&nbsp;</a></span>GetSequenced()</h2>
+<a id="adfdcb5eb439db947beb9a6991f351f98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfdcb5eb439db947beb9a6991f351f98">&#9670;&nbsp;</a></span>GetSequenced()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -261,7 +261,7 @@ Protected Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="namespacembgl.html#ae41741d32534d894827c96c194e7f16f">PassRefPtr</a>&lt;<a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a>&gt; mbgl::Scheduler::GetSequenced </td>
+          <td class="memname">static std::shared_ptr&lt;<a class="el" href="classmbgl_1_1Scheduler.html">Scheduler</a>&gt; mbgl::Scheduler::GetSequenced </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -375,7 +375,7 @@ template&lt;typename TaskFn , typename ReplyFn &gt; </div>
 <p>Enqueues the given |task| for execution into this scheduler's task queue and then enqueues the |reply| with the captured task result to the current task queue.</p>
 <p>The |TaskFn| return type must be compatible with the |ReplyFn| argument type. Note: the task result is copied and passed by value. </p>
 
-<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00062">62</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00061">61</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
 
 </div>
 </div>
@@ -421,7 +421,7 @@ template&lt;typename TaskFn , typename ReplyFn &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00091">91</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="scheduler_8hpp_source.html#l00090">90</a> of file <a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a>.</p>
 
 </div>
 </div>
@@ -452,7 +452,7 @@ template&lt;typename TaskFn , typename ReplyFn &gt; </div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/actor/<a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a></li>
+<li>/home/runner/work/maplibre-native/maplibre-native/include/mbgl/actor/<a class="el" href="scheduler_8hpp_source.html">scheduler.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

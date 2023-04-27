@@ -1,5 +1,9 @@
 var NAVTREEINDEX6 =
 {
+"classmbgl_1_1style_1_1RasterDEMSource.html#a072a24d89ac72176cdb9af174b87912e":[2,0,0,5,31,1],
+"classmbgl_1_1style_1_1RasterDEMSource.html#af3f2cc1a61e516a6211bca39b53d856a":[2,0,0,5,31,0],
+"classmbgl_1_1style_1_1RasterLayer.html":[2,0,0,5,18],
+"classmbgl_1_1style_1_1RasterLayer.html#a047694de7c3e2b1fb649c049e73582bc":[2,0,0,5,18,7],
 "classmbgl_1_1style_1_1RasterLayer.html#a06d052f5989bb7e3988434f7fece5bbc":[2,0,0,5,18,12],
 "classmbgl_1_1style_1_1RasterLayer.html#a1606ce94b2dcf911731bb46fd3421523":[2,0,0,5,18,41],
 "classmbgl_1_1style_1_1RasterLayer.html#a2cad47e1d84ff4bf03ba6310c2914182":[2,0,0,5,18,20],
@@ -245,9 +249,5 @@ var NAVTREEINDEX6 =
 "classmbgl_1_1style_1_1SymbolLayer.html#af9cf655150fff5b9fa4c98553bed46b3":[2,0,0,5,19,110],
 "classmbgl_1_1style_1_1SymbolLayer.html#afba1893113261935bb98ec9d361e41ae":[2,0,0,5,19,119],
 "classmbgl_1_1style_1_1SymbolLayer.html#afc006c7d265efe5b9e2274c241dbfa47":[2,0,0,5,19,72],
-"classmbgl_1_1style_1_1SymbolLayer.html#afc1857159398b45d76191939b668486f":[2,0,0,5,19,117],
-"classmbgl_1_1style_1_1SymbolLayer.html#afc2f6bb7476bc2dead08c9dceba3314c":[2,0,0,5,19,89],
-"classmbgl_1_1style_1_1SymbolLayer.html#afcd9f02ccd6a3ac5878413a4d9839c37":[2,0,0,5,19,68],
-"classmbgl_1_1style_1_1SymbolLayer.html#afd70ac6a08c6f61927a2c0ac13532f66":[2,0,0,5,19,70],
-"classmbgl_1_1style_1_1TransitionOptions.html":[2,0,0,5,36]
+"classmbgl_1_1style_1_1SymbolLayer.html#afc1857159398b45d76191939b668486f":[2,0,0,5,19,117]
 };

@@ -200,7 +200,6 @@ var hierarchy =
     [ "mbgl::OverscaledTileID", "classmbgl_1_1OverscaledTileID.html", null ],
     [ "mbgl::style::expression::ParsingContext", "classmbgl_1_1style_1_1expression_1_1ParsingContext.html", null ],
     [ "mbgl::style::expression::ParsingError", "structmbgl_1_1style_1_1expression_1_1ParsingError.html", null ],
-    [ "mbgl::Pass< T >", "classmbgl_1_1Pass.html", null ],
     [ "mbgl::PlacedSymbolData", "structmbgl_1_1PlacedSymbolData.html", null ],
     [ "mbgl::style::Position", "classmbgl_1_1style_1_1Position.html", null ],
     [ "mbgl::ProjectedMeters", "classmbgl_1_1ProjectedMeters.html", null ],

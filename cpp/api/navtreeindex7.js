@@ -1,5 +1,9 @@
 var NAVTREEINDEX7 =
 {
+"classmbgl_1_1style_1_1SymbolLayer.html#afc2f6bb7476bc2dead08c9dceba3314c":[2,0,0,5,19,89],
+"classmbgl_1_1style_1_1SymbolLayer.html#afcd9f02ccd6a3ac5878413a4d9839c37":[2,0,0,5,19,68],
+"classmbgl_1_1style_1_1SymbolLayer.html#afd70ac6a08c6f61927a2c0ac13532f66":[2,0,0,5,19,70],
+"classmbgl_1_1style_1_1TransitionOptions.html":[2,0,0,5,36],
 "classmbgl_1_1style_1_1TransitionOptions.html#a00250900f172977c80035d795476f1de":[2,0,0,5,36,3],
 "classmbgl_1_1style_1_1TransitionOptions.html#a31c88cf9b4621b694008a25b01ce46d8":[2,0,0,5,36,1],
 "classmbgl_1_1style_1_1TransitionOptions.html#a970b295f5ccb7ec7c73e68f7061dac1d":[2,0,0,5,36,6],
@@ -245,9 +249,5 @@ var NAVTREEINDEX7 =
 "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#aa1fd382aa28eaad7d394228b52e82ffd":[2,0,0,5,1,27,6],
 "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#aabbcc01a590e887d1a6fd3d6f1ae99a5":[2,0,0,5,1,27,0],
 "classmbgl_1_1style_1_1expression_1_1ImageExpression.html#abb952873b3a6d82fc0e865aa74f62b13":[2,0,0,5,1,27,2],
-"classmbgl_1_1style_1_1expression_1_1ImageExpression.html#ac1a6b2ec45464e70ffa8a73bff4c3d1e":[2,0,0,5,1,27,1],
-"classmbgl_1_1style_1_1expression_1_1ImageExpression.html#af1516f82b851aa837bbbc283bbac2882":[2,0,0,5,1,27,5],
-"classmbgl_1_1style_1_1expression_1_1In.html":[2,0,0,5,1,28],
-"classmbgl_1_1style_1_1expression_1_1In.html#a26ae8fd66238ebf71926307b7c1c285c":[2,0,0,5,1,28,4],
-"classmbgl_1_1style_1_1expression_1_1In.html#a6a0d03c289719d10325de584b0ae35e6":[2,0,0,5,1,28,3]
+"classmbgl_1_1style_1_1expression_1_1ImageExpression.html#ac1a6b2ec45464e70ffa8a73bff4c3d1e":[2,0,0,5,1,27,1]
 };

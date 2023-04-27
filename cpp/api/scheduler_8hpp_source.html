@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MapLibre GL Native Core: /home/runner/work/maplibre-gl-native/maplibre-gl-native/include/mbgl/actor/scheduler.hpp Source File</title>
+<title>MapLibre Native Core: /home/runner/work/maplibre-native/maplibre-native/include/mbgl/actor/scheduler.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,7 +28,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">MapLibre GL Native Core
+   <div id="projectname">MapLibre Native Core
    </div>
   </td>
  </tr>
@@ -90,70 +90,67 @@ $(document).ready(function(){initNavTree('scheduler_8hpp_source.html',''); initR
 <div class="contents">
 <a href="scheduler_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="pass__types_8hpp.html">mbgl/util/pass_types.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160; </div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">class </span>Mailbox;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html">   36</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a> {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a4bcb597aee74f8fa0cedc2777d559bcb">   38</a></span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classmbgl_1_1Scheduler.html#a4bcb597aee74f8fa0cedc2777d559bcb">~Scheduler</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">   41</a></span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">schedule</a>(std::function&lt;<span class="keywordtype">void</span>()&gt;) = 0;</div>
-<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">   43</a></span>&#160;    <span class="keyword">virtual</span> mapbox::base::WeakPtr&lt;Scheduler&gt; <a class="code" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">makeWeakPtr</a>() = 0;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a4347449d236e21abc079b355f6e24213">   53</a></span>&#160;    std::function&lt;void()&gt; <a class="code" href="classmbgl_1_1Scheduler.html#a4347449d236e21abc079b355f6e24213">bindOnce</a>(std::function&lt;<span class="keywordtype">void</span>()&gt;);</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TaskFn, <span class="keyword">typename</span> ReplyFn&gt;</div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">   62</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">scheduleAndReplyValue</a>(<span class="keyword">const</span> TaskFn&amp; task, <span class="keyword">const</span> ReplyFn&amp; reply) {</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        assert(<a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>());</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <a class="code" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">scheduleAndReplyValue</a>(task, reply, <a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>()-&gt;<a class="code" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">makeWeakPtr</a>());</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    }</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">   68</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>* <a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>();</div>
-<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">   69</a></span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">SetCurrent</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>*);</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#af942fce51457eb10379a0af1456e01bf">   77</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="classmbgl_1_1Pass.html">PassRefPtr&lt;Scheduler&gt;</a> <a class="code" href="classmbgl_1_1Scheduler.html#af942fce51457eb10379a0af1456e01bf">GetBackground</a>();</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a9f6346e9221e8a3cf849849e79d1b732">   87</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="classmbgl_1_1Pass.html">PassRefPtr&lt;Scheduler&gt;</a> <a class="code" href="classmbgl_1_1Scheduler.html#a9f6346e9221e8a3cf849849e79d1b732">GetSequenced</a>();</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TaskFn, <span class="keyword">typename</span> ReplyFn&gt;</div>
-<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">   91</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">scheduleAndReplyValue</a>(<span class="keyword">const</span> TaskFn&amp; task,</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                               <span class="keyword">const</span> ReplyFn&amp; reply,</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                               mapbox::base::WeakPtr&lt;Scheduler&gt; replyScheduler) {</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keyword">auto</span> scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            <span class="keyword">auto</span> lock = replyScheduler.lock();</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">if</span> (!replyScheduler) <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            <span class="keyword">auto</span> scheduledReply = [reply, result = task()] { reply(result); };</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            replyScheduler-&gt;schedule(std::move(scheduledReply));</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        };</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <a class="code" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">schedule</a>(std::move(scheduled));</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    }</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;};</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;} </div>
-<div class="ttc" id="aclassmbgl_1_1Pass_html"><div class="ttname"><a href="classmbgl_1_1Pass.html">mbgl::Pass</a></div><div class="ttdoc">Using this type as a return type enforces the client to retain the returned object.</div><div class="ttdef"><b>Definition:</b> <a href="pass__types_8hpp_source.html#l00009">pass_types.hpp:9</a></div></div>
-<div class="ttc" id="aclassmbgl_1_1Scheduler_html"><div class="ttname"><a href="classmbgl_1_1Scheduler.html">mbgl::Scheduler</a></div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00036">scheduler.hpp:36</a></div></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;mapbox/std/weak.hpp&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacembgl.html">mbgl</a> {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">class </span>Mailbox;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html">   35</a></span>&#160;<span class="keyword">class </span><a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a> {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a4bcb597aee74f8fa0cedc2777d559bcb">   37</a></span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classmbgl_1_1Scheduler.html#a4bcb597aee74f8fa0cedc2777d559bcb">~Scheduler</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">   40</a></span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">schedule</a>(std::function&lt;<span class="keywordtype">void</span>()&gt;) = 0;</div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">   42</a></span>&#160;    <span class="keyword">virtual</span> mapbox::base::WeakPtr&lt;Scheduler&gt; <a class="code" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">makeWeakPtr</a>() = 0;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a4347449d236e21abc079b355f6e24213">   52</a></span>&#160;    std::function&lt;void()&gt; <a class="code" href="classmbgl_1_1Scheduler.html#a4347449d236e21abc079b355f6e24213">bindOnce</a>(std::function&lt;<span class="keywordtype">void</span>()&gt;);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TaskFn, <span class="keyword">typename</span> ReplyFn&gt;</div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">   61</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">scheduleAndReplyValue</a>(<span class="keyword">const</span> TaskFn&amp; task, <span class="keyword">const</span> ReplyFn&amp; reply) {</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        assert(<a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>());</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <a class="code" href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">scheduleAndReplyValue</a>(task, reply, <a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>()-&gt;<a class="code" href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">makeWeakPtr</a>());</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">   67</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>* <a class="code" href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">GetCurrent</a>();</div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">   68</a></span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">SetCurrent</a>(<a class="code" href="classmbgl_1_1Scheduler.html">Scheduler</a>*);</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#ae7d8dd48a6cc51b30fa6b03ba06f9cef">   76</a></span>&#160;    [[nodiscard]] <span class="keyword">static</span> std::shared_ptr&lt;Scheduler&gt; <a class="code" href="classmbgl_1_1Scheduler.html#ae7d8dd48a6cc51b30fa6b03ba06f9cef">GetBackground</a>();</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#adfdcb5eb439db947beb9a6991f351f98">   86</a></span>&#160;    [[nodiscard]] <span class="keyword">static</span> std::shared_ptr&lt;Scheduler&gt; <a class="code" href="classmbgl_1_1Scheduler.html#adfdcb5eb439db947beb9a6991f351f98">GetSequenced</a>();</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TaskFn, <span class="keyword">typename</span> ReplyFn&gt;</div>
+<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">   90</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">scheduleAndReplyValue</a>(<span class="keyword">const</span> TaskFn&amp; task,</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                               <span class="keyword">const</span> ReplyFn&amp; reply,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                               mapbox::base::WeakPtr&lt;Scheduler&gt; replyScheduler) {</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keyword">auto</span> scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;            <span class="keyword">auto</span> lock = replyScheduler.lock();</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            <span class="keywordflow">if</span> (!replyScheduler) <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keyword">auto</span> scheduledReply = [reply, result = task()] { reply(result); };</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            replyScheduler-&gt;schedule(std::move(scheduledReply));</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        };</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        <a class="code" href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">schedule</a>(std::move(scheduled));</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    }</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;};</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;} </div>
+<div class="ttc" id="aclassmbgl_1_1Scheduler_html"><div class="ttname"><a href="classmbgl_1_1Scheduler.html">mbgl::Scheduler</a></div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00035">scheduler.hpp:35</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_a0b8e4cbd7f02d42fd4dd91dc10867a98"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a0b8e4cbd7f02d42fd4dd91dc10867a98">mbgl::Scheduler::makeWeakPtr</a></div><div class="ttdeci">virtual mapbox::base::WeakPtr&lt; Scheduler &gt; makeWeakPtr()=0</div><div class="ttdoc">Makes a weak pointer to this Scheduler.</div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_a0d8e8ba930577fae1343de10167280fd"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a0d8e8ba930577fae1343de10167280fd">mbgl::Scheduler::GetCurrent</a></div><div class="ttdeci">static Scheduler * GetCurrent()</div><div class="ttdoc">Set/Get the current Scheduler for this thread.</div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_a4347449d236e21abc079b355f6e24213"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a4347449d236e21abc079b355f6e24213">mbgl::Scheduler::bindOnce</a></div><div class="ttdeci">std::function&lt; void()&gt; bindOnce(std::function&lt; void()&gt;)</div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_a4bcb597aee74f8fa0cedc2777d559bcb"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a4bcb597aee74f8fa0cedc2777d559bcb">mbgl::Scheduler::~Scheduler</a></div><div class="ttdeci">virtual ~Scheduler()=default</div></div>
-<div class="ttc" id="aclassmbgl_1_1Scheduler_html_a5f5136d5e95d71c4f8249d330462cb95"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">mbgl::Scheduler::scheduleAndReplyValue</a></div><div class="ttdeci">void scheduleAndReplyValue(const TaskFn &amp;task, const ReplyFn &amp;reply)</div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00062">scheduler.hpp:62</a></div></div>
-<div class="ttc" id="aclassmbgl_1_1Scheduler_html_a9f6346e9221e8a3cf849849e79d1b732"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a9f6346e9221e8a3cf849849e79d1b732">mbgl::Scheduler::GetSequenced</a></div><div class="ttdeci">static PassRefPtr&lt; Scheduler &gt; GetSequenced()</div></div>
+<div class="ttc" id="aclassmbgl_1_1Scheduler_html_a5f5136d5e95d71c4f8249d330462cb95"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#a5f5136d5e95d71c4f8249d330462cb95">mbgl::Scheduler::scheduleAndReplyValue</a></div><div class="ttdeci">void scheduleAndReplyValue(const TaskFn &amp;task, const ReplyFn &amp;reply)</div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00061">scheduler.hpp:61</a></div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_ad380fbd2ea8a58d180e88158004340ee"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#ad380fbd2ea8a58d180e88158004340ee">mbgl::Scheduler::schedule</a></div><div class="ttdeci">virtual void schedule(std::function&lt; void()&gt;)=0</div><div class="ttdoc">Enqueues a function for execution.</div></div>
 <div class="ttc" id="aclassmbgl_1_1Scheduler_html_ad42d7aaef9f6034e3165b6395456ff80"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#ad42d7aaef9f6034e3165b6395456ff80">mbgl::Scheduler::SetCurrent</a></div><div class="ttdeci">static void SetCurrent(Scheduler *)</div></div>
-<div class="ttc" id="aclassmbgl_1_1Scheduler_html_af942fce51457eb10379a0af1456e01bf"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#af942fce51457eb10379a0af1456e01bf">mbgl::Scheduler::GetBackground</a></div><div class="ttdeci">static PassRefPtr&lt; Scheduler &gt; GetBackground()</div></div>
-<div class="ttc" id="aclassmbgl_1_1Scheduler_html_aff77e0a3fde2dfd2084f2908dc674fbc"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">mbgl::Scheduler::scheduleAndReplyValue</a></div><div class="ttdeci">void scheduleAndReplyValue(const TaskFn &amp;task, const ReplyFn &amp;reply, mapbox::base::WeakPtr&lt; Scheduler &gt; replyScheduler)</div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00091">scheduler.hpp:91</a></div></div>
+<div class="ttc" id="aclassmbgl_1_1Scheduler_html_adfdcb5eb439db947beb9a6991f351f98"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#adfdcb5eb439db947beb9a6991f351f98">mbgl::Scheduler::GetSequenced</a></div><div class="ttdeci">static std::shared_ptr&lt; Scheduler &gt; GetSequenced()</div></div>
+<div class="ttc" id="aclassmbgl_1_1Scheduler_html_ae7d8dd48a6cc51b30fa6b03ba06f9cef"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#ae7d8dd48a6cc51b30fa6b03ba06f9cef">mbgl::Scheduler::GetBackground</a></div><div class="ttdeci">static std::shared_ptr&lt; Scheduler &gt; GetBackground()</div></div>
+<div class="ttc" id="aclassmbgl_1_1Scheduler_html_aff77e0a3fde2dfd2084f2908dc674fbc"><div class="ttname"><a href="classmbgl_1_1Scheduler.html#aff77e0a3fde2dfd2084f2908dc674fbc">mbgl::Scheduler::scheduleAndReplyValue</a></div><div class="ttdeci">void scheduleAndReplyValue(const TaskFn &amp;task, const ReplyFn &amp;reply, mapbox::base::WeakPtr&lt; Scheduler &gt; replyScheduler)</div><div class="ttdef"><b>Definition:</b> <a href="scheduler_8hpp_source.html#l00090">scheduler.hpp:90</a></div></div>
 <div class="ttc" id="anamespacembgl_html"><div class="ttname"><a href="namespacembgl.html">mbgl</a></div><div class="ttdef"><b>Definition:</b> <a href="actor_8hpp_source.html#l00015">actor.hpp:15</a></div></div>
-<div class="ttc" id="apass__types_8hpp_html"><div class="ttname"><a href="pass__types_8hpp.html">pass_types.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->
