@@ -116,7 +116,7 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(platform::GLenum type
         std::fill(rawData.begin(), rawData.end(), 0);
 
         if (!rawData.empty()) {
-            std::uint8_t* outPtr = &rawData[0];
+            std::uint8_t* outPtr = rawData.data();
             for (std::size_t i = 0; i < count; ++i) {
                 if (!get(items[i], type, outPtr)) {
                     // throw?
@@ -143,7 +143,7 @@ namespace {
     template <> void applyUniform(GLint, const gfx::VertexAttribute::float4& ) { }
     template <> void applyUniform(GLint, const gfx::VertexAttribute::matf3& ) { }
     template <> void applyUniform(GLint location, const gfx::VertexAttribute::matf4& value) {
-        MBGL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, &value[0]));
+        MBGL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, value.data()));
     }
 }
 

@@ -24,9 +24,13 @@ void DrawableGLBuilder::init() {
     if (auto colorAttr = attrs.getOrAdd("a_color")) {
         std::size_t index = 0;
         for (const auto& color : impl->colors) {
-            const auto comp = util::convert<float>(color.toArray());
-            const auto norm = gfx::VertexAttribute::float4{comp[0]/255.f,comp[1]/255.f,comp[2]/255.f,comp[3]};
-            colorAttr->set(index++, norm);
+            const auto comp = color.toArray();
+            colorAttr->set(index++, gfx::VertexAttribute::float4 {
+                static_cast<float>(comp[0]/255.0),
+                static_cast<float>(comp[1]/255.0),
+                static_cast<float>(comp[2]/255.0),
+                static_cast<float>(comp[3]),
+            });
         }
     }
 
