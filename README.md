@@ -16,7 +16,7 @@ To get started with MapLibre Native, go to your platform below.
 
 ## Documentation
 
-The documentation of MapLibre Native is a work in progress. To get an architectural overview and to learn about the current state of the project and its path forward read the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/). See below for platform-specific documentation.
+The documentation of MapLibre Native is a work in progress. To get an architectural overview and to learn about the current state of the project and its path forward read the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/). See below for platform-specific documentation.
 
 ## Platforms
 

@@ -1,5 +1,5 @@
 {
-    "render-tests/icon-image/icon-sdf-non-sdf-one-layer": "Failing on GitHub runner for unknown reason https://github.com/maplibre/maplibre-gl-native/issues/377",
+    "render-tests/icon-image/icon-sdf-non-sdf-one-layer": "Failing on GitHub runner for unknown reason https://github.com/maplibre/maplibre-native/issues/377",
     "render-tests/regressions/mapbox-gl-js#5642": "Failing with mbgl-render-test",
     "render-tests/regressions/mapbox-gl-js#7066": "Failing with mbgl-render-test"
 }

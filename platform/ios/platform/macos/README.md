@@ -1,9 +1,9 @@
 # MapLibre Native for macOS
 
 > **Note**  
-> https://github.com/maplibre/maplibre-gl-native/pull/995 introduced OpenGL ES 3.0 shaders which are not supported by macOS without workarounds. That means that while the [Metal backend implementation](https://github.com/maplibre/maplibre-gl-native/blob/main/design-proposals/2022-11-29-metal-port.md) is underway, builds from the `main` branch will not work on macOS. Use the `opengl-2` branch in the meantime.
+> https://github.com/maplibre/maplibre-native/pull/995 introduced OpenGL ES 3.0 shaders which are not supported by macOS without workarounds. That means that while the [Metal backend implementation](https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-11-29-metal-port.md) is underway, builds from the `main` branch will not work on macOS. Use the `opengl-2` branch in the meantime.
 
-[![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-gl-native/workflows/macos-release/badge.svg)](https://github.com/maplibre/maplibre-gl-native/actions/workflows/macos-release.yml)
+[![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/macos-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/macos-release/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/macos-release.yml)
 
 Put interactive, scalable world maps into your native Cocoa application with MapLibre Native for macOS.
 
