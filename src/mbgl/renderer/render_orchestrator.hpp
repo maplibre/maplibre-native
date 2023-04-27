@@ -36,6 +36,8 @@ class RenderTree;
 
 namespace gfx {
     class Drawable;
+    class ShaderRegistry;
+
     using DrawablePtr = std::shared_ptr<Drawable>;
 }   // namespace gfx
 
@@ -97,9 +99,13 @@ public:
     void addDrawable(gfx::DrawablePtr);
     void removeDrawable(const util::SimpleIdentity& drawableId);
 
-    void updateLayers(PaintParameters&);
+    void updateLayers(gfx::ShaderRegistry&,
+                      const TransformState&,
+                      const PropertyEvaluationParameters&);
 
     void processChanges();
+
+    const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
 private:
     bool isLoaded() const;

@@ -7,6 +7,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <algorithm>
 
@@ -138,7 +139,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) {
     
     AttributeBindingArray bindings;
-    bindings.reserve(defaults.size());
+    bindings.resize(defaults.size());
 
     constexpr std::size_t align = 16;
     constexpr std::uint8_t padding = 0;
@@ -147,41 +148,55 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     allData.reserve(defaults.getTotalSize() * vertexCount);
 
     // For each attribute in the program, with the corresponding default and optional override...
-    defaults.resolve(overrides, [&](const std::string& /*name*/,
+    defaults.resolve(overrides, [&](const std::string& name,
                                     const gfx::VertexAttribute& defaultAttr,
                                     const gfx::VertexAttribute* overrideAttr)->void {
-        
+
         const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
+        const auto stride = defaultAttr.getStride();
         const auto offset = static_cast<uint8_t>(allData.size());
 
-        bindings.emplace_back(gfx::AttributeBinding{
-            /*.attribute = */           gfx::AttributeDescriptor{ defaultAttr.getDataType(), offset },
-            /*.vertexStride = */        static_cast<uint8_t>(defaultAttr.getStride()),
-            /*.vertexBufferResource = */nullptr,    // buffer pointer established later
-            /*.vertexOffset = */        static_cast<uint32_t>(defaultGL.getIndex())
-        });
-
+        // Get the raw data for the values in the desired format
         const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
-        if (rawData.size() == defaultAttr.getStride()) {
+
+        if (rawData.size() == stride * vertexCount) {
+            // The override provided a value for each vertex, append it as-is
+            allData.insert(allData.end(), rawData.begin(), rawData.end());
+        } else if (rawData.size() == stride) {
+            // We only have one value, append a copy for each vertex
             for (std::size_t i = 0; i < vertexCount; ++i) {
-                allData.insert(allData.begin(), rawData.begin(), rawData.end());
+                allData.insert(allData.end(), rawData.begin(), rawData.end());
             }
-        } else if (rawData.size() == defaultAttr.getStride() * vertexCount) {
-            allData.insert(allData.begin(), rawData.begin(), rawData.end());
         } else {
-            // TODO: log? throw?
-            allData.insert(allData.begin(), defaultAttr.getStride() * vertexCount, 0);
+            // something else, the binding is invalid
+            // TODO: throw?
+            Log::Warning(Event::General,
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name +
+                         "' (" + util::toString(defaultGL.getIndex()) + "), expected " +
+                         util::toString(stride) + " or " + util::toString(stride * vertexCount));
+            return;
         }
+
+        bindings[defaultGL.getIndex()] = {
+            /*.attribute = */           { defaultAttr.getDataType(), offset },
+            /*.vertexStride = */        static_cast<uint8_t>(stride),
+            /*.vertexBufferResource = */nullptr,    // buffer pointer established later
+            /*.vertexOffset = */        0,
+        };
 
         pad(allData, align, padding);
     });
 
-    auto vertBuf = createVertexBufferResource(&allData[0], allData.size(), usage);
+    auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage);
 
-    // Assign to each element
-    std::for_each(bindings.begin(), bindings.end(), [&](auto& b){ b->vertexBufferResource = vertBuf.get(); });
+    // Go back and fill in the newly-allocated buffer in each binding that was generated
+    std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
+            if (b) {
+                b->vertexBufferResource = vertBuf.get();
+            }
+        });
 
     outBuffer = std::move(vertBuf);
     return bindings;

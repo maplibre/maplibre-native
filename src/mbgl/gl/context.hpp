@@ -104,7 +104,7 @@ public:
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
-    bool setupDraw(const gfx::Drawable&) override;
+    bool setupDraw(const PaintParameters&, const gfx::Drawable&) override;
 
 private:
     RendererBackend& backend;
