@@ -11,16 +11,16 @@ namespace gl {
  */
 class DrawableGLBuilder final : public gfx::DrawableBuilder {
 public:
-    DrawableGLBuilder() {
+    DrawableGLBuilder(std::string name) : gfx::DrawableBuilder(std::move(name)) {
     }
     ~DrawableGLBuilder() override = default;
-    
+
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     void setVertexAttributes(const VertexAttributeArrayGL& value) { vertexAttributes = value; }
     void setVertexAttributes(VertexAttributeArrayGL&& value) { vertexAttributes = std::move(value); }
     
 protected:
-    gfx::DrawablePtr createDrawable() const override;
+    gfx::DrawablePtr createDrawable(std::string name) const override;
     
     /// Setup the SDK-specific aspects after all the values are present
     void init() override;

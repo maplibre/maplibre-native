@@ -4,8 +4,9 @@
 namespace mbgl {
 namespace gfx {
 
-DrawableBuilder::DrawableBuilder()
-    : impl(std::make_unique<Impl>()) {
+DrawableBuilder::DrawableBuilder(std::string name_) :
+    name(std::move(name_)),
+    impl(std::make_unique<Impl>()) {
 }
 
 DrawableBuilder::~DrawableBuilder() = default;
@@ -19,7 +20,7 @@ void DrawableBuilder::setColor(const Color& value) {
 
 DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
-        currentDrawable = createDrawable();
+        currentDrawable = createDrawable(drawableName.empty() ? name : drawableName);
     }
     return currentDrawable;
 }
