@@ -5,8 +5,8 @@
 namespace mbgl {
 namespace gl {
 
-DrawableGL::DrawableGL(std::string name) :
-    Drawable(std::move(name)),
+DrawableGL::DrawableGL(std::string name_) :
+    Drawable(std::move(name_)),
     impl(std::make_unique<Impl>()) {
 }
 
