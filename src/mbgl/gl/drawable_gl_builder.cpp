@@ -7,8 +7,8 @@
 namespace mbgl {
 namespace gl {
 
-gfx::DrawablePtr DrawableGLBuilder::createDrawable(std::string name) const {
-    return std::make_shared<DrawableGL>(std::move(name));
+gfx::DrawablePtr DrawableGLBuilder::createDrawable() const {
+    return std::make_shared<DrawableGL>(drawableName.empty() ? name : drawableName);
 };
 
 void DrawableGLBuilder::init() {

@@ -94,7 +94,7 @@ public:
 
 protected:
     /// Create an instance of the appropriate drawable type
-    virtual DrawablePtr createDrawable(std::string name) const = 0;
+    virtual DrawablePtr createDrawable() const = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
