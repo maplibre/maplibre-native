@@ -20,7 +20,7 @@ void DrawableBuilder::setColor(const Color& value) {
 
 DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
-        currentDrawable = createDrawable(drawableName.empty() ? name : drawableName);
+        currentDrawable = createDrawable();
     }
     return currentDrawable;
 }
