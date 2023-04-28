@@ -1,12 +1,13 @@
 #include <mbgl/renderer/renderer.hpp>
 
+#include <mbgl/annotation/annotation_manager.hpp>
+#include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/renderer_impl.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/annotation/annotation_manager.hpp>
 
 namespace mbgl {
 
@@ -46,7 +47,9 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
         const auto& state = renderTreeParameters.transformParams.state;
 
         if (impl->staticData && impl->staticData->shaders) {
-            impl->orchestrator.updateLayers(*impl->staticData->shaders, state, evalParameters);
+            auto& context = impl->backend.getContext();
+            auto& shaders = *impl->staticData->shaders;
+            impl->orchestrator.updateLayers(shaders, context, state, evalParameters);
         }
 
         impl->render(*renderTree);

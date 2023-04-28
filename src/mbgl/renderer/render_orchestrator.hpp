@@ -102,6 +102,7 @@ public:
     const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
 
     void updateLayers(gfx::ShaderRegistry&,
+                      gfx::Context&,
                       const TransformState&,
                       const PropertyEvaluationParameters&);
 
