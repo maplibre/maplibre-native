@@ -2,11 +2,11 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/util/color.hpp>
 
 #include <memory>
 
 namespace mbgl {
-
 namespace gfx {
 
 class IndexBuffer;
@@ -43,7 +43,17 @@ public:
 
     const gfx::UniqueVertexBufferResource& getBuffer() const;
     const gfx::IndexBuffer& getIndexBuffer() const;
-    
+
+    /// Reset a single color attribute for all vertexes
+    void resetColor(const Color&) override;
+
+    static gfx::VertexAttribute::float4 colorAttrValue(const Color& color) {
+        const auto components = color.toArray();
+        return { static_cast<float>(components[0]/255.0),
+                 static_cast<float>(components[1]/255.0),
+                 static_cast<float>(components[2]/255.0),
+                 static_cast<float>(components[3]) };
+    }
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;

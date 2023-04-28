@@ -68,5 +68,12 @@ void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
     impl->indexBuffer = std::move(indexBuffer_);
 }
 
+void DrawableGL::resetColor(const Color& newColor) {
+    if (auto* colorAttr = impl->vertexAttributes.get("a_color")) {
+        colorAttr->clear();
+        colorAttr->set(0, colorAttrValue(newColor));
+    }
+}
+
 } // namespace gl
 } // namespace mbgl

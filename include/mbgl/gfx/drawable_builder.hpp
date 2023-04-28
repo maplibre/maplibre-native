@@ -60,6 +60,11 @@ public:
     const Color& getColor() const;
     void setColor(const Color& value);
 
+    enum class ColorMode { PerDrawable, PerVertex };
+    /// Set how the color value is used
+    /// This should not be changed while a build is in progress
+    void setColorMode(ColorMode mode) { colorMode = mode; }
+
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
 
@@ -98,6 +103,7 @@ protected:
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
     std::vector<DrawableTweakerPtr> tweakers;
+    ColorMode colorMode = ColorMode::PerVertex;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
