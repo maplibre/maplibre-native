@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/gfx_types.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <functional>
