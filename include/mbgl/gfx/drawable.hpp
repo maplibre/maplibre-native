@@ -11,6 +11,7 @@
 
 namespace mbgl {
 
+class Color;
 class PaintParameters;
 
 namespace gfx {
@@ -70,6 +71,9 @@ public:
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
+
+    // Reset a single color attribute for all vertexes
+    virtual void resetColor(const Color&) = 0;
 
 protected:
     util::SimpleIdentity uniqueID;

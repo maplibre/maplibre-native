@@ -18,10 +18,10 @@ namespace style {
 
 BackgroundLayer::Impl::Impl(const Impl& other) :
     Layer::Impl(other),
-    shader(other.shader),
+    tileDrawables(other.tileDrawables),
+    lastColor(other.lastColor),
     paint(other.paint)
 {
-    // mutex, drawables, stats not copied
 }
 
 bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
@@ -46,17 +46,18 @@ void BackgroundLayer::Impl::layerAdded(gfx::ShaderRegistry& shaders,
 }
 
 void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const {
+    // TODO: This isn't happening on style change, so old tile drawables are being left active
+
     // Remove everything
     decltype(tileDrawables) localDrawables;
     {
         std::unique_lock<std::mutex> guard(mutex);
         localDrawables = std::move(tileDrawables);
     }
-    
-    for (auto& kv : localDrawables) {
-        auto& drawable = kv.second;
-        changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
-    }
+
+    removeDrawables<decltype(localDrawables)::const_iterator>(
+        localDrawables.cbegin(), localDrawables.cend(), changes,
+        [](auto& ii) { return ii->second->getId(); });
 }
 
 void BackgroundLayer::Impl::update(const TransformState& state,
@@ -64,8 +65,10 @@ void BackgroundLayer::Impl::update(const TransformState& state,
                                    UniqueChangeRequestVec& changes) const {
     std::unique_lock<std::mutex> guard(mutex);
 
-    const auto uneval = paint.untransitioned();
-    const auto eval = uneval.evaluate(evalParameters);
+    if (!unevaluated) {
+        unevaluated = paint.untransitioned();
+    }
+    const auto evaluated = unevaluated->evaluate(evalParameters);
 
     //const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
     //    ? RenderPass::None
@@ -79,12 +82,24 @@ void BackgroundLayer::Impl::update(const TransformState& state,
     //getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 
     std::optional<Color> color;
-    if (eval.get<BackgroundPattern>().from.empty()) {
-        const auto opacity = eval.get<style::BackgroundOpacity>();
+    if (evaluated.get<BackgroundPattern>().from.empty()) {
+        const auto opacity = evaluated.get<style::BackgroundOpacity>();
         if (opacity > 0.0f) {
-            color = eval.get<BackgroundColor>() * eval.get<BackgroundOpacity>();
+            color = evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>();
         }
     }
+
+    // If the result is transparent or missing, just remove any existing drawables and stop
+    if (!color) {
+        removeDrawables<decltype(tileDrawables)::const_iterator>(
+            tileDrawables.cbegin(), tileDrawables.cend(), changes,
+            [](auto& ii) { return ii->second->getId(); });
+        tileDrawables.clear();
+        return;
+    }
+
+    const bool colorChange = (color != lastColor);
+    lastColor = color;
 
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
@@ -99,21 +114,24 @@ void BackgroundLayer::Impl::update(const TransformState& state,
 
     // For each existing tile drawable...
     for (auto iter = tileDrawables.begin(); iter != tileDrawables.end(); ) {
+        const auto& drawable = iter->second;
+
         // Has this tile dropped out of the cover set?
         if (newTileIDs.find(iter->first) == newTileIDs.end()) {
             // remove it
-            const auto& drawable = iter->second;
             changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
             //Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " + std::to_string(stats.tileDrawablesRemoved+1));
             iter = tileDrawables.erase(iter);
             ++stats.tileDrawablesRemoved;
-        } else {
-            ++iter;
+            continue;
         }
-    }
+        ++iter;
 
-    if (!color) {
-        return;
+        // If the color evaluated to a new value, emit a change request updating all vertexes of
+        // the existing drawable to the new color.
+        if (colorChange) {
+            changes.emplace_back(std::make_unique<ResetColorRequest>(drawable->getId(), *color));
+        }
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
@@ -134,6 +152,7 @@ void BackgroundLayer::Impl::update(const TransformState& state,
             builder->setShader(shader);
             builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
             builder->setColor(*color);
+            builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
         }
 

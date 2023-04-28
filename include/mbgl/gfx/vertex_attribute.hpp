@@ -70,16 +70,38 @@ public:
 
     const ElementType& get(std::size_t i) const { return items[i]; }
 
+    void reserve(std::size_t count) { items.reserve(count); }
+
     template <typename T>
     const ElementType& set(std::size_t i, T value) {
-        dirty = true;   // need to rebuild the raw data next time
-        items.resize(std::max(items.size(), i + 1));
+        if (items.size() < i + 1) {
+            items.resize(std::max(items.size(), i + 1));
+            setDirty();   // need to rebuild the raw data next time
+        }
+        if (!isDirty()) {
+            if (std::holds_alternative<T>(items[i])) {
+                // TODO: epsilon for floats?
+                if (std::get<T>(items[i]) != value) {
+                    setDirty();
+                }
+            } else {
+                // different types
+                setDirty();
+            }
+        }
         return items[i] = value;
     }
 
-    bool getDirty() const { return dirty; }
-    void clearDirty() {
-        dirty = false;
+    void clear() {
+        if (!items.empty()) {
+            setDirty();
+        }
+        items.clear();
+    }
+
+    bool isDirty() const { return dirty; }
+    void setDirty() {
+        dirty = true;
         rawData.clear();
     }
 
@@ -159,8 +181,10 @@ public:
     }
 
     /// Indicates whether any values have changed
-    bool isDirty() const;
-    void resetDirty();
+    bool isDirty() const {
+        return std::any_of(attrs.begin(), attrs.end(),
+                           [](const auto& kv){ return kv.second && kv.second->isDirty(); });
+    }
 
     using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const VertexAttribute*)>;
     /// Call the provided delegate with each value, providing the override if one exists.
