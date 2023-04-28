@@ -17,10 +17,8 @@
 
 
 #include <functional>
-#include <memory>
 #include <vector>
 #include <array>
-#include <string>
 
 namespace mbgl {
 namespace gl {
