@@ -777,6 +777,7 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
 }
 
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
+                                      gfx::Context& context,
                                       const TransformState& state,
                                       const PropertyEvaluationParameters& evalParameters) {
     std::vector<std::unique_ptr<ChangeRequest>> changes;
@@ -785,11 +786,11 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         kv.second->layerRemoved(changes);
     }
     for (auto& kv : layersAdded) {
-        kv.second->layerAdded(shaders, state, evalParameters, changes);
+        kv.second->layerAdded(shaders, context, state, evalParameters, changes);
     }
     
     for (auto& impl : *layerImpls) {
-        impl->update(state, evalParameters, changes);
+        impl->update(context, state, evalParameters, changes);
     }
 
     addChanges(changes);

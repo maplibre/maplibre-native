@@ -17,9 +17,14 @@ class ProgramParameters;
 namespace gfx {
 
 class Drawable;
+class DrawableBuilder;
+class DrawableTweaker;
 class OffscreenTexture;
 class ShaderProgramBase;
 
+using DrawablePtr = std::shared_ptr<Drawable>;
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
+using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
 
@@ -92,6 +97,12 @@ public:
 public:
     /// Activate the shader, vertex attributes, etc., specified by the drawable
     virtual bool setupDraw(const PaintParameters&, const gfx::Drawable&) = 0;
+
+    /// Create a new drawable builder
+    virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
+    
+    /// Create a new drawable tweaker
+    virtual DrawableTweakerPtr createDrawableTweaker() = 0;
 };
 
 } // namespace gfx
