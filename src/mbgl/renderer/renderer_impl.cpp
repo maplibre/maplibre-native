@@ -117,7 +117,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             auto& shader = drawable.getShader();
 
             // Generate a vertex array object for the drawable state, if necessary
-            if (shader && !drawableGL.getVertexArray().isValid()) {
+            if (shader && (!drawableGL.getVertexArray().isValid() ||
+                            drawableGL.getVertexAttributes().isDirty())) {
                 const auto usage = gfx::BufferUsageType::StaticDraw;
 
                 // Build index buffer

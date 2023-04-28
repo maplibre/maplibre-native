@@ -99,6 +99,8 @@ public:
     void addDrawable(gfx::DrawablePtr);
     void removeDrawable(const util::SimpleIdentity& drawableId);
 
+    const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
+
     void updateLayers(gfx::ShaderRegistry&,
                       const TransformState&,
                       const PropertyEvaluationParameters&);
