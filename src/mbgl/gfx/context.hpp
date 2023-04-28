@@ -9,6 +9,9 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
+#include <memory>
+#include <string>
+
 namespace mbgl {
 
 class PaintParameters;
