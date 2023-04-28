@@ -22,15 +22,20 @@ void DrawableGLBuilder::init() {
         }
     }
     if (auto colorAttr = attrs.getOrAdd("a_color")) {
-        std::size_t index = 0;
-        for (const auto& color : impl->colors) {
-            const auto comp = color.toArray();
-            colorAttr->set(index++, gfx::VertexAttribute::float4 {
-                static_cast<float>(comp[0]/255.0),
-                static_cast<float>(comp[1]/255.0),
-                static_cast<float>(comp[2]/255.0),
-                static_cast<float>(comp[3]),
-            });
+        // We should have either a single color or one per vertex.  Otherwise,
+        // the color mode was probably changed after vertexes were added.
+        if (impl->colors.size() > 1 && impl->colors.size() != impl->vertices.elements()) {
+            impl->colors.clear();
+        }
+
+        if (impl->colors.empty()) {
+            colorAttr->set(0, DrawableGL::colorAttrValue(getColor()));
+        } else {
+            std::size_t index = 0;
+            colorAttr->reserve(impl->colors.size());
+            for (const auto& color : impl->colors) {
+                colorAttr->set(index++, DrawableGL::colorAttrValue(color));
+            }
         }
     }
 

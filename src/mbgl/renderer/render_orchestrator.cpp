@@ -770,6 +770,12 @@ void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) 
     drawables.erase(drawableId);
 }
 
+const gfx::DrawablePtr noDrawable;
+const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdentity& id) {
+    const auto hit = drawables.find(id);
+    return (hit != drawables.end()) ? hit->second : noDrawable;
+}
+
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       const TransformState& state,
                                       const PropertyEvaluationParameters& evalParameters) {
