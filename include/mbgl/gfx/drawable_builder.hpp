@@ -24,7 +24,7 @@ using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
  */
 class DrawableBuilder {
 protected:
-    DrawableBuilder();
+    DrawableBuilder(std::string name);
 
 public:
     virtual ~DrawableBuilder();
@@ -75,6 +75,10 @@ public:
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
+    /// Set the name given to new drawables
+    void setDrawableName(std::string value) { drawableName = std::move(value); }
+
+    /// Set the matrix applied to new drawables
     void setMatrix(mat4 value) { matrix = value; }
 
     /// Add a triangle
@@ -90,12 +94,14 @@ public:
 
 protected:
     /// Create an instance of the appropriate drawable type
-    virtual DrawablePtr createDrawable() const = 0;
+    virtual DrawablePtr createDrawable(std::string name) const = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
 
 protected:
+    std::string name;
+    std::string drawableName;
     DrawPriority drawPriority = 0;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;

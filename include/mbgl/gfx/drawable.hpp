@@ -27,7 +27,7 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 class Drawable {
 protected:
-    Drawable();
+    Drawable(std::string name);
 
 public:
     virtual ~Drawable() = default;
@@ -36,6 +36,10 @@ public:
 
     /// Draw the drawable
     virtual void draw(const PaintParameters &) const = 0;
+
+    /// Drawable name is used for debugging and troubleshooting
+    const std::string& getName() const { return name; }
+    void setName(std::string value) { name = std::move(value); }
 
     /// Which shader to use when rendering this drawable
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
@@ -76,6 +80,7 @@ public:
     virtual void resetColor(const Color&) = 0;
 
 protected:
+    std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
     mat4 matrix; //= matrix::identity4();

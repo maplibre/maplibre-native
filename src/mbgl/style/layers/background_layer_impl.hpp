@@ -34,13 +34,15 @@ public:
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
     void layerAdded(gfx::ShaderRegistry&,
+                    gfx::Context&,
                     const TransformState&,
                     const PropertyEvaluationParameters&,
                     UniqueChangeRequestVec&) const override;
     void layerRemoved(UniqueChangeRequestVec&) const override;
 
     /// Generate any changes needed by the layer
-    void update(const TransformState&,
+    void update(gfx::Context&,
+                const TransformState&,
                 const PropertyEvaluationParameters&,
                 UniqueChangeRequestVec&) const override;
 

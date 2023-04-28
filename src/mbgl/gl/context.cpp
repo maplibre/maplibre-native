@@ -1,15 +1,17 @@
 #include <mbgl/gl/context.hpp>
+#include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/gl/drawable_gl_builder.hpp>
+#include <mbgl/gl/drawable_gl_tweaker.hpp>
+#include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/draw_scope_resource.hpp>
+#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
-#include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/defines.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/traits.hpp>
@@ -475,6 +477,14 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
         bindVertexArray = value::BindVertexArray::Default;
         return false;
     }
+}
+
+gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
+    return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
+}
+
+gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
+    return std::make_shared<gl::DrawableGLTweaker>();
 }
 
 void Context::clear(std::optional<mbgl::Color> color,

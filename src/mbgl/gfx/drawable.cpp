@@ -5,7 +5,8 @@
 namespace mbgl {
 namespace gfx {
 
-Drawable::Drawable() :
+Drawable::Drawable(std::string name_) :
+    name(name_),
     matrix(matrix::identity4()),
     depthType(DepthMaskType::ReadOnly)
 {

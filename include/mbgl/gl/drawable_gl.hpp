@@ -22,7 +22,7 @@ class VertexArray;
 
 class DrawableGL : public gfx::Drawable {
 public:
-    DrawableGL();
+    DrawableGL(std::string name);
     ~DrawableGL() override;
 
     void draw(const PaintParameters &) const override;

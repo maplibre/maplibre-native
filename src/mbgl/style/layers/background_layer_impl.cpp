@@ -1,12 +1,13 @@
 #include <mbgl/style/layers/background_layer_impl.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/drawable_gl_builder.hpp>
-#include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
+//#include <mbgl/shaders/gl/shader_program_gl.hpp>
+//#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/tile_cover.hpp>
@@ -30,19 +31,27 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 
 constexpr auto shaderName = "background_generic";
 
+struct ShaderHack final : public gfx::ShaderProgramBase {
+    static constexpr std::string_view Name{"GenericGLShader"};
+    const std::string_view typeName() const noexcept override { return Name; }
+    const gfx::VertexAttributeArray& getUniforms() const override { return *dummy; }
+    const gfx::VertexAttributeArray& getVertexAttributes() const override { return *dummy; }
+    gfx::VertexAttributeArray& mutableUniforms() override { return *dummy; }
+    gfx::VertexAttributeArray& mutableVertexAttributes() override { return *dummy; }
+    gfx::VertexAttributeArray* dummy = nullptr;
+};
+
 void BackgroundLayer::Impl::layerAdded(gfx::ShaderRegistry& shaders,
-                                       const TransformState& state,
-                                       const PropertyEvaluationParameters& evalParameters,
-                                       UniqueChangeRequestVec& changes) const {
+                                       gfx::Context&,
+                                       const TransformState&,
+                                       const PropertyEvaluationParameters&,
+                                       UniqueChangeRequestVec&) const {
     {
         std::unique_lock<std::mutex> guard(mutex);
         if (!shader) {
-            shader = shaders.get<gl::ShaderProgramGL>(shaderName);
+            shader = shaders.get<ShaderHack>(shaderName);
         }
     }
-
-    // Add all the tiles
-    update(state, evalParameters, changes);
 }
 
 void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const {
@@ -60,7 +69,8 @@ void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const 
         [](auto& ii) { return ii->second->getId(); });
 }
 
-void BackgroundLayer::Impl::update(const TransformState& state,
+void BackgroundLayer::Impl::update(gfx::Context& context,
+                                   const TransformState& state,
                                    const PropertyEvaluationParameters& evalParameters,
                                    UniqueChangeRequestVec& changes) const {
     std::unique_lock<std::mutex> guard(mutex);
@@ -148,9 +158,9 @@ void BackgroundLayer::Impl::update(const TransformState& state,
 
         // We actually need to build things, so set up a builder if we haven't already
         if (!builder) {
-            builder = std::make_unique<gl::DrawableGLBuilder>();   // from GL-specific code via virtual method on ...Context?
+            builder = context.createDrawableBuilder("background");
             builder->setShader(shader);
-            builder->addTweaker(std::make_shared<gl::DrawableGLTweaker>()); // generally shared across drawables
+            builder->addTweaker(context.createDrawableTweaker());
             builder->setColor(*color);
             builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);

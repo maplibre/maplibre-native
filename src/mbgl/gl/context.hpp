@@ -106,6 +106,9 @@ public:
 
     bool setupDraw(const PaintParameters&, const gfx::Drawable&) override;
 
+    gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
+    gfx::DrawableTweakerPtr createDrawableTweaker() override;
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
