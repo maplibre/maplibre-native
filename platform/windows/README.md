@@ -43,7 +43,7 @@ To configure build with OSMesa (software rendering), use the following command:
 cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DMLN_WITH_OSMESA=ON
 ```
 
-**WARNING:** as OSMesa doesn't have static libraries, it's necessary to copy `libglapi.dll`, `libGLESv3.dll` and `osmesa.dll` from `platform\windows\vendor\mesa3d\<arch>` to executable/dll directory you want to use, otherwise it won't run.
+**WARNING:** as OSMesa doesn't have static libraries, it's necessary to copy `libglapi.dll`, `libGLESv2.dll` and `osmesa.dll` from `platform\windows\vendor\mesa3d\<arch>` to executable/dll directory you want to use, otherwise it won't run.
 
 ## Building
 

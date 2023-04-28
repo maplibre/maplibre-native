@@ -91,7 +91,7 @@ if(MLN_WITH_EGL)
         mbgl-core
         PRIVATE
             unofficial::angle::libEGL
-            unofficial::angle::libGLESv3
+            unofficial::angle::libGLESv2
     )
 elseif(MLN_WITH_OSMESA)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -114,7 +114,7 @@ elseif(MLN_WITH_OSMESA)
         mbgl-core
         PRIVATE
             OSMesa::osmesa
-            OSMesa::libGLESv3
+            OSMesa::libGLESv2
     )
 else()
     find_package(OpenGL REQUIRED)
