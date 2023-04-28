@@ -11,7 +11,7 @@ namespace gl {
  */
 class DrawableGLBuilder final : public gfx::DrawableBuilder {
 public:
-    DrawableGLBuilder(std::string name) : gfx::DrawableBuilder(std::move(name)) {
+    DrawableGLBuilder(std::string name_) : gfx::DrawableBuilder(std::move(name_)) {
     }
     ~DrawableGLBuilder() override = default;
 
