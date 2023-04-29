@@ -156,15 +156,14 @@ Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double
         for (auto& component : coord) component *= 1.0 / coord[3] / worldSize * scale;
     }
 
-    std::array<vec3i, 6> frustumPlanePointIndices = {
-        {
-            vec3i{{near_bl, near_br, far_br}},  // bottom
-            vec3i{{near_tl, near_bl, far_bl}},  // left
-            vec3i{{near_br, near_tr, far_tr}},  // right
-            vec3i{{near_tl, far_tl, far_tr}},   // top
-            vec3i{{near_tl, near_tr, near_br}}, // near
-            vec3i{{far_br, far_tr, far_tl}}     // far}
-        };
+    std::array<vec3i, 6> frustumPlanePointIndices = {{
+        vec3i{{near_bl, near_br, far_br}},  // bottom
+        vec3i{{near_tl, near_bl, far_bl}},  // left
+        vec3i{{near_br, near_tr, far_tr}},  // right
+        vec3i{{near_tl, far_tl, far_tr}},   // top
+        vec3i{{near_tl, near_tr, near_br}}, // near
+        vec3i{{far_br, far_tr, far_tl}}     // far
+    }};
 
     if (flippedY) {
         std::for_each(frustumPlanePointIndices.begin(), frustumPlanePointIndices.end(), [](vec3i& tri) {
