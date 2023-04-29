@@ -19,10 +19,12 @@ ParseResult parseInterpolate(const mbgl::style::conversion::Convertible& value, 
 
 class Interpolate : public Expression {
 public:
-    Interpolate(const type::Type& type_,
-                Interpolator interpolator_,
-                std::unique_ptr<Expression> input_,
-                std::map<double, std::unique_ptr<Expression>> stops_);
+    Interpolate(
+        const type::Type& type_,
+        Interpolator interpolator_,
+        std::unique_ptr<Expression> input_,
+        std::map<double, std::unique_ptr<Expression>> stops_
+    );
 
     const std::unique_ptr<Expression>& getInput() const { return input; }
     const Interpolator& getInterpolator() const { return interpolator; }
@@ -39,25 +41,22 @@ public:
             visit(stop.first, *stop.second);
         }
     }
-    
+
     // Return the smallest range of stops that covers the interval [lower, upper]
     Range<float> getCoveringStops(const double lower, const double upper) const {
         return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
     }
-    
+
     double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const {
-        return interpolator.match(
-            [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); }
-        );
+        return interpolator.match([&](const auto& interp) {
+            return interp.interpolationFactor(inputLevels, inputValue);
+        });
     }
 
     bool operator==(const Expression& e) const override {
         if (e.getKind() == Kind::Interpolate) {
             auto rhs = static_cast<const Interpolate*>(&e);
-            if (interpolator != rhs->interpolator ||
-                *input != *(rhs->input) ||
-                stops.size() != rhs->stops.size())
-            {
+            if (interpolator != rhs->interpolator || *input != *(rhs->input) || stops.size() != rhs->stops.size()) {
                 return false;
             }
 
@@ -76,11 +75,13 @@ protected:
     const std::map<double, std::unique_ptr<Expression>> stops;
 };
 
-ParseResult createInterpolate(type::Type type,
-                              Interpolator interpolator,
-                              std::unique_ptr<Expression> input,
-                              std::map<double, std::unique_ptr<Expression>> stops,
-                              ParsingContext& ctx);
+ParseResult createInterpolate(
+    type::Type type,
+    Interpolator interpolator,
+    std::unique_ptr<Expression> input,
+    std::map<double, std::unique_ptr<Expression>> stops,
+    ParsingContext& ctx
+);
 
 } // namespace expression
 } // namespace style

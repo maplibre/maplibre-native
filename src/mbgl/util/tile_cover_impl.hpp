@@ -49,7 +49,7 @@ struct Bound {
         auto x = p0.x;
         if (dx == 0) {
             return x;
-        } else if (dy == 0){
+        } else if (dy == 0) {
             return y <= p0.y ? p0.x : p1.x;
         }
         if (y < p0.y) return x;

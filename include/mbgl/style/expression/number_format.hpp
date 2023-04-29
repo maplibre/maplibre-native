@@ -9,11 +9,13 @@ namespace expression {
 
 class NumberFormat final : public Expression {
 public:
-    NumberFormat(std::unique_ptr<Expression> number_,
-                 std::unique_ptr<Expression> locale_,
-                 std::unique_ptr<Expression> currency_,
-                 std::unique_ptr<Expression> minFractionDigits_,
-                 std::unique_ptr<Expression> maxFractionDigits_);
+    NumberFormat(
+        std::unique_ptr<Expression> number_,
+        std::unique_ptr<Expression> locale_,
+        std::unique_ptr<Expression> currency_,
+        std::unique_ptr<Expression> minFractionDigits_,
+        std::unique_ptr<Expression> maxFractionDigits_
+    );
 
     ~NumberFormat() override;
 

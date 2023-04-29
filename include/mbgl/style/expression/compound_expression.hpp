@@ -46,13 +46,13 @@ protected:
     std::vector<std::unique_ptr<Expression>> args;
 };
 
-ParseResult parseCompoundExpression(const std::string& name,
-                                    const mbgl::style::conversion::Convertible& value,
-                                    ParsingContext& ctx);
+ParseResult parseCompoundExpression(
+    const std::string& name, const mbgl::style::conversion::Convertible& value, ParsingContext& ctx
+);
 
-ParseResult createCompoundExpression(const std::string& name,
-                                     std::vector<std::unique_ptr<Expression>> args,
-                                     ParsingContext& ctx);
+ParseResult createCompoundExpression(
+    const std::string& name, std::vector<std::unique_ptr<Expression>> args, ParsingContext& ctx
+);
 
 } // namespace expression
 } // namespace style

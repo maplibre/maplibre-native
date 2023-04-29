@@ -28,12 +28,14 @@ TEST(FreeCameraOptions, SetLocation) {
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.0, 0.4282409625, 0.000027532812465}}));
 
     options.setLocation(
-        {{util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(util::LATITUDE_MAX))});
+        {{util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(util::LATITUDE_MAX))}
+    );
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 0.0, 0.5}}));
 
     options.setLocation(
-        {{-util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(-util::LATITUDE_MAX))});
+        {{-util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(-util::LATITUDE_MAX))}
+    );
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 1.0, 0.5}}));
 }
@@ -113,7 +115,8 @@ TEST(FreeCameraOptions, GetLocationUnwrappedPosition) {
 static std::tuple<vec3, vec3, vec3> rotatedFrame(const std::array<double, 4>& quaternion) {
     Quaternion q(quaternion);
     return std::make_tuple(
-        q.transform({{1.0, 0.0, 0.0}}), q.transform({{0.0, -1.0, 0.0}}), q.transform({{0.0, 0.0, -1.0}}));
+        q.transform({{1.0, 0.0, 0.0}}), q.transform({{0.0, -1.0, 0.0}}), q.transform({{0.0, 0.0, -1.0}})
+    );
 }
 
 TEST(FreeCameraOptions, LookAtPoint) {

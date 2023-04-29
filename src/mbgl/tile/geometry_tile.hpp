@@ -27,9 +27,7 @@ class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
 public:
-    GeometryTile(const OverscaledTileID&,
-                 std::string sourceID,
-                 const TileParameters&);
+    GeometryTile(const OverscaledTileID&, std::string sourceID, const TileParameters&);
 
     ~GeometryTile() override;
 
@@ -45,21 +43,23 @@ public:
 
     void onGlyphsAvailable(GlyphMap) override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
-    
+
     void getGlyphs(GlyphDependencies);
     void getImages(ImageRequestPair);
 
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override;
 
-    void queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
-                               const GeometryCoordinates& queryGeometry, const TransformState&,
-                               const std::unordered_map<std::string, const RenderLayer*>& layers,
-                               const RenderedQueryOptions& options, const mat4& projMatrix,
-                               const SourceFeatureState& featureState) override;
+    void queryRenderedFeatures(
+        std::unordered_map<std::string, std::vector<Feature>>& result,
+        const GeometryCoordinates& queryGeometry,
+        const TransformState&,
+        const std::unordered_map<std::string, const RenderLayer*>& layers,
+        const RenderedQueryOptions& options,
+        const mat4& projMatrix,
+        const SourceFeatureState& featureState
+    ) override;
 
-    void querySourceFeatures(
-        std::vector<Feature>& result,
-        const SourceQueryOptions&) override;
+    void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
 
     float getQueryPadding(const std::unordered_map<std::string, const RenderLayer*>&) override;
 
@@ -74,10 +74,12 @@ public:
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-        LayoutResult(std::unordered_map<std::string, LayerRenderData> renderData_,
-                     std::unique_ptr<FeatureIndex> featureIndex_,
-                     std::optional<AlphaImage> glyphAtlasImage_,
-                     ImageAtlas iconAtlas_)
+        LayoutResult(
+            std::unordered_map<std::string, LayerRenderData> renderData_,
+            std::unique_ptr<FeatureIndex> featureIndex_,
+            std::optional<AlphaImage> glyphAtlasImage_,
+            ImageAtlas iconAtlas_
+        )
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
               glyphAtlasImage(std::move(glyphAtlasImage_)),
@@ -105,7 +107,7 @@ private:
     void markObsolete();
 
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
-    std::atomic<bool> obsolete { false };
+    std::atomic<bool> obsolete{false};
 
     std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;
@@ -120,9 +122,9 @@ private:
     std::shared_ptr<TileAtlasTextures> atlasTextures;
 
     const MapMode mode;
-    
+
     bool showCollisionBoxes;
-    
+
     enum class FadeState {
         Loaded,
         NeedsFirstPlacement,

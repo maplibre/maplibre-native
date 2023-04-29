@@ -9,12 +9,11 @@ namespace mbgl {
 class RenderVectorSource final : public RenderTileSetSource {
 public:
     explicit RenderVectorSource(Immutable<style::VectorSource::Impl>);
+
 private:
-    void updateInternal(const Tileset&,
-                        const std::vector<Immutable<style::LayerProperties>>&,
-                        bool needsRendering,
-                        bool needsRelayout,
-                        const TileParameters&) override;
+    void
+    updateInternal(const Tileset&, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&)
+        override;
     const std::optional<Tileset>& getTileset() const override;
 };
 

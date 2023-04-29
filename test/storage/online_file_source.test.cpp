@@ -17,8 +17,9 @@ TEST(OnlineFileSource, Cancel) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
-    fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"},
-                [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
+    fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"}, [&](Response) {
+        ADD_FAILURE() << "Callback should not be called";
+    });
 
     loop.runOnce();
 }
@@ -27,10 +28,11 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(CancelMultiple)) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/test" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
-    std::unique_ptr<AsyncRequest> req2 =
-        fs->request(resource, [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
+    std::unique_ptr<AsyncRequest> req2 = fs->request(resource, [&](Response) {
+        ADD_FAILURE() << "Callback should not be called";
+    });
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
@@ -124,7 +126,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Timeout)) {
 
     int counter = 0;
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/test?cachecontrol=max-age=1" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test?cachecontrol=max-age=1"};
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         counter++;
         EXPECT_EQ(nullptr, res.error);
@@ -151,7 +153,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryDelayOnExpiredTile)) {
 
     int counter = 0;
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/test?expires=10000" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test?expires=10000"};
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         counter++;
         EXPECT_EQ(nullptr, res.error);
@@ -171,7 +173,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryOnClockSkew)) {
 
     int counter = 0;
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/clockskew" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/clockskew"};
     std::unique_ptr<AsyncRequest> req1 = fs->request(resource, [&](Response res) {
         EXPECT_FALSE(res.mustRevalidate);
         switch (counter++) {
@@ -199,18 +201,18 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RespectPriorExpires)) {
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
     // Very long expiration time, should never arrive.
-    Resource resource1{ Resource::Unknown, "http://127.0.0.1:3000/test" };
+    Resource resource1{Resource::Unknown, "http://127.0.0.1:3000/test"};
     resource1.priorExpires = util::now() + Seconds(100000);
 
     std::unique_ptr<AsyncRequest> req1 = fs->request(resource1, [&](Response) { FAIL() << "Should never be called"; });
 
     // No expiration time, should be requested immediately.
-    Resource resource2{ Resource::Unknown, "http://127.0.0.1:3000/test" };
+    Resource resource2{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
     std::unique_ptr<AsyncRequest> req2 = fs->request(resource2, [&](Response) { loop.stop(); });
 
     // Very long expiration time, should never arrive.
-    Resource resource3{ Resource::Unknown, "http://127.0.0.1:3000/test" };
+    Resource resource3{Resource::Unknown, "http://127.0.0.1:3000/test"};
     resource3.priorExpires = util::now() + Seconds(100000);
 
     std::unique_ptr<AsyncRequest> req3 = fs->request(resource3, [&](Response) { FAIL() << "Should never be called"; });
@@ -248,23 +250,25 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Load)) {
 
     std::function<void(int)> req = [&](int i) {
         const auto current = number++;
-        reqs[i] = fs->request({Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
-                              [&, i, current](Response res) {
-                                  reqs[i].reset();
-                                  EXPECT_EQ(nullptr, res.error);
-                                  ASSERT_TRUE(res.data.get());
-                                  EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
-                                  EXPECT_FALSE(bool(res.expires));
-                                  EXPECT_FALSE(res.mustRevalidate);
-                                  EXPECT_FALSE(bool(res.modified));
-                                  EXPECT_FALSE(bool(res.etag));
+        reqs[i] = fs->request(
+            {Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
+            [&, i, current](Response res) {
+                reqs[i].reset();
+                EXPECT_EQ(nullptr, res.error);
+                ASSERT_TRUE(res.data.get());
+                EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
+                EXPECT_FALSE(bool(res.expires));
+                EXPECT_FALSE(res.mustRevalidate);
+                EXPECT_FALSE(bool(res.modified));
+                EXPECT_FALSE(bool(res.etag));
 
-                                  if (number <= max) {
-                                      req(i);
-                                  } else if (current == max) {
-                                      loop.stop();
-                                  }
-                              });
+                if (number <= max) {
+                    req(i);
+                } else if (current == max) {
+                    loop.stop();
+                }
+            }
+        );
     };
 
     for (int i = 0; i < concurrency; i++) {
@@ -284,7 +288,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/delayed" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/delayed"};
 
     // This request takes 200 milliseconds to answer.
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
@@ -301,9 +305,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
 
     // After 50 milliseconds, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
-    reachableTimer.start(Milliseconds(50), Duration::zero(), [] () {
-        mbgl::NetworkStatus::Reachable();
-    });
+    reachableTimer.start(Milliseconds(50), Duration::zero(), []() { mbgl::NetworkStatus::Reachable(); });
 
     loop.run();
 }
@@ -318,7 +320,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     const auto start = Clock::now();
     int counter = 0;
 
-    const Resource resource{ Resource::Unknown, "http://127.0.0.1:3001/test" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3001/test"};
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         const auto duration = std::chrono::duration<const double>(Clock::now() - start).count();
         if (counter == 0) {
@@ -345,9 +347,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
 
     // After 400 milliseconds, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
-    reachableTimer.start(Milliseconds(400), Duration::zero(), [] () {
-        mbgl::NetworkStatus::Reachable();
-    });
+    reachableTimer.start(Milliseconds(400), Duration::zero(), []() { mbgl::NetworkStatus::Reachable(); });
 
     fs->resume();
     loop.run();
@@ -357,13 +357,13 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusOnlineOffline)) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
-    const Resource resource { Resource::Unknown, "http://127.0.0.1:3000/test" };
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
     EXPECT_EQ(NetworkStatus::Get(), NetworkStatus::Status::Online) << "Default status should be Online";
     NetworkStatus::Set(NetworkStatus::Status::Offline);
 
     util::Timer onlineTimer;
-    onlineTimer.start(Milliseconds(100), Duration::zero(), [&] () {
+    onlineTimer.start(Milliseconds(100), Duration::zero(), [&]() {
         NetworkStatus::Set(NetworkStatus::Status::Online);
     });
 
@@ -441,7 +441,7 @@ TEST(OnlineFileSource, GetBaseURLAndApiKeyWhilePaused) {
     EXPECT_EQ(*fs->getProperty(API_KEY_KEY).getString(), apiKey);
 }
 
-TEST(OnlineFileSource, ChangeAPIBaseURL){
+TEST(OnlineFileSource, ChangeAPIBaseURL) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
     EXPECT_EQ(ResourceOptions::Default().tileServerOptions().baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
@@ -453,10 +453,10 @@ TEST(OnlineFileSource, ChangeAPIBaseURL){
     EXPECT_EQ(customURL, updatedTileServerOptions.baseURL());
 }
 
-TEST(OnlineFileSource, ChangeTileServerOptions){
+TEST(OnlineFileSource, ChangeTileServerOptions) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
-    
+
     TileServerOptions tileServerOptsChanged;
     tileServerOptsChanged.withApiKeyParameterName("apiKeyChanged")
         .withBaseURL("baseURLChanged")
@@ -468,8 +468,7 @@ TEST(OnlineFileSource, ChangeTileServerOptions){
         .withTileTemplate("tileTemplateChanged", "tileDomainChanged", {})
         .withUriSchemeAlias("uriSchemeAliasChanged");
     ResourceOptions resOpts;
-    resOpts.withApiKey("changedAPIKey")
-        .withTileServerOptions(tileServerOptsChanged);
+    resOpts.withApiKey("changedAPIKey").withTileServerOptions(tileServerOptsChanged);
 
     fs->setResourceOptions(resOpts.clone());
 
@@ -497,7 +496,6 @@ TEST(OnlineFileSource, ChangeTileServerOptions){
     EXPECT_EQ(resOpts.tileServerOptions().styleDomainName(), tileServerOptsChanged.styleDomainName());
     EXPECT_EQ(resOpts.tileServerOptions().styleVersionPrefix(), tileServerOptsChanged.styleVersionPrefix());
 }
-
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     util::RunLoop loop;
@@ -529,7 +527,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     });
 
     // Second regular priority request that should de-preoritize low priority request.
-    Resource regular2{ Resource::Unknown, "http://127.0.0.1:3000/load/3" };
+    Resource regular2{Resource::Unknown, "http://127.0.0.1:3000/load/3"};
     std::unique_ptr<AsyncRequest> req_2 = fs->request(regular2, [&](Response) {
         response_counter++;
         req_2.reset();
@@ -539,7 +537,6 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     NetworkStatus::Set(NetworkStatus::Status::Online);
     loop.run();
 }
-
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
     util::RunLoop loop;
@@ -557,17 +554,18 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
     for (int num_reqs = 0; num_reqs < 20; num_reqs++) {
         if (num_reqs % 2 == 0) {
             std::unique_ptr<AsyncRequest> req = fs->request(
-                {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)}, [&](Response) {
+                {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)},
+                [&](Response) {
                     response_counter++;
 
                     if (response_counter <= 10) { // count the high priority requests that arrive late correctly
                         correct_regular++;
                     }
-                });
+                }
+            );
             collector.push_back(std::move(req));
-        }
-        else {
-            Resource resource = { Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs) };
+        } else {
+            Resource resource = {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)};
             resource.setPriority(Resource::Priority::Low);
 
             std::unique_ptr<AsyncRequest> req = fs->request(std::move(resource), [&](Response) {

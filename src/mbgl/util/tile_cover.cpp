@@ -40,9 +40,8 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
     double y1 = ::fmin(ymax, std::ceil(e1.y1));
 
     // sort edges by x-coordinate
-    if ((e0.x0 == e1.x0 && e0.y0 == e1.y0) ?
-        (e0.x0 + e1.dy / e0.dy * e0.dx < e1.x1) :
-        (e0.x1 - e1.dy / e0.dy * e0.dx < e1.x0)) {
+    if ((e0.x0 == e1.x0 && e0.y0 == e1.y0) ? (e0.x0 + e1.dy / e0.dy * e0.dx < e1.x1)
+                                           : (e0.x1 - e1.dy / e0.dy * e0.dx < e1.x0)) {
         std::swap(e0, e1);
     }
 
@@ -59,20 +58,28 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
 }
 
 // scan-line conversion
-void scanTriangle(const Point<double>& a,
-                  const Point<double>& b,
-                  const Point<double>& c,
-                  int32_t ymin,
-                  int32_t ymax,
-                  ScanLine& scanLine) {
+void scanTriangle(
+    const Point<double>& a,
+    const Point<double>& b,
+    const Point<double>& c,
+    int32_t ymin,
+    int32_t ymax,
+    ScanLine& scanLine
+) {
     edge ab = edge(a, b);
     edge bc = edge(b, c);
     edge ca = edge(c, a);
 
     // sort edges by y-length
-    if (ab.dy > bc.dy) { std::swap(ab, bc); }
-    if (ab.dy > ca.dy) { std::swap(ab, ca); }
-    if (bc.dy > ca.dy) { std::swap(bc, ca); }
+    if (ab.dy > bc.dy) {
+        std::swap(ab, bc);
+    }
+    if (ab.dy > ca.dy) {
+        std::swap(ab, ca);
+    }
+    if (bc.dy > ca.dy) {
+        std::swap(bc, ca);
+    }
 
     // scan span! scan span!
     if (ab.dy) scanSpans(ca, ab, ymin, ymax, scanLine);
@@ -85,12 +92,14 @@ namespace util {
 
 namespace {
 
-std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
-                                       const Point<double>& tr,
-                                       const Point<double>& br,
-                                       const Point<double>& bl,
-                                       const Point<double>& c,
-                                       uint8_t z) {
+std::vector<UnwrappedTileID> tileCover(
+    const Point<double>& tl,
+    const Point<double>& tr,
+    const Point<double>& br,
+    const Point<double>& bl,
+    const Point<double>& c,
+    uint8_t z
+) {
     const int32_t tiles = 1 << z;
 
     struct ID {
@@ -106,7 +115,7 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
             for (x = x0; x < x1; ++x) {
                 const auto dx = x + 0.5 - c.x;
                 const auto dy = y + 0.5 - c.y;
-                t.emplace_back(ID{ x, y, dx * dx + dy * dy });
+                t.emplace_back(ID{x, y, dx * dx + dy * dy});
             }
         }
     };
@@ -124,9 +133,9 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
     });
 
     // Erase duplicate tile IDs (they typically occur at the common side of both triangles).
-    t.erase(std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) {
-                return a.x == b.x && a.y == b.y;
-            }), t.end());
+    t.erase(
+        std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) { return a.x == b.x && a.y == b.y; }), t.end()
+    );
 
     std::vector<UnwrappedTileID> result;
     result.reserve(t.size());
@@ -147,7 +156,9 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) {
     }
 }
 
-std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, const std::optional<uint8_t>& overscaledZ) {
+std::vector<OverscaledTileID> tileCover(
+    const TransformState& state, uint8_t z, const std::optional<uint8_t>& overscaledZ
+) {
     struct Node {
         AABB aabb;
         uint8_t zoom;
@@ -179,12 +190,13 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, 
     const double radiusOfMaxLvlLodInTiles = 3;
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
-        return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
-                uint8_t(0),
-                uint16_t(0),
-                uint16_t(0),
-                wrap,
-                false};
+        return {
+            AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
+            uint8_t(0),
+            uint16_t(0),
+            uint16_t(0),
+            wrap,
+            false};
     };
 
     // Perform depth-first traversal on tile tree to find visible tiles
@@ -256,8 +268,9 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, 
     }
 
     // Sort results by distance
-    std::sort(
-        result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
+    std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) {
+        return a.sqrDist < b.sqrDist;
+    });
 
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());
@@ -270,15 +283,14 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, 
 }
 
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds& bounds_, uint8_t z) {
-    if (bounds_.isEmpty() ||
-        bounds_.south() >  util::LATITUDE_MAX ||
-        bounds_.north() < -util::LATITUDE_MAX) {
+    if (bounds_.isEmpty() || bounds_.south() > util::LATITUDE_MAX || bounds_.north() < -util::LATITUDE_MAX) {
         return {};
     }
 
     LatLngBounds bounds = LatLngBounds::hull(
-        { std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west() },
-        { std::min(bounds_.north(),  util::LATITUDE_MAX), bounds_.east() });
+        {std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
+        {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()}
+    );
 
     return tileCover(
         Projection::project(bounds.northwest(), z),
@@ -286,7 +298,8 @@ std::vector<UnwrappedTileID> tileCover(const LatLngBounds& bounds_, uint8_t z) {
         Projection::project(bounds.southeast(), z),
         Projection::project(bounds.southwest(), z),
         Projection::project(bounds.center(), z),
-        z);
+        z
+    );
 }
 
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>& geometry, uint8_t z) {
@@ -302,7 +315,7 @@ std::vector<UnwrappedTileID> tileCover(const Geometry<double>& geometry, uint8_t
 // Taken from https://github.com/mapbox/sphericalmercator#xyzbbox-zoom-tms_style-srs
 // Computes the projected tiles for the lower left and upper right points of the bounds
 // and uses that to compute the tile cover count
-uint64_t tileCount(const LatLngBounds& bounds, uint8_t zoom){
+uint64_t tileCount(const LatLngBounds& bounds, uint8_t zoom) {
     if (zoom == 0) {
         return 1;
     }
@@ -329,14 +342,13 @@ uint64_t tileCount(const Geometry<double>& geometry, uint8_t z) {
     return tileCount;
 }
 
-TileCover::TileCover(const LatLngBounds&bounds_, uint8_t z) {
+TileCover::TileCover(const LatLngBounds& bounds_, uint8_t z) {
     LatLngBounds bounds = LatLngBounds::hull(
-        { std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west() },
-        { std::min(bounds_.north(),  util::LATITUDE_MAX), bounds_.east() });
+        {std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
+        {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()}
+    );
 
-    if (bounds.isEmpty() ||
-        bounds.south() >  util::LATITUDE_MAX ||
-        bounds.north() < -util::LATITUDE_MAX) {
+    if (bounds.isEmpty() || bounds.south() > util::LATITUDE_MAX || bounds.north() < -util::LATITUDE_MAX) {
         bounds = LatLngBounds::world();
     }
 
@@ -345,13 +357,12 @@ TileCover::TileCover(const LatLngBounds&bounds_, uint8_t z) {
     auto se = Projection::project(bounds.southeast(), z);
     auto nw = Projection::project(bounds.northwest(), z);
 
-    Polygon<double> p({ {sw, nw, ne, se, sw} });
+    Polygon<double> p({{sw, nw, ne, se, sw}});
     impl = std::make_unique<TileCover::Impl>(z, p, false);
 }
 
-TileCover::TileCover(const Geometry<double>& geom, uint8_t z, bool project/* = true*/)
- : impl( std::make_unique<TileCover::Impl>(z, geom, project)) {
-}
+TileCover::TileCover(const Geometry<double>& geom, uint8_t z, bool project /* = true*/)
+    : impl(std::make_unique<TileCover::Impl>(z, geom, project)) {}
 
 TileCover::~TileCover() = default;
 

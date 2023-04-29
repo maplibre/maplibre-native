@@ -12,19 +12,24 @@
 namespace mbgl {
 namespace style {
 
-static_assert(mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
-              "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
-              "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
-              "tile kind error");
+static_assert(
+    mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
+    "tile kind error"
+);
+static_assert(
+    mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
+    "tile kind error"
+);
+static_assert(
+    mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
+    "tile kind error"
+);
 
 static LayerObserver nullObserver;
 
 Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
-      observer(&nullObserver) {
-}
+      observer(&nullObserver) {}
 
 Layer::~Layer() = default;
 
@@ -71,8 +76,7 @@ VisibilityType Layer::getVisibility() const {
 }
 
 void Layer::setVisibility(VisibilityType value) {
-    if (value == getVisibility())
-        return;
+    if (value == getVisibility()) return;
     auto impl_ = mutableBaseImpl();
     impl_->visibility = value;
     baseImpl = std::move(impl_);
@@ -178,9 +182,12 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     } else if (name == "source-layer") {
         if (auto sourceLayer = convert<std::string>(value, *error)) {
             if (getTypeInfo()->source != LayerTypeInfo::Source::Required) {
-                Log::Warning(mbgl::Event::General,
-                             "'source-layer' property cannot be set to"
-                             "the layer " + baseImpl->id);
+                Log::Warning(
+                    mbgl::Event::General,
+                    "'source-layer' property cannot be set to"
+                    "the layer " +
+                        baseImpl->id
+                );
                 return std::nullopt;
             }
             setSourceLayer(*sourceLayer);
@@ -189,9 +196,12 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     } else if (name == "source") {
         if (auto sourceID = convert<std::string>(value, *error)) {
             if (getTypeInfo()->source != LayerTypeInfo::Source::Required) {
-                Log::Warning(mbgl::Event::General,
-                             "'source' property cannot be set to"
-                             "the layer " + baseImpl->id);
+                Log::Warning(
+                    mbgl::Event::General,
+                    "'source' property cannot be set to"
+                    "the layer " +
+                        baseImpl->id
+                );
                 return std::nullopt;
             }
             setSourceID(*sourceID);

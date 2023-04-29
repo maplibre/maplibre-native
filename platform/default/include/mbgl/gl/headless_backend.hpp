@@ -10,9 +10,9 @@ namespace gl {
 
 class HeadlessBackend final : public gl::RendererBackend, public gfx::HeadlessBackend {
 public:
-    HeadlessBackend(Size = {256, 256},
-                    SwapBehaviour = SwapBehaviour::NoFlush,
-                    gfx::ContextMode = gfx::ContextMode::Unique);
+    HeadlessBackend(
+        Size = {256, 256}, SwapBehaviour = SwapBehaviour::NoFlush, gfx::ContextMode = gfx::ContextMode::Unique
+    );
     ~HeadlessBackend() override;
     void updateAssumedState() override;
     gfx::Renderable& getDefaultRenderable() override;

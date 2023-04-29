@@ -10,21 +10,28 @@ namespace mbgl {
 namespace algorithm {
 
 template <typename T>
-bool tileNeedsMask(const std::reference_wrapper<T>& tile) { return tile.get().usedByRenderedLayers; }
-template <typename T> 
-void setTileMask(const std::reference_wrapper<T>& tile, TileMask&& mask ) { return tile.get().setMask(std::move(mask)); }
+bool tileNeedsMask(const std::reference_wrapper<T>& tile) {
+    return tile.get().usedByRenderedLayers;
+}
+template <typename T>
+void setTileMask(const std::reference_wrapper<T>& tile, TileMask&& mask) {
+    return tile.get().setMask(std::move(mask));
+}
 
 // Overloads for tests
-template <typename T> bool tileNeedsMask(const T& tile) { return tile.usedByRenderedLayers; }
-template <typename T> void setTileMask(T& tile, TileMask&& mask ) { return tile.setMask(std::move(mask)); }
+template <typename T>
+bool tileNeedsMask(const T& tile) {
+    return tile.usedByRenderedLayers;
+}
+template <typename T>
+void setTileMask(T& tile, TileMask&& mask) {
+    return tile.setMask(std::move(mask));
+}
 
 template <typename Iterator>
 void computeTileMasks(
-    const CanonicalTileID& root,
-    const UnwrappedTileID& ref,
-    const Iterator begin,
-    const Iterator end,
-    TileMask& mask) {
+    const CanonicalTileID& root, const UnwrappedTileID& ref, const Iterator begin, const Iterator end, TileMask& mask
+) {
     // If the reference or any of its children is found in the list, we need to recurse.
     for (auto it = begin; it != end; ++it) {
         const UnwrappedTileID& id = it->first;
@@ -35,7 +42,7 @@ void computeTileMasks(
         if (ref == id) {
             // The current tile is masked out, so we don't need to add them to the mask set.
             return;
-        } 
+        }
 
         if (id.isChildOf(ref)) {
             // There's at least one child tile that is masked out, so recursively descend.
@@ -118,9 +125,11 @@ void updateTileMasks(RenderableTilesMap& renderables) {
         // can never be children of the current wrap.
         auto child_it = std::next(it);
         const auto children_end = std::lower_bound(
-            child_it, end,
-            UnwrappedTileID{ static_cast<int16_t>(id.wrap + 1), { 0, 0, 0 } },
-            [](auto& a, auto& b) { return a.first < b; });
+            child_it,
+            end,
+            UnwrappedTileID{static_cast<int16_t>(id.wrap + 1), {0, 0, 0}},
+            [](auto& a, auto& b) { return a.first < b; }
+        );
 
         mask.clear();
         computeTileMasks(id.canonical, id, child_it, children_end, mask);

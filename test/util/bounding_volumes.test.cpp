@@ -67,14 +67,15 @@ TEST(BoundingVolumes, CreateFrustumFromProjectionMatrix) {
 
     const util::Frustum frustum = util::Frustum::fromInvProjMatrix(invProjMatrix, 1.0, 0.0, false);
 
-    const std::array<vec3, 8> expectedPoints = {vec3{-0.1, 0.1, -0.1},
-                                                vec3{0.1, 0.1, -0.1},
-                                                vec3{0.1, -0.1, -0.1},
-                                                vec3{-0.1, -0.1, -0.1},
-                                                vec3{-100.0, 100.0, -100.0},
-                                                vec3{100.0, 100.0, -100.0},
-                                                vec3{100.0, -100.0, -100.0},
-                                                vec3{-100.0, -100.0, -100.0}};
+    const std::array<vec3, 8> expectedPoints = {
+        vec3{-0.1, 0.1, -0.1},
+        vec3{0.1, 0.1, -0.1},
+        vec3{0.1, -0.1, -0.1},
+        vec3{-0.1, -0.1, -0.1},
+        vec3{-100.0, 100.0, -100.0},
+        vec3{100.0, 100.0, -100.0},
+        vec3{100.0, -100.0, -100.0},
+        vec3{-100.0, -100.0, -100.0}};
 
     const std::array<vec4, 6> expectedPlanes = {
 
@@ -108,7 +109,8 @@ TEST(BoundingVolumes, CreateFrustumFromProjectionMatrix) {
 }
 
 static util::Frustum createTestFrustum(
-    double fovy, double aspectRatio, double zNear, double zFar, double elevation, double bearing) {
+    double fovy, double aspectRatio, double zNear, double zFar, double elevation, double bearing
+) {
     mat4 proj;
     mat4 invProj;
 
@@ -136,8 +138,8 @@ TEST(BoundingVolumes, AabbFullyInsideFrustum) {
 TEST(BoundingVolumes, AabbIntersectsFrustum) {
     const util::Frustum frustum = createTestFrustum(M_PI_2, 1.0, 0.1, 100.0, -5.0, 0.0);
 
-    const std::array<util::AABB, 2> aabbArray = {util::AABB({-6, -6, 0}, {6, 6, 0}),
-                                                 util::AABB({-6, -6, 0}, {-5, -5, 0})};
+    const std::array<util::AABB, 2> aabbArray = {
+        util::AABB({-6, -6, 0}, {6, 6, 0}), util::AABB({-6, -6, 0}, {-5, -5, 0})};
 
     EXPECT_EQ(frustum.intersects(aabbArray[0]), util::IntersectionResult::Intersects);
     EXPECT_EQ(frustum.intersects(aabbArray[1]), util::IntersectionResult::Intersects);

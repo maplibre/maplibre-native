@@ -16,45 +16,50 @@ namespace android {
 
 class OfflineManager {
 public:
-
     class ListOfflineRegionsCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$ListOfflineRegionsCallback";}
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/offline/OfflineManager$ListOfflineRegionsCallback";
+        }
 
-        static void onError(jni::JNIEnv&, const jni::Object<OfflineManager::ListOfflineRegionsCallback>&, std::exception_ptr);
+        static void onError(
+            jni::JNIEnv&, const jni::Object<OfflineManager::ListOfflineRegionsCallback>&, std::exception_ptr
+        );
 
-        static void onList(jni::JNIEnv&,
-                            const jni::Object<FileSource>&,
-                            const jni::Object<OfflineManager::ListOfflineRegionsCallback>&,
-                            mbgl::OfflineRegions&);
+        static void
+        onList(jni::JNIEnv&, const jni::Object<FileSource>&, const jni::Object<OfflineManager::ListOfflineRegionsCallback>&, mbgl::OfflineRegions&);
     };
 
     class CreateOfflineRegionCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$CreateOfflineRegionCallback"; }
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/offline/OfflineManager$CreateOfflineRegionCallback";
+        }
 
-        static void onError(jni::JNIEnv&, const jni::Object<OfflineManager::CreateOfflineRegionCallback>&, std::exception_ptr);
+        static void onError(
+            jni::JNIEnv&, const jni::Object<OfflineManager::CreateOfflineRegionCallback>&, std::exception_ptr
+        );
 
-        static void onCreate(jni::JNIEnv&,
-                            const jni::Object<FileSource>&,
-                            const jni::Object<OfflineManager::CreateOfflineRegionCallback>&,
-                            mbgl::OfflineRegion&);
+        static void
+        onCreate(jni::JNIEnv&, const jni::Object<FileSource>&, const jni::Object<OfflineManager::CreateOfflineRegionCallback>&, mbgl::OfflineRegion&);
     };
 
     class MergeOfflineRegionsCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$MergeOfflineRegionsCallback";}
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/offline/OfflineManager$MergeOfflineRegionsCallback";
+        }
 
-        static void onError(jni::JNIEnv&, const jni::Object<OfflineManager::MergeOfflineRegionsCallback>&, std::exception_ptr);
+        static void onError(
+            jni::JNIEnv&, const jni::Object<OfflineManager::MergeOfflineRegionsCallback>&, std::exception_ptr
+        );
 
-        static void onMerge(jni::JNIEnv&,
-                            const jni::Object<FileSource>&,
-                            const jni::Object<MergeOfflineRegionsCallback>&,
-                            mbgl::OfflineRegions&);
+        static void
+        onMerge(jni::JNIEnv&, const jni::Object<FileSource>&, const jni::Object<MergeOfflineRegionsCallback>&, mbgl::OfflineRegions&);
     };
 
     struct FileSourceCallback {
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$FileSourceCallback";}
+        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager$FileSourceCallback"; }
 
         static void onSuccess(jni::JNIEnv&, const jni::Object<OfflineManager::FileSourceCallback>&);
 
@@ -70,26 +75,30 @@ public:
 
     void setOfflineMapboxTileCountLimit(jni::JNIEnv&, jni::jlong limit);
 
-    void listOfflineRegions(jni::JNIEnv&, const jni::Object<FileSource>&, const jni::Object<ListOfflineRegionsCallback>& callback);
+    void listOfflineRegions(
+        jni::JNIEnv&, const jni::Object<FileSource>&, const jni::Object<ListOfflineRegionsCallback>& callback
+    );
 
-    void createOfflineRegion(jni::JNIEnv&,
-                             const jni::Object<FileSource>& jFileSource_,
-                             const jni::Object<OfflineRegionDefinition>& definition,
-                             const jni::Array<jni::jbyte>& metadata,
-                             const jni::Object<OfflineManager::CreateOfflineRegionCallback>& callback);
+    void createOfflineRegion(
+        jni::JNIEnv&,
+        const jni::Object<FileSource>& jFileSource_,
+        const jni::Object<OfflineRegionDefinition>& definition,
+        const jni::Array<jni::jbyte>& metadata,
+        const jni::Object<OfflineManager::CreateOfflineRegionCallback>& callback
+    );
 
-    void mergeOfflineRegions(jni::JNIEnv&,
-                             const jni::Object<FileSource>&,
-                             const jni::String&,
-                             const jni::Object<MergeOfflineRegionsCallback>&);
+    void
+    mergeOfflineRegions(jni::JNIEnv&, const jni::Object<FileSource>&, const jni::String&, const jni::Object<MergeOfflineRegionsCallback>&);
 
-    void putResourceWithUrl(jni::JNIEnv&,
-                            const jni::String& url,
-                            const jni::Array<jni::jbyte>& data,
-                            jlong modified,
-                            jlong expires,
-                            const jni::String& eTag,
-                            jboolean mustRevalidate);
+    void putResourceWithUrl(
+        jni::JNIEnv&,
+        const jni::String& url,
+        const jni::Array<jni::jbyte>& data,
+        jlong modified,
+        jlong expires,
+        const jni::String& eTag,
+        jboolean mustRevalidate
+    );
 
     void resetDatabase(jni::JNIEnv&, const jni::Object<FileSourceCallback>& callback_);
 
@@ -99,7 +108,9 @@ public:
 
     void clearAmbientCache(jni::JNIEnv&, const jni::Object<FileSourceCallback>& callback_);
 
-    void setMaximumAmbientCacheSize(jni::JNIEnv&, const jni::jlong size, const jni::Object<FileSourceCallback>& callback_);
+    void setMaximumAmbientCacheSize(
+        jni::JNIEnv&, const jni::jlong size, const jni::Object<FileSourceCallback>& callback_
+    );
 
     void runPackDatabaseAutomatically(jni::JNIEnv&, jboolean autopack);
 

@@ -5,9 +5,7 @@
 namespace mbgl {
 namespace gl {
 
-void VertexArray::bind(Context& context,
-                       const gfx::IndexBuffer& indexBuffer,
-                       const AttributeBindingArray& bindings) {
+void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, const AttributeBindingArray& bindings) {
     context.bindVertexArray = state->vertexArray;
     state->indexBuffer = indexBuffer.getResource<gl::IndexBufferResource>().buffer;
 

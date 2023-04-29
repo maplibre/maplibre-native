@@ -33,9 +33,7 @@ public:
         cb();
     }
 
-    void sync(std::promise<void> barrier) {
-        barrier.set_value();
-    }
+    void sync(std::promise<void> barrier) { barrier.set_value(); }
 
 private:
     AsyncTask *async;
@@ -142,7 +140,9 @@ TEST(AsyncTask, ThreadSafety) {
 
     for (unsigned i = 0; i < numThreads; ++i) {
         // The callback runs on the worker, thus the atomic type.
-        workerRef.invoke(&TestWorker::runWithCallback, [&] { if (!--completed) loop.stop(); });
+        workerRef.invoke(&TestWorker::runWithCallback, [&] {
+            if (!--completed) loop.stop();
+        });
     }
 
     loop.run();
@@ -207,8 +207,9 @@ TEST(AsyncTask, MultipleSequencedSchedulers) {
 
     for (int i = 0; i < 10; ++i) {
         std::shared_ptr<Scheduler> scheduler = Scheduler::GetSequenced();
-        EXPECT_TRUE(std::none_of(
-            shedulers.begin(), shedulers.end(), [&scheduler](const auto &item) { return item == scheduler; }));
+        EXPECT_TRUE(std::none_of(shedulers.begin(), shedulers.end(), [&scheduler](const auto &item) {
+            return item == scheduler;
+        }));
         shedulers.emplace_back(std::move(scheduler));
     }
     EXPECT_EQ(shedulers.front(), std::shared_ptr<Scheduler>(Scheduler::GetSequenced()));

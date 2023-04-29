@@ -15,12 +15,14 @@ class OverscaledTileID;
 
 class DebugBucket : private util::noncopyable {
 public:
-    DebugBucket(const OverscaledTileID& id,
-                bool renderable,
-                bool complete,
-                std::optional<Timestamp> modified,
-                std::optional<Timestamp> expires,
-                MapDebugOptions);
+    DebugBucket(
+        const OverscaledTileID& id,
+        bool renderable,
+        bool complete,
+        std::optional<Timestamp> modified,
+        std::optional<Timestamp> expires,
+        MapDebugOptions
+    );
 
     void upload(gfx::UploadPass&);
 
@@ -29,7 +31,6 @@ public:
     const std::optional<Timestamp> modified;
     const std::optional<Timestamp> expires;
     const MapDebugOptions debugMode;
-
 
     gfx::VertexVector<FillLayoutVertex> vertices;
     gfx::IndexVector<gfx::Lines> indices;

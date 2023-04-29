@@ -10,8 +10,8 @@
 #include <cmath>
 
 namespace {
-    // Zero width space that is used to suggest break points for Japanese labels.
-    char16_t ZWSP = u'\u200b';
+// Zero width space that is used to suggest break points for Japanese labels.
+char16_t ZWSP = u'\u200b';
 } // namespace
 
 namespace mbgl {
@@ -21,33 +21,33 @@ AnchorAlignment AnchorAlignment::getAnchorAlignment(style::SymbolAnchorType anch
     AnchorAlignment result(0.5f, 0.5f);
 
     switch (anchor) {
-    case style::SymbolAnchorType::Right:
-    case style::SymbolAnchorType::TopRight:
-    case style::SymbolAnchorType::BottomRight:
-        result.horizontalAlign = 1.0f;
-        break;
-    case style::SymbolAnchorType::Left:
-    case style::SymbolAnchorType::TopLeft:
-    case style::SymbolAnchorType::BottomLeft:
-        result.horizontalAlign = 0.0f;
-        break;
-    default:
-        break;
+        case style::SymbolAnchorType::Right:
+        case style::SymbolAnchorType::TopRight:
+        case style::SymbolAnchorType::BottomRight:
+            result.horizontalAlign = 1.0f;
+            break;
+        case style::SymbolAnchorType::Left:
+        case style::SymbolAnchorType::TopLeft:
+        case style::SymbolAnchorType::BottomLeft:
+            result.horizontalAlign = 0.0f;
+            break;
+        default:
+            break;
     }
 
     switch (anchor) {
-    case style::SymbolAnchorType::Bottom:
-    case style::SymbolAnchorType::BottomLeft:
-    case style::SymbolAnchorType::BottomRight:
-        result.verticalAlign = 1.0f;
-        break;
-    case style::SymbolAnchorType::Top:
-    case style::SymbolAnchorType::TopLeft:
-    case style::SymbolAnchorType::TopRight:
-        result.verticalAlign = 0.0f;
-        break;
-    default:
-        break;
+        case style::SymbolAnchorType::Bottom:
+        case style::SymbolAnchorType::BottomLeft:
+        case style::SymbolAnchorType::BottomRight:
+            result.verticalAlign = 1.0f;
+            break;
+        case style::SymbolAnchorType::Top:
+        case style::SymbolAnchorType::TopLeft:
+        case style::SymbolAnchorType::TopRight:
+            result.verticalAlign = 0.0f;
+            break;
+        default:
+            break;
     }
 
     return result;
@@ -55,22 +55,22 @@ AnchorAlignment AnchorAlignment::getAnchorAlignment(style::SymbolAnchorType anch
 
 style::TextJustifyType getAnchorJustification(style::SymbolAnchorType anchor) {
     switch (anchor) {
-    case style::SymbolAnchorType::Right:
-    case style::SymbolAnchorType::TopRight:
-    case style::SymbolAnchorType::BottomRight:
-        return style::TextJustifyType::Right;
-    case style::SymbolAnchorType::Left:
-    case style::SymbolAnchorType::TopLeft:
-    case style::SymbolAnchorType::BottomLeft:
-        return style::TextJustifyType::Left;
-    default:
-        return style::TextJustifyType::Center;
+        case style::SymbolAnchorType::Right:
+        case style::SymbolAnchorType::TopRight:
+        case style::SymbolAnchorType::BottomRight:
+            return style::TextJustifyType::Right;
+        case style::SymbolAnchorType::Left:
+        case style::SymbolAnchorType::TopLeft:
+        case style::SymbolAnchorType::BottomLeft:
+            return style::TextJustifyType::Left;
+        default:
+            return style::TextJustifyType::Center;
     }
 }
 
-PositionedIcon PositionedIcon::shapeIcon(const ImagePosition& image,
-                                         const std::array<float, 2>& iconOffset,
-                                         style::SymbolAnchorType iconAnchor) {
+PositionedIcon PositionedIcon::shapeIcon(
+    const ImagePosition& image, const std::array<float, 2>& iconOffset, style::SymbolAnchorType iconAnchor
+) {
     AnchorAlignment anchorAlign = AnchorAlignment::getAnchorAlignment(iconAnchor);
     float dx = iconOffset[0];
     float dy = iconOffset[1];
@@ -92,11 +92,13 @@ PositionedIcon PositionedIcon::shapeIcon(const ImagePosition& image,
     return PositionedIcon{image, top, bottom, left, right, collisionPadding};
 }
 
-void PositionedIcon::fitIconToText(const Shaping& shapedText,
-                                   const style::IconTextFitType textFit,
-                                   const std::array<float, 4>& padding,
-                                   const std::array<float, 2>& iconOffset,
-                                   const float fontScale) {
+void PositionedIcon::fitIconToText(
+    const Shaping& shapedText,
+    const style::IconTextFitType textFit,
+    const std::array<float, 4>& padding,
+    const std::array<float, 2>& iconOffset,
+    const float fontScale
+) {
     assert(textFit != style::IconTextFitType::None);
     assert(shapedText);
 
@@ -130,15 +132,17 @@ void PositionedIcon::fitIconToText(const Shaping& shapedText,
     }
 }
 
-void align(Shaping& shaping,
-           float justify,
-           float horizontalAlign,
-           float verticalAlign,
-           float maxLineLength,
-           float maxLineHeight,
-           float lineHeight,
-           float blockHeight,
-           std::size_t lineCount) {
+void align(
+    Shaping& shaping,
+    float justify,
+    float horizontalAlign,
+    float verticalAlign,
+    float maxLineLength,
+    float maxLineHeight,
+    float lineHeight,
+    float blockHeight,
+    std::size_t lineCount
+) {
     const float shiftX = (justify - horizontalAlign) * maxLineLength;
     float shiftY = 0.0f;
 
@@ -171,12 +175,14 @@ void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, 
     }
 }
 
-float getGlyphAdvance(char16_t codePoint,
-                      const SectionOptions& section,
-                      const GlyphMap& glyphMap,
-                      const ImagePositions& imagePositions,
-                      float layoutTextSize,
-                      float spacing) {
+float getGlyphAdvance(
+    char16_t codePoint,
+    const SectionOptions& section,
+    const GlyphMap& glyphMap,
+    const ImagePositions& imagePositions,
+    float layoutTextSize,
+    float spacing
+) {
     if (!section.imageID) {
         auto glyphs = glyphMap.find(section.fontStackHash);
         if (glyphs == glyphMap.end()) {
@@ -192,24 +198,27 @@ float getGlyphAdvance(char16_t codePoint,
         if (image == imagePositions.end()) {
             return 0.0f;
         }
-        return image->second.displaySize()[0] * static_cast<float>(section.scale) * util::ONE_EM / layoutTextSize + spacing;
+        return image->second.displaySize()[0] * static_cast<float>(section.scale) * util::ONE_EM / layoutTextSize +
+               spacing;
     }
 }
 
-float determineAverageLineWidth(const TaggedString& logicalInput,
-                                float spacing,
-                                float maxWidth,
-                                const GlyphMap& glyphMap,
-                                const ImagePositions& imagePositions,
-                                float layoutTextSize) {
+float determineAverageLineWidth(
+    const TaggedString& logicalInput,
+    float spacing,
+    float maxWidth,
+    const GlyphMap& glyphMap,
+    const ImagePositions& imagePositions,
+    float layoutTextSize
+) {
     float totalWidth = 0;
-    
+
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
         char16_t codePoint = logicalInput.getCharCodeAt(i);
         totalWidth += getGlyphAdvance(codePoint, section, glyphMap, imagePositions, layoutTextSize, spacing);
     }
-    
+
     auto targetLineCount = static_cast<int32_t>(::fmax(1, std::ceil(totalWidth / maxWidth)));
     return totalWidth / targetLineCount;
 }
@@ -241,7 +250,7 @@ float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penaliza
     if (codePoint == 0x28 || codePoint == 0xff08) {
         penalty += 50;
     }
-    
+
     // Penalize close parenthesis at beginning of line
     if (nextCodePoint == 0x29 || nextCodePoint == 0xff09) {
         penalty += 50;
@@ -257,29 +266,38 @@ float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penaliza
 }
 
 struct PotentialBreak {
-    PotentialBreak(const std::size_t p_index, const float p_x, const PotentialBreak* p_priorBreak, const float p_badness)
-    : index(p_index), x(p_x), priorBreak(p_priorBreak), badness(p_badness)
-    {}
-    
+    PotentialBreak(
+        const std::size_t p_index, const float p_x, const PotentialBreak* p_priorBreak, const float p_badness
+    )
+        : index(p_index),
+          x(p_x),
+          priorBreak(p_priorBreak),
+          badness(p_badness) {}
+
     const std::size_t index;
     const float x;
     const PotentialBreak* priorBreak;
     const float badness;
 };
 
-
-PotentialBreak evaluateBreak(const std::size_t breakIndex, const float breakX, const float targetWidth, const std::list<PotentialBreak>& potentialBreaks, const float penalty, const bool isLastBreak) {
+PotentialBreak evaluateBreak(
+    const std::size_t breakIndex,
+    const float breakX,
+    const float targetWidth,
+    const std::list<PotentialBreak>& potentialBreaks,
+    const float penalty,
+    const bool isLastBreak
+) {
     // We could skip evaluating breaks where the line length (breakX - priorBreak.x) > maxWidth
     //  ...but in fact we allow lines longer than maxWidth (if there's no break points)
     //  ...and when targetWidth and maxWidth are close, strictly enforcing maxWidth can give
     //     more lopsided results.
-    
+
     const PotentialBreak* bestPriorBreak = nullptr;
     float bestBreakBadness = calculateBadness(breakX, targetWidth, penalty, isLastBreak);
     for (const auto& potentialBreak : potentialBreaks) {
         const float lineWidth = breakX - potentialBreak.x;
-        float breakBadness =
-        calculateBadness(lineWidth, targetWidth, penalty, isLastBreak) + potentialBreak.badness;
+        float breakBadness = calculateBadness(lineWidth, targetWidth, penalty, isLastBreak) + potentialBreak.badness;
         if (breakBadness <= bestBreakBadness) {
             bestPriorBreak = &potentialBreak;
             bestBreakBadness = breakBadness;
@@ -290,7 +308,7 @@ PotentialBreak evaluateBreak(const std::size_t breakIndex, const float breakX, c
 }
 
 std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
-    std::set<std::size_t> leastBadBreaks = { lastLineBreak.index };
+    std::set<std::size_t> leastBadBreaks = {lastLineBreak.index};
     const PotentialBreak* priorBreak = lastLineBreak.priorBreak;
     while (priorBreak) {
         leastBadBreaks.insert(priorBreak->index);
@@ -299,30 +317,32 @@ std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
     return leastBadBreaks;
 }
 
-
 // We determine line breaks based on shaped text in logical order. Working in visual order would be
 //  more intuitive, but we can't do that because the visual order may be changed by line breaks!
-std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
-                                          const float spacing,
-                                          float maxWidth,
-                                          const GlyphMap& glyphMap,
-                                          const ImagePositions& imagePositions,
-                                          float layoutTextSize) {
+std::set<std::size_t> determineLineBreaks(
+    const TaggedString& logicalInput,
+    const float spacing,
+    float maxWidth,
+    const GlyphMap& glyphMap,
+    const ImagePositions& imagePositions,
+    float layoutTextSize
+) {
     if (!maxWidth) {
         return {};
     }
-    
+
     if (logicalInput.empty()) {
         return {};
     }
 
-    const float targetWidth =
-        determineAverageLineWidth(logicalInput, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize);
+    const float targetWidth = determineAverageLineWidth(
+        logicalInput, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize
+    );
 
     std::list<PotentialBreak> potentialBreaks;
     float currentX = 0;
     // Find first occurance of zero width space (ZWSP) character.
-    const bool hasServerSuggestedBreaks = logicalInput.rawText().find_first_of(ZWSP) !=  std::string::npos;
+    const bool hasServerSuggestedBreaks = logicalInput.rawText().find_first_of(ZWSP) != std::string::npos;
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
@@ -338,41 +358,49 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
             if (section.imageID || allowsIdeographicBreak || util::i18n::allowsWordBreaking(codePoint)) {
                 const bool penalizableIdeographicBreak = allowsIdeographicBreak && hasServerSuggestedBreaks;
                 const std::size_t nextIndex = i + 1;
-                potentialBreaks.push_back(evaluateBreak(nextIndex, currentX, targetWidth, potentialBreaks,
-                                                        calculatePenalty(codePoint, logicalInput.getCharCodeAt(nextIndex), penalizableIdeographicBreak),
-                                                        false));
+                potentialBreaks.push_back(evaluateBreak(
+                    nextIndex,
+                    currentX,
+                    targetWidth,
+                    potentialBreaks,
+                    calculatePenalty(codePoint, logicalInput.getCharCodeAt(nextIndex), penalizableIdeographicBreak),
+                    false
+                ));
             }
         }
     }
-    
+
     return leastBadBreaks(evaluateBreak(logicalInput.length(), currentX, targetWidth, potentialBreaks, 0, true));
 }
 
-void shapeLines(Shaping& shaping,
-                std::vector<TaggedString>& lines,
-                const float spacing,
-                const float lineHeight,
-                const style::SymbolAnchorType textAnchor,
-                const style::TextJustifyType textJustify,
-                const WritingModeType writingMode,
-                const GlyphMap& glyphMap,
-                const GlyphPositions& glyphPositions,
-                const ImagePositions& imagePositions,
-                float layoutTextSize,
-                bool allowVerticalPlacement) {
+void shapeLines(
+    Shaping& shaping,
+    std::vector<TaggedString>& lines,
+    const float spacing,
+    const float lineHeight,
+    const style::SymbolAnchorType textAnchor,
+    const style::TextJustifyType textJustify,
+    const WritingModeType writingMode,
+    const GlyphMap& glyphMap,
+    const GlyphPositions& glyphPositions,
+    const ImagePositions& imagePositions,
+    float layoutTextSize,
+    bool allowVerticalPlacement
+) {
     float x = 0.0f;
     float y = Shaping::yOffset;
 
     float maxLineLength = 0.0f;
     float maxLineHeight = 0.0f;
 
-    const float justify =
-        textJustify == style::TextJustifyType::Right ? 1.0f : textJustify == style::TextJustifyType::Left ? 0.0f : 0.5f;
+    const float justify = textJustify == style::TextJustifyType::Right  ? 1.0f
+                          : textJustify == style::TextJustifyType::Left ? 0.0f
+                                                                        : 0.5f;
 
     for (TaggedString& line : lines) {
         // Collapse whitespace so it doesn't throw off justification
         line.trim();
-        
+
         const double lineMaxScale = line.getMaxScale();
         const double maxLineOffset = (lineMaxScale - 1.0) * util::ONE_EM;
         double lineOffset = 0.0;
@@ -384,7 +412,7 @@ void shapeLines(Shaping& shaping,
             y += lineHeight; // Still need a line feed after empty line
             continue;
         }
-        
+
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);
@@ -460,36 +488,40 @@ void shapeLines(Shaping& shaping,
 
                 // Difference between height of an image and one EM at max line scale.
                 // Pushes current line down if an image size is over 1 EM at max line scale.
-                double offset =
-                    (vertical ? displaySize[0] : displaySize[1]) * sectionScale - util::ONE_EM * lineMaxScale;
+                double offset = (vertical ? displaySize[0] : displaySize[1]) * sectionScale -
+                                util::ONE_EM * lineMaxScale;
                 if (offset > 0.0 && offset > lineOffset) {
                     lineOffset = offset;
                 }
             }
 
             if (!vertical) {
-                positionedGlyphs.emplace_back(codePoint,
-                                              x,
-                                              y + static_cast<float>(baselineOffset),
-                                              vertical,
-                                              section.fontStackHash,
-                                              static_cast<float>(sectionScale),
-                                              rect,
-                                              metrics,
-                                              section.imageID,
-                                              sectionIndex);
+                positionedGlyphs.emplace_back(
+                    codePoint,
+                    x,
+                    y + static_cast<float>(baselineOffset),
+                    vertical,
+                    section.fontStackHash,
+                    static_cast<float>(sectionScale),
+                    rect,
+                    metrics,
+                    section.imageID,
+                    sectionIndex
+                );
                 x += advance * static_cast<float>(sectionScale) + spacing;
             } else {
-                positionedGlyphs.emplace_back(codePoint,
-                                              x,
-                                              y + static_cast<float>(baselineOffset),
-                                              vertical,
-                                              section.fontStackHash,
-                                              static_cast<float>(sectionScale),
-                                              rect,
-                                              metrics,
-                                              section.imageID,
-                                              sectionIndex);
+                positionedGlyphs.emplace_back(
+                    codePoint,
+                    x,
+                    y + static_cast<float>(baselineOffset),
+                    vertical,
+                    section.fontStackHash,
+                    static_cast<float>(sectionScale),
+                    rect,
+                    metrics,
+                    section.imageID,
+                    sectionIndex
+                );
                 x += verticalAdvance * static_cast<float>(sectionScale) + spacing;
                 shaping.verticalizable |= true;
             }
@@ -511,15 +543,17 @@ void shapeLines(Shaping& shaping,
 
     auto anchorAlign = AnchorAlignment::getAnchorAlignment(textAnchor);
     const float height = y - Shaping::yOffset;
-    align(shaping,
-          justify,
-          anchorAlign.horizontalAlign,
-          anchorAlign.verticalAlign,
-          maxLineLength,
-          maxLineHeight,
-          lineHeight,
-          height,
-          lines.size());
+    align(
+        shaping,
+        justify,
+        anchorAlign.horizontalAlign,
+        anchorAlign.verticalAlign,
+        maxLineLength,
+        maxLineHeight,
+        lineHeight,
+        height,
+        lines.size()
+    );
 
     // Calculate the bounding box
     shaping.top += -anchorAlign.verticalAlign * height;
@@ -528,51 +562,57 @@ void shapeLines(Shaping& shaping,
     shaping.right = shaping.left + maxLineLength;
 }
 
-Shaping getShaping(const TaggedString& formattedString,
-                   const float maxWidth,
-                   const float lineHeight,
-                   const style::SymbolAnchorType textAnchor,
-                   const style::TextJustifyType textJustify,
-                   const float spacing,
-                   const std::array<float, 2>& translate,
-                   const WritingModeType writingMode,
-                   BiDi& bidi,
-                   const GlyphMap& glyphMap,
-                   const GlyphPositions& glyphPositions,
-                   const ImagePositions& imagePositions,
-                   float layoutTextSize,
-                   float layoutTextSizeAtBucketZoomLevel,
-                   bool allowVerticalPlacement) {
+Shaping getShaping(
+    const TaggedString& formattedString,
+    const float maxWidth,
+    const float lineHeight,
+    const style::SymbolAnchorType textAnchor,
+    const style::TextJustifyType textJustify,
+    const float spacing,
+    const std::array<float, 2>& translate,
+    const WritingModeType writingMode,
+    BiDi& bidi,
+    const GlyphMap& glyphMap,
+    const GlyphPositions& glyphPositions,
+    const ImagePositions& imagePositions,
+    float layoutTextSize,
+    float layoutTextSizeAtBucketZoomLevel,
+    bool allowVerticalPlacement
+) {
     assert(layoutTextSize);
     std::vector<TaggedString> reorderedLines;
     if (formattedString.sectionCount() == 1) {
         auto untaggedLines = bidi.processText(
             formattedString.rawText(),
-            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize)
+        );
         for (const auto& line : untaggedLines) {
             reorderedLines.emplace_back(line, formattedString.sectionAt(0));
         }
     } else {
         auto processedLines = bidi.processStyledText(
             formattedString.getStyledText(),
-            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize)
+        );
         for (const auto& line : processedLines) {
             reorderedLines.emplace_back(line, formattedString.getSections());
         }
     }
     Shaping shaping(translate[0], translate[1], writingMode);
-    shapeLines(shaping,
-               reorderedLines,
-               spacing,
-               lineHeight,
-               textAnchor,
-               textJustify,
-               writingMode,
-               glyphMap,
-               glyphPositions,
-               imagePositions,
-               layoutTextSizeAtBucketZoomLevel,
-               allowVerticalPlacement);
+    shapeLines(
+        shaping,
+        reorderedLines,
+        spacing,
+        lineHeight,
+        textAnchor,
+        textJustify,
+        writingMode,
+        glyphMap,
+        glyphPositions,
+        imagePositions,
+        layoutTextSizeAtBucketZoomLevel,
+        allowVerticalPlacement
+    );
 
     return shaping;
 }

@@ -7,8 +7,8 @@ namespace style {
 
 /**
  * @brief An interface, wrapping evaluated layer properties.
- * 
- *  It is an abstract base class; concrete derived classes that hold the actual data are provided for each layer type. 
+ *
+ *  It is an abstract base class; concrete derived classes that hold the actual data are provided for each layer type.
  */
 class LayerProperties {
 public:
@@ -20,7 +20,8 @@ public:
     uint8_t renderPasses = 0u;
 
 protected:
-    LayerProperties(Immutable<Layer::Impl> impl) : baseImpl(std::move(impl)) {}
+    LayerProperties(Immutable<Layer::Impl> impl)
+        : baseImpl(std::move(impl)) {}
 };
 
 template <class Derived>

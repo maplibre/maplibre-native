@@ -19,11 +19,13 @@ const AnnotationSource::Impl& RenderAnnotationSource::impl() const {
     return static_cast<const AnnotationSource::Impl&>(*baseImpl);
 }
 
-void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
-                                    const std::vector<Immutable<style::LayerProperties>>& layers,
-                                    const bool needsRendering,
-                                    const bool needsRelayout,
-                                    const TileParameters& parameters) {
+void RenderAnnotationSource::update(
+    Immutable<style::Source::Impl> baseImpl_,
+    const std::vector<Immutable<style::LayerProperties>>& layers,
+    const bool needsRendering,
+    const bool needsRelayout,
+    const TileParameters& parameters
+) {
     std::swap(baseImpl, baseImpl_);
 
     enabled = needsRendering;
@@ -39,21 +41,22 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
         // See https://github.com/mapbox/mapbox-gl-native/issues/10197
         {0, 16},
         std::nullopt,
-        [&](const OverscaledTileID& tileID) { return std::make_unique<AnnotationTile>(tileID, parameters); });
+        [&](const OverscaledTileID& tileID) { return std::make_unique<AnnotationTile>(tileID, parameters); }
+    );
 }
 
-std::unordered_map<std::string, std::vector<Feature>>
-RenderAnnotationSource::queryRenderedFeatures(const ScreenLineString& geometry,
-                                              const TransformState& transformState,
-                                              const std::unordered_map<std::string, const RenderLayer*>& layers,
-                                              const RenderedQueryOptions& options,
-                                              const mat4& projMatrix) const {
+std::unordered_map<std::string, std::vector<Feature>> RenderAnnotationSource::queryRenderedFeatures(
+    const ScreenLineString& geometry,
+    const TransformState& transformState,
+    const std::unordered_map<std::string, const RenderLayer*>& layers,
+    const RenderedQueryOptions& options,
+    const mat4& projMatrix
+) const {
     return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, {});
 }
 
 std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&) const {
     return {};
 }
-
 
 } // namespace mbgl

@@ -42,10 +42,11 @@ template <class T>
 class PropertyExpression final : public PropertyExpressionBase {
 public:
     // Second parameter to be used only for conversions from legacy functions.
-    PropertyExpression(std::unique_ptr<expression::Expression> expression_, std::optional<T> defaultValue_ = std::nullopt)
+    PropertyExpression(
+        std::unique_ptr<expression::Expression> expression_, std::optional<T> defaultValue_ = std::nullopt
+    )
         : PropertyExpressionBase(std::move(expression_)),
-          defaultValue(std::move(defaultValue_)) {
-    }
+          defaultValue(std::move(defaultValue_)) {}
 
     T evaluate(const expression::EvaluationContext& context, T finalDefaultValue = T()) const {
         const expression::EvaluationResult result = expression->evaluate(context);
@@ -68,56 +69,66 @@ public:
         return evaluate(expression::EvaluationContext(&feature), finalDefaultValue);
     }
 
-    T evaluate(const GeometryTileFeature& feature,
-               const std::set<std::string>& availableImages,
-               T finalDefaultValue) const {
-        return evaluate(expression::EvaluationContext(&feature).withAvailableImages(&availableImages),
-                        finalDefaultValue);
+    T evaluate(const GeometryTileFeature& feature, const std::set<std::string>& availableImages, T finalDefaultValue)
+        const {
+        return evaluate(
+            expression::EvaluationContext(&feature).withAvailableImages(&availableImages), finalDefaultValue
+        );
     }
 
     T evaluate(const GeometryTileFeature& feature, const CanonicalTileID& canonical, T finalDefaultValue) const {
         return evaluate(expression::EvaluationContext(&feature).withCanonicalTileID(&canonical), finalDefaultValue);
     }
 
-    T evaluate(const GeometryTileFeature& feature,
-               const std::set<std::string>& availableImages,
-               const CanonicalTileID& canonical,
-               T finalDefaultValue) const {
-        return evaluate(expression::EvaluationContext(&feature)
-                            .withAvailableImages(&availableImages)
-                            .withCanonicalTileID(&canonical),
-                        finalDefaultValue);
+    T evaluate(
+        const GeometryTileFeature& feature,
+        const std::set<std::string>& availableImages,
+        const CanonicalTileID& canonical,
+        T finalDefaultValue
+    ) const {
+        return evaluate(
+            expression::EvaluationContext(&feature)
+                .withAvailableImages(&availableImages)
+                .withCanonicalTileID(&canonical),
+            finalDefaultValue
+        );
     }
 
     T evaluate(float zoom, const GeometryTileFeature& feature, T finalDefaultValue) const {
         return evaluate(expression::EvaluationContext(zoom, &feature), finalDefaultValue);
     }
 
-    T evaluate(float zoom,
-               const GeometryTileFeature& feature,
-               const std::set<std::string>& availableImages,
-               T finalDefaultValue) const {
-        return evaluate(expression::EvaluationContext(zoom, &feature).withAvailableImages(&availableImages),
-                        finalDefaultValue);
+    T evaluate(
+        float zoom,
+        const GeometryTileFeature& feature,
+        const std::set<std::string>& availableImages,
+        T finalDefaultValue
+    ) const {
+        return evaluate(
+            expression::EvaluationContext(zoom, &feature).withAvailableImages(&availableImages), finalDefaultValue
+        );
     }
 
-    T evaluate(float zoom,
-               const GeometryTileFeature& feature,
-               const std::set<std::string>& availableImages,
-               const CanonicalTileID& canonical,
-               T finalDefaultValue) const {
-        return evaluate(expression::EvaluationContext(zoom, &feature)
-                            .withAvailableImages(&availableImages)
-                            .withCanonicalTileID(&canonical),
-                        finalDefaultValue);
+    T evaluate(
+        float zoom,
+        const GeometryTileFeature& feature,
+        const std::set<std::string>& availableImages,
+        const CanonicalTileID& canonical,
+        T finalDefaultValue
+    ) const {
+        return evaluate(
+            expression::EvaluationContext(zoom, &feature)
+                .withAvailableImages(&availableImages)
+                .withCanonicalTileID(&canonical),
+            finalDefaultValue
+        );
     }
 
-    T evaluate(float zoom,
-               const GeometryTileFeature& feature,
-               const CanonicalTileID& canonical,
-               T finalDefaultValue) const {
-        return evaluate(expression::EvaluationContext(zoom, &feature).withCanonicalTileID(&canonical),
-                        finalDefaultValue);
+    T evaluate(float zoom, const GeometryTileFeature& feature, const CanonicalTileID& canonical, T finalDefaultValue)
+        const {
+        return evaluate(
+            expression::EvaluationContext(zoom, &feature).withCanonicalTileID(&canonical), finalDefaultValue
+        );
     }
 
     T evaluate(float zoom, const GeometryTileFeature& feature, const FeatureState& state, T finalDefaultValue) const {
@@ -129,8 +140,7 @@ public:
         return expression::fromExpressionValues<T>(expression->possibleOutputs());
     }
 
-    friend bool operator==(const PropertyExpression& lhs,
-                           const PropertyExpression& rhs) {
+    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) {
         return *lhs.expression == *rhs.expression;
     }
 

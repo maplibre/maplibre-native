@@ -21,15 +21,17 @@ class CrossTileSymbolLayerIndex;
 
 class PlacedSymbol {
 public:
-    PlacedSymbol(Point<float> anchorPoint_,
-                 std::size_t segment_,
-                 float lowerSize_,
-                 float upperSize_,
-                 std::array<float, 2> lineOffset_,
-                 WritingModeType writingModes_,
-                 GeometryCoordinates line_,
-                 std::vector<float> tileDistances_,
-                 std::optional<size_t> placedIconIndex_ = std::nullopt)
+    PlacedSymbol(
+        Point<float> anchorPoint_,
+        std::size_t segment_,
+        float lowerSize_,
+        float upperSize_,
+        std::array<float, 2> lineOffset_,
+        WritingModeType writingModes_,
+        GeometryCoordinates line_,
+        std::vector<float> tileDistances_,
+        std::optional<size_t> placedIconIndex_ = std::nullopt
+    )
         : anchorPoint(anchorPoint_),
           segment(segment_),
           lowerSize(lowerSize_),
@@ -65,28 +67,31 @@ public:
 
 class SymbolBucket final : public Bucket {
 public:
-    SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEvaluated>,
-                 const std::map<std::string, Immutable<style::LayerProperties>>&,
-                 const style::PropertyValue<float>& textSize,
-                 const style::PropertyValue<float>& iconSize,
-                 float zoom,
-                 bool iconsNeedLinear,
-                 bool sortFeaturesByY,
-                 std::string bucketName_,
-                 const std::vector<SymbolInstance>&&,
-                 const std::vector<SortKeyRange>&&,
-                 float tilePixelRatio,
-                 bool allowVerticalPlacement,
-                 std::vector<style::TextWritingModeType> placementModes,
-                 bool iconsInText);
+    SymbolBucket(
+        Immutable<style::SymbolLayoutProperties::PossiblyEvaluated>,
+        const std::map<std::string, Immutable<style::LayerProperties>>&,
+        const style::PropertyValue<float>& textSize,
+        const style::PropertyValue<float>& iconSize,
+        float zoom,
+        bool iconsNeedLinear,
+        bool sortFeaturesByY,
+        std::string bucketName_,
+        const std::vector<SymbolInstance>&&,
+        const std::vector<SortKeyRange>&&,
+        float tilePixelRatio,
+        bool allowVerticalPlacement,
+        std::vector<style::TextWritingModeType> placementModes,
+        bool iconsInText
+    );
     ~SymbolBucket() override;
 
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
-    void updateVertices(
-        const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&) override;
+    void
+    updateVertices(const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&)
+        override;
     bool hasTextData() const;
     bool hasIconData() const;
     bool hasSdfIconData() const;
@@ -149,7 +154,7 @@ public:
 
     Buffer icon;
     Buffer sdfIcon;
-    
+
     struct CollisionBuffer {
         gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>> vertices;
         gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>> dynamicVertices;

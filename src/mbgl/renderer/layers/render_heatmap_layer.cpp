@@ -41,12 +41,11 @@ void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HeatmapLayerProperties>(
-        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
-        unevaluated.evaluate(parameters));
+        staticImmutableCast<HeatmapLayer::Impl>(baseImpl), unevaluated.evaluate(parameters)
+    );
 
-    passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0)
-            ? (RenderPass::Translucent | RenderPass::Pass3D)
-            : RenderPass::None;
+    passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
+                                                                      : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 }
@@ -61,8 +60,7 @@ bool RenderHeatmapLayer::hasCrossfade() const {
 
 void RenderHeatmapLayer::upload(gfx::UploadPass& uploadPass) {
     if (!colorRampTexture) {
-        colorRampTexture =
-            uploadPass.createTexture(colorRamp, gfx::TextureChannelDataType::UnsignedByte);
+        colorRampTexture = uploadPass.createTexture(colorRamp, gfx::TextureChannelDataType::UnsignedByte);
     }
 }
 
@@ -86,7 +84,8 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         }
 
         auto renderPass = parameters.encoder->createRenderPass(
-            "heatmap texture", { *renderTexture, Color{ 0.0f, 0.0f, 0.0f, 1.0f }, {}, {} });
+            "heatmap texture", {*renderTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}}
+        );
 
         for (const RenderTile& tile : *renderTiles) {
             const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
@@ -107,25 +106,29 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                     uniforms::heatmap::extrude_scale::Value(extrudeScale)},
                 paintPropertyBinders,
                 evaluated,
-                static_cast<float>(parameters.state.getZoom()));
-            const auto allAttributeBindings =
-                HeatmapProgram::computeAllAttributeBindings(*bucket.vertexBuffer, paintPropertyBinders, evaluated);
+                static_cast<float>(parameters.state.getZoom())
+            );
+            const auto allAttributeBindings = HeatmapProgram::computeAllAttributeBindings(
+                *bucket.vertexBuffer, paintPropertyBinders, evaluated
+            );
 
             checkRenderability(parameters, HeatmapProgram::activeBindingCount(allAttributeBindings));
 
-            heatmapProgram->draw(parameters.context,
-                                 *renderPass,
-                                 gfx::Triangles(),
-                                 gfx::DepthMode::disabled(),
-                                 gfx::StencilMode::disabled(),
-                                 gfx::ColorMode::additive(),
-                                 gfx::CullFaceMode::disabled(),
-                                 *bucket.indexBuffer,
-                                 bucket.segments,
-                                 allUniformValues,
-                                 allAttributeBindings,
-                                 HeatmapProgram::TextureBindings{},
-                                 getID());
+            heatmapProgram->draw(
+                parameters.context,
+                *renderPass,
+                gfx::Triangles(),
+                gfx::DepthMode::disabled(),
+                gfx::StencilMode::disabled(),
+                gfx::ColorMode::additive(),
+                gfx::CullFaceMode::disabled(),
+                *bucket.indexBuffer,
+                bucket.segments,
+                allUniformValues,
+                allAttributeBindings,
+                HeatmapProgram::TextureBindings{},
+                getID()
+            );
         }
 
     } else if (parameters.pass == RenderPass::Translucent) {
@@ -135,19 +138,21 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         matrix::ortho(viewportMat, 0, size.width, size.height, 0, 0, 1);
 
         const Properties<>::PossiblyEvaluated properties;
-        const HeatmapTextureProgram::Binders paintAttributeData{ properties, 0 };
+        const HeatmapTextureProgram::Binders paintAttributeData{properties, 0};
 
         const auto allUniformValues = HeatmapTextureProgram::computeAllUniformValues(
             HeatmapTextureProgram::LayoutUniformValues{
                 uniforms::matrix::Value(viewportMat),
                 uniforms::world::Value(size),
-                uniforms::opacity::Value(
-                    getEvaluated<HeatmapLayerProperties>(evaluatedProperties).get<HeatmapOpacity>())},
+                uniforms::opacity::Value(getEvaluated<HeatmapLayerProperties>(evaluatedProperties).get<HeatmapOpacity>()
+                )},
             paintAttributeData,
             properties,
-            static_cast<float>(parameters.state.getZoom()));
+            static_cast<float>(parameters.state.getZoom())
+        );
         const auto allAttributeBindings = HeatmapTextureProgram::computeAllAttributeBindings(
-            *parameters.staticData.heatmapTextureVertexBuffer, paintAttributeData, properties);
+            *parameters.staticData.heatmapTextureVertexBuffer, paintAttributeData, properties
+        );
 
         checkRenderability(parameters, HeatmapTextureProgram::activeBindingCount(allAttributeBindings));
 
@@ -171,7 +176,8 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                 textures::image::Value{renderTexture->getTexture().getResource(), gfx::TextureFilterType::Linear},
                 textures::color_ramp::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
             },
-            getID());
+            getID()
+        );
     }
 }
 
@@ -196,14 +202,13 @@ void RenderHeatmapLayer::updateColorRamp() {
     }
 }
 
-bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
-                                                const GeometryTileFeature& feature, const float zoom,
-                                                const TransformState&, const float pixelsToTileUnits, const mat4&,
-                                                const FeatureState&) const {
-    (void) queryGeometry;
-    (void) feature;
-    (void) zoom;
-    (void) pixelsToTileUnits;
+bool RenderHeatmapLayer::
+    queryIntersectsFeature(const GeometryCoordinates& queryGeometry, const GeometryTileFeature& feature, const float zoom, const TransformState&, const float pixelsToTileUnits, const mat4&, const FeatureState&)
+        const {
+    (void)queryGeometry;
+    (void)feature;
+    (void)zoom;
+    (void)pixelsToTileUnits;
     return false;
 }
 

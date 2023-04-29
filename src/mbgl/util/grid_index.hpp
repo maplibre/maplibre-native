@@ -14,32 +14,28 @@ namespace mbgl {
 namespace geometry {
 
 template <typename T>
-struct circle
-{
+struct circle {
     using point_type = mapbox::geometry::point<T>;
 
     constexpr circle(point_type const& center_, T const& radius_)
-        : center(center_), radius(radius_)
-    {}
+        : center(center_),
+          radius(radius_) {}
 
     point_type center;
     T radius;
 };
 
 template <typename T>
-constexpr bool operator==(circle<T> const& lhs, circle<T> const& rhs)
-{
+constexpr bool operator==(circle<T> const& lhs, circle<T> const& rhs) {
     return lhs.center == rhs.center && lhs.radius == rhs.radius;
 }
 
 template <typename T>
-constexpr bool operator!=(circle<T> const& lhs, circle<T> const& rhs)
-{
+constexpr bool operator!=(circle<T> const& lhs, circle<T> const& rhs) {
     return lhs.center != rhs.center || lhs.radius != rhs.radius;
 }
 
 } // namespace geometry
-
 
 /*
  GridIndex is a data structure for testing the intersection of
@@ -63,13 +59,13 @@ public:
 
     void insert(T&& t, const BBox&);
     void insert(T&& t, const BCircle&);
-    
+
     std::vector<T> query(const BBox&) const;
-    std::vector<std::pair<T,BBox>> queryWithBoxes(const BBox&) const;
-    
+    std::vector<std::pair<T, BBox>> queryWithBoxes(const BBox&) const;
+
     bool hitTest(const BBox&, std::optional<std::function<bool(const T&)>> predicate = std::nullopt) const;
     bool hitTest(const BCircle&, std::optional<std::function<bool(const T&)>> predicate = std::nullopt) const;
-    
+
     bool empty() const;
 
 private:
@@ -77,8 +73,8 @@ private:
     bool completeIntersection(const BBox& queryBBox) const;
     BBox convertToBox(const BCircle& circle) const;
 
-    void query(const BBox&, std::function<bool (const T&, const BBox&)>) const;
-    void query(const BCircle&, std::function<bool (const T&, const BBox&)>) const;
+    void query(const BBox&, std::function<bool(const T&, const BBox&)>) const;
+    void query(const BCircle&, std::function<bool(const T&, const BBox&)>) const;
 
     std::size_t convertToXCellCoord(float x) const;
     std::size_t convertToYCellCoord(float y) const;
@@ -89,7 +85,7 @@ private:
 
     const float width;
     const float height;
-    
+
     const std::size_t xCellCount;
     const std::size_t yCellCount;
     const double xScale;
@@ -97,10 +93,9 @@ private:
 
     std::vector<std::pair<T, BBox>> boxElements;
     std::vector<std::pair<T, BCircle>> circleElements;
-    
+
     std::vector<std::vector<size_t>> boxCells;
     std::vector<std::vector<size_t>> circleCells;
-
 };
 
 } // namespace mbgl

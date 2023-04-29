@@ -5,7 +5,6 @@
 using namespace mbgl::platform;
 
 TEST(GLFunctions, OpenGLES) {
-
     /* OpenGL ES 2.0 */
 
     EXPECT_NE(glActiveTexture, nullptr);

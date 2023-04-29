@@ -18,13 +18,15 @@ public:
 
 using PatternLayerMap = std::map<std::string, PatternDependency>;
 
-class PatternFeature  {
+class PatternFeature {
 public:
-    PatternFeature(std::size_t i_,
-                   std::unique_ptr<GeometryTileFeature> feature_,
-                   PatternLayerMap patterns_,
-                   float sortKey_ = 0.0f)
-        : i(i_), feature(std::move(feature_)), patterns(std::move(patterns_)), sortKey(sortKey_) {}
+    PatternFeature(
+        std::size_t i_, std::unique_ptr<GeometryTileFeature> feature_, PatternLayerMap patterns_, float sortKey_ = 0.0f
+    )
+        : i(i_),
+          feature(std::move(feature_)),
+          patterns(std::move(patterns_)),
+          sortKey(sortKey_) {}
 
     friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
@@ -40,13 +42,8 @@ struct PatternFeatureInserter;
 template <>
 struct PatternFeatureInserter<void> {
     template <typename PropertiesType>
-    static void insert(std::vector<PatternFeature>& features,
-                       std::size_t index,
-                       std::unique_ptr<GeometryTileFeature> feature,
-                       PatternLayerMap patternDependencyMap,
-                       float /*zoom*/,
-                       const PropertiesType&,
-                       const CanonicalTileID&) {
+    static void
+    insert(std::vector<PatternFeature>& features, std::size_t index, std::unique_ptr<GeometryTileFeature> feature, PatternLayerMap patternDependencyMap, float /*zoom*/, const PropertiesType&, const CanonicalTileID&) {
         features.emplace_back(index, std::move(feature), std::move(patternDependencyMap));
     }
 };
@@ -54,13 +51,15 @@ struct PatternFeatureInserter<void> {
 template <class SortKeyPropertyType>
 struct PatternFeatureInserter {
     template <typename PropertiesType>
-    static void insert(std::vector<PatternFeature>& features,
-                       std::size_t index,
-                       std::unique_ptr<GeometryTileFeature> feature,
-                       PatternLayerMap patternDependencyMap,
-                       float zoom,
-                       const PropertiesType& properties,
-                       const CanonicalTileID& canonical) {
+    static void insert(
+        std::vector<PatternFeature>& features,
+        std::size_t index,
+        std::unique_ptr<GeometryTileFeature> feature,
+        PatternLayerMap patternDependencyMap,
+        float zoom,
+        const PropertiesType& properties,
+        const CanonicalTileID& canonical
+    ) {
         const auto& sortKeyProperty = properties.template get<SortKeyPropertyType>();
         float sortKey = sortKeyProperty.evaluate(*feature, zoom, canonical, SortKeyPropertyType::defaultValue());
         PatternFeature patternFeature{index, std::move(feature), std::move(patternDependencyMap), sortKey};
@@ -69,17 +68,20 @@ struct PatternFeatureInserter {
     }
 };
 
-template <class BucketType,
-          class LayerPropertiesType,
-          class PatternPropertyType,
-          class LayoutPropertiesType = typename style::Properties<>,
-          class SortKeyPropertyType = void>
+template <
+    class BucketType,
+    class LayerPropertiesType,
+    class PatternPropertyType,
+    class LayoutPropertiesType = typename style::Properties<>,
+    class SortKeyPropertyType = void>
 class PatternLayout : public Layout {
 public:
-    PatternLayout(const BucketParameters& parameters,
-                  const std::vector<Immutable<style::LayerProperties>>& group,
-                  std::unique_ptr<GeometryTileLayer> sourceLayer_,
-                  const LayoutParameters& layoutParameters)
+    PatternLayout(
+        const BucketParameters& parameters,
+        const std::vector<Immutable<style::LayerProperties>>& group,
+        std::unique_ptr<GeometryTileLayer> sourceLayer_,
+        const LayoutParameters& layoutParameters
+    )
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
           overscaling(parameters.tileID.overscaleFactor()),
@@ -112,7 +114,8 @@ public:
             auto feature = sourceLayer->getFeature(i);
             if (!leaderLayerProperties->layerImpl().filter(
                     style::expression::EvaluationContext(this->zoom, feature.get())
-                        .withCanonicalTileID(&parameters.tileID.canonical)))
+                        .withCanonicalTileID(&parameters.tileID.canonical)
+                ))
                 continue;
 
             PatternLayerMap patternDependencyMap;
@@ -126,52 +129,63 @@ public:
                         if (!patternProperty.isConstant()) {
                             // For layers with non-data-constant pattern properties, evaluate their expression and add
                             // the patterns to the dependency vector
-                            const auto min = patternProperty.evaluate(*feature,
-                                                                      zoom - 1,
-                                                                      layoutParameters.availableImages,
-                                                                      parameters.tileID.canonical,
-                                                                      PatternPropertyType::defaultValue());
-                            const auto mid = patternProperty.evaluate(*feature,
-                                                                      zoom,
-                                                                      layoutParameters.availableImages,
-                                                                      parameters.tileID.canonical,
-                                                                      PatternPropertyType::defaultValue());
-                            const auto max = patternProperty.evaluate(*feature,
-                                                                      zoom + 1,
-                                                                      layoutParameters.availableImages,
-                                                                      parameters.tileID.canonical,
-                                                                      PatternPropertyType::defaultValue());
+                            const auto min = patternProperty.evaluate(
+                                *feature,
+                                zoom - 1,
+                                layoutParameters.availableImages,
+                                parameters.tileID.canonical,
+                                PatternPropertyType::defaultValue()
+                            );
+                            const auto mid = patternProperty.evaluate(
+                                *feature,
+                                zoom,
+                                layoutParameters.availableImages,
+                                parameters.tileID.canonical,
+                                PatternPropertyType::defaultValue()
+                            );
+                            const auto max = patternProperty.evaluate(
+                                *feature,
+                                zoom + 1,
+                                layoutParameters.availableImages,
+                                parameters.tileID.canonical,
+                                PatternPropertyType::defaultValue()
+                            );
 
                             layoutParameters.imageDependencies.emplace(min.to.id(), ImageType::Pattern);
                             layoutParameters.imageDependencies.emplace(mid.to.id(), ImageType::Pattern);
                             layoutParameters.imageDependencies.emplace(max.to.id(), ImageType::Pattern);
-                            patternDependencyMap.emplace(layerId,
-                                                         PatternDependency{min.to.id(), mid.to.id(), max.to.id()});
+                            patternDependencyMap.emplace(
+                                layerId, PatternDependency{min.to.id(), mid.to.id(), max.to.id()}
+                            );
                         }
                     }
                 }
             }
 
-            PatternFeatureInserter<SortKeyPropertyType>::insert(features,
-                                                                i,
-                                                                std::move(feature),
-                                                                std::move(patternDependencyMap),
-                                                                zoom,
-                                                                layout,
-                                                                parameters.tileID.canonical);
+            PatternFeatureInserter<SortKeyPropertyType>::insert(
+                features,
+                i,
+                std::move(feature),
+                std::move(patternDependencyMap),
+                zoom,
+                layout,
+                parameters.tileID.canonical
+            );
         }
     };
 
     bool hasDependencies() const override { return hasPattern; }
 
-    void createBucket(const ImagePositions& patternPositions,
-                      std::unique_ptr<FeatureIndex>& featureIndex,
-                      std::unordered_map<std::string, LayerRenderData>& renderData,
-                      const bool /*firstLoad*/,
-                      const bool /*showCollisionBoxes*/,
-                      const CanonicalTileID& canonical) override {
+    void createBucket(
+        const ImagePositions& patternPositions,
+        std::unique_ptr<FeatureIndex>& featureIndex,
+        std::unordered_map<std::string, LayerRenderData>& renderData,
+        const bool /*firstLoad*/,
+        const bool /*showCollisionBoxes*/,
+        const CanonicalTileID& canonical
+    ) override {
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
-        for (auto & patternFeature : features) {
+        for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             std::unique_ptr<GeometryTileFeature> feature = std::move(patternFeature.feature);
             const PatternLayerMap& patterns = patternFeature.patterns;
@@ -182,7 +196,7 @@ public:
         }
         if (bucket->hasData()) {
             for (const auto& pair : layerPropertiesMap) {
-                renderData.emplace(pair.first, LayerRenderData {bucket, pair.second});
+                renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
             }
         }
     };

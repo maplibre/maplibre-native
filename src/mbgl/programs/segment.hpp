@@ -12,11 +12,13 @@ namespace mbgl {
 template <class AttributeList>
 class Segment {
 public:
-    Segment(std::size_t vertexOffset_,
-            std::size_t indexOffset_,
-            std::size_t vertexLength_ = 0,
-            std::size_t indexLength_ = 0,
-            float sortKey_ = 0.0f)
+    Segment(
+        std::size_t vertexOffset_,
+        std::size_t indexOffset_,
+        std::size_t vertexLength_ = 0,
+        std::size_t indexLength_ = 0,
+        float sortKey_ = 0.0f
+    )
         : vertexOffset(vertexOffset_),
           indexOffset(indexOffset_),
           vertexLength(vertexLength_),

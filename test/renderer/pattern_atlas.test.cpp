@@ -18,8 +18,10 @@ TEST(PatternAtlas, Basic) {
     FixtureLog log;
     PatternAtlas patternAtlas;
 
-    auto images = parseSprite(util::read_file("test/fixtures/annotations/emerald.png"),
-                              util::read_file("test/fixtures/annotations/emerald.json"));
+    auto images = parseSprite(
+        util::read_file("test/fixtures/annotations/emerald.png"),
+        util::read_file("test/fixtures/annotations/emerald.json")
+    );
     for (auto& image : images) {
         if (image->id == "metro") {
             ASSERT_TRUE(patternAtlas.addPattern(*image));
@@ -44,7 +46,7 @@ TEST(PatternAtlas, Basic) {
 TEST(PatternAtlas, Updates) {
     PatternAtlas patternAtlas;
 
-    PremultipliedImage imageA({ 16, 12 });
+    PremultipliedImage imageA({16, 12});
     imageA.fill(255);
 
     auto added = patternAtlas.addPattern(*makeMutable<style::Image::Impl>("one", std::move(imageA), 1.0f));
@@ -63,12 +65,12 @@ TEST(PatternAtlas, Updates) {
     EXPECT_EQ(1.0f, a.pixelRatio);
     test::checkImage("test/fixtures/image_manager/updates_before", patternAtlas.getAtlasImageForTests());
 
-    auto imageB = makeMutable<style::Image::Impl>("one", PremultipliedImage({ 5, 5 }), 1.0f);
+    auto imageB = makeMutable<style::Image::Impl>("one", PremultipliedImage({5, 5}), 1.0f);
     EXPECT_FALSE(patternAtlas.addPattern(*imageB)); // Already added.
 
     patternAtlas.removePattern("one");
     ASSERT_FALSE(patternAtlas.getPattern("one"));
-    EXPECT_TRUE(patternAtlas.addPattern(*imageB)); 
+    EXPECT_TRUE(patternAtlas.addPattern(*imageB));
 
     auto b = *patternAtlas.getPattern("one");
     EXPECT_EQ(1, b.tl()[0]);

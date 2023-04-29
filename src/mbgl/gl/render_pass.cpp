@@ -6,14 +6,14 @@
 namespace mbgl {
 namespace gl {
 
-RenderPass::RenderPass(gl::CommandEncoder& commandEncoder_,
-                       const char* name,
-                       const gfx::RenderPassDescriptor& descriptor)
-    : commandEncoder(commandEncoder_), debugGroup(commandEncoder.createDebugGroup(name)) {
+RenderPass::RenderPass(
+    gl::CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor
+)
+    : commandEncoder(commandEncoder_),
+      debugGroup(commandEncoder.createDebugGroup(name)) {
     descriptor.renderable.getResource<gl::RenderableResource>().bind();
     const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
-    commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth,
-                                 descriptor.clearStencil);
+    commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil);
 }
 
 void RenderPass::pushDebugGroup(const char* name) {

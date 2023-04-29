@@ -10,7 +10,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-class Coercion : public Expression  {
+class Coercion : public Expression {
 public:
     Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_);
 
@@ -18,7 +18,7 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    
+
     mbgl::Value serialize() const override;
 
     bool operator==(const Expression& e) const override;
@@ -26,12 +26,12 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override;
+
 private:
-    EvaluationResult (*coerceSingleValue) (const Value& v);
+    EvaluationResult (*coerceSingleValue)(const Value& v);
     std::vector<std::unique_ptr<Expression>> inputs;
 };
 
 } // namespace expression
 } // namespace style
 } // namespace mbgl
-

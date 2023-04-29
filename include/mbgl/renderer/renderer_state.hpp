@@ -13,7 +13,6 @@ class UpdateParameters;
  */
 class RendererState {
 public:
-
     /// Obtains a CameraOptions out of a given UpdateParameters object.
     static CameraOptions getCameraOptions(const UpdateParameters&, const EdgeInsets& = {});
 

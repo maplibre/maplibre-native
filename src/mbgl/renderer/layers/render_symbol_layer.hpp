@@ -14,24 +14,22 @@ namespace style {
 // Since each program deals either with icons or text, using a smaller property set
 // lets us avoid unnecessarily binding attributes for properties the program wouldn't use.
 class IconPaintProperties : public Properties<
-        IconOpacity,
-        IconColor,
-        IconHaloColor,
-        IconHaloWidth,
-        IconHaloBlur,
-        IconTranslate,
-        IconTranslateAnchor
-> {};
+                                IconOpacity,
+                                IconColor,
+                                IconHaloColor,
+                                IconHaloWidth,
+                                IconHaloBlur,
+                                IconTranslate,
+                                IconTranslateAnchor> {};
 
 class TextPaintProperties : public Properties<
-        TextOpacity,
-        TextColor,
-        TextHaloColor,
-        TextHaloWidth,
-        TextHaloBlur,
-        TextTranslate,
-        TextTranslateAnchor
-> {};
+                                TextOpacity,
+                                TextColor,
+                                TextHaloColor,
+                                TextHaloWidth,
+                                TextHaloBlur,
+                                TextTranslate,
+                                TextTranslateAnchor> {};
 
 // Repackaging evaluated values from SymbolLayoutProperties + SymbolPaintProperties
 // for genericity over icons vs. text.
@@ -65,7 +63,7 @@ class SymbolTextAndIconProgram;
 class CollisionBoxProgram;
 class CollisionCircleProgram;
 
-class RenderSymbolLayer final: public RenderLayer {
+class RenderSymbolLayer final : public RenderLayer {
 public:
     struct Programs {
         std::shared_ptr<SymbolIconProgram> symbolIconProgram;
@@ -80,8 +78,10 @@ public:
     explicit RenderSymbolLayer(Immutable<style::SymbolLayer::Impl>);
     ~RenderSymbolLayer() override;
 
-    static style::IconPaintProperties::PossiblyEvaluated iconPaintProperties(const style::SymbolPaintProperties::PossiblyEvaluated&);
-    static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(const style::SymbolPaintProperties::PossiblyEvaluated&);
+    static style::IconPaintProperties::PossiblyEvaluated
+    iconPaintProperties(const style::SymbolPaintProperties::PossiblyEvaluated&);
+    static style::TextPaintProperties::PossiblyEvaluated
+    textPaintProperties(const style::SymbolPaintProperties::PossiblyEvaluated&);
 
 private:
     void transition(const TransitionParameters&) override;

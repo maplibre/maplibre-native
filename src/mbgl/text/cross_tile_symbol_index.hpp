@@ -22,8 +22,8 @@ class SymbolBucket;
 class IndexedSymbolInstance {
 public:
     IndexedSymbolInstance(uint32_t crossTileID_, Point<int64_t> coord_)
-        : crossTileID(crossTileID_), coord(coord_)
-    {}
+        : crossTileID(crossTileID_),
+          coord(coord_) {}
 
     uint32_t crossTileID;
     Point<int64_t> coord;
@@ -31,10 +31,9 @@ public:
 
 class TileLayerIndex {
 public:
-    TileLayerIndex(OverscaledTileID coord,
-                   std::vector<SymbolInstance>&,
-                   uint32_t bucketInstanceId,
-                   std::string bucketLeaderId);
+    TileLayerIndex(
+        OverscaledTileID coord, std::vector<SymbolInstance>&, uint32_t bucketInstanceId, std::string bucketLeaderId
+    );
 
     Point<int64_t> getScaledCoordinates(SymbolInstance&, const OverscaledTileID&) const;
     void findMatches(SymbolBucket&, const OverscaledTileID&, std::set<uint32_t>&) const;
@@ -42,7 +41,7 @@ public:
     OverscaledTileID coord;
     uint32_t bucketInstanceId;
     std::string bucketLeaderId;
-    std::map<std::u16string,std::vector<IndexedSymbolInstance>> indexedSymbolInstances;
+    std::map<std::u16string, std::vector<IndexedSymbolInstance>> indexedSymbolInstances;
 };
 
 class CrossTileSymbolLayerIndex {
@@ -51,10 +50,11 @@ public:
     bool addBucket(const OverscaledTileID&, const mat4& tileMatrix, SymbolBucket&);
     bool removeStaleBuckets(const std::unordered_set<uint32_t>& currentIDs);
     void handleWrapJump(float newLng);
+
 private:
     void removeBucketCrossTileIDs(uint8_t zoom, const TileLayerIndex& removedBucket);
 
-    std::map<uint8_t, std::map<OverscaledTileID,TileLayerIndex>> indexes;
+    std::map<uint8_t, std::map<OverscaledTileID, TileLayerIndex>> indexes;
     std::map<uint8_t, std::set<uint32_t>> usedCrossTileIDs;
     float lng = 0;
     uint32_t& maxCrossTileID;
@@ -74,6 +74,7 @@ public:
     void pruneUnusedLayers(const std::set<std::string>&);
 
     void reset();
+
 private:
     std::map<std::string, CrossTileSymbolLayerIndex> layerIndexes;
     uint32_t maxCrossTileID = 0;

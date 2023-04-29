@@ -53,11 +53,8 @@ public:
     bool isEnabled() const;
     virtual bool isLoaded() const = 0;
 
-    virtual void update(Immutable<style::Source::Impl>,
-                        const std::vector<Immutable<style::LayerProperties>>&,
-                        bool needsRendering,
-                        bool needsRelayout,
-                        const TileParameters&) = 0;
+    virtual void
+    update(Immutable<style::Source::Impl>, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&) = 0;
     // Note: calling of this method might reset the contained render data.
     virtual std::unique_ptr<RenderItem> createRenderItem() = 0;
     // Creates the render data to be passed to the render item.
@@ -75,21 +72,19 @@ public:
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
 
-    virtual std::unordered_map<std::string, std::vector<Feature>>
-    queryRenderedFeatures(const ScreenLineString& geometry,
-                          const TransformState& transformState,
-                          const std::unordered_map<std::string, const RenderLayer*>& layers,
-                          const RenderedQueryOptions& options,
-                          const mat4& projMatrix) const = 0;
+    virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
+        const ScreenLineString& geometry,
+        const TransformState& transformState,
+        const std::unordered_map<std::string, const RenderLayer*>& layers,
+        const RenderedQueryOptions& options,
+        const mat4& projMatrix
+    ) const = 0;
 
-    virtual std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const = 0;
+    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const = 0;
 
     virtual FeatureExtensionValue
-    queryFeatureExtensions(const Feature&,
-                           const std::string&,
-                           const std::string&,
-                           const std::optional<std::map<std::string, Value>>&) const {
+    queryFeatureExtensions(const Feature&, const std::string&, const std::string&, const std::optional<std::map<std::string, Value>>&)
+        const {
         return {};
     }
 
@@ -97,8 +92,9 @@ public:
 
     virtual void getFeatureState(FeatureState&, const std::optional<std::string>&, const std::string&) const {}
 
-    virtual void removeFeatureState(const std::optional<std::string>&, const std::optional<std::string>&,
-                                    const std::optional<std::string>&) {}
+    virtual void
+    removeFeatureState(const std::optional<std::string>&, const std::optional<std::string>&, const std::optional<std::string>&) {
+    }
 
     virtual void reduceMemoryUse() = 0;
 

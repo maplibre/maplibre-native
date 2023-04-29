@@ -16,18 +16,20 @@ enum class SymbolContent : uint8_t;
 
 class SymbolQuad {
 public:
-    SymbolQuad(Point<float> tl_,
-               Point<float> tr_,
-               Point<float> bl_,
-               Point<float> br_,
-               Rect<uint16_t> tex_,
-               WritingModeType writingMode_,
-               Point<float> glyphOffset_,
-               bool isSDF_,
-               Point<float> pixelOffsetTL_,
-               Point<float> pixelOffsetBR_,
-               Point<float> minFontScale_,
-               size_t sectionIndex_ = 0)
+    SymbolQuad(
+        Point<float> tl_,
+        Point<float> tr_,
+        Point<float> bl_,
+        Point<float> br_,
+        Rect<uint16_t> tex_,
+        WritingModeType writingMode_,
+        Point<float> glyphOffset_,
+        bool isSDF_,
+        Point<float> pixelOffsetTL_,
+        Point<float> pixelOffsetBR_,
+        Point<float> minFontScale_,
+        size_t sectionIndex_ = 0
+    )
         : tl(tl_),
           tr(tr_),
           bl(bl_),
@@ -57,16 +59,17 @@ public:
 
 using SymbolQuads = std::vector<SymbolQuad>;
 
-SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
-                         float iconRotate,
-                         SymbolContent iconType,
-                         bool hasIconTextFit);
+SymbolQuads getIconQuads(
+    const PositionedIcon& shapedIcon, float iconRotate, SymbolContent iconType, bool hasIconTextFit
+);
 
-SymbolQuads getGlyphQuads(const Shaping& shapedText,
-                          std::array<float, 2> textOffset,
-                          const style::SymbolLayoutProperties::Evaluated&,
-                          style::SymbolPlacementType placement,
-                          const ImageMap& imageMap,
-                          bool allowVerticalPlacement);
+SymbolQuads getGlyphQuads(
+    const Shaping& shapedText,
+    std::array<float, 2> textOffset,
+    const style::SymbolLayoutProperties::Evaluated&,
+    style::SymbolPlacementType placement,
+    const ImageMap& imageMap,
+    bool allowVerticalPlacement
+);
 
 } // namespace mbgl

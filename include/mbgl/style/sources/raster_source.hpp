@@ -12,7 +12,12 @@ namespace style {
 
 class RasterSource : public Source {
 public:
-    RasterSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize, SourceType sourceType = SourceType::Raster);
+    RasterSource(
+        std::string id,
+        variant<std::string, Tileset> urlOrTileset,
+        uint16_t tileSize,
+        SourceType sourceType = SourceType::Raster
+    );
     ~RasterSource() override;
 
     const variant<std::string, Tileset>& getURLOrTileset() const;
@@ -27,9 +32,7 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() final {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() final { return weakFactory.makeWeakPtr(); }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -37,7 +40,7 @@ protected:
 private:
     const variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
 template <>

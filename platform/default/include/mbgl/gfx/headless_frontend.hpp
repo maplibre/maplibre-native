@@ -23,15 +23,19 @@ public:
         gfx::RenderingStats stats;
     };
 
-    HeadlessFrontend(float pixelRatio_,
-                     gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
-                     gfx::ContextMode mode = gfx::ContextMode::Unique,
-                     const std::optional<std::string>& localFontFamily = std::nullopt);
-    HeadlessFrontend(Size,
-                     float pixelRatio_,
-                     gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
-                     gfx::ContextMode mode = gfx::ContextMode::Unique,
-                     const std::optional<std::string>& localFontFamily = std::nullopt);
+    HeadlessFrontend(
+        float pixelRatio_,
+        gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
+        gfx::ContextMode mode = gfx::ContextMode::Unique,
+        const std::optional<std::string>& localFontFamily = std::nullopt
+    );
+    HeadlessFrontend(
+        Size,
+        float pixelRatio_,
+        gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
+        gfx::ContextMode mode = gfx::ContextMode::Unique,
+        const std::optional<std::string>& localFontFamily = std::nullopt
+    );
     ~HeadlessFrontend() override;
 
     void reset() override;

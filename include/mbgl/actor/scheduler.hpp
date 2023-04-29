@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
@@ -87,13 +86,15 @@ public:
 
 protected:
     template <typename TaskFn, typename ReplyFn>
-    void scheduleAndReplyValue(const TaskFn& task,
-                               const ReplyFn& reply,
-                               mapbox::base::WeakPtr<Scheduler> replyScheduler) {
+    void scheduleAndReplyValue(
+        const TaskFn& task, const ReplyFn& reply, mapbox::base::WeakPtr<Scheduler> replyScheduler
+    ) {
         auto scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {
             auto lock = replyScheduler.lock();
             if (!replyScheduler) return;
-            auto scheduledReply = [reply, result = task()] { reply(result); };
+            auto scheduledReply = [reply, result = task()] {
+                reply(result);
+            };
             replyScheduler->schedule(std::move(scheduledReply));
         };
 
@@ -101,4 +102,4 @@ protected:
     }
 };
 
-} /// namespace mbgl
+} // namespace mbgl

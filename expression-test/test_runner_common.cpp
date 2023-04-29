@@ -47,9 +47,11 @@ Value stripPrecision(const Value& value) {
 std::vector<std::string> tokenize(std::string str) {
     std::vector<std::string> tokens;
     std::regex re("\n");
-    std::copy(std::regex_token_iterator<std::string::iterator>(str.begin(), str.end(), re, -1),
-              std::regex_token_iterator<std::string::iterator>(),
-              std::back_inserter(tokens));
+    std::copy(
+        std::regex_token_iterator<std::string::iterator>(str.begin(), str.end(), re, -1),
+        std::regex_token_iterator<std::string::iterator>(),
+        std::back_inserter(tokens)
+    );
     return tokens;
 }
 

@@ -18,17 +18,17 @@ Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const T& constant) const {
 
 template <typename T>
 Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const style::PropertyExpression<T>& expression) const {
-    return calculate(expression.evaluate(parameters.z - 1.0f),
-                     expression.evaluate(parameters.z),
-                     expression.evaluate(parameters.z + 1.0f));
+    return calculate(
+        expression.evaluate(parameters.z - 1.0f),
+        expression.evaluate(parameters.z),
+        expression.evaluate(parameters.z + 1.0f)
+    );
 }
 
 template <typename T>
 Faded<T> CrossFadedPropertyEvaluator<T>::calculate(const T& min, const T& mid, const T& max) const {
     const float z = parameters.z;
-    return z > parameters.zoomHistory.lastIntegerZoom
-        ? Faded<T> { min, mid }
-        : Faded<T> { max, mid };
+    return z > parameters.zoomHistory.lastIntegerZoom ? Faded<T>{min, mid} : Faded<T>{max, mid};
 }
 
 template class CrossFadedPropertyEvaluator<style::expression::Image>;

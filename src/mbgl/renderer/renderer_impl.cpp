@@ -25,7 +25,9 @@ static RendererObserver& nullObserver() {
     return observer;
 }
 
-Renderer::Impl::Impl(gfx::RendererBackend& backend_, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
+Renderer::Impl::Impl(
+    gfx::RendererBackend& backend_, float pixelRatio_, const std::optional<std::string>& localFontFamily_
+)
     : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
@@ -48,8 +50,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& renderTreeParameters = renderTree.getParameters();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio,
-            std::make_unique<gfx::ShaderRegistry>());
+        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
         staticData->programs.registerWith(*staticData->shaders);
         observer->onRegisterShaders(*staticData->shaders);
     }
@@ -60,7 +61,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
-    PaintParameters parameters {
+    PaintParameters parameters{
         context,
         pixelRatio,
         backend,
@@ -71,8 +72,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTreeParameters.transformParams,
         *staticData,
         renderTree.getLineAtlas(),
-        renderTree.getPatternAtlas()
-    };
+        renderTree.getPatternAtlas()};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -108,7 +108,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         if (!parameters.staticData.depthRenderbuffer ||
             parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
             parameters.staticData.depthRenderbuffer =
-                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(parameters.staticData.backendSize);
+                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+                    parameters.staticData.backendSize
+                );
         }
         parameters.staticData.depthRenderbuffer->setShouldClear(true);
 
@@ -133,7 +135,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         } else if (!backend.contextIsShared()) {
             color = renderTreeParameters.backgroundColor;
         }
-        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
+        parameters.renderPass = parameters.encoder->createRenderPass(
+            "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0}
+        );
     }
 
     // Actually render the layers

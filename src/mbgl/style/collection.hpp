@@ -90,8 +90,9 @@ public:
 private:
     std::size_t implsIndex(const std::string& id) const {
         const auto& impls_ = *Base::impls;
-        auto it = std::lower_bound(
-            impls_.begin(), impls_.end(), id, [](const auto& a, const std::string& b) { return a->id < b; });
+        auto it = std::lower_bound(impls_.begin(), impls_.end(), id, [](const auto& a, const std::string& b) {
+            return a->id < b;
+        });
         return it - impls_.begin();
     }
 };
@@ -99,7 +100,8 @@ template <class T>
 using CollectionWithPersistentOrder = Collection<T, true>;
 
 template <class T>
-CollectionBase<T>::CollectionBase() : impls(makeMutable<std::vector<Immutable<Impl>>>()) {}
+CollectionBase<T>::CollectionBase()
+    : impls(makeMutable<std::vector<Immutable<Impl>>>()) {}
 
 template <class T>
 std::size_t CollectionBase<T>::size() const {
@@ -108,9 +110,8 @@ std::size_t CollectionBase<T>::size() const {
 
 template <class T>
 std::size_t CollectionBase<T>::index(const std::string& id) const {
-    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) {
-        return e->getID() == id;
-    }) - wrappers.begin();
+    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) { return e->getID() == id; }) -
+           wrappers.begin();
 }
 
 template <class T>
@@ -133,9 +134,7 @@ std::vector<T*> CollectionBase<T>::getWrappers() const {
 
 template <class T>
 void CollectionBase<T>::clear() {
-    mutate(impls, [&] (auto& impls_) {
-        impls_.clear();
-    });
+    mutate(impls, [&](auto& impls_) { impls_.clear(); });
 
     wrappers.clear();
 }

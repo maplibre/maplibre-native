@@ -32,11 +32,8 @@ struct GlyphMetrics {
 };
 
 inline bool operator==(const GlyphMetrics& lhs, const GlyphMetrics& rhs) {
-    return lhs.width == rhs.width &&
-        lhs.height == rhs.height &&
-        lhs.left == rhs.left &&
-        lhs.top == rhs.top &&
-        lhs.advance == rhs.advance;
+    return lhs.width == rhs.width && lhs.height == rhs.height && lhs.left == rhs.left && lhs.top == rhs.top &&
+           lhs.advance == rhs.advance;
 }
 
 class Glyph {
@@ -59,16 +56,18 @@ using GlyphMap = std::map<FontStackHash, Glyphs>;
 
 class PositionedGlyph {
 public:
-    explicit PositionedGlyph(GlyphID glyph_,
-                             float x_,
-                             float y_,
-                             bool vertical_,
-                             FontStackHash font_,
-                             float scale_,
-                             Rect<uint16_t> rect_,
-                             GlyphMetrics metrics_,
-                             std::optional<std::string> imageID_,
-                             std::size_t sectionIndex_ = 0)
+    explicit PositionedGlyph(
+        GlyphID glyph_,
+        float x_,
+        float y_,
+        bool vertical_,
+        FontStackHash font_,
+        float scale_,
+        Rect<uint16_t> rect_,
+        GlyphMetrics metrics_,
+        std::optional<std::string> imageID_,
+        std::size_t sectionIndex_ = 0
+    )
         : glyph(glyph_),
           x(x_),
           y(y_),
@@ -101,10 +100,14 @@ struct PositionedLine {
 };
 
 class Shaping {
-    public:
+public:
     Shaping() = default;
     explicit Shaping(float x, float y, WritingModeType writingMode_)
-        : top(y), bottom(y), left(x), right(x), writingMode(writingMode_) {}
+        : top(y),
+          bottom(y),
+          left(x),
+          right(x),
+          writingMode(writingMode_) {}
     std::vector<PositionedLine> positionedLines;
     float top = 0;
     float bottom = 0;

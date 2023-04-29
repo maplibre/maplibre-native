@@ -41,7 +41,9 @@ namespace {
 class LayerRenderItem final : public RenderItem {
 public:
     LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_)
-        : layer(layer_), source(source_), index(index_) {}
+        : layer(layer_),
+          source(source_),
+          index(index_) {}
     bool operator<(const LayerRenderItem& other) const { return index < other.index; }
 
     std::reference_wrapper<RenderLayer> layer;
@@ -57,14 +59,16 @@ private:
 
 class RenderTreeImpl final : public RenderTree {
 public:
-    RenderTreeImpl(std::unique_ptr<RenderTreeParameters> parameters_,
-                   std::set<LayerRenderItem> layerRenderItems_,
-                   std::vector<std::unique_ptr<RenderItem>> sourceRenderItems_,
-                   LineAtlas& lineAtlas_,
-                   PatternAtlas& patternAtlas_,
-                   RenderLayerReferences layersNeedPlacement_,
-                   Immutable<Placement> placement_,
-                   bool updateSymbolOpacities_)
+    RenderTreeImpl(
+        std::unique_ptr<RenderTreeParameters> parameters_,
+        std::set<LayerRenderItem> layerRenderItems_,
+        std::vector<std::unique_ptr<RenderItem>> sourceRenderItems_,
+        LineAtlas& lineAtlas_,
+        PatternAtlas& patternAtlas_,
+        RenderLayerReferences layersNeedPlacement_,
+        Immutable<Placement> placement_,
+        bool updateSymbolOpacities_
+    )
         : RenderTree(std::move(parameters_)),
           layerRenderItems(std::move(layerRenderItems_)),
           sourceRenderItems(std::move(sourceRenderItems_)),
@@ -80,9 +84,7 @@ public:
         }
     }
 
-    RenderItems getLayerRenderItems() const override {
-        return { layerRenderItems.begin(), layerRenderItems.end() };
-    }
+    RenderItems getLayerRenderItems() const override { return {layerRenderItems.begin(), layerRenderItems.end()}; }
     RenderItems getSourceRenderItems() const override {
         RenderItems result;
         result.reserve(sourceRenderItems.size());
@@ -101,7 +103,7 @@ public:
     bool updateSymbolOpacities;
 };
 
-}  // namespace
+} // namespace
 
 RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
@@ -136,7 +138,8 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 }
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
-    const std::shared_ptr<UpdateParameters>& updateParameters) {
+    const std::shared_ptr<UpdateParameters>& updateParameters
+) {
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     if (!isMapModeContinuous) {
         // Reset zoom history state.
@@ -150,29 +153,32 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
 
-    const bool zoomChanged =
-        zoomHistory.update(static_cast<float>(updateParameters->transformState.getZoom()), updateParameters->timePoint);
+    const bool zoomChanged = zoomHistory.update(
+        static_cast<float>(updateParameters->transformState.getZoom()), updateParameters->timePoint
+    );
 
-    const TransitionOptions transitionOptions =
-        isMapModeContinuous ? updateParameters->transitionOptions : TransitionOptions();
+    const TransitionOptions transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
+                                                                    : TransitionOptions();
 
     const TransitionParameters transitionParameters{updateParameters->timePoint, transitionOptions};
 
     const PropertyEvaluationParameters evaluationParameters{
         zoomHistory,
         updateParameters->timePoint,
-        transitionOptions.duration.value_or(isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION
-                                                                : Duration::zero())};
+        transitionOptions.duration.value_or(
+            isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero()
+        )};
 
-    const TileParameters tileParameters{updateParameters->pixelRatio,
-                                        updateParameters->debugOptions,
-                                        updateParameters->transformState,
-                                        updateParameters->fileSource,
-                                        updateParameters->mode,
-                                        updateParameters->annotationManager,
-                                        *imageManager,
-                                        *glyphManager,
-                                        updateParameters->prefetchZoomDelta};
+    const TileParameters tileParameters{
+        updateParameters->pixelRatio,
+        updateParameters->debugOptions,
+        updateParameters->transformState,
+        updateParameters->fileSource,
+        updateParameters->mode,
+        updateParameters->annotationManager,
+        *imageManager,
+        *glyphManager,
+        updateParameters->prefetchZoomDelta};
 
     glyphManager->setURL(updateParameters->glyphURL);
 
@@ -191,7 +197,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
-    // Only trigger tile reparse for changed images. Changed images only need a relayout when they have a different size.
+    // Only trigger tile reparse for changed images. Changed images only need a relayout when they have a different
+    // size.
     bool hasImageDiff = !imageDiff.removed.empty();
 
     // Remove removed images from sprite atlas.
@@ -284,11 +291,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const bool tiltedView = transformState.getPitch() != 0.0f;
 
     // Create parameters for the render tree.
-    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(updateParameters->transformState,
-                                                                       updateParameters->mode,
-                                                                       updateParameters->debugOptions,
-                                                                       updateParameters->timePoint,
-                                                                       renderLight.getEvaluated());
+    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(
+        updateParameters->transformState,
+        updateParameters->mode,
+        updateParameters->debugOptions,
+        updateParameters->timePoint,
+        renderLight.getEvaluated()
+    );
 
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
@@ -315,14 +324,16 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
-                                           hasLayoutDifference(layerDiff, layerId));
+                    sourceNeedsRelayout =
+                        (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                         hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
                         if (zoomFitsLayer) {
                             sourceNeedsRendering = true;
-                            renderItemsEmplaceHint =
-                                layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
+                            renderItemsEmplaceHint = layerRenderItems.emplace_hint(
+                                renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index)
+                            );
                         }
                     }
                 }
@@ -339,14 +350,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   // items.
                     }
                 }
-                renderItemsEmplaceHint = layerRenderItems.emplace_hint(renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
+                renderItemsEmplaceHint = layerRenderItems.emplace_hint(
+                    renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index)
+                );
             }
         }
-        source->update(sourceImpl,
-                       filteredLayersForSource,
-                       sourceNeedsRendering,
-                       sourceNeedsRelayout,
-                       tileParameters);
+        source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
     }
 
@@ -358,8 +367,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // Prepare. Update all matrices and generate data that we should upload to the GPU.
     for (const auto& entry : renderSources) {
         if (entry.second->isEnabled()) {
-            entry.second->prepare(
-                {renderTreeParameters->transformParams, updateParameters->debugOptions, *imageManager});
+            entry.second->prepare({renderTreeParameters->transformParams, updateParameters->debugOptions, *imageManager}
+            );
         }
     }
 
@@ -367,7 +376,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (auto& renderItem : layerRenderItems) {
         RenderLayer& renderLayer = renderItem.layer;
         renderLayer.prepare(
-            {renderItem.source, *imageManager, *patternAtlas, *lineAtlas, updateParameters->transformState});
+            {renderItem.source, *imageManager, *patternAtlas, *lineAtlas, updateParameters->transformState}
+        );
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
@@ -407,7 +417,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
 
         renderTreeParameters->placementChanged = !placementController.placementIsRecent(
-            updateParameters->timePoint, static_cast<float>(updateParameters->transformState.getZoom()), placementUpdatePeriodOverride);
+            updateParameters->timePoint,
+            static_cast<float>(updateParameters->transformState.getZoom()),
+            placementUpdatePeriodOverride
+        );
         symbolBucketsChanged |= renderTreeParameters->placementChanged;
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());
@@ -449,17 +462,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
 
-    return std::make_unique<RenderTreeImpl>(std::move(renderTreeParameters),
-                                            std::move(layerRenderItems),
-                                            std::move(sourceRenderItems),
-                                            *lineAtlas,
-                                            *patternAtlas,
-                                            std::move(layersNeedPlacement),
-                                            placementController.getPlacement(),
-                                            symbolBucketsChanged);
+    return std::make_unique<RenderTreeImpl>(
+        std::move(renderTreeParameters),
+        std::move(layerRenderItems),
+        std::move(sourceRenderItems),
+        *lineAtlas,
+        *patternAtlas,
+        std::move(layersNeedPlacement),
+        placementController.getPlacement(),
+        symbolBucketsChanged
+    );
 }
 
-std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry, const RenderedQueryOptions& options) const {
+std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
+    const ScreenLineString& geometry, const RenderedQueryOptions& options
+) const {
     std::unordered_map<std::string, const RenderLayer*> layers;
     if (options.layerIDs) {
         for (const auto& layerID : *options.layerIDs) {
@@ -476,19 +493,23 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineS
     return queryRenderedFeatures(geometry, options, layers);
 }
 
-void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, std::vector<Feature>>& resultsByLayer,
-                                          const ScreenLineString& geometry,
-                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
-                                          const RenderedQueryOptions& options) const {
-    const auto hasCrossTileIndex = [] (const auto& pair) {
+void RenderOrchestrator::queryRenderedSymbols(
+    std::unordered_map<std::string, std::vector<Feature>>& resultsByLayer,
+    const ScreenLineString& geometry,
+    const std::unordered_map<std::string, const RenderLayer*>& layers,
+    const RenderedQueryOptions& options
+) const {
+    const auto hasCrossTileIndex = [](const auto& pair) {
         return pair.second->baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required;
     };
 
     std::unordered_map<std::string, const RenderLayer*> crossTileSymbolIndexLayers;
-    std::copy_if(layers.begin(),
-                 layers.end(),
-                 std::inserter(crossTileSymbolIndexLayers, crossTileSymbolIndexLayers.begin()),
-                 hasCrossTileIndex);
+    std::copy_if(
+        layers.begin(),
+        layers.end(),
+        std::inserter(crossTileSymbolIndexLayers, crossTileSymbolIndexLayers.begin()),
+        hasCrossTileIndex
+    );
 
     if (crossTileSymbolIndexLayers.empty()) {
         return;
@@ -502,19 +523,24 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     }
     // Although symbol query is global, symbol results are only sortable within a bucket
     // For a predictable global sort renderItems, we sort the buckets based on their corresponding tile position
-    std::sort(bucketQueryData.begin(), bucketQueryData.end(), [](const RetainedQueryData& a, const RetainedQueryData& b) {
-        return
-            std::tie(a.tileID.canonical.z, a.tileID.canonical.y, a.tileID.wrap, a.tileID.canonical.x) <
-            std::tie(b.tileID.canonical.z, b.tileID.canonical.y, b.tileID.wrap, b.tileID.canonical.x);
-    });
+    std::sort(
+        bucketQueryData.begin(),
+        bucketQueryData.end(),
+        [](const RetainedQueryData& a, const RetainedQueryData& b) {
+            return std::tie(a.tileID.canonical.z, a.tileID.canonical.y, a.tileID.wrap, a.tileID.canonical.x) <
+                   std::tie(b.tileID.canonical.z, b.tileID.canonical.y, b.tileID.wrap, b.tileID.canonical.x);
+        }
+    );
 
     for (auto wrappedQueryData : bucketQueryData) {
         auto& queryData = wrappedQueryData.get();
-        auto bucketSymbols = queryData.featureIndex->lookupSymbolFeatures(renderedSymbols[queryData.bucketInstanceId],
-                                                                          options,
-                                                                          crossTileSymbolIndexLayers,
-                                                                          queryData.tileID,
-                                                                          queryData.featureSortOrder);
+        auto bucketSymbols = queryData.featureIndex->lookupSymbolFeatures(
+            renderedSymbols[queryData.bucketInstanceId],
+            options,
+            crossTileSymbolIndexLayers,
+            queryData.tileID,
+            queryData.featureSortOrder
+        );
 
         for (auto layer : bucketSymbols) {
             auto& resultFeatures = resultsByLayer[layer.first];
@@ -523,7 +549,11 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     }
 }
 
-std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry, const RenderedQueryOptions& options, const std::unordered_map<std::string, const RenderLayer*>& layers) const {
+std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
+    const ScreenLineString& geometry,
+    const RenderedQueryOptions& options,
+    const std::unordered_map<std::string, const RenderLayer*>& layers
+) const {
     std::unordered_set<std::string> sourceIDs;
     std::unordered_map<std::string, const RenderLayer*> filteredLayers;
     for (const auto& pair : layers) {
@@ -540,8 +570,12 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineS
     std::unordered_map<std::string, std::vector<Feature>> resultsByLayer;
     for (const auto& sourceID : sourceIDs) {
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
-            auto sourceResults = renderSource->queryRenderedFeatures(geometry, transformState, filteredLayers, options, projMatrix);
-            std::move(sourceResults.begin(), sourceResults.end(), std::inserter(resultsByLayer, resultsByLayer.begin()));
+            auto sourceResults = renderSource->queryRenderedFeatures(
+                geometry, transformState, filteredLayers, options, projMatrix
+            );
+            std::move(
+                sourceResults.begin(), sourceResults.end(), std::inserter(resultsByLayer, resultsByLayer.begin())
+            );
         }
     }
 
@@ -575,8 +609,13 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
     std::unordered_map<std::string, const RenderLayer*> shapeAnnotationLayers;
     RenderedQueryOptions options;
     for (const auto& layerImpl : *layerImpls) {
-        if (std::mismatch(layerImpl->id.begin(), layerImpl->id.end(),
-                          AnnotationManager::ShapeLayerID.begin(), AnnotationManager::ShapeLayerID.end()).second == AnnotationManager::ShapeLayerID.end()) {
+        if (std::mismatch(
+                layerImpl->id.begin(),
+                layerImpl->id.end(),
+                AnnotationManager::ShapeLayerID.begin(),
+                AnnotationManager::ShapeLayerID.end()
+            )
+                .second == AnnotationManager::ShapeLayerID.end()) {
             if (const RenderLayer* layer = getRenderLayer(layerImpl->id)) {
                 shapeAnnotationLayers.emplace(layer->getID(), layer);
             }
@@ -586,42 +625,56 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
     return queryRenderedFeatures(geometry, options, shapeAnnotationLayers);
 }
 
-std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options) const {
+std::vector<Feature> RenderOrchestrator::querySourceFeatures(
+    const std::string& sourceID, const SourceQueryOptions& options
+) const {
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
 
     return source->querySourceFeatures(options);
 }
 
-FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(const std::string& sourceID,
-                                                             const Feature& feature,
-                                                             const std::string& extension,
-                                                             const std::string& extensionField,
-                                                             const std::optional<std::map<std::string, Value>>& args) const {
+FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(
+    const std::string& sourceID,
+    const Feature& feature,
+    const std::string& extension,
+    const std::string& extensionField,
+    const std::optional<std::map<std::string, Value>>& args
+) const {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         return renderSource->queryFeatureExtensions(feature, extension, extensionField, args);
     }
     return {};
 }
 
-void RenderOrchestrator::setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
-                                         const std::string& featureID, const FeatureState& state) {
+void RenderOrchestrator::setFeatureState(
+    const std::string& sourceID,
+    const std::optional<std::string>& sourceLayerID,
+    const std::string& featureID,
+    const FeatureState& state
+) {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->setFeatureState(sourceLayerID, featureID, state);
     }
 }
 
-void RenderOrchestrator::getFeatureState(FeatureState& state, const std::string& sourceID,
-                                         const std::optional<std::string>& sourceLayerID,
-                                         const std::string& featureID) const {
+void RenderOrchestrator::getFeatureState(
+    FeatureState& state,
+    const std::string& sourceID,
+    const std::optional<std::string>& sourceLayerID,
+    const std::string& featureID
+) const {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->getFeatureState(state, sourceLayerID, featureID);
     }
 }
 
-void RenderOrchestrator::removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
-                                            const std::optional<std::string>& featureID,
-                                            const std::optional<std::string>& stateKey) {
+void RenderOrchestrator::removeFeatureState(
+    const std::string& sourceID,
+    const std::optional<std::string>& sourceLayerID,
+    const std::optional<std::string>& featureID,
+    const std::optional<std::string>& stateKey
+) {
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->removeFeatureState(sourceLayerID, featureID, stateKey);
     }
@@ -692,7 +745,7 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
 }
 
 bool RenderOrchestrator::isLoaded() const {
-    for (const auto& entry: renderSources) {
+    for (const auto& entry : renderSources) {
         if (!entry.second->isLoaded()) {
             return false;
         }
@@ -718,14 +771,23 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
-void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
-               " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error));
+void RenderOrchestrator::onGlyphsError(
+    const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error
+) {
+    Log::Error(
+        Event::Style,
+        "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
+            " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error)
+    );
     observer->onResourceError(error);
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " + util::toString(error));
+    Log::Error(
+        Event::Style,
+        "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
+            util::toString(error)
+    );
     observer->onResourceError(error);
 }
 

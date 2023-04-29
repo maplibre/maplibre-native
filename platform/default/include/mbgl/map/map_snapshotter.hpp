@@ -34,12 +34,14 @@ public:
 
 class MapSnapshotter {
 public:
-    MapSnapshotter(Size size,
-                   float pixelRatio,
-                   const ResourceOptions&,
-                   const ClientOptions&,
-                   MapSnapshotterObserver&,
-                   std::optional<std::string> localFontFamily = std::nullopt);
+    MapSnapshotter(
+        Size size,
+        float pixelRatio,
+        const ResourceOptions&,
+        const ClientOptions&,
+        MapSnapshotterObserver&,
+        std::optional<std::string> localFontFamily = std::nullopt
+    );
 
     MapSnapshotter(Size size, float pixelRatio, const ResourceOptions&, const ClientOptions& = ClientOptions());
 
@@ -63,10 +65,10 @@ public:
     style::Style& getStyle();
     const style::Style& getStyle() const;
 
-    using PointForFn = std::function<ScreenCoordinate (const LatLng&)>;
-    using LatLngForFn = std::function<LatLng (const ScreenCoordinate&)>;
+    using PointForFn = std::function<ScreenCoordinate(const LatLng&)>;
+    using LatLngForFn = std::function<LatLng(const ScreenCoordinate&)>;
     using Attributions = std::vector<std::string>;
-    using Callback = std::function<void (std::exception_ptr, PremultipliedImage, Attributions, PointForFn, LatLngForFn)>;
+    using Callback = std::function<void(std::exception_ptr, PremultipliedImage, Attributions, PointForFn, LatLngForFn)>;
     void snapshot(Callback);
     void cancel();
 

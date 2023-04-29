@@ -41,13 +41,13 @@ public:
     // Contains the tile ID string for painting debug information.
     std::unique_ptr<DebugBucket> debugBucket;
 
-    mat4 translatedMatrix(const std::array<float, 2>& translation,
-                          style::TranslateAnchorType anchor,
-                          const TransformState&) const;
+    mat4
+    translatedMatrix(const std::array<float, 2>& translation, style::TranslateAnchorType anchor, const TransformState&)
+        const;
 
-    mat4 translatedClipMatrix(const std::array<float, 2>& translation,
-                              style::TranslateAnchorType anchor,
-                              const TransformState&) const;
+    mat4
+    translatedClipMatrix(const std::array<float, 2>& translation, style::TranslateAnchorType anchor, const TransformState&)
+        const;
 
     const OverscaledTileID& getOverscaledTileID() const;
     bool holdForFade() const;
@@ -62,11 +62,13 @@ public:
     void prepare(const SourcePrepareParameters&);
     void finishRender(PaintParameters&) const;
 
-    mat4 translateVtxMatrix(const mat4& tileMatrix,
-                            const std::array<float, 2>& translation,
-                            style::TranslateAnchorType anchor,
-                            const TransformState& state,
-                            bool inViewportPixelUnits) const;
+    mat4 translateVtxMatrix(
+        const mat4& tileMatrix,
+        const std::array<float, 2>& translation,
+        style::TranslateAnchorType anchor,
+        const TransformState& state,
+        bool inViewportPixelUnits
+    ) const;
 
     void setFeatureState(const LayerFeatureStates&);
 

@@ -13,8 +13,8 @@ namespace mbgl {
 
 struct AnchorAlignment {
     AnchorAlignment(float horizontal, float vertical)
-        : horizontalAlign(horizontal), verticalAlign(vertical) {
-    }
+        : horizontalAlign(horizontal),
+          verticalAlign(vertical) {}
 
     static AnchorAlignment getAnchorAlignment(style::SymbolAnchorType anchor);
 
@@ -45,7 +45,8 @@ public:
 class PositionedIcon {
 private:
     PositionedIcon(
-        ImagePosition image_, float top_, float bottom_, float left_, float right_, const Padding& collisionPadding_)
+        ImagePosition image_, float top_, float bottom_, float left_, float right_, const Padding& collisionPadding_
+    )
         : _image(std::move(image_)),
           _top(top_),
           _bottom(bottom_),
@@ -61,17 +62,19 @@ private:
     Padding _collisionPadding;
 
 public:
-    static PositionedIcon shapeIcon(const ImagePosition&,
-                                    const std::array<float, 2>& iconOffset,
-                                    style::SymbolAnchorType iconAnchor);
+    static PositionedIcon shapeIcon(
+        const ImagePosition&, const std::array<float, 2>& iconOffset, style::SymbolAnchorType iconAnchor
+    );
 
     // Updates shaped icon's bounds based on shaped text's bounds and provided
     // layout properties.
-    void fitIconToText(const Shaping& shapedText,
-                       style::IconTextFitType textFit,
-                       const std::array<float, 4>& padding,
-                       const std::array<float, 2>& iconOffset,
-                       float fontScale);
+    void fitIconToText(
+        const Shaping& shapedText,
+        style::IconTextFitType textFit,
+        const std::array<float, 4>& padding,
+        const std::array<float, 2>& iconOffset,
+        float fontScale
+    );
 
     const ImagePosition& image() const { return _image; }
     float top() const { return _top; }
@@ -81,20 +84,22 @@ public:
     const Padding& collisionPadding() const { return _collisionPadding; }
 };
 
-Shaping getShaping(const TaggedString& string,
-                   float maxWidth,
-                   float lineHeight,
-                   style::SymbolAnchorType textAnchor,
-                   style::TextJustifyType textJustify,
-                   float spacing,
-                   const std::array<float, 2>& translate,
-                   WritingModeType,
-                   BiDi& bidi,
-                   const GlyphMap& glyphMap,
-                   const GlyphPositions& glyphPositions,
-                   const ImagePositions& imagePositions,
-                   float layoutTextSize,
-                   float layoutTextSizeAtBucketZoomLevel,
-                   bool allowVerticalPlacement);
+Shaping getShaping(
+    const TaggedString& string,
+    float maxWidth,
+    float lineHeight,
+    style::SymbolAnchorType textAnchor,
+    style::TextJustifyType textJustify,
+    float spacing,
+    const std::array<float, 2>& translate,
+    WritingModeType,
+    BiDi& bidi,
+    const GlyphMap& glyphMap,
+    const GlyphPositions& glyphPositions,
+    const ImagePositions& imagePositions,
+    float layoutTextSize,
+    float layoutTextSizeAtBucketZoomLevel,
+    bool allowVerticalPlacement
+);
 
 } // namespace mbgl

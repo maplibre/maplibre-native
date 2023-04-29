@@ -15,24 +15,20 @@ public:
     std::optional<Duration> delay;
     bool enablePlacementTransitions;
 
-    TransitionOptions(std::optional<Duration> duration_ = std::nullopt,
-                      std::optional<Duration> delay_ = std::nullopt,
-                      bool enablePlacementTransitions_ = true)
+    TransitionOptions(
+        std::optional<Duration> duration_ = std::nullopt,
+        std::optional<Duration> delay_ = std::nullopt,
+        bool enablePlacementTransitions_ = true
+    )
         : duration(std::move(duration_)),
           delay(std::move(delay_)),
           enablePlacementTransitions(enablePlacementTransitions_) {}
 
     TransitionOptions reverseMerge(const TransitionOptions& defaults) const {
-        return {
-            duration ? duration : defaults.duration,
-            delay ? delay : defaults.delay,
-            enablePlacementTransitions
-        };
+        return {duration ? duration : defaults.duration, delay ? delay : defaults.delay, enablePlacementTransitions};
     }
 
-    bool isDefined() const {
-        return duration || delay;
-    }
+    bool isDefined() const { return duration || delay; }
 
     mapbox::base::Value serialize() const {
         mapbox::base::ValueObject result;

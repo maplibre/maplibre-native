@@ -9,12 +9,14 @@ namespace style {
 namespace expression {
 
 EvaluationResult toBoolean(const Value& v) {
-    return v.match([&](double f) { return static_cast<bool>(f); },
-                   [&](const std::string& s) { return s.length() > 0; },
-                   [&](bool b) { return b; },
-                   [&](const NullValue&) { return false; },
-                   [&](const Image& i) { return i.isAvailable(); },
-                   [&](const auto&) { return true; });
+    return v.match(
+        [&](double f) { return static_cast<bool>(f); },
+        [&](const std::string& s) { return s.length() > 0; },
+        [&](bool b) { return b; },
+        [&](const NullValue&) { return false; },
+        [&](const Image& i) { return i.isAvailable(); },
+        [&](const auto&) { return true; }
+    );
 }
 
 EvaluationResult toNumber(const Value& v) {
@@ -31,26 +33,20 @@ EvaluationResult toNumber(const Value& v) {
         [](const auto&) { return std::optional<double>(); }
     );
     if (!result) {
-        return EvaluationError {
-            "Could not convert " + stringify(v) + " to number."
-        };
+        return EvaluationError{"Could not convert " + stringify(v) + " to number."};
     }
     return *result;
 }
 
 EvaluationResult toColor(const Value& colorValue) {
     return colorValue.match(
-        [&](const Color& color) -> EvaluationResult {
-            return color;
-        },
+        [&](const Color& color) -> EvaluationResult { return color; },
         [&](const std::string& colorString) -> EvaluationResult {
             const std::optional<Color> result = Color::parse(colorString);
             if (result) {
                 return *result;
             } else {
-                return EvaluationError{
-                    "Could not parse color from value '" + colorString + "'"
-                };
+                return EvaluationError{"Could not parse color from value '" + colorString + "'"};
             }
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
@@ -69,14 +65,12 @@ EvaluationResult toColor(const Value& colorValue) {
                 return *c;
             } else {
                 return EvaluationError{
-                    "Invalid rbga value " + stringify(colorValue) + ": expected an array containing either three or four numeric values."
-                };
+                    "Invalid rbga value " + stringify(colorValue) +
+                    ": expected an array containing either three or four numeric values."};
             }
         },
         [&](const auto&) -> EvaluationResult {
-            return EvaluationError{
-                "Could not parse color from value '" + stringify(colorValue) + "'"
-            };
+            return EvaluationError{"Could not parse color from value '" + stringify(colorValue) + "'"};
         }
     );
 }
@@ -89,10 +83,9 @@ EvaluationResult toImage(const Value& imageValue) {
     return Image(toString(imageValue).c_str());
 }
 
-Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) :
-    Expression(Kind::Coercion, std::move(type_)),
-    inputs(std::move(inputs_))
-{
+Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
+    : Expression(Kind::Coercion, std::move(type_)),
+      inputs(std::move(inputs_)) {
     assert(!inputs.empty());
     type::Type t = getType();
     if (t.is<type::BooleanType>()) {
@@ -102,7 +95,9 @@ Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> in
     } else if (t.is<type::NumberType>()) {
         coerceSingleValue = toNumber;
     } else if (t.is<type::StringType>()) {
-        coerceSingleValue = [] (const Value& v) -> EvaluationResult { return toString(v); };
+        coerceSingleValue = [](const Value& v) -> EvaluationResult {
+            return toString(v);
+        };
     } else if (t.is<type::FormattedType>()) {
         coerceSingleValue = toFormatted;
     } else if (t.is<type::ImageType>()) {
@@ -116,7 +111,7 @@ mbgl::Value Coercion::serialize() const {
     if (getType().is<type::FormattedType>()) {
         // Since there's no explicit "to-formatted" coercion, the only coercions should be created
         // by string expressions that get implicitly coerced to "formatted".
-        std::vector<mbgl::Value> serialized{{ std::string("format") }};
+        std::vector<mbgl::Value> serialized{{std::string("format")}};
         serialized.push_back(inputs[0]->serialize());
         serialized.emplace_back(std::unordered_map<std::string, mbgl::Value>());
         return serialized;
@@ -126,24 +121,27 @@ mbgl::Value Coercion::serialize() const {
         return Expression::serialize();
     }
 };
-    
+
 std::string Coercion::getOperator() const {
     return getType().match(
-      [](const type::BooleanType&) { return "to-boolean"; },
-      [](const type::ColorType&) { return "to-color"; },
-      [](const type::NumberType&) { return "to-number"; },
-      [](const type::StringType&) { return "to-string"; },
-      [](const auto&) { assert(false); return ""; });
+        [](const type::BooleanType&) { return "to-boolean"; },
+        [](const type::ColorType&) { return "to-color"; },
+        [](const type::NumberType&) { return "to-number"; },
+        [](const type::StringType&) { return "to-string"; },
+        [](const auto&) {
+            assert(false);
+            return "";
+        }
+    );
 }
 
 using namespace mbgl::style::conversion;
 ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
-    static std::unordered_map<std::string, type::Type> types {
+    static std::unordered_map<std::string, type::Type> types{
         {"to-boolean", type::Boolean},
         {"to-color", type::Color},
         {"to-number", type::Number},
-        {"to-string", type::String}
-    };
+        {"to-string", type::String}};
 
     std::size_t length = arrayLength(value);
 
@@ -190,11 +188,11 @@ EvaluationResult Coercion::evaluate(const EvaluationContext& params) const {
     }
 
     assert(false);
-    return EvaluationError { "Unreachable" };
+    return EvaluationError{"Unreachable"};
 };
 
 void Coercion::eachChild(const std::function<void(const Expression&)>& visit) const {
-    for(const std::unique_ptr<Expression>& input : inputs) {
+    for (const std::unique_ptr<Expression>& input : inputs) {
         visit(*input);
     }
 };

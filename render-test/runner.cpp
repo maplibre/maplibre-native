@@ -90,7 +90,8 @@ std::string simpleDiff(const Value& result, const Value& expected) {
 }
 
 TestRunner::TestRunner(Manifest manifest_, UpdateResults updateResults_)
-    : manifest(std::move(manifest_)), updateResults(updateResults_) {
+    : manifest(std::move(manifest_)),
+      updateResults(updateResults_) {
     registerProxyFileSource();
 }
 
@@ -99,9 +100,10 @@ void TestRunner::registerProxyFileSource() {
     std::call_once(registerProxyFlag, [] {
         auto* fileSourceManager = mbgl::FileSourceManager::get();
 
-        auto resourceLoaderFactory =
-            fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::ResourceLoader);
-        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::ResourceLoader
+        );
+        auto factory = [defaultFactory = std::move(resourceLoaderFactory
+                        )](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             assert(defaultFactory);
             std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
             return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
@@ -119,9 +121,9 @@ void TestRunner::doShuffle(uint32_t seed) {
     manifest.doShuffle(seed);
 }
 
-void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
-                                       std::vector<mbgl::Feature>&& features,
-                                       TestMetadata& metadata) {
+void TestRunner::checkQueryTestResults(
+    mbgl::PremultipliedImage&& actualImage, std::vector<mbgl::Feature>&& features, TestMetadata& metadata
+) {
     const std::string& base = metadata.paths.defaultExpectations();
     const std::vector<mbgl::filesystem::path>& expectations = metadata.paths.expectations;
 
@@ -257,13 +259,14 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
             expectedImage = mbgl::decodeImage(*maybeExpectedImage);
 
-            pixels = static_cast<double>(
-                mapbox::pixelmatch(actualImage.data.get(),
-                                   expectedImage.data.get(),
-                                   expectedImage.size.width,
-                                   expectedImage.size.height,
-                                   imageDiff.data.get(),
-                                   0.1285) // Defined in GL JS
+            pixels = static_cast<double>(mapbox::pixelmatch(
+                actualImage.data.get(),
+                expectedImage.data.get(),
+                expectedImage.size.width,
+                expectedImage.size.height,
+                imageDiff.data.get(),
+                0.1285
+            ) // Defined in GL JS
             );
 
             metadata.diff = mbgl::encodePNG(imageDiff);
@@ -284,12 +287,12 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
 void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     if (resultMetadata.metrics.isEmpty()) return;
-    const auto writeMetrics = [&resultMetadata](const mbgl::filesystem::path& path,
-                                                const std::string& message = std::string()) {
-        mbgl::filesystem::create_directories(path);
-        mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
-        resultMetadata.errorMessage += message;
-    };
+    const auto writeMetrics =
+        [&resultMetadata](const mbgl::filesystem::path& path, const std::string& message = std::string()) {
+            mbgl::filesystem::create_directories(path);
+            mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
+            resultMetadata.errorMessage += message;
+        };
 
     const std::vector<mbgl::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
     if (updateResults == UpdateResults::METRICS) {
@@ -322,8 +325,8 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     }
 
     if (resultMetadata.expectedMetrics.isEmpty()) {
-        resultMetadata.errorMessage =
-            "Failed to find metric expectations for: " + resultMetadata.paths.stylePath.string();
+        resultMetadata.errorMessage = "Failed to find metric expectations for: " +
+                                      resultMetadata.paths.stylePath.string();
         if (updateResults == UpdateResults::REBASELINE && !resultMetadata.ignoredTest) {
             writeMetrics(expectedMetrics.back(), ". Created baseline for missing metrics.");
         }
@@ -350,7 +353,11 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
                 return;
             }
 
-            auto result = checkValue(static_cast<float>(expected.second.size), static_cast<float>(actual->second.size), actual->second.tolerance);
+            auto result = checkValue(
+                static_cast<float>(expected.second.size),
+                static_cast<float>(actual->second.size),
+                actual->second.tolerance
+            );
             if (!std::get<bool>(result)) {
                 std::stringstream ss;
                 ss << "File size does not match at probe \"" << expected.first << "\" for file \""
@@ -557,10 +564,13 @@ TestOperations getBeforeOperations(const Manifest& manifest) {
             result.emplace_back([](TestContext& ctx) {
                 assert(!AllocationIndex::isActive());
                 AllocationIndex::setActive(true);
-                ctx.getMetadata().metrics.memory.emplace(std::piecewise_construct,
-                                                         std::forward_as_tuple(memoryProbeOp + mark),
-                                                         std::forward_as_tuple(AllocationIndex::getAllocatedSizePeak(),
-                                                                               AllocationIndex::getAllocationsCount()));
+                ctx.getMetadata().metrics.memory.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(memoryProbeOp + mark),
+                    std::forward_as_tuple(
+                        AllocationIndex::getAllocatedSizePeak(), AllocationIndex::getAllocationsCount()
+                    )
+                );
                 return true;
             });
             continue;
@@ -582,7 +592,8 @@ TestOperations getBeforeOperations(const Manifest& manifest) {
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(networkProbeOp + mark),
-                    std::forward_as_tuple(ProxyFileSource::getRequestCount(), ProxyFileSource::getTransferredSize()));
+                    std::forward_as_tuple(ProxyFileSource::getRequestCount(), ProxyFileSource::getTransferredSize())
+                );
                 return true;
             });
             continue;
@@ -602,8 +613,10 @@ TestOperations getAfterOperations(const Manifest& manifest) {
                 auto emplaced = ctx.getMetadata().metrics.memory.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(memoryProbeOp + mark),
-                    std::forward_as_tuple(AllocationIndex::getAllocatedSizePeak(),
-                                          AllocationIndex::getAllocationsCount()));
+                    std::forward_as_tuple(
+                        AllocationIndex::getAllocatedSizePeak(), AllocationIndex::getAllocationsCount()
+                    )
+                );
                 assert(emplaced.second);
                 // TODO: Improve tolerance handling for memory tests.
                 emplaced.first->second.tolerance = 0.2f;
@@ -632,7 +645,8 @@ TestOperations getAfterOperations(const Manifest& manifest) {
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(networkProbeOp + mark),
-                    std::forward_as_tuple(ProxyFileSource::getRequestCount(), ProxyFileSource::getTransferredSize()));
+                    std::forward_as_tuple(ProxyFileSource::getRequestCount(), ProxyFileSource::getTransferredSize())
+                );
                 ProxyFileSource::setTrackingActive(false);
                 return true;
             });
@@ -648,17 +662,17 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
     ctx.getFrontend().setSize(metadata.size);
     auto& map = ctx.getMap();
     map.setSize(metadata.size);
-    map.setProjectionMode(mbgl::ProjectionMode()
-                              .withAxonometric(metadata.axonometric)
-                              .withXSkew(metadata.xSkew)
-                              .withYSkew(metadata.ySkew));
+    map.setProjectionMode(
+        mbgl::ProjectionMode().withAxonometric(metadata.axonometric).withXSkew(metadata.xSkew).withYSkew(metadata.ySkew)
+    );
     map.setDebug(metadata.debug);
     map.getStyle().loadJSON(serializeJsonValue(metadata.document));
 }
 
 LatLng getTileCenterCoordinates(const UnwrappedTileID& tileId) {
     double scale = (1 << tileId.canonical.z);
-    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D, (tileId.canonical.y + 0.5) * util::tileSize_D};
+    Point<double> tileCenter{
+        (tileId.canonical.x + 0.5) * util::tileSize_D, (tileId.canonical.y + 0.5) * util::tileSize_D};
     return Projection::unproject(tileCenter, scale);
 }
 
@@ -677,10 +691,14 @@ uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float 
 
 } // namespace
 
-TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions)
+TestRunner::Impl::Impl(
+    const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions
+)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
+      fileSource(mbgl::FileSourceManager::get()->getFileSource(
+          mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions
+      )),
       map(frontend,
           *observer.get(),
           mbgl::MapOptions()
@@ -699,7 +717,8 @@ void TestRunner::run(TestMetadata& metadata) {
     ProxyFileSource::setTrackingActive(false);
 
     struct ContextImpl final : public TestContext {
-        ContextImpl(TestMetadata& metadata_) : metadata(metadata_) {}
+        ContextImpl(TestMetadata& metadata_)
+            : metadata(metadata_) {}
         HeadlessFrontend& getFrontend() override {
             assert(runnerImpl);
             return runnerImpl->frontend;
@@ -740,7 +759,8 @@ void TestRunner::run(TestMetadata& metadata) {
         maps[key] = std::make_unique<TestRunner::Impl>(
             metadata,
             mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()),
-            mbgl::ClientOptions());
+            mbgl::ClientOptions()
+        );
     }
 
     ctx.runnerImpl = maps[key].get();
@@ -837,17 +857,20 @@ void TestRunner::run(TestMetadata& metadata) {
                 if (placedSymbol.intersectsTileBorder) {
                     if (placedSymbol.textCollisionBox) {
                         findCutOffs(
-                            placedSymbol, *placedSymbol.textCollisionBox, placedSymbol.textPlaced, false /*isIcon*/);
+                            placedSymbol, *placedSymbol.textCollisionBox, placedSymbol.textPlaced, false /*isIcon*/
+                        );
                     }
                     if (placedSymbol.iconCollisionBox) {
                         findCutOffs(
-                            placedSymbol, *placedSymbol.iconCollisionBox, placedSymbol.iconPlaced, true /*isIcon*/);
+                            placedSymbol, *placedSymbol.iconCollisionBox, placedSymbol.iconPlaced, true /*isIcon*/
+                        );
                     }
                 }
             }
 
             PremultipliedImage::copy(
-                resultForTile.image, result.image, {0, 0}, {xOffset, yOffset}, resultForTile.image.size);
+                resultForTile.image, result.image, {0, 0}, {xOffset, yOffset}, resultForTile.image.size
+            );
             result.stats += resultForTile.stats;
         }
     } else {
@@ -881,9 +904,9 @@ void TestRunner::run(TestMetadata& metadata) {
     }
 }
 
-void TestRunner::appendLabelCutOffResults(TestMetadata& resultMetadata,
-                                          const std::string& cutOffLabelsReport,
-                                          const std::string& duplicationsReport) {
+void TestRunner::appendLabelCutOffResults(
+    TestMetadata& resultMetadata, const std::string& cutOffLabelsReport, const std::string& duplicationsReport
+) {
     if (resultMetadata.labelCutOffFound) { // Append label cut-off statistics.
         resultMetadata.errorMessage += "\n Label cut-offs:";
         resultMetadata.errorMessage += cutOffLabelsReport;

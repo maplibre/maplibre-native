@@ -13,16 +13,17 @@ namespace mbgl {
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
-    return {util::rad2deg(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
-            mercatorCoordinate.x * 360.0 - 180.0,
-            wrapMode};
+    return {
+        util::rad2deg(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
+        mercatorCoordinate.x * 360.0 - 180.0,
+        wrapMode};
 }
 constexpr double kEpsilon = 1e-9;
 // To avoid flickering issue due to "zoom = 13.9999999..".
 double roundForAccuracy(double x) {
     double round_x = std::round(x);
     double diff = std::abs(round_x - x);
-    if (diff < kEpsilon && diff > 0 ){
+    if (diff < kEpsilon && diff > 0) {
         return round_x;
     } else {
         return x;
@@ -31,7 +32,9 @@ double roundForAccuracy(double x) {
 } // namespace
 
 TransformState::TransformState(ConstrainMode constrainMode_, ViewportMode viewportMode_)
-    : bounds(LatLngBounds()), constrainMode(constrainMode_), viewportMode(viewportMode_) {}
+    : bounds(LatLngBounds()),
+      constrainMode(constrainMode_),
+      viewportMode(viewportMode_) {}
 
 void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.x) {
@@ -91,11 +94,13 @@ void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) cons
     const double s = Projection::worldSize(scale) / tileScale;
 
     matrix::identity(matrix);
-    matrix::translate(matrix,
-                      matrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
-                      int64_t(tileID.canonical.y) * s,
-                      0);
+    matrix::translate(
+        matrix,
+        matrix,
+        int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+        int64_t(tileID.canonical.y) * s,
+        0
+    );
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
 }
 
@@ -126,8 +131,9 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     updateCameraState();
 
     mat4 worldToCamera = camera.getWorldToCamera(scale, viewportMode == ViewportMode::FlippedY);
-    mat4 cameraToClip =
-        camera.getCameraToClipPerspective(getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
+    mat4 cameraToClip = camera.getCameraToClipPerspective(
+        getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ
+    );
 
     // Move the center of perspective to center of specified edgeInsets.
     // Values are in range [-1, 1] where the upper and lower range values
@@ -198,9 +204,10 @@ void TransformState::updateCameraState() const {
     camera.setOrientation(getPitch(), getBearing());
 
     const vec3 forward = camera.forward();
-    const vec3 orbitPosition = {{-forward[0] * cameraToCenterDistance,
-                                 -forward[1] * cameraToCenterDistance,
-                                 -forward[2] * cameraToCenterDistance}};
+    const vec3 orbitPosition = {
+        {-forward[0] * cameraToCenterDistance,
+         -forward[1] * cameraToCenterDistance,
+         -forward[2] * cameraToCenterDistance}};
     vec3 cameraPosition = {{dx + orbitPosition[0], dy + orbitPosition[1], orbitPosition[2]}};
 
     cameraPosition[0] /= worldSize;
@@ -812,10 +819,10 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({ 0, static_cast<float>(getSize().height) });
+    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
-    vec4 p = {{ pt.x, pt.y, 0, 1 }};
+    vec4 p = {{pt.x, pt.y, 0, 1}};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());
     return static_cast<float>(topPoint[3]) / getCameraToCenterDistance();

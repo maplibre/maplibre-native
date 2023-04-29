@@ -17,9 +17,9 @@ class CircleBucket final : public Bucket {
 public:
     using PossiblyEvaluatedLayoutProperties = style::CircleLayoutProperties::PossiblyEvaluated;
 
-    CircleBucket(const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-                 MapMode mode,
-                 float zoom);
+    CircleBucket(
+        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties, MapMode mode, float zoom
+    );
     ~CircleBucket() override;
 
     bool hasData() const override;

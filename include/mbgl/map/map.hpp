@@ -33,23 +33,25 @@ class Style;
 
 class Map : private util::noncopyable {
 public:
-    explicit Map(RendererFrontend&,
-                 MapObserver&,
-                 const MapOptions&,
-                 const ResourceOptions&,
-                 const ClientOptions& = ClientOptions());
+    explicit Map(
+        RendererFrontend&,
+        MapObserver&,
+        const MapOptions&,
+        const ResourceOptions&,
+        const ClientOptions& = ClientOptions()
+    );
     ~Map();
 
     /// Register a callback that will get called (on the render thread) when all resources have
     /// been loaded and a complete render occurs.
-    using StillImageCallback = std::function<void (std::exception_ptr)>;
+    using StillImageCallback = std::function<void(std::exception_ptr)>;
     void renderStill(StillImageCallback);
     void renderStill(const CameraOptions&, MapDebugOptions, StillImageCallback);
 
     /// Triggers a repaint.
     void triggerRepaint();
 
-          style::Style& getStyle();
+    style::Style& getStyle();
     const style::Style& getStyle() const;
 
     void setStyle(std::unique_ptr<style::Style>);
@@ -71,18 +73,24 @@ public:
     void scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation = {});
     void pitchBy(double pitch, const AnimationOptions& animation = {});
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
-    CameraOptions cameraForLatLngBounds(const LatLngBounds&,
-                                        const EdgeInsets&,
-                                        const std::optional<double>& bearing = std::nullopt,
-                                        const std::optional<double>& pitch = std::nullopt) const;
-    CameraOptions cameraForLatLngs(const std::vector<LatLng>&,
-                                   const EdgeInsets&,
-                                   const std::optional<double>& bearing = std::nullopt,
-                                   const std::optional<double>& pitch = std::nullopt) const;
-    CameraOptions cameraForGeometry(const Geometry<double>&,
-                                    const EdgeInsets&,
-                                    const std::optional<double>& bearing = std::nullopt,
-                                    const std::optional<double>& pitch = std::nullopt) const;
+    CameraOptions cameraForLatLngBounds(
+        const LatLngBounds&,
+        const EdgeInsets&,
+        const std::optional<double>& bearing = std::nullopt,
+        const std::optional<double>& pitch = std::nullopt
+    ) const;
+    CameraOptions cameraForLatLngs(
+        const std::vector<LatLng>&,
+        const EdgeInsets&,
+        const std::optional<double>& bearing = std::nullopt,
+        const std::optional<double>& pitch = std::nullopt
+    ) const;
+    CameraOptions cameraForGeometry(
+        const Geometry<double>&,
+        const EdgeInsets&,
+        const std::optional<double>& bearing = std::nullopt,
+        const std::optional<double>& pitch = std::nullopt
+    ) const;
     LatLngBounds latLngBoundsForCamera(const CameraOptions&) const;
     LatLngBounds latLngBoundsForCameraUnwrapped(const CameraOptions&) const;
 
@@ -103,7 +111,7 @@ public:
     void setSize(Size);
     MapOptions getMapOptions() const;
 
-    //Projection Mode
+    // Projection Mode
     void setProjectionMode(const ProjectionMode&);
     ProjectionMode getProjectionMode() const;
 

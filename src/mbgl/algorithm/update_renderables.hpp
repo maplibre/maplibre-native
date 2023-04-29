@@ -10,18 +10,21 @@
 namespace mbgl {
 namespace algorithm {
 
-template <typename GetTileFn,
-          typename CreateTileFn,
-          typename RetainTileFn,
-          typename RenderTileFn,
-          typename IdealTileIDs>
-void updateRenderables(GetTileFn getTile,
-                       CreateTileFn createTile,
-                       RetainTileFn retainTile,
-                       RenderTileFn renderTile,
-                       const IdealTileIDs& idealTileIDs,
-                       const Range<uint8_t>& zoomRange,
-                       const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
+template <
+    typename GetTileFn,
+    typename CreateTileFn,
+    typename RetainTileFn,
+    typename RenderTileFn,
+    typename IdealTileIDs>
+void updateRenderables(
+    GetTileFn getTile,
+    CreateTileFn createTile,
+    RetainTileFn retainTile,
+    RenderTileFn renderTile,
+    const IdealTileIDs& idealTileIDs,
+    const Range<uint8_t>& zoomRange,
+    const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt
+) {
     std::unordered_set<OverscaledTileID> checked;
     bool covered;
     int32_t overscaledZ;
@@ -38,7 +41,7 @@ void updateRenderables(GetTileFn getTile,
             tile = createTile(idealDataTileID);
             // For source types where TileJSON.bounds is set, tiles outside the
             // bounds are not created
-            if(tile == nullptr) {
+            if (tile == nullptr) {
                 continue;
             }
         }

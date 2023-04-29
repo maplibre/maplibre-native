@@ -24,8 +24,10 @@ TEST(ImageManager, Basic) {
     FixtureLog log;
     ImageManager imageManager;
 
-    auto images = parseSprite(util::read_file("test/fixtures/annotations/emerald.png"),
-                              util::read_file("test/fixtures/annotations/emerald.json"));
+    auto images = parseSprite(
+        util::read_file("test/fixtures/annotations/emerald.png"),
+        util::read_file("test/fixtures/annotations/emerald.json")
+    );
     for (auto& image : images) {
         imageManager.addImage(image);
         auto* stored = imageManager.getImage(image->id);
@@ -38,9 +40,9 @@ TEST(ImageManager, AddRemove) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
-    imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({ 16, 16 }), 2.0f));
-    imageManager.addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({16, 16}), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({16, 16}), 2.0f));
 
     imageManager.removeImage("one");
     imageManager.removeImage("two");
@@ -54,9 +56,9 @@ TEST(ImageManager, Update) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
     EXPECT_EQ(0, imageManager.updatedImageVersions.size());
-    imageManager.updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
     EXPECT_EQ(1, imageManager.updatedImageVersions.size());
     imageManager.removeImage("one");
     EXPECT_EQ(0, imageManager.updatedImageVersions.size());
@@ -66,25 +68,31 @@ TEST(ImageManager, RemoveReleasesBinPackRect) {
     FixtureLog log;
     ImageManager imageManager;
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
     EXPECT_TRUE(imageManager.getImage("big"));
 
     imageManager.removeImage("big");
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({ 32, 32 }), 1.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
     EXPECT_TRUE(imageManager.getImage("big"));
     EXPECT_TRUE(log.empty());
 }
 
 class StubImageRequestor : public ImageRequestor {
 public:
-    StubImageRequestor(ImageManager& imageManager_) : ImageRequestor(imageManager_) {}
+    StubImageRequestor(ImageManager& imageManager_)
+        : ImageRequestor(imageManager_) {}
 
-    void onImagesAvailable(ImageMap icons, ImageMap patterns, std::unordered_map<std::string, uint32_t> versionMap, uint64_t imageCorrelationID_) final {
+    void onImagesAvailable(
+        ImageMap icons,
+        ImageMap patterns,
+        std::unordered_map<std::string, uint32_t> versionMap,
+        uint64_t imageCorrelationID_
+    ) final {
         if (imagesAvailable && imageCorrelationID == imageCorrelationID_) imagesAvailable(icons, patterns, versionMap);
     }
 
-    std::function<void (ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>)> imagesAvailable;
+    std::function<void(ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>)> imagesAvailable;
     uint64_t imageCorrelationID = 0;
 };
 
@@ -97,7 +105,7 @@ TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     ImageManagerObserver observer;
     imageManager.setObserver(&observer);
 
-    requestor.imagesAvailable = [&] (ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
         notified = true;
     };
 
@@ -122,31 +130,32 @@ TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
     StubImageRequestor requestor(imageManager);
     bool notified = false;
 
-    requestor.imagesAvailable = [&] (ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
         notified = true;
     };
 
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("one", ImageType::Icon);
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({ 16, 16 }), 2.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
     imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
 
     ASSERT_TRUE(notified);
 }
 
-
 class StubImageManagerObserver : public ImageManagerObserver {
-    public:
+public:
     int count = 0;
-    std::function<void (const std::string&)> imageMissing = [](const std::string&){};
+    std::function<void(const std::string&)> imageMissing = [](const std::string&) {
+    };
     void onStyleImageMissing(const std::string& id, const std::function<void()>& done) override {
         count++;
         imageMissing(id);
         done();
     }
 
-    std::function<void (const std::vector<std::string>&)> removeUnusedStyleImages = [](const std::vector<std::string>&){};
+    std::function<void(const std::vector<std::string>&)> removeUnusedStyleImages = [](const std::vector<std::string>&) {
+    };
     void onRemoveUnusedStyleImages(const std::vector<std::string>& unusedImageIDs) override {
         removeUnusedStyleImages(unusedImageIDs);
     }
@@ -162,7 +171,7 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
 
     bool notified = false;
 
-    requestor.imagesAvailable = [&] (ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
         notified = true;
     };
 
@@ -217,7 +226,7 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
 
     bool notified = false;
 
-    requestor.imagesAvailable = [&] (ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
         notified = true;
     };
 
@@ -250,11 +259,11 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     imageManager.setObserver(&observer);
     imageManager.setLoaded(true);
 
-    observer.imageMissing = [&imageManager] (const std::string& id) {
+    observer.imageMissing = [&imageManager](const std::string& id) {
         if (id == "1024px") {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 1024, 1024 }), 1.0f));
+            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({1024, 1024}), 1.0f));
         } else {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({ 16, 16 }), 1.0f));
+            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({16, 16}), 1.0f));
         }
     };
 
@@ -266,7 +275,7 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     };
 
     // Style sprite.
-    imageManager.addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({ 16, 16 }), 1.0f));
+    imageManager.addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({16, 16}), 1.0f));
 
     // Single requestor
     {
@@ -326,7 +335,10 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
     {
         std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
-        imageManager.getImages(*requestor, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull));
+        imageManager.getImages(
+            *requestor,
+            std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull)
+        );
         imageManager.getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 5);

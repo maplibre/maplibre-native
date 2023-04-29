@@ -20,11 +20,13 @@
 
 namespace mapbox {
 namespace util {
-template <> struct nth<0, mbgl::GeometryCoordinate> {
+template <>
+struct nth<0, mbgl::GeometryCoordinate> {
     static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
 };
 
-template <> struct nth<1, mbgl::GeometryCoordinate> {
+template <>
+struct nth<1, mbgl::GeometryCoordinate> {
     static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
 };
 } // namespace util
@@ -36,28 +38,31 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
-FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
-                       const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-                       const float zoom,
-                       const uint32_t) {
+FillBucket::FillBucket(
+    const FillBucket::PossiblyEvaluatedLayoutProperties&,
+    const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
+    const float zoom,
+    const uint32_t
+) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(
-                getEvaluated<FillLayerProperties>(pair.second),
-                zoom));
+            std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom)
+        );
     }
 }
 
 FillBucket::~FillBucket() = default;
 
-void FillBucket::addFeature(const GeometryTileFeature& feature,
-                            const GeometryCollection& geometry,
-                            const ImagePositions& patternPositions,
-                            const PatternLayerMap& patternDependencies,
-                            std::size_t index,
-                            const CanonicalTileID& canonical) {
+void FillBucket::addFeature(
+    const GeometryTileFeature& feature,
+    const GeometryCollection& geometry,
+    const ImagePositions& patternPositions,
+    const PatternLayerMap& patternDependencies,
+    std::size_t index,
+    const CanonicalTileID& canonical
+) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -66,8 +71,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
         for (const auto& ring : polygon) {
             totalVertices += ring.size();
-            if (totalVertices > std::numeric_limits<uint16_t>::max())
-                throw GeometryTooLongException();
+            if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
         }
 
         std::size_t startVertices = vertices.elements();
@@ -75,10 +79,10 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         for (const auto& ring : polygon) {
             std::size_t nVertices = ring.size();
 
-            if (nVertices == 0)
-                continue;
+            if (nVertices == 0) continue;
 
-            if (lineSegments.empty() || lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
+            if (lineSegments.empty() ||
+                lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
                 lineSegments.emplace_back(vertices.elements(), lines.elements());
             }
 
@@ -103,7 +107,8 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         std::size_t nIndicies = indices.size();
         assert(nIndicies % 3 == 0);
 
-        if (triangleSegments.empty() || triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
+        if (triangleSegments.empty() ||
+            triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
@@ -112,9 +117,9 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
         for (std::size_t i = 0; i < nIndicies; i += 3) {
-            triangles.emplace_back(triangleIndex + indices[i],
-                                   triangleIndex + indices[i + 1],
-                                   triangleIndex + indices[i + 2]);
+            triangles.emplace_back(
+                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]
+            );
         }
 
         triangleSegment.vertexLength += totalVertices;
@@ -125,7 +130,8 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         const auto it = patternDependencies.find(pair.first);
         if (it != patternDependencies.end()) {
             pair.second.populateVertexVectors(
-                feature, vertices.elements(), index, patternPositions, it->second, canonical);
+                feature, vertices.elements(), index, patternPositions, it->second, canonical
+            );
         } else {
             pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
         }
@@ -136,8 +142,8 @@ void FillBucket::upload(gfx::UploadPass& uploadPass) {
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         lineIndexBuffer = uploadPass.createIndexBuffer(std::move(lines));
-        triangleIndexBuffer =
-            triangles.empty() ? std::optional<gfx::IndexBuffer>{} : uploadPass.createIndexBuffer(std::move(triangles));
+        triangleIndexBuffer = triangles.empty() ? std::optional<gfx::IndexBuffer>{}
+                                                : uploadPass.createIndexBuffer(std::move(triangles));
     }
 
     for (auto& pair : paintPropertyBinders) {
@@ -157,8 +163,12 @@ float FillBucket::getQueryRadius(const RenderLayer& layer) const {
     return util::length(translate[0], translate[1]);
 }
 
-void FillBucket::update(const FeatureStates& states, const GeometryTileLayer& layer, const std::string& layerID,
-                        const ImagePositions& imagePositions) {
+void FillBucket::update(
+    const FeatureStates& states,
+    const GeometryTileLayer& layer,
+    const std::string& layerID,
+    const ImagePositions& imagePositions
+) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);

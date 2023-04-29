@@ -40,7 +40,8 @@ namespace mbgl {
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
-    explicit LocationIndicatorRenderParameters(const TransformParameters& tp) : state(&tp.state) {}
+    explicit LocationIndicatorRenderParameters(const TransformParameters& tp)
+        : state(&tp.state) {}
     LocationIndicatorRenderParameters(const LocationIndicatorRenderParameters& o) = default;
     LocationIndicatorRenderParameters& operator=(const LocationIndicatorRenderParameters& o) = default;
 
@@ -76,9 +77,13 @@ protected:
         GLfloat x = 0.0f;
         GLfloat y = 0.0f;
 
-        vec2(GLfloat x_, GLfloat y_) : x(x_), y(y_) {}
+        vec2(GLfloat x_, GLfloat y_)
+            : x(x_),
+              y(y_) {}
         vec2() = default;
-        explicit vec2(const Point<double>& p) : x(static_cast<GLfloat>(p.x)), y(static_cast<GLfloat>(p.y)) {}
+        explicit vec2(const Point<double>& p)
+            : x(static_cast<GLfloat>(p.x)),
+              y(static_cast<GLfloat>(p.y)) {}
         vec2(const vec2& o) = default;
         vec2(vec2&& o) = default;
         vec2& operator=(vec2&& o) = default;
@@ -103,7 +108,9 @@ protected:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::rad2degf(util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)));
+            return util::rad2degf(util::wrap<float>(
+                static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)
+            ));
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -308,15 +315,17 @@ public:
             if (!sharedImage || !image || !image->valid()) {
                 MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
             } else {
-                MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                              0,
-                                              GL_RGBA,
-                                              image->size.width,
-                                              image->size.height,
-                                              0,
-                                              GL_RGBA,
-                                              GL_UNSIGNED_BYTE,
-                                              image->data.get()));
+                MBGL_CHECK_ERROR(glTexImage2D(
+                    GL_TEXTURE_2D,
+                    0,
+                    GL_RGBA,
+                    image->size.width,
+                    image->size.height,
+                    0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE,
+                    image->data.get()
+                ));
                 MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
                 MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
                 MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -376,10 +385,11 @@ public:
         if (hasAnisotropicFiltering()) anisotropicFilteringAvailable = true;
         simpleShader.initialize();
         texturedShader.initialize();
-        texCoords = {{{0.0f, 1.0f},
-                      {0.0f, 0.0f},
-                      {1.0f, 0.0f},
-                      {1.0f, 1.0f}}}; // Quads will be drawn as triangle fans. so bl, tl, tr, br
+        texCoords = {
+            {{0.0f, 1.0f},
+             {0.0f, 0.0f},
+             {1.0f, 0.0f},
+             {1.0f, 1.0f}}}; // Quads will be drawn as triangle fans. so bl, tl, tr, br
         texCoordsBuffer.upload(texCoords);
     }
 
@@ -407,8 +417,9 @@ public:
         if (params.projectionMatrix != oldParams.projectionMatrix) positionChanged = true;
         if (params.puckPosition != oldParams.puckPosition) {
             positionChanged = true;
-            ruler = mapbox::cheap_ruler::CheapRuler(params.puckPosition.latitude(),
-                                                    mapbox::cheap_ruler::CheapRuler::Meters);
+            ruler = mapbox::cheap_ruler::CheapRuler(
+                params.puckPosition.latitude(), mapbox::cheap_ruler::CheapRuler::Meters
+            );
         } else if (params.puckBearing != oldParams.puckBearing ||
                    params.puckLayersDisplacement != oldParams.puckLayersDisplacement ||
                    params.perspectiveCompensation != oldParams.perspectiveCompensation ||
@@ -448,8 +459,8 @@ public:
         featureEnvelope->clear();
         if (!texPuck || !texPuck->isValid()) return;
 
-        feature->geometry =
-            mapbox::geometry::point<double>{oldParams.puckPosition.latitude(), oldParams.puckPosition.longitude()};
+        feature->geometry = mapbox::geometry::point<double>{
+            oldParams.puckPosition.latitude(), oldParams.puckPosition.longitude()};
         mapbox::geometry::linear_ring<int64_t> border;
         for (const auto& v : puckGeometry) {
             vec4 p{{v.x, v.y, 0, 1}};
@@ -484,7 +495,8 @@ protected:
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
-        const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
+        const float bearingStep = 360.0f /
+                                  static_cast<float>(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
@@ -529,8 +541,9 @@ protected:
         return res.normalized();
     }
 
-    static Point<double> hatShadowShiftVector(const LatLng& position,
-                                              const mbgl::LocationIndicatorRenderParameters& params) {
+    static Point<double> hatShadowShiftVector(
+        const LatLng& position, const mbgl::LocationIndicatorRenderParameters& params
+    ) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
         posScreen.y = params.height - 1; // moving it to bottom
@@ -597,8 +610,7 @@ protected:
         for (unsigned long i = 0; i < 4; ++i) {
             const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{std::sin(util::deg2rad(b)),
-                                                -std::cos(util::deg2rad(b))};
+            const Point<double> cornerDirection{std::sin(util::deg2rad(b)), -std::cos(util::deg2rad(b))};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
@@ -658,23 +670,31 @@ protected:
         texturedShader.detach();
     }
 
-    void drawShadow() { drawQuad(shadowBuffer, shadowGeometry, texShadow); }
+    void drawShadow() {
+        drawQuad(shadowBuffer, shadowGeometry, texShadow);
+    }
 
-    void drawPuck() { drawQuad(puckBuffer, puckGeometry, texPuck); }
+    void drawPuck() {
+        drawQuad(puckBuffer, puckGeometry, texPuck);
+    }
 
-    void drawHat() { drawQuad(hatBuffer, hatGeometry, texPuckHat); }
+    void drawHat() {
+        drawQuad(hatBuffer, hatGeometry, texPuckHat);
+    }
 
-    static LatLng screenCoordinateToLatLng(const ScreenCoordinate& p,
-                                           const TransformState& s,
-                                           LatLng::WrapMode wrapMode = LatLng::Wrapped) {
+    static LatLng screenCoordinateToLatLng(
+        const ScreenCoordinate& p, const TransformState& s, LatLng::WrapMode wrapMode = LatLng::Wrapped
+    ) {
         ScreenCoordinate flippedPoint = p;
         flippedPoint.y = s.getSize().height - flippedPoint.y;
         return s.screenCoordinateToLatLng(flippedPoint, wrapMode);
     }
 
-    bool setTextureFromImageID(const std::string& imagePath,
-                               std::shared_ptr<Texture>& texture,
-                               const mbgl::LocationIndicatorRenderParameters& params) {
+    bool setTextureFromImageID(
+        const std::string& imagePath,
+        std::shared_ptr<Texture>& texture,
+        const mbgl::LocationIndicatorRenderParameters& params
+    ) {
         bool updated = false;
         if (textures.find(imagePath) == textures.end()) {
             std::shared_ptr<Texture> tx = std::make_shared<Texture>();
@@ -765,7 +785,8 @@ void RenderLocationIndicatorLayer::transition(const TransitionParameters& parame
 void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     passes = RenderPass::Translucent;
     auto properties = makeMutable<LocationIndicatorLayerProperties>(
-        staticImmutableCast<LocationIndicatorLayer::Impl>(baseImpl), unevaluated.evaluate(parameters));
+        staticImmutableCast<LocationIndicatorLayer::Impl>(baseImpl), unevaluated.evaluate(parameters)
+    );
     const auto& evaluated = properties->evaluated;
     auto& layout = impl(baseImpl).layout;
 

@@ -27,20 +27,25 @@ namespace mbgl {
 
 using namespace style;
 
-Map::Map(RendererFrontend& frontend,
-         MapObserver& observer,
-         const MapOptions& mapOptions,
-         const ResourceOptions& resourceOptions,
-         const ClientOptions& clientOptions)
+Map::Map(
+    RendererFrontend& frontend,
+    MapObserver& observer,
+    const MapOptions& mapOptions,
+    const ResourceOptions& resourceOptions,
+    const ClientOptions& clientOptions
+)
     : impl(std::make_unique<Impl>(
           frontend,
           observer,
-          FileSourceManager::get()
-              ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(ResourceLoader, resourceOptions, clientOptions))
-              : nullptr,
-          mapOptions)) {}
+          FileSourceManager::get() ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
+                                         ResourceLoader, resourceOptions, clientOptions
+                                     ))
+                                   : nullptr,
+          mapOptions
+      )) {}
 
-Map::Map(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+Map::Map(std::unique_ptr<Impl> impl_)
+    : impl(std::move(impl_)) {}
 
 Map::~Map() = default;
 
@@ -171,10 +176,12 @@ void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second
     impl->onUpdate();
 }
 
-CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
-                                         const EdgeInsets& padding,
-                                         const std::optional<double>& bearing,
-                                         const std::optional<double>& pitch) const {
+CameraOptions Map::cameraForLatLngBounds(
+    const LatLngBounds& bounds,
+    const EdgeInsets& padding,
+    const std::optional<double>& bearing,
+    const std::optional<double>& pitch
+) const {
     return cameraForLatLngs(
         {
             bounds.northwest(),
@@ -184,10 +191,13 @@ CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
         },
         padding,
         bearing,
-        pitch);
+        pitch
+    );
 }
 
-CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transform& transform, const EdgeInsets& padding) {
+CameraOptions cameraForLatLngs(
+    const std::vector<LatLng>& latLngs, const Transform& transform, const EdgeInsets& padding
+) {
     if (latLngs.empty()) {
         return {};
     }
@@ -217,9 +227,15 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transfo
 
     double zoom = transform.getZoom();
     if (minScale > 0) {
-        zoom = util::clamp(zoom + util::log2(minScale), transform.getState().getMinZoom(), transform.getState().getMaxZoom());
+        zoom = util::clamp(
+            zoom + util::log2(minScale), transform.getState().getMinZoom(), transform.getState().getMaxZoom()
+        );
     } else {
-        Log::Error(Event::General, "Unable to calculate appropriate zoom level for bounds. Vertical or horizontal padding is greater than map's height or width.");
+        Log::Error(
+            Event::General,
+            "Unable to calculate appropriate zoom level for bounds. Vertical or horizontal padding is greater "
+            "than map's height or width."
+        );
     }
 
     // Calculate the center point of a virtual bounds that is extended in all directions by padding.
@@ -232,10 +248,12 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transfo
         .withZoom(zoom);
 }
 
-CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
-                                    const EdgeInsets& padding,
-                                    const std::optional<double>& bearing,
-                                    const std::optional<double>& pitch) const {
+CameraOptions Map::cameraForLatLngs(
+    const std::vector<LatLng>& latLngs,
+    const EdgeInsets& padding,
+    const std::optional<double>& bearing,
+    const std::optional<double>& pitch
+) const {
     if (!bearing && !pitch) {
         return mbgl::cameraForLatLngs(latLngs, impl->transform, padding);
     }
@@ -251,25 +269,25 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
         .withPitch(util::rad2deg(transform.getPitch()));
 }
 
-CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
-                                     const EdgeInsets& padding,
-                                     const std::optional<double>& bearing,
-                                     const std::optional<double>& pitch) const {
+CameraOptions Map::cameraForGeometry(
+    const Geometry<double>& geometry,
+    const EdgeInsets& padding,
+    const std::optional<double>& bearing,
+    const std::optional<double>& pitch
+) const {
     std::vector<LatLng> latLngs;
-    forEachPoint(geometry, [&](const Point<double>& pt) {
-        latLngs.emplace_back(pt.y, pt.x);
-    });
+    forEachPoint(geometry, [&](const Point<double>& pt) { latLngs.emplace_back(pt.y, pt.x); });
     return cameraForLatLngs(latLngs, padding, bearing, pitch);
 }
 
 LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
-    Transform shallow { impl->transform.getState() };
+    Transform shallow{impl->transform.getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
     return LatLngBounds::hull(
         shallow.screenCoordinateToLatLng({}),
-        shallow.screenCoordinateToLatLng({ static_cast<double>(size.width), static_cast<double>(size.height) })
+        shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)})
     );
 }
 
@@ -282,7 +300,8 @@ LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) co
     LatLng se = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)});
     LatLng ne = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), 0.0});
     LatLng sw = shallow.screenCoordinateToLatLng({0.0, static_cast<double>(size.height)});
-    LatLng center = shallow.screenCoordinateToLatLng({static_cast<double>(size.width) / 2, static_cast<double>(size.height) / 2});
+    LatLng center =
+        shallow.screenCoordinateToLatLng({static_cast<double>(size.width) / 2, static_cast<double>(size.height) / 2});
     nw.unwrapForShortestPath(center);
     se.unwrapForShortestPath(center);
     ne.unwrapForShortestPath(center);
@@ -375,13 +394,13 @@ void Map::setViewportMode(mbgl::ViewportMode mode) {
 
 MapOptions Map::getMapOptions() const {
     return std::move(MapOptions()
-        .withMapMode(impl->mode)
-        .withConstrainMode(impl->transform.getConstrainMode())
-        .withViewportMode(impl->transform.getViewportMode())
-        .withCrossSourceCollisions(impl->crossSourceCollisions)
-        .withNorthOrientation(impl->transform.getNorthOrientation())
-        .withSize(impl->transform.getState().getSize())
-        .withPixelRatio(impl->pixelRatio));
+                         .withMapMode(impl->mode)
+                         .withConstrainMode(impl->transform.getConstrainMode())
+                         .withViewportMode(impl->transform.getViewportMode())
+                         .withCrossSourceCollisions(impl->crossSourceCollisions)
+                         .withNorthOrientation(impl->transform.getNorthOrientation())
+                         .withSize(impl->transform.getState().getSize())
+                         .withPixelRatio(impl->pixelRatio));
 }
 
 // MARK: - Projection mode

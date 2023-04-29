@@ -4,9 +4,17 @@
 #include "mbgl/util/traits.hpp"
 
 // mbgl::FeatureType
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::LineStringType) == mbgl::underlying_type(mbgl::FeatureType::LineString), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PolygonType) == mbgl::underlying_type(mbgl::FeatureType::Polygon), "error");
+static_assert(
+    mbgl::underlying_type(QMapLibreGL::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point), "error"
+);
+static_assert(
+    mbgl::underlying_type(QMapLibreGL::Feature::LineStringType) == mbgl::underlying_type(mbgl::FeatureType::LineString),
+    "error"
+);
+static_assert(
+    mbgl::underlying_type(QMapLibreGL::Feature::PolygonType) == mbgl::underlying_type(mbgl::FeatureType::Polygon),
+    "error"
+);
 
 namespace QMapLibreGL {
 

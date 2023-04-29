@@ -29,8 +29,9 @@ struct GeoJSONOptions {
     bool cluster = false;
     uint16_t clusterRadius = 50;
     uint8_t clusterMaxZoom = 17;
-    using ClusterExpression = std::pair<std::shared_ptr<mbgl::style::expression::Expression>,
-                                        std::shared_ptr<mbgl::style::expression::Expression>>;
+    using ClusterExpression = std::pair<
+        std::shared_ptr<mbgl::style::expression::Expression>,
+        std::shared_ptr<mbgl::style::expression::Expression>>;
     using ClusterProperties = std::map<std::string, ClusterExpression>;
     ClusterProperties clusterProperties;
 
@@ -40,9 +41,11 @@ class GeoJSONData {
 public:
     using TileFeatures = mapbox::feature::feature_collection<int16_t>;
     using Features = mapbox::feature::feature_collection<double>;
-    static std::shared_ptr<GeoJSONData> create(const GeoJSON&,
-                                               const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions(),
-                                               std::shared_ptr<Scheduler> scheduler = nullptr);
+    static std::shared_ptr<GeoJSONData> create(
+        const GeoJSON&,
+        const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions(),
+        std::shared_ptr<Scheduler> scheduler = nullptr
+    );
 
     virtual ~GeoJSONData() = default;
     virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
@@ -74,9 +77,7 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -85,7 +86,7 @@ private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
     std::shared_ptr<Scheduler> threadPool;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
 template <>

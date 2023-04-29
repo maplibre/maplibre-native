@@ -9,12 +9,10 @@ class RenderCustomGeometrySource final : public RenderTileSource {
 public:
     explicit RenderCustomGeometrySource(Immutable<style::CustomGeometrySource::Impl>);
 
-    void update(Immutable<style::Source::Impl>,
-                const std::vector<Immutable<style::LayerProperties>>&,
-                bool needsRendering,
-                bool needsRelayout,
-                const TileParameters&) override;
-    
+    void
+    update(Immutable<style::Source::Impl>, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&)
+        override;
+
 private:
     const style::CustomGeometrySource::Impl& impl() const;
 };

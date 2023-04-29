@@ -71,51 +71,47 @@ class SymbolSizeBinder {
 public:
     virtual ~SymbolSizeBinder() = default;
 
-    using UniformList = TypeList<
-        uniforms::is_size_zoom_constant,
-        uniforms::is_size_feature_constant,
-        uniforms::size_t,
-        uniforms::size>;
+    using UniformList =
+        TypeList<uniforms::is_size_zoom_constant, uniforms::is_size_feature_constant, uniforms::size_t, uniforms::size>;
     using UniformValues = gfx::UniformValues<UniformList>;
 
-    static std::unique_ptr<SymbolSizeBinder> create(float tileZoom,
-                                                    const style::PropertyValue<float>& sizeProperty,
-                                                    float defaultValue);
+    static std::unique_ptr<SymbolSizeBinder> create(
+        float tileZoom, const style::PropertyValue<float>& sizeProperty, float defaultValue
+    );
 
     virtual Range<float> getVertexSizeData(const GeometryTileFeature& feature) = 0;
     virtual ZoomEvaluatedSize evaluateForZoom(float currentZoom) const = 0;
 
     UniformValues uniformValues(float currentZoom) const {
         const ZoomEvaluatedSize u = evaluateForZoom(currentZoom);
-        return UniformValues {
-            uniforms::is_size_zoom_constant::Value( u.isZoomConstant ),
-            uniforms::is_size_feature_constant::Value( u.isFeatureConstant),
-            uniforms::size_t::Value( u.sizeT ),
-            uniforms::size::Value( u.size )
-        };
+        return UniformValues{
+            uniforms::is_size_zoom_constant::Value(u.isZoomConstant),
+            uniforms::is_size_feature_constant::Value(u.isFeatureConstant),
+            uniforms::size_t::Value(u.sizeT),
+            uniforms::size::Value(u.size)};
     }
 };
-
 
 class ConstantSymbolSizeBinder final : public SymbolSizeBinder {
 public:
     ConstantSymbolSizeBinder(const float /*tileZoom*/, const float& size, const float /*defaultValue*/)
-      : layoutSize(size) {}
+        : layoutSize(size) {}
 
     ConstantSymbolSizeBinder(const float /*tileZoom*/, const style::Undefined&, const float defaultValue)
-      : layoutSize(defaultValue) {}
+        : layoutSize(defaultValue) {}
 
-    ConstantSymbolSizeBinder(const float tileZoom, const style::PropertyExpression<float>& expression_, const float /*defaultValue*/)
-      : layoutSize(expression_.evaluate(tileZoom + 1)),
-        expression(expression_) {
+    ConstantSymbolSizeBinder(
+        const float tileZoom, const style::PropertyExpression<float>& expression_, const float /*defaultValue*/
+    )
+        : layoutSize(expression_.evaluate(tileZoom + 1)),
+          expression(expression_) {
         const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
         coveringRanges = std::make_tuple(
-            zoomLevels,
-            Range<float> { expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max) }
+            zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)}
         );
     }
 
-    Range<float> getVertexSizeData(const GeometryTileFeature&) override { return { 0.0f, 0.0f }; };
+    Range<float> getVertexSizeData(const GeometryTileFeature&) override { return {0.0f, 0.0f}; };
 
     ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float size = layoutSize;
@@ -128,17 +124,14 @@ public:
             // restriction on composite functions.
             const Range<float>& zoomLevels = std::get<0>(*coveringRanges);
             const Range<float>& sizeLevels = std::get<1>(*coveringRanges);
-            float t = util::clamp(
-                expression->interpolationFactor(zoomLevels, currentZoom),
-                0.0f, 1.0f
-            );
+            float t = util::clamp(expression->interpolationFactor(zoomLevels, currentZoom), 0.0f, 1.0f);
             size = sizeLevels.min + t * (sizeLevels.max - sizeLevels.min);
         } else if (expression) {
             size = expression->evaluate(currentZoom);
         }
 
         const float unused = 0.0f;
-        return { isZoomConstant, true, unused, size, layoutSize };
+        return {isZoomConstant, true, unused, size, layoutSize};
     }
 
     float layoutSize;
@@ -148,19 +141,20 @@ public:
 
 class SourceFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
-    SourceFunctionSymbolSizeBinder(const float /*tileZoom*/, style::PropertyExpression<float> expression_, const float defaultValue_)
+    SourceFunctionSymbolSizeBinder(
+        const float /*tileZoom*/, style::PropertyExpression<float> expression_, const float defaultValue_
+    )
         : expression(std::move(expression_)),
-          defaultValue(defaultValue_) {
-    }
+          defaultValue(defaultValue_) {}
 
     Range<float> getVertexSizeData(const GeometryTileFeature& feature) override {
         const float size = expression.evaluate(feature, defaultValue);
-        return { size, size };
+        return {size, size};
     };
 
     ZoomEvaluatedSize evaluateForZoom(float) const override {
         const float unused = 0.0f;
-        return { true, false, unused, unused, unused };
+        return {true, false, unused, unused, unused};
     }
 
     style::PropertyExpression<float> expression;
@@ -169,29 +163,27 @@ public:
 
 class CompositeFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
-
-    CompositeFunctionSymbolSizeBinder(const float tileZoom, style::PropertyExpression<float> expression_, const float defaultValue_)
+    CompositeFunctionSymbolSizeBinder(
+        const float tileZoom, style::PropertyExpression<float> expression_, const float defaultValue_
+    )
         : expression(std::move(expression_)),
           defaultValue(defaultValue_),
           layoutZoom(tileZoom + 1),
-          coveringZoomStops(expression.getCoveringStops(tileZoom, tileZoom + 1))
-    {}
+          coveringZoomStops(expression.getCoveringStops(tileZoom, tileZoom + 1)) {}
 
     Range<float> getVertexSizeData(const GeometryTileFeature& feature) override {
         return {
             expression.evaluate(coveringZoomStops.min, feature, defaultValue),
-            expression.evaluate(coveringZoomStops.max, feature, defaultValue)
-        };
+            expression.evaluate(coveringZoomStops.max, feature, defaultValue)};
     };
 
     ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float sizeInterpolationT = util::clamp(
-            expression.interpolationFactor(coveringZoomStops, currentZoom),
-            0.0f, 1.0f
+            expression.interpolationFactor(coveringZoomStops, currentZoom), 0.0f, 1.0f
         );
 
         const float unused = 0.0f;
-        return { false, false, sizeInterpolationT, unused, unused };
+        return {false, false, sizeInterpolationT, unused, unused};
     }
 
     style::PropertyExpression<float> expression;
@@ -202,17 +194,20 @@ public:
 
 class SymbolProgramBase : public gfx::Shader {
 public:
-    static gfx::Vertex<SymbolLayoutAttributes> layoutVertex(Point<float> labelAnchor,
-                                                            Point<float> o,
-                                                            float glyphOffsetY,
-                                                            uint16_t tx,
-                                                            uint16_t ty,
-                                                            const Range<float>& sizeData,
-                                                            bool isSDF,
-                                                            Point<float> pixelOffset,
-                                                            Point<float> minFontScale) {
-        const uint16_t aSizeMin =
-            (std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.min * SIZE_PACK_FACTOR)) << 1) + uint16_t(isSDF);
+    static gfx::Vertex<SymbolLayoutAttributes> layoutVertex(
+        Point<float> labelAnchor,
+        Point<float> o,
+        float glyphOffsetY,
+        uint16_t tx,
+        uint16_t ty,
+        const Range<float>& sizeData,
+        bool isSDF,
+        Point<float> pixelOffset,
+        Point<float> minFontScale
+    ) {
+        const uint16_t aSizeMin = (std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.min * SIZE_PACK_FACTOR))
+                                   << 1) +
+                                  uint16_t(isSDF);
         const uint16_t aSizeMax = std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.max * SIZE_PACK_FACTOR));
         return {
             // combining pos and offset to reduce number of vertex attributes passed to shader (8 max for some devices)
@@ -229,34 +224,28 @@ public:
     }
 
     static gfx::Vertex<SymbolDynamicLayoutAttributes> dynamicLayoutVertex(Point<float> anchorPoint, float labelAngle) {
-        return {
-            {{
-                 anchorPoint.x,
-                 anchorPoint.y,
-                 labelAngle
-             }}
-        };
+        return {{{anchorPoint.x, anchorPoint.y, labelAngle}}};
     }
 
     static gfx::Vertex<SymbolOpacityAttributes> opacityVertex(bool placed, float opacity) {
-        return {
-            {{ static_cast<float>((static_cast<uint8_t>(opacity * 127) << 1) | static_cast<uint8_t>(placed)) }}
-        };
+        return {{{static_cast<float>((static_cast<uint8_t>(opacity * 127) << 1) | static_cast<uint8_t>(placed))}}};
     }
 };
 
-template <class Name,
-          shaders::BuiltIn ShaderSource,
-          gfx::PrimitiveType Primitive,
-          class LayoutAttributeList,
-          class LayoutUniformList,
-          class Textures,
-          class PaintProps>
+template <
+    class Name,
+    shaders::BuiltIn ShaderSource,
+    gfx::PrimitiveType Primitive,
+    class LayoutAttributeList,
+    class LayoutUniformList,
+    class Textures,
+    class PaintProps>
 class SymbolProgram : public SymbolProgramBase {
 public:
     using LayoutVertex = gfx::Vertex<LayoutAttributeList>;
 
-    using LayoutAndSizeAttributeList = TypeListConcat<LayoutAttributeList, SymbolDynamicLayoutAttributes, SymbolOpacityAttributes>;
+    using LayoutAndSizeAttributeList =
+        TypeListConcat<LayoutAttributeList, SymbolDynamicLayoutAttributes, SymbolOpacityAttributes>;
 
     using PaintProperties = PaintProps;
     using Binders = PaintPropertyBinders<typename PaintProperties::DataDrivenProperties>;
@@ -280,12 +269,11 @@ public:
         switch (gfx::Backend::GetType()) {
 #ifdef MBGL_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
-                program = std::make_unique<gl::Program<Name>>(programParameters
-                    .withDefaultSource({
-                        gfx::Backend::Type::OpenGL,
-                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
-                        shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment
-                    }));
+                program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
+                    {gfx::Backend::Type::OpenGL,
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}
+                ));
                 break;
             }
 #endif
@@ -300,7 +288,8 @@ public:
         const SymbolSizeBinder& symbolSizeBinder,
         const Binders& paintPropertyBinders,
         const typename PaintProperties::PossiblyEvaluated& currentProperties,
-        float currentZoom) {
+        float currentZoom
+    ) {
         return layoutUniformValues.concat(symbolSizeBinder.uniformValues(currentZoom))
             .concat(paintPropertyBinders.uniformValues(currentZoom, currentProperties));
     }
@@ -310,9 +299,12 @@ public:
         const gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicLayoutVertexBuffer,
         const gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>& opacityVertexBuffer,
         const Binders& paintPropertyBinders,
-        const typename PaintProperties::PossiblyEvaluated& currentProperties) {
-        assert(layoutVertexBuffer.elements == dynamicLayoutVertexBuffer.elements &&
-               layoutVertexBuffer.elements == opacityVertexBuffer.elements);
+        const typename PaintProperties::PossiblyEvaluated& currentProperties
+    ) {
+        assert(
+            layoutVertexBuffer.elements == dynamicLayoutVertexBuffer.elements &&
+            layoutVertexBuffer.elements == opacityVertexBuffer.elements
+        );
         return gfx::AttributeBindings<LayoutAttributeList>(layoutVertexBuffer)
             .concat(gfx::AttributeBindings<SymbolDynamicLayoutAttributes>(dynamicLayoutVertexBuffer))
             .concat(gfx::AttributeBindings<SymbolOpacityAttributes>(opacityVertexBuffer))
@@ -324,19 +316,21 @@ public:
     }
 
     template <class DrawMode>
-    void draw(gfx::Context& context,
-              gfx::RenderPass& renderPass,
-              const DrawMode& drawMode,
-              const gfx::DepthMode& depthMode,
-              const gfx::StencilMode& stencilMode,
-              const gfx::ColorMode& colorMode,
-              const gfx::CullFaceMode& cullFaceMode,
-              const gfx::IndexBuffer& indexBuffer,
-              const Segment<AttributeList>& segment,
-              const UniformValues& uniformValues,
-              const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
-              const std::string& layerID) {
+    void draw(
+        gfx::Context& context,
+        gfx::RenderPass& renderPass,
+        const DrawMode& drawMode,
+        const gfx::DepthMode& depthMode,
+        const gfx::StencilMode& stencilMode,
+        const gfx::ColorMode& colorMode,
+        const gfx::CullFaceMode& cullFaceMode,
+        const gfx::IndexBuffer& indexBuffer,
+        const Segment<AttributeList>& segment,
+        const UniformValues& uniformValues,
+        const AttributeBindings& allAttributeBindings,
+        const TextureBindings& textureBindings,
+        const std::string& layerID
+    ) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
         if (!program) {
@@ -362,23 +356,26 @@ public:
             textureBindings,
             indexBuffer,
             segment.indexOffset,
-            segment.indexLength);
+            segment.indexLength
+        );
     }
 
     template <class DrawMode>
-    void draw(gfx::Context& context,
-              gfx::RenderPass& renderPass,
-              const DrawMode& drawMode,
-              const gfx::DepthMode& depthMode,
-              const gfx::StencilMode& stencilMode,
-              const gfx::ColorMode& colorMode,
-              const gfx::CullFaceMode& cullFaceMode,
-              const gfx::IndexBuffer& indexBuffer,
-              const SegmentVector<AttributeList>& segments,
-              const UniformValues& uniformValues,
-              const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
-              const std::string& layerID) {
+    void draw(
+        gfx::Context& context,
+        gfx::RenderPass& renderPass,
+        const DrawMode& drawMode,
+        const gfx::DepthMode& depthMode,
+        const gfx::StencilMode& stencilMode,
+        const gfx::ColorMode& colorMode,
+        const gfx::CullFaceMode& cullFaceMode,
+        const gfx::IndexBuffer& indexBuffer,
+        const SegmentVector<AttributeList>& segments,
+        const UniformValues& uniformValues,
+        const AttributeBindings& allAttributeBindings,
+        const TextureBindings& textureBindings,
+        const std::string& layerID
+    ) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
         if (!program) {
@@ -386,62 +383,62 @@ public:
         }
 
         for (const auto& segment : segments) {
-            draw(context,
-                 renderPass,
-                 drawMode,
-                 depthMode,
-                 stencilMode,
-                 colorMode,
-                 cullFaceMode,
-                 indexBuffer,
-                 segment,
-                 uniformValues,
-                 allAttributeBindings,
-                 textureBindings,
-                 layerID);
+            draw(
+                context,
+                renderPass,
+                drawMode,
+                depthMode,
+                stencilMode,
+                colorMode,
+                cullFaceMode,
+                indexBuffer,
+                segment,
+                uniformValues,
+                allAttributeBindings,
+                textureBindings,
+                layerID
+            );
         }
     }
 };
 
 class SymbolIconProgram final : public SymbolProgram<
-    SymbolIconProgram,
-    shaders::BuiltIn::SymbolIconProgram,
-    gfx::PrimitiveType::Triangle,
-    SymbolLayoutAttributes,
-    TypeList<
-        uniforms::matrix,
-        uniforms::label_plane_matrix,
-        uniforms::coord_matrix,
-        uniforms::extrude_scale,
-        uniforms::texsize,
-        uniforms::fade_change,
-        uniforms::is_text,
-        uniforms::camera_to_center_distance,
-        uniforms::pitch,
-        uniforms::pitch_with_map,
-        uniforms::rotate_symbol,
-        uniforms::aspect_ratio>,
-    TypeList<
-        textures::texture>,
-    style::IconPaintProperties>
-{
+                                    SymbolIconProgram,
+                                    shaders::BuiltIn::SymbolIconProgram,
+                                    gfx::PrimitiveType::Triangle,
+                                    SymbolLayoutAttributes,
+                                    TypeList<
+                                        uniforms::matrix,
+                                        uniforms::label_plane_matrix,
+                                        uniforms::coord_matrix,
+                                        uniforms::extrude_scale,
+                                        uniforms::texsize,
+                                        uniforms::fade_change,
+                                        uniforms::is_text,
+                                        uniforms::camera_to_center_distance,
+                                        uniforms::pitch,
+                                        uniforms::pitch_with_map,
+                                        uniforms::rotate_symbol,
+                                        uniforms::aspect_ratio>,
+                                    TypeList<textures::texture>,
+                                    style::IconPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolIconProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using SymbolProgram::SymbolProgram;
 
-    static LayoutUniformValues layoutUniformValues(bool isText,
-                                                   bool hasVariablePacement,
-                                                   const style::SymbolPropertyValues&,
-                                                   const Size& texsize,
-                                                   const std::array<float, 2>& pixelsToGLUnits,
-                                                   bool alongLine,
-                                                   const RenderTile&,
-                                                   const TransformState&,
-                                                   float symbolFadeChange);
+    static LayoutUniformValues layoutUniformValues(
+        bool isText,
+        bool hasVariablePacement,
+        const style::SymbolPropertyValues&,
+        const Size& texsize,
+        const std::array<float, 2>& pixelsToGLUnits,
+        bool alongLine,
+        const RenderTile&,
+        const TransformState&,
+        float symbolFadeChange
+    );
 };
 
 enum class SymbolSDFPart {
@@ -449,121 +446,121 @@ enum class SymbolSDFPart {
     Halo = 0
 };
 
-using SymbolSDFProgramUniforms = TypeList<uniforms::matrix,
-                                          uniforms::label_plane_matrix,
-                                          uniforms::coord_matrix,
-                                          uniforms::extrude_scale,
-                                          uniforms::texsize,
-                                          uniforms::fade_change,
-                                          uniforms::is_text,
-                                          uniforms::camera_to_center_distance,
-                                          uniforms::pitch,
-                                          uniforms::pitch_with_map,
-                                          uniforms::rotate_symbol,
-                                          uniforms::aspect_ratio,
-                                          uniforms::gamma_scale,
-                                          uniforms::device_pixel_ratio,
-                                          uniforms::is_halo>;
+using SymbolSDFProgramUniforms = TypeList<
+    uniforms::matrix,
+    uniforms::label_plane_matrix,
+    uniforms::coord_matrix,
+    uniforms::extrude_scale,
+    uniforms::texsize,
+    uniforms::fade_change,
+    uniforms::is_text,
+    uniforms::camera_to_center_distance,
+    uniforms::pitch,
+    uniforms::pitch_with_map,
+    uniforms::rotate_symbol,
+    uniforms::aspect_ratio,
+    uniforms::gamma_scale,
+    uniforms::device_pixel_ratio,
+    uniforms::is_halo>;
 
 template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>
-class SymbolSDFProgram : public SymbolProgram<Name,
-                                              ShaderSource,
-                                              gfx::PrimitiveType::Triangle,
-                                              SymbolLayoutAttributes,
-                                              SymbolSDFProgramUniforms,
-                                              TypeList<textures::texture>,
-                                              PaintProperties> {
+class SymbolSDFProgram : public SymbolProgram<
+                             Name,
+                             ShaderSource,
+                             gfx::PrimitiveType::Triangle,
+                             SymbolLayoutAttributes,
+                             SymbolSDFProgramUniforms,
+                             TypeList<textures::texture>,
+                             PaintProperties> {
 public:
-    using BaseProgram = SymbolProgram<Name,
-                                      ShaderSource,
-                                      gfx::PrimitiveType::Triangle,
-                                      SymbolLayoutAttributes,
-                                      SymbolSDFProgramUniforms,
-                                      TypeList<textures::texture>,
-                                      PaintProperties>;
+    using BaseProgram = SymbolProgram<
+        Name,
+        ShaderSource,
+        gfx::PrimitiveType::Triangle,
+        SymbolLayoutAttributes,
+        SymbolSDFProgramUniforms,
+        TypeList<textures::texture>,
+        PaintProperties>;
 
     using LayoutUniformValues = typename BaseProgram::LayoutUniformValues;
 
     using BaseProgram::BaseProgram;
 
-    static LayoutUniformValues layoutUniformValues(bool isText,
-                                                   bool hasVariablePacement,
-                                                   const style::SymbolPropertyValues&,
-                                                   const Size& texsize,
-                                                   const std::array<float, 2>& pixelsToGLUnits,
-                                                   float pixelRatio,
-                                                   bool alongLine,
-                                                   const RenderTile&,
-                                                   const TransformState&,
-                                                   float SymbolFadeChange,
-                                                   SymbolSDFPart);
+    static LayoutUniformValues layoutUniformValues(
+        bool isText,
+        bool hasVariablePacement,
+        const style::SymbolPropertyValues&,
+        const Size& texsize,
+        const std::array<float, 2>& pixelsToGLUnits,
+        float pixelRatio,
+        bool alongLine,
+        const RenderTile&,
+        const TransformState&,
+        float SymbolFadeChange,
+        SymbolSDFPart
+    );
 };
 
 using SymbolTextAndIconProgramUniforms = TypeList<uniforms::texsize_icon>;
 
-class SymbolTextAndIconProgram final
-    : public SymbolProgram<SymbolTextAndIconProgram,
-                           shaders::BuiltIn::SymbolTextAndIconProgram,
-                           gfx::PrimitiveType::Triangle,
-                           SymbolLayoutAttributes,
-                           TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
-                           TypeList<textures::texture, textures::texture_icon>,
-                           style::TextPaintProperties> {
+class SymbolTextAndIconProgram final : public SymbolProgram<
+                                           SymbolTextAndIconProgram,
+                                           shaders::BuiltIn::SymbolTextAndIconProgram,
+                                           gfx::PrimitiveType::Triangle,
+                                           SymbolLayoutAttributes,
+                                           TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
+                                           TypeList<textures::texture, textures::texture_icon>,
+                                           style::TextPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolTextAndIconProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
-    using BaseProgram = SymbolProgram<SymbolTextAndIconProgram,
-                                      shaders::BuiltIn::SymbolTextAndIconProgram,
-                                      gfx::PrimitiveType::Triangle,
-                                      SymbolLayoutAttributes,
-                                      TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
-                                      TypeList<textures::texture, textures::texture_icon>,
-                                      style::TextPaintProperties>;
+    using BaseProgram = SymbolProgram<
+        SymbolTextAndIconProgram,
+        shaders::BuiltIn::SymbolTextAndIconProgram,
+        gfx::PrimitiveType::Triangle,
+        SymbolLayoutAttributes,
+        TypeListConcat<SymbolSDFProgramUniforms, SymbolTextAndIconProgramUniforms>,
+        TypeList<textures::texture, textures::texture_icon>,
+        style::TextPaintProperties>;
 
     using LayoutUniformValues = typename BaseProgram::LayoutUniformValues;
 
     using BaseProgram::BaseProgram;
 
-    static LayoutUniformValues layoutUniformValues(bool hasVariablePacement,
-                                                   const style::SymbolPropertyValues&,
-                                                   const Size& texsize,
-                                                   const Size& texsize_icon,
-                                                   const std::array<float, 2>& pixelsToGLUnits,
-                                                   float pixelRatio,
-                                                   bool alongLine,
-                                                   const RenderTile&,
-                                                   const TransformState&,
-                                                   float SymbolFadeChange,
-                                                   SymbolSDFPart);
+    static LayoutUniformValues layoutUniformValues(
+        bool hasVariablePacement,
+        const style::SymbolPropertyValues&,
+        const Size& texsize,
+        const Size& texsize_icon,
+        const std::array<float, 2>& pixelsToGLUnits,
+        float pixelRatio,
+        bool alongLine,
+        const RenderTile&,
+        const TransformState&,
+        float SymbolFadeChange,
+        SymbolSDFPart
+    );
 };
 
 class SymbolSDFIconProgram final : public SymbolSDFProgram<
-    SymbolSDFIconProgram,
-    shaders::BuiltIn::SymbolSDFIconProgram,
-    style::IconPaintProperties>
-{
+                                       SymbolSDFIconProgram,
+                                       shaders::BuiltIn::SymbolSDFIconProgram,
+                                       style::IconPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolSDFIconProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using SymbolSDFProgram::SymbolSDFProgram;
 };
 
 class SymbolSDFTextProgram final : public SymbolSDFProgram<
-    SymbolSDFTextProgram,
-    shaders::BuiltIn::SymbolSDFTextProgram,
-    style::TextPaintProperties>
-{
+                                       SymbolSDFTextProgram,
+                                       shaders::BuiltIn::SymbolSDFTextProgram,
+                                       style::TextPaintProperties> {
 public:
     static constexpr std::string_view Name{"SymbolSDFTextProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using SymbolSDFProgram::SymbolSDFProgram;
 };

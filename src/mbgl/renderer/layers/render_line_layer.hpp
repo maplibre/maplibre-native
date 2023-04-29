@@ -29,13 +29,9 @@ private:
     void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
 
-    bool queryIntersectsFeature(const GeometryCoordinates&,
-                                const GeometryTileFeature&,
-                                float,
-                                const TransformState&,
-                                float,
-                                const mat4&,
-                                const FeatureState&) const override;
+    bool
+    queryIntersectsFeature(const GeometryCoordinates&, const GeometryTileFeature&, float, const TransformState&, float, const mat4&, const FeatureState&)
+        const override;
 
     // Paint properties
     style::LinePaintProperties::Unevaluated unevaluated;

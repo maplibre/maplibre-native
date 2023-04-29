@@ -5,20 +5,23 @@
 
 namespace mbgl {
 
-CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
-                                   const Anchor& anchor,
-                                   const float top,
-                                   const float bottom,
-                                   const float left,
-                                   const float right,
-                                   const std::optional<Padding>& collisionPadding,
-                                   const float boxScale,
-                                   const float padding,
-                                   const style::SymbolPlacementType placement,
-                                   IndexedSubfeature indexedFeature_,
-                                   const float overscaling,
-                                   const float rotate)
-    : indexedFeature(std::move(indexedFeature_)), alongLine(placement != style::SymbolPlacementType::Point) {
+CollisionFeature::CollisionFeature(
+    const GeometryCoordinates& line,
+    const Anchor& anchor,
+    const float top,
+    const float bottom,
+    const float left,
+    const float right,
+    const std::optional<Padding>& collisionPadding,
+    const float boxScale,
+    const float padding,
+    const style::SymbolPlacementType placement,
+    IndexedSubfeature indexedFeature_,
+    const float overscaling,
+    const float rotate
+)
+    : indexedFeature(std::move(indexedFeature_)),
+      alongLine(placement != style::SymbolPlacementType::Point) {
     if (top == 0 && bottom == 0 && left == 0 && right == 0) return;
 
     float y1 = top * boxScale - padding;
@@ -53,7 +56,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
             const Point<float> tr = util::rotate(Point<float>(x2, y1), rotateRadians);
             const Point<float> bl = util::rotate(Point<float>(x1, y2), rotateRadians);
             const Point<float> br = util::rotate(Point<float>(x2, y2), rotateRadians);
-            
+
             // Collision features require an "on-axis" geometry,
             // so take the envelope of the rotated geometry
             // (may be quite large for wide labels rotated 45 degrees)
@@ -61,7 +64,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
             const float xMax = std::max({tl.x, tr.x, bl.x, br.x});
             const float yMin = std::min({tl.y, tr.y, bl.y, br.y});
             const float yMax = std::max({tl.y, tr.y, bl.y, br.y});
-            
+
             boxes.emplace_back(anchor.point, xMin, yMin, xMax, yMax);
         } else {
             boxes.emplace_back(anchor.point, x1, y1, x2, y2);
@@ -69,12 +72,14 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
     }
 }
 
-void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
-                                    GeometryCoordinate& anchorPoint,
-                                    std::size_t segment,
-                                    const float labelLength,
-                                    const float boxSize,
-                                    const float overscaling) {
+void CollisionFeature::bboxifyLabel(
+    const GeometryCoordinates& line,
+    GeometryCoordinate& anchorPoint,
+    std::size_t segment,
+    const float labelLength,
+    const float boxSize,
+    const float overscaling
+) {
     const float step = boxSize / 2;
     const int nBoxes = std::max(static_cast<int>(std::floor(labelLength / step)), 1);
 
@@ -93,7 +98,7 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
     // box is at the edge of the label.
     const float firstBoxOffset = -boxSize / 2;
 
-    GeometryCoordinate &p = anchorPoint;
+    GeometryCoordinate& p = anchorPoint;
     std::size_t index = segment + 1;
     float anchorDistance = firstBoxOffset;
     const float labelStartDistance = -labelLength / 2;
@@ -126,9 +131,9 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
         const float boxOffset = i * step;
         float boxDistanceToAnchor = labelStartDistance + boxOffset;
 
-         // make the distance between pitch padding boxes bigger
-         if (boxOffset < 0) boxDistanceToAnchor += boxOffset;
-         if (boxOffset > labelLength) boxDistanceToAnchor += boxOffset - labelLength;
+        // make the distance between pitch padding boxes bigger
+        if (boxOffset < 0) boxDistanceToAnchor += boxOffset;
+        if (boxOffset > labelLength) boxDistanceToAnchor += boxOffset - labelLength;
 
         if (boxDistanceToAnchor < anchorDistance) {
             // The line doesn't extend far enough back for this box, skip it
@@ -155,16 +160,15 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
 
         Point<float> boxAnchor = {
             p0.x + segmentBoxDistance / segmentLength * (p1.x - p0.x),
-            p0.y + segmentBoxDistance / segmentLength * (p1.y - p0.y)
-        };
-        
+            p0.y + segmentBoxDistance / segmentLength * (p1.y - p0.y)};
+
         // If the box is within boxSize of the anchor, force the box to be used
         // (so even 0-width labels use at least one box)
         // Otherwise, the .8 multiplication gives us a little bit of conservative
         // padding in choosing which boxes to use (see CollisionIndex#placedCollisionCircles)
-        const float paddedAnchorDistance = std::abs(boxDistanceToAnchor - firstBoxOffset) < step ?
-            0.0f :
-            (boxDistanceToAnchor - firstBoxOffset) * 0.8f;
+        const float paddedAnchorDistance = std::abs(boxDistanceToAnchor - firstBoxOffset) < step
+                                               ? 0.0f
+                                               : (boxDistanceToAnchor - firstBoxOffset) * 0.8f;
 
         boxes.emplace_back(boxAnchor, -boxSize / 2, -boxSize / 2, boxSize / 2, boxSize / 2, paddedAnchorDistance);
     }

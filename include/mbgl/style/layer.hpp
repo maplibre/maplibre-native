@@ -33,37 +33,57 @@ struct LayerTypeInfo {
      * @brief contains \c Source::Required if the corresponding layer type
      * requires source. Contains \c Source::NotRequired otherwise.
      */
-    const enum class Source { Required, NotRequired } source;
+    const enum class Source {
+        Required,
+        NotRequired
+    } source;
 
     /**
      * @brief contains \c Pass3D::Required if the corresponding layer type
      * requires 3D rendering pass. Contains \c Pass3D::NotRequired otherwise.
      */
-    const enum class Pass3D { Required, NotRequired } pass3d;
+    const enum class Pass3D {
+        Required,
+        NotRequired
+    } pass3d;
 
     /**
      * @brief contains \c Layout::Required if the corresponding layer type
      * requires layouting. * contains \c Layout::NotRequired otherwise.
      */
-    const enum class Layout { Required, NotRequired } layout;
+    const enum class Layout {
+        Required,
+        NotRequired
+    } layout;
 
     /**
      * @brief contains \c FadingTiles::Required if the corresponding layer type
      * requires rendering on fading tiles. Contains \c FadingTiles::NotRequired otherwise.
      */
-    const enum class FadingTiles { Required, NotRequired } fadingTiles;
+    const enum class FadingTiles {
+        Required,
+        NotRequired
+    } fadingTiles;
 
     /**
      * @brief contains \c CrossTileIndex::Required if the corresponding layer type
      * requires cross-tile indexing and placement. Contains \c CrossTileIndex::NotRequired otherwise.
      */
-    const enum class CrossTileIndex { Required, NotRequired } crossTileIndex;
+    const enum class CrossTileIndex {
+        Required,
+        NotRequired
+    } crossTileIndex;
 
     /**
      * @brief contains the Id of the supported tile type. Used for internal checks.
      * The contained values correspond to \c Tile::Kind enum.
      */
-    const enum class TileKind : uint8_t { Geometry, Raster, RasterDEM, NotRequired } tileKind;
+    const enum class TileKind : uint8_t {
+        Geometry,
+        Raster,
+        RasterDEM,
+        NotRequired
+    } tileKind;
 };
 
 /**
@@ -84,7 +104,7 @@ struct LayerTypeInfo {
  */
 class Layer {
 public:
-    Layer(const Layer& ) = delete;
+    Layer(const Layer&) = delete;
     Layer& operator=(const Layer&) = delete;
 
     virtual ~Layer();
@@ -126,7 +146,6 @@ public:
     // Create a layer, copying all properties except id and paint properties from this layer.
     virtual std::unique_ptr<Layer> cloneRef(const std::string& id) const = 0;
 
-    
     void setObserver(LayerObserver*);
 
     // For use in SDK bindings, which store a reference to a platform-native peer
@@ -137,17 +156,16 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept;
 
-    mapbox::base::WeakPtr<Layer> makeWeakPtr() {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Layer> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
 
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
-    virtual std::optional<conversion::Error> setPropertyInternal(const std::string& name,
-                                                            const conversion::Convertible& value) = 0;
+    virtual std::optional<conversion::Error> setPropertyInternal(
+        const std::string& name, const conversion::Convertible& value
+    ) = 0;
     LayerObserver* observer;
-    mapbox::base::WeakPtrFactory<Layer> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Layer> weakFactory{this};
 
 private:
     std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);

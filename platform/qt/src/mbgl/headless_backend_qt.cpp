@@ -23,13 +23,9 @@ public:
         return thisContext->getProcAddress(name);
     }
 
-    void activateContext() {
-        context.makeCurrent(&surface);
-    }
+    void activateContext() { context.makeCurrent(&surface); }
 
-    void deactivateContext() {
-        context.doneCurrent();
-    }
+    void deactivateContext() { context.doneCurrent(); }
 
 private:
     QOpenGLContext context;

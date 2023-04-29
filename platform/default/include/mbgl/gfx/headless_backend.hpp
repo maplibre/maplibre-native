@@ -15,12 +15,17 @@ namespace gfx {
 // of readStillImage.
 class HeadlessBackend : public gfx::Renderable {
 public:
-    enum class SwapBehaviour { NoFlush, Flush };
+    enum class SwapBehaviour {
+        NoFlush,
+        Flush
+    };
 
     // Factory.
-    static std::unique_ptr<HeadlessBackend> Create(const Size size = {256, 256},
-                                                   SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
-                                                   const gfx::ContextMode contextMode = gfx::ContextMode::Unique) {
+    static std::unique_ptr<HeadlessBackend> Create(
+        const Size size = {256, 256},
+        SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
+        const gfx::ContextMode contextMode = gfx::ContextMode::Unique
+    ) {
         return Backend::Create<HeadlessBackend, Size, SwapBehaviour, gfx::ContextMode>(size, swapBehavior, contextMode);
     }
 

@@ -10,14 +10,16 @@ namespace mbgl {
 
 using namespace style;
 
-CircleBucket::CircleBucket(const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties,
-                           const MapMode mode_,
-                           const float zoom)
+CircleBucket::CircleBucket(
+    const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties, const MapMode mode_, const float zoom
+)
     : mode(mode_) {
     for (const auto& pair : layerPaintProperties) {
-        paintPropertyBinders.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(pair.first),
-                                     std::forward_as_tuple(getEvaluated<CircleLayerProperties>(pair.second), zoom));
+        paintPropertyBinders.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(pair.first),
+            std::forward_as_tuple(getEvaluated<CircleLayerProperties>(pair.second), zoom)
+        );
     }
 }
 
@@ -41,7 +43,11 @@ bool CircleBucket::hasData() const {
 }
 
 template <class Property>
-static float get(const CirclePaintProperties::PossiblyEvaluated& evaluated, const std::string& id, const std::map<std::string, CircleProgram::Binders>& paintPropertyBinders) {
+static float get(
+    const CirclePaintProperties::PossiblyEvaluated& evaluated,
+    const std::string& id,
+    const std::map<std::string, CircleProgram::Binders>& paintPropertyBinders
+) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -58,8 +64,12 @@ float CircleBucket::getQueryRadius(const RenderLayer& layer) const {
     return radius + stroke + util::length(translate[0], translate[1]);
 }
 
-void CircleBucket::update(const FeatureStates& states, const GeometryTileLayer& layer, const std::string& layerID,
-                          const ImagePositions& imagePositions) {
+void CircleBucket::update(
+    const FeatureStates& states,
+    const GeometryTileLayer& layer,
+    const std::string& layerID,
+    const ImagePositions& imagePositions
+) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);

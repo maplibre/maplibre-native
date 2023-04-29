@@ -24,8 +24,7 @@ class ShaderRegistry;
 
 struct StillImageRequest {
     StillImageRequest(Map::StillImageCallback&& callback_)
-        : callback(std::move(callback_)) {
-    }
+        : callback(std::move(callback_)) {}
 
     Map::StillImageCallback callback;
 };
@@ -65,7 +64,7 @@ public:
     const float pixelRatio;
     const bool crossSourceCollisions;
 
-    MapDebugOptions debugOptions { MapDebugOptions::NoDebug };
+    MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
 
     std::shared_ptr<FileSource> fileSource;
 
@@ -82,8 +81,8 @@ public:
 };
 
 // Forward declaration of this method is required for the MapProjection class
-CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
-                               const Transform& transform,
-                               const EdgeInsets& padding);
+CameraOptions cameraForLatLngs(
+    const std::vector<LatLng>& latLngs, const Transform& transform, const EdgeInsets& padding
+);
 
 } // namespace mbgl

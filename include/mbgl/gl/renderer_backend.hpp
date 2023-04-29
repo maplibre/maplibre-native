@@ -31,8 +31,7 @@ protected:
     PremultipliedImage readFramebuffer(const Size&);
 
     /// A constant to signal that a framebuffer is bound, but with an unknown ID.
-    static constexpr const FramebufferID ImplicitFramebufferBinding =
-        std::numeric_limits<FramebufferID>::max();
+    static constexpr const FramebufferID ImplicitFramebufferBinding = std::numeric_limits<FramebufferID>::max();
 
     /// Tells the renderer that OpenGL state has already been set by the windowing toolkit.
     /// It sets the internal assumed state to the supplied values.

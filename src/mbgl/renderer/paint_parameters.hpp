@@ -33,7 +33,6 @@ class RenderPass;
 class ShaderRegistry;
 } // namespace gfx
 
-
 class TransformParameters {
 public:
     TransformParameters(const TransformState&);
@@ -45,17 +44,7 @@ public:
 
 class PaintParameters {
 public:
-    PaintParameters(gfx::Context&,
-                    float pixelRatio,
-                    gfx::RendererBackend&,
-                    const EvaluatedLight&,
-                    MapMode,
-                    MapDebugOptions,
-                    TimePoint,
-                    const TransformParameters&,
-                    RenderStaticData&,
-                    LineAtlas&,
-                    PatternAtlas&);
+    PaintParameters(gfx::Context&, float pixelRatio, gfx::RendererBackend&, const EvaluatedLight&, MapMode, MapDebugOptions, TimePoint, const TransformParameters&, RenderStaticData&, LineAtlas&, PatternAtlas&);
     ~PaintParameters();
 
     gfx::Context& context;

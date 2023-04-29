@@ -20,28 +20,32 @@ TEST(Settings, SetAndGet) {
 
     Value networkPrioValue{-20.0};
     Value databasePrioValue{-10.0};
-    Object multipleValues{{EXPERIMENTAL_THREAD_PRIORITY_DATABASE, databasePrioValue},
-                          {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, networkPrioValue}};
+    Object multipleValues{
+        {EXPERIMENTAL_THREAD_PRIORITY_DATABASE, databasePrioValue},
+        {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, networkPrioValue}};
     settings.set(std::move(multipleValues));
 
-    std::vector<std::string> keys{EXPERIMENTAL_THREAD_PRIORITY_WORKER,
-                                  EXPERIMENTAL_THREAD_PRIORITY_DATABASE,
-                                  EXPERIMENTAL_THREAD_PRIORITY_NETWORK,
-                                  EXPERIMENTAL_THREAD_PRIORITY_FILE};
+    std::vector<std::string> keys{
+        EXPERIMENTAL_THREAD_PRIORITY_WORKER,
+        EXPERIMENTAL_THREAD_PRIORITY_DATABASE,
+        EXPERIMENTAL_THREAD_PRIORITY_NETWORK,
+        EXPERIMENTAL_THREAD_PRIORITY_FILE};
 
     auto object = settings.get(keys);
 
-    Object values{{EXPERIMENTAL_THREAD_PRIORITY_WORKER, lowPrioValue},
-                  {EXPERIMENTAL_THREAD_PRIORITY_DATABASE, databasePrioValue},
-                  {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, networkPrioValue},
-                  {EXPERIMENTAL_THREAD_PRIORITY_FILE, Value{}}};
+    Object values{
+        {EXPERIMENTAL_THREAD_PRIORITY_WORKER, lowPrioValue},
+        {EXPERIMENTAL_THREAD_PRIORITY_DATABASE, databasePrioValue},
+        {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, networkPrioValue},
+        {EXPERIMENTAL_THREAD_PRIORITY_FILE, Value{}}};
 
     EXPECT_EQ(values, object);
 
-    values = Object{{EXPERIMENTAL_THREAD_PRIORITY_WORKER, Value{}},
-                    {EXPERIMENTAL_THREAD_PRIORITY_DATABASE, Value{}},
-                    {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, Value{}},
-                    {EXPERIMENTAL_THREAD_PRIORITY_FILE, Value{}}};
+    values = Object{
+        {EXPERIMENTAL_THREAD_PRIORITY_WORKER, Value{}},
+        {EXPERIMENTAL_THREAD_PRIORITY_DATABASE, Value{}},
+        {EXPERIMENTAL_THREAD_PRIORITY_NETWORK, Value{}},
+        {EXPERIMENTAL_THREAD_PRIORITY_FILE, Value{}}};
 
     settings.set(values);
     EXPECT_EQ(values, settings.get(keys));

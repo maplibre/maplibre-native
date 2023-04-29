@@ -32,12 +32,8 @@ public:
     // Feature geometries are also used to populate the feature index.
     // Obtaining these is a costly operation, so we do it only once, and
     // pass-by-const-ref the geometries as a second parameter.
-    virtual void addFeature(const GeometryTileFeature&,
-                            const GeometryCollection&,
-                            const ImagePositions&,
-                            const PatternLayerMap&,
-                            std::size_t,
-                            const CanonicalTileID&){};
+    virtual void
+    addFeature(const GeometryTileFeature&, const GeometryCollection&, const ImagePositions&, const PatternLayerMap&, std::size_t, const CanonicalTileID&){};
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
@@ -47,14 +43,10 @@ public:
 
     virtual bool hasData() const = 0;
 
-    virtual float getQueryRadius(const RenderLayer&) const {
-        return 0;
-    };
+    virtual float getQueryRadius(const RenderLayer&) const { return 0; };
 
-    bool needsUpload() const {
-        return hasData() && !uploaded;
-    }
-   
+    bool needsUpload() const { return hasData() && !uploaded; }
+
     // The following methods are implemented by buckets that require cross-tile indexing and placement.
 
     // Returns a pair, the first element of which is a bucket cross-tile id
@@ -65,12 +57,13 @@ public:
     }
     // Places this bucket to the given placement.
     virtual void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) {}
-    virtual void updateVertices(
-        const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
+    virtual void
+    updateVertices(const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {
+    }
 
 protected:
     Bucket() = default;
-    std::atomic<bool> uploaded { false };
+    std::atomic<bool> uploaded{false};
 };
 
 } // namespace mbgl

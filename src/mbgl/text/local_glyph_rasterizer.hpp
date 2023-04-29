@@ -10,7 +10,7 @@ namespace mbgl {
     then generate a matching glyph object with a greyscale rasterization of
     the glyph and appropriate metrics. GlyphManager will then use TinySDF to
     transform the rasterized bitmap into an SDF.
- 
+
     The JS equivalent of this functionality will only generate glyphs in the
     'CJK Unified Ideographs' and 'Hangul Syllables' ranges, for which it can
     get away with rendering a fixed 30px square image and GlyphMetrics of:
@@ -23,10 +23,10 @@ namespace mbgl {
 
     The JS equivalent also uses heuristic evaluation of the font stack name
     to control the font-weight it uses during rasterization.
- 
+
     It is left to platform-specific implementation to decide how best to
     map a FontStack to a particular rasterization.
- 
+
     The default implementation simply refuses to rasterize any glyphs.
 */
 
@@ -38,6 +38,7 @@ public:
     // virtual so that test harness can override platform-specific behavior
     virtual bool canRasterizeGlyph(const FontStack&, GlyphID);
     virtual Glyph rasterizeGlyph(const FontStack&, GlyphID);
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl;

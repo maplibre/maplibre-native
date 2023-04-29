@@ -14,9 +14,8 @@ std::u16string applyArabicShaping(const std::u16string& input) {
     return input;
 }
 
-BiDi::BiDi() : impl(std::make_unique<BiDiImpl>())
-{
-}
+BiDi::BiDi()
+    : impl(std::make_unique<BiDiImpl>()) {}
 
 BiDi::~BiDi() = default;
 
@@ -42,7 +41,8 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
         if (lineBreakPoint <= input.second.size()) {
             transformedLines.emplace_back(
                 input.first.substr(start, lineBreakPoint - start),
-                std::vector<uint8_t>(input.second.begin() + start, input.second.begin() + lineBreakPoint));
+                std::vector<uint8_t>(input.second.begin() + start, input.second.begin() + lineBreakPoint)
+            );
             start = lineBreakPoint;
         }
     }

@@ -15,7 +15,7 @@ void hash_combine(std::size_t& seed, const T& v) {
 template <class... Args>
 std::size_t hash(Args&&... args) {
     std::size_t seed = 0;
-    ignore({ (hash_combine(seed, args), 0)... });
+    ignore({(hash_combine(seed, args), 0)...});
     return seed;
 }
 

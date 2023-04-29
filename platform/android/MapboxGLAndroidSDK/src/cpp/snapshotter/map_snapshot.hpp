@@ -15,7 +15,6 @@ namespace android {
 
 class MapSnapshot {
 public:
-
     using PointForFn = mbgl::MapSnapshotter::PointForFn;
     using LatLngForFn = mbgl::MapSnapshotter::LatLngForFn;
 
@@ -23,15 +22,17 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    static jni::Local<jni::Object<MapSnapshot>> New(JNIEnv& env,
-                                        PremultipliedImage&& image,
-                                        float pixelRatio,
-                                        std::vector<std::string> attributions,
-                                        bool showLogo,
-                                        PointForFn pointForFn,
-                                        LatLngForFn latLngForFn);
+    static jni::Local<jni::Object<MapSnapshot>> New(
+        JNIEnv& env,
+        PremultipliedImage&& image,
+        float pixelRatio,
+        std::vector<std::string> attributions,
+        bool showLogo,
+        PointForFn pointForFn,
+        LatLngForFn latLngForFn
+    );
 
-    MapSnapshot(jni::JNIEnv&) {};
+    MapSnapshot(jni::JNIEnv&){};
     MapSnapshot(float pixelRatio, PointForFn, LatLngForFn);
     ~MapSnapshot();
 

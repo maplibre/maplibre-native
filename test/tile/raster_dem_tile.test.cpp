@@ -20,20 +20,21 @@ public:
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};
-    AnnotationManager annotationManager { style };
+    AnnotationManager annotationManager{style};
     ImageManager imageManager;
     GlyphManager glyphManager;
-    Tileset tileset { { "https://example.com" }, { 0, 22 }, "none" };
+    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    TileParameters tileParameters{
+        1.0,
+        MapDebugOptions(),
+        transformState,
+        fileSource,
+        MapMode::Continuous,
+        annotationManager.makeWeakPtr(),
+        imageManager,
+        glyphManager,
+        0};
 };
 
 TEST(RasterDEMTile, setError) {
@@ -85,4 +86,3 @@ TEST(RasterDEMTile, onParsedEmpty) {
     EXPECT_TRUE(tile.isLoaded());
     EXPECT_TRUE(tile.isComplete());
 }
-

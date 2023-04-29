@@ -27,13 +27,12 @@ MapSnapshotterObserver& MapSnapshotterObserver::nullObserver() {
 class ForwardingRendererObserver final : public RendererObserver {
 public:
     explicit ForwardingRendererObserver(RendererObserver& delegate_)
-        : mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())), delegate(delegate_, mailbox) {}
+        : mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
+          delegate(delegate_, mailbox) {}
 
     ~ForwardingRendererObserver() override { mailbox->close(); }
 
-    void onInvalidate() override {
-      delegate.invoke(&RendererObserver::onInvalidate);
-    }
+    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
 
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
@@ -53,20 +52,16 @@ private:
 class SnapshotterRenderer final : public RendererObserver {
 public:
     SnapshotterRenderer(Size size, float pixelRatio, const std::optional<std::string>& localFontFamily)
-        : frontend(size,
-                   pixelRatio,
-                   gfx::HeadlessBackend::SwapBehaviour::NoFlush,
-                   gfx::ContextMode::Unique,
-                   localFontFamily) {}
+        : frontend(
+              size, pixelRatio, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Unique, localFontFamily
+          ) {}
 
     void reset() {
         hasPendingStillImageRequest = false;
         frontend.reset();
     }
 
-    void onInvalidate() override {
-      rendererObserver->onInvalidate();
-    }
+    void onInvalidate() override { rendererObserver->onInvalidate(); }
 
     void onResourceError(std::exception_ptr err) override {
         hasPendingStillImageRequest = false;
@@ -114,15 +109,17 @@ class SnapshotterRendererFrontend final : public RendererFrontend {
 public:
     SnapshotterRendererFrontend(Size size, float pixelRatio, std::optional<std::string> localFontFamily)
         : renderer(std::make_unique<util::Thread<SnapshotterRenderer>>(
-              "Snapshotter", size, pixelRatio, std::move(localFontFamily))) {}
+              "Snapshotter", size, pixelRatio, std::move(localFontFamily)
+          )) {}
 
     ~SnapshotterRendererFrontend() override = default;
 
     void reset() override { renderer->actor().invoke(&SnapshotterRenderer::reset); }
 
     void setObserver(RendererObserver& observer) override {
-        renderer->actor().invoke(&SnapshotterRenderer::setObserver,
-                                 std::make_unique<ForwardingRendererObserver>(observer));
+        renderer->actor().invoke(
+            &SnapshotterRenderer::setObserver, std::make_unique<ForwardingRendererObserver>(observer)
+        );
     }
 
     void update(std::shared_ptr<UpdateParameters> parameters) override {
@@ -148,12 +145,14 @@ private:
 
 class MapSnapshotter::Impl final : public MapObserver {
 public:
-    Impl(Size size,
-         float pixelRatio,
-         const ResourceOptions& resourceOptions,
-         const ClientOptions& clientOptions,
-         MapSnapshotterObserver& observer_,
-         std::optional<std::string> localFontFamily)
+    Impl(
+        Size size,
+        float pixelRatio,
+        const ResourceOptions& resourceOptions,
+        const ClientOptions& clientOptions,
+        MapSnapshotterObserver& observer_,
+        std::optional<std::string> localFontFamily
+    )
         : observer(observer_),
           frontend(size, pixelRatio, std::move(localFontFamily)),
           map(frontend,
@@ -175,23 +174,28 @@ public:
         }
 
         if (renderStillCallback) {
-            callback(std::make_exception_ptr(util::MisuseException("MapSnapshotter is currently rendering an image")),
-                     PremultipliedImage(),
-                     {},
-                     {},
-                     {});
+            callback(
+                std::make_exception_ptr(util::MisuseException("MapSnapshotter is currently rendering an image")),
+                PremultipliedImage(),
+                {},
+                {},
+                {}
+            );
         }
 
         renderStillCallback = std::make_unique<Actor<MapSnapshotter::Callback>>(
             *Scheduler::GetCurrent(),
-            [this, cb = std::move(callback)](std::exception_ptr ptr,
-                                             PremultipliedImage image,
-                                             Attributions attributions,
-                                             PointForFn pfn,
-                                             LatLngForFn latLonFn) {
+            [this, cb = std::move(callback)](
+                std::exception_ptr ptr,
+                PremultipliedImage image,
+                Attributions attributions,
+                PointForFn pfn,
+                LatLngForFn latLonFn
+            ) {
                 cb(std::move(ptr), std::move(image), std::move(attributions), std::move(pfn), std::move(latLonFn));
                 renderStillCallback.reset();
-            });
+            }
+        );
 
         map.renderStill([this, actorRef = renderStillCallback->self()](const std::exception_ptr& error) {
             // Create lambda that captures the current transform state
@@ -209,11 +213,11 @@ public:
             // Create lambda that captures the current transform state
             // and can be used to translate for geographic to screen
             // coordinates
-            LatLngForFn latLngForFn = [transformState =
-                                           frontend.getTransformState()](const ScreenCoordinate& screenCoordinate) {
-                Transform transform{transformState};
-                return transform.screenCoordinateToLatLng(screenCoordinate);
-            };
+            LatLngForFn latLngForFn =
+                [transformState = frontend.getTransformState()](const ScreenCoordinate& screenCoordinate) {
+                    Transform transform{transformState};
+                    return transform.screenCoordinateToLatLng(screenCoordinate);
+                };
 
             // Collect all source attributions
             std::vector<std::string> attributions;
@@ -225,12 +229,14 @@ public:
             }
 
             // Invoke callback
-            actorRef.invoke(&MapSnapshotter::Callback::operator(),
-                            error,
-                            error ? PremultipliedImage() : frontend.takeImage(),
-                            std::move(attributions),
-                            std::move(pointForFn),
-                            std::move(latLngForFn));
+            actorRef.invoke(
+                &MapSnapshotter::Callback::operator(),
+                error,
+                error ? PremultipliedImage() : frontend.takeImage(),
+                std::move(attributions),
+                std::move(pointForFn),
+                std::move(latLngForFn)
+            );
         });
     }
 
@@ -251,16 +257,21 @@ private:
     Map map;
 };
 
-MapSnapshotter::MapSnapshotter(Size size,
-                               float pixelRatio,
-                               const ResourceOptions& resourceOptions,
-                               const ClientOptions& clientOptions,
-                               MapSnapshotterObserver& observer,
-                               std::optional<std::string> localFontFamily)
+MapSnapshotter::MapSnapshotter(
+    Size size,
+    float pixelRatio,
+    const ResourceOptions& resourceOptions,
+    const ClientOptions& clientOptions,
+    MapSnapshotterObserver& observer,
+    std::optional<std::string> localFontFamily
+)
     : impl(std::make_unique<MapSnapshotter::Impl>(
-          size, pixelRatio, resourceOptions, clientOptions, observer, std::move(localFontFamily))) {}
+          size, pixelRatio, resourceOptions, clientOptions, observer, std::move(localFontFamily)
+      )) {}
 
-MapSnapshotter::MapSnapshotter(Size size, float pixelRatio, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+MapSnapshotter::MapSnapshotter(
+    Size size, float pixelRatio, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions
+)
     : MapSnapshotter(size, pixelRatio, resourceOptions, clientOptions, MapSnapshotterObserver::nullObserver()) {}
 
 MapSnapshotter::~MapSnapshotter() = default;

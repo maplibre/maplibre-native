@@ -11,7 +11,7 @@ namespace mapbox {
 namespace sqlite {
 
 enum OpenFlag : int {
-    ReadOnly        = 0b001,
+    ReadOnly = 0b001,
     ReadWriteCreate = 0b110,
 };
 
@@ -50,13 +50,14 @@ enum class ExtendedResultCode : uint8_t {
 
 class Exception : public std::runtime_error {
 public:
-    Exception(ResultCode err, const char* msg) : Exception(static_cast<int>(err), msg) {}
-    Exception(int err, const char* msg) : Exception(err, std::string{ msg }) {}
+    Exception(ResultCode err, const char* msg)
+        : Exception(static_cast<int>(err), msg) {}
+    Exception(int err, const char* msg)
+        : Exception(err, std::string{msg}) {}
     Exception(int err, const std::string& msg)
         : std::runtime_error(msg),
           code(static_cast<ResultCode>(err)),
-          extendedCode(static_cast<ExtendedResultCode>(err >> 8)) {
-    }
+          extendedCode(static_cast<ExtendedResultCode>(err >> 8)) {}
     const ResultCode code = ResultCode::OK;
     const ExtendedResultCode extendedCode = ExtendedResultCode::Unknown;
 };
@@ -74,17 +75,17 @@ private:
     Database(std::unique_ptr<DatabaseImpl>);
 
 public:
-    Database(const Database &) = delete;
-    Database &operator=(const Database &) = delete;
-    static mapbox::util::variant<Database, Exception> tryOpen(const std::string &filename, int flags = 0);
-    static Database open(const std::string &filename, int flags = 0);
+    Database(const Database&) = delete;
+    Database& operator=(const Database&) = delete;
+    static mapbox::util::variant<Database, Exception> tryOpen(const std::string& filename, int flags = 0);
+    static Database open(const std::string& filename, int flags = 0);
 
     Database(Database&&) noexcept;
     ~Database();
     Database& operator=(Database&&) noexcept;
 
     void setBusyTimeout(std::chrono::milliseconds);
-    void exec(const std::string &sql);
+    void exec(const std::string& sql);
 
 private:
     std::unique_ptr<DatabaseImpl> impl;

@@ -15,27 +15,34 @@ struct ShapedTextOrientations {
     Shaping horizontal;
     Shaping vertical;
     // The following are used with variable text placement on.
-    Shaping& right = horizontal; 
+    Shaping& right = horizontal;
     Shaping center;
     Shaping left;
     bool singleLine = false;
 };
 
-enum class SymbolContent : uint8_t { None = 0, Text = 1 << 0, IconRGBA = 1 << 1, IconSDF = 1 << 2 };
+enum class SymbolContent : uint8_t {
+    None = 0,
+    Text = 1 << 0,
+    IconRGBA = 1 << 1,
+    IconSDF = 1 << 2
+};
 
 struct SymbolInstanceSharedData {
-    SymbolInstanceSharedData(GeometryCoordinates line,
-                             const ShapedTextOrientations& shapedTextOrientations,
-                             const std::optional<PositionedIcon>& shapedIcon,
-                             const std::optional<PositionedIcon>& verticallyShapedIcon,
-                             const style::SymbolLayoutProperties::Evaluated& layout,
-                             style::SymbolPlacementType textPlacement,
-                             const std::array<float, 2>& textOffset,
-                             const ImageMap& imageMap,
-                             float iconRotation,
-                             SymbolContent iconType,
-                             bool hasIconTextFit,
-                             bool allowVerticalPlacement);
+    SymbolInstanceSharedData(
+        GeometryCoordinates line,
+        const ShapedTextOrientations& shapedTextOrientations,
+        const std::optional<PositionedIcon>& shapedIcon,
+        const std::optional<PositionedIcon>& verticallyShapedIcon,
+        const style::SymbolLayoutProperties::Evaluated& layout,
+        style::SymbolPlacementType textPlacement,
+        const std::array<float, 2>& textOffset,
+        const ImageMap& imageMap,
+        float iconRotation,
+        SymbolContent iconType,
+        bool hasIconTextFit,
+        bool allowVerticalPlacement
+    );
     bool empty() const;
     GeometryCoordinates line;
     // Note: When singleLine == true, only `rightJustifiedGlyphQuads` is populated.
@@ -49,28 +56,30 @@ struct SymbolInstanceSharedData {
 
 class SymbolInstance {
 public:
-    SymbolInstance(Anchor& anchor_,
-                   std::shared_ptr<SymbolInstanceSharedData> sharedData,
-                   const ShapedTextOrientations& shapedTextOrientations,
-                   const std::optional<PositionedIcon>& shapedIcon,
-                   const std::optional<PositionedIcon>& verticallyShapedIcon,
-                   float textBoxScale,
-                   float textPadding,
-                   style::SymbolPlacementType textPlacement,
-                   const std::array<float, 2>& textOffset,
-                   float iconBoxScale,
-                   float iconPadding,
-                   const std::array<float, 2>& iconOffset,
-                   const IndexedSubfeature& indexedFeature,
-                   std::size_t layoutFeatureIndex,
-                   std::size_t dataFeatureIndex,
-                   std::u16string key,
-                   float overscaling,
-                   float iconRotation,
-                   float textRotation,
-                   const std::array<float, 2>& variableTextOffset,
-                   bool allowVerticalPlacement,
-                   SymbolContent iconType = SymbolContent::None);
+    SymbolInstance(
+        Anchor& anchor_,
+        std::shared_ptr<SymbolInstanceSharedData> sharedData,
+        const ShapedTextOrientations& shapedTextOrientations,
+        const std::optional<PositionedIcon>& shapedIcon,
+        const std::optional<PositionedIcon>& verticallyShapedIcon,
+        float textBoxScale,
+        float textPadding,
+        style::SymbolPlacementType textPlacement,
+        const std::array<float, 2>& textOffset,
+        float iconBoxScale,
+        float iconPadding,
+        const std::array<float, 2>& iconOffset,
+        const IndexedSubfeature& indexedFeature,
+        std::size_t layoutFeatureIndex,
+        std::size_t dataFeatureIndex,
+        std::u16string key,
+        float overscaling,
+        float iconRotation,
+        float textRotation,
+        const std::array<float, 2>& variableTextOffset,
+        bool allowVerticalPlacement,
+        SymbolContent iconType = SymbolContent::None
+    );
 
     std::optional<size_t> getDefaultHorizontalPlacedTextIndex() const;
     const GeometryCoordinates& line() const;

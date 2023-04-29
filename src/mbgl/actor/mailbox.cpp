@@ -8,7 +8,8 @@ namespace mbgl {
 
 Mailbox::Mailbox() = default;
 
-Mailbox::Mailbox(Scheduler& scheduler_) : weakScheduler(scheduler_.makeWeakPtr()) {}
+Mailbox::Mailbox(Scheduler& scheduler_)
+    : weakScheduler(scheduler_.makeWeakPtr()) {}
 
 void Mailbox::open(Scheduler& scheduler_) {
     assert(!weakScheduler);
@@ -99,7 +100,9 @@ void Mailbox::maybeReceive(const std::weak_ptr<Mailbox>& mailbox) {
 
 // static
 std::function<void()> Mailbox::makeClosure(std::weak_ptr<Mailbox> mailbox) {
-    return [mailbox = std::move(mailbox)]() { maybeReceive(mailbox); };
+    return [mailbox = std::move(mailbox)]() {
+        maybeReceive(mailbox);
+    };
 }
 
 } // namespace mbgl

@@ -6,10 +6,12 @@
 #include <utility>
 namespace mbgl {
 
-GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
-                         std::string sourceID_,
-                         const TileParameters& parameters,
-                         std::shared_ptr<style::GeoJSONData> data_)
+GeoJSONTile::GeoJSONTile(
+    const OverscaledTileID& overscaledTileID,
+    std::string sourceID_,
+    const TileParameters& parameters,
+    std::shared_ptr<style::GeoJSONData> data_
+)
     : GeometryTile(overscaledTileID, std::move(sourceID_), parameters) {
     updateData(std::move(data_), false /*needsRelayout*/);
 }
@@ -25,13 +27,11 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
             if (data.get() != capturedData) return;
             auto tileData = std::make_unique<GeoJSONTileData>(std::move(features));
             setData(std::move(tileData));
-        });
+        }
+    );
 }
 
-void GeoJSONTile::querySourceFeatures(
-    std::vector<Feature>& result,
-    const SourceQueryOptions& options) {
-
+void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
     // Ignore the sourceLayer, there is only one
     if (auto tileData = getData()) {
         if (auto layer = tileData->getLayer({})) {
@@ -40,7 +40,8 @@ void GeoJSONTile::querySourceFeatures(
                 auto feature = layer->getFeature(i);
 
                 // Apply filter, if any
-                if (options.filter && !(*options.filter)(style::expression::EvaluationContext { static_cast<float>(this->id.overscaledZ), feature.get() })) {
+                if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
+                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
                     continue;
                 }
 

@@ -146,15 +146,13 @@ public:
      * downloading resources, call `setOfflineRegionDownloadState(OfflineRegionDownloadState::Active)`,
      * optionally registering an `OfflineRegionObserver` beforehand.
      */
-    virtual void createOfflineRegion(const OfflineRegionDefinition& definition,
-                                     const OfflineRegionMetadata& metadata,
-                                     std::function<void(expected<OfflineRegion, std::exception_ptr>)>);
+    virtual void
+    createOfflineRegion(const OfflineRegionDefinition& definition, const OfflineRegionMetadata& metadata, std::function<void(expected<OfflineRegion, std::exception_ptr>)>);
     /**
      * Update an offline region metadata in the database.
      */
-    virtual void updateOfflineMetadata(int64_t regionID,
-                                       const OfflineRegionMetadata& metadata,
-                                       std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>);
+    virtual void
+    updateOfflineMetadata(int64_t regionID, const OfflineRegionMetadata& metadata, std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>);
 
     /**
      * Register an observer to be notified when the state of the region changes.
@@ -172,8 +170,9 @@ public:
      * executed on the database thread; it is the responsibility of the SDK bindings
      * to re-execute a user-provided callback on the main thread.
      */
-    virtual void getOfflineRegionStatus(const OfflineRegion&,
-                                        std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>) const;
+    virtual void
+    getOfflineRegionStatus(const OfflineRegion&, std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>)
+        const;
 
     /**
      * Merge offline regions from a secondary database into the main offline database.
@@ -195,8 +194,8 @@ public:
      * Merged regions may not be in a completed status if the secondary database
      * does not contain all the tiles or resources required by the region definition.
      */
-    virtual void mergeOfflineRegions(const std::string& sideDatabasePath,
-                                     std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
+    virtual void
+    mergeOfflineRegions(const std::string& sideDatabasePath, std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
 
     /**
      * Remove an offline region from the database and perform any resources evictions

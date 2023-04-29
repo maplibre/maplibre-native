@@ -15,12 +15,13 @@ using GeoJSONDataCallback = std::function<void(std::shared_ptr<style::GeoJSONDat
 
 class FeatureConverter {
 public:
-    explicit FeatureConverter(Immutable<style::GeoJSONOptions> options_) : options(std::move(options_)) {}
+    explicit FeatureConverter(Immutable<style::GeoJSONOptions> options_)
+        : options(std::move(options_)) {}
     void convertJson(std::shared_ptr<std::string>, ActorRef<GeoJSONDataCallback>);
 
     template <class JNIType>
-    void convertObject(std::shared_ptr<jni::Global<jni::Object<JNIType>, jni::EnvAttachingDeleter>>,
-                       ActorRef<GeoJSONDataCallback>);
+    void
+        convertObject(std::shared_ptr<jni::Global<jni::Object<JNIType>, jni::EnvAttachingDeleter>>, ActorRef<GeoJSONDataCallback>);
 
 private:
     Immutable<style::GeoJSONOptions> options;
@@ -53,11 +54,14 @@ private:
     void setGeometry(jni::JNIEnv&, const jni::Object<geojson::Geometry>&);
     void setURL(jni::JNIEnv&, const jni::String&);
 
-    jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
-                                                                  const jni::Array<jni::Object<>>&);
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>>
+    querySourceFeatures(jni::JNIEnv&, const jni::Array<jni::Object<>>&);
 
-    jni::Local<jni::Array<jni::Object<geojson::Feature>>> getClusterChildren(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
-    jni::Local<jni::Array<jni::Object<geojson::Feature>>> getClusterLeaves(jni::JNIEnv&, const jni::Object<geojson::Feature>&, jni::jlong, jni::jlong);
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>>
+    getClusterChildren(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>> getClusterLeaves(
+        jni::JNIEnv&, const jni::Object<geojson::Feature>&, jni::jlong, jni::jlong
+    );
     jint getClusterExpansionZoom(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
 
     jni::Local<jni::String> getURL(jni::JNIEnv&);

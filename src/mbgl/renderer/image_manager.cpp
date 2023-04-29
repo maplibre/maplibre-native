@@ -237,8 +237,9 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                     req->removePendingRequest(missingImage);
                 }
             };
-            observer->onStyleImageMissing(missingImage,
-                                          Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests)));
+            observer->onStyleImageMissing(
+                missingImage, Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests))
+            );
         }
     } else {
         // Associate requestor with an image that was provided by the client.
@@ -277,8 +278,8 @@ void ImageManager::dumpDebugLogs() const {
     Log::Info(Event::General, ss.str());
 }
 
-ImageRequestor::ImageRequestor(ImageManager& imageManager_) : imageManager(imageManager_) {
-}
+ImageRequestor::ImageRequestor(ImageManager& imageManager_)
+    : imageManager(imageManager_) {}
 
 ImageRequestor::~ImageRequestor() {
     imageManager.removeRequestor(*this);

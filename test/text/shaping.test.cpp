@@ -27,28 +27,28 @@ TEST(Shaping, ZWSP) {
     const SectionOptions sectionOptions(1.0f, fontStack);
     const float layoutTextSize = 16.0f;
     const float layoutTextSizeAtBucketZoomLevel = 16.0f;
-    GlyphMap glyphs = {
-        { FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}} }
-    };
+    GlyphMap glyphs = {{FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}}}};
     GlyphPositions glyphPositions = {{FontStackHasher()(fontStack), {{u'中', std::move(glyphPosition)}}}};
     ImagePositions imagePositions;
 
     const auto testGetShaping = [&](const TaggedString& string, unsigned maxWidthInChars) {
-        return getShaping(string,
-                          maxWidthInChars * ONE_EM,
-                          ONE_EM, // lineHeight
-                          style::SymbolAnchorType::Center,
-                          style::TextJustifyType::Center,
-                          0,              // spacing
-                          {{0.0f, 0.0f}}, // translate
-                          WritingModeType::Horizontal,
-                          bidi,
-                          glyphs,
-                          glyphPositions,
-                          imagePositions,
-                          layoutTextSize,
-                          layoutTextSizeAtBucketZoomLevel,
-                          /*allowVerticalPlacement*/ false);
+        return getShaping(
+            string,
+            maxWidthInChars * ONE_EM,
+            ONE_EM, // lineHeight
+            style::SymbolAnchorType::Center,
+            style::TextJustifyType::Center,
+            0,              // spacing
+            {{0.0f, 0.0f}}, // translate
+            WritingModeType::Horizontal,
+            bidi,
+            glyphs,
+            glyphPositions,
+            imagePositions,
+            layoutTextSize,
+            layoutTextSizeAtBucketZoomLevel,
+            /*allowVerticalPlacement*/ false
+        );
     };
 
     // 3 lines

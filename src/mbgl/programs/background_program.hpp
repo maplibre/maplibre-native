@@ -13,14 +13,12 @@ namespace mbgl {
 class ImagePosition;
 class UnwrappedTileID;
 class TransformState;
-template <class> class Faded;
+template <class>
+class Faded;
 
 using BackgroundLayoutAttributes = PositionOnlyLayoutAttributes;
 
-using BackgroundUniforms = TypeList<
-    uniforms::matrix,
-    uniforms::color,
-    uniforms::opacity>;
+using BackgroundUniforms = TypeList<uniforms::matrix, uniforms::color, uniforms::opacity>;
 
 using BackgroundPatternUniforms = TypeList<
     uniforms::matrix,
@@ -40,49 +38,36 @@ using BackgroundPatternUniforms = TypeList<
     uniforms::tile_units_to_pixels>;
 
 class BackgroundProgram final : public Program<
-    BackgroundProgram,
-    shaders::BuiltIn::BackgroundProgram,
-    gfx::PrimitiveType::Triangle,
-    BackgroundLayoutAttributes,
-    BackgroundUniforms,
-    TypeList<>,
-    style::Properties<>>
-{
+                                    BackgroundProgram,
+                                    shaders::BuiltIn::BackgroundProgram,
+                                    gfx::PrimitiveType::Triangle,
+                                    BackgroundLayoutAttributes,
+                                    BackgroundUniforms,
+                                    TypeList<>,
+                                    style::Properties<>> {
 public:
     static constexpr std::string_view Name{"BackgroundProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 };
 
 class BackgroundPatternProgram final : public Program<
-    BackgroundPatternProgram,
-    shaders::BuiltIn::BackgroundPatternProgram,
-    gfx::PrimitiveType::Triangle,
-    BackgroundLayoutAttributes,
-    BackgroundPatternUniforms,
-    TypeList<
-        textures::image>,
-    style::Properties<>>
-{
+                                           BackgroundPatternProgram,
+                                           shaders::BuiltIn::BackgroundPatternProgram,
+                                           gfx::PrimitiveType::Triangle,
+                                           BackgroundLayoutAttributes,
+                                           BackgroundPatternUniforms,
+                                           TypeList<textures::image>,
+                                           style::Properties<>> {
 public:
     static constexpr std::string_view Name{"BackgroundPatternProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
-    static LayoutUniformValues layoutUniformValues(mat4 matrix,
-                                                   float opacity,
-                                                   Size atlasSize,
-                                                   const ImagePosition&,
-                                                   const ImagePosition&,
-                                                   const CrossfadeParameters&,
-                                                   const UnwrappedTileID&,
-                                                   const TransformState&);
+    static LayoutUniformValues
+    layoutUniformValues(mat4 matrix, float opacity, Size atlasSize, const ImagePosition&, const ImagePosition&, const CrossfadeParameters&, const UnwrappedTileID&, const TransformState&);
 };
 
 using BackgroundLayoutVertex = BackgroundProgram::LayoutVertex;

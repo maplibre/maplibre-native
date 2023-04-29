@@ -20,17 +20,16 @@ public:
     ~FillBucket() override;
     using PossiblyEvaluatedLayoutProperties = style::FillLayoutProperties::PossiblyEvaluated;
 
-    FillBucket(const PossiblyEvaluatedLayoutProperties& layout,
-               const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-               float zoom,
-               uint32_t overscaling);
+    FillBucket(
+        const PossiblyEvaluatedLayoutProperties& layout,
+        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
+        float zoom,
+        uint32_t overscaling
+    );
 
-    void addFeature(const GeometryTileFeature&,
-                    const GeometryCollection&,
-                    const mbgl::ImagePositions&,
-                    const PatternLayerMap&,
-                    std::size_t,
-                    const CanonicalTileID&) override;
+    void
+    addFeature(const GeometryTileFeature&, const GeometryCollection&, const mbgl::ImagePositions&, const PatternLayerMap&, std::size_t, const CanonicalTileID&)
+        override;
 
     bool hasData() const override;
 

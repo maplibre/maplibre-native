@@ -48,8 +48,9 @@ public:
 class JointPlacement {
 public:
     JointPlacement(bool text_, bool icon_, bool skipFade_)
-        : text(text_), icon(icon_), skipFade(skipFade_)
-    {}
+        : text(text_),
+          icon(icon_),
+          skipFade(skipFade_) {}
 
     bool placed() const { return text || icon; }
 
@@ -61,7 +62,7 @@ public:
     // visible right away.
     const bool skipFade;
 };
-  
+
 struct RetainedQueryData {
     uint32_t bucketInstanceId;
     std::shared_ptr<FeatureIndex> featureIndex;
@@ -69,21 +70,22 @@ struct RetainedQueryData {
     mutable FeatureSortOrder featureSortOrder;
 
     RetainedQueryData(uint32_t bucketInstanceId_, std::shared_ptr<FeatureIndex> featureIndex_, OverscaledTileID tileID_)
-        : bucketInstanceId(bucketInstanceId_), featureIndex(std::move(featureIndex_)), tileID(tileID_) {}
+        : bucketInstanceId(bucketInstanceId_),
+          featureIndex(std::move(featureIndex_)),
+          tileID(tileID_) {}
 };
-    
+
 class CollisionGroups {
 public:
     using Predicate = std::function<bool(const IndexedSubfeature&)>;
     using CollisionGroup = std::pair<uint16_t, std::optional<Predicate>>;
-    
+
     CollisionGroups(const bool crossSourceCollisions_)
-        : maxGroupID(0)
-        , crossSourceCollisions(crossSourceCollisions_)
-    {}
-    
+        : maxGroupID(0),
+          crossSourceCollisions(crossSourceCollisions_) {}
+
     const CollisionGroup& get(const std::string& sourceID);
-    
+
 private:
     std::map<std::string, CollisionGroup> collisionGroups;
     uint16_t maxGroupID;
@@ -114,8 +116,10 @@ public:
      * Different placement implementations are created based on `updateParameters->mapMode`.
      * In Continuous map mode, `prevPlacement` must be provided.
      */
-    static Mutable<Placement> create(std::shared_ptr<const UpdateParameters> updateParameters,
-                                     std::optional<Immutable<Placement>> prevPlacement = std::nullopt);
+    static Mutable<Placement> create(
+        std::shared_ptr<const UpdateParameters> updateParameters,
+        std::optional<Immutable<Placement>> prevPlacement = std::nullopt
+    );
 
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
@@ -145,33 +149,36 @@ protected:
     JointPlacement placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext&);
     void placeLayer(const RenderLayer&, std::set<uint32_t>&);
     virtual void commit();
-    virtual void newSymbolPlaced(const SymbolInstance&,
-                                 const PlacementContext&,
-                                 const JointPlacement&,
-                                 style::SymbolPlacementType,
-                                 const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
-                                 const std::vector<ProjectedCollisionBox>& /*iconBoxes*/) {}
+    virtual void newSymbolPlaced(
+        const SymbolInstance&,
+        const PlacementContext&,
+        const JointPlacement&,
+        style::SymbolPlacementType,
+        const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
+        const std::vector<ProjectedCollisionBox>& /*iconBoxes*/
+    ) {}
     // Implentation specific hooks, which get called during a symbol bucket placement.
     virtual std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4& /*posMatrix*/) {
         return std::nullopt;
     }
     SymbolInstanceReferences getSortedSymbols(const BucketPlacementData&, float pixelRatio);
-    virtual bool canPlaceAtVariableAnchor(const CollisionBox&,
-                                          style::TextVariableAnchorType,
-                                          Point<float> /*shift*/,
-                                          std::vector<style::TextVariableAnchorType>&,
-                                          const mat4& /*posMatrix*/,
-                                          float /*textPixelRatio*/) {
+    virtual bool canPlaceAtVariableAnchor(
+        const CollisionBox&,
+        style::TextVariableAnchorType,
+        Point<float> /*shift*/,
+        std::vector<style::TextVariableAnchorType>&,
+        const mat4& /*posMatrix*/,
+        float /*textPixelRatio*/
+    ) {
         return true;
     }
 
     // Returns `true` if bucket vertices were updated; returns `false` otherwise.
     bool updateBucketDynamicVertices(SymbolBucket&, const TransformState&, const RenderTile& tile) const;
     void updateBucketOpacities(SymbolBucket&, const TransformState&, std::set<uint32_t>&) const;
-    void markUsedJustification(SymbolBucket&,
-                               style::TextVariableAnchorType,
-                               const SymbolInstance&,
-                               style::TextWritingModeType orientation) const;
+    void markUsedJustification(
+        SymbolBucket&, style::TextVariableAnchorType, const SymbolInstance&, style::TextWritingModeType orientation
+    ) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
     const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
     bool isTiltedView() const;

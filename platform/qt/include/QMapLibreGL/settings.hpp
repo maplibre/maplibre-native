@@ -11,16 +11,13 @@
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
 // TODO: this will be wrapped at some point
-namespace mbgl
-{
-    class TileServerOptions;
+namespace mbgl {
+class TileServerOptions;
 }
-
 
 namespace QMapLibreGL {
 
-class Q_MAPLIBREGL_EXPORT Settings
-{
+class Q_MAPLIBREGL_EXPORT Settings {
 public:
     Settings();
 

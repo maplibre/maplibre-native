@@ -5,15 +5,18 @@
 namespace mbgl {
 namespace style {
 
-Image::Image(std::string id,
-             PremultipliedImage&& image,
-             const float pixelRatio,
-             bool sdf,
-             ImageStretches stretchX,
-             ImageStretches stretchY,
-             const std::optional<ImageContent>& content)
+Image::Image(
+    std::string id,
+    PremultipliedImage&& image,
+    const float pixelRatio,
+    bool sdf,
+    ImageStretches stretchX,
+    ImageStretches stretchY,
+    const std::optional<ImageContent>& content
+)
     : baseImpl(makeMutable<Impl>(
-          std::move(id), std::move(image), pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content)) {}
+          std::move(id), std::move(image), pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content
+      )) {}
 
 std::string Image::getID() const {
     return baseImpl->id;

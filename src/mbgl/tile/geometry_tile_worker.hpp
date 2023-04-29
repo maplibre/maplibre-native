@@ -27,41 +27,42 @@ class Layer;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(ActorRef<GeometryTileWorker> self,
-                       ActorRef<GeometryTile> parent,
-                       OverscaledTileID,
-                       std::string,
-                       const std::atomic<bool>&,
-                       MapMode,
-                       float pixelRatio,
-                       bool showCollisionBoxes_);
+    GeometryTileWorker(
+        ActorRef<GeometryTileWorker> self,
+        ActorRef<GeometryTile> parent,
+        OverscaledTileID,
+        std::string,
+        const std::atomic<bool>&,
+        MapMode,
+        float pixelRatio,
+        bool showCollisionBoxes_
+    );
     ~GeometryTileWorker();
 
-    void setLayers(std::vector<Immutable<style::LayerProperties>>,
-                   std::set<std::string> availableImages,
-                   uint64_t correlationID);
-    void setData(std::unique_ptr<const GeometryTileData>,
-                 std::set<std::string> availableImages,
-                 uint64_t correlationID);
+    void setLayers(
+        std::vector<Immutable<style::LayerProperties>>, std::set<std::string> availableImages, uint64_t correlationID
+    );
+    void setData(
+        std::unique_ptr<const GeometryTileData>, std::set<std::string> availableImages, uint64_t correlationID
+    );
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
     void onGlyphsAvailable(GlyphMap newGlyphMap);
-    void onImagesAvailable(ImageMap newIconMap,
-                           ImageMap newPatternMap,
-                           ImageVersionMap versionMap,
-                           uint64_t imageCorrelationID);
+    void onImagesAvailable(
+        ImageMap newIconMap, ImageMap newPatternMap, ImageVersionMap versionMap, uint64_t imageCorrelationID
+    );
 
 private:
     void coalesced();
     void parse();
     void finalizeLayout();
-    
+
     void coalesce();
 
     void requestNewGlyphs(const GlyphDependencies&);
     void requestNewImages(const ImageDependencies&);
-   
+
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
     bool hasPendingParseResult() const;
@@ -76,7 +77,7 @@ private:
     const std::atomic<bool>& obsolete;
     const MapMode mode;
     const float pixelRatio;
-    
+
     std::unique_ptr<FeatureIndex> featureIndex;
     std::unordered_map<std::string, LayerRenderData> renderData;
 

@@ -103,28 +103,30 @@ const char* resultsHeaderButtons = R"HTML(
 )HTML";
 
 void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const mbgl::Value& value) {
-    value.match([&writer](const mbgl::NullValue&) { writer.Null(); },
-                [&writer](bool b) { writer.Bool(b); },
-                [&writer](uint64_t u) { writer.Uint64(u); },
-                [&writer](int64_t i) { writer.Int64(i); },
-                [&writer](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
-                [&writer](const std::string& s) { writer.String(s); },
-                [&writer](const std::vector<mbgl::Value>& arr) {
-                    writer.StartArray();
-                    for (const auto& item : arr) {
-                        writeJSON(writer, item);
-                    }
-                    writer.EndArray();
-                },
-                [&writer](const std::unordered_map<std::string, mbgl::Value>& obj) {
-                    writer.StartObject();
-                    std::map<std::string, mbgl::Value> sorted(obj.begin(), obj.end());
-                    for (const auto& entry : sorted) {
-                        writer.Key(entry.first.c_str());
-                        writeJSON(writer, entry.second);
-                    }
-                    writer.EndObject();
-                });
+    value.match(
+        [&writer](const mbgl::NullValue&) { writer.Null(); },
+        [&writer](bool b) { writer.Bool(b); },
+        [&writer](uint64_t u) { writer.Uint64(u); },
+        [&writer](int64_t i) { writer.Int64(i); },
+        [&writer](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
+        [&writer](const std::string& s) { writer.String(s); },
+        [&writer](const std::vector<mbgl::Value>& arr) {
+            writer.StartArray();
+            for (const auto& item : arr) {
+                writeJSON(writer, item);
+            }
+            writer.EndArray();
+        },
+        [&writer](const std::unordered_map<std::string, mbgl::Value>& obj) {
+            writer.StartObject();
+            std::map<std::string, mbgl::Value> sorted(obj.begin(), obj.end());
+            for (const auto& entry : sorted) {
+                writer.Key(entry.first.c_str());
+                writeJSON(writer, entry.second);
+            }
+            writer.EndObject();
+        }
+    );
 }
 
 } // namespace
@@ -154,7 +156,8 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
         result.AddMember("type", "Feature", allocator);
         if (!feature.id.is<mbgl::NullValue>()) {
             result.AddMember(
-                "id", mapbox::geojson::identifier::visit(feature.id, mapbox::geojson::to_value{allocator}), allocator);
+                "id", mapbox::geojson::identifier::visit(feature.id, mapbox::geojson::to_value{allocator}), allocator
+            );
         }
         result.AddMember("geometry", mapbox::geojson::convert(feature.geometry, allocator), allocator);
         result.AddMember("properties", mapbox::geojson::to_value{allocator}(feature.properties), allocator);
@@ -172,13 +175,13 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
 JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
     auto maybeJSON = mbgl::util::readFile(jsonPath);
     if (!maybeJSON) {
-        return { std::string("Unable to open file ") + jsonPath.string() };
+        return {std::string("Unable to open file ") + jsonPath.string()};
     }
 
     mbgl::JSDocument document;
     document.Parse<0>(*maybeJSON);
     if (document.HasParseError()) {
-        return { mbgl::formatJSONParseError(document) };
+        return {mbgl::formatJSONParseError(document)};
     }
 
     return {std::move(document)};
@@ -350,9 +353,11 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
             std::string filePath{probeValue[1].GetString(), probeValue[1].GetStringLength()};
             assert(!filePath.empty());
 
-            result.fileSize.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(std::move(mark)),
-                                    std::forward_as_tuple(std::move(filePath), probeValue[2].GetUint64(), 0.f));
+            result.fileSize.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(std::move(mark)),
+                std::forward_as_tuple(std::move(filePath), probeValue[2].GetUint64(), 0.f)
+            );
         }
     }
 
@@ -368,9 +373,11 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
 
             std::string mark{probeValue[0].GetString(), probeValue[0].GetStringLength()};
             assert(!mark.empty());
-            result.memory.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(std::move(mark)),
-                                  std::forward_as_tuple(probeValue[1].GetUint64(), probeValue[2].GetUint64()));
+            result.memory.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(std::move(mark)),
+                std::forward_as_tuple(probeValue[1].GetUint64(), probeValue[2].GetUint64())
+            );
         }
     }
 
@@ -387,9 +394,11 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
             std::string mark{probeValue[0].GetString(), probeValue[0].GetStringLength()};
             assert(!mark.empty());
 
-            result.network.emplace(std::piecewise_construct,
-                                   std::forward_as_tuple(std::move(mark)),
-                                   std::forward_as_tuple(probeValue[1].GetUint64(), probeValue[2].GetUint64()));
+            result.network.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(std::move(mark)),
+                std::forward_as_tuple(probeValue[1].GetUint64(), probeValue[2].GetUint64())
+            );
         }
     }
 
@@ -406,7 +415,8 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
             const std::string mark{probeValue[0].GetString(), probeValue[0].GetStringLength()};
             assert(!mark.empty());
             result.fps.insert(
-                {std::move(mark), {probeValue[1].GetFloat(), probeValue[2].GetFloat(), probeValue[3].GetFloat()}});
+                {std::move(mark), {probeValue[1].GetFloat(), probeValue[2].GetFloat(), probeValue[3].GetFloat()}}
+            );
         }
     }
 
@@ -486,7 +496,8 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             metadata.mapMode = mbgl::MapMode::Static;
         else {
             mbgl::Log::Warning(
-                mbgl::Event::ParseStyle, "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
+                mbgl::Event::ParseStyle, "Unknown map mode: " + mapModeStr + ". Falling back to static mode"
+            );
             metadata.mapMode = mbgl::MapMode::Static;
         }
     }
@@ -521,8 +532,8 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 
     if (testValue.HasMember("description")) {
         assert(testValue["description"].IsString());
-        metadata.description =
-            std::string{testValue["description"].GetString(), testValue["description"].GetStringLength()};
+        metadata.description = std::string{
+            testValue["description"].GetString(), testValue["description"].GetStringLength()};
     }
 
     // Test operations handled in runner.cpp.
@@ -568,7 +579,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         }
         metadata.renderTest = false;
     }
-    
+
     if (testValue.HasMember("ignoreProbing")) {
         if (testValue["ignoreProbing"].IsBool()) {
             metadata.ignoreProbing = testValue["ignoreProbing"].GetBool();
@@ -714,14 +725,16 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 std::optional<std::string> maybeImage;
                 bool requestCompleted = false;
 
-                auto req = ctx.getFileSource().request(mbgl::Resource::image("mapbox://render-tests/" + imagePath),
-                                                       [&](mbgl::Response response) {
-                                                           if (response.data) {
-                                                               maybeImage = *response.data;
-                                                           }
+                auto req = ctx.getFileSource().request(
+                    mbgl::Resource::image("mapbox://render-tests/" + imagePath),
+                    [&](mbgl::Response response) {
+                        if (response.data) {
+                            maybeImage = *response.data;
+                        }
 
-                                                           requestCompleted = true;
-                                                       });
+                        requestCompleted = true;
+                    }
+                );
 
                 while (!requestCompleted) {
                     mbgl::util::RunLoop::Get()->runOnce();
@@ -733,7 +746,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 }
 
                 ctx.getMap().getStyle().addImage(
-                    std::make_unique<mbgl::style::Image>(imageName, mbgl::decodeImage(*maybeImage), pixelRatio, sdf));
+                    std::make_unique<mbgl::style::Image>(imageName, mbgl::decodeImage(*maybeImage), pixelRatio, sdf)
+                );
                 return true;
             });
 
@@ -879,8 +893,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray.Size() >= 2u);
             assert(operationArray[1].IsString());
             std::string layerName = operationArray[1].GetString();
-            result.emplace_back(
-                [layerName](TestContext& ctx) { return bool(ctx.getMap().getStyle().removeLayer(layerName)); });
+            result.emplace_back([layerName](TestContext& ctx) {
+                return bool(ctx.getMap().getStyle().removeLayer(layerName));
+            });
         } else if (operationArray[0].GetString() == addSourceOp) {
             // addSource
             assert(operationArray.Size() >= 3u);
@@ -890,8 +905,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
             result.emplace_back([sourceName, json = serializeJsonValue(operationArray[2])](TestContext& ctx) {
                 mbgl::style::conversion::Error error;
-                auto converted =
-                    mbgl::style::conversion::convertJSON<std::unique_ptr<mbgl::style::Source>>(json, error, sourceName);
+                auto converted = mbgl::style::conversion::convertJSON<std::unique_ptr<mbgl::style::Source>>(
+                    json, error, sourceName
+                );
                 if (!converted) {
                     ctx.getMetadata().errorMessage = std::string("Unable to convert source: ") + error.message;
                     return false;
@@ -904,10 +920,10 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray.Size() >= 2u);
             assert(operationArray[1].IsString());
             std::string sourceName = operationArray[1].GetString();
-            result.emplace_back(
-                [sourceName](TestContext& ctx) { return bool(ctx.getMap().getStyle().removeSource(sourceName)); });
-        } else if (operationArray[0].GetString() == setLayoutPropertyOp ||
-                   operationArray[0].GetString() == setPaintPropertyOp) {
+            result.emplace_back([sourceName](TestContext& ctx) {
+                return bool(ctx.getMap().getStyle().removeSource(sourceName));
+            });
+        } else if (operationArray[0].GetString() == setLayoutPropertyOp || operationArray[0].GetString() == setPaintPropertyOp) {
             // set{Paint|Layout}Property
             assert(operationArray.Size() >= 4u);
             assert(operationArray[1].IsString());
@@ -915,19 +931,19 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
             std::string layerName{operationArray[1].GetString(), operationArray[1].GetStringLength()};
             std::string propertyName{operationArray[2].GetString(), operationArray[2].GetStringLength()};
-            result.emplace_back(
-                [layerName, propertyName, json = serializeJsonValue(operationArray[3])](TestContext& ctx) {
-                    auto layer = ctx.getMap().getStyle().getLayer(layerName);
-                    if (!layer) {
-                        ctx.getMetadata().errorMessage = std::string("Layer not found: ") + layerName;
-                        return false;
-                    }
-                    mbgl::JSDocument d;
-                    d.Parse(json.c_str(), json.length());
-                    const mbgl::JSValue* propertyValue = &d;
-                    layer->setProperty(propertyName, propertyValue);
-                    return true;
-                });
+            result.emplace_back([layerName, propertyName, json = serializeJsonValue(operationArray[3])](TestContext& ctx
+                                ) {
+                auto layer = ctx.getMap().getStyle().getLayer(layerName);
+                if (!layer) {
+                    ctx.getMetadata().errorMessage = std::string("Layer not found: ") + layerName;
+                    return false;
+                }
+                mbgl::JSDocument d;
+                d.Parse(json.c_str(), json.length());
+                const mbgl::JSValue* propertyValue = &d;
+                layer->setProperty(propertyName, propertyValue);
+                return true;
+            });
         } else if (operationArray[0].GetString() == fileSizeProbeOp) {
             // probeFileSize
             assert(operationArray.Size() >= 4u);
@@ -964,9 +980,11 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     size = mbgl::filesystem::file_size(filePath);
                 }
 
-                ctx.getMetadata().metrics.fileSize.emplace(std::piecewise_construct,
-                                                           std::forward_as_tuple(std::move(mark)),
-                                                           std::forward_as_tuple(std::move(path), size, tolerance));
+                ctx.getMetadata().metrics.fileSize.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(std::move(mark)),
+                    std::forward_as_tuple(std::move(path), size, tolerance)
+                );
                 return true;
             });
         } else if (operationArray[0].GetString() == memoryProbeStartOp) {
@@ -991,8 +1009,10 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 auto emplaced = ctx.getMetadata().metrics.memory.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(std::move(mark)),
-                    std::forward_as_tuple(AllocationIndex::getAllocatedSizePeak(),
-                                          AllocationIndex::getAllocationsCount()));
+                    std::forward_as_tuple(
+                        AllocationIndex::getAllocatedSizePeak(), AllocationIndex::getAllocationsCount()
+                    )
+                );
                 if (tolerance >= 0.0f) emplaced.first->second.tolerance = tolerance;
                 return true;
             });
@@ -1019,8 +1039,10 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(std::move(mark)),
-                    std::forward_as_tuple(mbgl::ProxyFileSource::getRequestCount(),
-                                          mbgl::ProxyFileSource::getTransferredSize()));
+                    std::forward_as_tuple(
+                        mbgl::ProxyFileSource::getRequestCount(), mbgl::ProxyFileSource::getTransferredSize()
+                    )
+                );
                 return true;
             });
         } else if (operationArray[0].GetString() == networkProbeEndOp) {
@@ -1229,7 +1251,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
                 mbgl::AnimationOptions animationOptions(mbgl::Milliseconds(duration * 1000));
                 animationOptions.minZoom = mbgl::util::min(startZoom, endZoom);
-                animationOptions.transitionFinishFn = [&]() { transitionFinished = true; };
+                animationOptions.transitionFinishFn = [&]() {
+                    transitionFinished = true;
+                };
 
                 map.flyTo(mbgl::CameraOptions().withCenter(endPos).withZoom(endZoom), animationOptions);
 
@@ -1313,12 +1337,15 @@ std::string encodeBase64(const std::string& data) {
 }
 
 std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) {
-    const bool shouldHide =
-        (hasFailedTests && metadata.status == "passed") || (metadata.status.find("ignored") != std::string::npos);
+    const bool shouldHide = (hasFailedTests && metadata.status == "passed") ||
+                            (metadata.status.find("ignored") != std::string::npos);
 
     std::string html;
     html.append("<div class=\"test " + metadata.status + (shouldHide ? " hide" : "") + "\">\n");
-    html.append(R"(<h2><span class="label" style="background: )" + metadata.color + "\">" + metadata.status + "</span> " + metadata.id + "</h2>\n");
+    html.append(
+        R"(<h2><span class="label" style="background: )" + metadata.color + "\">" + metadata.status + "</span> " +
+        metadata.id + "</h2>\n"
+    );
 
     if (!metadata.renderErrored) {
         if (metadata.outputsImage) {
@@ -1344,14 +1371,17 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
     }
 
     if (metadata.metricsFailed || metadata.metricsErrored || metadata.labelCutOffFound) {
-        html.append("<p style=\"color: red\"><strong>Error:</strong> " +
-                    std::regex_replace(metadata.errorMessage, std::regex{"\n"}, "<br>") + "</p>\n");
+        html.append(
+            "<p style=\"color: red\"><strong>Error:</strong> " +
+            std::regex_replace(metadata.errorMessage, std::regex{"\n"}, "<br>") + "</p>\n"
+        );
     }
 
     if (metadata.difference != 0.0) {
         if (metadata.renderTest) {
-            html.append("<p class=\"diff\"><strong>Diff:</strong> " + mbgl::util::toString(metadata.difference) +
-                        "</p>\n");
+            html.append(
+                "<p class=\"diff\"><strong>Diff:</strong> " + mbgl::util::toString(metadata.difference) + "</p>\n"
+            );
         } else {
             html.append("<p class=\"diff\"><strong>Diff:</strong> " + metadata.diff + "</p>\n");
         }
@@ -1361,7 +1391,9 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
     return html;
 }
 
-std::string createResultPage(const TestStatistics& stats, const std::vector<TestMetadata>& metadatas, bool shuffle, uint32_t seed) {
+std::string createResultPage(
+    const TestStatistics& stats, const std::vector<TestMetadata>& metadatas, bool shuffle, uint32_t seed
+) {
     const uint32_t unsuccessful = stats.erroredTests + stats.failedTests;
     std::string resultsPage;
 

@@ -7,19 +7,18 @@ namespace mbgl {
 namespace style {
 
 namespace {
-const LayerTypeInfo typeInfoCustom{"custom",
-                                   LayerTypeInfo::Source::NotRequired,
-                                   LayerTypeInfo::Pass3D::NotRequired,
-                                   LayerTypeInfo::Layout::NotRequired,
-                                   LayerTypeInfo::FadingTiles::NotRequired,
-                                   LayerTypeInfo::CrossTileIndex::NotRequired,
-                                   LayerTypeInfo::TileKind::NotRequired};
-}  // namespace
+const LayerTypeInfo typeInfoCustom{
+    "custom",
+    LayerTypeInfo::Source::NotRequired,
+    LayerTypeInfo::Pass3D::NotRequired,
+    LayerTypeInfo::Layout::NotRequired,
+    LayerTypeInfo::FadingTiles::NotRequired,
+    LayerTypeInfo::CrossTileIndex::NotRequired,
+    LayerTypeInfo::TileKind::NotRequired};
+} // namespace
 
-CustomLayer::CustomLayer(const std::string& layerID,
-                         std::unique_ptr<CustomLayerHost> host)
-    : Layer(makeMutable<Impl>(layerID, std::move(host))) {
-}
+CustomLayer::CustomLayer(const std::string& layerID, std::unique_ptr<CustomLayerHost> host)
+    : Layer(makeMutable<Impl>(layerID, std::move(host))) {}
 
 CustomLayer::~CustomLayer() = default;
 
@@ -39,7 +38,7 @@ std::unique_ptr<Layer> CustomLayer::cloneRef(const std::string&) const {
 using namespace conversion;
 
 std::optional<Error> CustomLayer::setPropertyInternal(const std::string&, const Convertible&) {
-    return Error { "layer doesn't support this property" };
+    return Error{"layer doesn't support this property"};
 }
 
 StyleProperty CustomLayer::getProperty(const std::string&) const {

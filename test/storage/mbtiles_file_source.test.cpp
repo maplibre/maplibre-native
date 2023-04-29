@@ -8,12 +8,12 @@
 #include <gtest/gtest.h>
 
 #if defined(WIN32)
-#    include <Windows.h>
-#    ifndef PATH_MAX
-#        define PATH_MAX MAX_PATH
-#    endif /* PATH_MAX */
+#include <Windows.h>
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif /* PATH_MAX */
 #else
-#    include <unistd.h>
+#include <unistd.h>
 #endif
 
 namespace {
@@ -25,8 +25,7 @@ std::string toAbsoluteURL(const std::string &fileName) {
 #else
     char *cwd = getcwd(buff, PATH_MAX + 1);
 #endif
-    std::string url
-        = {"mbtiles://" + std::string(cwd) + "/test/fixtures/storage/mbtiles/" + fileName};
+    std::string url = {"mbtiles://" + std::string(cwd) + "/test/fixtures/storage/mbtiles/" + fileName};
     assert(url.size() <= PATH_MAX);
     return url;
 }
@@ -49,8 +48,8 @@ TEST(MBTilesFileSource, AbsolutePath) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, "mbtiles://not_absolute"}, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req =
+        mbtiles.request({Resource::Unknown, "mbtiles://not_absolute"}, [&](Response res) {
             req.reset();
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
@@ -68,15 +67,15 @@ TEST(MBTilesFileSource, NonExistentFile) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
-              req.reset();
-              ASSERT_NE(nullptr, res.error);
-              EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
-              EXPECT_NE((res.error->message).find("path not found"), std::string::npos);
-              ASSERT_FALSE(res.data.get());
-              loop.stop();
-          });
+    std::unique_ptr<AsyncRequest> req =
+        mbtiles.request({Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
+            EXPECT_NE((res.error->message).find("path not found"), std::string::npos);
+            ASSERT_FALSE(res.data.get());
+            loop.stop();
+        });
 
     loop.run();
 }
@@ -87,14 +86,13 @@ TEST(MBTilesFileSource, TileJSON) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req =
+        mbtiles.request({Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_TRUE(res.data.get());
             // basic test that TileJSON included a tile URL
-            EXPECT_NE((*res.data).find("geography-class-png.mbtiles?file={x}/{y}/{z}"),
-                      std::string::npos);
+            EXPECT_NE((*res.data).find("geography-class-png.mbtiles?file={x}/{y}/{z}"), std::string::npos);
             loop.stop();
         });
 
@@ -108,14 +106,17 @@ TEST(MBTilesFileSource, Tile) {
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        Resource::tile(toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        Resource::tile(
+            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ
+        ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_TRUE(res.data.get());
             ASSERT_EQ(res.noContent, false);
             loop.stop();
-        });
+        }
+    );
 
     loop.run();
 }
@@ -127,16 +128,17 @@ TEST(MBTilesFileSource, NonExistentTile) {
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        Resource::tile(toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
+        Resource::tile(
+            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ
+        ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_FALSE(res.data.get());
             ASSERT_EQ(res.noContent, true);
             loop.stop();
-        });
+        }
+    );
 
     loop.run();
 }
-
-

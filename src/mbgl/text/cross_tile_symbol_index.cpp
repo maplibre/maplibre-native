@@ -6,34 +6,45 @@
 
 namespace mbgl {
 
-TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
-                               std::vector<SymbolInstance>& symbolInstances,
-                               uint32_t bucketInstanceId_,
-                               std::string bucketLeaderId_)
-    : coord(coord_), bucketInstanceId(bucketInstanceId_), bucketLeaderId(std::move(bucketLeaderId_)) {
+TileLayerIndex::TileLayerIndex(
+    OverscaledTileID coord_,
+    std::vector<SymbolInstance>& symbolInstances,
+    uint32_t bucketInstanceId_,
+    std::string bucketLeaderId_
+)
+    : coord(coord_),
+      bucketInstanceId(bucketInstanceId_),
+      bucketLeaderId(std::move(bucketLeaderId_)) {
     for (SymbolInstance& symbolInstance : symbolInstances) {
         if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) continue;
-        indexedSymbolInstances[symbolInstance.key].emplace_back(symbolInstance.crossTileID,
-                                                                getScaledCoordinates(symbolInstance, coord));
+        indexedSymbolInstances[symbolInstance.key].emplace_back(
+            symbolInstance.crossTileID, getScaledCoordinates(symbolInstance, coord)
+        );
     }
 }
 
-Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstance,
-                                                    const OverscaledTileID& childTileCoord) const {
+Point<int64_t> TileLayerIndex::getScaledCoordinates(
+    SymbolInstance& symbolInstance, const OverscaledTileID& childTileCoord
+) const {
     // Round anchor positions to roughly 4 pixel grid
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;
     const double scale = roundingFactor / std::pow(2, childTileCoord.canonical.z - coord.canonical.z);
     return {
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))
-    };
+        static_cast<int64_t>(
+            std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)
+        ),
+        static_cast<int64_t>(
+            std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale)
+        )};
 }
 
-void TileLayerIndex::findMatches(SymbolBucket& bucket,
-                                 const OverscaledTileID& newCoord,
-                                 std::set<uint32_t>& zoomCrossTileIDs) const {
+void TileLayerIndex::findMatches(
+    SymbolBucket& bucket, const OverscaledTileID& newCoord, std::set<uint32_t>& zoomCrossTileIDs
+) const {
     auto& symbolInstances = bucket.symbolInstances;
-    float tolerance = coord.canonical.z < newCoord.canonical.z ? 1.0f : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
+    float tolerance = coord.canonical.z < newCoord.canonical.z
+                          ? 1.0f
+                          : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
 
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
@@ -68,7 +79,8 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     }
 }
 
-CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_) : maxCrossTileID(maxCrossTileID_) {}
+CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_)
+    : maxCrossTileID(maxCrossTileID_) {}
 
 /*
  * Sometimes when a user pans across the antimeridian the longitude value gets wrapped.
@@ -78,9 +90,9 @@ CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_) 
 void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
     const auto wrapDelta = static_cast<int>(std::round((newLng - lng) / 360.0f));
     if (wrapDelta != 0) {
-        std::map<uint8_t, std::map<OverscaledTileID,TileLayerIndex>> newIndexes;
+        std::map<uint8_t, std::map<OverscaledTileID, TileLayerIndex>> newIndexes;
         for (auto& zoomIndex : indexes) {
-            std::map<OverscaledTileID,TileLayerIndex> newZoomIndex;
+            std::map<OverscaledTileID, TileLayerIndex> newZoomIndex;
             for (auto& index : zoomIndex.second) {
                 // change the tileID's wrap and move its index
                 index.second.coord = index.second.coord.unwrapTo(index.second.coord.wrap + wrapDelta);
@@ -111,9 +123,9 @@ bool isInVewport(const mat4& posMatrix, const Point<float>& point) {
 
 } // namespace
 
-bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
-                                          const mat4& tileMatrix,
-                                          SymbolBucket& bucket) {
+bool CrossTileSymbolLayerIndex::addBucket(
+    const OverscaledTileID& tileID, const mat4& tileMatrix, SymbolBucket& bucket
+) {
     auto& thisZoomIndexes = indexes[tileID.overscaledZ];
     auto previousIndex = thisZoomIndexes.find(tileID);
     if (previousIndex != thisZoomIndexes.end()) {
@@ -179,7 +191,8 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
     thisZoomIndexes.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(tileID),
-        std::forward_as_tuple(tileID, bucket.symbolInstances, bucket.bucketInstanceId, bucket.bucketLeaderID));
+        std::forward_as_tuple(tileID, bucket.symbolInstances, bucket.bucketInstanceId, bucket.bucketLeaderID)
+    );
     return true;
 }
 
@@ -213,9 +226,11 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
     auto found = layerIndexes.find(layer.getID());
     if (found == layerIndexes.end()) {
         found = layerIndexes
-                    .emplace(std::piecewise_construct,
-                             std::forward_as_tuple(layer.getID()),
-                             std::forward_as_tuple(maxCrossTileID))
+                    .emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(layer.getID()),
+                        std::forward_as_tuple(maxCrossTileID)
+                    )
                     .first;
     }
     auto& layerIndex = found->second;
@@ -254,4 +269,3 @@ void CrossTileSymbolIndex::reset() {
 }
 
 } // namespace mbgl
-

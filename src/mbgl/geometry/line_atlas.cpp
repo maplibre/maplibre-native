@@ -11,8 +11,8 @@ namespace mbgl {
 namespace {
 
 size_t getDashPatternHash(const std::vector<float>& dasharray, const LinePatternCap patternCap) {
-    size_t key =
-        patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min() : std::numeric_limits<size_t>::max();
+    size_t key = patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min()
+                                                     : std::numeric_limits<size_t>::max();
     for (const float part : dasharray) {
         util::hash_combine<float>(key, part);
     }
@@ -48,7 +48,8 @@ std::vector<DashRange> getDashRanges(const std::vector<float>& dasharray, float 
 }
 
 void addRoundDash(
-    const std::vector<DashRange>& ranges, uint32_t yOffset, float stretch, const int n, AlphaImage& image) {
+    const std::vector<DashRange>& ranges, uint32_t yOffset, float stretch, const int n, AlphaImage& image
+) {
     const float halfStretch = stretch * 0.5f;
 
     if (ranges.empty()) return;
@@ -136,10 +137,9 @@ void addRegularDash(std::vector<DashRange>& ranges, uint32_t yOffset, AlphaImage
     }
 }
 
-LinePatternPos addDashPattern(AlphaImage& image,
-                              uint32_t yOffset,
-                              const std::vector<float>& dasharray,
-                              const LinePatternCap patternCap) {
+LinePatternPos addDashPattern(
+    AlphaImage& image, uint32_t yOffset, const std::vector<float>& dasharray, const LinePatternCap patternCap
+) {
     const uint8_t n = patternCap == LinePatternCap::Round ? 7 : 0;
 
     if (dasharray.size() < 2) {
@@ -171,9 +171,9 @@ LinePatternPos addDashPattern(AlphaImage& image,
 
 } // namespace
 
-DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
-                                       const std::vector<float>& to_,
-                                       const LinePatternCap cap) {
+DashPatternTexture::DashPatternTexture(
+    const std::vector<float>& from_, const std::vector<float>& to_, const LinePatternCap cap
+) {
     const bool patternsIdentical = from_ == to_;
     const uint32_t patternHeight = cap == LinePatternCap::Round ? 15 : 1;
     const uint32_t height = (patternsIdentical ? 1 : 2) * patternHeight;
@@ -211,11 +211,12 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
     assert(texture.is<gfx::Texture>());
-    return {texture.get<gfx::Texture>().getResource(),
-            gfx::TextureFilterType::Linear,
-            gfx::TextureMipMapType::No,
-            gfx::TextureWrapType::Repeat,
-            gfx::TextureWrapType::Clamp};
+    return {
+        texture.get<gfx::Texture>().getResource(),
+        gfx::TextureFilterType::Linear,
+        gfx::TextureMipMapType::No,
+        gfx::TextureWrapType::Repeat,
+        gfx::TextureWrapType::Clamp};
 }
 
 Size DashPatternTexture::getSize() const {
@@ -226,16 +227,17 @@ LineAtlas::LineAtlas() = default;
 
 LineAtlas::~LineAtlas() = default;
 
-DashPatternTexture& LineAtlas::getDashPatternTexture(const std::vector<float>& from,
-                                                     const std::vector<float>& to,
-                                                     const LinePatternCap cap) {
+DashPatternTexture& LineAtlas::getDashPatternTexture(
+    const std::vector<float>& from, const std::vector<float>& to, const LinePatternCap cap
+) {
     const size_t hash = util::hash(getDashPatternHash(from, cap), getDashPatternHash(to, cap));
 
     // Note: We're not handling hash collisions here.
     const auto it = textures.find(hash);
     if (it == textures.end()) {
         auto inserted = textures.emplace(
-            std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(from, to, cap));
+            std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(from, to, cap)
+        );
         assert(inserted.second);
         needsUpload.emplace_back(hash);
         return inserted.first->second;

@@ -62,9 +62,9 @@ public:
     ~LineAtlas();
 
     // Obtains or creates a texture that has both line patterns in it
-    DashPatternTexture& getDashPatternTexture(const std::vector<float>& from,
-                                              const std::vector<float>& to,
-                                              LinePatternCap);
+    DashPatternTexture& getDashPatternTexture(
+        const std::vector<float>& from, const std::vector<float>& to, LinePatternCap
+    );
 
     // Uploads the textures to the GPU to be available when we need it.
     void upload(gfx::UploadPass&);

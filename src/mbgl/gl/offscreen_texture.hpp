@@ -10,9 +10,9 @@ class Context;
 
 class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
-    OffscreenTexture(gl::Context&,
-                     Size size,
-                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+    OffscreenTexture(
+        gl::Context&, Size size, gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte
+    );
 
     bool isRenderable() override;
 

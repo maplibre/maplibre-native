@@ -19,23 +19,24 @@ namespace android {
 
 class MapSnapshotter final : public mbgl::MapSnapshotterObserver {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/snapshotter/MapSnapshotter"; };
 
     static void registerNative(jni::JNIEnv&);
 
-    MapSnapshotter(jni::JNIEnv&,
-                   const jni::Object<MapSnapshotter>&,
-                   const jni::Object<FileSource>&,
-                   jni::jfloat pixelRatio,
-                   jni::jint width,
-                   jni::jint height,
-                   const jni::String& styleURL,
-                   const jni::String& styleJSON,
-                   const jni::Object<LatLngBounds>& region,
-                   const jni::Object<CameraPosition>& position,
-                   jni::jboolean showLogo,
-                   const jni::String& localIdeographFontFamily);
+    MapSnapshotter(
+        jni::JNIEnv&,
+        const jni::Object<MapSnapshotter>&,
+        const jni::Object<FileSource>&,
+        jni::jfloat pixelRatio,
+        jni::jint width,
+        jni::jint height,
+        const jni::String& styleURL,
+        const jni::String& styleJSON,
+        const jni::Object<LatLngBounds>& region,
+        const jni::Object<CameraPosition>& position,
+        jni::jboolean showLogo,
+        const jni::String& localIdeographFontFamily
+    );
 
     virtual ~MapSnapshotter() override;
 
@@ -69,13 +70,13 @@ public:
 private:
     MBGL_STORE_THREAD(tid);
 
-    JavaVM *vm = nullptr;
+    JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<MapSnapshotter>, jni::EnvAttachingDeleter> javaPeer;
 
     float pixelRatio;
     bool showLogo;
 
-    FileSource *jFileSource;
+    FileSource* jFileSource;
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;

@@ -36,8 +36,8 @@ void RenderRasterLayer::transition(const TransitionParameters& parameters) {
 
 void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<RasterLayerProperties>(
-        staticImmutableCast<RasterLayer::Impl>(baseImpl),
-        unevaluated.evaluate(parameters));
+        staticImmutableCast<RasterLayer::Impl>(baseImpl), unevaluated.evaluate(parameters)
+    );
     passes = properties->evaluated.get<style::RasterOpacity>() > 0 ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
@@ -71,11 +71,8 @@ static std::array<float, 3> spinWeights(float spin) {
     spin = util::deg2radf(spin);
     float s = std::sin(spin);
     float c = std::cos(spin);
-    std::array<float, 3> spin_weights = {{
-        (2 * c + 1) / 3,
-        (-std::sqrt(3.0f) * s - c + 1) / 3,
-        (std::sqrt(3.0f) * s - c + 1) / 3
-    }};
+    std::array<float, 3> spin_weights = {
+        {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3}};
     return spin_weights;
 }
 
@@ -94,14 +91,14 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.populate(rasterProgram)) return;
 
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
-    RasterProgram::Binders paintAttributeData{ evaluated, 0 };
+    RasterProgram::Binders paintAttributeData{evaluated, 0};
 
-    auto draw = [&] (const mat4& matrix,
-                     const auto& vertexBuffer,
-                     const auto& indexBuffer,
-                     const auto& segments,
-                     const auto& textureBindings,
-                     const std::string& drawScopeID) {
+    auto draw = [&](const mat4& matrix,
+                    const auto& vertexBuffer,
+                    const auto& indexBuffer,
+                    const auto& segments,
+                    const auto& textureBindings,
+                    const std::string& drawScopeID) {
         const auto allUniformValues = RasterProgram::computeAllUniformValues(
             RasterProgram::LayoutUniformValues{
                 uniforms::matrix::Value(matrix),
@@ -118,9 +115,11 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
             },
             paintAttributeData,
             evaluated,
-            static_cast<float>(parameters.state.getZoom()));
-        const auto allAttributeBindings =
-            RasterProgram::computeAllAttributeBindings(vertexBuffer, paintAttributeData, evaluated);
+            static_cast<float>(parameters.state.getZoom())
+        );
+        const auto allAttributeBindings = RasterProgram::computeAllAttributeBindings(
+            vertexBuffer, paintAttributeData, evaluated
+        );
 
         checkRenderability(parameters, RasterProgram::activeBindingCount(allAttributeBindings));
 
@@ -141,7 +140,9 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
         );
     };
 
-    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
+    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest
+                                              ? gfx::TextureFilterType::Nearest
+                                              : gfx::TextureFilterType::Linear;
 
     if (imageData && !imageData->bucket->needsUpload()) {
         RasterBucket& bucket = *imageData->bucket;
@@ -149,15 +150,17 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
 
         size_t i = 0;
         for (const auto& matrix_ : imageData->matrices) {
-            draw(matrix_,
-                 *bucket.vertexBuffer,
-                 *bucket.indexBuffer,
-                 bucket.segments,
-                 RasterProgram::TextureBindings{
-                     textures::image0::Value{bucket.texture->getResource(), filter},
-                     textures::image1::Value{bucket.texture->getResource(), filter},
-                 },
-                 std::to_string(i++));
+            draw(
+                matrix_,
+                *bucket.vertexBuffer,
+                *bucket.indexBuffer,
+                bucket.segments,
+                RasterProgram::TextureBindings{
+                    textures::image0::Value{bucket.texture->getResource(), filter},
+                    textures::image1::Value{bucket.texture->getResource(), filter},
+                },
+                std::to_string(i++)
+            );
         }
     } else if (renderTiles) {
         for (const RenderTile& tile : *renderTiles) {
@@ -167,36 +170,39 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
             }
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
-            if (!bucket.hasData())
-                continue;
+            if (!bucket.hasData()) continue;
 
             assert(bucket.texture);
             if (bucket.vertexBuffer && bucket.indexBuffer) {
                 // Draw only the parts of the tile that aren't drawn by another tile in the layer.
-                draw(parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
-                     *bucket.vertexBuffer,
-                     *bucket.indexBuffer,
-                     bucket.segments,
-                     RasterProgram::TextureBindings{
-                         textures::image0::Value{bucket.texture->getResource(), filter},
-                         textures::image1::Value{bucket.texture->getResource(), filter},
-                     },
-                     "image");
+                draw(
+                    parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
+                    *bucket.vertexBuffer,
+                    *bucket.indexBuffer,
+                    bucket.segments,
+                    RasterProgram::TextureBindings{
+                        textures::image0::Value{bucket.texture->getResource(), filter},
+                        textures::image1::Value{bucket.texture->getResource(), filter},
+                    },
+                    "image"
+                );
             } else {
                 // Draw the full tile.
                 if (bucket.segments.empty()) {
                     // Copy over the segments so that we can create our own DrawScopes.
                     bucket.segments = RenderStaticData::rasterSegments();
                 }
-                draw(parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
-                     *parameters.staticData.rasterVertexBuffer,
-                     *parameters.staticData.quadTriangleIndexBuffer,
-                     bucket.segments,
-                     RasterProgram::TextureBindings{
-                         textures::image0::Value{bucket.texture->getResource(), filter},
-                         textures::image1::Value{bucket.texture->getResource(), filter},
-                     },
-                     "image");
+                draw(
+                    parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
+                    *parameters.staticData.rasterVertexBuffer,
+                    *parameters.staticData.quadTriangleIndexBuffer,
+                    bucket.segments,
+                    RasterProgram::TextureBindings{
+                        textures::image0::Value{bucket.texture->getResource(), filter},
+                        textures::image1::Value{bucket.texture->getResource(), filter},
+                    },
+                    "image"
+                );
             }
         }
     }

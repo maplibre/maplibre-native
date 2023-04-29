@@ -29,8 +29,9 @@ public:
     static jni::Local<jni::Object<Bitmap>>
     CreateBitmap(jni::JNIEnv&, jni::jint width, jni::jint height, const jni::Object<Config>&);
 
-    static jni::Local<jni::Object<Bitmap>>
-    CreateBitmap(jni::JNIEnv& env, jni::jint width, jni::jint height, Config::Value config) {
+    static jni::Local<jni::Object<Bitmap>> CreateBitmap(
+        jni::JNIEnv& env, jni::jint width, jni::jint height, Config::Value config
+    ) {
         return CreateBitmap(env, width, height, Config::Create(env, config));
     }
 

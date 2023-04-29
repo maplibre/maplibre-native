@@ -27,7 +27,9 @@ int severityToPriority(EventSeverity severity) {
 template <class T>
 class JavaWrapper {
 public:
-    JavaWrapper(JNIEnv* env_, T obj_) : env(env_), obj(obj_) {}
+    JavaWrapper(JNIEnv* env_, T obj_)
+        : env(env_),
+          obj(obj_) {}
     ~JavaWrapper() {
         env->DeleteLocalRef(obj);
         env = nullptr;
@@ -51,7 +53,9 @@ std::string jstringToStdString(JNIEnv* env, jstring jStr) {
     JavaWrapper<jbyteArray> stringJbytes(
         env,
         static_cast<jbyteArray>(
-            env->CallObjectMethod(jStr, getBytes, JavaWrapper<jstring>(env, env->NewStringUTF("UTF-8")).get())));
+            env->CallObjectMethod(jStr, getBytes, JavaWrapper<jstring>(env, env->NewStringUTF("UTF-8")).get())
+        )
+    );
 
     size_t length = static_cast<size_t>(env->GetArrayLength(stringJbytes.get()));
     jbyte* pBytes = env->GetByteArrayElements(stringJbytes.get(), NULL);
@@ -79,11 +83,13 @@ void changeState(JNIEnv* env, struct android_app* app, bool result) {
     }
 }
 
-bool copyFile(JNIEnv* env,
-              AAssetManager* assetManager,
-              const std::string& filePath,
-              const std::string& destinationPath,
-              const std::string& fileName) {
+bool copyFile(
+    JNIEnv* env,
+    AAssetManager* assetManager,
+    const std::string& filePath,
+    const std::string& destinationPath,
+    const std::string& fileName
+) {
     JavaWrapper<jclass> fileClass(env, env->FindClass("java/io/File"));
     jmethodID fileCtor = env->GetMethodID(fileClass.get(), "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     jmethodID fileExists = env->GetMethodID(fileClass.get(), "exists", "()Z");
@@ -98,7 +104,8 @@ bool copyFile(JNIEnv* env,
     } else {
         std::unique_ptr<AAsset, std::function<void(AAsset*)>> fileAsset(
             AAssetManager_open(assetManager, fileName.c_str(), AASSET_MODE_BUFFER),
-            [](AAsset* asset) { AAsset_close(asset); });
+            [](AAsset* asset) { AAsset_close(asset); }
+        );
         if (fileAsset == nullptr) {
             mbgl::Log::Warning(mbgl::Event::General, "Failed to open asset file " + fileName);
             return false;
@@ -106,8 +113,9 @@ bool copyFile(JNIEnv* env,
         const void* fileData = AAsset_getBuffer(fileAsset.get());
         const off_t fileLen = AAsset_getLength(fileAsset.get());
 
-        std::unique_ptr<FILE, std::function<void(FILE*)>> newFile(std::fopen(filePath.c_str(), "w+"),
-                                                                  [](FILE* file) { std::fclose(file); });
+        std::unique_ptr<FILE, std::function<void(FILE*)>> newFile(std::fopen(filePath.c_str(), "w+"), [](FILE* file) {
+            std::fclose(file);
+        });
         stateOk = newFile != nullptr;
 
         if (!stateOk) {
@@ -115,8 +123,7 @@ bool copyFile(JNIEnv* env,
         } else {
             auto res = static_cast<off_t>(std::fwrite(fileData, sizeof(char), fileLen, newFile.get()));
             if (fileLen != res) {
-                mbgl::Log::Warning(
-                    mbgl::Event::General, "Failed to generate file entry" + fileName + "from assets");
+                mbgl::Log::Warning(mbgl::Event::General, "Failed to generate file entry" + fileName + "from assets");
             }
         }
     }
@@ -179,22 +186,24 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
             if (!(env->CallBooleanMethod(f, fileIsDirectory))) {
                 jmethodID mkdirs = env->GetMethodID(fileClass, "mkdirs", "()Z");
                 bool success = (env->CallBooleanMethod(f, mkdirs));
-                std::string fileNameStr =
-                    jstringToStdString(env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
+                std::string fileNameStr = jstringToStdString(
+                    env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName))
+                );
 
                 if (!success) {
                     mbgl::Log::Warning(
-                        mbgl::Event::General, "Failed to create folder entry " + fileNameStr + " from zip");
+                        mbgl::Event::General, "Failed to create folder entry " + fileNameStr + " from zip"
+                    );
                 }
             }
         } else if (!(env->CallBooleanMethod(f, fileExists))) {
             bool success = env->CallBooleanMethod(f, createNewFile);
-            std::string fileNameStr =
-                jstringToStdString(env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
+            std::string fileNameStr = jstringToStdString(
+                env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName))
+            );
 
             if (!success) {
-                mbgl::Log::Warning(
-                    mbgl::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
+                mbgl::Log::Warning(mbgl::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
                 continue;
             }
 

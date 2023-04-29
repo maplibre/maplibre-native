@@ -23,7 +23,7 @@ public:
     jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv&);
 }; // class CustomLayer
 
-class CustomJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::CustomLayerFactory {
+class CustomJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::CustomLayerFactory {
 public:
     ~CustomJavaLayerPeerFactory() override;
 
@@ -35,7 +35,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class CustomJavaLayerPeerFactory
+}; // class CustomJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

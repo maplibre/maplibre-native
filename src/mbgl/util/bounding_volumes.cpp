@@ -33,14 +33,19 @@ Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3&
 
 namespace util {
 
-AABB::AABB() : min({{0, 0, 0}}), max({{0, 0, 0}}) {}
+AABB::AABB()
+    : min({{0, 0, 0}}),
+      max({{0, 0, 0}}) {}
 
-AABB::AABB(const vec3& min_, const vec3& max_) : min(min_), max(max_) {}
+AABB::AABB(const vec3& min_, const vec3& max_)
+    : min(min_),
+      max(max_) {}
 
 vec3 AABB::closestPoint(const vec3& point) const {
-    return {{std::max(std::min(max[0], point[0]), min[0]),
-             std::max(std::min(max[1], point[1]), min[1]),
-             std::max(std::min(max[2], point[2]), min[2])}};
+    return {
+        {std::max(std::min(max[0], point[0]), min[0]),
+         std::max(std::min(max[1], point[1]), min[1]),
+         std::max(std::min(max[2], point[2]), min[2])}};
 }
 
 vec3 AABB::distanceXYZ(const vec3& point) const {
@@ -102,7 +107,8 @@ enum {
 };
 
 Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& planes_)
-    : points(points_), planes(planes_) {
+    : points(points_),
+      planes(planes_) {
     const Point<double> xBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{1, 0, 0}});
     const Point<double> yBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 1, 0}});
     const Point<double> zBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 0, 1}});
@@ -111,12 +117,13 @@ Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& 
 
     // Precompute a set of separating axis candidates for precise intersection tests.
     // Remaining axes not covered in basic intersection tests are: axis[] = (edges of aabb) x (edges of frustum)
-    std::array<vec3, 6> frustumEdges = {{vec3Sub(points[near_br], points[near_bl]),
-                                         vec3Sub(points[near_tl], points[near_bl]),
-                                         vec3Sub(points[far_tl], points[near_tl]),
-                                         vec3Sub(points[far_tr], points[near_tr]),
-                                         vec3Sub(points[far_br], points[near_br]),
-                                         vec3Sub(points[far_bl], points[near_bl])}};
+    std::array<vec3, 6> frustumEdges = {
+        {vec3Sub(points[near_br], points[near_bl]),
+         vec3Sub(points[near_tl], points[near_bl]),
+         vec3Sub(points[far_tl], points[near_tl]),
+         vec3Sub(points[far_tr], points[near_tr]),
+         vec3Sub(points[far_br], points[near_br]),
+         vec3Sub(points[far_bl], points[near_bl])}};
 
     for (size_t i = 0; i < frustumEdges.size(); i++) {
         // Cross product [1, 0, 0] x [a, b, c] == [0, -c, b]
@@ -131,14 +138,15 @@ Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& 
 
 Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double zoom, bool flippedY) {
     // Define frustum corner points in normalized clip space
-    std::array<vec4, 8> cornerCoords = {{vec4{{-1.0, 1.0, -1.0, 1.0}},
-                                         vec4{{1.0, 1.0, -1.0, 1.0}},
-                                         vec4{{1.0, -1.0, -1.0, 1.0}},
-                                         vec4{{-1.0, -1.0, -1.0, 1.0}},
-                                         vec4{{-1.0, 1.0, 1.0, 1.0}},
-                                         vec4{{1.0, 1.0, 1.0, 1.0}},
-                                         vec4{{1.0, -1.0, 1.0, 1.0}},
-                                         vec4{{-1.0, -1.0, 1.0, 1.0}}}};
+    std::array<vec4, 8> cornerCoords = {
+        {vec4{{-1.0, 1.0, -1.0, 1.0}},
+         vec4{{1.0, 1.0, -1.0, 1.0}},
+         vec4{{1.0, -1.0, -1.0, 1.0}},
+         vec4{{-1.0, -1.0, -1.0, 1.0}},
+         vec4{{-1.0, 1.0, 1.0, 1.0}},
+         vec4{{1.0, 1.0, 1.0, 1.0}},
+         vec4{{1.0, -1.0, 1.0, 1.0}},
+         vec4{{-1.0, -1.0, 1.0, 1.0}}}};
 
     const double scale = std::pow(2.0, zoom);
 
@@ -148,14 +156,15 @@ Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double
         for (auto& component : coord) component *= 1.0 / coord[3] / worldSize * scale;
     }
 
-    std::array<vec3i, 6> frustumPlanePointIndices = {{
-        vec3i{{near_bl, near_br, far_br}},  // bottom
-        vec3i{{near_tl, near_bl, far_bl}},  // left
-        vec3i{{near_br, near_tr, far_tr}},  // right
-        vec3i{{near_tl, far_tl, far_tr}},   // top
-        vec3i{{near_tl, near_tr, near_br}}, // near
-        vec3i{{far_br, far_tr, far_tl}}     // far
-    }};
+    std::array<vec3i, 6> frustumPlanePointIndices = {
+        {
+            vec3i{{near_bl, near_br, far_br}},  // bottom
+            vec3i{{near_tl, near_bl, far_bl}},  // left
+            vec3i{{near_br, near_tr, far_tr}},  // right
+            vec3i{{near_tl, far_tl, far_tr}},   // top
+            vec3i{{near_tl, near_tr, near_br}}, // near
+            vec3i{{far_br, far_tr, far_tl}}     // far}
+        };
 
     if (flippedY) {
         std::for_each(frustumPlanePointIndices.begin(), frustumPlanePointIndices.end(), [](vec3i& tri) {
@@ -232,10 +241,11 @@ IntersectionResult Frustum::intersectsPrecise(const AABB& aabb, bool edgeCasesOn
         if (result == IntersectionResult::Separate) return result;
     }
 
-    const std::array<vec3, 4> aabbPoints = {{vec3{{aabb.min[0], aabb.min[1], 0.0}},
-                                             vec3{{aabb.max[0], aabb.min[1], 0.0}},
-                                             vec3{{aabb.max[0], aabb.max[1], 0.0}},
-                                             vec3{{aabb.min[0], aabb.max[1], 0.0}}}};
+    const std::array<vec3, 4> aabbPoints = {
+        {vec3{{aabb.min[0], aabb.min[1], 0.0}},
+         vec3{{aabb.max[0], aabb.min[1], 0.0}},
+         vec3{{aabb.max[0], aabb.max[1], 0.0}},
+         vec3{{aabb.min[0], aabb.max[1], 0.0}}}};
 
     // For a precise SAT-test all edge cases needs to be covered
     // Projections of the frustum on separating axis candidates have been precomputed already
