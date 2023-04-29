@@ -11,10 +11,6 @@ pre-commit install
 
 to install the pre-commit hooks configured in `.pre-commit-config.yml`.
 
-## Static Analysis
-We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMBGL_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
- [`.clang-tidy`](.clang-tidy) and [`test/.clang-tidy`](test/.clang-tidy)(for tests we are less strict and use different set of checks).
-
 ## Render Tests
 
 To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests is stored in the MapLibre GL JS submodule which means that GL JS and Native are in fact quasi pixel-identical in their rendering.
