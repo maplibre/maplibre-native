@@ -1533,177 +1533,176 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     uint8_t z = renderTile.id.canonical.z;
     uint32_t x = renderTile.id.canonical.x;
     uint32_t y = renderTile.id.canonical.y;
-    const std::array<NeighborTileData, 4> neighbours {
-        {
-            {collisionIndex, UnwrappedTileID(z, x, y - 1), {0.0f, util::EXTENT}},  // top
-            {collisionIndex, UnwrappedTileID(z, x, y + 1), {0.0f, -util::EXTENT}}, // bottom
-            {collisionIndex, UnwrappedTileID(z, x - 1, y), {util::EXTENT, 0.0f}},  // left
-            {collisionIndex, UnwrappedTileID(z, x + 1, y), {-util::EXTENT, 0.0f}}  // right}
-        };
+    const std::array<NeighborTileData, 4> neighbours{{
+        {collisionIndex, UnwrappedTileID(z, x, y - 1), {0.0f, util::EXTENT}},  // top
+        {collisionIndex, UnwrappedTileID(z, x, y + 1), {0.0f, -util::EXTENT}}, // bottom
+        {collisionIndex, UnwrappedTileID(z, x - 1, y), {util::EXTENT, 0.0f}},  // left
+        {collisionIndex, UnwrappedTileID(z, x + 1, y), {-util::EXTENT, 0.0f}}  // right
+    }};
 
-        auto collisionBoxIntersectsTileEdges = [&](const CollisionBox& collisionBox,
-                                                   Point<float> shift) noexcept -> IntersectStatus {
-            IntersectStatus intersects = collisionIndex.intersectsTileEdges(
-                collisionBox, shift, renderTile.matrix, ctx.pixelRatio, *tileBorders
+    auto collisionBoxIntersectsTileEdges = [&](const CollisionBox& collisionBox,
+                                               Point<float> shift) noexcept -> IntersectStatus {
+        IntersectStatus intersects = collisionIndex.intersectsTileEdges(
+            collisionBox, shift, renderTile.matrix, ctx.pixelRatio, *tileBorders
+        );
+        // Check if this symbol intersects the neighbor tile borders. If so, it also shall be placed with priority.
+        for (const auto& neighbor : neighbours) {
+            if (intersects.flags != IntersectStatus::None) break;
+            intersects = collisionIndex.intersectsTileEdges(
+                collisionBox, shift + neighbor.shift, neighbor.matrix, ctx.pixelRatio, neighbor.borders
             );
-            // Check if this symbol intersects the neighbor tile borders. If so, it also shall be placed with priority.
-            for (const auto& neighbor : neighbours) {
-                if (intersects.flags != IntersectStatus::None) break;
-                intersects = collisionIndex.intersectsTileEdges(
-                    collisionBox, shift + neighbor.shift, neighbor.matrix, ctx.pixelRatio, neighbor.borders
+        }
+        return intersects;
+    };
+
+    auto symbolIntersectsTileEdges = [&collisionBoxIntersectsTileEdges,
+                                      variableAnchor,
+                                      pitchTextWithMap = ctx.pitchTextWithMap,
+                                      rotateTextWithMap = ctx.rotateTextWithMap,
+                                      variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
+                                      bearing = static_cast<float>(ctx.getTransformState().getBearing()
+                                      )](const SymbolInstance& symbol) noexcept -> IntersectStatus {
+        IntersectStatus result;
+        if (!symbol.textCollisionFeature.boxes.empty()) {
+            const auto& textCollisionBox = symbol.textCollisionFeature.boxes.front();
+
+            Point<float> offset{};
+            if (variableAnchor) {
+                float width = textCollisionBox.x2 - textCollisionBox.x1;
+                float height = textCollisionBox.y2 - textCollisionBox.y1;
+                offset = calculateVariableLayoutOffset(
+                    *variableAnchor,
+                    width,
+                    height,
+                    symbol.variableTextOffset,
+                    symbol.textBoxScale,
+                    rotateTextWithMap,
+                    pitchTextWithMap,
+                    bearing
                 );
             }
-            return intersects;
-        };
+            result = collisionBoxIntersectsTileEdges(textCollisionBox, offset);
+        }
 
-        auto symbolIntersectsTileEdges = [&collisionBoxIntersectsTileEdges,
-                                          variableAnchor,
-                                          pitchTextWithMap = ctx.pitchTextWithMap,
-                                          rotateTextWithMap = ctx.rotateTextWithMap,
-                                          variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
-                                          bearing = static_cast<float>(ctx.getTransformState().getBearing()
-                                          )](const SymbolInstance& symbol) noexcept -> IntersectStatus {
-            IntersectStatus result;
-            if (!symbol.textCollisionFeature.boxes.empty()) {
-                const auto& textCollisionBox = symbol.textCollisionFeature.boxes.front();
-
-                Point<float> offset{};
-                if (variableAnchor) {
-                    float width = textCollisionBox.x2 - textCollisionBox.x1;
-                    float height = textCollisionBox.y2 - textCollisionBox.y1;
-                    offset = calculateVariableLayoutOffset(
-                        *variableAnchor,
-                        width,
-                        height,
-                        symbol.variableTextOffset,
-                        symbol.textBoxScale,
-                        rotateTextWithMap,
-                        pitchTextWithMap,
-                        bearing
-                    );
-                }
-                result = collisionBoxIntersectsTileEdges(textCollisionBox, offset);
+        if (!symbol.iconCollisionFeature.boxes.empty()) {
+            const auto& iconCollisionBox = symbol.iconCollisionFeature.boxes.front();
+            Point<float> offset{};
+            if (variableAnchor && variableIconPlacement) {
+                float width = iconCollisionBox.x2 - iconCollisionBox.x1;
+                float height = iconCollisionBox.y2 - iconCollisionBox.y1;
+                offset = calculateVariableLayoutOffset(
+                    *variableAnchor,
+                    width,
+                    height,
+                    symbol.variableTextOffset,
+                    symbol.textBoxScale,
+                    rotateTextWithMap,
+                    pitchTextWithMap,
+                    bearing
+                );
             }
-
-            if (!symbol.iconCollisionFeature.boxes.empty()) {
-                const auto& iconCollisionBox = symbol.iconCollisionFeature.boxes.front();
-                Point<float> offset{};
-                if (variableAnchor && variableIconPlacement) {
-                    float width = iconCollisionBox.x2 - iconCollisionBox.x1;
-                    float height = iconCollisionBox.y2 - iconCollisionBox.y1;
-                    offset = calculateVariableLayoutOffset(
-                        *variableAnchor,
-                        width,
-                        height,
-                        symbol.variableTextOffset,
-                        symbol.textBoxScale,
-                        rotateTextWithMap,
-                        pitchTextWithMap,
-                        bearing
-                    );
-                }
-                auto iconIntersects = collisionBoxIntersectsTileEdges(iconCollisionBox, offset);
-                result.flags |= iconIntersects.flags;
-                result.minSectionLength = std::max(result.minSectionLength, iconIntersects.minSectionLength);
-            }
-
-            return result;
-        };
-
-        for (const SymbolInstance& symbol : symbolInstances) {
-            auto intersectStatus = symbolIntersectsTileEdges(symbol);
-            if (intersectStatus.flags == IntersectStatus::None) continue;
-            intersections.emplace_back(symbol, ctx, intersectStatus, currentIntersectionPriority);
+            auto iconIntersects = collisionBoxIntersectsTileEdges(iconCollisionBox, offset);
+            result.flags |= iconIntersects.flags;
+            result.minSectionLength = std::max(result.minSectionLength, iconIntersects.minSectionLength);
         }
 
-        ++currentIntersectionPriority;
+        return result;
+    };
+
+    for (const SymbolInstance& symbol : symbolInstances) {
+        auto intersectStatus = symbolIntersectsTileEdges(symbol);
+        if (intersectStatus.flags == IntersectStatus::None) continue;
+        intersections.emplace_back(symbol, ctx, intersectStatus, currentIntersectionPriority);
     }
 
-    bool TilePlacement::canPlaceAtVariableAnchor(
-        const CollisionBox& box,
-        TextVariableAnchorType anchor,
-        Point<float> shift,
-        std::vector<style::TextVariableAnchorType>& anchors,
-        const mat4& posMatrix,
-        float textPixelRatio
-    ) {
-        assert(tileBorders);
-        if (populateIntersections) {
-            // A variable label is only allowed to intersect tile border with the first anchor.
-            if (anchor == anchors.front()) {
-                // Check, that the label would intersect the tile borders even without shift, otherwise intersection
-                // is not allowed (preventing cut-offs in case the shift is lager than the buffer size).
-                auto status = collisionIndex.intersectsTileEdges(box, {}, posMatrix, textPixelRatio, *tileBorders);
-                if (status.flags != IntersectStatus::None) return true;
-            }
-            // The most important labels shall be placed first anyway, so we continue trying
-            // the following variable anchors for them; less priority labels
-            // will wait for the second round (when `populateIntersections` is `false`).
-            if (currentIntersectionPriority > 0u) return false;
+    ++currentIntersectionPriority;
+}
+
+bool TilePlacement::canPlaceAtVariableAnchor(
+    const CollisionBox& box,
+    TextVariableAnchorType anchor,
+    Point<float> shift,
+    std::vector<style::TextVariableAnchorType>& anchors,
+    const mat4& posMatrix,
+    float textPixelRatio
+) {
+    assert(tileBorders);
+    if (populateIntersections) {
+        // A variable label is only allowed to intersect tile border with the first anchor.
+        if (anchor == anchors.front()) {
+            // Check, that the label would intersect the tile borders even without shift, otherwise intersection
+            // is not allowed (preventing cut-offs in case the shift is lager than the buffer size).
+            auto status = collisionIndex.intersectsTileEdges(box, {}, posMatrix, textPixelRatio, *tileBorders);
+            if (status.flags != IntersectStatus::None) return true;
         }
-        // Can be placed, if it does not intersect tile borders.
-        auto status = collisionIndex.intersectsTileEdges(box, shift, posMatrix, textPixelRatio, *tileBorders);
-        return (status.flags == IntersectStatus::None);
+        // The most important labels shall be placed first anyway, so we continue trying
+        // the following variable anchors for them; less priority labels
+        // will wait for the second round (when `populateIntersections` is `false`).
+        if (currentIntersectionPriority > 0u) return false;
     }
+    // Can be placed, if it does not intersect tile borders.
+    auto status = collisionIndex.intersectsTileEdges(box, shift, posMatrix, textPixelRatio, *tileBorders);
+    return (status.flags == IntersectStatus::None);
+}
 
-    void TilePlacement::newSymbolPlaced(
-        const SymbolInstance& symbol,
-        const PlacementContext& ctx,
-        const JointPlacement& placement,
-        style::SymbolPlacementType placementType,
-        const std::vector<ProjectedCollisionBox>& textCollisionBoxes,
-        const std::vector<ProjectedCollisionBox>& iconCollisionBoxes
-    ) {
-        if (!collectData || placementType != style::SymbolPlacementType::Point || shouldRetryPlacement(placement, ctx))
-            return;
+void TilePlacement::newSymbolPlaced(
+    const SymbolInstance& symbol,
+    const PlacementContext& ctx,
+    const JointPlacement& placement,
+    style::SymbolPlacementType placementType,
+    const std::vector<ProjectedCollisionBox>& textCollisionBoxes,
+    const std::vector<ProjectedCollisionBox>& iconCollisionBoxes
+) {
+    if (!collectData || placementType != style::SymbolPlacementType::Point || shouldRetryPlacement(placement, ctx))
+        return;
 
-        std::optional<mapbox::geometry::box<float>> textCollisionBox;
-        if (!textCollisionBoxes.empty()) {
-            assert(textCollisionBoxes.size() == 1u);
-            auto& box = textCollisionBoxes.front();
-            assert(box.isBox());
-            textCollisionBox = box.box();
-        }
-        std::optional<mapbox::geometry::box<float>> iconCollisionBox;
-        if (!iconCollisionBoxes.empty()) {
-            assert(iconCollisionBoxes.size() == 1u);
-            auto& box = iconCollisionBoxes.front();
-            assert(box.isBox());
-            iconCollisionBox = box.box();
-        }
-        PlacedSymbolData symbolData{
-            symbol.key,
-            textCollisionBox,
-            iconCollisionBox,
-            placement.text,
-            placement.icon,
-            !placement.skipFade && populateIntersections,
-            collisionIndex.getViewportPadding(),
-            ctx.getBucket().bucketLeaderID};
-        placedSymbolsData.emplace_back(std::move(symbolData));
+    std::optional<mapbox::geometry::box<float>> textCollisionBox;
+    if (!textCollisionBoxes.empty()) {
+        assert(textCollisionBoxes.size() == 1u);
+        auto& box = textCollisionBoxes.front();
+        assert(box.isBox());
+        textCollisionBox = box.box();
     }
-
-    bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
-        // We re-try the placement to try out remaining variable anchors.
-        return populateIntersections && !placement.placed() && !ctx.getVariableTextAnchors().empty();
+    std::optional<mapbox::geometry::box<float>> iconCollisionBox;
+    if (!iconCollisionBoxes.empty()) {
+        assert(iconCollisionBoxes.size() == 1u);
+        auto& box = iconCollisionBoxes.front();
+        assert(box.isBox());
+        iconCollisionBox = box.box();
     }
+    PlacedSymbolData symbolData{
+        symbol.key,
+        textCollisionBox,
+        iconCollisionBox,
+        placement.text,
+        placement.icon,
+        !placement.skipFade && populateIntersections,
+        collisionIndex.getViewportPadding(),
+        ctx.getBucket().bucketLeaderID};
+    placedSymbolsData.emplace_back(std::move(symbolData));
+}
 
-    // static
-    Mutable<Placement> Placement::create(
-        std::shared_ptr<const UpdateParameters> updateParameters_, std::optional<Immutable<Placement>> prevPlacement
-    ) {
-        assert(updateParameters_);
-        switch (updateParameters_->mode) {
-            case MapMode::Continuous:
-                assert(prevPlacement);
-                return makeMutable<Placement>(std::move(updateParameters_), std::move(prevPlacement));
-            case MapMode::Static:
-                return staticMutableCast<Placement>(makeMutable<StaticPlacement>(std::move(updateParameters_)));
-            case MapMode::Tile:
-                return staticMutableCast<Placement>(makeMutable<TilePlacement>(std::move(updateParameters_)));
-        }
-        assert(false);
-        return makeMutable<Placement>();
+bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
+    // We re-try the placement to try out remaining variable anchors.
+    return populateIntersections && !placement.placed() && !ctx.getVariableTextAnchors().empty();
+}
+
+// static
+Mutable<Placement> Placement::create(
+    std::shared_ptr<const UpdateParameters> updateParameters_, std::optional<Immutable<Placement>> prevPlacement
+) {
+    assert(updateParameters_);
+    switch (updateParameters_->mode) {
+        case MapMode::Continuous:
+            assert(prevPlacement);
+            return makeMutable<Placement>(std::move(updateParameters_), std::move(prevPlacement));
+        case MapMode::Static:
+            return staticMutableCast<Placement>(makeMutable<StaticPlacement>(std::move(updateParameters_)));
+        case MapMode::Tile:
+            return staticMutableCast<Placement>(makeMutable<TilePlacement>(std::move(updateParameters_)));
     }
+    assert(false);
+    return makeMutable<Placement>();
+}
 
 } // namespace mbgl
