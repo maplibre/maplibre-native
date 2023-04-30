@@ -2,7 +2,7 @@
 
 Up until now, this document focused solely on the state of MapLibre GL
 Native at the time of writing. This section speaks of possible future
-improvements for MapLibre GL Native from an architectural point of view.
+improvements for MapLibre Native from an architectural point of view.
 Before that, let's look into the architectural challenges MapLibre GL
 Native is facing[^18]:
 
@@ -21,37 +21,37 @@ Native does not have a clear separation between the following:
 
 The current rendering loop is only implemented for OpenGL. In 2018,
 Apple deprecated OpenGL for both iOS 12 and macOS in favour of Metal.
-Metal is Apple's own 3D graphics API. MapLibre GL Native's sole
+Metal is Apple's own 3D graphics API. MapLibre Native's sole
 dependency on OpenGL ES puts it in a risk of deprecation for iOS
 customers.
 
 ## Lack of support for other map projections except Web Mercator
 
-MapLibre GL Native supports Web Mercator (EPSG:3857) as its only
+MapLibre Native supports Web Mercator (EPSG:3857) as its only
 supported projection. This fulfills most of the web and device map
 needs. At the time of writing, modern map renderers such as Google Maps
 and Mapbox GL offers 3D globe, conic, and rectangular projections too.
-At the time of writing, MapLibre GL Native renderer component does not
+At the time of writing, MapLibre Native renderer component does not
 have an architectural separation for supporting multiple projections and
 coordinate reference systems.
 
 ## Inconsistency among platforms
 
-Each MapLibre GL Native platform has a Map View and Map Renderer
+Each MapLibre Native platform has a Map View and Map Renderer
 component. The inconsistency introduced due to differences in
 concurrency model and programming language is unavoidable. But from an
 abstractions point of view there are inconsistencies that can be
 mitigated:
 
-1.  Map Configuration is modeled inside MapLibre GL Native Core, the
+1.  Map Configuration is modeled inside MapLibre Native Core, the
     shared cross platform codebase. Each platform creates its own
     configuration class and creates a shadow native object. The native
     configuration object is consistent across platforms but the platform
     specific configuration is not.
 
-2.  MapLibre GL Native has a sister repository named MapLibre GL JS. At
+2.  MapLibre Native has a sister repository named MapLibre GL JS. At
     the time of writing, MapLibre GL JS does not share any code with
-    MapLibre GL Native except shaders, the style specification, and
+    MapLibre Native except shaders, the style specification, and
     render test fixtures. This creates a feature inconsistency across
     web and device experience for customers. The rendering architecture
     is also different between Web and Mobile. MapLibre GL JS currently
@@ -66,11 +66,11 @@ mitigated:
     ChromeOS, macOS, and Windows 10. Technically, it can be used with
     Android and iOS but these platforms do not provide out of the box
     support for it. This also has created a divergent experience for
-    customers when it comes to using MapLibre GL Native.
+    customers when it comes to using MapLibre Native.
 
 ## Lack of documentation
 
-Last but not the least, MapLibre GL Native suffers from a general lack
+Last but not the least, MapLibre Native suffers from a general lack
 of documentation. This includes current state of the code architecture,
 continuous integration and development, testing strategy, and a roadmap
 for future improvement. This document intends to address the first.
@@ -81,9 +81,9 @@ This document proposes the following component architecture for MapLibre
 GL Native to address the architectural shortcomings.
 
 ![](media/proposed-architecture-of-maplibre-gl.png)    
-*Figure 4: Proposed Architecture of MapLibre GL Native*
+*Figure 4: Proposed Architecture of MapLibre Native*
 
-Proposed architecture of MapLibre GL Native in Figure 4 addresses the 
+Proposed architecture of MapLibre Native in Figure 4 addresses the 
 aforementioned problems by:
 
 #### Modular Rendering
@@ -112,7 +112,7 @@ native device coordinates.
 
 One example of introducing new component is supporting 3D maps in the
 future. This could mean rendering map tiles on a spherical globe instead
-of a flat 3D plane. At the time of writing MapLibre GL Native supports
+of a flat 3D plane. At the time of writing MapLibre Native supports
 2.5D extrusion for buildings and terrain tiles. Supporting confidential
 datums like *GCJ-02* can also be achieved through this.
 
@@ -132,7 +132,7 @@ interoperability with Rust, this document proposes the following to be
 done in sequence:
 
 1.  At first, this document proposes to implement ***Modularized
-    Rendering*** in C++ for MapLibre GL Native. This document also
+    Rendering*** in C++ for MapLibre Native. This document also
     proposes that Unified Rendering Interface will keep the door open
     for a *WebGPU* backed renderer in MapLibre Rust. This will address
     the divergence of web and native platforms in the future. The Rust
@@ -146,7 +146,7 @@ done in sequence:
 
 3.  Finally, this document proposes to migrate Unified Rendering
     Interface and its implementations to Rust. This will completely
-    transform MapLibre GL Native from a C++ ecosystem to a Rust
+    transform MapLibre Native from a C++ ecosystem to a Rust
     ecosystem.
 
 Following the above steps will merge towards a single MapLibre
@@ -155,7 +155,7 @@ implementation for web and native.
 ____________________________
 
 [^18]: This document deliberately does not speak of problems regarding
-    build and infrastructure of MapLibre GL Native. They will be handled
+    build and infrastructure of MapLibre Native. They will be handled
     in individual design PR requests / documents.
 
 [^19]: Rust Foreign Function Interface allows interop bindings and code

@@ -57,7 +57,7 @@ If you wish to deploy on attached hardware, you need to setup your Apple Develop
 
 1. Clone the git repository:
    ```bash
-   git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+   git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
    cd maplibre-gl-native
    ```
    Note that you must check out the project's git submodules to build. If you did not include `--recurse-submodules` in the clone, you can later run `git submodule update --init`.

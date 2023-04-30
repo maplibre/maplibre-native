@@ -35,7 +35,7 @@ dependencies {
 }
 
 tasks.withType(DokkaTask.class) {
-    moduleName.set("MapLibre GL Native for Android")
+    moduleName.set("MapLibre Native for Android")
 
     dokkaSourceSets {
 

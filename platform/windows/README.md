@@ -6,7 +6,7 @@ The files produced by building mbgl-core target can be reused as libraries in ot
 
 ## Prerequisites
 
-The Windows port, for while, relies on `Microsoft Visual Studio` to build Maplibre GL Native, either using `Ninja` or `Microsoft Visual Studio`. The build was tested with `Microsoft Visual Studio 2022 Community Edition`. Other 2022 editions might work as well. Earlier versions are not guaranteed to work, but `Microsoft Visual Studio 2019` might work.
+The Windows port, for while, relies on `Microsoft Visual Studio` to build MapLibre Native, either using `Ninja` or `Microsoft Visual Studio`. The build was tested with `Microsoft Visual Studio 2022 Community Edition`. Other 2022 editions might work as well. Earlier versions are not guaranteed to work, but `Microsoft Visual Studio 2019` might work.
 
 To install the required Visual Studio components, open Visual Studio Installer and check `Desktop Development with C++` option. Make sure `C++ CMake tools for Windows` is selected in the right pane. If `git` is not already installed, select `Git for Windows` option in `Individual Components`. When Visual Studio finishes the install process, everything is ready to start.
 
@@ -15,7 +15,7 @@ To install the required Visual Studio components, open Visual Studio Installer a
 Open `x64 Native Tools Command Prompt for VS 2022` and then clone the repository:
 
 ```cmd
-git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-gl-native.git
+git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
 cd maplibre-gl-native
 ```
 

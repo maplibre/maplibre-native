@@ -85,7 +85,7 @@ map, style with source and layers, and observers.*
 
 ### Layer
 
-*Layer* is an overloaded terminology in the MapLibre GL Native's
+*Layer* is an overloaded terminology in the MapLibre Native's
 context. *Layer* can mean any of the following:
 
 1.  From the point of view of data that needs to be rendered on map,
@@ -129,8 +129,8 @@ When it does, we will dive more into *glyph* rendering.
 
 ### Actor Framework
 
-MapLibre GL Native is used in mobile platforms. To be performant in
-underpowered environments, MapLibre GL Native tries to leverage message
+MapLibre Native is used in mobile platforms. To be performant in
+underpowered environments, MapLibre Native tries to leverage message
 passing across threads to render frames asynchronously. The threading
 architecture in implementation realizes this using the Actor
 interface[^6]. In reality the messages are raw pointers. This ranges
@@ -147,10 +147,10 @@ rendering events that render layers, sources, and subsequently tiles. An
 
 A *Map Renderer* translates geospatial features in a vector or raster
 tile to rendered or rasterized map tiles shown in a *slippy map.*
-MapLibre GL Native uses a *Renderer* component to translate map tiles
+MapLibre Native uses a *Renderer* component to translate map tiles
 fetched from a tile server to a rendered map.
 
-MapLibre GL Native uses a pool of *workers*. These workers are
+MapLibre Native uses a pool of *workers*. These workers are
 responsible for background tile generation. A render thread continuously
 renders the current state of the map with available tiles at the time of
 rendering. In Javascript and iOS, the render thread is the same as the
@@ -168,7 +168,7 @@ Android uses a *GLSurfaceView* with a *GLThread* where the iOS SDK uses
 
 ### Tile Worker
 
-We have noted early in this document that MapLibre GL Native uses message
+We have noted early in this document that MapLibre Native uses message
 passing to communicate with the renderer. These messages are *immutable*
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,
