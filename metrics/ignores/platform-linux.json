@@ -1,5 +1,5 @@
 {
-    "render-tests/icon-text-fit/enlargen-both": "Not working for unknown reason: https://github.com/maplibre/maplibre-gl-native/issues/355",
+    "render-tests/icon-text-fit/enlargen-both": "Not working for unknown reason: https://github.com/maplibre/maplibre-native/issues/355",
     "render-tests/fill-opacity/zoom-and-property-function-pattern": "Flaky on Linux: https://github.com/mapbox/mapbox-gl-native/issues/15322",
     "render-tests/fill-pattern/literal": "Flaky on Linux: https://github.com/mapbox/mapbox-gl-native/issues/14423",
     "render-tests/fill-pattern/opacity": "Flaky on Linux: https://github.com/mapbox/mapbox-gl-native/issues/14870",

@@ -186,11 +186,11 @@ namespace QMapLibreGL {
 
 /*!
     \class QMapLibreGL::Map
-    \brief The QMapLibreGL::Map class is a Qt wrapper for the MapLibre GL Native engine.
+    \brief The QMapLibreGL::Map class is a Qt wrapper for the MapLibre Native engine.
 
     \inmodule MapLibre Maps SDK for Qt
 
-    QMapLibreGL::Map is a Qt friendly version the MapLibre GL Native engine using Qt types
+    QMapLibreGL::Map is a Qt friendly version the MapLibre Native engine using Qt types
     and deep integration with Qt event loop. QMapLibreGL::Map relies as much as possible
     on Qt, trying to minimize the external dependencies. For instance it will use
     QNetworkAccessManager for HTTP requests and QString for UTF-8 manipulation.
