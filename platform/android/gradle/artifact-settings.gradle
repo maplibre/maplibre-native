@@ -5,8 +5,8 @@ ext {
     mapLibreArtifactDescription = 'MapLibre Maps SDK for Android'
     mapLibreDeveloperName = 'MapLibre'
     mapLibreDeveloperId = 'maplibre'
-    mapLibreArtifactUrl = 'https://github.com/maplibre/maplibre-gl-native'
-    mapLibreArtifactScmUrl = 'scm:git@github.com:maplibre/maplibre-gl-native.git'
+    mapLibreArtifactUrl = 'https://github.com/maplibre/maplibre-native'
+    mapLibreArtifactScmUrl = 'scm:git@github.com:maplibre/maplibre-native.git'
     mapLibreArtifactLicenseName = 'BSD'
     mapLibreArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
     versionName = project.hasProperty('VERSION_NAME') ? project.property('VERSION_NAME') : System.getenv('VERSION_NAME')

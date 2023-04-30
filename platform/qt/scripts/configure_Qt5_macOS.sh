@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z ${1+x} ]]; then
-  echo "Error: Pass the path to maplibre-gl-native as first argument" 1>&2
+  echo "Error: Pass the path to maplibre-native as first argument" 1>&2
   exit 1
 fi
 
