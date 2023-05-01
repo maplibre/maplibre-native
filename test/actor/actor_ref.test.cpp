@@ -14,13 +14,12 @@ TEST(ActorRef, CanOutliveActor) {
     struct TestActorRef {
         bool& died;
 
-        TestActorRef(ActorRef<TestActorRef>, bool& died_) : died(died_) {}
+        TestActorRef(ActorRef<TestActorRef>, bool& died_)
+            : died(died_) {}
 
         ~TestActorRef() { died = true; }
 
-        void receive() {
-            FAIL();
-        }
+        void receive() { FAIL(); }
     };
 
     bool died = false;
@@ -39,13 +38,9 @@ TEST(ActorRef, Ask) {
     struct TestActorRef {
         TestActorRef(ActorRef<TestActorRef>) {}
 
-        int gimme() {
-            return 20;
-        }
+        int gimme() { return 20; }
 
-        int echo(int i) {
-            return i;
-        }
+        int echo(int i) { return i; }
     };
 
     Actor<TestActorRef> actor(Scheduler::GetBackground());
@@ -61,11 +56,10 @@ TEST(ActorRef, AskVoid) {
     struct TestActorRef {
         bool& executed;
 
-        TestActorRef(bool& executed_) : executed(executed_) {}
+        TestActorRef(bool& executed_)
+            : executed(executed_) {}
 
-        void doIt() {
-            executed = true;
-        }
+        void doIt() { executed = true; }
     };
 
     bool executed = false;
@@ -83,13 +77,12 @@ TEST(ActorRef, AskOnDestroyedActor) {
     struct TestActorRef {
         bool& died;
 
-        TestActorRef(ActorRef<TestActorRef>, bool& died_) : died(died_) {}
+        TestActorRef(ActorRef<TestActorRef>, bool& died_)
+            : died(died_) {}
 
         ~TestActorRef() { died = true; }
 
-        int receive() {
-            return 1;
-        }
+        int receive() { return 1; }
     };
     bool died = false;
 

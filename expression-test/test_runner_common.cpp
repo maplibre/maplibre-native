@@ -5,8 +5,8 @@
 
 using namespace mbgl;
 
-// Strip precision for numbers, so that we can compare evaluated results with fixtures.
-// Copied from JS expression harness.
+// Strip precision for numbers, so that we can compare evaluated results with
+// fixtures. Copied from JS expression harness.
 Value stripPrecision(const Value& value) {
     const double decimalSigFigs = 6;
     if (auto num = numericValue<double>(value)) {

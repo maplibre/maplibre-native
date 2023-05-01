@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
@@ -47,16 +46,16 @@ public:
     /// the given closure to this scheduler, the consequent calls of the
     /// returned closure are ignored.
     ///
-    /// If this scheduler is already deleted by the time the returnded closure is
-    /// first invoked, the call is ignored.
+    /// If this scheduler is already deleted by the time the returnded closure
+    /// is first invoked, the call is ignored.
     std::function<void()> bindOnce(std::function<void()>);
 
-    /// Enqueues the given |task| for execution into this scheduler's task queue and
-    /// then enqueues the |reply| with the captured task result to the current
-    /// task queue.
+    /// Enqueues the given |task| for execution into this scheduler's task queue
+    /// and then enqueues the |reply| with the captured task result to the
+    /// current task queue.
     ///
-    /// The |TaskFn| return type must be compatible with the |ReplyFn| argument type.
-    /// Note: the task result is copied and passed by value.
+    /// The |TaskFn| return type must be compatible with the |ReplyFn| argument
+    /// type. Note: the task result is copied and passed by value.
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const TaskFn& task, const ReplyFn& reply) {
         assert(GetCurrent());
@@ -93,7 +92,9 @@ protected:
         auto scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {
             auto lock = replyScheduler.lock();
             if (!replyScheduler) return;
-            auto scheduledReply = [reply, result = task()] { reply(result); };
+            auto scheduledReply = [reply, result = task()] {
+                reply(result);
+            };
             replyScheduler->schedule(std::move(scheduledReply));
         };
 
@@ -101,4 +102,4 @@ protected:
     }
 };
 
-} /// namespace mbgl
+} // namespace mbgl

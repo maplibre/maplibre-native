@@ -30,11 +30,10 @@ CameraOptions MapProjection::getCamera() const {
     return transform->getCameraOptions(std::nullopt);
 }
 
-void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs,
-                                          const EdgeInsets& padding) {
+void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs, const EdgeInsets& padding) {
     transform->jumpTo(mbgl::cameraForLatLngs(latLngs, *transform, padding)
-                      .withBearing(util::rad2deg(-transform->getBearing()))
-                      .withPitch(util::rad2deg(transform->getPitch())));
+                          .withBearing(util::rad2deg(-transform->getBearing()))
+                          .withPitch(util::rad2deg(transform->getPitch())));
 }
 
 } // namespace mbgl

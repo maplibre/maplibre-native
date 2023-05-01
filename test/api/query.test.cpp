@@ -26,21 +26,23 @@ class QueryTest {
 public:
     QueryTest() {
         map.getStyle().loadJSON(util::read_file("test/fixtures/api/query_style.json"));
-        map.getStyle().addImage(std::make_unique<style::Image>("test-icon",
-            decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f));
+        map.getStyle().addImage(std::make_unique<style::Image>(
+            "test-icon", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f));
 
         frontend.render(map);
     }
 
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
-    HeadlessFrontend frontend { 1 };
-    MapAdapter map { frontend, MapObserver::nullObserver(), fileSource,
-                  MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    HeadlessFrontend frontend{1};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 };
 
 std::vector<Feature> getTopClusterFeature(QueryTest& test) {
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("http://url"s, resource.url);
         Response response;
         response.data = std::make_unique<std::string>(util::read_file("test/fixtures/supercluster/places.json"s));
@@ -65,9 +67,8 @@ std::vector<Feature> getTopClusterFeature(QueryTest& test) {
     test.frontend.render(test.map);
 
     auto screenCoordinate = test.map.pixelForLatLng(coordinate);
-    const RenderedQueryOptions queryOptions({{{ "cluster_layer"s}}, {}});
-    return test.frontend.getRenderer()->queryRenderedFeatures(screenCoordinate,
-                                                              queryOptions);
+    const RenderedQueryOptions queryOptions({{{"cluster_layer"s}}, {}});
+    return test.frontend.getRenderer()->queryRenderedFeatures(screenCoordinate, queryOptions);
 }
 
 } // end namespace
@@ -97,18 +98,18 @@ TEST(Query, QueryRenderedFeatures) {
 TEST(Query, QueryRenderedFeaturesFilterLayer) {
     QueryTest test;
 
-    auto zz = test.map.pixelForLatLng({ 0, 0 });
+    auto zz = test.map.pixelForLatLng({0, 0});
 
-    auto features1 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{ "layer1"}}, {}});
+    auto features1 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{"layer1"}}, {}});
     EXPECT_EQ(features1.size(), 1u);
 
-    auto features2 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{ "layer1", "layer2" }}, {}});
+    auto features2 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{"layer1", "layer2"}}, {}});
     EXPECT_EQ(features2.size(), 2u);
 
-    auto features3 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{ "foobar" }}, {}});
+    auto features3 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{"foobar"}}, {}});
     EXPECT_EQ(features3.size(), 0u);
 
-    auto features4 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{ "foobar", "layer3" }}, {}});
+    auto features4 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{"foobar", "layer3"}}, {}});
     EXPECT_EQ(features4.size(), 1u);
 }
 
@@ -116,18 +117,18 @@ TEST(Query, QueryRenderedFeaturesFilter) {
     using namespace mbgl::style::expression::dsl;
 
     QueryTest test;
-    auto zz = test.map.pixelForLatLng({ 0, 0 });
+    auto zz = test.map.pixelForLatLng({0, 0});
 
     const Filter eqFilter(eq(get("key1"), literal("value1")));
-    auto features1 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{}, { eqFilter }});
+    auto features1 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{}, {eqFilter}});
     EXPECT_EQ(features1.size(), 1u);
 
     const Filter idNotEqFilter(ne(id(), literal("feature1")));
-    auto features2 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{ "layer4" }}, { idNotEqFilter }});
+    auto features2 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{{"layer4"}}, {idNotEqFilter}});
     EXPECT_EQ(features2.size(), 0u);
 
     const Filter gtFilter(gt(number(get("key2")), literal(1.0)));
-    auto features3 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{ }, { gtFilter }});
+    auto features3 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{}, {gtFilter}});
     EXPECT_EQ(features3.size(), 1u);
 }
 
@@ -164,7 +165,7 @@ TEST(Query, QuerySourceFeaturesOptionValidation) {
     // VectorSource, requires a layer id
     features = test.frontend.getRenderer()->querySourceFeatures("source5");
     ASSERT_EQ(features.size(), 0u);
-    
+
     // RasterSource, not supported
     features = test.frontend.getRenderer()->querySourceFeatures("source6");
     ASSERT_EQ(features.size(), 0u);
@@ -176,25 +177,22 @@ TEST(Query, QuerySourceFeaturesFilter) {
     QueryTest test;
 
     const Filter eqFilter(eq(get("key1"), literal("value1")));
-    auto features1 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, { eqFilter }});
+    auto features1 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, {eqFilter}});
     EXPECT_EQ(features1.size(), 1u);
 
     const Filter idNotEqFilter(ne(id(), literal("feature1")));
-    auto features2 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, { idNotEqFilter }});
+    auto features2 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, {idNotEqFilter}});
     EXPECT_EQ(features2.size(), 0u);
 
     const Filter gtFilter(gt(number(get("key2")), literal(1.0)));
-    auto features3 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, { gtFilter }});
+    auto features3 = test.frontend.getRenderer()->querySourceFeatures("source4", {{}, {gtFilter}});
     EXPECT_EQ(features3.size(), 1u);
 }
 
 TEST(Query, QueryFeatureExtensionsInvalidExtension) {
     QueryTest test;
 
-    auto unknownExt = test.frontend.getRenderer()->queryFeatureExtensions("source4"s,
-                                                                          {},
-                                                                          "unknown"s,
-                                                                          "children"s);
+    auto unknownExt = test.frontend.getRenderer()->queryFeatureExtensions("source4"s, {}, "unknown"s, "children"s);
     auto unknownValue = unknownExt.get<mbgl::Value>();
     EXPECT_TRUE(unknownValue.is<NullValue>());
 }
@@ -206,14 +204,12 @@ TEST(Query, QueryFeatureExtensionsSuperclusterChildren) {
     EXPECT_EQ(topClusterFeature.size(), 1u);
     const auto featureProps = topClusterFeature[0].properties;
     auto clusterId = featureProps.find("cluster_id"s);
-    auto cluster   = featureProps.find("cluster"s);
+    auto cluster = featureProps.find("cluster"s);
     EXPECT_TRUE(clusterId != featureProps.end());
     EXPECT_TRUE(cluster != featureProps.end());
 
-    auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                             topClusterFeature[0],
-                                                                             "supercluster"s,
-                                                                             "children"s);
+    auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s);
 
     EXPECT_TRUE(queryChildren.is<FeatureCollection>());
     auto children = queryChildren.get<FeatureCollection>();
@@ -235,22 +231,15 @@ TEST(Query, QueryFeatureExtensionsSuperclusterExpansionZoom) {
     auto topClusterFeature = getTopClusterFeature(test);
     EXPECT_EQ(topClusterFeature.size(), 1u);
 
-    auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                             topClusterFeature[0],
-                                                                             "supercluster"s,
-                                                                             "children"s);
+    auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s);
     auto children = queryChildren.get<FeatureCollection>();
 
+    auto queryExpansionZoom1 = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "expansion-zoom"s);
 
-    auto queryExpansionZoom1 = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                                    topClusterFeature[0],
-                                                                                   "supercluster"s,
-                                                                                   "expansion-zoom"s);
-
-    auto queryExpansionZoom2 = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                                   children[3],
-                                                                                   "supercluster"s,
-                                                                                   "expansion-zoom"s);
+    auto queryExpansionZoom2 = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, children[3], "supercluster"s, "expansion-zoom"s);
     auto zoomValue1 = queryExpansionZoom1.get<mbgl::Value>();
     auto zoomValue2 = queryExpansionZoom2.get<mbgl::Value>();
     EXPECT_TRUE(zoomValue1.is<uint64_t>());
@@ -265,21 +254,16 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(topClusterFeature.size(), 1u);
 
     // Get leaves for cluster 1, with default limit 10, offset 0.
-    auto queryClusterLeaves = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                                  topClusterFeature[0],
-                                                                                  "supercluster"s,
-                                                                                  "leaves"s);
+    auto queryClusterLeaves = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s);
     EXPECT_TRUE(queryClusterLeaves.is<FeatureCollection>());
     auto leaves = queryClusterLeaves.get<FeatureCollection>();
     EXPECT_EQ(leaves.size(), 10u);
 
     // Get leaves for cluster 1, with limit 3, offset 0.
-    const std::map<std::string, mbgl::Value> limitOpts = { {"limit"s, static_cast<uint64_t>(3u)} };
-    auto queryClusterLeavesLimit3 = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                                        topClusterFeature[0],
-                                                                                        "supercluster"s,
-                                                                                        "leaves"s,
-                                                                                        limitOpts);
+    const std::map<std::string, mbgl::Value> limitOpts = {{"limit"s, static_cast<uint64_t>(3u)}};
+    auto queryClusterLeavesLimit3 = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, limitOpts);
     auto limitLeaves3 = queryClusterLeavesLimit3.get<FeatureCollection>();
     EXPECT_EQ(limitLeaves3.size(), 3u);
 
@@ -288,13 +272,10 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(limitLeaves3[2].properties["name"].get<std::string>(), "Cape Fear"s);
 
     // Get leaves for cluster 1, with limit 3, offset 3.
-    const std::map<std::string, mbgl::Value> offsetOpts = { {"limit"s, static_cast<uint64_t>(3u)},
-                                                            {"offset"s, static_cast<uint64_t>(3u)} };
-    auto queryClusterLeavesOffset3 = test.frontend.getRenderer()->queryFeatureExtensions("cluster_source"s,
-                                                                                        topClusterFeature[0],
-                                                                                        "supercluster"s,
-                                                                                        "leaves"s,
-                                                                                        offsetOpts);
+    const std::map<std::string, mbgl::Value> offsetOpts = {{"limit"s, static_cast<uint64_t>(3u)},
+                                                           {"offset"s, static_cast<uint64_t>(3u)}};
+    auto queryClusterLeavesOffset3 = test.frontend.getRenderer()->queryFeatureExtensions(
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, offsetOpts);
     auto offsetLeaves3 = queryClusterLeavesOffset3.get<FeatureCollection>();
     EXPECT_EQ(offsetLeaves3.size(), 3u);
     EXPECT_EQ(offsetLeaves3[0].properties["name"].get<std::string>(), "Cape Hatteras"s);

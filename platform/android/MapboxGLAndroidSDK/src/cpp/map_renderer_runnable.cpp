@@ -35,14 +35,13 @@ void MapRendererRunnable::registerNative(jni::JNIEnv& env) {
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
-    jni::RegisterNativePeer<MapRendererRunnable>(
-            env,
-            javaClass,
-            "nativePtr",
-            std::make_unique<MapRendererRunnable, JNIEnv&>,
-            "nativeInitialize",
-            "finalize",
-            METHOD(&MapRendererRunnable::run, "run"));
+    jni::RegisterNativePeer<MapRendererRunnable>(env,
+                                                 javaClass,
+                                                 "nativePtr",
+                                                 std::make_unique<MapRendererRunnable, JNIEnv&>,
+                                                 "nativeInitialize",
+                                                 "finalize",
+                                                 METHOD(&MapRendererRunnable::run, "run"));
 }
 
 } // namespace android

@@ -20,11 +20,11 @@ public:
                 bool needsRelayout,
                 const TileParameters&) override;
 
-    FeatureExtensionValue
-    queryFeatureExtensions(const Feature& feature,
-                           const std::string& extension,
-                           const std::string& extensionField,
-                           const std::optional<std::map<std::string, Value>>& args) const override;
+    FeatureExtensionValue queryFeatureExtensions(
+        const Feature& feature,
+        const std::string& extension,
+        const std::string& extensionField,
+        const std::optional<std::map<std::string, Value>>& args) const override;
 
 private:
     const style::GeoJSONSource::Impl& impl() const;

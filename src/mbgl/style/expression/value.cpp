@@ -59,9 +59,9 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                     assert(false);
                 },
                 [&](const Formatted& f) {
-                    // `stringify` in turns calls ValueConverter::fromExpressionValue below
-                    // Serialization strategy for Formatted objects is to return the constant
-                    // expression that would generate them.
+                    // `stringify` in turns calls ValueConverter::fromExpressionValue
+                    // below Serialization strategy for Formatted objects is to return
+                    // the constant expression that would generate them.
                     mbgl::style::conversion::stringify(writer, f);
                 },
                 [&](const Image& i) { mbgl::style::conversion::stringify(writer, i); },
@@ -93,31 +93,27 @@ struct FromMBGLValue {
     Value operator()(const std::vector<mbgl::Value>& v) {
         std::vector<Value> result;
         result.reserve(v.size());
-        for(const auto& item : v) {
+        for (const auto& item : v) {
             result.emplace_back(toExpressionValue(item));
         }
         return result;
     }
-    
+
     Value operator()(const std::unordered_map<std::string, mbgl::Value>& v) {
         std::unordered_map<std::string, Value> result;
         result.reserve(v.size());
-        for(const auto& entry : v) {
+        for (const auto& entry : v) {
             result.emplace(entry.first, toExpressionValue(entry.second));
         }
         return result;
     }
-    
+
     Value operator()(const std::string& s) { return s; }
     Value operator()(const bool b) { return b; }
     Value operator()(const NullValue) { return Null; }
     Value operator()(const double v) { return v; }
-    Value operator()(const uint64_t& v) {
-        return static_cast<double>(v);
-    }
-    Value operator()(const int64_t& v) {
-        return static_cast<double>(v);
-    }
+    Value operator()(const uint64_t& v) { return static_cast<double>(v); }
+    Value operator()(const int64_t& v) { return static_cast<double>(v); }
 };
 
 Value ValueConverter<mbgl::Value>::toExpressionValue(const mbgl::Value& value) {
@@ -134,8 +130,8 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
             return mbgl::Value();
         },
         [&](const Formatted& formatted) -> mbgl::Value {
-            // Serialization strategy for Formatted objects is to return the constant
-            // expression that would generate them.
+            // Serialization strategy for Formatted objects is to return the
+            // constant expression that would generate them.
             std::vector<mbgl::Value> serialized;
             static std::string formatOperator("format");
             serialized.emplace_back(formatOperator);
@@ -147,7 +143,7 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
 
                 serialized.emplace_back(section.text);
                 std::unordered_map<std::string, mbgl::Value> options;
-                
+
                 if (section.fontScale) {
                     options.emplace("font-scale", *section.fontScale);
                 }
@@ -157,7 +153,7 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
                     for (const auto& font : *section.fontStack) {
                         fontStack.emplace_back(font);
                     }
-                    options.emplace("text-font", std::vector<mbgl::Value>{ std::string("literal"), fontStack });
+                    options.emplace("text-font", std::vector<mbgl::Value>{std::string("literal"), fontStack});
                 }
 
                 if (section.textColor) {
@@ -180,7 +176,7 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
         [&](const std::unordered_map<std::string, Value>& values) -> mbgl::Value {
             std::unordered_map<std::string, mbgl::Value> converted;
             converted.reserve(values.size());
-            for(const auto& entry : values) {
+            for (const auto& entry : values) {
                 converted.emplace(entry.first, fromExpressionValue(entry.second));
             }
             return converted;
@@ -193,11 +189,8 @@ Value ValueConverter<float>::toExpressionValue(const float value) {
 }
 
 std::optional<float> ValueConverter<float>::fromExpressionValue(const Value& value) {
-    return value.template is<double>()
-        ? static_cast<float>(value.template get<double>())
-        : std::optional<float>();
+    return value.template is<double>() ? static_cast<float>(value.template get<double>()) : std::optional<float>();
 }
-
 
 template <typename T, typename Container>
 std::vector<Value> toArrayValue(const Container& value) {
@@ -217,24 +210,22 @@ Value ValueConverter<std::array<T, N>>::toExpressionValue(const std::array<T, N>
 template <typename T, std::size_t N>
 std::optional<std::array<T, N>> ValueConverter<std::array<T, N>>::fromExpressionValue(const Value& value) {
     return value.match(
-        [&] (const std::vector<Value>& v) -> std::optional<std::array<T, N>> {
+        [&](const std::vector<Value>& v) -> std::optional<std::array<T, N>> {
             if (v.size() != N) return std::optional<std::array<T, N>>();
-                std::array<T, N> result;
-                auto it = result.begin();
-                for(const Value& item : v) {
-                    std::optional<T> convertedItem = ValueConverter<T>::fromExpressionValue(item);
-                    if (!convertedItem) {
-                        return std::optional<std::array<T, N>>();
-                    }
-                    *it = *convertedItem;
-                    it = std::next(it);
+            std::array<T, N> result;
+            auto it = result.begin();
+            for (const Value& item : v) {
+                std::optional<T> convertedItem = ValueConverter<T>::fromExpressionValue(item);
+                if (!convertedItem) {
+                    return std::optional<std::array<T, N>>();
                 }
-                return result;
+                *it = *convertedItem;
+                it = std::next(it);
+            }
+            return result;
         },
-        [&] (const auto&) { return std::optional<std::array<T, N>>(); }
-    );
+        [&](const auto&) { return std::optional<std::array<T, N>>(); });
 }
-
 
 template <typename T>
 Value ValueConverter<std::vector<T>>::toExpressionValue(const std::vector<T>& value) {
@@ -244,10 +235,10 @@ Value ValueConverter<std::vector<T>>::toExpressionValue(const std::vector<T>& va
 template <typename T>
 std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValue(const Value& value) {
     return value.match(
-        [&] (const std::vector<Value>& v) -> std::optional<std::vector<T>> {
+        [&](const std::vector<Value>& v) -> std::optional<std::vector<T>> {
             std::vector<T> result;
             result.reserve(v.size());
-            for(const Value& item : v) {
+            for (const Value& item : v) {
                 std::optional<T> convertedItem = ValueConverter<T>::fromExpressionValue(item);
                 if (!convertedItem) {
                     return std::optional<std::vector<T>>();
@@ -256,8 +247,7 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
             }
             return result;
         },
-        [&] (const auto&) { return std::optional<std::vector<T>>(); }
-    );
+        [&](const auto&) { return std::optional<std::vector<T>>(); });
 }
 
 Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
@@ -279,16 +269,14 @@ std::optional<Rotation> ValueConverter<Rotation>::fromExpressionValue(const Valu
 }
 
 template <typename T>
-Value ValueConverter<T, std::enable_if_t< std::is_enum_v<T>>>::toExpressionValue(const T& value) {
+Value ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>>::toExpressionValue(const T& value) {
     return std::string(Enum<T>::toString(value));
 }
 
 template <typename T>
 std::optional<T> ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>>::fromExpressionValue(const Value& value) {
-    return value.match(
-        [&] (const std::string& v) { return Enum<T>::toEnum(v); },
-        [&] (const auto&) { return std::optional<T>(); }
-    );
+    return value.match([&](const std::string& v) { return Enum<T>::toEnum(v); },
+                       [&](const auto&) { return std::optional<T>(); });
 }
 
 template <typename T>
@@ -296,24 +284,56 @@ type::Type valueTypeToExpressionType() {
     return ValueConverter<T>::expressionType();
 }
 
-template <> type::Type valueTypeToExpressionType<Value>() { return type::Value; }
-template <> type::Type valueTypeToExpressionType<NullValue>() { return type::Null; }
-template <> type::Type valueTypeToExpressionType<bool>() { return type::Boolean; }
-template <> type::Type valueTypeToExpressionType<double>() { return type::Number; }
-template <> type::Type valueTypeToExpressionType<std::string>() { return type::String; }
-template <> type::Type valueTypeToExpressionType<Color>() { return type::Color; }
-template <> type::Type valueTypeToExpressionType<Collator>() { return type::Collator; }
-template <> type::Type valueTypeToExpressionType<Formatted>() { return type::Formatted; }
+template <>
+type::Type valueTypeToExpressionType<Value>() {
+    return type::Value;
+}
+template <>
+type::Type valueTypeToExpressionType<NullValue>() {
+    return type::Null;
+}
+template <>
+type::Type valueTypeToExpressionType<bool>() {
+    return type::Boolean;
+}
+template <>
+type::Type valueTypeToExpressionType<double>() {
+    return type::Number;
+}
+template <>
+type::Type valueTypeToExpressionType<std::string>() {
+    return type::String;
+}
+template <>
+type::Type valueTypeToExpressionType<Color>() {
+    return type::Color;
+}
+template <>
+type::Type valueTypeToExpressionType<Collator>() {
+    return type::Collator;
+}
+template <>
+type::Type valueTypeToExpressionType<Formatted>() {
+    return type::Formatted;
+}
 template <>
 type::Type valueTypeToExpressionType<Image>() {
     return type::Image;
 }
-template <> type::Type valueTypeToExpressionType<std::unordered_map<std::string, Value>>() { return type::Object; }
-template <> type::Type valueTypeToExpressionType<std::vector<Value>>() { return type::Array(type::Value); }
+template <>
+type::Type valueTypeToExpressionType<std::unordered_map<std::string, Value>>() {
+    return type::Object;
+}
+template <>
+type::Type valueTypeToExpressionType<std::vector<Value>>() {
+    return type::Array(type::Value);
+}
 
 // used only for the special (and private) "error" expression
-template <> type::Type valueTypeToExpressionType<type::ErrorType>() { return type::Error; }
-
+template <>
+type::Type valueTypeToExpressionType<type::ErrorType>() {
+    return type::Error;
+}
 
 // for to_rgba expression
 template type::Type valueTypeToExpressionType<std::array<double, 4>>();
@@ -360,7 +380,7 @@ template struct ValueConverter<LineJoinType>;
 
 template type::Type valueTypeToExpressionType<SymbolPlacementType>();
 template struct ValueConverter<SymbolPlacementType>;
-    
+
 template type::Type valueTypeToExpressionType<SymbolZOrderType>();
 template struct ValueConverter<SymbolZOrderType>;
 

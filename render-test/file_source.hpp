@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/storage/file_source.hpp> 
+#include <mbgl/storage/file_source.hpp>
 
 namespace mbgl {
 

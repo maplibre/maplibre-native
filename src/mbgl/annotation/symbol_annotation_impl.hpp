@@ -35,30 +35,50 @@ namespace geometry {
 // Make Boost Geometry aware of our LatLng type
 namespace traits {
 
-template<> struct tag<mbgl::LatLng> { using type = point_tag; };
-template<> struct dimension<mbgl::LatLng> : boost::mpl::int_<2> {};
-template<> struct coordinate_type<mbgl::LatLng> { using type = double; };
-template<> struct coordinate_system<mbgl::LatLng> { using type = boost::geometry::cs::cartesian; };
+template <>
+struct tag<mbgl::LatLng> {
+    using type = point_tag;
+};
+template <>
+struct dimension<mbgl::LatLng> : boost::mpl::int_<2> {};
+template <>
+struct coordinate_type<mbgl::LatLng> {
+    using type = double;
+};
+template <>
+struct coordinate_system<mbgl::LatLng> {
+    using type = boost::geometry::cs::cartesian;
+};
 
-template<> struct access<mbgl::LatLng, 0> { static inline double get(mbgl::LatLng const& p) { return p.longitude(); } };
-template<> struct access<mbgl::LatLng, 1> { static inline double get(mbgl::LatLng const& p) { return p.latitude(); } };
+template <>
+struct access<mbgl::LatLng, 0> {
+    static inline double get(mbgl::LatLng const& p) { return p.longitude(); }
+};
+template <>
+struct access<mbgl::LatLng, 1> {
+    static inline double get(mbgl::LatLng const& p) { return p.latitude(); }
+};
 
-template<> struct tag<mbgl::LatLngBounds> { using type = box_tag; };
-template<> struct point_type<mbgl::LatLngBounds> { using type = mbgl::LatLng; };
+template <>
+struct tag<mbgl::LatLngBounds> {
+    using type = box_tag;
+};
+template <>
+struct point_type<mbgl::LatLngBounds> {
+    using type = mbgl::LatLng;
+};
 
 template <size_t D>
-struct indexed_access<mbgl::LatLngBounds, min_corner, D>
-{
+struct indexed_access<mbgl::LatLngBounds, min_corner, D> {
     using ct = coordinate_type<mbgl::LatLng>::type;
     static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.southwest()); }
     static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.southwest(), value); }
 };
 
 template <size_t D>
-struct indexed_access<mbgl::LatLngBounds, max_corner, D>
-{
+struct indexed_access<mbgl::LatLngBounds, max_corner, D> {
     using ct = coordinate_type<mbgl::LatLng>::type;
-    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.northeast());  }
+    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.northeast()); }
     static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.northeast(), value); }
 };
 

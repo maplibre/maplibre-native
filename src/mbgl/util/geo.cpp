@@ -22,18 +22,17 @@ double lon_(const uint8_t z, const int64_t x) {
 
 } // end namespace
 
-LatLng::LatLng(const CanonicalTileID& id) : lat(lat_(id.z, id.y)), lon(lon_(id.z, id.x)) {
-}
+LatLng::LatLng(const CanonicalTileID& id)
+    : lat(lat_(id.z, id.y)),
+      lon(lon_(id.z, id.x)) {}
 
 LatLng::LatLng(const UnwrappedTileID& id)
     : lat(lat_(id.canonical.z, id.canonical.y)),
-      lon(lon_(id.canonical.z, id.canonical.x) + id.wrap * util::DEGREES_MAX) {
-}
+      lon(lon_(id.canonical.z, id.canonical.x) + id.wrap * util::DEGREES_MAX) {}
 
 LatLngBounds::LatLngBounds(const CanonicalTileID& id)
-    : sw({ lat_(id.z, id.y + 1), lon_(id.z, id.x) }),
-      ne({ lat_(id.z, id.y), lon_(id.z, id.x + 1) }) {
-}
+    : sw({lat_(id.z, id.y + 1), lon_(id.z, id.x)}),
+      ne({lat_(id.z, id.y), lon_(id.z, id.x + 1)}) {}
 
 bool LatLngBounds::contains(const CanonicalTileID& tileID) const {
     return util::TileRange::fromLatLngBounds(*this, tileID.z).contains(tileID);
@@ -50,7 +49,7 @@ bool LatLngBounds::contains(const LatLngBounds& area, LatLng::WrapMode wrap /*= 
     }
 
     bool containsUnwrapped = area.east() <= east() && area.west() >= west();
-    if(containsUnwrapped) {
+    if (containsUnwrapped) {
         return true;
     } else if (wrap == LatLng::Wrapped) {
         LatLngBounds wrapped(sw.wrapped(), ne.wrapped());
@@ -78,15 +77,11 @@ bool LatLngBounds::intersects(const LatLngBounds area, LatLng::WrapMode wrap /*=
         LatLngBounds wrapped(sw.wrapped(), ne.wrapped());
         LatLngBounds other(area.sw.wrapped(), area.ne.wrapped());
         if (crossesAntimeridian()) {
-            return area.crossesAntimeridian() ||
-                   other.east() > wrapped.west() ||
-                   other.west() < wrapped.east();
-        } else if (other.crossesAntimeridian()){
-            return other.east() > wrapped.west() ||
-                   other.west() < wrapped.east();
+            return area.crossesAntimeridian() || other.east() > wrapped.west() || other.west() < wrapped.east();
+        } else if (other.crossesAntimeridian()) {
+            return other.east() > wrapped.west() || other.west() < wrapped.east();
         } else {
-            return other.east() > wrapped.west() &&
-                   other.west() < wrapped.east();
+            return other.east() > wrapped.west() && other.west() < wrapped.east();
         }
     }
     return false;
@@ -108,7 +103,7 @@ LatLng LatLngBounds::constrain(const LatLng& p) const {
         lng = util::clamp(lng, west(), east());
     }
 
-    return LatLng { lat, lng };
+    return LatLng{lat, lng};
 }
 
 bool LatLngBounds::containsLatitude(double latitude) const {

@@ -216,7 +216,7 @@ static int sqlite3_test_fs_open(sqlite3_vfs* vfs, const char* zName, sqlite3_fil
     return status;
 }
 
-static int sqlite3_test_fs_delete(sqlite3_vfs* vfs, const char *zPath, int dirSync) {
+static int sqlite3_test_fs_delete(sqlite3_vfs* vfs, const char* zPath, int dirSync) {
     if (sqlite3_test_fs_debug) {
         fprintf(stderr, "SQLite3: delete(name=%s, sync=%d)\n", zPath, dirSync);
     }
@@ -227,7 +227,7 @@ static int sqlite3_test_fs_delete(sqlite3_vfs* vfs, const char *zPath, int dirSy
     return unix_fs->xDelete(unix_fs, zPath, dirSync);
 }
 
-static int sqlite3_test_fs_access(sqlite3_vfs* vfs, const char *zPath, int flags, int *pResOut) {
+static int sqlite3_test_fs_access(sqlite3_vfs* vfs, const char* zPath, int flags, int* pResOut) {
     if (sqlite3_test_fs_debug) {
         fprintf(stderr, "SQLite3: access(name=%s, flags=%d)\n", zPath, flags);
     }

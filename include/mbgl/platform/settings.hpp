@@ -32,8 +32,9 @@ public:
     /// for specified key is missing.
     mapbox::base::Value get(const std::string& key) const noexcept;
 
-    /// Returns values for settings whose keys are equal to the ones provided in `keys` argument.
-    /// Null values would be provided for keys whose elements are missing in Settings.
+    /// Returns values for settings whose keys are equal to the ones provided in
+    /// `keys` argument. Null values would be provided for keys whose elements
+    /// are missing in Settings.
     mapbox::base::ValueObject get(const std::vector<std::string>& keys) const noexcept;
 
 private:

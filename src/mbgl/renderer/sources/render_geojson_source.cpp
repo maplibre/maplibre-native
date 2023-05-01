@@ -12,7 +12,7 @@ using namespace style;
 
 namespace {
 
-template<typename T, typename C>
+template <typename T, typename C>
 std::optional<T> getProperty(const C& cont, const typename C::key_type& name) {
     const auto it = cont.find(name);
     if (it == cont.end() || !(it->second.template is<T>())) {
@@ -42,9 +42,8 @@ FeatureExtensionValue getLeaves(std::shared_ptr<style::GeoJSONData> clusterData,
         // Offset cannot be set without limit.
         if (limit) {
             if (offset) {
-                return clusterData->getLeaves(clusterID,
-                                              static_cast<std::uint32_t>(*limit),
-                                              static_cast<std::uint32_t>(*offset));
+                return clusterData->getLeaves(
+                    clusterID, static_cast<std::uint32_t>(*limit), static_cast<std::uint32_t>(*offset));
             }
             return clusterData->getLeaves(clusterID, static_cast<std::uint32_t>(*limit), 0u);
         }
@@ -60,17 +59,14 @@ FeatureExtensionValue getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData
     return Value{static_cast<uint64_t>(clusterData->getClusterExpansionZoom(clusterID))};
 }
 
-MAPBOX_ETERNAL_CONSTEXPR const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>({
-    {"children", &getChildren},
-    {"leaves", &getLeaves},
-    {"expansion-zoom", &getClusterExpansionZoom}
-});
+MAPBOX_ETERNAL_CONSTEXPR const auto extensionGetters =
+    mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
+        {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
 
 } // namespace
 
 RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_)
-    : RenderTileSource(std::move(impl_)) {
-}
+    : RenderTileSource(std::move(impl_)) {}
 
 RenderGeoJSONSource::~RenderGeoJSONSource() = default;
 
@@ -119,11 +115,11 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
                        });
 }
 
-mapbox::util::variant<Value, FeatureCollection>
-RenderGeoJSONSource::queryFeatureExtensions(const Feature& feature,
-                                            const std::string& extension,
-                                            const std::string& extensionField,
-                                            const std::optional<std::map<std::string, Value>>& args) const {
+mapbox::util::variant<Value, FeatureCollection> RenderGeoJSONSource::queryFeatureExtensions(
+    const Feature& feature,
+    const std::string& extension,
+    const std::string& extensionField,
+    const std::optional<std::map<std::string, Value>>& args) const {
     if (extension != "supercluster") {
         return {};
     }

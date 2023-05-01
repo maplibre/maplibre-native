@@ -5,7 +5,8 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Options>::operator()(const Convertible& value, Error& error) const {
+std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Options>::operator()(
+    const Convertible& value, Error& error) const {
     CustomGeometrySource::Options options;
 
     const auto minzoomValue = objectMember(value, "minzoom");

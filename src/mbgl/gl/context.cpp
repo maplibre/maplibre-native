@@ -67,11 +67,8 @@ Context::~Context() noexcept {
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
-    if (const auto* extensions =
-            reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
-
-        auto fn = [&](
-            std::initializer_list<std::pair<const char*, const char*>> probes) -> ProcAddress {
+    if (const auto* extensions = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
+        auto fn = [&](std::initializer_list<std::pair<const char*, const char*>> probes) -> ProcAddress {
             for (auto probe : probes) {
                 if (strstr(extensions, probe.first) != nullptr) {
                     if (ProcAddress ptr = getProcAddress(probe.second)) {
@@ -89,8 +86,7 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
         }();
 
         // Block ANGLE on Direct3D since the debugging extension is causing crashes
-        if (!(renderer.find("ANGLE") != std::string::npos
-              && renderer.find("Direct3D") != std::string::npos)) {
+        if (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) {
             debugging = std::make_unique<extension::Debugging>(fn);
         }
     }
@@ -102,18 +98,22 @@ void Context::enableDebugging() {
     }
 
     // This will enable all messages including performance hints
-    // MBGL_CHECK_ERROR(debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE));
+    // MBGL_CHECK_ERROR(debugging->debugMessageControl(GL_DONT_CARE,
+    // GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE));
 
     // This will only enable high and medium severity messages
-    MBGL_CHECK_ERROR(debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE));
-    MBGL_CHECK_ERROR(debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE));
-    MBGL_CHECK_ERROR(debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE));
+    MBGL_CHECK_ERROR(
+        debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE));
+    MBGL_CHECK_ERROR(
+        debugging->debugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE));
+    MBGL_CHECK_ERROR(debugging->debugMessageControl(
+        GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE));
 
     MBGL_CHECK_ERROR(debugging->debugMessageCallback(extension::Debugging::DebugCallback, nullptr));
 }
 
 UniqueShader Context::createShader(ShaderType type, const std::initializer_list<const char*>& sources) {
-    UniqueShader result { MBGL_CHECK_ERROR(glCreateShader(static_cast<GLenum>(type))), { this } };
+    UniqueShader result{MBGL_CHECK_ERROR(glCreateShader(static_cast<GLenum>(type))), {this}};
 
     MBGL_CHECK_ERROR(glShaderSource(result, static_cast<GLsizei>(sources.size()), sources.begin(), nullptr));
     MBGL_CHECK_ERROR(glCompileShader(result));
@@ -136,7 +136,7 @@ UniqueShader Context::createShader(ShaderType type, const std::initializer_list<
 }
 
 UniqueProgram Context::createProgram(ShaderID vertexShader, ShaderID fragmentShader, const char* location0AttribName) {
-    UniqueProgram result { MBGL_CHECK_ERROR(glCreateProgram()), { this } };
+    UniqueProgram result{MBGL_CHECK_ERROR(glCreateProgram()), {this}};
 
     MBGL_CHECK_ERROR(glAttachShader(result, vertexShader));
     MBGL_CHECK_ERROR(glAttachShader(result, fragmentShader));
@@ -193,8 +193,8 @@ VertexArray Context::createVertexArray() {
     VertexArrayID id = 0;
     MBGL_CHECK_ERROR(glGenVertexArrays(1, &id));
     // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueVertexArray vao(std::move(id), { this });
-    return { UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter { true })};
+    UniqueVertexArray vao(std::move(id), {this});
+    return {UniqueVertexArrayState(new VertexArrayState(std::move(vao)), VertexArrayStateDeleter{true})};
 }
 
 UniqueFramebuffer Context::createFramebuffer() {
@@ -202,29 +202,36 @@ UniqueFramebuffer Context::createFramebuffer() {
     MBGL_CHECK_ERROR(glGenFramebuffers(1, &id));
     stats.numFrameBuffers++;
     // NOLINTNEXTLINE(performance-move-const-arg)
-    return UniqueFramebuffer{ std::move(id), { this } };
+    return UniqueFramebuffer{std::move(id), {this}};
 }
 
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(
-    const Size size, const gfx::TexturePixelType format, const gfx::TextureChannelDataType type) {
+std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size size,
+                                                                     const gfx::TexturePixelType format,
+                                                                     const gfx::TextureChannelDataType type) {
     auto obj = createUniqueTexture();
     int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
     stats.memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource =
-        std::make_unique<gl::TextureResource>(std::move(obj), textureByteSize);
+    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
+                                                                                           textureByteSize);
 
     // Always use texture unit 0 for manipulating it.
     activeTextureUnit = 0;
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
 
     // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::sizedFor(format, type),
-                                  size.width, size.height, 0,
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
+                                  0,
+                                  Enum<gfx::TexturePixelType>::sizedFor(format, type),
+                                  size.width,
+                                  size.height,
+                                  0,
                                   Enum<gfx::TexturePixelType>::to(format),
-                                  Enum<gfx::TextureChannelDataType>::to(type), nullptr));
+                                  Enum<gfx::TextureChannelDataType>::to(type),
+                                  nullptr));
 
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT on NPOT textures.
-    // We use those when the pixelRatio isn't a power of two, e.g. on iPhone 6 Plus.
+    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
+    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
+    // e.g. on iPhone 6 Plus.
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -233,12 +240,12 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(
     return resource;
 }
 
-std::unique_ptr<gfx::RenderbufferResource>
-Context::createRenderbufferResource(const gfx::RenderbufferPixelType type, const Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(const gfx::RenderbufferPixelType type,
+                                                                               const Size size) {
     RenderbufferID id = 0;
     MBGL_CHECK_ERROR(glGenRenderbuffers(1, &id));
     // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueRenderbuffer renderbuffer{ std::move(id), { this } };
+    UniqueRenderbuffer renderbuffer{std::move(id), {this}};
 
     bindRenderbuffer = renderbuffer;
     MBGL_CHECK_ERROR(
@@ -247,18 +254,18 @@ Context::createRenderbufferResource(const gfx::RenderbufferPixelType type, const
     return std::make_unique<gl::RenderbufferResource>(std::move(renderbuffer));
 }
 
-
-std::unique_ptr<uint8_t[]> Context::readFramebuffer(const Size size, const gfx::TexturePixelType format, const bool flip) {
+std::unique_ptr<uint8_t[]> Context::readFramebuffer(const Size size,
+                                                    const gfx::TexturePixelType format,
+                                                    const bool flip) {
     const size_t stride = size.width * (format == gfx::TexturePixelType::RGBA ? 4 : 1);
     auto data = std::make_unique<uint8_t[]>(stride * size.height);
 
-    // When reading data from the framebuffer, make sure that we are storing the values
-    // tightly packed into the buffer to avoid buffer overruns.
-    pixelStorePack = { 1 };
+    // When reading data from the framebuffer, make sure that we are storing the
+    // values tightly packed into the buffer to avoid buffer overruns.
+    pixelStorePack = {1};
 
-    MBGL_CHECK_ERROR(glReadPixels(0, 0, size.width, size.height,
-                                  Enum<gfx::TexturePixelType>::to(format), GL_UNSIGNED_BYTE,
-                                  data.get()));
+    MBGL_CHECK_ERROR(glReadPixels(
+        0, 0, size.width, size.height, Enum<gfx::TexturePixelType>::to(format), GL_UNSIGNED_BYTE, data.get()));
 
     if (flip) {
         auto tmp = std::make_unique<uint8_t[]>(stride);
@@ -279,50 +286,51 @@ void checkFramebuffer() {
     GLenum status = MBGL_CHECK_ERROR(glCheckFramebufferStatus(GL_FRAMEBUFFER));
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         switch (status) {
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            throw std::runtime_error("Couldn't create framebuffer: incomplete attachment");
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            throw std::runtime_error("Couldn't create framebuffer: incomplete missing attachment");
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                throw std::runtime_error("Couldn't create framebuffer: incomplete attachment");
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                throw std::runtime_error(
+                    "Couldn't create framebuffer: incomplete missing "
+                    "attachment");
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-            throw std::runtime_error("Couldn't create framebuffer: incomplete draw buffer");
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                throw std::runtime_error("Couldn't create framebuffer: incomplete draw buffer");
 #endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-            throw std::runtime_error("Couldn't create framebuffer: incomplete read buffer");
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                throw std::runtime_error("Couldn't create framebuffer: incomplete read buffer");
 #endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS
-        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-            throw std::runtime_error("Couldn't create framebuffer: incomplete dimensions");
+            case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+                throw std::runtime_error("Couldn't create framebuffer: incomplete dimensions");
 #endif
 
-        case GL_FRAMEBUFFER_UNSUPPORTED:
-            throw std::runtime_error("Couldn't create framebuffer: unsupported");
-        default:
-            throw std::runtime_error("Couldn't create framebuffer: other");
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                throw std::runtime_error("Couldn't create framebuffer: unsupported");
+            default:
+                throw std::runtime_error("Couldn't create framebuffer: other");
         }
     }
 }
 
-void bindDepthStencilRenderbuffer(
-    const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
+void bindDepthStencilRenderbuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
     auto& depthStencilResource = depthStencil.getResource<gl::RenderbufferResource>();
 #ifdef GL_DEPTH_STENCIL_ATTACHMENT
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                               GL_RENDERBUFFER, depthStencilResource.renderbuffer));
+    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilResource.renderbuffer));
 #else
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                               depthStencilResource.renderbuffer));
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                               GL_RENDERBUFFER, depthStencilResource.renderbuffer));
+    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStencilResource.renderbuffer));
+    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilResource.renderbuffer));
 #endif
 }
 
 } // namespace
 
-Framebuffer
-Context::createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>& color,
-                           const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
+Framebuffer Context::createFramebuffer(
+    const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>& color,
+    const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
     if (color.getSize() != depthStencil.getSize()) {
         throw std::runtime_error("Renderbuffer size mismatch");
     }
@@ -330,67 +338,65 @@ Context::createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::R
     bindFramebuffer = fbo;
 
     auto& colorResource = color.getResource<gl::RenderbufferResource>();
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                               GL_RENDERBUFFER, colorResource.renderbuffer));
+    MBGL_CHECK_ERROR(
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return { color.getSize(), std::move(fbo) };
+    return {color.getSize(), std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
     auto& colorResource = color.getResource<gl::RenderbufferResource>();
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                               GL_RENDERBUFFER, colorResource.renderbuffer));
+    MBGL_CHECK_ERROR(
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     checkFramebuffer();
-    return { color.getSize(), std::move(fbo) };
+    return {color.getSize(), std::move(fbo)};
 }
 
-Framebuffer
-Context::createFramebuffer(const gfx::Texture& color,
-                           const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
+Framebuffer Context::createFramebuffer(
+    const gfx::Texture& color, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
     if (color.size != depthStencil.getSize()) {
         throw std::runtime_error("Renderbuffer size mismatch");
     }
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                            color.getResource<gl::TextureResource>().texture, 0));
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return { color.size, std::move(fbo) };
+    return {color.size, std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                            color.getResource<gl::TextureResource>().texture, 0));
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
     checkFramebuffer();
-    return { color.size, std::move(fbo) };
+    return {color.size, std::move(fbo)};
 }
 
-Framebuffer
-Context::createFramebuffer(const gfx::Texture& color,
-                           const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
+Framebuffer Context::createFramebuffer(const gfx::Texture& color,
+                                       const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
     if (color.size != depth.getSize()) {
         throw std::runtime_error("Renderbuffer size mismatch");
     }
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                            color.getResource<gl::TextureResource>().texture, 0));
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
 
     auto& depthResource = depth.getResource<gl::RenderbufferResource>();
-    MBGL_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                               depthResource.renderbuffer));
+    MBGL_CHECK_ERROR(
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthResource.renderbuffer));
     checkFramebuffer();
-    return { depth.getSize(), std::move(fbo) };
+    return {depth.getSize(), std::move(fbo)};
 }
 
-std::unique_ptr<gfx::OffscreenTexture>
-Context::createOffscreenTexture(const Size size, const gfx::TextureChannelDataType type) {
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
+                                                                       const gfx::TextureChannelDataType type) {
     return std::make_unique<gl::OffscreenTexture>(*this, size, type);
 }
 
@@ -432,16 +438,14 @@ void Context::setDirtyState() {
     pixelStorePack.setDirty();
     pixelStoreUnpack.setDirty();
     for (auto& tex : texture) {
-       tex.setDirty();
+        tex.setDirty();
     }
     vertexBuffer.setDirty();
     bindVertexArray.setDirty();
     globalVertexArrayState.setDirty();
 }
 
-void Context::clear(std::optional<mbgl::Color> color,
-                    std::optional<float> depth,
-                    std::optional<int32_t> stencil) {
+void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
 
     if (color) {
@@ -481,8 +485,9 @@ void Context::setDepthMode(const gfx::DepthMode& depth) {
     if (depth.func == gfx::DepthFunctionType::Always && depth.mask != gfx::DepthMaskType::ReadWrite) {
         depthTest = false;
 
-        // Workaround for rendering errors on Adreno 2xx GPUs. Depth-related state should
-        // not matter when the depth test is disabled, but on these GPUs it apparently does.
+        // Workaround for rendering errors on Adreno 2xx GPUs. Depth-related
+        // state should not matter when the depth test is disabled, but on these
+        // GPUs it apparently does.
         // https://github.com/mapbox/mapbox-gl-native/issues/9164
         depthFunc = depth.func;
         depthMask = depth.mask;
@@ -501,10 +506,8 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
     } else {
         stencilTest = true;
         stencilMask = stencil.mask;
-        stencilOp = { stencil.fail, stencil.depthFail, stencil.pass };
-        apply_visitor([&] (const auto& test) {
-            stencilFunc = { test.func, stencil.ref, test.mask };
-        }, stencil.test);
+        stencilOp = {stencil.fail, stencil.depthFail, stencil.pass};
+        apply_visitor([&](const auto& test) { stencilFunc = {test.func, stencil.ref, test.mask}; }, stencil.test);
     }
 }
 
@@ -514,10 +517,12 @@ void Context::setColorMode(const gfx::ColorMode& color) {
     } else {
         blend = true;
         blendColor = color.blendColor;
-        apply_visitor([&] (const auto& blendFunction) {
-            blendEquation = gfx::ColorBlendEquationType(blendFunction.equation);
-            blendFunc = { blendFunction.srcFactor, blendFunction.dstFactor };
-        }, color.blendFunction);
+        apply_visitor(
+            [&](const auto& blendFunction) {
+                blendEquation = gfx::ColorBlendEquationType(blendFunction.equation);
+                blendFunc = {blendFunction.srcFactor, blendFunction.dstFactor};
+            },
+            color.blendFunction);
     }
 
     colorMask = color.mask;
@@ -543,33 +548,30 @@ void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
 
-void Context::draw(const gfx::DrawMode& drawMode,
-                   std::size_t indexOffset,
-                   std::size_t indexLength) {
+void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     switch (drawMode.type) {
-    case gfx::DrawModeType::Points:
-        break;
-    case gfx::DrawModeType::Lines:
-    case gfx::DrawModeType::LineLoop:
-    case gfx::DrawModeType::LineStrip:
-        lineWidth = drawMode.size;
-        break;
-    default:
-        break;
+        case gfx::DrawModeType::Points:
+            break;
+        case gfx::DrawModeType::Lines:
+        case gfx::DrawModeType::LineLoop:
+        case gfx::DrawModeType::LineStrip:
+            lineWidth = drawMode.size;
+            break;
+        default:
+            break;
     }
 
-    MBGL_CHECK_ERROR(glDrawElements(
-        Enum<gfx::DrawModeType>::to(drawMode.type),
-        static_cast<GLsizei>(indexLength),
-        GL_UNSIGNED_SHORT,
-        reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
+    MBGL_CHECK_ERROR(glDrawElements(Enum<gfx::DrawModeType>::to(drawMode.type),
+                                    static_cast<GLsizei>(indexLength),
+                                    GL_UNSIGNED_SHORT,
+                                    reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
 
     stats.numDrawCalls++;
 }
 
 void Context::performCleanup() {
-    // TODO: Find a better way to unbind VAOs after we're done with them without introducing
-    // unnecessary bind(0)/bind(N) sequences.
+    // TODO: Find a better way to unbind VAOs after we're done with them without
+    // introducing unnecessary bind(0)/bind(N) sequences.
     {
         activeTextureUnit = 1;
         texture[1] = 0;
@@ -635,16 +637,14 @@ void Context::performCleanup() {
                 bindFramebuffer.setDirty();
             }
         }
-        MBGL_CHECK_ERROR(
-            glDeleteFramebuffers(int(abandonedFramebuffers.size()), abandonedFramebuffers.data()));
+        MBGL_CHECK_ERROR(glDeleteFramebuffers(int(abandonedFramebuffers.size()), abandonedFramebuffers.data()));
         stats.numFrameBuffers -= int(abandonedFramebuffers.size());
         assert(stats.numFrameBuffers >= 0);
         abandonedFramebuffers.clear();
     }
 
     if (!abandonedRenderbuffers.empty()) {
-        MBGL_CHECK_ERROR(glDeleteRenderbuffers(int(abandonedRenderbuffers.size()),
-                                               abandonedRenderbuffers.data()));
+        MBGL_CHECK_ERROR(glDeleteRenderbuffers(int(abandonedRenderbuffers.size()), abandonedRenderbuffers.data()));
         abandonedRenderbuffers.clear();
     }
 }
@@ -652,8 +652,8 @@ void Context::performCleanup() {
 void Context::reduceMemoryUsage() {
     performCleanup();
 
-    // Ensure that all pending actions are executed to ensure that they happen before the app goes
-    // to the background.
+    // Ensure that all pending actions are executed to ensure that they happen
+    // before the app goes to the background.
     MBGL_CHECK_ERROR(glFinish());
 }
 

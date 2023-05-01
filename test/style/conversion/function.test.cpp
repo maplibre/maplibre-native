@@ -62,18 +62,23 @@ TEST(StyleConversion, CompositeFunctionExpression) {
     auto fn1 = parseFunction(R"(["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10])");
     ASSERT_TRUE(fn1);
 
-    auto fn2 = parseFunction(R"(["coalesce", ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10], 0])");
+    auto fn2 = parseFunction(
+        R"(["coalesce", ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10], 0])");
     ASSERT_TRUE(fn2);
 
-    auto fn3 = parseFunction(R"(["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10] ])");
+    auto fn3 = parseFunction(
+        R"(["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10] ])");
     ASSERT_TRUE(fn3);
 
-    auto fn4 = parseFunction(R"(["coalesce", ["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10]], 0])");
+    auto fn4 = parseFunction(
+        R"(["coalesce", ["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10]], 0])");
     ASSERT_TRUE(fn4);
 
-    auto fn5 = parseFunction(R"(["coalesce", ["interpolate", ["linear"], ["number", ["get", "x"]], 0, ["zoom"], 10, 10], 0])");
+    auto fn5 = parseFunction(
+        R"(["coalesce", ["interpolate", ["linear"], ["number", ["get", "x"]], 0, ["zoom"], 10, 10], 0])");
     ASSERT_FALSE(fn5);
-    ASSERT_EQ(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)", error.message);
+    ASSERT_EQ(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)",
+              error.message);
 }
 
 TEST(StyleConversion, TokenStrings) {
@@ -88,11 +93,13 @@ TEST(StyleConversion, TokenStrings) {
     ASSERT_EQ(*convertTokenStringToExpression("{token}"), *toString(get(literal("token"))));
     ASSERT_EQ(*convertTokenStringToExpression("token {token}"), *concat(vec(literal("token "), get(literal("token")))));
     ASSERT_EQ(*convertTokenStringToExpression("{token} token"), *concat(vec(get(literal("token")), literal(" token"))));
-    ASSERT_EQ(*convertTokenStringToExpression("{token} {token}"), *concat(vec(get(literal("token")), literal(" "), get(literal("token")))));
-    ASSERT_EQ(*convertTokenStringToExpression("{token} {token"), *concat(vec(get(literal("token")), literal(" "), literal("{token"))));
-    ASSERT_EQ(*convertTokenStringToExpression("{token {token}"), *concat(vec(literal("{token "), get(literal("token")))));
+    ASSERT_EQ(*convertTokenStringToExpression("{token} {token}"),
+              *concat(vec(get(literal("token")), literal(" "), get(literal("token")))));
+    ASSERT_EQ(*convertTokenStringToExpression("{token} {token"),
+              *concat(vec(get(literal("token")), literal(" "), literal("{token"))));
+    ASSERT_EQ(*convertTokenStringToExpression("{token {token}"),
+              *concat(vec(literal("{token "), get(literal("token")))));
 }
-
 
 TEST(StyleConversion, FormattedIdentityFunction) {
     // See https://github.com/mapbox/mapbox-gl-js/issues/7311
@@ -102,7 +109,7 @@ TEST(StyleConversion, FormattedIdentityFunction) {
     auto parseFunction = [&](const std::string& json) {
         return convertJSON<PropertyValue<mbgl::style::expression::Formatted>>(json, error, true, false);
     };
-    
+
     using namespace mbgl::style::expression::dsl;
 
     auto fn1 = parseFunction(R"({ "property": "name", "type": "identity" })");

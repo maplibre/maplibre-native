@@ -12,11 +12,20 @@ namespace mbgl {
  */
 struct BoundOptions {
     /// Sets the latitude and longitude bounds to which the camera center are constrained
-    BoundOptions& withLatLngBounds(LatLngBounds b) { bounds = b; return *this; }
+    BoundOptions& withLatLngBounds(LatLngBounds b) {
+        bounds = b;
+        return *this;
+    }
     /// Sets the minimum zoom level
-    BoundOptions& withMinZoom(double z) { minZoom = z; return *this; }
+    BoundOptions& withMinZoom(double z) {
+        minZoom = z;
+        return *this;
+    }
     /// Sets the maximum zoom level
-    BoundOptions& withMaxZoom(double z) { maxZoom = z; return *this; }
+    BoundOptions& withMaxZoom(double z) {
+        maxZoom = z;
+        return *this;
+    }
     /// Sets the minimum pitch
     BoundOptions& withMinPitch(double p) {
         minPitch = p;
@@ -44,4 +53,4 @@ struct BoundOptions {
     std::optional<double> minPitch;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

@@ -15,13 +15,9 @@ public:
 template <>
 class PaintPropertyStatistics<float> {
 public:
-    std::optional<float> max() const {
-        return _max;
-    }
+    std::optional<float> max() const { return _max; }
 
-    void add(float value) {
-        _max = _max ? std::max(*_max, value) : value;
-    }
+    void add(float value) { _max = _max ? std::max(*_max, value) : value; }
 
 private:
     std::optional<float> _max;

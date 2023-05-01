@@ -37,13 +37,13 @@ public:
     FileSource& operator=(const FileSource&) = delete;
     virtual ~FileSource() = default;
 
-    using Callback = std::function<void (Response)>;
+    using Callback = std::function<void(Response)>;
 
-    /// Request a resource. The callback will be called asynchronously, in the same
-    /// thread as the request was made. This thread must have an active RunLoop. The
-    /// request may be cancelled before completion by releasing the returned AsyncRequest.
-    /// If the request is cancelled before the callback is executed, the callback will
-    /// not be executed.
+    /// Request a resource. The callback will be called asynchronously, in the
+    /// same thread as the request was made. This thread must have an active
+    /// RunLoop. The request may be cancelled before completion by releasing the
+    /// returned AsyncRequest. If the request is cancelled before the callback
+    /// is executed, the callback will not be executed.
     virtual std::unique_ptr<AsyncRequest> request(const Resource&, Callback) = 0;
 
     /// Allows to forward response from one source to another.
@@ -53,10 +53,11 @@ public:
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     virtual void forward(const Resource&, const Response&, std::function<void()>) {}
 
-    /// When a file source supports consulting a local cache only, it must return true.
-    /// Cache-only requests are requests that aren't as urgent, but could be useful, e.g.
-    /// to cover part of the map while loading. The FileSource should only do cheap actions to
-    /// retrieve the data, e.g. load it from a cache, but not from the internet.
+    /// When a file source supports consulting a local cache only, it must
+    /// return true. Cache-only requests are requests that aren't as urgent, but
+    /// could be useful, e.g. to cover part of the map while loading. The
+    /// FileSource should only do cheap actions to retrieve the data, e.g. load
+    /// it from a cache, but not from the internet.
     virtual bool supportsCacheOnlyRequests() const { return false; }
 
     /// Checks whether a resource could be requested from this file source.
@@ -112,8 +113,8 @@ constexpr const char* MAX_CONCURRENT_REQUESTS_KEY = "max-concurrent-requests";
 
 // Properties that may be supported by database file sources:
 
-/// Property to set database mode. When set, database opens in read-only mode; database opens in read-write-create mode
-/// otherwise. type: bool
+/// Property to set database mode. When set, database opens in read-only mode;
+/// database opens in read-write-create mode otherwise. type: bool
 constexpr const char* READ_ONLY_MODE_KEY = "read-only-mode";
 
 } // namespace mbgl

@@ -20,7 +20,8 @@ std::mutex mutex;
 
 class Log::Impl {
 public:
-    Impl() : scheduler(Scheduler::GetSequenced()) {}
+    Impl()
+        : scheduler(Scheduler::GetSequenced()) {}
 
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
         if (useThread) {
@@ -35,7 +36,8 @@ private:
     const std::shared_ptr<Scheduler> scheduler;
 };
 
-Log::Log() : impl(std::make_unique<Impl>()) {}
+Log::Log()
+    : impl(std::make_unique<Impl>()) {}
 
 Log::~Log() = default;
 
@@ -60,11 +62,11 @@ std::unique_ptr<Log::Observer> Log::removeObserver() {
     return observer;
 }
 
-void Log::record(EventSeverity severity, Event event, const std::string &msg) {
+void Log::record(EventSeverity severity, Event event, const std::string& msg) {
     get()->impl->record(severity, event, -1, msg);
 }
 
-void Log::record(EventSeverity severity, Event event, int64_t code, const std::string &msg) {
+void Log::record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
     get()->impl->record(severity, event, code, msg);
 }
 
@@ -74,8 +76,7 @@ void Log::record(EventSeverity severity,
                  const std::string& msg,
                  const std::optional<std::string>& threadName) {
     std::lock_guard<std::mutex> lock(mutex);
-    if (currentObserver && severity != EventSeverity::Debug &&
-        currentObserver->onRecord(severity, event, code, msg)) {
+    if (currentObserver && severity != EventSeverity::Debug && currentObserver->onRecord(severity, event, code, msg)) {
         return;
     }
 

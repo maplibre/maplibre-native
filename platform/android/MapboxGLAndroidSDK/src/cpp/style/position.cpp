@@ -3,9 +3,12 @@
 namespace mbgl {
 namespace android {
 
-jni::Local<jni::Object<Position>> Position::fromPosition(jni::JNIEnv& env, jfloat radialCoordinate, jfloat azimuthalAngle, jfloat polarAngle) {
+jni::Local<jni::Object<Position>> Position::fromPosition(jni::JNIEnv& env,
+                                                         jfloat radialCoordinate,
+                                                         jfloat azimuthalAngle,
+                                                         jfloat polarAngle) {
     static auto& javaClass = jni::Class<Position>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<Position> (jfloat, jfloat, jfloat)>(env, "fromPosition");
+    static auto method = javaClass.GetStaticMethod<jni::Object<Position>(jfloat, jfloat, jfloat)>(env, "fromPosition");
     return javaClass.Call(env, method, radialCoordinate, azimuthalAngle, polarAngle);
 }
 

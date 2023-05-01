@@ -35,7 +35,9 @@ using namespace style;
 
 template <class RegionDefinition>
 Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
-                                 style::SourceType type, uint16_t tileSize, const Range<uint8_t>& zoomRange) {
+                                 style::SourceType type,
+                                 uint16_t tileSize,
+                                 const Range<uint8_t>& zoomRange) {
     double minZ = std::max<double>(util::coveringZoomLevel(definition.minZoom, type, tileSize), zoomRange.min);
     double maxZ = std::min<double>(util::coveringZoomLevel(definition.maxZoom, type, tileSize), zoomRange.max);
 
@@ -43,7 +45,7 @@ Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
     assert(maxZ >= 0);
     assert(minZ < std::numeric_limits<uint8_t>::max());
     assert(maxZ < std::numeric_limits<uint8_t>::max());
-    return { static_cast<uint8_t>(minZ), static_cast<uint8_t>(maxZ) };
+    return {static_cast<uint8_t>(minZ), static_cast<uint8_t>(maxZ)};
 }
 
 template <class Geometry, class Fn>
@@ -54,33 +56,33 @@ void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
     }
 }
 
-
 template <class Fn>
-void tileCover(const OfflineRegionDefinition& definition, style::SourceType type,
-               uint16_t tileSize, const Range<uint8_t>& zoomRange, Fn&& fn) {
-    const Range<uint8_t> clampedZoomRange =
-            definition.match([&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
+void tileCover(const OfflineRegionDefinition& definition,
+               style::SourceType type,
+               uint16_t tileSize,
+               const Range<uint8_t>& zoomRange,
+               Fn&& fn) {
+    const Range<uint8_t> clampedZoomRange = definition.match(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
 
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        definition.match(
-                [&](const OfflineTilePyramidRegionDefinition& reg){ tileCover(reg.bounds, z, fn); },
-                [&](const OfflineGeometryRegionDefinition& reg){ tileCover(reg.geometry, z, fn); }
-        );
+        definition.match([&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
+                         [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); });
     }
 }
 
-uint64_t tileCount(const OfflineRegionDefinition& definition, style::SourceType type,
-                   uint16_t tileSize, const Range<uint8_t>& zoomRange) {
-
-    const Range<uint8_t> clampedZoomRange =
-            definition.match([&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
+uint64_t tileCount(const OfflineRegionDefinition& definition,
+                   style::SourceType type,
+                   uint16_t tileSize,
+                   const Range<uint8_t>& zoomRange) {
+    const Range<uint8_t> clampedZoomRange = definition.match(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
 
     uint64_t result{};
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
         result += definition.match(
-                [&](const OfflineTilePyramidRegionDefinition& reg){ return util::tileCount(reg.bounds, z); },
-                [&](const OfflineGeometryRegionDefinition& reg){ return util::tileCount(reg.geometry, z); }
-        );
+            [&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
+            [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); });
     }
 
     return result;
@@ -128,14 +130,14 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     auto result = offlineDatabase.getRegionCompletedStatus(id);
     if (!result) {
-        // We can't find this offline region because the database is unavailable, or the download
-        // does not exist.
+        // We can't find this offline region because the database is
+        // unavailable, or the download does not exist.
         return {};
     }
 
     result->requiredResourceCount++;
-    std::optional<Response> styleResponse =
-            offlineDatabase.get(Resource::style(definition.match([](auto& reg){ return reg.styleURL; })));
+    std::optional<Response> styleResponse = offlineDatabase.get(
+        Resource::style(definition.match([](auto& reg) { return reg.styleURL; })));
     if (!styleResponse) {
         return *result;
     }
@@ -148,7 +150,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     for (const auto& source : parser.sources) {
         SourceType type = source->getType();
 
-        auto handleTiledSource = [&] (const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
+        auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
             if (urlOrTileset.is<Tileset>()) {
                 uint64_t tileSourceCount = tileCount(definition, type, tileSize, urlOrTileset.get<Tileset>().zoomRange);
                 result->requiredTileCount += tileSourceCount;
@@ -159,7 +161,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
                 std::optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
                 if (sourceResponse) {
                     style::conversion::Error error;
-                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
+                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data,
+                                                                                             error);
                     if (tileset) {
                         uint64_t tileSourceCount = tileCount(definition, type, tileSize, (*tileset).zoomRange);
                         result->requiredTileCount += tileSourceCount;
@@ -172,52 +175,52 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
         };
 
         switch (type) {
-        case SourceType::Vector: {
-            const auto& vectorSource = *source->as<VectorSource>();
-            handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize_I);
-            break;
-        }
-
-        case SourceType::Raster: {
-            const auto& rasterSource = *source->as<RasterSource>();
-            handleTiledSource(rasterSource.getURLOrTileset(), rasterSource.getTileSize());
-            break;
-        }
-
-        case SourceType::RasterDEM: {
-            const auto& rasterDEMSource = *source->as<RasterDEMSource>();
-            handleTiledSource(rasterDEMSource.getURLOrTileset(), rasterDEMSource.getTileSize());
-            break;
-        }
-
-        case SourceType::GeoJSON: {
-            const auto& geojsonSource = *source->as<GeoJSONSource>();
-            if (geojsonSource.getURL()) {
-                result->requiredResourceCount += 1;
+            case SourceType::Vector: {
+                const auto& vectorSource = *source->as<VectorSource>();
+                handleTiledSource(vectorSource.getURLOrTileset(), util::tileSize_I);
+                break;
             }
-            break;
-        }
 
-        case SourceType::Image: {
-            const auto& imageSource = *source->as<ImageSource>();
-            if (imageSource.getURL()) {
-                result->requiredResourceCount += 1;
+            case SourceType::Raster: {
+                const auto& rasterSource = *source->as<RasterSource>();
+                handleTiledSource(rasterSource.getURLOrTileset(), rasterSource.getTileSize());
+                break;
             }
-            break;
-        }
 
-        case SourceType::Video:
-        case SourceType::Annotations:
-        case SourceType::CustomVector:
-            break;
+            case SourceType::RasterDEM: {
+                const auto& rasterDEMSource = *source->as<RasterDEMSource>();
+                handleTiledSource(rasterDEMSource.getURLOrTileset(), rasterDEMSource.getTileSize());
+                break;
+            }
+
+            case SourceType::GeoJSON: {
+                const auto& geojsonSource = *source->as<GeoJSONSource>();
+                if (geojsonSource.getURL()) {
+                    result->requiredResourceCount += 1;
+                }
+                break;
+            }
+
+            case SourceType::Image: {
+                const auto& imageSource = *source->as<ImageSource>();
+                if (imageSource.getURL()) {
+                    result->requiredResourceCount += 1;
+                }
+                break;
+            }
+
+            case SourceType::Video:
+            case SourceType::Annotations:
+            case SourceType::CustomVector:
+                break;
         }
     }
 
     if (!parser.glyphURL.empty()) {
         result->requiredResourceCount += parser.fontStacks().size() *
-            (definition.match([](auto& reg){ return reg.includeIdeographs; }) ?
-                GLYPH_RANGES_PER_FONT_STACK :
-                NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
+                                         (definition.match([](auto& reg) { return reg.includeIdeographs; })
+                                              ? GLYPH_RANGES_PER_FONT_STACK
+                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
     }
 
     if (!parser.spriteURL.empty()) {
@@ -232,7 +235,7 @@ void OfflineDownload::activateDownload() {
     status.downloadState = OfflineRegionDownloadState::Active;
     status.requiredResourceCount++;
 
-    auto styleResource = Resource::style(definition.match([](auto& reg){ return reg.styleURL; }));
+    auto styleResource = Resource::style(definition.match([](auto& reg) { return reg.styleURL; }));
     styleResource.setPriority(Resource::Priority::Low);
     styleResource.setUsage(Resource::Usage::Offline);
 
@@ -241,21 +244,21 @@ void OfflineDownload::activateDownload() {
 
         style::Parser parser;
         parser.parse(*styleResponse.data);
-        
+
         auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
         parser.spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, parser.spriteURL);
         parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
-        
+
         for (const auto& source : parser.sources) {
             SourceType type = source->getType();
 
-            auto handleTiledSource = [&] (const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
+            auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
                 if (urlOrTileset.is<Tileset>()) {
                     queueTiles(type, tileSize, urlOrTileset.get<Tileset>());
                 } else {
                     const auto& rawUrl = urlOrTileset.get<std::string>();
                     const auto& url = util::mapbox::canonicalizeSourceURL(tileServerOptions, rawUrl);
-                    
+
                     status.requiredResourceCountIsPrecise = false;
                     status.requiredResourceCount++;
                     requiredSourceURLs.insert(url);
@@ -266,10 +269,12 @@ void OfflineDownload::activateDownload() {
 
                     ensureResource(std::move(sourceResource), [=](const Response& sourceResponse) {
                         style::conversion::Error error;
-                        std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
+                        std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data,
+                                                                                                 error);
                         if (tileset) {
                             auto resourceOptions = onlineFileSource.getResourceOptions();
-                            util::mapbox::canonicalizeTileset(resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
+                            util::mapbox::canonicalizeTileset(
+                                resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
                             queueTiles(type, tileSize, *tileset);
 
                             requiredSourceURLs.erase(url);
@@ -325,13 +330,14 @@ void OfflineDownload::activateDownload() {
         }
 
         if (!parser.glyphURL.empty()) {
-            const bool includeIdeographs = definition.match([](auto& reg){ return reg.includeIdeographs; });
+            const bool includeIdeographs = definition.match([](auto& reg) { return reg.includeIdeographs; });
             for (const auto& fontStack : parser.fontStacks()) {
                 for (char16_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; i++) {
-                    // Assumes that if a glyph range starts with fixed width/ideographic characters, the entire
-                    // range will be fixed width.
+                    // Assumes that if a glyph range starts with fixed width/ideographic
+                    // characters, the entire range will be fixed width.
                     if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
-                        queueResource(Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE)));
+                        queueResource(
+                            Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE)));
                     }
                 }
             }
@@ -350,21 +356,23 @@ void OfflineDownload::activateDownload() {
 }
 
 /*
-   Fill up our own request queue by requesting the next few resources. This is called
-   when activating the download, or when a request completes successfully.
+   Fill up our own request queue by requesting the next few resources. This is
+   called when activating the download, or when a request completes
+   successfully.
 
-   Note "successfully"; it's not called when a requests receives an error. A request
-   that errors will be retried after some delay. So in that sense it's still "active"
-   and consuming resources, notably the request object, its timer, and network resources
-   when the timer fires.
+   Note "successfully"; it's not called when a requests receives an error. A
+   request that errors will be retried after some delay. So in that sense it's
+   still "active" and consuming resources, notably the request object, its
+   timer, and network resources when the timer fires.
 
-   We could try to squeeze in subsequent requests while we wait for the errored request
-   to retry. But that risks overloading the upstream request queue -- defeating our own
-   metering -- if there are a lot of errored requests that all come up for retry at the
-   same time. And many times, the cause of a request error will apply to many requests
-   of the same type. For instance if a server is unreachable, all the requests to that
-   host are going to error. In that case, continuing to try subsequent resources after
-   the first few errors is fruitless anyway.
+   We could try to squeeze in subsequent requests while we wait for the errored
+   request to retry. But that risks overloading the upstream request queue --
+   defeating our own metering -- if there are a lot of errored requests that all
+   come up for retry at the same time. And many times, the cause of a request
+   error will apply to many requests of the same type. For instance if a server
+   is unreachable, all the requests to that host are going to error. In that
+   case, continuing to try subsequent resources after the first few errors is
+   fruitless anyway.
 */
 void OfflineDownload::continueDownload() {
     if (resourcesRemaining.empty()) {
@@ -426,9 +434,12 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
         status.requiredResourceCount++;
         status.requiredTileCount++;
 
-        auto tileResource = Resource::tile(
-                tileset.tiles[0], definition.match([](auto& def) { return def.pixelRatio; }),
-                tile.x, tile.y, tile.z, tileset.scheme);
+        auto tileResource = Resource::tile(tileset.tiles[0],
+                                           definition.match([](auto& def) { return def.pixelRatio; }),
+                                           tile.x,
+                                           tile.y,
+                                           tile.z,
+                                           tileset.scheme);
 
         tileResource.setPriority(Resource::Priority::Low);
         tileResource.setUsage(Resource::Usage::Offline);
@@ -442,8 +453,7 @@ void OfflineDownload::markPendingUsedResources() {
     resourcesToBeMarkedAsUsed.clear();
 }
 
-void OfflineDownload::ensureResource(Resource&& resource,
-                                     std::function<void(Response)> callback) {
+void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Response)> callback) {
     assert(resource.priority == Resource::Priority::Low);
     assert(resource.usage == Resource::Usage::Offline);
 
@@ -451,7 +461,7 @@ void OfflineDownload::ensureResource(Resource&& resource,
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=]() {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
-        auto getResourceSizeInDatabase = [&] () -> std::optional<int64_t> {
+        auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
             std::optional<int64_t> result;
             if (!callback) {
                 result = offlineDatabase.hasRegionResource(resource);
@@ -511,7 +521,8 @@ void OfflineDownload::ensureResource(Resource&& resource,
             buffer.emplace_back(resource, onlineResponse);
 
             // Flush buffer periodically.
-            // Have to keep `resourcesRemaining.empty()` as the following condition would fail otherwise.
+            // Have to keep `resourcesRemaining.empty()` as the following
+            // condition would fail otherwise.
             // TODO: Simplify the tile count limit check code path!
             if ((buffer.size() == kResourcesBatchSize || resourcesRemaining.empty()) && !flushResourcesBuffer()) return;
 
