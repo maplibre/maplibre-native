@@ -45,13 +45,11 @@ public:
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
 
     // Feature extension query
-    FeatureExtensionValue queryFeatureExtensions(
-        const std::string& sourceID,
-        const Feature& feature,
-        const std::string& extension,
-        const std::string& extensionField,
-        const std::optional<std::map<std::string, mbgl::Value>>& args
-    ) const;
+    FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,
+                                                 const Feature& feature,
+                                                 const std::string& extension,
+                                                 const std::string& extensionField,
+                                                 const std::optional<std::map<std::string, mbgl::Value>>& args) const;
 
     // Memory
     void reduceMemoryUse();

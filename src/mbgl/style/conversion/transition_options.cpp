@@ -5,8 +5,8 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const Convertible& value, Error& error)
-    const {
+std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const Convertible& value,
+                                                                          Error& error) const {
     if (!isObject(value)) {
         error.message = "transition must be an object";
         return std::nullopt;

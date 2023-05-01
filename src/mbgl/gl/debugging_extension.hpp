@@ -55,24 +55,21 @@ using namespace platform;
 
 class Debugging {
 public:
-    using Callback = void (*)(
-        GLenum source,
-        GLenum type,
-        GLuint id,
-        GLenum severity,
-        GLsizei length,
-        const GLchar* message,
-        const void* userParam
-    );
+    using Callback = void (*)(GLenum source,
+                              GLenum type,
+                              GLuint id,
+                              GLenum severity,
+                              GLsizei length,
+                              const GLchar* message,
+                              const void* userParam);
 
-    static void DebugCallback(
-        GLenum source,
-        GLenum type,
-        GLuint id,
-        GLenum severity,
-        GLsizei /* length */,
-        const GLchar* message,
-        const void* /* userParam */
+    static void DebugCallback(GLenum source,
+                              GLenum type,
+                              GLuint id,
+                              GLenum severity,
+                              GLsizei /* length */,
+                              const GLchar* message,
+                              const void* /* userParam */
     );
 
     template <typename Fn>
@@ -85,11 +82,9 @@ public:
           popGroupMarkerEXT(loadExtension({{"GL_EXT_debug_marker", "glPopGroupMarkerEXT"}})),
 #endif
           debugMessageControl(loadExtension(
-              {{"GL_KHR_debug", "glDebugMessageControl"}, {"GL_ARB_debug_output", "glDebugMessageControlARB"}}
-          )),
+              {{"GL_KHR_debug", "glDebugMessageControl"}, {"GL_ARB_debug_output", "glDebugMessageControlARB"}})),
           debugMessageCallback(loadExtension(
-              {{"GL_KHR_debug", "glDebugMessageCallback"}, {"GL_ARB_debug_output", "glDebugMessageCallbackARB"}}
-          )) {
+              {{"GL_KHR_debug", "glDebugMessageCallback"}, {"GL_ARB_debug_output", "glDebugMessageCallbackARB"}})) {
     }
 
 #ifndef NDEBUG
@@ -102,8 +97,8 @@ public:
     const ExtensionFunction<void()> popGroupMarkerEXT;
 #endif
 
-    const ExtensionFunction<
-        void(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled)>
+    const ExtensionFunction<void(
+        GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled)>
         debugMessageControl;
 
     const ExtensionFunction<void(Callback callback, const void* userParam)> debugMessageCallback;

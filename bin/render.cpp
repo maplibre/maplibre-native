@@ -23,8 +23,7 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<std::string> outputValue(argumentParser, "file", "Output file name", {'o', "output"});
     args::ValueFlag<std::string> cacheValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
     args::ValueFlag<std::string> assetsValue(
-        argumentParser, "file", "Directory to which asset:// URLs will resolve", {'a', "assets"}
-    );
+        argumentParser, "file", "Directory to which asset:// URLs will resolve", {'a', "assets"});
 
     args::Flag debugFlag(argumentParser, "debug", "Debug mode", {"debug"});
 
@@ -81,19 +80,17 @@ int main(int argc, char* argv[]) {
     util::RunLoop loop;
 
     HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
-    Map map(
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions()
-            .withMapMode(MapMode::Static)
-            .withSize(frontend.getSize())
-            .withPixelRatio(static_cast<float>(pixelRatio)),
-        ResourceOptions()
-            .withCachePath(cache_file)
-            .withAssetPath(asset_root)
-            .withApiKey(apikey)
-            .withTileServerOptions(mapTilerConfiguration)
-    );
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions()
+                .withMapMode(MapMode::Static)
+                .withSize(frontend.getSize())
+                .withPixelRatio(static_cast<float>(pixelRatio)),
+            ResourceOptions()
+                .withCachePath(cache_file)
+                .withAssetPath(asset_root)
+                .withApiKey(apikey)
+                .withTileServerOptions(mapTilerConfiguration));
 
     if (style.find("://") == std::string::npos) {
         style = std::string("file://") + style;
@@ -103,10 +100,8 @@ int main(int argc, char* argv[]) {
     map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
 
     if (debug) {
-        map.setDebug(
-            debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
-                  : mbgl::MapDebugOptions::NoDebug
-        );
+        map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
+                           : mbgl::MapDebugOptions::NoDebug);
     }
 
     try {

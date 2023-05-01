@@ -257,8 +257,7 @@ private:
         };
 
         auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(
-            path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)
-        ));
+            path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)));
         return ptr2.first->second;
     }
 
@@ -273,8 +272,7 @@ MBTilesFileSource::MBTilesFileSource(const ResourceOptions &resourceOptions, con
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "MBTilesFileSource",
           resourceOptions.clone(),
-          clientOptions.clone()
-      )) {}
+          clientOptions.clone())) {}
 
 std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -288,9 +286,8 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     if (resource.url.find(":///") == std::string::npos) {
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other, "MBTilesFileSource only supports absolute path urls"
-        );
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                           "MBTilesFileSource only supports absolute path urls");
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
     }
@@ -302,9 +299,8 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     if (result == -1 && errno == ENOENT) {
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::NotFound, "path not found: " + path
-        );
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           "path not found: " + path);
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
     }

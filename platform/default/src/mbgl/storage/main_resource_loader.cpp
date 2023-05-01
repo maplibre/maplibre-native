@@ -17,13 +17,11 @@ namespace mbgl {
 
 class MainResourceLoaderThread {
 public:
-    MainResourceLoaderThread(
-        std::shared_ptr<FileSource> assetFileSource_,
-        std::shared_ptr<FileSource> databaseFileSource_,
-        std::shared_ptr<FileSource> localFileSource_,
-        std::shared_ptr<FileSource> onlineFileSource_,
-        std::shared_ptr<FileSource> mbtilesFileSource_
-    )
+    MainResourceLoaderThread(std::shared_ptr<FileSource> assetFileSource_,
+                             std::shared_ptr<FileSource> databaseFileSource_,
+                             std::shared_ptr<FileSource> localFileSource_,
+                             std::shared_ptr<FileSource> onlineFileSource_,
+                             std::shared_ptr<FileSource> mbtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
@@ -51,14 +49,12 @@ public:
                 }
                 if (res.kind == Resource::Kind::Tile) {
                     // onlineResponse.data will be null if data not modified
-                    MBGL_TIMING_FINISH(
-                        watch,
-                        " Action: "
-                            << "Requesting,"
-                            << " URL: " << res.url.c_str()
-                            << " Size: " << (response.data != nullptr ? response.data->size() : 0) << "B,"
-                            << " Time"
-                    )
+                    MBGL_TIMING_FINISH(watch,
+                                       " Action: "
+                                           << "Requesting,"
+                                           << " URL: " << res.url.c_str() << " Size: "
+                                           << (response.data != nullptr ? response.data->size() : 0) << "B,"
+                                           << " Time")
                 }
                 callback(response);
             });
@@ -94,9 +90,10 @@ public:
                             // Set the priority of existing resource to low if it's expired but usable.
                             res.setPriority(Resource::Priority::Low);
                         } else {
-                            // Set prior data only if it was not returned to the requester.
-                            // Once we get 304 response from the network, we will forward response
-                            // to the requester.
+                            // Set prior data only if it was not returned to
+                            // the requester. Once we get 304 response from
+                            // the network, we will forward response to the
+                            // requester.
                             res.priorData = response.data;
                         }
 
@@ -118,9 +115,8 @@ public:
         if (tasks.size() == tasksSize) {
             Response response;
             response.noContent = true;
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::Other, "Unsupported resource request."
-            );
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "Unsupported resource request.");
             callback(response);
         }
     }
@@ -141,15 +137,13 @@ private:
 
 class MainResourceLoader::Impl {
 public:
-    Impl(
-        const ResourceOptions& resourceOptions_,
-        const ClientOptions& clientOptions_,
-        std::shared_ptr<FileSource> assetFileSource_,
-        std::shared_ptr<FileSource> databaseFileSource_,
-        std::shared_ptr<FileSource> localFileSource_,
-        std::shared_ptr<FileSource> onlineFileSource_,
-        std::shared_ptr<FileSource> mbtilesFileSource_
-    )
+    Impl(const ResourceOptions& resourceOptions_,
+         const ClientOptions& clientOptions_,
+         std::shared_ptr<FileSource> assetFileSource_,
+         std::shared_ptr<FileSource> databaseFileSource_,
+         std::shared_ptr<FileSource> localFileSource_,
+         std::shared_ptr<FileSource> onlineFileSource_,
+         std::shared_ptr<FileSource> mbtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
@@ -163,8 +157,7 @@ public:
               databaseFileSource,
               localFileSource,
               onlineFileSource,
-              mbtilesFileSource
-          )),
+              mbtilesFileSource)),
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
@@ -244,8 +237,7 @@ MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, c
           FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions)
-      )) {}
+          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 

@@ -40,11 +40,10 @@ StyleParseResult Parser::parse(const std::string& json) {
         const JSValue& versionValue = document["version"];
         const int version = versionValue.IsNumber() ? versionValue.GetInt() : 0;
         if (version != 8) {
-            Log::Warning(
-                Event::ParseStyle,
-                "current renderer implementation only supports style spec version 8; using an outdated style "
-                "will cause rendering errors"
-            );
+            Log::Warning(Event::ParseStyle,
+                         "current renderer implementation only supports style spec "
+                         "version 8; using an outdated style "
+                         "will cause rendering errors");
         }
     }
 
@@ -156,8 +155,7 @@ void Parser::parseSources(const JSValue& value) {
 
         conversion::Error error;
         std::optional<std::unique_ptr<Source>> source = conversion::convert<std::unique_ptr<Source>>(
-            property.value, error, id
-        );
+            property.value, error, id);
         if (!source) {
             Log::Warning(Event::ParseStyle, error.message);
             continue;

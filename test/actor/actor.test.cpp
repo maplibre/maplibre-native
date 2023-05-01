@@ -322,9 +322,10 @@ TEST(Actor, NoSelfActorRef) {
 }
 
 TEST(Actor, TwoPhaseConstruction) {
-    // This test mimics, in simplified form, the approach used by the Thread<Object> to construct
-    // its actor in two parts so that the Thread<Object> instance can be created without waiting
-    // for the target thread to be up and running.
+    // This test mimics, in simplified form, the approach used by the
+    // Thread<Object> to construct its actor in two parts so that the
+    // Thread<Object> instance can be created without waiting for the target
+    // thread to be up and running.
 
     struct TestActor {
         TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_)

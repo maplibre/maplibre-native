@@ -10,9 +10,10 @@ char16_t PUAend = u'\uF8FF';
 
 namespace mbgl {
 
-void TaggedString::addTextSection(
-    const std::u16string& sectionText, double scale, const FontStack& fontStack, std::optional<Color> textColor
-) {
+void TaggedString::addTextSection(const std::u16string& sectionText,
+                                  double scale,
+                                  const FontStack& fontStack,
+                                  std::optional<Color> textColor) {
     styledText.first += sectionText;
     sections.emplace_back(scale, fontStack, std::move(textColor));
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
@@ -54,9 +55,8 @@ void TaggedString::trim() {
         std::size_t trailingWhitespace = styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1;
 
         styledText.first = styledText.first.substr(beginningWhitespace, trailingWhitespace - beginningWhitespace);
-        styledText.second = std::vector<uint8_t>(
-            styledText.second.begin() + beginningWhitespace, styledText.second.begin() + trailingWhitespace
-        );
+        styledText.second = std::vector<uint8_t>(styledText.second.begin() + beginningWhitespace,
+                                                 styledText.second.begin() + trailingWhitespace);
     }
 }
 

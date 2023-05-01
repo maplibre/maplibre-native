@@ -95,8 +95,8 @@ public:
     /**
      * @brief Create an owning peer.
      */
-    virtual jni::Local<jni::Object<Layer>>
-    createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) = 0;
+    virtual jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env,
+                                                               std::unique_ptr<mbgl::style::Layer>) = 0;
 
     /**
      * @brief Register peer methods.

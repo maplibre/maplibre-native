@@ -58,11 +58,9 @@ public:
         : db(db_) {
         const int error = sqlite3_extended_result_codes(db, true);
         if (error != SQLITE_OK) {
-            mbgl::Log::Warning(
-                mbgl::Event::Database,
-                error,
-                std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db)
-            );
+            mbgl::Log::Warning(mbgl::Event::Database,
+                               error,
+                               std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
         }
     }
 
@@ -115,13 +113,12 @@ void logSqlMessage(void*, const int err, const char* msg) {
 MBGL_CONSTRUCTOR(initialize) {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
-        snprintf(
-            message,
-            96,
-            "sqlite3 libversion mismatch: headers report %d, but library reports %d",
-            SQLITE_VERSION_NUMBER,
-            sqlite3_libversion_number()
-        );
+        snprintf(message,
+                 96,
+                 "sqlite3 libversion mismatch: headers report %d, but library "
+                 "reports %d",
+                 SQLITE_VERSION_NUMBER,
+                 sqlite3_libversion_number());
         throw std::runtime_error(message);
     }
 
@@ -171,8 +168,7 @@ void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
 
 void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) {
     const int err = sqlite3_busy_timeout(
-        db, int(std::min<std::chrono::milliseconds::rep>(timeout.count(), std::numeric_limits<int>::max()))
-    );
+        db, int(std::min<std::chrono::milliseconds::rep>(timeout.count(), std::numeric_limits<int>::max())));
     if (err != SQLITE_OK) {
         throw Exception{err, sqlite3_errmsg(db)};
     }
@@ -303,8 +299,7 @@ void Query::bind(int offset, const char* value, std::size_t length, bool retain)
         throw std::range_error("value too long for sqlite3_bind_text");
     }
     stmt.impl->check(
-        sqlite3_bind_text(stmt.impl->stmt, offset, value, int(length), retain ? SQLITE_TRANSIENT : SQLITE_STATIC)
-    );
+        sqlite3_bind_text(stmt.impl->stmt, offset, value, int(length), retain ? SQLITE_TRANSIENT : SQLITE_STATIC));
 }
 
 void Query::bind(int offset, const std::string& value, bool retain) {
@@ -317,8 +312,7 @@ void Query::bindBlob(int offset, const void* value, std::size_t length, bool ret
         throw std::range_error("value too long for sqlite3_bind_text");
     }
     stmt.impl->check(
-        sqlite3_bind_blob(stmt.impl->stmt, offset, value, int(length), retain ? SQLITE_TRANSIENT : SQLITE_STATIC)
-    );
+        sqlite3_bind_blob(stmt.impl->stmt, offset, value, int(length), retain ? SQLITE_TRANSIENT : SQLITE_STATIC));
 }
 
 void Query::bindBlob(int offset, const std::vector<uint8_t>& value, bool retain) {
@@ -341,9 +335,8 @@ void Query::bind(int offset, std::optional<std::string> value) {
 }
 
 template <>
-void Query::bind(
-    int offset, std::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>> value
-) {
+void Query::bind(int offset,
+                 std::optional<std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>> value) {
     if (!value) {
         bind(offset, nullptr);
     } else {
@@ -394,9 +387,8 @@ double Query::get(int offset) {
 template <>
 std::string Query::get(int offset) {
     assert(stmt.impl);
-    return {
-        reinterpret_cast<const char*>(sqlite3_column_blob(stmt.impl->stmt, offset)),
-        size_t(sqlite3_column_bytes(stmt.impl->stmt, offset))};
+    return {reinterpret_cast<const char*>(sqlite3_column_blob(stmt.impl->stmt, offset)),
+            size_t(sqlite3_column_bytes(stmt.impl->stmt, offset))};
 }
 
 template <>
@@ -411,8 +403,7 @@ template <>
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> Query::get(int offset) {
     assert(stmt.impl);
     return std::chrono::time_point_cast<std::chrono::seconds>(
-        std::chrono::system_clock::from_time_t(sqlite3_column_int64(stmt.impl->stmt, offset))
-    );
+        std::chrono::system_clock::from_time_t(sqlite3_column_int64(stmt.impl->stmt, offset)));
 }
 
 template <>

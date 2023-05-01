@@ -27,8 +27,7 @@ public:
     QueryTest() {
         map.getStyle().loadJSON(util::read_file("test/fixtures/api/query_style.json"));
         map.getStyle().addImage(std::make_unique<style::Image>(
-            "test-icon", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f
-        ));
+            "test-icon", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f));
 
         frontend.render(map);
     }
@@ -36,11 +35,10 @@ public:
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
     HeadlessFrontend frontend{1};
-    MapAdapter map{
-        frontend,
-        MapObserver::nullObserver(),
-        fileSource,
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 };
 
 std::vector<Feature> getTopClusterFeature(QueryTest& test) {
@@ -211,8 +209,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterChildren) {
     EXPECT_TRUE(cluster != featureProps.end());
 
     auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s);
 
     EXPECT_TRUE(queryChildren.is<FeatureCollection>());
     auto children = queryChildren.get<FeatureCollection>();
@@ -235,17 +232,14 @@ TEST(Query, QueryFeatureExtensionsSuperclusterExpansionZoom) {
     EXPECT_EQ(topClusterFeature.size(), 1u);
 
     auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s);
     auto children = queryChildren.get<FeatureCollection>();
 
     auto queryExpansionZoom1 = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "expansion-zoom"s
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "expansion-zoom"s);
 
     auto queryExpansionZoom2 = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, children[3], "supercluster"s, "expansion-zoom"s
-    );
+        "cluster_source"s, children[3], "supercluster"s, "expansion-zoom"s);
     auto zoomValue1 = queryExpansionZoom1.get<mbgl::Value>();
     auto zoomValue2 = queryExpansionZoom2.get<mbgl::Value>();
     EXPECT_TRUE(zoomValue1.is<uint64_t>());
@@ -261,8 +255,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
 
     // Get leaves for cluster 1, with default limit 10, offset 0.
     auto queryClusterLeaves = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s);
     EXPECT_TRUE(queryClusterLeaves.is<FeatureCollection>());
     auto leaves = queryClusterLeaves.get<FeatureCollection>();
     EXPECT_EQ(leaves.size(), 10u);
@@ -270,8 +263,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     // Get leaves for cluster 1, with limit 3, offset 0.
     const std::map<std::string, mbgl::Value> limitOpts = {{"limit"s, static_cast<uint64_t>(3u)}};
     auto queryClusterLeavesLimit3 = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, limitOpts
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, limitOpts);
     auto limitLeaves3 = queryClusterLeavesLimit3.get<FeatureCollection>();
     EXPECT_EQ(limitLeaves3.size(), 3u);
 
@@ -280,11 +272,10 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(limitLeaves3[2].properties["name"].get<std::string>(), "Cape Fear"s);
 
     // Get leaves for cluster 1, with limit 3, offset 3.
-    const std::map<std::string, mbgl::Value> offsetOpts = {
-        {"limit"s, static_cast<uint64_t>(3u)}, {"offset"s, static_cast<uint64_t>(3u)}};
+    const std::map<std::string, mbgl::Value> offsetOpts = {{"limit"s, static_cast<uint64_t>(3u)},
+                                                           {"offset"s, static_cast<uint64_t>(3u)}};
     auto queryClusterLeavesOffset3 = test.frontend.getRenderer()->queryFeatureExtensions(
-        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, offsetOpts
-    );
+        "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, offsetOpts);
     auto offsetLeaves3 = queryClusterLeavesOffset3.get<FeatureCollection>();
     EXPECT_EQ(offsetLeaves3.size(), 3u);
     EXPECT_EQ(offsetLeaves3[0].properties["name"].get<std::string>(), "Cape Hatteras"s);

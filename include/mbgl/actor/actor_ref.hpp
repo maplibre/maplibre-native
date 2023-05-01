@@ -8,16 +8,18 @@
 namespace mbgl {
 
 /**
-    An `ActorRef<O>` is a *non*-owning, weak reference to an actor of type `O`. You can send it
-    messages just like an `Actor<O>`. It's a value object: safe to copy and pass between actors
-    via messages.
+    An `ActorRef<O>` is a *non*-owning, weak reference to an actor of type `O`.
+   You can send it messages just like an `Actor<O>`. It's a value object: safe
+   to copy and pass between actors via messages.
 
-    An `ActorRef<O>` does not extend the lifetime of the corresponding `Actor<O>`. That's determined
-    entirely by whichever object owns the `Actor<O>` -- the actor's "supervisor".
+    An `ActorRef<O>` does not extend the lifetime of the corresponding
+   `Actor<O>`. That's determined entirely by whichever object owns the
+   `Actor<O>` -- the actor's "supervisor".
 
-    It's safe for a `Ref` to outlive its `Actor` -- the reference is "weak", and does not extend
-    the lifetime of the owning Actor, and sending a message to a `Ref` whose `Actor` has died is
-    a no-op. (In the future, a dead-letters queue or log may be implemented.)
+    It's safe for a `Ref` to outlive its `Actor` -- the reference is "weak", and
+   does not extend the lifetime of the owning Actor, and sending a message to a
+   `Ref` whose `Actor` has died is a no-op. (In the future, a dead-letters queue
+   or log may be implemented.)
 */
 template <class Object>
 class ActorRef {

@@ -20,9 +20,8 @@ inline mbgl::style::HeatmapLayer& toHeatmapLayer(mbgl::style::Layer& layer) {
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 HeatmapLayer::HeatmapLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::HeatmapLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::HeatmapLayer>(jni::Make<std::string>(env, layerId),
+                                                        jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -120,23 +119,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> HeatmapJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> HeatmapJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                                mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new HeatmapLayer(toHeatmapLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> HeatmapJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new HeatmapLayer(
-            std::unique_ptr<mbgl::style::HeatmapLayer>(static_cast<mbgl::style::HeatmapLayer*>(layer.release()))
-        )
-    );
+    return createJavaPeer(env,
+                          new HeatmapLayer(std::unique_ptr<mbgl::style::HeatmapLayer>(
+                              static_cast<mbgl::style::HeatmapLayer*>(layer.release()))));
 }
 
 void HeatmapJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -163,8 +157,7 @@ void HeatmapJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&HeatmapLayer::getHeatmapColor, "nativeGetHeatmapColor"),
         METHOD(&HeatmapLayer::getHeatmapOpacityTransition, "nativeGetHeatmapOpacityTransition"),
         METHOD(&HeatmapLayer::setHeatmapOpacityTransition, "nativeSetHeatmapOpacityTransition"),
-        METHOD(&HeatmapLayer::getHeatmapOpacity, "nativeGetHeatmapOpacity")
-    );
+        METHOD(&HeatmapLayer::getHeatmapOpacity, "nativeGetHeatmapOpacity"));
 }
 
 } // namespace android

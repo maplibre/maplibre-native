@@ -19,8 +19,7 @@ public:
         return util::interpolationFactor(
             static_cast<float>(base),
             Range<float>{static_cast<float>(inputLevels.min), static_cast<float>(inputLevels.max)},
-            static_cast<float>(input)
-        );
+            static_cast<float>(input));
     }
 
     bool operator==(const ExponentialInterpolator& rhs) const { return base == rhs.base; }
@@ -32,14 +31,11 @@ public:
         : ub(x1_, y1_, x2_, y2_) {}
 
     double interpolationFactor(const Range<double>& inputLevels, const double input) const {
-        return ub.solve(
-            util::interpolationFactor(
-                1.0f,
-                Range<float>{static_cast<float>(inputLevels.min), static_cast<float>(inputLevels.max)},
-                static_cast<float>(input)
-            ),
-            1e-6
-        );
+        return ub.solve(util::interpolationFactor(
+                            1.0f,
+                            Range<float>{static_cast<float>(inputLevels.min), static_cast<float>(inputLevels.max)},
+                            static_cast<float>(input)),
+                        1e-6);
     }
 
     bool operator==(const CubicBezierInterpolator& rhs) const { return ub == rhs.ub; }

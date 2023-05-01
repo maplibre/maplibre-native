@@ -93,8 +93,8 @@ extern void (*const glCompileShader)(GLuint);
 /// Pointer to glCompressedTexImage2D OpenGL function.
 extern void (*const glCompressedTexImage2D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const void*);
 /// Pointer to glCompressedTexSubImage2D OpenGL function.
-extern void (*const glCompressedTexSubImage2D
-)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, const void*);
+extern void (*const glCompressedTexSubImage2D)(
+    GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, const void*);
 /// Pointer to glCopyTexImage2D OpenGL function.
 extern void (*const glCopyTexImage2D)(GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint);
 /// Pointer to glCopyTexSubImage2D OpenGL function.
@@ -341,19 +341,19 @@ extern void (*const glReadBuffer)(GLenum);
 /// Pointer to glDrawRangeElements OpenGL function.
 extern void (*const glDrawRangeElements)(GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid*);
 /// Pointer to glTexImage3D OpenGL function.
-extern void (*const glTexImage3D
-)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*);
+extern void (*const glTexImage3D)(
+    GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*);
 /// Pointer to glTexSubImage3D OpenGL function.
-extern void (*const glTexSubImage3D
-)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid*);
+extern void (*const glTexSubImage3D)(
+    GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid*);
 /// Pointer to glCopyTexSubImage3D OpenGL function.
 extern void (*const glCopyTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei);
 /// Pointer to glCompressedTexImage3D OpenGL function.
-extern void (*const glCompressedTexImage3D
-)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid*);
+extern void (*const glCompressedTexImage3D)(
+    GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid*);
 /// Pointer to glCompressedTexSubImage3D OpenGL function.
-extern void (*const glCompressedTexSubImage3D
-)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid*);
+extern void (*const glCompressedTexSubImage3D)(
+    GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid*);
 /// Pointer to glGenQueries OpenGL function.
 extern void (*const glGenQueries)(GLsizei, GLuint*);
 /// Pointer to glDeleteQueries OpenGL function.

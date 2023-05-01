@@ -16,12 +16,10 @@ namespace mbgl {
 
 class AssetManagerFileSource::Impl {
 public:
-    Impl(
-        ActorRef<Impl>,
-        AAssetManager* assetManager_,
-        const ResourceOptions resourceOptions_,
-        const ClientOptions clientOptions_
-    )
+    Impl(ActorRef<Impl>,
+         AAssetManager* assetManager_,
+         const ResourceOptions resourceOptions_,
+         const ClientOptions clientOptions_)
         : resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()),
           assetManager(assetManager_) {}
@@ -33,14 +31,12 @@ public:
         Response response;
 
         if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER)) {
-            response.data = std::make_shared<std::string>(
-                reinterpret_cast<const char*>(AAsset_getBuffer(asset)), AAsset_getLength64(asset)
-            );
+            response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
+                                                          AAsset_getLength64(asset));
             AAsset_close(asset);
         } else {
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::NotFound, "Could not read asset"
-            );
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               "Could not read asset");
         }
 
         req.invoke(&FileSourceRequest::setResponse, response);
@@ -60,20 +56,17 @@ private:
     ClientOptions clientOptions;
 };
 
-AssetManagerFileSource::AssetManagerFileSource(
-    jni::JNIEnv& env,
-    const jni::Object<android::AssetManager>& assetManager_,
-    const ResourceOptions resourceOptions,
-    const ClientOptions clientOptions
-)
+AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
+                                               const jni::Object<android::AssetManager>& assetManager_,
+                                               const ResourceOptions resourceOptions,
+                                               const ClientOptions clientOptions)
     : assetManager(jni::NewGlobal(env, assetManager_)),
       impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetManagerFileSource",
           AAssetManager_fromJava(&env, jni::Unwrap(assetManager.get())),
           resourceOptions.clone(),
-          clientOptions.clone()
-      )) {}
+          clientOptions.clone())) {}
 
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 

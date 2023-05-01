@@ -10,9 +10,9 @@ namespace expression {
 template <class T>
 class FormatSectionOverride final : public Expression {
 public:
-    FormatSectionOverride(
-        const type::Type& type_, PossiblyEvaluatedPropertyValue<T> defaultValue_, std::string propertyName_
-    )
+    FormatSectionOverride(const type::Type& type_,
+                          PossiblyEvaluatedPropertyValue<T> defaultValue_,
+                          std::string propertyName_)
         : Expression(Kind::FormatSectionOverride, type_),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
@@ -28,8 +28,7 @@ public:
 
         return defaultValue.match(
             [&context](const style::PropertyExpression<T>& e) { return e.getExpression().evaluate(context); },
-            [](const T& t) -> EvaluationResult { return t; }
-        );
+            [](const T& t) -> EvaluationResult { return t; });
     }
 
     void eachChild(const std::function<void(const Expression&)>& fn) const final {
@@ -49,16 +48,13 @@ public:
                 [other](const style::PropertyExpression<T>& thisExpr) {
                     return other->defaultValue.match(
                         [&thisExpr](const style::PropertyExpression<T>& otherExpr) { return thisExpr == otherExpr; },
-                        [](const T&) { return false; }
-                    );
+                        [](const T&) { return false; });
                 },
                 [other](const T& thisValue) {
                     return other->defaultValue.match(
                         [&thisValue](const T& otherValue) { return thisValue == otherValue; },
-                        [](const style::PropertyExpression<T>&) { return false; }
-                    );
-                }
-            );
+                        [](const style::PropertyExpression<T>&) { return false; });
+                });
         }
 
         return false;

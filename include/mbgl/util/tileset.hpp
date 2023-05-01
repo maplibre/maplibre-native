@@ -31,13 +31,11 @@ public:
     DEMEncoding encoding;
     std::optional<LatLngBounds> bounds;
 
-    Tileset(
-        std::vector<std::string> tiles_ = std::vector<std::string>(),
-        Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},
-        std::string attribution_ = {},
-        Scheme scheme_ = Scheme::XYZ,
-        DEMEncoding encoding_ = DEMEncoding::Mapbox
-    )
+    Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),
+            Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},
+            std::string attribution_ = {},
+            Scheme scheme_ = Scheme::XYZ,
+            DEMEncoding encoding_ = DEMEncoding::Mapbox)
         : tiles(std::move(tiles_)),
           zoomRange(zoomRange_),
           attribution(std::move(attribution_)),

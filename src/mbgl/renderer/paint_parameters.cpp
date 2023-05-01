@@ -15,8 +15,8 @@ TransformParameters::TransformParameters(const TransformState& state_)
     // Update the default matrices to the current viewport dimensions.
     state.getProjMatrix(projMatrix);
 
-    // Also compute a projection matrix that aligns with the current pixel grid, taking into account
-    // odd viewport sizes.
+    // Also compute a projection matrix that aligns with the current pixel grid,
+    // taking into account odd viewport sizes.
     state.getProjMatrix(alignedProjMatrix, 1, true);
 
     // Calculate a second projection matrix with the near plane moved further,
@@ -26,19 +26,17 @@ TransformParameters::TransformParameters(const TransformState& state_)
     state.getProjMatrix(nearClippedProjMatrix, static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
 }
 
-PaintParameters::PaintParameters(
-    gfx::Context& context_,
-    float pixelRatio_,
-    gfx::RendererBackend& backend_,
-    const EvaluatedLight& evaluatedLight_,
-    MapMode mode_,
-    MapDebugOptions debugOptions_,
-    TimePoint timePoint_,
-    const TransformParameters& transformParams_,
-    RenderStaticData& staticData_,
-    LineAtlas& lineAtlas_,
-    PatternAtlas& patternAtlas_
-)
+PaintParameters::PaintParameters(gfx::Context& context_,
+                                 float pixelRatio_,
+                                 gfx::RendererBackend& backend_,
+                                 const EvaluatedLight& evaluatedLight_,
+                                 MapMode mode_,
+                                 MapDebugOptions debugOptions_,
+                                 TimePoint timePoint_,
+                                 const TransformParameters& transformParams_,
+                                 RenderStaticData& staticData_,
+                                 LineAtlas& lineAtlas_,
+                                 PatternAtlas& patternAtlas_)
     : context(context_),
       backend(backend_),
       encoder(context.createCommandEncoder()),
@@ -103,11 +101,9 @@ bool tileIDsIdentical(const RenderTiles& renderTiles, const std::map<UnwrappedTi
         return false;
     }
     return std::equal(
-        renderTiles->begin(),
-        renderTiles->end(),
-        tileClippingMaskIDs.begin(),
-        [](const RenderTile& a, const auto& b) { return a.id == b.first; }
-    );
+        renderTiles->begin(), renderTiles->end(), tileClippingMaskIDs.begin(), [](const RenderTile& a, const auto& b) {
+            return a.id == b.first;
+        });
 }
 
 } // namespace
@@ -137,36 +133,31 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         const int32_t stencilID = nextStencilID++;
         tileClippingMaskIDs.emplace(renderTile.id, stencilID);
 
-        program->draw(
-            context,
-            *renderPass,
-            gfx::Triangles(),
-            gfx::DepthMode::disabled(),
-            gfx::StencilMode{
-                gfx::StencilMode::Always{},
-                stencilID,
-                0b11111111,
-                gfx::StencilOpType::Keep,
-                gfx::StencilOpType::Keep,
-                gfx::StencilOpType::Replace},
-            gfx::ColorMode::disabled(),
-            gfx::CullFaceMode::disabled(),
-            *staticData.quadTriangleIndexBuffer,
-            staticData.clippingMaskSegments,
-            ClippingMaskProgram::computeAllUniformValues(
-                ClippingMaskProgram::LayoutUniformValues{
-                    uniforms::matrix::Value(matrixForTile(renderTile.id)),
-                },
-                paintAttributeData,
-                properties,
-                static_cast<float>(state.getZoom())
-            ),
-            ClippingMaskProgram::computeAllAttributeBindings(
-                *staticData.tileVertexBuffer, paintAttributeData, properties
-            ),
-            ClippingMaskProgram::TextureBindings{},
-            "clipping/" + util::toString(stencilID)
-        );
+        program->draw(context,
+                      *renderPass,
+                      gfx::Triangles(),
+                      gfx::DepthMode::disabled(),
+                      gfx::StencilMode{gfx::StencilMode::Always{},
+                                       stencilID,
+                                       0b11111111,
+                                       gfx::StencilOpType::Keep,
+                                       gfx::StencilOpType::Keep,
+                                       gfx::StencilOpType::Replace},
+                      gfx::ColorMode::disabled(),
+                      gfx::CullFaceMode::disabled(),
+                      *staticData.quadTriangleIndexBuffer,
+                      staticData.clippingMaskSegments,
+                      ClippingMaskProgram::computeAllUniformValues(
+                          ClippingMaskProgram::LayoutUniformValues{
+                              uniforms::matrix::Value(matrixForTile(renderTile.id)),
+                          },
+                          paintAttributeData,
+                          properties,
+                          static_cast<float>(state.getZoom())),
+                      ClippingMaskProgram::computeAllAttributeBindings(
+                          *staticData.tileVertexBuffer, paintAttributeData, properties),
+                      ClippingMaskProgram::TextureBindings{},
+                      "clipping/" + util::toString(stencilID));
     }
 }
 
@@ -174,13 +165,12 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
-    return gfx::StencilMode{
-        gfx::StencilMode::Equal{0b11111111},
-        id,
-        0b00000000,
-        gfx::StencilOpType::Keep,
-        gfx::StencilOpType::Keep,
-        gfx::StencilOpType::Replace};
+    return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
+                            id,
+                            0b00000000,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Replace};
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
@@ -188,18 +178,17 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
         clearStencil();
     }
 
-    // We're potentially destroying the stencil clipping mask in this pass. That means we'll have
-    // to recreate it for the next source if any.
+    // We're potentially destroying the stencil clipping mask in this pass. That
+    // means we'll have to recreate it for the next source if any.
     tileClippingMaskIDs.clear();
 
     const int32_t id = nextStencilID++;
-    return gfx::StencilMode{
-        gfx::StencilMode::NotEqual{0b11111111},
-        id,
-        0b11111111,
-        gfx::StencilOpType::Keep,
-        gfx::StencilOpType::Keep,
-        gfx::StencilOpType::Replace};
+    return gfx::StencilMode{gfx::StencilMode::NotEqual{0b11111111},
+                            id,
+                            0b11111111,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Replace};
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {

@@ -101,11 +101,11 @@ public:
         return bounds;
     }
 
-    /// Construct an infinite bound, a bound for which the constrain method returns its
-    /// input unmodified.
+    /// Construct an infinite bound, a bound for which the constrain method
+    /// returns its input unmodified.
     ///
-    /// Note: this is different than LatLngBounds::world() since arbitrary unwrapped
-    /// coordinates are also inside the bounds.
+    /// Note: this is different than LatLngBounds::world() since arbitrary
+    /// unwrapped coordinates are also inside the bounds.
     LatLngBounds()
         : sw({-90, -180}),
           ne({90, 180}),

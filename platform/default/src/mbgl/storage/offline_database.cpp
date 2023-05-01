@@ -42,8 +42,7 @@ void OfflineDatabase::initialize() {
     }
 
     db = std::make_unique<mapbox::sqlite::Database>(
-        mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadWriteCreate)
-    );
+        mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadWriteCreate));
     db->setBusyTimeout(Milliseconds::max());
     db->exec("PRAGMA foreign_keys = ON");
 
@@ -107,8 +106,8 @@ void OfflineDatabase::handleError(const mapbox::sqlite::Exception& ex, const cha
     if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt ||
         (ex.code == mapbox::sqlite::ResultCode::ReadOnly &&
          ex.extendedCode == mapbox::sqlite::ExtendedResultCode::ReadOnlyDBMoved)) {
-        // The database was corruped, moved away, or deleted. We're going to start fresh with a
-        // clean slate for the next operation.
+        // The database was corruped, moved away, or deleted. We're going to
+        // start fresh with a clean slate for the next operation.
         Log::Error(Event::Database, static_cast<int>(ex.code), std::string("Can't ") + action + ": " + ex.what());
         try {
             removeExisting();
@@ -206,8 +205,12 @@ void OfflineDatabase::migrateToVersion6() {
     checkFlags();
 
     mapbox::sqlite::Transaction transaction(*db);
-    db->exec("ALTER TABLE resources ADD COLUMN must_revalidate INTEGER NOT NULL DEFAULT 0");
-    db->exec("ALTER TABLE tiles ADD COLUMN must_revalidate INTEGER NOT NULL DEFAULT 0");
+    db->exec(
+        "ALTER TABLE resources ADD COLUMN must_revalidate INTEGER NOT NULL "
+        "DEFAULT 0");
+    db->exec(
+        "ALTER TABLE tiles ADD COLUMN must_revalidate INTEGER NOT NULL DEFAULT "
+        "0");
     db->exec("PRAGMA user_version = 6");
     transaction.commit();
 }
@@ -291,9 +294,9 @@ std::pair<bool, uint64_t> OfflineDatabase::put(const Resource& resource, const R
     return {false, 0};
 }
 
-std::pair<bool, uint64_t> OfflineDatabase::putInternal(
-    const Resource& resource, const Response& response, bool evict_
-) {
+std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
+                                                       const Response& response,
+                                                       bool evict_) {
     checkFlags();
 
     if (response.error) {
@@ -323,23 +326,19 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(
 
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
-        inserted = putTile(
-            *resource.tileData,
-            response,
-            compressed      ? compressedData
-            : response.data ? *response.data
-                            : "",
-            compressed
-        );
+        inserted = putTile(*resource.tileData,
+                           response,
+                           compressed      ? compressedData
+                           : response.data ? *response.data
+                                           : "",
+                           compressed);
     } else {
-        inserted = putResource(
-            resource,
-            response,
-            compressed      ? compressedData
-            : response.data ? *response.data
-                            : "",
-            compressed
-        );
+        inserted = putResource(resource,
+                               response,
+                               compressed      ? compressedData
+                               : response.data ? *response.data
+                                               : "",
+                               compressed);
     }
 
     if (stats) {
@@ -364,8 +363,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
 
             // If we don't have any indication that the database is corrupt, continue as usual.
             Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what()
-            );
+                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
     }
 
@@ -415,9 +413,10 @@ std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     return query.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putResource(
-    const Resource& resource, const Response& response, const std::string& data, bool compressed
-) {
+bool OfflineDatabase::putResource(const Resource& resource,
+                                  const Response& response,
+                                  const std::string& data,
+                                  bool compressed) {
     checkFlags();
 
     if (response.notModified) {
@@ -530,8 +529,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
 
             // If we don't have any indication that the database is corrupt, continue as usual.
             Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what()
-            );
+                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
     }
 
@@ -604,9 +602,10 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
     return size.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putTile(
-    const Resource::TileData& tile, const Response& response, const std::string& data, bool compressed
-) {
+bool OfflineDatabase::putTile(const Resource::TileData& tile,
+                              const Response& response,
+                              const std::string& data,
+                              bool compressed) {
     checkFlags();
 
     if (response.notModified) {
@@ -836,9 +835,8 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::listRegions() try 
     return unexpected<std::exception_ptr>(std::current_exception());
 }
 
-expected<OfflineRegion, std::exception_ptr> OfflineDatabase::createRegion(
-    const OfflineRegionDefinition& definition, const OfflineRegionMetadata& metadata
-) try {
+expected<OfflineRegion, std::exception_ptr> OfflineDatabase::createRegion(const OfflineRegionDefinition& definition,
+                                                                          const OfflineRegionMetadata& metadata) try {
     checkFlags();
 
     // clang-format off
@@ -867,18 +865,16 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
         query.bind(1, sideDatabasePath);
         query.run();
     } catch (const mapbox::sqlite::Exception& ex) {
-        Log::Error(
-            Event::Database,
-            static_cast<int>(ex.code),
-            std::string("Can't attach database (") + sideDatabasePath + ") for merge: " + ex.what()
-        );
+        Log::Error(Event::Database,
+                   static_cast<int>(ex.code),
+                   std::string("Can't attach database (") + sideDatabasePath + ") for merge: " + ex.what());
 
         return unexpected<std::exception_ptr>(std::current_exception());
     }
     try {
-        // Support sideloaded databases at user_version = 6. Future schema version
-        // changes will need to implement migration paths for sideloaded databases at
-        // version 6.
+        // Support sideloaded databases at user_version = 6. Future schema
+        // version changes will need to implement migration paths for sideloaded
+        // databases at version 6.
         auto sideUserVersion = static_cast<int>(getPragma<int64_t>("PRAGMA side.user_version"));
         const auto mainUserVersion = getPragma<int64_t>("PRAGMA user_version");
         if (sideUserVersion < 6 || sideUserVersion != mainUserVersion) {
@@ -922,11 +918,9 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
         OfflineRegions result;
         while (queryRegions.run()) {
             // Construct, then move because this constructor is private.
-            OfflineRegion region(
-                queryRegions.get<int64_t>(0),
-                decodeOfflineRegionDefinition(queryRegions.get<std::string>(1)),
-                queryRegions.get<std::vector<uint8_t>>(2)
-            );
+            OfflineRegion region(queryRegions.get<int64_t>(0),
+                                 decodeOfflineRegionDefinition(queryRegions.get<std::string>(1)),
+                                 queryRegions.get<std::vector<uint8_t>>(2));
             result.emplace_back(std::move(region));
         }
         db->exec("DETACH DATABASE side");
@@ -942,8 +936,7 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
 }
 
 expected<OfflineRegionMetadata, std::exception_ptr> OfflineDatabase::updateMetadata(
-    const int64_t regionID, const OfflineRegionMetadata& metadata
-) try {
+    const int64_t regionID, const OfflineRegionMetadata& metadata) try {
     checkFlags();
 
     // clang-format off
@@ -1013,9 +1006,9 @@ uint64_t OfflineDatabase::putRegionResource(int64_t regionID, const Resource& re
     return 0;
 }
 
-void OfflineDatabase::putRegionResources(
-    int64_t regionID, const std::list<std::tuple<Resource, Response>>& resources, OfflineRegionStatus& status
-) try {
+void OfflineDatabase::putRegionResources(int64_t regionID,
+                                         const std::list<std::tuple<Resource, Response>>& resources,
+                                         OfflineRegionStatus& status) try {
     checkFlags();
 
     if (!db) {
@@ -1023,8 +1016,9 @@ void OfflineDatabase::putRegionResources(
     }
     mapbox::sqlite::Transaction transaction(*db);
 
-    // Accumulate all statistics locally first before adding them to the OfflineRegionStatus object
-    // to ensure correctness when the transaction fails.
+    // Accumulate all statistics locally first before adding them to the
+    // OfflineRegionStatus object to ensure correctness when the transaction
+    // fails.
     uint64_t completedResourceCount = 0;
     uint64_t completedResourceSize = 0;
     uint64_t completedTileCount = 0;
@@ -1060,9 +1054,9 @@ void OfflineDatabase::putRegionResources(
     handleError("write region resources");
 }
 
-uint64_t OfflineDatabase::putRegionResourceInternal(
-    int64_t regionID, const Resource& resource, const Response& response
-) {
+uint64_t OfflineDatabase::putRegionResourceInternal(int64_t regionID,
+                                                    const Resource& resource,
+                                                    const Response& response) {
     checkFlags();
 
     uint64_t size = putInternal(resource, response, false).second;
@@ -1230,8 +1224,8 @@ T OfflineDatabase::getPragma(const char* sql) {
 // SQLite database never shrinks in size unless we call VACUUM. We here
 // are monitoring the soft limit (i.e. number of free pages in the file)
 // and as it approaches to the hard limit (i.e. the actual file size) we
-// delete an arbitrary number of old cache entries. The free pages approach saves
-// us from calling VACUUM or keeping a running total, which can be costly.
+// delete an arbitrary number of old cache entries. The free pages approach
+// saves us from calling VACUUM or keeping a running total, which can be costly.
 bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats) {
     checkFlags();
     uint64_t ambientCacheSize = (initAmbientCacheSize() == nullptr) ? *currentAmbientCacheSize
@@ -1296,8 +1290,7 @@ bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& st
 
         // Update current ambient cache size, based on how many bytes were released.
         newAmbientCacheSize = std::max<int64_t>(
-            static_cast<int64_t>(newAmbientCacheSize) - static_cast<int64_t>(stats.bytesReleased()), 0u
-        );
+            static_cast<int64_t>(newAmbientCacheSize) - static_cast<int64_t>(stats.bytesReleased()), 0u);
 
         // The cached value of offlineTileCount does not need to be updated
         // here because only non-offline tiles can be removed by eviction.

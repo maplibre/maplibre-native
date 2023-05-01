@@ -19,19 +19,17 @@ jni::Local<jni::Object<NumberFormat>> NumberFormat::getInstance(jni::JNIEnv& env
     return javaClass.Call(env, method, locale);
 }
 
-jni::Local<jni::Object<NumberFormat>> NumberFormat::getCurrencyInstance(
-    jni::JNIEnv& env, const jni::Object<Locale>& locale
-) {
+jni::Local<jni::Object<NumberFormat>> NumberFormat::getCurrencyInstance(jni::JNIEnv& env,
+                                                                        const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<NumberFormat>(jni::Object<Locale>)>(
-        env, "getCurrencyInstance"
-    );
+        env, "getCurrencyInstance");
     return javaClass.Call(env, method, locale);
 }
 
-jni::Local<jni::String> NumberFormat::format(
-    jni::JNIEnv& env, const jni::Object<NumberFormat>& nf, jni::jdouble number
-) {
+jni::Local<jni::String> NumberFormat::format(jni::JNIEnv& env,
+                                             const jni::Object<NumberFormat>& nf,
+                                             jni::jdouble number) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::String(jni::jdouble)>(env, "format");
     return nf.Call(env, method, number);
@@ -53,13 +51,11 @@ void NumberFormat::setMaximumFractionDigits(jni::JNIEnv& env, const jni::Object<
 
 namespace platform {
 
-std::string formatNumber(
-    double number,
-    const std::string& localeId,
-    const std::string& currency,
-    uint8_t minFractionDigits,
-    uint8_t maxFractionDigits
-) {
+std::string formatNumber(double number,
+                         const std::string& localeId,
+                         const std::string& currency,
+                         uint8_t minFractionDigits,
+                         uint8_t maxFractionDigits) {
     auto env{android::AttachEnv()};
 
     jni::Global<jni::Object<android::Locale>> locale;
@@ -69,14 +65,10 @@ std::string formatNumber(
     } else if (!languageTag.region) {
         locale = jni::NewGlobal(*env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
     } else {
-        locale = jni::NewGlobal(
-            *env,
-            android::Locale::New(
-                *env,
-                jni::Make<jni::String>(*env, *languageTag.language),
-                jni::Make<jni::String>(*env, *languageTag.region)
-            )
-        );
+        locale = jni::NewGlobal(*env,
+                                android::Locale::New(*env,
+                                                     jni::Make<jni::String>(*env, *languageTag.language),
+                                                     jni::Make<jni::String>(*env, *languageTag.region)));
     }
 
     jni::Global<jni::Object<android::NumberFormat>> formatter;

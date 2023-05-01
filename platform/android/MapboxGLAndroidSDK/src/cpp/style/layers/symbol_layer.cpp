@@ -20,9 +20,8 @@ inline mbgl::style::SymbolLayer& toSymbolLayer(mbgl::style::Layer& layer) {
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 SymbolLayer::SymbolLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::SymbolLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::SymbolLayer>(jni::Make<std::string>(env, layerId),
+                                                       jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -483,22 +482,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> SymbolJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> SymbolJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                               mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new SymbolLayer(toSymbolLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> SymbolJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new SymbolLayer(std::unique_ptr<mbgl::style::SymbolLayer>(static_cast<mbgl::style::SymbolLayer*>(layer.release()
-        )))
-    );
+    return createJavaPeer(env,
+                          new SymbolLayer(std::unique_ptr<mbgl::style::SymbolLayer>(
+                              static_cast<mbgl::style::SymbolLayer*>(layer.release()))));
 }
 
 void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -593,8 +588,7 @@ void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&SymbolLayer::getTextTranslateTransition, "nativeGetTextTranslateTransition"),
         METHOD(&SymbolLayer::setTextTranslateTransition, "nativeSetTextTranslateTransition"),
         METHOD(&SymbolLayer::getTextTranslate, "nativeGetTextTranslate"),
-        METHOD(&SymbolLayer::getTextTranslateAnchor, "nativeGetTextTranslateAnchor")
-    );
+        METHOD(&SymbolLayer::getTextTranslateAnchor, "nativeGetTextTranslateAnchor"));
 }
 
 } // namespace android

@@ -10,11 +10,9 @@ namespace expression {
 struct FormatExpressionSection {
     explicit FormatExpressionSection(std::unique_ptr<Expression> content_);
 
-    void setTextSectionOptions(
-        std::optional<std::unique_ptr<Expression>> fontScale_,
-        std::optional<std::unique_ptr<Expression>> textFont_,
-        std::optional<std::unique_ptr<Expression>> textColor_
-    );
+    void setTextSectionOptions(std::optional<std::unique_ptr<Expression>> fontScale_,
+                               std::optional<std::unique_ptr<Expression>> textFont_,
+                               std::optional<std::unique_ptr<Expression>> textColor_);
 
     // Content can be expression that evaluates to String or Image.
     std::shared_ptr<Expression> content;

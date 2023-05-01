@@ -73,8 +73,7 @@ AssetFileSource::AssetFileSource(const ResourceOptions& resourceOptions, const C
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetFileSource",
           resourceOptions.clone(),
-          clientOptions.clone()
-      )) {}
+          clientOptions.clone())) {}
 
 AssetFileSource::~AssetFileSource() = default;
 

@@ -45,11 +45,9 @@ public:
 
 public:
     // Creates an empty texture with the specified dimensions.
-    Texture createTexture(
-        const Size size,
-        TexturePixelType format = TexturePixelType::RGBA,
-        TextureChannelDataType type = TextureChannelDataType::UnsignedByte
-    ) {
+    Texture createTexture(const Size size,
+                          TexturePixelType format = TexturePixelType::RGBA,
+                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
         return {size, createTextureResource(size, format, type)};
     }
 

@@ -41,9 +41,9 @@ public:
         : zoom(zoom_),
           feature(feature_),
           featureState(state_) {}
-    EvaluationContext(
-        std::optional<float> zoom_, GeometryTileFeature const* feature_, std::optional<double> colorRampParameter_
-    )
+    EvaluationContext(std::optional<float> zoom_,
+                      GeometryTileFeature const* feature_,
+                      std::optional<double> colorRampParameter_)
         : zoom(std::move(zoom_)),
           feature(feature_),
           colorRampParameter(std::move(colorRampParameter_)) {}
@@ -196,28 +196,25 @@ public:
     Kind getKind() const { return kind; };
     type::Type getType() const { return type; };
 
-    EvaluationResult evaluate(
-        std::optional<float> zoom, const Feature& feature, std::optional<double> colorRampParameter
-    ) const;
-    EvaluationResult evaluate(
-        std::optional<float> zoom,
-        const Feature& feature,
-        std::optional<double> colorRampParameter,
-        const std::set<std::string>& availableImages
-    ) const;
-    EvaluationResult evaluate(
-        std::optional<float> zoom,
-        const Feature& feature,
-        std::optional<double> colorRampParameter,
-        const std::set<std::string>& availableImages,
-        const CanonicalTileID& canonical
-    ) const;
+    EvaluationResult evaluate(std::optional<float> zoom,
+                              const Feature& feature,
+                              std::optional<double> colorRampParameter) const;
+    EvaluationResult evaluate(std::optional<float> zoom,
+                              const Feature& feature,
+                              std::optional<double> colorRampParameter,
+                              const std::set<std::string>& availableImages) const;
+    EvaluationResult evaluate(std::optional<float> zoom,
+                              const Feature& feature,
+                              std::optional<double> colorRampParameter,
+                              const std::set<std::string>& availableImages,
+                              const CanonicalTileID& canonical) const;
     EvaluationResult evaluate(std::optional<mbgl::Value> accumulated, const Feature& feature) const;
 
     /**
-     * Statically analyze the expression, attempting to enumerate possible outputs. Returns
-     * an array of values plus the sentinel null optional value, used to indicate that the
-     * complete set of outputs is statically undecidable.
+     * Statically analyze the expression, attempting to enumerate possible
+     * outputs. Returns an array of values plus the sentinel null optional
+     * value, used to indicate that the complete set of outputs is statically
+     * undecidable.
      */
     virtual std::vector<std::optional<Value>> possibleOutputs() const = 0;
 
@@ -246,23 +243,19 @@ protected:
     }
 
     template <typename T>
-    static bool childEqual(
-        const std::pair<T, std::unique_ptr<Expression>>& lhs, const std::pair<T, std::unique_ptr<Expression>>& rhs
-    ) {
+    static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
+                           const std::pair<T, std::unique_ptr<Expression>>& rhs) {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
     template <typename T>
-    static bool childEqual(
-        const std::pair<T, std::shared_ptr<Expression>>& lhs, const std::pair<T, std::shared_ptr<Expression>>& rhs
-    ) {
+    static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
-    static bool childEqual(
-        const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
-        const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs
-    ) {
+    static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
+                           const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) {
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
     }
 

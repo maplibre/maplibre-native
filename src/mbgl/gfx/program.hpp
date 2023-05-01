@@ -38,22 +38,20 @@ public:
     using UniformList = typename Name::UniformList;
     using TextureList = typename Name::TextureList;
 
-    virtual void draw(
-        Context&,
-        RenderPass&,
-        const DrawMode&,
-        const DepthMode&,
-        const StencilMode&,
-        const ColorMode&,
-        const CullFaceMode&,
-        const UniformValues<UniformList>&,
-        DrawScope&,
-        const AttributeBindings<AttributeList>&,
-        const TextureBindings<TextureList>&,
-        const IndexBuffer&,
-        std::size_t indexOffset,
-        std::size_t indexLength
-    ) = 0;
+    virtual void draw(Context&,
+                      RenderPass&,
+                      const DrawMode&,
+                      const DepthMode&,
+                      const StencilMode&,
+                      const ColorMode&,
+                      const CullFaceMode&,
+                      const UniformValues<UniformList>&,
+                      DrawScope&,
+                      const AttributeBindings<AttributeList>&,
+                      const TextureBindings<TextureList>&,
+                      const IndexBuffer&,
+                      std::size_t indexOffset,
+                      std::size_t indexLength) = 0;
 };
 
 } // namespace gfx

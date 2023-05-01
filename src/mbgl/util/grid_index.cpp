@@ -125,9 +125,8 @@ bool GridIndex<T>::completeIntersection(const BBox& queryBBox) const {
 
 template <class T>
 typename GridIndex<T>::BBox GridIndex<T>::convertToBox(const BCircle& circle) const {
-    return BBox{
-        {circle.center.x - circle.radius, circle.center.y - circle.radius},
-        {circle.center.x + circle.radius, circle.center.y + circle.radius}};
+    return BBox{{circle.center.x - circle.radius, circle.center.y - circle.radius},
+                {circle.center.x + circle.radius, circle.center.y + circle.radius}};
 }
 
 template <class T>

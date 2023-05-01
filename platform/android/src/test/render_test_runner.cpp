@@ -19,13 +19,12 @@ void android_main(struct android_app* app) {
     struct android_poll_source* source = nullptr;
     if (!copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
         mbgl::Log::Error(
-            mbgl::Event::General, "Failed to copy zip File '%s' to external storage for upzipping", zipFile.c_str()
-        );
+            mbgl::Event::General, "Failed to copy zip File '%s' to external storage for upzipping", zipFile.c_str());
     } else {
         unZipFile(env, zipFile, storagePath);
 
-        auto runTestWithManifest = [&storagePath, &app, &outFd, &outEvents, &source](const std::string& manifest
-                                   ) -> bool {
+        auto runTestWithManifest =
+            [&storagePath, &app, &outFd, &outEvents, &source](const std::string& manifest) -> bool {
             const std::string configFile = storagePath + manifest;
             std::vector<std::string> arguments = {"mbgl-render-test-runner", "-p", configFile, "-u", "rebaseline"};
             std::vector<char*> argv;
@@ -45,8 +44,7 @@ void android_main(struct android_app* app) {
                 mbgl::Log::Info(mbgl::Event::General, "Current finished tests number is '%d' ", ++finishedTestCount);
             };
             mbgl::Log::Info(
-                mbgl::Event::General, "Start running RenderTestRunner with manifest: '%s'", manifest.c_str()
-            );
+                mbgl::Event::General, "Start running RenderTestRunner with manifest: '%s'", manifest.c_str());
             bool result = mbgl::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;
             mbgl::Log::Info(mbgl::Event::General, "End running RenderTestRunner with manifest: '%s'", manifest.c_str());
             return result;

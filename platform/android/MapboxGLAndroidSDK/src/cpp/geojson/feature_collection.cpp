@@ -6,9 +6,8 @@ namespace mbgl {
 namespace android {
 namespace geojson {
 
-mbgl::FeatureCollection FeatureCollection::convert(
-    jni::JNIEnv& env, const jni::Object<FeatureCollection>& jCollection
-) {
+mbgl::FeatureCollection FeatureCollection::convert(jni::JNIEnv& env,
+                                                   const jni::Object<FeatureCollection>& jCollection) {
     auto collection = mbgl::FeatureCollection();
 
     if (jCollection) {
@@ -25,8 +24,7 @@ mbgl::FeatureCollection FeatureCollection::convert(
 }
 
 jni::Local<jni::Object<java::util::List>> FeatureCollection::features(
-    jni::JNIEnv& env, const jni::Object<FeatureCollection>& jCollection
-) {
+    jni::JNIEnv& env, const jni::Object<FeatureCollection>& jCollection) {
     static auto& javaClass = jni::Class<FeatureCollection>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "features");
     return jCollection.Call(env, method);

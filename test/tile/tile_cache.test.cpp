@@ -34,23 +34,23 @@ public:
     GlyphManager glyphManager;
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
-    TileParameters tileParameters{
-        1.0,
-        MapDebugOptions(),
-        transformState,
-        fileSource,
-        MapMode::Continuous,
-        annotationManager.makeWeakPtr(),
-        imageManager,
-        glyphManager,
-        0};
+    TileParameters tileParameters{1.0,
+                                  MapDebugOptions(),
+                                  transformState,
+                                  fileSource,
+                                  MapMode::Continuous,
+                                  annotationManager.makeWeakPtr(),
+                                  imageManager,
+                                  glyphManager,
+                                  0};
 };
 
 class VectorTileMock : public VectorTile {
 public:
-    VectorTileMock(
-        const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters, const Tileset& tileset
-    )
+    VectorTileMock(const OverscaledTileID& id_,
+                   std::string sourceID_,
+                   const TileParameters& parameters,
+                   const Tileset& tileset)
         : VectorTile(id_, sourceID_, parameters, tileset) {
         renderable = true;
     }

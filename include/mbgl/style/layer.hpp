@@ -66,8 +66,9 @@ struct LayerTypeInfo {
     } fadingTiles;
 
     /**
-     * @brief contains \c CrossTileIndex::Required if the corresponding layer type
-     * requires cross-tile indexing and placement. Contains \c CrossTileIndex::NotRequired otherwise.
+     * @brief contains \c CrossTileIndex::Required if the corresponding layer
+     * type requires cross-tile indexing and placement. Contains \c
+     * CrossTileIndex::NotRequired otherwise.
      */
     const enum class CrossTileIndex {
         Required,
@@ -75,8 +76,8 @@ struct LayerTypeInfo {
     } crossTileIndex;
 
     /**
-     * @brief contains the Id of the supported tile type. Used for internal checks.
-     * The contained values correspond to \c Tile::Kind enum.
+     * @brief contains the Id of the supported tile type. Used for internal
+     * checks. The contained values correspond to \c Tile::Kind enum.
      */
     const enum class TileKind : uint8_t {
         Geometry,
@@ -87,18 +88,18 @@ struct LayerTypeInfo {
 };
 
 /**
- * The runtime representation of a [layer](https://www.mapbox.com/mapbox-gl-style-spec/#layers) from the Mapbox Style
- * Specification.
+ * The runtime representation of a [layer](https://www.mapbox.com/mapbox-gl-style-spec/#layers)
+ * from the Mapbox Style Specification.
  *
- * `Layer` is an abstract base class; concrete derived classes are provided for each layer type. `Layer` contains
- * functionality that is common to all layer types:
+ * `Layer` is an abstract base class; concrete derived classes are provided for
+ * each layer type. `Layer` contains functionality that is common to all layer types:
  *
  * * Runtime type information: type predicates and casting
  * * Accessors for properties common to all layer types: ID, visibility, etc.
  * * Cloning and copying
  *
- * All other functionality lives in the derived classes. To instantiate a layer, create an instance of the desired
- * type, calling `LayerManager`:
+ * All other functionality lives in the derived classes. To instantiate a layer,
+ * create an instance of the desired type, calling `LayerManager`:
  *
  *     auto circleLayer = LayerManager::get()->createLayer("circle", ...);
  */
@@ -148,9 +149,9 @@ public:
 
     void setObserver(LayerObserver*);
 
-    // For use in SDK bindings, which store a reference to a platform-native peer
-    // object here, so that separately-obtained references to this object share
-    // identical platform-native peers.
+    // For use in SDK bindings, which store a reference to a platform-native
+    // peer object here, so that separately-obtained references to this object
+    // share identical platform-native peers.
     mapbox::base::TypeWrapper peer;
     Layer(Immutable<Impl>);
 
@@ -161,9 +162,8 @@ public:
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
-    virtual std::optional<conversion::Error> setPropertyInternal(
-        const std::string& name, const conversion::Convertible& value
-    ) = 0;
+    virtual std::optional<conversion::Error> setPropertyInternal(const std::string& name,
+                                                                 const conversion::Convertible& value) = 0;
     LayerObserver* observer;
     mapbox::base::WeakPtrFactory<Layer> weakFactory{this};
 

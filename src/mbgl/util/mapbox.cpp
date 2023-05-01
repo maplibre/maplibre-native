@@ -78,8 +78,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
     // e.g. path = /satelite
     std::regex tokenPattern(R"(\{domain\}|\{path\}|\{directory\}|\{filename\}|\{extension\})");
     std::string templatePattern = std::regex_replace(
-        urlTemplate, tokenPattern, "(.+)", std::regex_constants::match_any
-    );
+        urlTemplate, tokenPattern, "(.+)", std::regex_constants::match_any);
     std::regex r2(templatePattern);
     int idx = 0;
     for (std::sregex_iterator i = std::sregex_iterator(path.begin(), path.end(), r2); i != std::sregex_iterator();
@@ -160,9 +159,9 @@ static bool equals(const std::string& str, const URL::Segment& segment, std::str
     return str.compare(segment.first, segment.second, ref) == 0;
 }
 
-std::string normalizeSourceURL(
-    const TileServerOptions& tileServerOptions, const std::string& str, const std::string& apiKey
-) {
+std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
+                               const std::string& str,
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -186,9 +185,9 @@ std::string normalizeSourceURL(
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeStyleURL(
-    const TileServerOptions& tileServerOptions, const std::string& str, const std::string& apiKey
-) {
+std::string normalizeStyleURL(const TileServerOptions& tileServerOptions,
+                              const std::string& str,
+                              const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -206,9 +205,9 @@ std::string normalizeStyleURL(
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeSpriteURL(
-    const TileServerOptions& tileServerOptions, const std::string& str, const std::string& apiKey
-) {
+std::string normalizeSpriteURL(const TileServerOptions& tileServerOptions,
+                               const std::string& str,
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -225,9 +224,9 @@ std::string normalizeSpriteURL(
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeGlyphsURL(
-    const TileServerOptions& tileServerOptions, const std::string& str, const std::string& apiKey
-) {
+std::string normalizeGlyphsURL(const TileServerOptions& tileServerOptions,
+                               const std::string& str,
+                               const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -244,9 +243,9 @@ std::string normalizeGlyphsURL(
     return transformURL(tpl, str, url);
 }
 
-std::string normalizeTileURL(
-    const TileServerOptions& tileServerOptions, const std::string& str, const std::string& apiKey
-) {
+std::string normalizeTileURL(const TileServerOptions& tileServerOptions,
+                             const std::string& str,
+                             const std::string& apiKey) {
     if (!isCanonicalURL(tileServerOptions, str)) {
         return str;
     }
@@ -263,12 +262,10 @@ std::string normalizeTileURL(
     return transformURL(tpl, str, url);
 }
 
-std::string canonicalizeTileURL(
-    const TileServerOptions& tileServerOptions,
-    const std::string& str,
-    const style::SourceType type,
-    const uint16_t tileSize
-) {
+std::string canonicalizeTileURL(const TileServerOptions& tileServerOptions,
+                                const std::string& str,
+                                const style::SourceType type,
+                                const uint16_t tileSize) {
     if (!isNormalizedURL(tileServerOptions, str)) {
         return str;
     }
@@ -311,13 +308,11 @@ std::string canonicalizeTileURL(
     return result;
 }
 
-void canonicalizeTileset(
-    const TileServerOptions& tileServerOptions,
-    Tileset& tileset,
-    const std::string& sourceURL,
-    style::SourceType type,
-    uint16_t tileSize
-) {
+void canonicalizeTileset(const TileServerOptions& tileServerOptions,
+                         Tileset& tileset,
+                         const std::string& sourceURL,
+                         style::SourceType type,
+                         uint16_t tileSize) {
     if (isCanonicalURL(tileServerOptions, sourceURL) ||
         isNormalizedSourceURL(tileServerOptions.baseURL(), tileServerOptions.sourceTemplate(), sourceURL)) {
         for (auto& url : tileset.tiles) {

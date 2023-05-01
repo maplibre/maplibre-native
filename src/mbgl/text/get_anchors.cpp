@@ -20,16 +20,14 @@ float getLineLength(const GeometryCoordinates& line) {
     return lineLength;
 }
 
-static Anchors resample(
-    const GeometryCoordinates& line,
-    const float offset,
-    const float spacing,
-    const float angleWindowSize,
-    const float maxAngle,
-    const float labelLength,
-    const bool continuedLine,
-    const bool placeAtMiddle
-) {
+static Anchors resample(const GeometryCoordinates& line,
+                        const float offset,
+                        const float spacing,
+                        const float angleWindowSize,
+                        const float maxAngle,
+                        const float labelLength,
+                        const bool continuedLine,
+                        const bool placeAtMiddle) {
     const float halfLabelLength = labelLength / 2.0f;
     const float lineLength = getLineLength(line);
 
@@ -72,29 +70,28 @@ static Anchors resample(
     }
 
     if (!placeAtMiddle && anchors.empty() && !continuedLine) {
-        // The first attempt at finding anchors at which labels can be placed failed.
-        // Try again, but this time just try placing one anchor at the middle of the line.
-        // This has the most effect for short lines in overscaled tiles, since the
-        // initial offset used in overscaled tiles is calculated to align labels with positions in
-        // parent tiles instead of placing the label as close to the beginning as possible.
+        // The first attempt at finding anchors at which labels can be placed
+        // failed. Try again, but this time just try placing one anchor at the
+        // middle of the line. This has the most effect for short lines in
+        // overscaled tiles, since the initial offset used in overscaled tiles
+        // is calculated to align labels with positions in parent tiles instead
+        // of placing the label as close to the beginning as possible.
         anchors = resample(line, distance / 2, spacing, angleWindowSize, maxAngle, labelLength, continuedLine, true);
     }
 
     return anchors;
 }
 
-Anchors getAnchors(
-    const GeometryCoordinates& line,
-    float spacing,
-    const float maxAngle,
-    const float textLeft,
-    const float textRight,
-    const float iconLeft,
-    const float iconRight,
-    const float glyphSize,
-    const float boxScale,
-    const float overscaling
-) {
+Anchors getAnchors(const GeometryCoordinates& line,
+                   float spacing,
+                   const float maxAngle,
+                   const float textLeft,
+                   const float textRight,
+                   const float iconLeft,
+                   const float iconRight,
+                   const float glyphSize,
+                   const float boxScale,
+                   const float overscaling) {
     if (line.empty()) {
         return {};
     }
@@ -109,8 +106,8 @@ Anchors getAnchors(
     const float labelLength = shapedLabelLength * boxScale;
 
     // Is the line continued from outside the tile boundary?
-    const bool continuedLine =
-        (line[0].x == 0 || line[0].x == util::EXTENT || line[0].y == 0 || line[0].y == util::EXTENT);
+    const bool continuedLine = (line[0].x == 0 || line[0].x == util::EXTENT || line[0].y == 0 ||
+                                line[0].y == util::EXTENT);
 
     // Is the label long, relative to the spacing?
     // If so, adjust the spacing so there is always a minimum space of `spacing / 4` between label edges.
@@ -119,8 +116,8 @@ Anchors getAnchors(
     }
 
     // Offset the first anchor by:
-    // Either half the label length plus a fixed extra offset if the line is not continued
-    // Or half the spacing if the line is continued.
+    // Either half the label length plus a fixed extra offset if the line is not
+    // continued Or half the spacing if the line is continued.
 
     // For non-continued lines, add a bit of fixed extra offset to avoid collisions at T intersections.
     const float fixedExtraOffset = glyphSize * 2;
@@ -132,16 +129,14 @@ Anchors getAnchors(
     return resample(line, offset, spacing, angleWindowSize, maxAngle, labelLength, continuedLine, false);
 }
 
-std::optional<Anchor> getCenterAnchor(
-    const GeometryCoordinates& line,
-    const float maxAngle,
-    const float textLeft,
-    const float textRight,
-    const float iconLeft,
-    const float iconRight,
-    const float glyphSize,
-    const float boxScale
-) {
+std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
+                                      const float maxAngle,
+                                      const float textLeft,
+                                      const float textRight,
+                                      const float iconLeft,
+                                      const float iconRight,
+                                      const float glyphSize,
+                                      const float boxScale) {
     if (line.empty()) {
         return {};
     }

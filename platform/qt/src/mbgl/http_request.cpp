@@ -133,8 +133,7 @@ void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& dat
         }
         case 429:
             response.error = std::make_unique<Error>(
-                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset)
-            );
+                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset));
             break;
         default:
             Response::Error::Reason reason = (responseCode >= 500 && responseCode < 600) ? Error::Reason::Server

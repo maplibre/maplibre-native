@@ -38,39 +38,37 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
                 throw std::runtime_error("Failed to register " + std::string(T::Name) + " with shader registry!");
             }
         }(registry.registerShader(std::make_shared<T>(programParameters_))),
-        ...
-    );
+        ...);
 }
 
 void Programs::registerWith(gfx::ShaderRegistry& registry) {
     /// The following types will be registered
-    registerTypes<
-        BackgroundProgram,
-        BackgroundPatternProgram,
-        RasterProgram,
-        HeatmapProgram,
-        HeatmapTextureProgram,
-        HillshadeProgram,
-        HillshadePrepareProgram,
-        FillProgram,
-        FillPatternProgram,
-        FillOutlineProgram,
-        FillOutlinePatternProgram,
-        FillExtrusionProgram,
-        FillExtrusionPatternProgram,
-        CircleProgram,
-        LineProgram,
-        LineGradientProgram,
-        LineSDFProgram,
-        LinePatternProgram,
-        SymbolIconProgram,
-        SymbolSDFIconProgram,
-        SymbolSDFTextProgram,
-        SymbolTextAndIconProgram,
-        CollisionBoxProgram,
-        CollisionCircleProgram,
-        DebugProgram,
-        ClippingMaskProgram>(registry, programParameters);
+    registerTypes<BackgroundProgram,
+                  BackgroundPatternProgram,
+                  RasterProgram,
+                  HeatmapProgram,
+                  HeatmapTextureProgram,
+                  HillshadeProgram,
+                  HillshadePrepareProgram,
+                  FillProgram,
+                  FillPatternProgram,
+                  FillOutlineProgram,
+                  FillOutlinePatternProgram,
+                  FillExtrusionProgram,
+                  FillExtrusionPatternProgram,
+                  CircleProgram,
+                  LineProgram,
+                  LineGradientProgram,
+                  LineSDFProgram,
+                  LinePatternProgram,
+                  SymbolIconProgram,
+                  SymbolSDFIconProgram,
+                  SymbolSDFTextProgram,
+                  SymbolTextAndIconProgram,
+                  CollisionBoxProgram,
+                  CollisionCircleProgram,
+                  DebugProgram,
+                  ClippingMaskProgram>(registry, programParameters);
 }
 
 } // namespace mbgl

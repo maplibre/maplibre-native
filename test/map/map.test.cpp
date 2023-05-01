@@ -64,16 +64,13 @@ public:
           map(frontend, observer, fileSource, options.withSize(frontend.getSize())) {}
 
     template <typename T = FileSource>
-    MapTest(
-        const std::string& cachePath,
-        const std::string& assetPath,
-        float pixelRatio = 1,
-        MapMode mode = MapMode::Static,
-        typename std::enable_if_t<std::is_same_v<T, MainResourceLoader>>* = nullptr
-    )
-        : fileSource(
-              std::make_shared<T>(ResourceOptions().withCachePath(cachePath).withAssetPath(assetPath), ClientOptions())
-          ),
+    MapTest(const std::string& cachePath,
+            const std::string& assetPath,
+            float pixelRatio = 1,
+            MapMode mode = MapMode::Static,
+            typename std::enable_if_t<std::is_same_v<T, MainResourceLoader>>* = nullptr)
+        : fileSource(std::make_shared<T>(ResourceOptions().withCachePath(cachePath).withAssetPath(assetPath),
+                                         ClientOptions())),
           frontend(pixelRatio),
           map(frontend,
               observer,
@@ -81,12 +78,10 @@ public:
               MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
 
     template <typename T = FileSource>
-    MapTest(
-        const ResourceOptions& resourceOptions,
-        const ClientOptions& clientOptions = ClientOptions(),
-        float pixelRatio = 1,
-        MapMode mode = MapMode::Static
-    )
+    MapTest(const ResourceOptions& resourceOptions,
+            const ClientOptions& clientOptions = ClientOptions(),
+            float pixelRatio = 1,
+            MapMode mode = MapMode::Static)
         : fileSource(std::make_shared<T>(resourceOptions, clientOptions)),
           frontend(pixelRatio),
           map(frontend,
@@ -109,8 +104,7 @@ TEST(Map, RendererState) {
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map.jumpTo(
-        CameraOptions().withCenter(coordinate).withZoom(zoom).withPitch(pitchInDegrees).withBearing(bearingInDegrees)
-    );
+        CameraOptions().withCenter(coordinate).withZoom(zoom).withPitch(pitchInDegrees).withBearing(bearingInDegrees));
 
     test.runLoop.runOnce();
     test.frontend.render(test.map);
@@ -135,8 +129,7 @@ TEST(Map, RendererState) {
 
     // RendererState::hasImage
     test.map.getStyle().addImage(std::make_unique<style::Image>(
-        "default_marker", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f
-    ));
+        "default_marker", decodeImage(util::read_file("test/fixtures/sprites/default_marker.png")), 1.0f));
 
     // The frontend has not yet been notified about the newly-added image.
     EXPECT_FALSE(test.frontend.hasImage("default_marker"));
@@ -241,10 +234,8 @@ TEST(Map, LatLngBoundsToCameraWithBearingPitchAndPadding) {
     ASSERT_DOUBLE_EQ(virtualCameraPadded.center->longitude(), virtualCamera.center->longitude());
 
     const Size size = test.map.getMapOptions().size();
-    const auto scaleChange = std::min(
-        (size.width - padding.left() - padding.right()) / size.width,
-        (size.height - padding.top() - padding.bottom()) / size.height
-    );
+    const auto scaleChange = std::min((size.width - padding.left() - padding.right()) / size.width,
+                                      (size.height - padding.top() - padding.bottom()) / size.height);
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.zoom, *virtualCamera.zoom + util::log2(scaleChange));
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.pitch, *virtualCamera.pitch);
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.bearing, *virtualCamera.bearing);
@@ -307,9 +298,8 @@ TEST(Map, CameraToLatLngBounds) {
     test.map.jumpTo(CameraOptions().withCenter(LatLng{45, 90}).withZoom(16.0));
 
     const Size size = test.map.getMapOptions().size();
-    LatLngBounds bounds = LatLngBounds::hull(
-        test.map.latLngForPixel({}), test.map.latLngForPixel({double(size.width), double(size.height)})
-    );
+    LatLngBounds bounds = LatLngBounds::hull(test.map.latLngForPixel({}),
+                                             test.map.latLngForPixel({double(size.width), double(size.height)}));
 
     CameraOptions camera = test.map.getCameraOptions();
 
@@ -333,17 +323,13 @@ TEST(Map, CameraToLatLngBoundsUnwrappedWithRotation) {
 
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({})));
     ASSERT_TRUE(
-        test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({0.0, double(size.height)}))
-    );
+        test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({0.0, double(size.height)})));
     ASSERT_TRUE(
-        test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({double(size.width), 0.0}))
-    );
+        test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({double(size.width), 0.0})));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({double(size.width), double(size.height)})
-    ));
+        test.map.latLngForPixel({double(size.width), double(size.height)})));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({double(size.width) / 2, double(size.height) / 2})
-    ));
+        test.map.latLngForPixel({double(size.width) / 2, double(size.height) / 2})));
 }
 
 TEST(Map, CameraToLatLngBoundsUnwrappedCrossDateLine) {
@@ -357,17 +343,13 @@ TEST(Map, CameraToLatLngBoundsUnwrappedCrossDateLine) {
 
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(test.map.latLngForPixel({}), LatLng::Wrapped));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({0.0, double(size.height)}), LatLng::Wrapped
-    ));
+        test.map.latLngForPixel({0.0, double(size.height)}), LatLng::Wrapped));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({double(size.width), 0.0}), LatLng::Wrapped
-    ));
+        test.map.latLngForPixel({double(size.width), 0.0}), LatLng::Wrapped));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({double(size.width), double(size.height)}), LatLng::Wrapped
-    ));
+        test.map.latLngForPixel({double(size.width), double(size.height)}), LatLng::Wrapped));
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).contains(
-        test.map.latLngForPixel({double(size.width) / 2, double(size.height) / 2})
-    ));
+        test.map.latLngForPixel({double(size.width) / 2, double(size.height) / 2})));
 
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).crossesAntimeridian());
 }
@@ -384,23 +366,18 @@ TEST(Map, Offline) {
 
     NetworkStatus::Set(NetworkStatus::Status::Offline);
     const std::string prefix = "http://127.0.0.1:3000/";
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
-        FileSourceType::Database, ResourceOptions{}
-    );
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
     dbfs->forward(Resource::style(prefix + "style.json"), expiredItem("style.json"), [] {});
     dbfs->forward(Resource::source(prefix + "streets.json"), expiredItem("streets.json"), [] {});
     dbfs->forward(Resource::spriteJSON(prefix + "sprite", 1.0), expiredItem("sprite.json"), [] {});
     dbfs->forward(Resource::spriteImage(prefix + "sprite", 1.0), expiredItem("sprite.png"), [] {});
-    dbfs->forward(
-        Resource::tile(prefix + "{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
-        expiredItem("0-0-0.vector.pbf"),
-        [] {}
-    );
-    dbfs->forward(
-        Resource::glyphs(prefix + "{fontstack}/{range}.pbf", {{"Helvetica"}}, {0, 255}),
-        expiredItem("glyph.pbf"),
-        [&] { test.map.getStyle().loadURL(prefix + "style.json"); }
-    );
+    dbfs->forward(Resource::tile(prefix + "{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+                  expiredItem("0-0-0.vector.pbf"),
+                  [] {});
+    dbfs->forward(Resource::glyphs(prefix + "{fontstack}/{range}.pbf", {{"Helvetica"}}, {0, 255}),
+                  expiredItem("glyph.pbf"),
+                  [&] { test.map.getStyle().loadURL(prefix + "style.json"); });
 
 #if ANDROID
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0046, 0.1);
@@ -517,8 +494,7 @@ TEST(Map, SetStyleInvalidJSON) {
     auto flo = static_cast<FixtureLogObserver*>(observer.get());
     EXPECT_EQ(
         1u,
-        flo->count({EventSeverity::Error, Event::ParseStyle, -1, "Failed to parse style: Invalid value. at offset 0"})
-    );
+        flo->count({EventSeverity::Error, Event::ParseStyle, -1, "Failed to parse style: Invalid value. at offset 0"}));
     auto unchecked = flo->unchecked();
     EXPECT_TRUE(unchecked.empty()) << unchecked;
 }
@@ -581,19 +557,20 @@ TEST(Map, StyleExpired) {
     test.fileSource->respond(Resource::Style, response);
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
-    // Mutate layer. From now on, sending a response to the style won't overwrite it anymore, but
-    // we should continue to wait for a fresh response.
+    // Mutate layer. From now on, sending a response to the style won't
+    // overwrite it anymore, but we should continue to wait for a fresh
+    // response.
     test.map.getStyle().addLayer(std::make_unique<style::BackgroundLayer>("bg"));
     EXPECT_EQ(1u, test.fileSource->requests.size());
 
-    // Send another expired response, and confirm that we didn't overwrite the style, but continue
-    // to wait for a fresh response.
+    // Send another expired response, and confirm that we didn't overwrite the
+    // style, but continue to wait for a fresh response.
     test.fileSource->respond(Resource::Style, response);
     EXPECT_EQ(1u, test.fileSource->requests.size());
     EXPECT_NE(nullptr, test.map.getStyle().getLayer("bg"));
 
-    // Send a fresh response, and confirm that we didn't overwrite the style, but continue to wait
-    // for a fresh response.
+    // Send a fresh response, and confirm that we didn't overwrite the style,
+    // but continue to wait for a fresh response.
     response.expires = util::now() + 1h;
     test.fileSource->respond(Resource::Style, response);
     EXPECT_EQ(1u, test.fileSource->requests.size());
@@ -772,8 +749,8 @@ TEST(Map, DisabledSources) {
     test.fileSource->response = [](const Resource& res) -> std::optional<Response> {
         if (res.url == "asset://tile.png") {
             Response response;
-            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/map/disabled_layers/tile.png")
-            );
+            response.data = std::make_shared<std::string>(
+                util::read_file("test/fixtures/map/disabled_layers/tile.png"));
             return {std::move(response)};
         }
         return {};
@@ -781,11 +758,13 @@ TEST(Map, DisabledSources) {
 
     test.map.jumpTo(CameraOptions().withZoom(1.0));
 
-    // This stylesheet has two raster layers, one that starts at zoom 1, the other at zoom 0.
-    // We first render a map at zoom level 1, which should show both layers (both are "visible" due
-    // to an opacity of 0.5). Then, we are zooming back out to a zoom level of 0.5 and rerender.
-    // The "raster1" layer should not be visible anymore since it has minzoom 1, while "raster2"
-    // should still be there. Both layers have a distinct color through "raster-hue-rotate".
+    // This stylesheet has two raster layers, one that starts at zoom 1, the
+    // other at zoom 0. We first render a map at zoom level 1, which should show
+    // both layers (both are "visible" due to an opacity of 0.5). Then, we are
+    // zooming back out to a zoom level of 0.5 and rerender. The "raster1" layer
+    // should not be visible anymore since it has minzoom 1, while "raster2"
+    // should still be there. Both layers have a distinct color through
+    // "raster-hue-rotate".
     test.map.getStyle().loadJSON(R"STYLE(
 {
   "version": 8,
@@ -859,9 +838,10 @@ TEST(Map, DontLoadUnneededTiles) {
         // Since the layer's maxzoom is 1.6, we should never load z2 or z3 tiles.
     };
 
-    // Loop through zoom levels from 0 to 3 and check that the correct tiles are loaded at every
-    // step. The source is marked with maxzoom 1.0, which means that it won't be visible anymore
-    // after z1.0, so we should under no circumstances attempt to load z2 tiles.
+    // Loop through zoom levels from 0 to 3 and check that the correct tiles are
+    // loaded at every step. The source is marked with maxzoom 1.0, which means
+    // that it won't be visible anymore after z1.0, so we should under no
+    // circumstances attempt to load z2 tiles.
     for (unsigned zoom = 0; zoom <= 30; zoom++) { // times 10
         // Note: using z += 0.1 in the loop doesn't produce accurate floating point numbers.
         const double z = double(zoom) / 10;
@@ -889,18 +869,17 @@ TEST(Map, TEST_DISABLED_ON_CI(ContinuousRendering)) {
 
     StubMapObserver observer;
     observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus) {
-        // Start a timer that ends the test one second from now. If we are continuing to render
-        // indefinitely, the timer will be constantly restarted and never trigger. Instead, the
-        // emergency shutoff above will trigger, failing the test.
+        // Start a timer that ends the test one second from now. If we are
+        // continuing to render indefinitely, the timer will be constantly
+        // restarted and never trigger. Instead, the emergency shutoff above
+        // will trigger, failing the test.
         timer.start(1s, 0s, [&] { runLoop.stop(); });
     };
 
-    Map map(
-        frontend,
-        observer,
-        MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()),
-        ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets")
-    );
+    Map map(frontend,
+            observer,
+            MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
 
     runLoop.run();
@@ -915,13 +894,10 @@ TEST(Map, NoContentTiles) {
     Response response;
     response.noContent = true;
     response.expires = util::now() + 1h;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
-        FileSourceType::Database, ResourceOptions{}
-    );
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
     dbfs->forward(
-        Resource::tile("http://example.com/{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
-        response,
-        [&] {
+        Resource::tile("http://example.com/{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ), response, [&] {
             test.map.getStyle().loadJSON(R"STYLE({
                         "version": 8,
                         "name": "Water",
@@ -944,8 +920,7 @@ TEST(Map, NoContentTiles) {
                             "source-layer": "water"
                         }]
                         })STYLE");
-        }
-    );
+        });
     test::checkImage("test/fixtures/map/nocontent", test.frontend.render(test.map).image, 0.0015, 0.1);
 }
 
@@ -1008,7 +983,8 @@ TEST(Map, Issue15216) {
 }
 
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
-// Tests the fix for constant repaint caused by `RenderSource::hasFadingTiles()` returning `true` all the time.
+// Tests the fix for constant repaint caused by `RenderSource::hasFadingTiles()`
+// returning `true` all the time.
 TEST(Map, Issue15342) {
     MapTest<> test{1, MapMode::Continuous};
 
@@ -1217,8 +1193,7 @@ TEST(Map, PrefetchDeltaOverride) {
                     "minzoom": 0,
                     "maxzoom": 24
                 }]
-                })STYLE"
-    );
+                })STYLE");
 
     // Vector source
     auto vectorSource = std::make_unique<VectorSource>("vector", Tileset{{"a/{z}/{x}/{y}"}});
@@ -1288,8 +1263,7 @@ TEST(Map, PrefetchDeltaOverrideCustomSource) {
                     "minzoom": 0,
                     "maxzoom": 24
                 }]
-                })STYLE"
-    );
+                })STYLE");
 
     std::atomic_int requestedTiles(0);
 
@@ -1331,8 +1305,8 @@ TEST(Map, PrefetchDeltaOverrideCustomSource) {
     test.map.getStyle().addSource(makeCustomSource());
     test.runLoop.run();
 
-    // Source was significantly mutated, therefore, tile pyramid would be cleared
-    // and current zoom level + parent tiles would be re-requested.
+    // Source was significantly mutated, therefore, tile pyramid would be
+    // cleared and current zoom level + parent tiles would be re-requested.
     EXPECT_EQ(8, requestedTiles);
 }
 
@@ -1375,18 +1349,15 @@ TEST(Map, TEST_REQUIRES_SERVER(ExpiredSpriteSheet)) {
 
     NetworkStatus::Set(NetworkStatus::Status::Offline);
     const std::string prefix = "http://127.0.0.1:3000/online/";
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
-        FileSourceType::Database, ResourceOptions{}
-    );
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
     dbfs->forward(Resource::style(prefix + "style.json"), makeResponse("style.json"), [] {});
     dbfs->forward(Resource::source(prefix + "streets.json"), makeResponse("streets.json"), [] {});
     dbfs->forward(Resource::spriteJSON(prefix + "sprite", 1.0), makeResponse("sprite.json", true), [] {});
     dbfs->forward(Resource::spriteImage(prefix + "sprite", 1.0), makeResponse("sprite.png", true), [] {});
-    dbfs->forward(
-        Resource::tile(prefix + "{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
-        makeResponse("0-0-0.vector.pbf"),
-        [&] { test.map.getStyle().loadURL(prefix + "style.json"); }
-    );
+    dbfs->forward(Resource::tile(prefix + "{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+                  makeResponse("0-0-0.vector.pbf"),
+                  [&] { test.map.getStyle().loadURL(prefix + "style.json"); });
 
     test.runLoop.run();
 }
@@ -1410,8 +1381,7 @@ TEST(Map, SourceMinimumUpdateIntervalOverride) {
                     "minzoom": 0,
                     "maxzoom": 24
                 }]
-                })STYLE"
-    );
+                })STYLE");
 
     // Vector source
     auto vectorSourceA = std::make_unique<VectorSource>("source-a", Tileset{{"a/{z}/{x}/{y}"}});

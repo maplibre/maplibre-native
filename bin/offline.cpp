@@ -35,22 +35,20 @@ std::string readFile(const std::string& fileName) {
 mapbox::geometry::geometry<double> parseGeometry(const std::string& json) {
     using namespace mapbox::geojson;
     auto geojson = parse(json);
-    return geojson.match(
-        [](const geometry& geom) { return geom; },
-        [](const feature& feature) { return feature.geometry; },
-        [](const feature_collection& featureCollection) {
-            if (featureCollection.size() < 1) {
-                throw std::runtime_error("No features in feature collection");
-            }
-            geometry_collection geometries;
+    return geojson.match([](const geometry& geom) { return geom; },
+                         [](const feature& feature) { return feature.geometry; },
+                         [](const feature_collection& featureCollection) {
+                             if (featureCollection.size() < 1) {
+                                 throw std::runtime_error("No features in feature collection");
+                             }
+                             geometry_collection geometries;
 
-            for (auto feature : featureCollection) {
-                geometries.push_back(feature.geometry);
-            }
+                             for (auto feature : featureCollection) {
+                                 geometries.push_back(feature.geometry);
+                             }
 
-            return geometries;
-        }
-    );
+                             return geometries;
+                         });
 }
 
 std::ostream& operator<<(std::ostream& os, mbgl::Response::Error::Reason r) {
@@ -86,8 +84,7 @@ int main(int argc, char* argv[]) {
     args::Group mergeGroup(argumentParser, "Merge databases:", args::Group::Validators::AllOrNone);
     args::ValueFlag<std::string> mergePathValue(mergeGroup, "merge", "Database to merge from", {'m', "merge"});
     args::ValueFlag<std::string> inputValue(
-        mergeGroup, "input", "Database to merge into. Use with --merge option.", {'i', "input"}
-    );
+        mergeGroup, "input", "Database to merge into. Use with --merge option.", {'i', "input"});
 
     // LatLngBounds
     args::Group latLngBoundsGroup(argumentParser, "LatLng bounds:", args::Group::Validators::AllOrNone);
@@ -98,19 +95,17 @@ int main(int argc, char* argv[]) {
 
     // Geometry
     args::Group geoJSONGroup(argumentParser, "GeoJson geometry:", args::Group::Validators::AllOrNone);
-    args::ValueFlag<std::string> geometryValue(
-        geoJSONGroup,
-        "file",
-        "GeoJSON Feature file containing the region geometry (can't be a FeatureCollection)",
-        {"geojson"}
-    );
+    args::ValueFlag<std::string> geometryValue(geoJSONGroup,
+                                               "file",
+                                               "GeoJSON Feature file containing the region geometry (can't be a "
+                                               "FeatureCollection)",
+                                               {"geojson"});
 
     args::ValueFlag<double> minZoomValue(argumentParser, "number", "Min zoom level", {"minZoom"});
     args::ValueFlag<double> maxZoomValue(argumentParser, "number", "Max zoom level", {"maxZoom"});
     args::ValueFlag<double> pixelRatioValue(argumentParser, "number", "Pixel ratio", {"pixelRatio"});
     args::ValueFlag<bool> includeIdeographsValue(
-        argumentParser, "boolean", "Include CJK glyphs", {"includeIdeographs"}
-    );
+        argumentParser, "boolean", "Include CJK glyphs", {"includeIdeographs"});
 
     try {
         argumentParser.ParseCLI(argc, argv);
@@ -151,8 +146,7 @@ int main(int argc, char* argv[]) {
                 std::string json = readFile(geometryValue.Get());
                 auto geometry = parseGeometry(json);
                 return OfflineRegionDefinition{OfflineGeometryRegionDefinition(
-                    style, geometry, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs
-                )};
+                    style, geometry, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs)};
             } catch (const std::runtime_error& e) {
                 std::cerr << "Could not parse geojson file " << geometryValue.Get() << ": " << e.what() << std::endl;
                 exit(1);
@@ -165,8 +159,7 @@ int main(int argc, char* argv[]) {
             const double east = eastValue ? args::get(eastValue) : -121.7;
             LatLngBounds boundingBox = LatLngBounds::hull(LatLng(north, west), LatLng(south, east));
             return OfflineRegionDefinition{OfflineTilePyramidRegionDefinition(
-                style, boundingBox, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs
-            )};
+                style, boundingBox, minZoom, maxZoom, static_cast<float>(pixelRatio), includeIdeographs)};
         }
     }();
 
@@ -182,9 +175,7 @@ int main(int argc, char* argv[]) {
         std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
             FileSourceType::Database,
             ResourceOptions().withApiKey(apiKey).withTileServerOptions(mapTilerConfiguration).withCachePath(output),
-            ClientOptions()
-        ))
-    );
+            ClientOptions())));
 
     std::unique_ptr<OfflineRegion> region;
 
@@ -194,8 +185,7 @@ int main(int argc, char* argv[]) {
         int retCode = 0;
         std::cout << "Start Merge" << std::endl;
         inputSource.mergeOfflineRegions(
-            *mergePath,
-            [&](mbgl::expected<std::vector<OfflineRegion>, std::exception_ptr> result) {
+            *mergePath, [&](mbgl::expected<std::vector<OfflineRegion>, std::exception_ptr> result) {
                 if (!result) {
                     std::cerr << "Error merging database: " << util::toString(result.error()) << std::endl;
                     retCode = 1;
@@ -204,8 +194,7 @@ int main(int argc, char* argv[]) {
                     std::cout << "Finished Merge" << std::endl;
                 }
                 loop.stop();
-            }
-        );
+            });
         loop.run();
         return retCode;
     }
@@ -214,12 +203,10 @@ int main(int argc, char* argv[]) {
 
     class Observer : public OfflineRegionObserver {
     public:
-        Observer(
-            OfflineRegion& region_,
-            std::shared_ptr<DatabaseFileSource> fileSource_,
-            util::RunLoop& loop_,
-            std::optional<std::string> mergePath_
-        )
+        Observer(OfflineRegion& region_,
+                 std::shared_ptr<DatabaseFileSource> fileSource_,
+                 util::RunLoop& loop_,
+                 std::optional<std::string> mergePath_)
             : region(region_),
               fileSource(std::move(fileSource_)),
               loop(loop_),
@@ -276,8 +263,8 @@ int main(int argc, char* argv[]) {
 
     std::signal(SIGINT, [](int) { stop(); });
 
-    fileSource
-        ->createOfflineRegion(definition, metadata, [&](mbgl::expected<OfflineRegion, std::exception_ptr> region_) {
+    fileSource->createOfflineRegion(
+        definition, metadata, [&](mbgl::expected<OfflineRegion, std::exception_ptr> region_) {
             if (!region_) {
                 std::cerr << "Error creating region: " << util::toString(region_.error()) << std::endl;
                 loop.stop();
@@ -285,9 +272,8 @@ int main(int argc, char* argv[]) {
             } else {
                 assert(region_);
                 region = std::make_unique<OfflineRegion>(std::move(*region_));
-                fileSource->setOfflineRegionObserver(
-                    *region, std::make_unique<Observer>(*region, fileSource, loop, mergePath)
-                );
+                fileSource->setOfflineRegionObserver(*region,
+                                                     std::make_unique<Observer>(*region, fileSource, loop, mergePath));
                 fileSource->setOfflineRegionDownloadState(*region, OfflineRegionDownloadState::Active);
             }
         });

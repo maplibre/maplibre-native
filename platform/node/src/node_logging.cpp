@@ -23,17 +23,13 @@ NodeLogObserver::NodeLogObserver(v8::Local<v8::Object> target)
 
           auto msg = Nan::New<v8::Object>();
 
-          Nan::Set(
-              msg,
-              Nan::New("class").ToLocalChecked(),
-              Nan::New(mbgl::Enum<mbgl::Event>::toString(message.event)).ToLocalChecked()
-          );
+          Nan::Set(msg,
+                   Nan::New("class").ToLocalChecked(),
+                   Nan::New(mbgl::Enum<mbgl::Event>::toString(message.event)).ToLocalChecked());
 
-          Nan::Set(
-              msg,
-              Nan::New("severity").ToLocalChecked(),
-              Nan::New(mbgl::Enum<mbgl::EventSeverity>::toString(message.severity)).ToLocalChecked()
-          );
+          Nan::Set(msg,
+                   Nan::New("severity").ToLocalChecked(),
+                   Nan::New(mbgl::Enum<mbgl::EventSeverity>::toString(message.severity)).ToLocalChecked());
 
           if (message.code != -1) {
               Nan::Set(msg, Nan::New("code").ToLocalChecked(), Nan::New<v8::Number>(message.code));

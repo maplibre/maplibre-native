@@ -20,7 +20,8 @@ public:
     }
 
     ~TestObject() {
-        EXPECT_EQ(tid, std::this_thread::get_id()); // Object is destroyed on child thread
+        EXPECT_EQ(tid,
+                  std::this_thread::get_id()); // Object is destroyed on child thread
     }
 
     void fn1(int val) const {

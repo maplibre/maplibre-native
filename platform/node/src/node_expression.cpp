@@ -40,16 +40,15 @@ void NodeExpression::Init(v8::Local<v8::Object> target) {
 }
 
 type::Type parseType(v8::Local<v8::Object> type) {
-    static std::unordered_map<std::string, type::Type> types = {
-        {"string", type::String},
-        {"number", type::Number},
-        {"boolean", type::Boolean},
-        {"object", type::Object},
-        {"color", type::Color},
-        {"value", type::Value},
-        {"formatted", type::Formatted},
-        {"number-format", type::String},
-        {"resolvedImage", type::Image}};
+    static std::unordered_map<std::string, type::Type> types = {{"string", type::String},
+                                                                {"number", type::Number},
+                                                                {"boolean", type::Boolean},
+                                                                {"object", type::Object},
+                                                                {"color", type::Color},
+                                                                {"value", type::Value},
+                                                                {"formatted", type::Formatted},
+                                                                {"number-format", type::String},
+                                                                {"resolvedImage", type::Image}};
 
     v8::Local<v8::Value> v8kind = Nan::Get(type, Nan::New("kind").ToLocalChecked()).ToLocalChecked();
     std::string kind(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), v8kind));
@@ -61,8 +60,7 @@ type::Type parseType(v8::Local<v8::Object> type) {
         v8::Local<v8::Context> context = type->GetCreationContext().ToLocalChecked();
 #endif
         type::Type itemType = parseType(
-            Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()
-        );
+            Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
         std::optional<std::size_t> N;
 
         v8::Local<v8::String> Nkey = Nan::New("N").ToLocalChecked();
@@ -212,11 +210,10 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(const mbgl::Color& color) {
-        return operator()(std::vector<Value>{
-            static_cast<double>(color.r),
-            static_cast<double>(color.g),
-            static_cast<double>(color.b),
-            static_cast<double>(color.a)});
+        return operator()(std::vector<Value>{static_cast<double>(color.r),
+                                             static_cast<double>(color.g),
+                                             static_cast<double>(color.b),
+                                             static_cast<double>(color.a)});
     }
 
     v8::Local<v8::Value> operator()(const std::unordered_map<std::string, Value>& map) {
@@ -251,9 +248,9 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
     if (v8zoom->IsNumber()) zoom = static_cast<float>(Nan::To<double>(v8zoom).FromJust());
 
     std::optional<double> heatmapDensity;
-    v8::Local<v8::Value> v8heatmapDensity =
-        Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("heatmapDensity").ToLocalChecked())
-            .ToLocalChecked();
+    v8::Local<v8::Value> v8heatmapDensity = Nan::Get(info[0]->ToObject(context).ToLocalChecked(),
+                                                     Nan::New("heatmapDensity").ToLocalChecked())
+                                                .ToLocalChecked();
     if (v8heatmapDensity->IsNumber()) heatmapDensity = Nan::To<double>(v8heatmapDensity).FromJust();
 
     Nan::JSON NanJSON;
@@ -272,8 +269,7 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
         } else {
             v8::Local<v8::Object> res = Nan::New<v8::Object>();
             Nan::Set(
-                res, Nan::New("error").ToLocalChecked(), Nan::New(result.error().message.c_str()).ToLocalChecked()
-            );
+                res, Nan::New("error").ToLocalChecked(), Nan::New(result.error().message.c_str()).ToLocalChecked());
             info.GetReturnValue().Set(res);
         }
     } catch (std::exception& ex) {

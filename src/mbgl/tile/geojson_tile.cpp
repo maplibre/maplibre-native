@@ -6,12 +6,10 @@
 #include <utility>
 namespace mbgl {
 
-GeoJSONTile::GeoJSONTile(
-    const OverscaledTileID& overscaledTileID,
-    std::string sourceID_,
-    const TileParameters& parameters,
-    std::shared_ptr<style::GeoJSONData> data_
-)
+GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
+                         std::string sourceID_,
+                         const TileParameters& parameters,
+                         std::shared_ptr<style::GeoJSONData> data_)
     : GeometryTile(overscaledTileID, std::move(sourceID_), parameters) {
     updateData(std::move(data_), false /*needsRelayout*/);
 }
@@ -27,8 +25,7 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
             if (data.get() != capturedData) return;
             auto tileData = std::make_unique<GeoJSONTileData>(std::move(features));
             setData(std::move(tileData));
-        }
-    );
+        });
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {

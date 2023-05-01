@@ -34,17 +34,15 @@ public:
 
     bool isLoaded() const;
 
-    void update(
-        const std::vector<Immutable<style::LayerProperties>>& visibleLayers,
-        bool needsRendering,
-        bool needsRelayout,
-        const TileParameters&,
-        const style::Source::Impl&,
-        uint16_t tileSize,
-        Range<uint8_t> zoomRange,
-        std::optional<LatLngBounds> bounds,
-        std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile
-    );
+    void update(const std::vector<Immutable<style::LayerProperties>>& visibleLayers,
+                bool needsRendering,
+                bool needsRelayout,
+                const TileParameters&,
+                const style::Source::Impl&,
+                uint16_t tileSize,
+                Range<uint8_t> zoomRange,
+                std::optional<LatLngBounds> bounds,
+                std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
     Tile* getTile(const OverscaledTileID&);
@@ -58,8 +56,7 @@ public:
         const std::unordered_map<std::string, const RenderLayer*>&,
         const RenderedQueryOptions& options,
         const mat4& projMatrix,
-        const mbgl::SourceFeatureState& featureState
-    ) const;
+        const mbgl::SourceFeatureState& featureState) const;
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
 

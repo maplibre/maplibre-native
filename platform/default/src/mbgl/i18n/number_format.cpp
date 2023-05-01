@@ -11,13 +11,11 @@ namespace mbgl {
 namespace platform {
 
 #if !defined(MBGL_USE_BUILTIN_ICU)
-std::string formatNumber(
-    double number,
-    const std::string& localeId,
-    const std::string& currency,
-    uint8_t minFractionDigits,
-    uint8_t maxFractionDigits
-) {
+std::string formatNumber(double number,
+                         const std::string& localeId,
+                         const std::string& currency,
+                         uint8_t minFractionDigits,
+                         uint8_t maxFractionDigits) {
     UErrorCode status = U_ZERO_ERROR;
     icu::UnicodeString ustr;
     std::string formatted;

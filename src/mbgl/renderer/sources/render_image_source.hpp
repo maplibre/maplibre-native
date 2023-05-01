@@ -40,9 +40,11 @@ public:
     void updateFadingTiles() final {}
     bool hasFadingTiles() const final { return false; }
 
-    void
-    update(Immutable<style::Source::Impl>, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&)
-        final;
+    void update(Immutable<style::Source::Impl>,
+                const std::vector<Immutable<style::LayerProperties>>&,
+                bool needsRendering,
+                bool needsRelayout,
+                const TileParameters&) final;
 
     const ImageSourceRenderData* getImageRenderData() const override { return renderData.get(); }
 
@@ -51,8 +53,7 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
-        const mat4& projMatrix
-    ) const final;
+        const mat4& projMatrix) const final;
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const final;
 

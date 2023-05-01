@@ -51,9 +51,8 @@ public:
         if (!Nan::Has(Nan::To<v8::Object>(value).ToLocalChecked(), Nan::New(name).ToLocalChecked()).FromJust()) {
             return {};
         }
-        Nan::MaybeLocal<v8::Value> result = Nan::Get(
-            Nan::To<v8::Object>(value).ToLocalChecked(), Nan::New(name).ToLocalChecked()
-        );
+        Nan::MaybeLocal<v8::Value> result = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(),
+                                                     Nan::New(name).ToLocalChecked());
         if (result.IsEmpty()) {
             return {};
         }
@@ -68,7 +67,8 @@ public:
         for (uint32_t i = 0; i < names->Length(); ++i) {
             v8::Local<v8::Value> k = Nan::Get(names, i).ToLocalChecked();
             v8::Local<v8::Value> v = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(), k).ToLocalChecked();
-            std::optional<Error> result = fn(*Nan::Utf8String(k), std::move(v)); // NOLINT(performance-move-const-arg)
+            std::optional<Error> result = fn(*Nan::Utf8String(k),
+                                             std::move(v)); // NOLINT(performance-move-const-arg)
             if (result) {
                 return result;
             }

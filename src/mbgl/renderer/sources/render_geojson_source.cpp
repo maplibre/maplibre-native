@@ -21,21 +21,21 @@ std::optional<T> getProperty(const C& cont, const typename C::key_type& name) {
     return it->second.template get<T>();
 }
 
-using FeatureExtensionGetterPtr =
-    FeatureExtensionValue (*)(std::shared_ptr<style::GeoJSONData>, std::uint32_t, const std::optional<std::map<std::string, Value>>&);
+using FeatureExtensionGetterPtr = FeatureExtensionValue (*)(std::shared_ptr<style::GeoJSONData>,
+                                                            std::uint32_t,
+                                                            const std::optional<std::map<std::string, Value>>&);
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-FeatureExtensionValue
-getChildren(std::shared_ptr<style::GeoJSONData> clusterData, std::uint32_t clusterID, const std::optional<std::map<std::string, Value>>&) {
+FeatureExtensionValue getChildren(std::shared_ptr<style::GeoJSONData> clusterData,
+                                  std::uint32_t clusterID,
+                                  const std::optional<std::map<std::string, Value>>&) {
     return clusterData->getChildren(clusterID);
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-FeatureExtensionValue getLeaves(
-    std::shared_ptr<style::GeoJSONData> clusterData,
-    std::uint32_t clusterID,
-    const std::optional<std::map<std::string, Value>>& args
-) {
+FeatureExtensionValue getLeaves(std::shared_ptr<style::GeoJSONData> clusterData,
+                                std::uint32_t clusterID,
+                                const std::optional<std::map<std::string, Value>>& args) {
     if (args) {
         const auto limit = getProperty<uint64_t>(*args, "limit");
         const auto offset = getProperty<uint64_t>(*args, "offset");
@@ -43,8 +43,7 @@ FeatureExtensionValue getLeaves(
         if (limit) {
             if (offset) {
                 return clusterData->getLeaves(
-                    clusterID, static_cast<std::uint32_t>(*limit), static_cast<std::uint32_t>(*offset)
-                );
+                    clusterID, static_cast<std::uint32_t>(*limit), static_cast<std::uint32_t>(*offset));
             }
             return clusterData->getLeaves(clusterID, static_cast<std::uint32_t>(*limit), 0u);
         }
@@ -54,15 +53,15 @@ FeatureExtensionValue getLeaves(
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-FeatureExtensionValue
-getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData> clusterData, std::uint32_t clusterID, const std::optional<std::map<std::string, Value>>&) {
+FeatureExtensionValue getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData> clusterData,
+                                              std::uint32_t clusterID,
+                                              const std::optional<std::map<std::string, Value>>&) {
     return Value{static_cast<uint64_t>(clusterData->getClusterExpansionZoom(clusterID))};
 }
 
 MAPBOX_ETERNAL_CONSTEXPR const auto extensionGetters =
     mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
-        {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}}
-    );
+        {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
 
 } // namespace
 
@@ -75,13 +74,11 @@ const style::GeoJSONSource::Impl& RenderGeoJSONSource::impl() const {
     return static_cast<const style::GeoJSONSource::Impl&>(*baseImpl);
 }
 
-void RenderGeoJSONSource::update(
-    Immutable<style::Source::Impl> baseImpl_,
-    const std::vector<Immutable<LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters
-) {
+void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
+                                 const std::vector<Immutable<LayerProperties>>& layers,
+                                 const bool needsRendering,
+                                 const bool needsRelayout,
+                                 const TileParameters& parameters) {
     std::swap(baseImpl, baseImpl_);
 
     enabled = needsRendering;
@@ -105,27 +102,24 @@ void RenderGeoJSONSource::update(
 
     if (!data_) return;
 
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        util::tileSize_I,
-        impl().getZoomRange(),
-        std::optional<LatLngBounds>{},
-        [&, data_](const OverscaledTileID& tileID) {
-            return std::make_unique<GeoJSONTile>(tileID, impl().id, parameters, data_);
-        }
-    );
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       util::tileSize_I,
+                       impl().getZoomRange(),
+                       std::optional<LatLngBounds>{},
+                       [&, data_](const OverscaledTileID& tileID) {
+                           return std::make_unique<GeoJSONTile>(tileID, impl().id, parameters, data_);
+                       });
 }
 
 mapbox::util::variant<Value, FeatureCollection> RenderGeoJSONSource::queryFeatureExtensions(
     const Feature& feature,
     const std::string& extension,
     const std::string& extensionField,
-    const std::optional<std::map<std::string, Value>>& args
-) const {
+    const std::optional<std::map<std::string, Value>>& args) const {
     if (extension != "supercluster") {
         return {};
     }

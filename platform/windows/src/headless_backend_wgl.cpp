@@ -16,8 +16,8 @@
 namespace mbgl {
 namespace gl {
 
-// This class provides a singleton that contains information about the configuration used for
-// instantiating new headless rendering contexts.
+// This class provides a singleton that contains information about the
+// configuration used for instantiating new headless rendering contexts.
 class WGLDisplayConfig {
 private:
     // Key for singleton construction.
@@ -46,20 +46,18 @@ private:
             throw std::runtime_error("Failed to register helper window class");
         }
 
-        helperWindowHandle = CreateWindowExA(
-            0,
-            helperWindowClass.lpszClassName,
-            "WGL Helper Window",
-            WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-            0,
-            0,
-            1,
-            1,
-            NULL,
-            NULL,
-            helperWindowClass.hInstance,
-            NULL
-        );
+        helperWindowHandle = CreateWindowExA(0,
+                                             helperWindowClass.lpszClassName,
+                                             "WGL Helper Window",
+                                             WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                             0,
+                                             0,
+                                             1,
+                                             1,
+                                             NULL,
+                                             NULL,
+                                             helperWindowClass.hInstance,
+                                             NULL);
 
         if (!helperWindowHandle) {
             Log::Error(Event::OpenGL, "Failed to create helper window");
@@ -141,8 +139,9 @@ public:
         pfd.cDepthBits = 24;
         pfd.cStencilBits = 8;
 
-        // Note: we're choosing an arbitrary pixel format, since we're not using the default surface
-        // anyway; all rendering will be directed to framebuffers which have their own configuration.
+        // Note: we're choosing an arbitrary pixel format, since we're not using
+        // the default surface anyway; all rendering will be directed to
+        // framebuffers which have their own configuration.
         if (!SetPixelFormat(dummyDC, ChoosePixelFormat(dummyDC, &pfd), &pfd)) {
             Log::Error(Event::OpenGL, "Failed to set pixel format for dummy context");
             throw std::runtime_error("Failed to set pixel format for dummy context");
@@ -230,20 +229,18 @@ private:
     void CreateRenderingWindow() {
         MSG message;
 
-        renderingWindowHandle = CreateWindowExA(
-            0,
-            wglDisplayConfig->renderingWindowClass.lpszClassName,
-            "WGL Render Window",
-            WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-            0,
-            0,
-            1,
-            1,
-            NULL,
-            NULL,
-            wglDisplayConfig->renderingWindowClass.hInstance,
-            NULL
-        );
+        renderingWindowHandle = CreateWindowExA(0,
+                                                wglDisplayConfig->renderingWindowClass.lpszClassName,
+                                                "WGL Render Window",
+                                                WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                                0,
+                                                0,
+                                                1,
+                                                1,
+                                                NULL,
+                                                NULL,
+                                                wglDisplayConfig->renderingWindowClass.hInstance,
+                                                NULL);
 
         if (!renderingWindowHandle) {
             Log::Error(Event::OpenGL, "Failed to create helper window");
@@ -292,31 +289,29 @@ private:
             renderingWindowDeviceContext = GetDC(renderingWindowHandle);
         }
 
-        if (!mbgl::platform::wglChoosePixelFormatARB(
-                renderingWindowDeviceContext,
-                std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
-                                              GL_TRUE,
-                                              WGL_DOUBLE_BUFFER_ARB,
-                                              GL_TRUE,
-                                              WGL_ACCELERATION_ARB,
-                                              WGL_FULL_ACCELERATION_ARB,
-                                              WGL_PIXEL_TYPE_ARB,
-                                              WGL_TYPE_RGBA_ARB,
-                                              WGL_COLOR_BITS_ARB,
-                                              24,
-                                              WGL_ALPHA_BITS_ARB,
-                                              8,
-                                              WGL_DEPTH_BITS_ARB,
-                                              24,
-                                              WGL_STENCIL_BITS_ARB,
-                                              8,
-                                              NULL})
-                    .begin(),
-                NULL,
-                1,
-                &pixelFormat,
-                &numFormats
-            )) {
+        if (!mbgl::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
+                                                     std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
+                                                                                   GL_TRUE,
+                                                                                   WGL_DOUBLE_BUFFER_ARB,
+                                                                                   GL_TRUE,
+                                                                                   WGL_ACCELERATION_ARB,
+                                                                                   WGL_FULL_ACCELERATION_ARB,
+                                                                                   WGL_PIXEL_TYPE_ARB,
+                                                                                   WGL_TYPE_RGBA_ARB,
+                                                                                   WGL_COLOR_BITS_ARB,
+                                                                                   24,
+                                                                                   WGL_ALPHA_BITS_ARB,
+                                                                                   8,
+                                                                                   WGL_DEPTH_BITS_ARB,
+                                                                                   24,
+                                                                                   WGL_STENCIL_BITS_ARB,
+                                                                                   8,
+                                                                                   NULL})
+                                                         .begin(),
+                                                     NULL,
+                                                     1,
+                                                     &pixelFormat,
+                                                     &numFormats)) {
             Log::Error(Event::OpenGL, "Failed to choose pixel format for context");
             throw std::runtime_error("Failed to choose pixel format for context");
         }
@@ -346,8 +341,7 @@ private:
                                             WGL_CONTEXT_PROFILE_MASK_ARB,
                                             WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
                                             NULL})
-                    .begin()
-            );
+                    .begin());
 
             if (!renderingWindowRenderingContext) {
                 const DWORD error = GetLastError();
@@ -359,8 +353,12 @@ private:
                     Log::Error(Event::OpenGL, "Driver does not support the requested OpenGL profile");
                     throw std::runtime_error("Driver does not support the requested OpenGL profile");
                 } else if (error == (0xc0070000 | ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB)) {
-                    Log::Error(Event::OpenGL, "The share context is not compatible with the requested context");
-                    throw std::runtime_error("The share context is not compatible with the requested context");
+                    Log::Error(Event::OpenGL,
+                               "The share context is not compatible with the "
+                               "requested context");
+                    throw std::runtime_error(
+                        "The share context is not compatible with the "
+                        "requested context");
                 } else {
                     Log::Error(Event::OpenGL, "Failed to create OpenGL ES context");
                     throw std::runtime_error("Failed to create OpenGL ES context");

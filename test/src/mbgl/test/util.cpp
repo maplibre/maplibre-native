@@ -18,9 +18,10 @@
 namespace mbgl {
 namespace test {
 
-void checkImage(
-    const std::string& base, const PremultipliedImage& actual, double imageThreshold, double pixelThreshold
-) {
+void checkImage(const std::string& base,
+                const PremultipliedImage& actual,
+                double imageThreshold,
+                double pixelThreshold) {
 #if !TEST_READ_ONLY
     if (getenv("UPDATE")) {
         util::write_file(base + "/expected.png", encodePNG(actual));
@@ -45,14 +46,12 @@ void checkImage(
 
     ASSERT_EQ(expected.size, actual.size);
 
-    uint64_t pixels = mapbox::pixelmatch(
-        actual.data.get(),
-        expected.data.get(),
-        expected.size.width,
-        expected.size.height,
-        diff.data.get(),
-        pixelThreshold
-    );
+    uint64_t pixels = mapbox::pixelmatch(actual.data.get(),
+                                         expected.data.get(),
+                                         expected.size.width,
+                                         expected.size.height,
+                                         diff.data.get(),
+                                         pixelThreshold);
 
     EXPECT_LE(static_cast<double>(pixels) / (expected.size.width * expected.size.height), imageThreshold);
 

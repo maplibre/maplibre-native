@@ -9,14 +9,12 @@
 
 namespace mbgl {
 
-DebugBucket::DebugBucket(
-    const OverscaledTileID& id,
-    const bool renderable_,
-    const bool complete_,
-    std::optional<Timestamp> modified_,
-    std::optional<Timestamp> expires_,
-    MapDebugOptions debugMode_
-)
+DebugBucket::DebugBucket(const OverscaledTileID& id,
+                         const bool renderable_,
+                         const bool complete_,
+                         std::optional<Timestamp> modified_,
+                         std::optional<Timestamp> expires_,
+                         MapDebugOptions debugMode_)
     : renderable(renderable_),
       complete(complete_),
       modified(std::move(modified_)),
@@ -33,17 +31,14 @@ DebugBucket::DebugBucket(
                 if (glyph.data[j] == -1 && glyph.data[j + 1] == -1) {
                     prev = {};
                 } else {
-                    Point<int16_t> p{
-                        int16_t(::round(left + glyph.data[j] * scale)),
-                        int16_t(::round(baseline - glyph.data[j + 1] * scale))};
+                    Point<int16_t> p{int16_t(::round(left + glyph.data[j] * scale)),
+                                     int16_t(::round(baseline - glyph.data[j + 1] * scale))};
 
                     vertices.emplace_back(FillProgram::layoutVertex(p));
 
                     if (prev) {
-                        indices.emplace_back(
-                            static_cast<uint16_t>(vertices.elements() - 2),
-                            static_cast<uint16_t>(vertices.elements() - 1)
-                        );
+                        indices.emplace_back(static_cast<uint16_t>(vertices.elements() - 2),
+                                             static_cast<uint16_t>(vertices.elements() - 1));
                     }
 
                     prev = p;

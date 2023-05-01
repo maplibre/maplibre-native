@@ -312,8 +312,7 @@ void Query::bindBlob(int offset, const void* value_, std::size_t length, bool re
     stmt.impl->query.bindValue(
         offset - 1,
         retain ? QByteArray(value, static_cast<int>(length)) : QByteArray::fromRawData(value, static_cast<int>(length)),
-        QSql::In | QSql::Binary
-    );
+        QSql::In | QSql::Binary);
 
     checkQueryError(stmt.impl->query);
 }
@@ -368,8 +367,7 @@ mbgl::Timestamp Query::get(int offset) {
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
     return std::chrono::time_point_cast<std::chrono::seconds>(
-        std::chrono::system_clock::from_time_t(value.value<::time_t>())
-    );
+        std::chrono::system_clock::from_time_t(value.value<::time_t>()));
 }
 
 template <>

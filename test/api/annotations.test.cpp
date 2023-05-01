@@ -29,11 +29,10 @@ public:
     util::RunLoop loop;
     HeadlessFrontend frontend{1};
 
-    MapAdapter map{
-        frontend,
-        MapObserver::nullObserver(),
-        std::make_shared<StubFileSource>(),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   std::make_shared<StubFileSource>(),
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 
     void checkRendering(const char* name) {
         test::checkImage(std::string("test/fixtures/annotations/") + name, frontend.render(map).image, 0.0002, 0.1);
@@ -51,8 +50,9 @@ TEST(Annotations, SymbolAnnotation) {
     test.checkRendering("point_annotation");
 
     //    auto size = test.frontend.getSize();
-    //    auto screenBox = ScreenBox { {}, { double(size.width), double(size.height) } };
-    //    for (uint8_t zoom = test.map.getMinZoom(); zoom <= test.map.getMaxZoom(); ++zoom) {
+    //    auto screenBox = ScreenBox { {}, { double(size.width),
+    //    double(size.height) } }; for (uint8_t zoom = test.map.getMinZoom();
+    //    zoom <= test.map.getMaxZoom(); ++zoom) {
     //        test.map.jumpTo(CameraOptions().withZoom(zoom));
     //        test.checkRendering("point_annotation");
     //        EXPECT_EQ(test.map.queryPointAnnotations(screenBox).size(), 1u);
@@ -60,8 +60,9 @@ TEST(Annotations, SymbolAnnotation) {
 }
 
 TEST(Annotations, SymbolAnnotationTileBoundary) {
-    // Almost exactly the same as SymbolAnnotation test above, but offset my fractions of a degree
-    // tests precision issue from https://github.com/mapbox/mapbox-gl-native/issues/12472
+    // Almost exactly the same as SymbolAnnotation test above, but offset my
+    // fractions of a degree tests precision issue from
+    // https://github.com/mapbox/mapbox-gl-native/issues/12472
     AnnotationTest test;
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
@@ -392,8 +393,8 @@ TEST(Annotations, QueryFractionalZoomLevels) {
     std::vector<mbgl::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude < 10; latitude += 2) {
-            ids.push_back(test.map.addAnnotation(SymbolAnnotation{
-                {double(latitude), double(longitude)}, "default_marker"}));
+            ids.push_back(
+                test.map.addAnnotation(SymbolAnnotation{{double(latitude), double(longitude)}, "default_marker"}));
         }
     }
 
@@ -430,8 +431,8 @@ TEST(Annotations, VisibleFeatures) {
     std::vector<mbgl::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude <= 10; latitude += 2) {
-            ids.push_back(test.map.addAnnotation(SymbolAnnotation{
-                {double(latitude), double(longitude)}, "default_marker"}));
+            ids.push_back(
+                test.map.addAnnotation(SymbolAnnotation{{double(latitude), double(longitude)}, "default_marker"}));
         }
     }
 
@@ -463,10 +464,10 @@ TEST(Annotations, ViewFrustumCulling) {
     // rectangle are not rendered for different camera setup, especially when
     // using edge insets - viewport center is then offsetted.
 
-    // Important premise of this test is "static const float viewportPadding = 100;"
-    // as defined in collision_index.cpp: tests using edge insets are writen so that
-    // padding is 128 (half of viewSize width). If increasing viewportPadding,
-    // increase the padding in test cases below.
+    // Important premise of this test is "static const float viewportPadding =
+    // 100;" as defined in collision_index.cpp: tests using edge insets are
+    // writen so that padding is 128 (half of viewSize width). If increasing
+    // viewportPadding, increase the padding in test cases below.
     AnnotationTest test;
 
     auto viewSize = test.frontend.getSize();
@@ -482,8 +483,7 @@ TEST(Annotations, ViewFrustumCulling) {
         {ScreenCoordinate(0, 0),
          ScreenCoordinate(viewSize.width, viewSize.height),
          ScreenCoordinate(viewSize.width, 0),
-         ScreenCoordinate(0, viewSize.height)}
-    );
+         ScreenCoordinate(0, viewSize.height)});
     ASSERT_EQ(4, batchLatLngs.size());
 
     // Single conversion of pixel to latLng
@@ -507,8 +507,8 @@ TEST(Annotations, ViewFrustumCulling) {
 
     std::vector<mbgl::AnnotationID> ids;
     for (auto latLng : latLngs) {
-        ids.push_back(test.map.addAnnotation(SymbolAnnotation{{latLng.longitude(), latLng.latitude()}, "default_marker"}
-        ));
+        ids.push_back(
+            test.map.addAnnotation(SymbolAnnotation{{latLng.longitude(), latLng.latitude()}, "default_marker"}));
     }
 
     std::vector<std::pair<CameraOptions, std::vector<uint64_t>>> expectedVisibleForCamera = {
@@ -537,15 +537,11 @@ TEST(Annotations, ViewFrustumCulling) {
         test.frontend.render(test.map);
         auto features = test.frontend.getRenderer()->queryRenderedFeatures(box, {});
         for (uint64_t id : testCase.second) { // testCase.second is vector of ids expected.
-            EXPECT_NE(
-                std::find_if(
-                    features.begin(),
-                    features.end(),
-                    [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }
-                ),
-                features.end()
-            ) << "Point with id "
-              << id << " is missing in test case " << i;
+            EXPECT_NE(std::find_if(features.begin(),
+                                   features.end(),
+                                   [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }),
+                      features.end())
+                << "Point with id " << id << " is missing in test case " << i;
             EXPECT_EQ(features.size(), testCase.second.size()) << " in test case " << i;
         }
     }
@@ -559,9 +555,9 @@ TEST(Annotations, TopOffsetPixels) {
 }
 
 TEST(Annotations, DebugEmpty) {
-    // This test should render nothing, not even the tile borders. Tile borders are only rendered
-    // when there is an actual tile we're trying to render, but since there is no annotation, we
-    // should not render them.
+    // This test should render nothing, not even the tile borders. Tile borders
+    // are only rendered when there is an actual tile we're trying to render,
+    // but since there is no annotation, we should not render them.
     AnnotationTest test;
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
@@ -576,8 +572,8 @@ TEST(Annotations, DebugSparse) {
         return;
     }
 
-    // This test should only render the top right tile with the associated tile border, but no other
-    // tiles because they're all empty.
+    // This test should only render the top right tile with the associated tile
+    // border, but no other tiles because they're all empty.
     AnnotationTest test;
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));

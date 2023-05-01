@@ -142,24 +142,26 @@ bool lineStringWithinPolygons(const LineString<T>& line, const MultiPolygon<T>& 
 
 template void updateBBox(GeometryBBox<int64_t>& bbox, const Point<int64_t>& p);
 template bool boxWithinBox(const GeometryBBox<int64_t>& bbox1, const GeometryBBox<int64_t>& bbox2);
-template bool segmentIntersectSegment(
-    const Point<int64_t>& a, const Point<int64_t>& b, const Point<int64_t>& c, const Point<int64_t>& d
-);
+template bool segmentIntersectSegment(const Point<int64_t>& a,
+                                      const Point<int64_t>& b,
+                                      const Point<int64_t>& c,
+                                      const Point<int64_t>& d);
 template bool rayIntersect(const Point<int64_t>& p, const Point<int64_t>& p1, const Point<int64_t>& p2);
 template bool pointOnBoundary(const Point<int64_t>& p, const Point<int64_t>& p1, const Point<int64_t>& p2);
 template bool lineIntersectPolygon(const Point<int64_t>& p1, const Point<int64_t>& p2, const Polygon<int64_t>& polygon);
 template bool pointWithinPolygon(const Point<int64_t>& point, const Polygon<int64_t>& polygon, bool trueOnBoundary);
-template bool pointWithinPolygons(
-    const Point<int64_t>& point, const MultiPolygon<int64_t>& polygons, bool trueOnBoundary
-);
+template bool pointWithinPolygons(const Point<int64_t>& point,
+                                  const MultiPolygon<int64_t>& polygons,
+                                  bool trueOnBoundary);
 template bool lineStringWithinPolygon(const LineString<int64_t>& line, const Polygon<int64_t>& polygon);
 template bool lineStringWithinPolygons(const LineString<int64_t>& line, const MultiPolygon<int64_t>& polygons);
 
 template void updateBBox(GeometryBBox<double>& bbox, const Point<double>& p);
 template bool boxWithinBox(const GeometryBBox<double>& bbox1, const GeometryBBox<double>& bbox2);
-template bool segmentIntersectSegment(
-    const Point<double>& a, const Point<double>& b, const Point<double>& c, const Point<double>& d
-);
+template bool segmentIntersectSegment(const Point<double>& a,
+                                      const Point<double>& b,
+                                      const Point<double>& c,
+                                      const Point<double>& d);
 template bool pointWithinPolygon(const Point<double>& point, const Polygon<double>& polygon, bool trueOnBoundary);
 
 } // namespace mbgl

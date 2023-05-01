@@ -23,19 +23,17 @@ public:
         map.getStyle().loadJSON(util::read_file("benchmark/fixtures/api/style.json"));
         map.jumpTo(CameraOptions().withCenter(LatLng{40.726989, -73.992857}).withZoom(15.0)); // Manhattan
         map.getStyle().addImage(std::make_unique<style::Image>(
-            "test-icon", decodeImage(util::read_file("benchmark/fixtures/api/default_marker.png")), 1.0f
-        ));
+            "test-icon", decodeImage(util::read_file("benchmark/fixtures/api/default_marker.png")), 1.0f));
 
         frontend.render(map);
     }
 
     util::RunLoop loop;
     HeadlessFrontend frontend{{1000, 1000}, 1};
-    Map map{
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-        ResourceOptions().withCachePath("benchmark/fixtures/api/cache.db").withAssetPath(".").withApiKey("foobar")};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath("benchmark/fixtures/api/cache.db").withAssetPath(".").withApiKey("foobar")};
     ScreenBox box{{0, 0}, {1000, 1000}};
 };
 

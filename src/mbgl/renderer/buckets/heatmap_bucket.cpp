@@ -10,16 +10,14 @@ namespace mbgl {
 
 using namespace style;
 
-HeatmapBucket::HeatmapBucket(
-    const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers
-)
+HeatmapBucket::HeatmapBucket(const BucketParameters& parameters,
+                             const std::vector<Immutable<style::LayerProperties>>& layers)
     : mode(parameters.mode) {
     for (const auto& layer : layers) {
         paintPropertyBinders.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(layer->baseImpl->id),
-            std::forward_as_tuple(getEvaluated<HeatmapLayerProperties>(layer), parameters.tileID.overscaledZ)
-        );
+            std::forward_as_tuple(getEvaluated<HeatmapLayerProperties>(layer), parameters.tileID.overscaledZ));
     }
 }
 
@@ -40,14 +38,12 @@ bool HeatmapBucket::hasData() const {
     return !segments.empty();
 }
 
-void HeatmapBucket::addFeature(
-    const GeometryTileFeature& feature,
-    const GeometryCollection& geometry,
-    const ImagePositions&,
-    const PatternLayerMap&,
-    std::size_t featureIndex,
-    const CanonicalTileID& canonical
-) {
+void HeatmapBucket::addFeature(const GeometryTileFeature& feature,
+                               const GeometryCollection& geometry,
+                               const ImagePositions&,
+                               const PatternLayerMap&,
+                               std::size_t featureIndex,
+                               const CanonicalTileID& canonical) {
     constexpr const uint16_t vertexLength = 4;
 
     for (auto& points : geometry) {

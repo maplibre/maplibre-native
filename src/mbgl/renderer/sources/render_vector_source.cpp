@@ -15,26 +15,22 @@ const std::optional<Tileset>& RenderVectorSource::getTileset() const {
     return static_cast<const style::VectorSource::Impl&>(*baseImpl).tileset;
 }
 
-void RenderVectorSource::updateInternal(
-    const Tileset& tileset,
-    const std::vector<Immutable<style::LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters
-) {
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        util::tileSize_I,
-        tileset.zoomRange,
-        tileset.bounds,
-        [&](const OverscaledTileID& tileID) {
-            return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset);
-        }
-    );
+void RenderVectorSource::updateInternal(const Tileset& tileset,
+                                        const std::vector<Immutable<style::LayerProperties>>& layers,
+                                        const bool needsRendering,
+                                        const bool needsRelayout,
+                                        const TileParameters& parameters) {
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       util::tileSize_I,
+                       tileset.zoomRange,
+                       tileset.bounds,
+                       [&](const OverscaledTileID& tileID) {
+                           return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset);
+                       });
 }
 
 } // namespace mbgl

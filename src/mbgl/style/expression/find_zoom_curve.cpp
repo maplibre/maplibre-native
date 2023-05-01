@@ -88,8 +88,7 @@ variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(co
             assert(false);
             return nullptr;
         },
-        [](auto zoomCurve) -> variant<std::nullptr_t, const Interpolate*, const Step*> { return zoomCurve; }
-    );
+        [](auto zoomCurve) -> variant<std::nullptr_t, const Interpolate*, const Step*> { return zoomCurve; });
 }
 
 } // namespace expression

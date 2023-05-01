@@ -5,9 +5,9 @@
 
 namespace mbgl {
 
-// A movable type-erasing function wrapper. This allows to store arbitrary invokable
-// things (like std::function<>, or the result of a movable-only std::bind()) in the queue.
-// Source: http://stackoverflow.com/a/29642072/331379
+// A movable type-erasing function wrapper. This allows to store arbitrary
+// invokable things (like std::function<>, or the result of a movable-only
+// std::bind()) in the queue. Source: http://stackoverflow.com/a/29642072/331379
 class Message {
 public:
     virtual ~Message() = default;
@@ -90,13 +90,13 @@ std::unique_ptr<Message> makeMessage(Object& object, MemberFn memberFn, Args&&..
 }
 
 template <class ResultType, class Object, class MemberFn, class... Args>
-std::unique_ptr<Message> makeMessage(
-    std::promise<ResultType>&& promise, Object& object, MemberFn memberFn, Args&&... args
-) {
+std::unique_ptr<Message> makeMessage(std::promise<ResultType>&& promise,
+                                     Object& object,
+                                     MemberFn memberFn,
+                                     Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(
-        std::move(promise), object, memberFn, std::move(tuple)
-    );
+        std::move(promise), object, memberFn, std::move(tuple));
 }
 
 } // namespace actor

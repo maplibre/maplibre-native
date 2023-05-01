@@ -56,10 +56,10 @@ public:
 
     const bool text;
     const bool icon;
-    // skipFade = outside viewport, but within CollisionIndex::viewportPadding px of the edge
-    // Because these symbols aren't onscreen yet, we can skip the "fade in" animation,
-    // and if a subsequent viewport change brings them into view, they'll be fully
-    // visible right away.
+    // skipFade = outside viewport, but within CollisionIndex::viewportPadding
+    // px of the edge Because these symbols aren't onscreen yet, we can skip the
+    // "fade in" animation, and if a subsequent viewport change brings them into
+    // view, they'll be fully visible right away.
     const bool skipFade;
 };
 
@@ -111,15 +111,14 @@ private:
 class Placement {
 public:
     /**
-     * @brief creates a new placement instance, from the given update parameters and the previous placement instance.
+     * @brief creates a new placement instance, from the given update parameters
+     * and the previous placement instance.
      *
      * Different placement implementations are created based on `updateParameters->mapMode`.
      * In Continuous map mode, `prevPlacement` must be provided.
      */
-    static Mutable<Placement> create(
-        std::shared_ptr<const UpdateParameters> updateParameters,
-        std::optional<Immutable<Placement>> prevPlacement = std::nullopt
-    );
+    static Mutable<Placement> create(std::shared_ptr<const UpdateParameters> updateParameters,
+                                     std::optional<Immutable<Placement>> prevPlacement = std::nullopt);
 
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
@@ -149,26 +148,24 @@ protected:
     JointPlacement placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext&);
     void placeLayer(const RenderLayer&, std::set<uint32_t>&);
     virtual void commit();
-    virtual void newSymbolPlaced(
-        const SymbolInstance&,
-        const PlacementContext&,
-        const JointPlacement&,
-        style::SymbolPlacementType,
-        const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
-        const std::vector<ProjectedCollisionBox>& /*iconBoxes*/
+    virtual void newSymbolPlaced(const SymbolInstance&,
+                                 const PlacementContext&,
+                                 const JointPlacement&,
+                                 style::SymbolPlacementType,
+                                 const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
+                                 const std::vector<ProjectedCollisionBox>& /*iconBoxes*/
     ) {}
     // Implentation specific hooks, which get called during a symbol bucket placement.
     virtual std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4& /*posMatrix*/) {
         return std::nullopt;
     }
     SymbolInstanceReferences getSortedSymbols(const BucketPlacementData&, float pixelRatio);
-    virtual bool canPlaceAtVariableAnchor(
-        const CollisionBox&,
-        style::TextVariableAnchorType,
-        Point<float> /*shift*/,
-        std::vector<style::TextVariableAnchorType>&,
-        const mat4& /*posMatrix*/,
-        float /*textPixelRatio*/
+    virtual bool canPlaceAtVariableAnchor(const CollisionBox&,
+                                          style::TextVariableAnchorType,
+                                          Point<float> /*shift*/,
+                                          std::vector<style::TextVariableAnchorType>&,
+                                          const mat4& /*posMatrix*/,
+                                          float /*textPixelRatio*/
     ) {
         return true;
     }
@@ -176,9 +173,10 @@ protected:
     // Returns `true` if bucket vertices were updated; returns `false` otherwise.
     bool updateBucketDynamicVertices(SymbolBucket&, const TransformState&, const RenderTile& tile) const;
     void updateBucketOpacities(SymbolBucket&, const TransformState&, std::set<uint32_t>&) const;
-    void markUsedJustification(
-        SymbolBucket&, style::TextVariableAnchorType, const SymbolInstance&, style::TextWritingModeType orientation
-    ) const;
+    void markUsedJustification(SymbolBucket&,
+                               style::TextVariableAnchorType,
+                               const SymbolInstance&,
+                               style::TextWritingModeType orientation) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
     const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
     bool isTiltedView() const;

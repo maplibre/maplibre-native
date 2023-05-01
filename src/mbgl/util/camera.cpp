@@ -56,10 +56,9 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) {
     const double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(location.latitude(), 0.0);
     const double worldSize = Projection::worldSize(std::pow(2.0, 0.0));
 
-    return {
-        {mercatorXfromLng(location.longitude()),
-         mercatorYfromLat(location.latitude()),
-         altitudeMeters * pixelsPerMeter / worldSize}};
+    return {{mercatorXfromLng(location.longitude()),
+             mercatorYfromLat(location.latitude()),
+             altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
 static Quaternion orientationFromPitchBearing(double pitch, double bearing) {
@@ -122,8 +121,7 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
     mat4 result = orientation.conjugate().toRotationMatrix();
 
     matrix::translate(
-        result, result, -transform[12] * worldSize, -transform[13] * worldSize, -transform[14] * worldSize
-    );
+        result, result, -transform[12] * worldSize, -transform[13] * worldSize, -transform[14] * worldSize);
 
     if (!flippedY) {
         // Pre-multiply y

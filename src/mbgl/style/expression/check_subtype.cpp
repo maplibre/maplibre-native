@@ -48,8 +48,7 @@ std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
                 return {errorMessage(expected, t)};
             }
             return {};
-        }
-    );
+        });
 
     return result;
 }

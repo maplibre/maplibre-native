@@ -17,9 +17,8 @@ TEST(OnlineFileSource, Cancel) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
 
-    fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"}, [&](Response) {
-        ADD_FAILURE() << "Callback should not be called";
-    });
+    fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"},
+                [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
 
     loop.runOnce();
 }
@@ -30,9 +29,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(CancelMultiple)) {
 
     const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
-    std::unique_ptr<AsyncRequest> req2 = fs->request(resource, [&](Response) {
-        ADD_FAILURE() << "Callback should not be called";
-    });
+    std::unique_ptr<AsyncRequest> req2 = fs->request(
+        resource, [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
@@ -250,25 +248,23 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Load)) {
 
     std::function<void(int)> req = [&](int i) {
         const auto current = number++;
-        reqs[i] = fs->request(
-            {Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
-            [&, i, current](Response res) {
-                reqs[i].reset();
-                EXPECT_EQ(nullptr, res.error);
-                ASSERT_TRUE(res.data.get());
-                EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
-                EXPECT_FALSE(bool(res.expires));
-                EXPECT_FALSE(res.mustRevalidate);
-                EXPECT_FALSE(bool(res.modified));
-                EXPECT_FALSE(bool(res.etag));
+        reqs[i] = fs->request({Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
+                              [&, i, current](Response res) {
+                                  reqs[i].reset();
+                                  EXPECT_EQ(nullptr, res.error);
+                                  ASSERT_TRUE(res.data.get());
+                                  EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
+                                  EXPECT_FALSE(bool(res.expires));
+                                  EXPECT_FALSE(res.mustRevalidate);
+                                  EXPECT_FALSE(bool(res.modified));
+                                  EXPECT_FALSE(bool(res.etag));
 
-                if (number <= max) {
-                    req(i);
-                } else if (current == max) {
-                    loop.stop();
-                }
-            }
-        );
+                                  if (number <= max) {
+                                      req(i);
+                                  } else if (current == max) {
+                                      loop.stop();
+                                  }
+                              });
     };
 
     for (int i = 0; i < concurrency; i++) {
@@ -280,9 +276,10 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Load)) {
 
 // Test for https://github.com/mapbox/mapbox-gl-native/issues/2123
 //
-// A request is made. While the request is in progress, the network status changes. This should
-// trigger an immediate retry of all requests that are not in progress. This test makes sure that
-// we don't accidentally double-trigger the request.
+// A request is made. While the request is in progress, the network status
+// changes. This should trigger an immediate retry of all requests that are not
+// in progress. This test makes sure that we don't accidentally double-trigger
+// the request.
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
     util::RunLoop loop;
@@ -310,8 +307,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
     loop.run();
 }
 
-// Tests that a change in network status preempts requests that failed due to connection or
-// reachability issues.
+// Tests that a change in network status preempts requests that failed due to
+// connection or reachability issues.
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
@@ -363,9 +360,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusOnlineOffline)) {
     NetworkStatus::Set(NetworkStatus::Status::Offline);
 
     util::Timer onlineTimer;
-    onlineTimer.start(Milliseconds(100), Duration::zero(), [&]() {
-        NetworkStatus::Set(NetworkStatus::Status::Online);
-    });
+    onlineTimer.start(
+        Milliseconds(100), Duration::zero(), [&]() { NetworkStatus::Set(NetworkStatus::Status::Online); });
 
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         req.reset();
@@ -522,7 +518,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     std::unique_ptr<AsyncRequest> req_1 = fs->request(low_prio, [&](Response) {
         response_counter++;
         req_1.reset();
-        EXPECT_EQ(response_counter, NUM_REQUESTS); // make sure this is responded last
+        EXPECT_EQ(response_counter,
+                  NUM_REQUESTS); // make sure this is responded last
         loop.stop();
     });
 
@@ -554,15 +551,13 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
     for (int num_reqs = 0; num_reqs < 20; num_reqs++) {
         if (num_reqs % 2 == 0) {
             std::unique_ptr<AsyncRequest> req = fs->request(
-                {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)},
-                [&](Response) {
+                {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)}, [&](Response) {
                     response_counter++;
 
                     if (response_counter <= 10) { // count the high priority requests that arrive late correctly
                         correct_regular++;
                     }
-                }
-            );
+                });
             collector.push_back(std::move(req));
         } else {
             Resource resource = {Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(num_reqs)};

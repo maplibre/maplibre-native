@@ -20,9 +20,8 @@ inline mbgl::style::FillLayer& toFillLayer(mbgl::style::Layer& layer) {
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 FillLayer::FillLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::FillLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::FillLayer>(jni::Make<std::string>(env, layerId),
+                                                     jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -157,21 +156,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                             mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new FillLayer(toFillLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(
         env,
-        new FillLayer(std::unique_ptr<mbgl::style::FillLayer>(static_cast<mbgl::style::FillLayer*>(layer.release())))
-    );
+        new FillLayer(std::unique_ptr<mbgl::style::FillLayer>(static_cast<mbgl::style::FillLayer*>(layer.release()))));
 }
 
 void FillJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -205,8 +201,7 @@ void FillJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillLayer::getFillTranslateAnchor, "nativeGetFillTranslateAnchor"),
         METHOD(&FillLayer::getFillPatternTransition, "nativeGetFillPatternTransition"),
         METHOD(&FillLayer::setFillPatternTransition, "nativeSetFillPatternTransition"),
-        METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern")
-    );
+        METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern"));
 }
 
 } // namespace android

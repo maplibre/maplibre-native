@@ -22,9 +22,10 @@ public:
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
 
-    /// Called with the name of an OpenGL extension that should be loaded. RendererBackend implementations
-    /// must call the API-specific version that obtains the function pointer for this function,
-    /// or a null pointer if unsupported/unavailable.
+    /// Called with the name of an OpenGL extension that should be loaded.
+    /// RendererBackend implementations must call the API-specific version that
+    /// obtains the function pointer for this function, or a null pointer if
+    /// unsupported/unavailable.
     virtual ProcAddress getExtensionFunctionPointer(const char*) = 0;
 
     /// Reads the color pixel data from the currently bound framebuffer.
@@ -43,8 +44,8 @@ protected:
     bool implicitFramebufferBound();
 
 public:
-    /// Triggers an OpenGL state update if the internal assumed state doesn't match the
-    /// supplied values.
+    /// Triggers an OpenGL state update if the internal assumed state doesn't
+    /// match the supplied values.
     void setFramebufferBinding(FramebufferID fbo);
     void setViewport(int32_t x, int32_t y, const Size&);
     void setScissorTest(bool);

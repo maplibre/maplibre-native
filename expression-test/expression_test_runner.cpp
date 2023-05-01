@@ -99,9 +99,8 @@ void writeTestData(const JSDocument& document, const std::string& rootPath, cons
 
 TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, const std::string& id) {
     TestRunOutput output(id);
-    const auto evaluateExpression = [&data](
-                                        std::unique_ptr<style::expression::Expression>& expression, TestResult& result
-                                    ) {
+    const auto evaluateExpression = [&data](std::unique_ptr<style::expression::Expression>& expression,
+                                            TestResult& result) {
         assert(expression);
         std::vector<Value> outputs;
         if (!data.inputs.empty()) {
@@ -109,12 +108,10 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
                 mbgl::style::expression::EvaluationResult evaluationResult;
                 if (input.canonical) {
                     evaluationResult = expression->evaluate(
-                        input.zoom, input.feature, input.heatmapDensity, input.availableImages, *input.canonical
-                    );
+                        input.zoom, input.feature, input.heatmapDensity, input.availableImages, *input.canonical);
                 } else {
                     evaluationResult = expression->evaluate(
-                        input.zoom, input.feature, input.heatmapDensity, input.availableImages
-                    );
+                        input.zoom, input.feature, input.heatmapDensity, input.availableImages);
                 }
                 if (!evaluationResult) {
                     std::unordered_map<std::string, Value> error{{"error", Value{evaluationResult.error().message}}};

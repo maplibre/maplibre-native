@@ -27,31 +27,30 @@ class Layer;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(
-        ActorRef<GeometryTileWorker> self,
-        ActorRef<GeometryTile> parent,
-        OverscaledTileID,
-        std::string,
-        const std::atomic<bool>&,
-        MapMode,
-        float pixelRatio,
-        bool showCollisionBoxes_
-    );
+    GeometryTileWorker(ActorRef<GeometryTileWorker> self,
+                       ActorRef<GeometryTile> parent,
+                       OverscaledTileID,
+                       std::string,
+                       const std::atomic<bool>&,
+                       MapMode,
+                       float pixelRatio,
+                       bool showCollisionBoxes_);
     ~GeometryTileWorker();
 
-    void setLayers(
-        std::vector<Immutable<style::LayerProperties>>, std::set<std::string> availableImages, uint64_t correlationID
-    );
-    void setData(
-        std::unique_ptr<const GeometryTileData>, std::set<std::string> availableImages, uint64_t correlationID
-    );
+    void setLayers(std::vector<Immutable<style::LayerProperties>>,
+                   std::set<std::string> availableImages,
+                   uint64_t correlationID);
+    void setData(std::unique_ptr<const GeometryTileData>,
+                 std::set<std::string> availableImages,
+                 uint64_t correlationID);
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
     void onGlyphsAvailable(GlyphMap newGlyphMap);
-    void onImagesAvailable(
-        ImageMap newIconMap, ImageMap newPatternMap, ImageVersionMap versionMap, uint64_t imageCorrelationID
-    );
+    void onImagesAvailable(ImageMap newIconMap,
+                           ImageMap newPatternMap,
+                           ImageVersionMap versionMap,
+                           uint64_t imageCorrelationID);
 
 private:
     void coalesced();

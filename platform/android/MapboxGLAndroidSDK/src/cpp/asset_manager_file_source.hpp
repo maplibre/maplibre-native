@@ -17,9 +17,10 @@ class Thread;
 
 class AssetManagerFileSource : public FileSource {
 public:
-    AssetManagerFileSource(
-        jni::JNIEnv&, const jni::Object<android::AssetManager>&, const ResourceOptions, const ClientOptions
-    );
+    AssetManagerFileSource(jni::JNIEnv&,
+                           const jni::Object<android::AssetManager>&,
+                           const ResourceOptions,
+                           const ClientOptions);
     ~AssetManagerFileSource() override;
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;

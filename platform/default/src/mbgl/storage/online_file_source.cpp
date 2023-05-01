@@ -61,13 +61,13 @@ struct OnlineFileRequest {
     std::function<void()> cancelCallback = nullptr;
     std::shared_ptr<Mailbox> mailbox;
 
-    // Counts the number of times a response was already expired when received. We're using
-    // this to add a delay when making a new request so we don't keep retrying immediately
-    // in case of a server serving expired tiles.
+    // Counts the number of times a response was already expired when received.
+    // We're using this to add a delay when making a new request so we don't
+    // keep retrying immediately in case of a server serving expired tiles.
     uint32_t expiredRequests = 0;
 
-    // Counts the number of subsequent failed requests. We're using this value for exponential
-    // backoff when retrying requests.
+    // Counts the number of subsequent failed requests. We're using this value
+    // for exponential backoff when retrying requests.
     uint32_t failedRequests = 0;
     Response::Error::Reason failedRequestReason = Response::Error::Reason::Success;
     std::optional<Timestamp> retryAfter;
@@ -102,13 +102,13 @@ public:
     void add(OnlineFileRequest* req) {
         allRequests.insert(req);
         if (resourceTransform) {
-            // Request the ResourceTransform actor a new url and replace the resource url with the
-            // transformed one before proceeding to schedule the request.
+            // Request the ResourceTransform actor a new url and replace the
+            // resource url with the transformed one before proceeding to
+            // schedule the request.
             resourceTransform.transform(
-                req->resource.kind,
-                req->resource.url,
-                [ref = req->actor()](const std::string& url) { ref.invoke(&OnlineFileRequest::setTransformedURL, url); }
-            );
+                req->resource.kind, req->resource.url, [ref = req->actor()](const std::string& url) {
+                    ref.invoke(&OnlineFileRequest::setTransformedURL, url);
+                });
         } else {
             req->activate();
         }
@@ -151,9 +151,8 @@ public:
             req->request = httpFileSource.request(req->resource, callback);
         } else {
             Response response;
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::Connection, "Online connectivity is disabled."
-            );
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Connection,
+                                                               "Online connectivity is disabled.");
             callback(response);
         }
     }
@@ -319,14 +318,12 @@ public:
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK),
               "OnlineFileSource",
               resourceOptions.clone(),
-              clientOptions.clone()
-          )) {}
+              clientOptions.clone())) {}
 
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
-        req->onCancel([actorRef = thread->actor(), req = req.get()]() {
-            actorRef.invoke(&OnlineFileSourceThread::cancel, req);
-        });
+        req->onCancel(
+            [actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
         thread->actor().invoke(&OnlineFileSourceThread::request, req.get(), std::move(res), req->actor());
         return req;
     }
@@ -409,8 +406,7 @@ public:
             {
                 std::lock_guard<std::mutex> lock(resourceOptionsMutex);
                 cachedResourceOptions.withTileServerOptions(
-                    cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL)
-                );
+                    cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
             }
         } else {
             Log::Error(Event::General, "Invalid base-url property value type.");
@@ -514,9 +510,8 @@ Duration OnlineFileRequest::getUpdateInterval(std::optional<Timestamp> expires) 
     // Calculate a timeout that depends on how many
     // consecutive errors we've encountered, and on the expiration time, if present.
     Duration errorRetryTimeout = http::errorRetryTimeout(failedRequestReason, failedRequests, retryAfter);
-    Duration expirationTimeout = std::max(
-        http::expirationTimeout(std::move(expires), expiredRequests), resource.minimumUpdateInterval
-    );
+    Duration expirationTimeout = std::max(http::expirationTimeout(std::move(expires), expiredRequests),
+                                          resource.minimumUpdateInterval);
     return std::min(errorRetryTimeout, expirationTimeout);
 }
 
@@ -540,9 +535,10 @@ void OnlineFileRequest::completed(Response response) {
     }
 
     if (response.notModified && resource.priorData) {
-        // When the priorData field is set, it indicates that we had to revalidate the request and
-        // that the requestor hasn't gotten data yet. If we get a 304 response, this means that we
-        // have send the cached data to give the requestor a chance to actually obtain the data.
+        // When the priorData field is set, it indicates that we had to
+        // revalidate the request and that the requestor hasn't gotten data yet.
+        // If we get a 304 response, this means that we have send the cached
+        // data to give the requestor a chance to actually obtain the data.
         response.data = std::move(resource.priorData);
         response.notModified = false;
     }
@@ -581,9 +577,9 @@ void OnlineFileRequest::completed(Response response) {
 
     schedule(getUpdateInterval(response.expires));
 
-    // Calling the callback may result in `this` being deleted. It needs to be done last,
-    // and needs to make a local copy of the callback to ensure that it remains valid for
-    // the duration of the call.
+    // Calling the callback may result in `this` being deleted. It needs to be
+    // done last, and needs to make a local copy of the callback to ensure that
+    // it remains valid for the duration of the call.
     auto callback_ = callback;
     callback_(response);
 }

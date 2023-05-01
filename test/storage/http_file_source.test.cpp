@@ -13,9 +13,8 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(Cancel)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    fs.request({Resource::Unknown, "http://127.0.0.1:3000/test"}, [&](Response) {
-        ADD_FAILURE() << "Callback should not be called";
-    });
+    fs.request({Resource::Unknown, "http://127.0.0.1:3000/test"},
+               [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
 
     loop.runOnce();
 }
@@ -134,19 +133,19 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(ExpiresParsing)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    auto req = fs.request(
-        {Resource::Unknown, "http://127.0.0.1:3000/test?modified=1420794326&expires=1420797926&etag=foo"},
-        [&](Response res) {
-            EXPECT_EQ(nullptr, res.error);
-            ASSERT_TRUE(res.data.get());
-            EXPECT_EQ("Hello World!", *res.data);
-            EXPECT_EQ(Timestamp{Seconds(1420797926)}, res.expires);
-            EXPECT_FALSE(res.mustRevalidate);
-            EXPECT_EQ(Timestamp{Seconds(1420794326)}, res.modified);
-            EXPECT_EQ("foo", *res.etag);
-            loop.stop();
-        }
-    );
+    auto req = fs.request({Resource::Unknown,
+                           "http://127.0.0.1:3000/"
+                           "test?modified=1420794326&expires=1420797926&etag=foo"},
+                          [&](Response res) {
+                              EXPECT_EQ(nullptr, res.error);
+                              ASSERT_TRUE(res.data.get());
+                              EXPECT_EQ("Hello World!", *res.data);
+                              EXPECT_EQ(Timestamp{Seconds(1420797926)}, res.expires);
+                              EXPECT_FALSE(res.mustRevalidate);
+                              EXPECT_EQ(Timestamp{Seconds(1420794326)}, res.modified);
+                              EXPECT_EQ("foo", *res.etag);
+                              loop.stop();
+                          });
 
     loop.run();
 }
@@ -155,18 +154,18 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(CacheControlParsing)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    auto req =
-        fs.request({Resource::Unknown, "http://127.0.0.1:3000/test?cachecontrol=max-age=120"}, [&](Response res) {
-            EXPECT_EQ(nullptr, res.error);
-            ASSERT_TRUE(res.data.get());
-            EXPECT_EQ("Hello World!", *res.data);
-            EXPECT_GT(Seconds(2), util::abs(*res.expires - util::now() - Seconds(120)))
-                << "Expiration date isn't about 120 seconds in the future";
-            EXPECT_FALSE(res.mustRevalidate);
-            EXPECT_FALSE(bool(res.modified));
-            EXPECT_FALSE(bool(res.etag));
-            loop.stop();
-        });
+    auto req = fs.request({Resource::Unknown, "http://127.0.0.1:3000/test?cachecontrol=max-age=120"},
+                          [&](Response res) {
+                              EXPECT_EQ(nullptr, res.error);
+                              ASSERT_TRUE(res.data.get());
+                              EXPECT_EQ("Hello World!", *res.data);
+                              EXPECT_GT(Seconds(2), util::abs(*res.expires - util::now() - Seconds(120)))
+                                  << "Expiration date isn't about 120 seconds in the future";
+                              EXPECT_FALSE(res.mustRevalidate);
+                              EXPECT_FALSE(bool(res.modified));
+                              EXPECT_FALSE(bool(res.etag));
+                              loop.stop();
+                          });
 
     loop.run();
 }
@@ -183,25 +182,23 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(Load)) {
 
     std::function<void(int)> req = [&](int i) {
         const auto current = number++;
-        reqs[i] = fs.request(
-            {Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
-            [&, i, current](Response res) {
-                reqs[i].reset();
-                EXPECT_EQ(nullptr, res.error);
-                ASSERT_TRUE(res.data.get());
-                EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
-                EXPECT_FALSE(bool(res.expires));
-                EXPECT_FALSE(res.mustRevalidate);
-                EXPECT_FALSE(bool(res.modified));
-                EXPECT_FALSE(bool(res.etag));
+        reqs[i] = fs.request({Resource::Unknown, std::string("http://127.0.0.1:3000/load/") + util::toString(current)},
+                             [&, i, current](Response res) {
+                                 reqs[i].reset();
+                                 EXPECT_EQ(nullptr, res.error);
+                                 ASSERT_TRUE(res.data.get());
+                                 EXPECT_EQ(std::string("Request ") + util::toString(current), *res.data);
+                                 EXPECT_FALSE(bool(res.expires));
+                                 EXPECT_FALSE(res.mustRevalidate);
+                                 EXPECT_FALSE(bool(res.modified));
+                                 EXPECT_FALSE(bool(res.etag));
 
-                if (number <= max) {
-                    req(i);
-                } else if (current == max) {
-                    loop.stop();
-                }
-            }
-        );
+                                 if (number <= max) {
+                                     req(i);
+                                 } else if (current == max) {
+                                     loop.stop();
+                                 }
+                             });
     };
 
     for (int i = 0; i < concurrency; i++) {

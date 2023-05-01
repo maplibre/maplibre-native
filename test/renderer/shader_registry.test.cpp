@@ -42,14 +42,12 @@ public:
 
     MapInstance(float pixelRatio, MapObserver& observer)
         : frontend(pixelRatio),
-          adapter(
-              frontend,
-              observer,
-              std::make_shared<MainResourceLoader>(
-                  ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"), ClientOptions()
-              ),
-              MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio)
-          ) {}
+          adapter(frontend,
+                  observer,
+                  std::make_shared<MainResourceLoader>(
+                      ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"),
+                      ClientOptions()),
+                  MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
 
 public:
     HeadlessFrontend frontend;
@@ -232,8 +230,8 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
     test::checkImage("test/fixtures/shader_registry/glsl_replace_noop", img, 0.005, 0.1);
 }
 
-// Test replacing an actual program with a similar instance using a different fragment
-// shader
+// Test replacing an actual program with a similar instance using a different
+// fragment shader
 TEST(ShaderRegistry, GLSLReplacement1) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
@@ -241,18 +239,15 @@ TEST(ShaderRegistry, GLSLReplacement1) {
 
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(
-                std::make_shared<FillProgram>(ProgramParameters(1.0f, false)
-                                                  .withShaderSource(ProgramParameters::ProgramSource(
-                                                      gfx::Backend::Type::OpenGL,
-                                                      "",
-                                                      R"(
+        if (!registry.replaceShader(std::make_shared<FillProgram>(
+                ProgramParameters(1.0f, false)
+                    .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
+                                                                       "",
+                                                                       R"(
 void main() {
     fragColor = vec4(0.0, 0.0, 1.0, 1.0);
 }
-                    )"
-                                                  )))
-            )) {
+                    )"))))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -269,8 +264,8 @@ void main() {
     test::checkImage("test/fixtures/shader_registry/glsl_replace_1", img, 0.005, 0.1);
 }
 
-// Test replacing an actual program with a similar instance using a different fragment
-// shader
+// Test replacing an actual program with a similar instance using a different
+// fragment shader
 TEST(ShaderRegistry, GLSLReplacement2) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
@@ -278,12 +273,11 @@ TEST(ShaderRegistry, GLSLReplacement2) {
 
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(
-                std::make_shared<FillProgram>(ProgramParameters(1.0f, false)
-                                                  .withShaderSource(ProgramParameters::ProgramSource(
-                                                      gfx::Backend::Type::OpenGL,
-                                                      "",
-                                                      R"(
+        if (!registry.replaceShader(std::make_shared<FillProgram>(
+                ProgramParameters(1.0f, false)
+                    .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
+                                                                       "",
+                                                                       R"(
 #ifndef HAS_UNIFORM_u_color
 varying highp vec4 color;
 #else
@@ -311,9 +305,7 @@ void main() {
     fragColor = vec4(1.0);
 #endif
 }
-                    )"
-                                                  )))
-            )) {
+                    )"))))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };

@@ -53,14 +53,12 @@ TEST(Buckets, CircleBucket) {
 
     // CircleBucket::addFeature() is a no-op.
     GeometryCollection point{{{0, 0}}};
-    bucket.addFeature(
-        StubGeometryTileFeature{{}, FeatureType::Point, point, properties},
-        point,
-        {},
-        PatternLayerMap(),
-        0,
-        CanonicalTileID(0, 0, 0)
-    );
+    bucket.addFeature(StubGeometryTileFeature{{}, FeatureType::Point, point, properties},
+                      point,
+                      {},
+                      PatternLayerMap(),
+                      0,
+                      CanonicalTileID(0, 0, 0));
     ASSERT_FALSE(bucket.hasData());
     ASSERT_FALSE(bucket.needsUpload());
 
@@ -86,14 +84,12 @@ TEST(Buckets, FillBucket) {
     ASSERT_FALSE(bucket.needsUpload());
 
     GeometryCollection polygon{{{0, 0}, {0, 1}, {1, 1}}};
-    bucket.addFeature(
-        StubGeometryTileFeature{{}, FeatureType::Polygon, polygon, properties},
-        polygon,
-        {},
-        PatternLayerMap(),
-        0,
-        CanonicalTileID(0, 0, 0)
-    );
+    bucket.addFeature(StubGeometryTileFeature{{}, FeatureType::Polygon, polygon, properties},
+                      polygon,
+                      {},
+                      PatternLayerMap(),
+                      0,
+                      CanonicalTileID(0, 0, 0));
     ASSERT_TRUE(bucket.hasData());
     ASSERT_TRUE(bucket.needsUpload());
 
@@ -115,25 +111,21 @@ TEST(Buckets, LineBucket) {
 
     // Ignore invalid feature type.
     GeometryCollection point{{{0, 0}}};
-    bucket.addFeature(
-        StubGeometryTileFeature{{}, FeatureType::Point, point, properties},
-        point,
-        {},
-        PatternLayerMap(),
-        0,
-        CanonicalTileID(0, 0, 0)
-    );
+    bucket.addFeature(StubGeometryTileFeature{{}, FeatureType::Point, point, properties},
+                      point,
+                      {},
+                      PatternLayerMap(),
+                      0,
+                      CanonicalTileID(0, 0, 0));
     ASSERT_FALSE(bucket.hasData());
 
     GeometryCollection line{{{0, 0}, {1, 1}}};
-    bucket.addFeature(
-        StubGeometryTileFeature{{}, FeatureType::LineString, line, properties},
-        line,
-        {},
-        PatternLayerMap(),
-        1,
-        CanonicalTileID(0, 0, 0)
-    );
+    bucket.addFeature(StubGeometryTileFeature{{}, FeatureType::LineString, line, properties},
+                      line,
+                      {},
+                      PatternLayerMap(),
+                      1,
+                      CanonicalTileID(0, 0, 0));
     ASSERT_TRUE(bucket.hasData());
     ASSERT_TRUE(bucket.needsUpload());
 
@@ -155,21 +147,20 @@ TEST(Buckets, SymbolBucket) {
     std::vector<SortKeyRange> symbolRanges;
 
     gl::Context context{backend};
-    SymbolBucket bucket{
-        std::move(layout),
-        {},
-        16.0f,
-        1.0f,
-        0,
-        iconsNeedLinear,
-        sortFeaturesByY,
-        bucketLeaderID,
-        std::move(symbolInstances),
-        std::move(symbolRanges),
-        1.0f,
-        false,
-        {},
-        false /*iconsInText*/};
+    SymbolBucket bucket{std::move(layout),
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        iconsNeedLinear,
+                        sortFeaturesByY,
+                        bucketLeaderID,
+                        std::move(symbolInstances),
+                        std::move(symbolRanges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
     ASSERT_FALSE(bucket.hasIconData());
     ASSERT_FALSE(bucket.hasSdfIconData());
     ASSERT_FALSE(bucket.hasTextData());
@@ -182,14 +173,12 @@ TEST(Buckets, SymbolBucket) {
 
     // SymbolBucket::addFeature() is a no-op.
     GeometryCollection point{{{0, 0}}};
-    bucket.addFeature(
-        StubGeometryTileFeature{{}, FeatureType::Point, std::move(point), properties},
-        point,
-        {},
-        PatternLayerMap(),
-        0,
-        CanonicalTileID(0, 0, 0)
-    );
+    bucket.addFeature(StubGeometryTileFeature{{}, FeatureType::Point, std::move(point), properties},
+                      point,
+                      {},
+                      PatternLayerMap(),
+                      0,
+                      CanonicalTileID(0, 0, 0));
     ASSERT_FALSE(bucket.hasData());
     ASSERT_FALSE(bucket.needsUpload());
 
@@ -249,43 +238,39 @@ TEST(Buckets, RasterBucketMaskTwoChildren) {
     RasterBucket bucket{nullptr};
     bucket.setMask({CanonicalTileID{1, 0, 0}, CanonicalTileID{1, 1, 1}});
 
-    EXPECT_EQ(
-        (std::vector<RasterLayoutVertex>{
-            // 1/0/1
-            RasterProgram::layoutVertex({0, 0}, {0, 0}),
-            RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
-            RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
-            RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
+    EXPECT_EQ((std::vector<RasterLayoutVertex>{
+                  // 1/0/1
+                  RasterProgram::layoutVertex({0, 0}, {0, 0}),
+                  RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
+                  RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
+                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
 
-            // 1/1/1
-            RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-            RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
-            RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
-            RasterProgram::layoutVertex({8192, 8192}, {8192, 8192}),
-        }),
-        bucket.vertices.vector()
-    );
+                  // 1/1/1
+                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
+                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
+                  RasterProgram::layoutVertex({8192, 8192}, {8192, 8192}),
+              }),
+              bucket.vertices.vector());
 
-    EXPECT_EQ(
-        (std::vector<uint16_t>{
-            // 1/0/1
-            0,
-            1,
-            2,
-            1,
-            2,
-            3,
+    EXPECT_EQ((std::vector<uint16_t>{
+                  // 1/0/1
+                  0,
+                  1,
+                  2,
+                  1,
+                  2,
+                  3,
 
-            // 1/1/1
-            4,
-            5,
-            6,
-            5,
-            6,
-            7,
-        }),
-        bucket.indices.vector()
-    );
+                  // 1/1/1
+                  4,
+                  5,
+                  6,
+                  5,
+                  6,
+                  7,
+              }),
+              bucket.indices.vector());
 
     SegmentVector<RasterAttributes> expectedSegments;
     expectedSegments.emplace_back(0, 0, 8, 12);
@@ -294,108 +279,102 @@ TEST(Buckets, RasterBucketMaskTwoChildren) {
 
 TEST(Buckets, RasterBucketMaskComplex) {
     RasterBucket bucket{nullptr};
-    bucket.setMask(
-        {CanonicalTileID{1, 0, 1},
-         CanonicalTileID{1, 1, 0},
-         CanonicalTileID{2, 2, 3},
-         CanonicalTileID{2, 3, 2},
-         CanonicalTileID{3, 6, 7},
-         CanonicalTileID{3, 7, 6}}
-    );
+    bucket.setMask({CanonicalTileID{1, 0, 1},
+                    CanonicalTileID{1, 1, 0},
+                    CanonicalTileID{2, 2, 3},
+                    CanonicalTileID{2, 3, 2},
+                    CanonicalTileID{3, 6, 7},
+                    CanonicalTileID{3, 7, 6}});
 
-    EXPECT_EQ(
-        (std::vector<RasterLayoutVertex>{
-            // 1/0/1
-            RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
-            RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-            RasterProgram::layoutVertex({0, 8192}, {0, 8192}),
-            RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
+    EXPECT_EQ((std::vector<RasterLayoutVertex>{
+                  // 1/0/1
+                  RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
+                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterProgram::layoutVertex({0, 8192}, {0, 8192}),
+                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
 
-            // 1/1/0
-            RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
-            RasterProgram::layoutVertex({8192, 0}, {8192, 0}),
-            RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-            RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
+                  // 1/1/0
+                  RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
+                  RasterProgram::layoutVertex({8192, 0}, {8192, 0}),
+                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
 
-            // 2/2/3
-            RasterProgram::layoutVertex({4096, 6144}, {4096, 6144}),
-            RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
-            RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
-            RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
+                  // 2/2/3
+                  RasterProgram::layoutVertex({4096, 6144}, {4096, 6144}),
+                  RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
+                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
+                  RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
 
-            // 2/3/2
-            RasterProgram::layoutVertex({6144, 4096}, {6144, 4096}),
-            RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
-            RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
-            RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
+                  // 2/3/2
+                  RasterProgram::layoutVertex({6144, 4096}, {6144, 4096}),
+                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
+                  RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
+                  RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
 
-            // 3/6/7
-            RasterProgram::layoutVertex({6144, 7168}, {6144, 7168}),
-            RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
-            RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
-            RasterProgram::layoutVertex({7168, 8192}, {7168, 8192}),
+                  // 3/6/7
+                  RasterProgram::layoutVertex({6144, 7168}, {6144, 7168}),
+                  RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
+                  RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
+                  RasterProgram::layoutVertex({7168, 8192}, {7168, 8192}),
 
-            // 3/7/6
-            RasterProgram::layoutVertex({7168, 6144}, {7168, 6144}),
-            RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
-            RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
-            RasterProgram::layoutVertex({8192, 7168}, {8192, 7168}),
-        }),
-        bucket.vertices.vector()
-    );
+                  // 3/7/6
+                  RasterProgram::layoutVertex({7168, 6144}, {7168, 6144}),
+                  RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
+                  RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
+                  RasterProgram::layoutVertex({8192, 7168}, {8192, 7168}),
+              }),
+              bucket.vertices.vector());
 
-    EXPECT_EQ(
-        (std::vector<uint16_t>{
-            // 1/0/1
-            0,
-            1,
-            2,
-            1,
-            2,
-            3,
+    EXPECT_EQ((std::vector<uint16_t>{
+                  // 1/0/1
+                  0,
+                  1,
+                  2,
+                  1,
+                  2,
+                  3,
 
-            // 1/1/0
-            4,
-            5,
-            6,
-            5,
-            6,
-            7,
+                  // 1/1/0
+                  4,
+                  5,
+                  6,
+                  5,
+                  6,
+                  7,
 
-            // 2/2/3
-            8,
-            9,
-            10,
-            9,
-            10,
-            11,
+                  // 2/2/3
+                  8,
+                  9,
+                  10,
+                  9,
+                  10,
+                  11,
 
-            // 2/3/2
-            12,
-            13,
-            14,
-            13,
-            14,
-            15,
+                  // 2/3/2
+                  12,
+                  13,
+                  14,
+                  13,
+                  14,
+                  15,
 
-            // 3/6/7
-            16,
-            17,
-            18,
-            17,
-            18,
-            19,
+                  // 3/6/7
+                  16,
+                  17,
+                  18,
+                  17,
+                  18,
+                  19,
 
-            // 3/7/6
-            20,
-            21,
-            22,
-            21,
-            22,
-            23,
-        }),
-        bucket.indices.vector()
-    );
+                  // 3/7/6
+                  20,
+                  21,
+                  22,
+                  21,
+                  22,
+                  23,
+              }),
+              bucket.indices.vector());
 
     SegmentVector<RasterAttributes> expectedSegments;
     expectedSegments.emplace_back(0, 0, 24, 36);

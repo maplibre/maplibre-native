@@ -26,10 +26,8 @@ TEST(Expression, IsExpression) {
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> spec;
     spec.Parse<0>(util::read_file("scripts/style-spec-reference/v8.json").c_str());
     ASSERT_FALSE(spec.HasParseError());
-    ASSERT_TRUE(
-        spec.IsObject() && spec.HasMember("expression_name") && spec["expression_name"].IsObject() &&
-        spec["expression_name"].HasMember("values") && spec["expression_name"]["values"].IsObject()
-    );
+    ASSERT_TRUE(spec.IsObject() && spec.HasMember("expression_name") && spec["expression_name"].IsObject() &&
+                spec["expression_name"].HasMember("values") && spec["expression_name"]["values"].IsObject());
 
     const auto& allExpressions = spec["expression_name"]["values"];
 

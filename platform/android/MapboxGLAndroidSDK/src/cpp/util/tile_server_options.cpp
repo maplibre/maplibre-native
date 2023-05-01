@@ -3,32 +3,30 @@
 namespace mbgl {
 namespace android {
 
-jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(
-    jni::JNIEnv& env, const mbgl::TileServerOptions& tileServerOptions
-) {
+jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(jni::JNIEnv& env,
+                                                                  const mbgl::TileServerOptions& tileServerOptions) {
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
-    static auto constructor = javaClass.GetConstructor<
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::String,
-        jni::jboolean,
-        jni::String,
-        jni::Array<jni::Object<DefaultStyle>>>(env);
+    static auto constructor = javaClass.GetConstructor<jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::String,
+                                                       jni::jboolean,
+                                                       jni::String,
+                                                       jni::Array<jni::Object<DefaultStyle>>>(env);
 
     std::optional<std::string> sourceVersionPrefixValue = tileServerOptions.sourceVersionPrefix();
     std::optional<std::string> styleVersionPrefixValue = tileServerOptions.styleVersionPrefix();
@@ -59,13 +57,11 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::New(
         jni::Make<jni::String>(env, tileServerOptions.apiKeyParameterName()),
         jni::jboolean(tileServerOptions.requiresApiKey()),
         jni::Make<jni::String>(env, tileServerOptions.defaultStyle()),
-        TileServerOptions::NewStyles(env, tileServerOptions.defaultStyles())
-    );
+        TileServerOptions::NewStyles(env, tileServerOptions.defaultStyles()));
 }
 
 jni::Local<jni::Array<jni::Object<DefaultStyle>>> TileServerOptions::NewStyles(
-    jni::JNIEnv& env, const std::vector<mbgl::util::DefaultStyle>& nativeStyles
-) {
+    jni::JNIEnv& env, const std::vector<mbgl::util::DefaultStyle>& nativeStyles) {
     auto retVal = jni::Array<jni::Object<DefaultStyle>>::New(env, nativeStyles.size());
     for (auto it = begin(nativeStyles); it != end(nativeStyles); ++it) {
         auto converted = DefaultStyle::New(env, *it);
@@ -76,36 +72,31 @@ jni::Local<jni::Array<jni::Object<DefaultStyle>>> TileServerOptions::NewStyles(
 }
 
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::DefaultConfiguration(
-    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions
-) {
+    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
     auto options = mbgl::TileServerOptions::DefaultConfiguration();
     return TileServerOptions::New(env, options);
 }
 
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapboxConfiguration(
-    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions
-) {
+    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
     auto options = mbgl::TileServerOptions::MapboxConfiguration();
     return TileServerOptions::New(env, options);
 }
 
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapTilerConfiguration(
-    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions
-) {
+    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
     auto options = mbgl::TileServerOptions::MapTilerConfiguration();
     return TileServerOptions::New(env, options);
 }
 
 jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapLibreConfiguration(
-    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions
-) {
+    jni::JNIEnv& env, const jni::Class<TileServerOptions>& jOptions) {
     auto options = mbgl::TileServerOptions::MapLibreConfiguration();
     return TileServerOptions::New(env, options);
 }
 
-mbgl::TileServerOptions TileServerOptions::getTileServerOptions(
-    jni::JNIEnv& env, const jni::Object<TileServerOptions>& options
-) {
+mbgl::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env,
+                                                                const jni::Object<TileServerOptions>& options) {
     auto opts = mbgl::TileServerOptions();
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
 
@@ -140,8 +131,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(
 
     static auto defaultStylesField = javaClass.GetField<jni::Array<jni::Object<DefaultStyle>>>(env, "defaultStyles");
     std::vector<mbgl::util::DefaultStyle> defaultStyles = TileServerOptions::getDefaultStyles(
-        env, options.Get(env, defaultStylesField)
-    );
+        env, options.Get(env, defaultStylesField));
 
     auto retVal = mbgl::TileServerOptions()
                       .withBaseURL(jni::Make<std::string>(env, options.Get(env, baseURLField)))
@@ -153,37 +143,31 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(
     retVal.withSourceTemplate(
         jni::Make<std::string>(env, options.Get(env, sourceTemplateField)),
         jni::Make<std::string>(env, options.Get(env, sourceDomainNameField)),
-        sourcePrefixValue ? jni::Make<std::string>(env, sourcePrefixValue) : std::optional<std::string>{}
-    );
+        sourcePrefixValue ? jni::Make<std::string>(env, sourcePrefixValue) : std::optional<std::string>{});
 
     auto styleVersionPrefixValue = options.Get(env, styleVersionPrefixField);
     retVal.withStyleTemplate(
         jni::Make<std::string>(env, options.Get(env, styleTemplateField)),
         jni::Make<std::string>(env, options.Get(env, styleDomainNameField)),
-        styleVersionPrefixValue ? jni::Make<std::string>(env, styleVersionPrefixValue) : std::optional<std::string>{}
-    );
+        styleVersionPrefixValue ? jni::Make<std::string>(env, styleVersionPrefixValue) : std::optional<std::string>{});
 
     auto spritesVersionPrefixValue = options.Get(env, spritesVersionPrefixField);
-    retVal.withSpritesTemplate(
-        jni::Make<std::string>(env, options.Get(env, spritesTemplateField)),
-        jni::Make<std::string>(env, options.Get(env, spritesDomainNameField)),
-        spritesVersionPrefixValue ? jni::Make<std::string>(env, spritesVersionPrefixValue)
-                                  : std::optional<std::string>{}
-    );
+    retVal.withSpritesTemplate(jni::Make<std::string>(env, options.Get(env, spritesTemplateField)),
+                               jni::Make<std::string>(env, options.Get(env, spritesDomainNameField)),
+                               spritesVersionPrefixValue ? jni::Make<std::string>(env, spritesVersionPrefixValue)
+                                                         : std::optional<std::string>{});
 
     auto glyphsVersionPrefixValue = options.Get(env, glyphsVersionPrefixField);
-    retVal.withGlyphsTemplate(
-        jni::Make<std::string>(env, options.Get(env, glyphsTemplateField)),
-        jni::Make<std::string>(env, options.Get(env, glyphsDomainNameField)),
-        glyphsVersionPrefixValue ? jni::Make<std::string>(env, glyphsVersionPrefixValue) : std::optional<std::string>{}
-    );
+    retVal.withGlyphsTemplate(jni::Make<std::string>(env, options.Get(env, glyphsTemplateField)),
+                              jni::Make<std::string>(env, options.Get(env, glyphsDomainNameField)),
+                              glyphsVersionPrefixValue ? jni::Make<std::string>(env, glyphsVersionPrefixValue)
+                                                       : std::optional<std::string>{});
 
     auto tileVersionPrefixValue = options.Get(env, tileVersionPrefixField);
     retVal.withTileTemplate(
         jni::Make<std::string>(env, options.Get(env, tileTemplateField)),
         jni::Make<std::string>(env, options.Get(env, tileDomainNameField)),
-        tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue) : std::optional<std::string>{}
-    );
+        tileVersionPrefixValue ? jni::Make<std::string>(env, tileVersionPrefixValue) : std::optional<std::string>{});
 
     retVal.withDefaultStyle(jni::Make<std::string>(env, options.Get(env, defaultStyleField)));
     retVal.withDefaultStyles(defaultStyles);
@@ -192,8 +176,7 @@ mbgl::TileServerOptions TileServerOptions::getTileServerOptions(
 }
 
 std::vector<mbgl::util::DefaultStyle> TileServerOptions::getDefaultStyles(
-    jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_
-) {
+    jni::JNIEnv& env, const jni::Array<jni::Object<DefaultStyle>>& styles_) {
     std::size_t length = styles_.Length(env);
     std::vector<mbgl::util::DefaultStyle> convertedStyles;
     // convertedStyles.reserve(length);
@@ -207,22 +190,16 @@ std::vector<mbgl::util::DefaultStyle> TileServerOptions::getDefaultStyles(
 
 void TileServerOptions::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
-    jni::RegisterNatives(
-        env,
-        *javaClass,
-        jni::MakeNativeMethod<
-            decltype(&TileServerOptions::DefaultConfiguration),
-            &TileServerOptions::DefaultConfiguration>("defaultConfiguration"),
-        jni::MakeNativeMethod<
-            decltype(&TileServerOptions::MapboxConfiguration),
-            &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"),
-        jni::MakeNativeMethod<
-            decltype(&TileServerOptions::MapTilerConfiguration),
-            &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"),
-        jni::MakeNativeMethod<
-            decltype(&TileServerOptions::MapLibreConfiguration),
-            &TileServerOptions::MapLibreConfiguration>("mapLibreConfiguration")
-    );
+    jni::RegisterNatives(env,
+                         *javaClass,
+                         jni::MakeNativeMethod<decltype(&TileServerOptions::DefaultConfiguration),
+                                               &TileServerOptions::DefaultConfiguration>("defaultConfiguration"),
+                         jni::MakeNativeMethod<decltype(&TileServerOptions::MapboxConfiguration),
+                                               &TileServerOptions::MapboxConfiguration>("mapboxConfiguration"),
+                         jni::MakeNativeMethod<decltype(&TileServerOptions::MapTilerConfiguration),
+                                               &TileServerOptions::MapTilerConfiguration>("mapTilerConfiguration"),
+                         jni::MakeNativeMethod<decltype(&TileServerOptions::MapLibreConfiguration),
+                                               &TileServerOptions::MapLibreConfiguration>("mapLibreConfiguration"));
 }
 
 } // namespace android

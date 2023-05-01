@@ -20,9 +20,8 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
     return std::make_unique<gl::UploadPass>(*this, name);
 }
 
-std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(
-    const char* name, const gfx::RenderPassDescriptor& descriptor
-) {
+std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* name,
+                                                                  const gfx::RenderPassDescriptor& descriptor) {
     return std::make_unique<gl::RenderPass>(*this, name, descriptor);
 }
 
@@ -36,8 +35,7 @@ void CommandEncoder::pushDebugGroup(const char* name) {
     if (auto debugging = context.getDebuggingExtension()) {
         if (debugging->pushDebugGroup) {
             MBGL_CHECK_ERROR(
-                debugging->pushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, platform::GLsizei(strlen(name)), name)
-            );
+                debugging->pushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, platform::GLsizei(strlen(name)), name));
         } else if (debugging->pushGroupMarkerEXT) {
             MBGL_CHECK_ERROR(debugging->pushGroupMarkerEXT(platform::GLsizei(strlen(name) + 1), name));
         }

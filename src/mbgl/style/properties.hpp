@@ -45,8 +45,9 @@ public:
             return finalValue;
         } else if (value.isDataDriven()) {
             // Transitions to data-driven properties are not supported.
-            // We snap immediately to the data-driven value so that, when we perform layout,
-            // we see the data-driven function and can use it to populate vertex buffers.
+            // We snap immediately to the data-driven value so that, when we
+            // perform layout, we see the data-driven function and can use it to
+            // populate vertex buffers.
             prior = {};
             return finalValue;
         } else if (now < begin) {
@@ -55,11 +56,9 @@ public:
         } else {
             // Interpolate between recursively-calculated prior value and final.
             float t = std::chrono::duration<float>(now - begin) / (end - begin);
-            return util::interpolate(
-                prior->get().evaluate(evaluator, now),
-                finalValue,
-                static_cast<float>(util::DEFAULT_TRANSITION_EASE.solve(t, 0.001))
-            );
+            return util::interpolate(prior->get().evaluate(evaluator, now),
+                                     finalValue,
+                                     static_cast<float>(util::DEFAULT_TRANSITION_EASE.solve(t, 0.001)));
         }
     }
 
@@ -110,16 +109,19 @@ template <class... Ps>
 class Properties {
 public:
     /*
-        For style properties we implement a two step evaluation process: if you have a zoom level,
-        you can evaluate a set of unevaluated property values, producing a set of possibly evaluated
-        values, where undefined, constant, or camera function values have been fully evaluated, and
-        source or composite function values have not.
+        For style properties we implement a two step evaluation process: if you
+       have a zoom level, you can evaluate a set of unevaluated property values,
+       producing a set of possibly evaluated values, where undefined, constant,
+       or camera function values have been fully evaluated, and source or
+       composite function values have not.
 
-        Once you also have a particular feature, you can evaluate that set of possibly evaluated values
-        fully, producing a set of fully evaluated values.
+        Once you also have a particular feature, you can evaluate that set of
+       possibly evaluated values fully, producing a set of fully evaluated
+       values.
 
-        This is in theory maximally efficient in terms of avoiding repeated evaluation of camera
-        functions, though it's more of a historical accident than a purposeful optimization.
+        This is in theory maximally efficient in terms of avoiding repeated
+       evaluation of camera functions, though it's more of a historical accident
+       than a purposeful optimization.
     */
 
     using PropertyTypes = TypeList<Ps...>;
@@ -158,75 +160,57 @@ public:
         }
 
         template <class T>
-        static T evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const PossiblyEvaluatedPropertyValue<T>& v,
-            const T& defaultValue
-        ) {
-            return v.match(
-                [&](const T& t) { return t; },
-                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, defaultValue); }
-            );
+        static T evaluate(float z,
+                          const GeometryTileFeature& feature,
+                          const PossiblyEvaluatedPropertyValue<T>& v,
+                          const T& defaultValue) {
+            return v.match([&](const T& t) { return t; },
+                           [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, defaultValue); });
         }
 
         template <class T>
-        static T evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const PossiblyEvaluatedPropertyValue<T>& v,
-            const T& defaultValue,
-            const std::set<std::string>& availableImages
-        ) {
+        static T evaluate(float z,
+                          const GeometryTileFeature& feature,
+                          const PossiblyEvaluatedPropertyValue<T>& v,
+                          const T& defaultValue,
+                          const std::set<std::string>& availableImages) {
             return v.match(
                 [&](const T& t) { return t; },
-                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, availableImages, defaultValue); }
-            );
+                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, availableImages, defaultValue); });
         }
 
         template <class T>
-        static T evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const PossiblyEvaluatedPropertyValue<T>& v,
-            const T& defaultValue,
-            const std::set<std::string>& availableImages,
-            const CanonicalTileID& canonical
-        ) {
-            return v.match(
-                [&](const T& t) { return t; },
-                [&](const PropertyExpression<T>& t) {
-                    return t.evaluate(z, feature, availableImages, canonical, defaultValue);
-                }
-            );
+        static T evaluate(float z,
+                          const GeometryTileFeature& feature,
+                          const PossiblyEvaluatedPropertyValue<T>& v,
+                          const T& defaultValue,
+                          const std::set<std::string>& availableImages,
+                          const CanonicalTileID& canonical) {
+            return v.match([&](const T& t) { return t; },
+                           [&](const PropertyExpression<T>& t) {
+                               return t.evaluate(z, feature, availableImages, canonical, defaultValue);
+                           });
         }
 
         template <class T>
-        static T evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const CanonicalTileID& canonical,
-            const PossiblyEvaluatedPropertyValue<T>& v,
-            const T& defaultValue
-        ) {
+        static T evaluate(float z,
+                          const GeometryTileFeature& feature,
+                          const CanonicalTileID& canonical,
+                          const PossiblyEvaluatedPropertyValue<T>& v,
+                          const T& defaultValue) {
             return v.match(
                 [&](const T& t) { return t; },
-                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, canonical, defaultValue); }
-            );
+                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, canonical, defaultValue); });
         }
 
         template <class T>
-        static T evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const FeatureState& state,
-            const PossiblyEvaluatedPropertyValue<T>& v,
-            const T& defaultValue
-        ) {
-            return v.match(
-                [&](const T& t) { return t; },
-                [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, state, defaultValue); }
-            );
+        static T evaluate(float z,
+                          const GeometryTileFeature& feature,
+                          const FeatureState& state,
+                          const PossiblyEvaluatedPropertyValue<T>& v,
+                          const T& defaultValue) {
+            return v.match([&](const T& t) { return t; },
+                           [&](const PropertyExpression<T>& t) { return t.evaluate(z, feature, state, defaultValue); });
         }
 
         template <class P>
@@ -250,12 +234,10 @@ public:
         }
 
         template <class P>
-        auto evaluate(
-            float z,
-            const GeometryTileFeature& feature,
-            const std::set<std::string>& availableImages,
-            const CanonicalTileID& canonical
-        ) const {
+        auto evaluate(float z,
+                      const GeometryTileFeature& feature,
+                      const std::set<std::string>& availableImages,
+                      const CanonicalTileID& canonical) const {
             return evaluate(z, feature, this->template get<P>(), P::defaultValue(), availableImages, canonical);
         }
 
@@ -312,9 +294,8 @@ public:
 
         bool hasDataDrivenPropertyDifference(const Transitionable& other) const {
             bool result = false;
-            util::ignore({(
-                result |= this->template get<Ps>().value.hasDataDrivenPropertyDifference(other.template get<Ps>().value)
-            )...});
+            util::ignore({(result |= this->template get<Ps>().value.hasDataDrivenPropertyDifference(
+                               other.template get<Ps>().value))...});
             return result;
         }
     };

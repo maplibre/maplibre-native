@@ -53,15 +53,15 @@ public:
     // Used as the CURL timer function to periodically check for socket updates.
     util::Timer timeout;
 
-    // CURL multi handle that we use to request multiple URLs at the same time, without having to
-    // block and spawn threads.
+    // CURL multi handle that we use to request multiple URLs at the same time,
+    // without having to block and spawn threads.
     CURLM *multi = nullptr;
 
     // CURL share handles are used for sharing session state (e.g.)
     CURLSH *share = nullptr;
 
-    // A queue that we use for storing reusable CURL easy handles to avoid creating and destroying
-    // them all the time.
+    // A queue that we use for storing reusable CURL easy handles to avoid
+    // creating and destroying them all the time.
     std::queue<CURL *> handles;
 
     void setResourceOptions(ResourceOptions options);
@@ -186,8 +186,8 @@ void HTTPFileSource::Impl::perform(curl_socket_t s, util::RunLoop::Event events)
     checkMultiInfo();
 }
 
-int HTTPFileSource::Impl::
-    handleSocket(CURL * /* handle */, curl_socket_t s, int action, void *userp, void * /* socketp */) {
+int HTTPFileSource::Impl::handleSocket(
+    CURL * /* handle */, curl_socket_t s, int action, void *userp, void * /* socketp */) {
     assert(userp);
     auto context = reinterpret_cast<Impl *>(userp);
 
@@ -195,15 +195,13 @@ int HTTPFileSource::Impl::
         case CURL_POLL_IN: {
             using namespace std::placeholders;
             util::RunLoop::Get()->addWatch(
-                static_cast<int>(s), util::RunLoop::Event::Read, std::bind(&Impl::perform, context, _1, _2)
-            );
+                static_cast<int>(s), util::RunLoop::Event::Read, std::bind(&Impl::perform, context, _1, _2));
             break;
         }
         case CURL_POLL_OUT: {
             using namespace std::placeholders;
             util::RunLoop::Get()->addWatch(
-                static_cast<int>(s), util::RunLoop::Event::Write, std::bind(&Impl::perform, context, _1, _2)
-            );
+                static_cast<int>(s), util::RunLoop::Event::Write, std::bind(&Impl::perform, context, _1, _2));
             break;
         }
         case CURL_POLL_REMOVE:
@@ -265,8 +263,9 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
       resource(std::move(resource_)),
       callback(std::move(callback_)),
       handle(context->getHandle()) {
-    // If there's already a response, set the correct etags/modified headers to make sure we are
-    // getting a 304 response if possible. This avoids redownloading unchanged data.
+    // If there's already a response, set the correct etags/modified headers to
+    // make sure we are getting a 304 response if possible. This avoids
+    // redownloading unchanged data.
     if (resource.priorEtag) {
         const std::string header = std::string("If-None-Match: ") + *resource.priorEtag;
         headers = curl_slist_append(headers, header.c_str());
@@ -280,8 +279,8 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
     }
 
 #ifdef WIN32
-    // Windows has issues with TLSv1.3, so we limit to TLSv1.2. Should be resolved in a later cURL release
-    // https://github.com/curl/curl/issues/9431
+    // Windows has issues with TLSv1.3, so we limit to TLSv1.2. Should be
+    // resolved in a later cURL release https://github.com/curl/curl/issues/9431
     handleError(curl_easy_setopt(handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_MAX_TLSv1_2));
 #endif
     handleError(curl_easy_setopt(handle, CURLOPT_PRIVATE, this));
@@ -318,8 +317,8 @@ HTTPRequest::~HTTPRequest() {
     }
 }
 
-// This function is called when we have new data for a request. We just append it to the string
-// containing the previous data.
+// This function is called when we have new data for a request. We just append
+// it to the string containing the previous data.
 size_t HTTPRequest::writeCallback(void *const contents, const size_t size, const size_t nmemb, void *userp) {
     assert(userp);
     auto impl = reinterpret_cast<HTTPRequest *>(userp);
@@ -332,10 +331,11 @@ size_t HTTPRequest::writeCallback(void *const contents, const size_t size, const
     return size * nmemb;
 }
 
-// Compares the beginning of the (non-zero-terminated!) data buffer with the (zero-terminated!)
-// header string. If the data buffer contains the header string at the beginning, it returns
-// the length of the header string == begin of the value, otherwise it returns npos.
-// The comparison of the header is ASCII-case-insensitive.
+// Compares the beginning of the (non-zero-terminated!) data buffer with the
+// (zero-terminated!) header string. If the data buffer contains the header
+// string at the beginning, it returns the length of the header string == begin
+// of the value, otherwise it returns npos. The comparison of the header is
+// ASCII-case-insensitive.
 size_t headerMatches(const char *const header, const char *const buffer, const size_t length) {
     const size_t headerLength = strlen(header);
     if (length < headerLength) {
@@ -360,12 +360,13 @@ size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const 
     const size_t length = size * nmemb;
     size_t begin = std::string::npos;
     if ((begin = headerMatches("last-modified: ", buffer, length)) != std::string::npos) {
-        // Always overwrite the modification date; We might already have a value here from the
-        // Date header, but this one is more accurate.
+        // Always overwrite the modification date; We might already have a value
+        // here from the Date header, but this one is more accurate.
         const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         baton->response->modified = Timestamp{Seconds(curl_getdate(value.c_str(), nullptr))};
     } else if ((begin = headerMatches("etag: ", buffer, length)) != std::string::npos) {
-        baton->response->etag = std::string(buffer + begin, length - begin - 2); // remove \r\n
+        baton->response->etag = std::string(buffer + begin,
+                                            length - begin - 2); // remove \r\n
     } else if ((begin = headerMatches("cache-control: ", buffer, length)) != std::string::npos) {
         const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         const auto cc = http::CacheControl::parse(value);
@@ -375,9 +376,11 @@ size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const 
         const std::string value{buffer + begin, length - begin - 2}; // remove \r\n
         baton->response->expires = Timestamp{Seconds(curl_getdate(value.c_str(), nullptr))};
     } else if ((begin = headerMatches("retry-after: ", buffer, length)) != std::string::npos) {
-        baton->retryAfter = std::string(buffer + begin, length - begin - 2); // remove \r\n
+        baton->retryAfter = std::string(buffer + begin,
+                                        length - begin - 2); // remove \r\n
     } else if ((begin = headerMatches("x-rate-limit-reset: ", buffer, length)) != std::string::npos) {
-        baton->xRateLimitReset = std::string(buffer + begin, length - begin - 2); // remove \r\n
+        baton->xRateLimitReset = std::string(buffer + begin,
+                                             length - begin - 2); // remove \r\n
     }
     // NOLINTEND(bugprone-assignment-in-if-condition)
 
@@ -400,15 +403,13 @@ void HTTPRequest::handleResult(CURLcode code) {
             case CURLE_COULDNT_CONNECT:
             case CURLE_OPERATION_TIMEDOUT:
 
-                response->error = std::make_unique<Error>(
-                    Error::Reason::Connection, std::string{curl_easy_strerror(code)} + ": " + error
-                );
+                response->error = std::make_unique<Error>(Error::Reason::Connection,
+                                                          std::string{curl_easy_strerror(code)} + ": " + error);
                 break;
 
             default:
-                response->error = std::make_unique<Error>(
-                    Error::Reason::Other, std::string{curl_easy_strerror(code)} + ": " + error
-                );
+                response->error = std::make_unique<Error>(Error::Reason::Other,
+                                                          std::string{curl_easy_strerror(code)} + ": " + error);
                 break;
         }
     } else {
@@ -429,16 +430,13 @@ void HTTPRequest::handleResult(CURLcode code) {
             response->error = std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
         } else if (responseCode == 429) {
             response->error = std::make_unique<Error>(
-                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset)
-            );
+                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset));
         } else if (responseCode >= 500 && responseCode < 600) {
-            response->error = std::make_unique<Error>(
-                Error::Reason::Server, std::string{"HTTP status code "} + util::toString(responseCode)
-            );
+            response->error = std::make_unique<Error>(Error::Reason::Server,
+                                                      std::string{"HTTP status code "} + util::toString(responseCode));
         } else {
-            response->error = std::make_unique<Error>(
-                Error::Reason::Other, std::string{"HTTP status code "} + util::toString(responseCode)
-            );
+            response->error = std::make_unique<Error>(Error::Reason::Other,
+                                                      std::string{"HTTP status code "} + util::toString(responseCode));
         }
     }
 

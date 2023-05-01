@@ -35,14 +35,13 @@ public:
 
 private:
     void setTileData(
-        jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Object<geojson::FeatureCollection>& jf
-    );
+        jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Object<geojson::FeatureCollection>& jf);
 
     void invalidateTile(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y);
     void invalidateBounds(jni::JNIEnv& env, const jni::Object<LatLngBounds>& bounds);
 
-    jni::Local<jni::Array<jni::Object<geojson::Feature>>>
-    querySourceFeatures(jni::JNIEnv&, const jni::Array<jni::Object<>>&);
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
+                                                                              const jni::Array<jni::Object<>>&);
 
     jni::Local<jni::Object<Source>> createJavaPeer(jni::JNIEnv&);
 

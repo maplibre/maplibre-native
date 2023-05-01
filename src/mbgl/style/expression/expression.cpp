@@ -44,32 +44,27 @@ private:
     FeatureType getTypeImpl() const { return apply_visitor(ToFeatureType(), feature.geometry); }
 };
 
-EvaluationResult Expression::evaluate(
-    std::optional<float> zoom, const Feature& feature, std::optional<double> colorRampParameter
-) const {
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
+                                      const Feature& feature,
+                                      std::optional<double> colorRampParameter) const {
     GeoJSONFeature f(feature);
     return this->evaluate(EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter)));
 }
 
-EvaluationResult Expression::evaluate(
-    std::optional<float> zoom,
-    const Feature& feature,
-    std::optional<double> colorRampParameter,
-    const std::set<std::string>& availableImages
-) const {
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
+                                      const Feature& feature,
+                                      std::optional<double> colorRampParameter,
+                                      const std::set<std::string>& availableImages) const {
     GeoJSONFeature f(feature);
     return this->evaluate(
-        EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter)).withAvailableImages(&availableImages)
-    );
+        EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter)).withAvailableImages(&availableImages));
 }
 
-EvaluationResult Expression::evaluate(
-    std::optional<float> zoom,
-    const Feature& feature,
-    std::optional<double> colorRampParameter,
-    const std::set<std::string>& availableImages,
-    const CanonicalTileID& canonical
-) const {
+EvaluationResult Expression::evaluate(std::optional<float> zoom,
+                                      const Feature& feature,
+                                      std::optional<double> colorRampParameter,
+                                      const std::set<std::string>& availableImages,
+                                      const CanonicalTileID& canonical) const {
     GeoJSONFeature f(feature, canonical);
     return this->evaluate(EvaluationContext(std::move(zoom), &f, std::move(colorRampParameter))
                               .withAvailableImages(&availableImages)

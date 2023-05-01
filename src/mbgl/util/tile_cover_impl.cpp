@@ -106,9 +106,9 @@ Bound create_bound_towards_minimum(PointList& points, PointList::iterator& pt) {
 }
 
 // Given a set of points (ring or list) representing a shape, compute a set of
-// Bounds, where each Bound represents edges going from a local minima to a local
-// maxima point. The BoundsMap is an edge table indexed on the starting Y-tile
-// of each Bound.
+// Bounds, where each Bound represents edges going from a local minima to a
+// local maxima point. The BoundsMap is an edge table indexed on the starting
+// Y-tile of each Bound.
 void build_bounds_map(PointList& points, uint32_t maxTile, BoundsMap& et, bool closed = false) {
     if (points.size() < 2) return;
     // While traversing closed rings, start the bounds at a local minimum.
@@ -124,13 +124,13 @@ void build_bounds_map(PointList& points, uint32_t maxTile, BoundsMap& et, bool c
 
         if (to_max.points.size() >= 2) {
             // Projections may result in values beyond the bounds, clamp to max tile coordinates
-            const auto y =
-                static_cast<uint32_t>(std::floor(clamp(to_max.points.front().y, 0.0, static_cast<double>(maxTile))));
+            const auto y = static_cast<uint32_t>(
+                std::floor(clamp(to_max.points.front().y, 0.0, static_cast<double>(maxTile))));
             et[y].push_back(to_max);
         }
         if (to_min.points.size() >= 2) {
-            const auto y =
-                static_cast<uint32_t>(std::floor(clamp(to_min.points.front().y, 0.0, static_cast<double>(maxTile))));
+            const auto y = static_cast<uint32_t>(
+                std::floor(clamp(to_min.points.front().y, 0.0, static_cast<double>(maxTile))));
             et[y].push_back(to_min);
         }
     }
@@ -159,8 +159,8 @@ std::vector<TileSpan> scan_row(uint32_t y, Bounds& activeBounds) {
             x = b.interpolate(y);
             update_span(xp, x);
 
-            // If this edge ends beyond the current row, find the x-intercept where
-            // it exits the row
+            // If this edge ends beyond the current row, find the x-intercept
+            // where it exits the row
             auto& p1 = b.points[b.currentPoint + 1];
             if (p1.y > y + 1) {
                 x = b.interpolate(y + 1);

@@ -14,52 +14,38 @@
 #endif
 
 // mbgl::GLContextMode
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::UniqueGLContext) ==
-        mbgl::underlying_type(mbgl::gfx::ContextMode::Unique),
-    "error"
-);
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::SharedGLContext) ==
-        mbgl::underlying_type(mbgl::gfx::ContextMode::Shared),
-    "error"
-);
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::UniqueGLContext) ==
+                  mbgl::underlying_type(mbgl::gfx::ContextMode::Unique),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::SharedGLContext) ==
+                  mbgl::underlying_type(mbgl::gfx::ContextMode::Shared),
+              "error");
 
 // mbgl::MapMode
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::Continuous) == mbgl::underlying_type(mbgl::MapMode::Continuous),
-    "error"
-);
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::Static) == mbgl::underlying_type(mbgl::MapMode::Static), "error"
-);
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Continuous) ==
+                  mbgl::underlying_type(mbgl::MapMode::Continuous),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Static) == mbgl::underlying_type(mbgl::MapMode::Static),
+              "error");
 
 // mbgl::ConstrainMode
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::NoConstrain) == mbgl::underlying_type(mbgl::ConstrainMode::None),
-    "error"
-);
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::ConstrainHeightOnly) ==
-        mbgl::underlying_type(mbgl::ConstrainMode::HeightOnly),
-    "error"
-);
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::ConstrainWidthAndHeight) ==
-        mbgl::underlying_type(mbgl::ConstrainMode::WidthAndHeight),
-    "error"
-);
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::NoConstrain) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::None),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainHeightOnly) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::HeightOnly),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainWidthAndHeight) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::WidthAndHeight),
+              "error");
 
 // mbgl::ViewportMode
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::DefaultViewport) == mbgl::underlying_type(mbgl::ViewportMode::Default),
-    "error"
-);
-static_assert(
-    mbgl::underlying_type(QMapLibreGL::Settings::FlippedYViewport) ==
-        mbgl::underlying_type(mbgl::ViewportMode::FlippedY),
-    "error"
-);
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::DefaultViewport) ==
+                  mbgl::underlying_type(mbgl::ViewportMode::Default),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::FlippedYViewport) ==
+                  mbgl::underlying_type(mbgl::ViewportMode::FlippedY),
+              "error");
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -69,16 +55,19 @@ namespace QMapLibreGL {
 
 /*!
     \class QMapLibreGL::Settings
-    \brief The Settings class stores the initial configuration for QMapLibreGL::Map.
+    \brief The Settings class stores the initial configuration for
+   QMapLibreGL::Map.
 
     \inmodule MapLibre Maps SDK for Qt
 
-    Settings is used to configure QMapLibreGL::Map at the moment of its creation.
-    Once created, the Settings of a QMapLibreGL::Map can no longer be changed.
+    Settings is used to configure QMapLibreGL::Map at the moment of its
+   creation. Once created, the Settings of a QMapLibreGL::Map can no longer be
+   changed.
 
-    Cache-related settings are shared between all QMapLibreGL::Map instances using the same cache path.
-    The first map to configure cache properties such as size will force the configuration
-    to all newly instantiated QMapLibreGL::Map objects using the same cache in the same process.
+    Cache-related settings are shared between all QMapLibreGL::Map instances
+   using the same cache path. The first map to configure cache properties such
+   as size will force the configuration to all newly instantiated
+   QMapLibreGL::Map objects using the same cache in the same process.
 */
 
 /*!
@@ -86,15 +75,15 @@ namespace QMapLibreGL {
 
     This enum sets the expectations for the OpenGL state.
 
-    \value UniqueGLContext  The OpenGL context is only used by QMapLibreGL::Map, so it is not
-    reset before each rendering. Use this mode if the intention is to only draw a
-    fullscreen map.
+    \value UniqueGLContext  The OpenGL context is only used by QMapLibreGL::Map,
+   so it is not reset before each rendering. Use this mode if the intention is
+   to only draw a fullscreen map.
 
     \value SharedGLContext  The OpenGL context is shared and the state will be
     marked dirty - which invalidates any previously assumed GL state. The
     embedder is responsible for clearing up the viewport prior to calling
-    QMapLibreGL::Map::render. The embedder is also responsible for resetting its own
-    GL state after QMapLibreGL::Map::render has finished, if needed.
+    QMapLibreGL::Map::render. The embedder is also responsible for resetting its
+   own GL state after QMapLibreGL::Map::render has finished, if needed.
 
     \sa contextMode()
 */
@@ -125,15 +114,15 @@ namespace QMapLibreGL {
 
     This enum determines if the map wraps.
 
-    \value NoConstrain              The map will wrap on the horizontal axis. Since it doesn't
-    make sense to wrap on the vertical axis in a Web Mercator projection, the map will scroll
-    and show some empty space.
+    \value NoConstrain              The map will wrap on the horizontal axis.
+   Since it doesn't make sense to wrap on the vertical axis in a Web Mercator
+   projection, the map will scroll and show some empty space.
 
-    \value ConstrainHeightOnly      The map will wrap around the horizontal axis, like a spinning
-    globe. This is the recommended constrain mode.
+    \value ConstrainHeightOnly      The map will wrap around the horizontal
+   axis, like a spinning globe. This is the recommended constrain mode.
 
-    \value ConstrainWidthAndHeight  The map won't wrap and panning is restricted to the boundaries
-    of the map.
+    \value ConstrainWidthAndHeight  The map won't wrap and panning is restricted
+   to the boundaries of the map.
 
     \sa constrainMode()
 */
@@ -348,10 +337,11 @@ QString Settings::localFontFamily() const {
 /*!
     Sets the local font family.
 
-   Rendering Chinese/Japanese/Korean (CJK) ideographs and precomposed Hangul Syllables requires
-   downloading large amounts of font data, which can significantly slow map load times. Use the
-   localIdeographFontFamily setting to speed up map load times by using locally available fonts
-   instead of font data fetched from the server.
+   Rendering Chinese/Japanese/Korean (CJK) ideographs and precomposed Hangul
+   Syllables requires downloading large amounts of font data, which can
+   significantly slow map load times. Use the localIdeographFontFamily setting
+   to speed up map load times by using locally available fonts instead of font
+   data fetched from the server.
 */
 void Settings::setLocalFontFamily(const QString &family) {
     m_localFontFamily = family;
@@ -435,8 +425,7 @@ QVector<QPair<QString, QString>> Settings::defaultStyles() const {
     QVector<QPair<QString, QString>> styles;
     for (const auto &style : tileServerOptionsInternal()->defaultStyles()) {
         styles.append(
-            QPair<QString, QString>(QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName()))
-        );
+            QPair<QString, QString>(QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
     }
     return styles;
 }

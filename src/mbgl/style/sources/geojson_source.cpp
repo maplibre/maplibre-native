@@ -42,9 +42,8 @@ void GeoJSONSource::setURL(const std::string& url_) {
 
 namespace {
 
-inline std::shared_ptr<GeoJSONData> createGeoJSONData(
-    const mapbox::geojson::geojson& geoJSON, const GeoJSONSource::Impl& impl
-) {
+inline std::shared_ptr<GeoJSONData> createGeoJSONData(const mapbox::geojson::geojson& geoJSON,
+                                                      const GeoJSONSource::Impl& impl) {
     if (auto data = impl.getData().lock()) {
         return GeoJSONData::create(geoJSON, impl.getOptions(), data->getScheduler());
     }
@@ -97,7 +96,8 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                 if (std::optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
                     geoJSONData = createGeoJSONData(*geoJSON, current);
                 } else {
-                    // Create an empty GeoJSON VT object to make sure we're not infinitely waiting for tiles to load.
+                    // Create an empty GeoJSON VT object to make sure we're not
+                    // infinitely waiting for tiles to load.
                     Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: " + error.message);
                 }
                 return makeMutable<Impl>(current, std::move(geoJSONData));

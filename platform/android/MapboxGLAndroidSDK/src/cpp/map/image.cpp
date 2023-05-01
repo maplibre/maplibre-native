@@ -54,14 +54,13 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     if (content) {
         const style::ImageContent imageContent = style::ImageContent{
             content.Get(env, 0), content.Get(env, 1), content.Get(env, 2), content.Get(env, 3)};
-        return mbgl::style::Image{
-            name,
-            std::move(premultipliedImage),
-            pixelRatio,
-            sdf,
-            imageStretchesX,
-            imageStretchesY,
-            std::move(imageContent)};
+        return mbgl::style::Image{name,
+                                  std::move(premultipliedImage),
+                                  pixelRatio,
+                                  sdf,
+                                  imageStretchesX,
+                                  imageStretchesY,
+                                  std::move(imageContent)};
     }
 
     return mbgl::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf, imageStretchesX, imageStretchesY};

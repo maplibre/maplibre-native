@@ -10,11 +10,9 @@ namespace mbgl {
 
 class CircleLayout final : public Layout {
 public:
-    CircleLayout(
-        const BucketParameters& parameters,
-        const std::vector<Immutable<style::LayerProperties>>& group,
-        std::unique_ptr<GeometryTileLayer> sourceLayer_
-    )
+    CircleLayout(const BucketParameters& parameters,
+                 const std::vector<Immutable<style::LayerProperties>>& group,
+                 std::unique_ptr<GeometryTileLayer> sourceLayer_)
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
           mode(parameters.mode) {
@@ -54,14 +52,12 @@ public:
 
     bool hasDependencies() const override { return false; }
 
-    void createBucket(
-        const ImagePositions&,
-        std::unique_ptr<FeatureIndex>& featureIndex,
-        std::unordered_map<std::string, LayerRenderData>& renderData,
-        const bool,
-        const bool,
-        const CanonicalTileID& canonical
-    ) override {
+    void createBucket(const ImagePositions&,
+                      std::unique_ptr<FeatureIndex>& featureIndex,
+                      std::unordered_map<std::string, LayerRenderData>& renderData,
+                      const bool,
+                      const bool,
+                      const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<CircleBucket>(layerPropertiesMap, mode, zoom);
 
         for (auto& circleFeature : features) {
@@ -91,14 +87,12 @@ private:
         float sortKey;
     };
 
-    void addCircle(
-        CircleBucket& bucket,
-        const GeometryTileFeature& feature,
-        const GeometryCollection& geometry,
-        std::size_t featureIndex,
-        float sortKey,
-        const CanonicalTileID& canonical
-    ) {
+    void addCircle(CircleBucket& bucket,
+                   const GeometryTileFeature& feature,
+                   const GeometryCollection& geometry,
+                   std::size_t featureIndex,
+                   float sortKey,
+                   const CanonicalTileID& canonical) {
         constexpr const uint16_t vertexLength = 4;
 
         auto& segments = bucket.segments;

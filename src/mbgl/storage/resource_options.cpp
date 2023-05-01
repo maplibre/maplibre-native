@@ -89,8 +89,8 @@ void* ResourceOptions::platformContext() const {
 }
 
 ResourceOptions ResourceOptions::Default() {
-    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(TileServerOptions::DefaultConfiguration()
-    );
+    ResourceOptions resourceOptions = ResourceOptions().withTileServerOptions(
+        TileServerOptions::DefaultConfiguration());
     return resourceOptions;
 }
 

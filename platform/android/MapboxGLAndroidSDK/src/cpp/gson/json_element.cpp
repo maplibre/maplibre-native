@@ -27,8 +27,7 @@ jni::Local<jni::Object<JsonElement>> JsonElement::New(jni::JNIEnv& env, const mb
             return primitive.New(env, booleanConstructor, jni::Box(env, value ? jni::jni_true : jni::jni_false));
         },
         [&](const std::vector<mbgl::Value>& values) { return JsonArray::New(env, values); },
-        [&](const mbgl::PropertyMap& values) { return JsonObject::New(env, values); }
-    );
+        [&](const mbgl::PropertyMap& values) { return JsonObject::New(env, values); });
 }
 
 mbgl::Value JsonElement::convert(jni::JNIEnv& env, const jni::Object<JsonElement>& jsonElement) {

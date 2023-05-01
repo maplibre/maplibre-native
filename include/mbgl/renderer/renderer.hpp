@@ -42,9 +42,9 @@ struct PlacedSymbolData {
 
 class Renderer {
 public:
-    Renderer(
-        gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily = std::nullopt
-    );
+    Renderer(gfx::RendererBackend&,
+             float pixelRatio_,
+             const std::optional<std::string>& localFontFamily = std::nullopt);
     ~Renderer();
 
     void markContextLost();
@@ -55,8 +55,8 @@ public:
 
     /// Feature queries
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions& options = {}) const;
-    std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options = {})
-        const;
+    std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point,
+                                               const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
@@ -69,44 +69,37 @@ public:
         const Feature& feature,
         const std::string& extension,
         const std::string& extensionField,
-        const std::optional<std::map<std::string, Value>>& args = std::nullopt
-    ) const;
+        const std::optional<std::map<std::string, Value>>& args = std::nullopt) const;
 
-    void setFeatureState(
-        const std::string& sourceID,
-        const std::optional<std::string>& sourceLayerID,
-        const std::string& featureID,
-        const FeatureState& state
-    );
+    void setFeatureState(const std::string& sourceID,
+                         const std::optional<std::string>& sourceLayerID,
+                         const std::string& featureID,
+                         const FeatureState& state);
 
-    void getFeatureState(
-        FeatureState& state,
-        const std::string& sourceID,
-        const std::optional<std::string>& sourceLayerID,
-        const std::string& featureID
-    ) const;
+    void getFeatureState(FeatureState& state,
+                         const std::string& sourceID,
+                         const std::optional<std::string>& sourceLayerID,
+                         const std::string& featureID) const;
 
-    void removeFeatureState(
-        const std::string& sourceID,
-        const std::optional<std::string>& sourceLayerID,
-        const std::optional<std::string>& featureID,
-        const std::optional<std::string>& stateKey
-    );
+    void removeFeatureState(const std::string& sourceID,
+                            const std::optional<std::string>& sourceLayerID,
+                            const std::optional<std::string>& featureID,
+                            const std::optional<std::string>& stateKey);
 
     // Debug
     void dumpDebugLogs();
 
     /**
-     * @brief In Tile map mode, enables or disables collecting of the placed symbols data,
-     * which can be obtained with `getPlacedSymbolsData()`.
+     * @brief In Tile map mode, enables or disables collecting of the placed
+     * symbols data, which can be obtained with `getPlacedSymbolsData()`.
      *
      * The placed symbols data collecting is disabled by default.
      */
     void collectPlacedSymbolData(bool enable);
 
     /**
-     * @brief If collecting of the placed symbols data is enabled, returns the reference
-     * to the `PlacedSymbolData` vector holding the collected data.
+     * @brief If collecting of the placed symbols data is enabled, returns the
+     * reference to the `PlacedSymbolData` vector holding the collected data.
      *
      * Note: the returned vector gets re-populated at every `render()` call.
      *

@@ -37,25 +37,21 @@ public:
 
     class Instance {
     public:
-        Instance(
-            Context& context,
-            const std::initializer_list<const char*>& vertexSource,
-            const std::initializer_list<const char*>& fragmentSource
-        )
-            : program(context.createProgram(
-                  context.createShader(ShaderType::Vertex, vertexSource),
-                  context.createShader(ShaderType::Fragment, fragmentSource),
-                  attributeLocations.getFirstAttribName()
-              )) {
+        Instance(Context& context,
+                 const std::initializer_list<const char*>& vertexSource,
+                 const std::initializer_list<const char*>& fragmentSource)
+            : program(context.createProgram(context.createShader(ShaderType::Vertex, vertexSource),
+                                            context.createShader(ShaderType::Fragment, fragmentSource),
+                                            attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
             uniformStates.queryLocations(program);
             // Texture units are specified via uniforms as well, so we need query their locations
             textureStates.queryLocations(program);
         }
 
-        static std::unique_ptr<Instance> createInstance(
-            gl::Context& context, const ProgramParameters& programParameters, const std::string& additionalDefines
-        ) {
+        static std::unique_ptr<Instance> createInstance(gl::Context& context,
+                                                        const ProgramParameters& programParameters,
+                                                        const std::string& additionalDefines) {
             // Compile the shader
             std::initializer_list<const char*> vertexSource = {
                 "#version 300 es\n",
@@ -80,22 +76,20 @@ public:
         gl::TextureStates<TextureList> textureStates;
     };
 
-    void draw(
-        gfx::Context& genericContext,
-        gfx::RenderPass&,
-        const gfx::DrawMode& drawMode,
-        const gfx::DepthMode& depthMode,
-        const gfx::StencilMode& stencilMode,
-        const gfx::ColorMode& colorMode,
-        const gfx::CullFaceMode& cullFaceMode,
-        const gfx::UniformValues<UniformList>& uniformValues,
-        gfx::DrawScope& drawScope,
-        const gfx::AttributeBindings<AttributeList>& attributeBindings,
-        const gfx::TextureBindings<TextureList>& textureBindings,
-        const gfx::IndexBuffer& indexBuffer,
-        std::size_t indexOffset,
-        std::size_t indexLength
-    ) override {
+    void draw(gfx::Context& genericContext,
+              gfx::RenderPass&,
+              const gfx::DrawMode& drawMode,
+              const gfx::DepthMode& depthMode,
+              const gfx::StencilMode& stencilMode,
+              const gfx::ColorMode& colorMode,
+              const gfx::CullFaceMode& cullFaceMode,
+              const gfx::UniformValues<UniformList>& uniformValues,
+              gfx::DrawScope& drawScope,
+              const gfx::AttributeBindings<AttributeList>& attributeBindings,
+              const gfx::TextureBindings<TextureList>& textureBindings,
+              const gfx::IndexBuffer& indexBuffer,
+              std::size_t indexOffset,
+              std::size_t indexLength) override {
         auto& context = static_cast<gl::Context&>(genericContext);
 
         context.setDepthMode(depthMode);
@@ -108,12 +102,10 @@ public:
         if (it == instances.end()) {
             try {
                 it = instances
-                         .emplace(
-                             key,
-                             Instance::createInstance(
-                                 context, programParameters, gl::AttributeKey<AttributeList>::defines(attributeBindings)
-                             )
-                         )
+                         .emplace(key,
+                                  Instance::createInstance(context,
+                                                           programParameters,
+                                                           gl::AttributeKey<AttributeList>::defines(attributeBindings)))
                          .first;
             } catch (const std::runtime_error& e) {
                 Log::Error(Event::OpenGL, e.what());

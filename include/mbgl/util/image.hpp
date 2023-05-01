@@ -105,12 +105,15 @@ public:
         }
     }
 
-    /// Copy image data within `rect` from `src` to the rectangle of the same size at `pt`
-    /// in `dst`. If the specified bounds exceed the bounds of the source or destination,
-    /// throw `std::out_of_range`. Must not be used to move data within a single Image.
-    static void copy(
-        const Image& srcImg, Image& dstImg, const Point<uint32_t>& srcPt, const Point<uint32_t>& dstPt, const Size& size
-    ) {
+    /// Copy image data within `rect` from `src` to the rectangle of the same
+    /// size at `pt` in `dst`. If the specified bounds exceed the bounds of the
+    /// source or destination, throw `std::out_of_range`. Must not be used to
+    /// move data within a single Image.
+    static void copy(const Image& srcImg,
+                     Image& dstImg,
+                     const Point<uint32_t>& srcPt,
+                     const Point<uint32_t>& dstPt,
+                     const Size& size) {
         if (size.isEmpty()) {
             return;
         }

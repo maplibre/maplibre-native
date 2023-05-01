@@ -33,8 +33,7 @@ void ConnectivityListener::registerNative(jni::JNIEnv& env) {
         std::make_unique<ConnectivityListener, JNIEnv&>,
         "initialize",
         "finalize",
-        METHOD(&ConnectivityListener::onConnectivityStateChanged, "nativeOnConnectivityStateChanged")
-    );
+        METHOD(&ConnectivityListener::onConnectivityStateChanged, "nativeOnConnectivityStateChanged"));
 }
 
 } // namespace android

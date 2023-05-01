@@ -13,8 +13,8 @@ namespace conversion {
 
 template <>
 struct Converter<jni::Local<jni::Object<TransitionOptions>>, mbgl::style::TransitionOptions> {
-    Result<jni::Local<jni::Object<TransitionOptions>>> operator()(jni::JNIEnv&, const mbgl::style::TransitionOptions&)
-        const;
+    Result<jni::Local<jni::Object<TransitionOptions>>> operator()(jni::JNIEnv&,
+                                                                  const mbgl::style::TransitionOptions&) const;
 };
 
 } // namespace conversion

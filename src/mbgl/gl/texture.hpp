@@ -32,17 +32,14 @@ public:
     }
 
     NamedUniformLocations getNamedLocations() const {
-        return NamedUniformLocations{
-            {concat_literals<&string_literal<'u', '_'>::value, &Ts::name>::value(),
-             state.template get<Ts>().location}...};
+        return NamedUniformLocations{{concat_literals<&string_literal<'u', '_'>::value, &Ts::name>::value(),
+                                      state.template get<Ts>().location}...};
     }
 
     void bind(gl::Context& context, const gfx::TextureBindings<TypeList<Ts...>>& bindings) {
-        util::ignore(
-            {(state.template get<Ts>() = TypeIndex<Ts, Ts...>::value,
-              gl::bindTexture(context, TypeIndex<Ts, Ts...>::value, bindings.template get<Ts>()),
-              0)...}
-        );
+        util::ignore({(state.template get<Ts>() = TypeIndex<Ts, Ts...>::value,
+                       gl::bindTexture(context, TypeIndex<Ts, Ts...>::value, bindings.template get<Ts>()),
+                       0)...});
     }
 };
 

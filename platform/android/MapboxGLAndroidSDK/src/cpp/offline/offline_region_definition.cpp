@@ -15,16 +15,13 @@ void OfflineRegionDefinition::registerNative(jni::JNIEnv& env) {
 }
 
 mbgl::OfflineRegionDefinition OfflineRegionDefinition::getDefinition(
-    JNIEnv& env, const jni::Object<OfflineRegionDefinition>& jDefinition
-) {
+    JNIEnv& env, const jni::Object<OfflineRegionDefinition>& jDefinition) {
     if (jDefinition.IsInstanceOf(env, jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env))) {
         return OfflineTilePyramidRegionDefinition::getDefinition(
-            env, jni::Cast(env, jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env), jDefinition)
-        );
+            env, jni::Cast(env, jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env), jDefinition));
     } else if (jDefinition.IsInstanceOf(env, jni::Class<OfflineGeometryRegionDefinition>::Singleton(env))) {
         return OfflineGeometryRegionDefinition::getDefinition(
-            env, jni::Cast(env, jni::Class<OfflineGeometryRegionDefinition>::Singleton(env), jDefinition)
-        );
+            env, jni::Cast(env, jni::Class<OfflineGeometryRegionDefinition>::Singleton(env), jDefinition));
     }
 
     throw std::runtime_error("Unknown offline region definition java class");
@@ -33,32 +30,27 @@ mbgl::OfflineRegionDefinition OfflineRegionDefinition::getDefinition(
 // OfflineTilePyramidRegionDefinition //
 
 jni::Local<jni::Object<OfflineRegionDefinition>> OfflineTilePyramidRegionDefinition::New(
-    jni::JNIEnv& env, const mbgl::OfflineTilePyramidRegionDefinition& definition
-) {
+    jni::JNIEnv& env, const mbgl::OfflineTilePyramidRegionDefinition& definition) {
     static auto& javaClass = jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env);
-    static auto constructor = javaClass.GetConstructor<
-        jni::String,
-        jni::Object<LatLngBounds>,
-        jni::jdouble,
-        jni::jdouble,
-        jni::jfloat,
-        jni::jboolean>(env);
+    static auto constructor = javaClass.GetConstructor<jni::String,
+                                                       jni::Object<LatLngBounds>,
+                                                       jni::jdouble,
+                                                       jni::jdouble,
+                                                       jni::jfloat,
+                                                       jni::jboolean>(env);
 
-    return javaClass.New(
-        env,
-        constructor,
-        jni::Make<jni::String>(env, definition.styleURL),
-        LatLngBounds::New(env, definition.bounds),
-        definition.minZoom,
-        definition.maxZoom,
-        definition.pixelRatio,
-        jni::jboolean(definition.includeIdeographs)
-    );
+    return javaClass.New(env,
+                         constructor,
+                         jni::Make<jni::String>(env, definition.styleURL),
+                         LatLngBounds::New(env, definition.bounds),
+                         definition.minZoom,
+                         definition.maxZoom,
+                         definition.pixelRatio,
+                         jni::jboolean(definition.includeIdeographs));
 }
 
 mbgl::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::getDefinition(
-    jni::JNIEnv& env, const jni::Object<OfflineTilePyramidRegionDefinition>& jDefinition
-) {
+    jni::JNIEnv& env, const jni::Object<OfflineTilePyramidRegionDefinition>& jDefinition) {
     // Field references
     static auto& javaClass = jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env);
     static auto styleURLF = javaClass.GetField<jni::String>(env, "styleURL");
@@ -68,14 +60,12 @@ mbgl::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::get
     static auto pixelRatioF = javaClass.GetField<jni::jfloat>(env, "pixelRatio");
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
-    return mbgl::OfflineTilePyramidRegionDefinition(
-        jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-        LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
-        jDefinition.Get(env, minZoomF),
-        jDefinition.Get(env, maxZoomF),
-        jDefinition.Get(env, pixelRatioF),
-        jDefinition.Get(env, includeIdeographsF)
-    );
+    return mbgl::OfflineTilePyramidRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
+                                                    LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
+                                                    jDefinition.Get(env, minZoomF),
+                                                    jDefinition.Get(env, maxZoomF),
+                                                    jDefinition.Get(env, pixelRatioF),
+                                                    jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineTilePyramidRegionDefinition::registerNative(jni::JNIEnv& env) {
@@ -85,32 +75,27 @@ void OfflineTilePyramidRegionDefinition::registerNative(jni::JNIEnv& env) {
 // OfflineGeometryRegionDefinition //
 
 jni::Local<jni::Object<OfflineRegionDefinition>> OfflineGeometryRegionDefinition::New(
-    jni::JNIEnv& env, const mbgl::OfflineGeometryRegionDefinition& definition
-) {
+    jni::JNIEnv& env, const mbgl::OfflineGeometryRegionDefinition& definition) {
     static auto& javaClass = jni::Class<OfflineGeometryRegionDefinition>::Singleton(env);
-    static auto constructor = javaClass.GetConstructor<
-        jni::String,
-        jni::Object<geojson::Geometry>,
-        jni::jdouble,
-        jni::jdouble,
-        jni::jfloat,
-        jni::jboolean>(env);
+    static auto constructor = javaClass.GetConstructor<jni::String,
+                                                       jni::Object<geojson::Geometry>,
+                                                       jni::jdouble,
+                                                       jni::jdouble,
+                                                       jni::jfloat,
+                                                       jni::jboolean>(env);
 
-    return javaClass.New(
-        env,
-        constructor,
-        jni::Make<jni::String>(env, definition.styleURL),
-        geojson::Geometry::New(env, definition.geometry),
-        definition.minZoom,
-        definition.maxZoom,
-        definition.pixelRatio,
-        jni::jboolean(definition.includeIdeographs)
-    );
+    return javaClass.New(env,
+                         constructor,
+                         jni::Make<jni::String>(env, definition.styleURL),
+                         geojson::Geometry::New(env, definition.geometry),
+                         definition.minZoom,
+                         definition.maxZoom,
+                         definition.pixelRatio,
+                         jni::jboolean(definition.includeIdeographs));
 }
 
 mbgl::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefinition(
-    jni::JNIEnv& env, const jni::Object<OfflineGeometryRegionDefinition>& jDefinition
-) {
+    jni::JNIEnv& env, const jni::Object<OfflineGeometryRegionDefinition>& jDefinition) {
     // Field references
     static auto& javaClass = jni::Class<OfflineGeometryRegionDefinition>::Singleton(env);
     static auto styleURLF = javaClass.GetField<jni::String>(env, "styleURL");
@@ -120,14 +105,12 @@ mbgl::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefini
     static auto pixelRatioF = javaClass.GetField<jni::jfloat>(env, "pixelRatio");
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
-    return mbgl::OfflineGeometryRegionDefinition(
-        jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-        geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
-        jDefinition.Get(env, minZoomF),
-        jDefinition.Get(env, maxZoomF),
-        jDefinition.Get(env, pixelRatioF),
-        jDefinition.Get(env, includeIdeographsF)
-    );
+    return mbgl::OfflineGeometryRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
+                                                 geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
+                                                 jDefinition.Get(env, minZoomF),
+                                                 jDefinition.Get(env, maxZoomF),
+                                                 jDefinition.Get(env, pixelRatioF),
+                                                 jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineGeometryRegionDefinition::registerNative(jni::JNIEnv& env) {

@@ -25,8 +25,8 @@ TEST(GeometryTileData, classifyRings1) {
 }
 
 TEST(GeometryTileData, classifyRings2) {
-    std::vector<GeometryCollection> polygons =
-        classifyRings({{{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}}, {{10, 10}, {20, 10}, {20, 20}, {10, 10}}});
+    std::vector<GeometryCollection> polygons = classifyRings(
+        {{{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}}, {{10, 10}, {20, 10}, {20, 20}, {10, 10}}});
 
     // output: 1 polygon
     ASSERT_EQ(polygons.size(), 1u);
@@ -35,10 +35,9 @@ TEST(GeometryTileData, classifyRings2) {
 }
 
 TEST(GeometryTileData, limitHoles1) {
-    GeometryCollection polygon = {
-        {{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}},
-        {{30, 30}, {32, 30}, {32, 32}, {30, 30}},
-        {{10, 10}, {20, 10}, {20, 20}, {10, 10}}};
+    GeometryCollection polygon = {{{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}},
+                                  {{30, 30}, {32, 30}, {32, 32}, {30, 30}},
+                                  {{10, 10}, {20, 10}, {20, 20}, {10, 10}}};
 
     limitHoles(polygon, 1);
 
@@ -51,10 +50,9 @@ TEST(GeometryTileData, limitHoles1) {
 }
 
 TEST(GeometryTileData, limitHoles2) {
-    GeometryCollection polygon = {
-        {{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}},
-        {{10, 10}, {20, 10}, {20, 20}, {10, 10}},
-        {{30, 30}, {32, 30}, {32, 32}, {30, 30}}};
+    GeometryCollection polygon = {{{0, 0}, {0, 40}, {40, 40}, {40, 0}, {0, 0}},
+                                  {{10, 10}, {20, 10}, {20, 20}, {10, 10}},
+                                  {{30, 30}, {32, 30}, {32, 32}, {30, 30}}};
 
     limitHoles(polygon, 1);
 

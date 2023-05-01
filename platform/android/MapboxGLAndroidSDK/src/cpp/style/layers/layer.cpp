@@ -68,13 +68,11 @@ style::Layer& Layer::get() {
 
 void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::Object<>& jvalue) {
     // Convert and set property
-    std::optional<mbgl::style::conversion::Error> error = layer.setProperty(
-        jni::Make<std::string>(env, jname), Value(env, jvalue)
-    );
+    std::optional<mbgl::style::conversion::Error> error = layer.setProperty(jni::Make<std::string>(env, jname),
+                                                                            Value(env, jvalue));
     if (error) {
-        mbgl::Log::Error(
-            mbgl::Event::JNI, "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message
-        );
+        mbgl::Log::Error(mbgl::Event::JNI,
+                         "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
         return;
     }
 }
@@ -151,10 +149,8 @@ void Layer::registerNative(jni::JNIEnv& env) {
         javaClass,
         "nativePtr",
         METHOD(&Layer::getId, "nativeGetId"),
-        METHOD(
-            &Layer::setProperty,
-            "nativeSetLayoutProperty"
-        ), // TODO : Export only nativeSetProperty() when #15970 lands.
+        METHOD(&Layer::setProperty,
+               "nativeSetLayoutProperty"), // TODO : Export only nativeSetProperty() when #15970 lands.
         METHOD(&Layer::setProperty, "nativeSetPaintProperty"),
         METHOD(&Layer::setFilter, "nativeSetFilter"),
         METHOD(&Layer::getFilter, "nativeGetFilter"),
@@ -165,8 +161,7 @@ void Layer::registerNative(jni::JNIEnv& env) {
         METHOD(&Layer::getMaxZoom, "nativeGetMaxZoom"),
         METHOD(&Layer::setMinZoom, "nativeSetMinZoom"),
         METHOD(&Layer::setMaxZoom, "nativeSetMaxZoom"),
-        METHOD(&Layer::getVisibility, "nativeGetVisibility")
-    );
+        METHOD(&Layer::getVisibility, "nativeGetVisibility"));
 }
 
 } // namespace android

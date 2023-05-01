@@ -34,10 +34,8 @@ static void iterateEntrySet(jni::JNIEnv& env, const jni::Object<JsonObject>& jso
     for (size_t i = 0; i < size; i++) {
         auto entry = entryArray.Get(env, i);
         if (entry) {
-            callback(
-                java::util::Map::Entry::getKey<jni::StringTag>(env, entry),
-                java::util::Map::Entry::getValue<gson::JsonElement>(env, entry)
-            );
+            callback(java::util::Map::Entry::getKey<jni::StringTag>(env, entry),
+                     java::util::Map::Entry::getValue<gson::JsonElement>(env, entry));
         }
     }
 }
@@ -47,12 +45,9 @@ mbgl::PropertyMap JsonObject::convert(jni::JNIEnv& env, const jni::Object<JsonOb
 
     if (jsonObject) {
         iterateEntrySet(
-            env,
-            jsonObject,
-            [&map, &env](const jni::String& jId, const jni::Object<gson::JsonElement>& jsonElement) {
+            env, jsonObject, [&map, &env](const jni::String& jId, const jni::Object<gson::JsonElement>& jsonElement) {
                 map[jni::Make<std::string>(env, jId)] = JsonElement::convert(env, jsonElement);
-            }
-        );
+            });
     }
 
     return map;

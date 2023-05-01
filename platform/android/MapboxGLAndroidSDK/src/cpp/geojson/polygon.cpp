@@ -10,9 +10,8 @@ namespace geojson {
 
 jni::Local<jni::Object<Polygon>> Polygon::New(jni::JNIEnv& env, const mbgl::Polygon<double>& polygon) {
     static auto& javaClass = jni::Class<Polygon>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<Polygon>(jni::Object<java::util::List>)>(
-        env, "fromLngLats"
-    );
+    static auto method = javaClass.GetStaticMethod<jni::Object<Polygon>(jni::Object<java::util::List>)>(env,
+                                                                                                        "fromLngLats");
 
     return javaClass.Call(env, method, asPointsListsList(env, polygon));
 }
@@ -28,8 +27,7 @@ mapbox::geojson::polygon Polygon::convert(jni::JNIEnv& env, const jni::Object<Po
 }
 
 mapbox::geojson::polygon Polygon::convert(
-    jni::JNIEnv& env, const jni::Object<java::util::List /*<java::util::List<Point>>*/>& jPointListsList
-) {
+    jni::JNIEnv& env, const jni::Object<java::util::List /*<java::util::List<Point>>*/>& jPointListsList) {
     mapbox::geojson::polygon polygon;
 
     if (jPointListsList) {

@@ -28,29 +28,27 @@ using namespace std::literals;
 namespace {
 
 void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match(
-        [&](const NullValue&) { writer.Null(); },
-        [&](bool b) { writer.Bool(b); },
-        [&](uint64_t u) { writer.Uint64(u); },
-        [&](int64_t i) { writer.Int64(i); },
-        [&](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
-        [&](const std::string& s) { writer.String(s); },
-        [&](const std::vector<Value>& arr) {
-            writer.StartArray();
-            for (const auto& item : arr) {
-                writeJSON(writer, item);
-            }
-            writer.EndArray();
-        },
-        [&](const std::unordered_map<std::string, Value>& obj) {
-            writer.StartObject();
-            for (const auto& entry : obj) {
-                writer.Key(entry.first.c_str());
-                writeJSON(writer, entry.second);
-            }
-            writer.EndObject();
-        }
-    );
+    value.match([&](const NullValue&) { writer.Null(); },
+                [&](bool b) { writer.Bool(b); },
+                [&](uint64_t u) { writer.Uint64(u); },
+                [&](int64_t i) { writer.Int64(i); },
+                [&](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
+                [&](const std::string& s) { writer.String(s); },
+                [&](const std::vector<Value>& arr) {
+                    writer.StartArray();
+                    for (const auto& item : arr) {
+                        writeJSON(writer, item);
+                    }
+                    writer.EndArray();
+                },
+                [&](const std::unordered_map<std::string, Value>& obj) {
+                    writer.StartObject();
+                    for (const auto& entry : obj) {
+                        writer.Key(entry.first.c_str());
+                        writeJSON(writer, entry.second);
+                    }
+                    writer.EndObject();
+                });
 }
 
 using ErrorMessage = std::string;
@@ -269,8 +267,7 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
             assert(canonicalIDObject.HasMember("x") && canonicalIDObject["x"].IsNumber());
             assert(canonicalIDObject.HasMember("y") && canonicalIDObject["y"].IsNumber());
             canonical = CanonicalTileID(
-                canonicalIDObject["z"].GetUint(), canonicalIDObject["x"].GetUint(), canonicalIDObject["y"].GetUint()
-            );
+                canonicalIDObject["z"].GetUint(), canonicalIDObject["x"].GetUint(), canonicalIDObject["y"].GetUint());
         }
 
         // Parse availableImages
@@ -301,13 +298,11 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
             feature.id = mapbox::geojson::convert<mapbox::feature::identifier>(featureObject["id"]);
         }
 
-        data.inputs.emplace_back(
-            std::move(zoom),
-            std::move(heatmapDensity),
-            std::move(canonical),
-            std::move(availableImages),
-            std::move(feature)
-        );
+        data.inputs.emplace_back(std::move(zoom),
+                                 std::move(heatmapDensity),
+                                 std::move(canonical),
+                                 std::move(availableImages),
+                                 std::move(feature));
     }
     return true;
 }
@@ -379,11 +374,10 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         }
     }
 
-    return Arguments{
-        std::move(rootPath),
-        std::move(testPaths),
-        shuffleFlag ? args::get(shuffleFlag) : false,
-        seedValue ? args::get(seedValue) : 1u};
+    return Arguments{std::move(rootPath),
+                     std::move(testPaths),
+                     shuffleFlag ? args::get(shuffleFlag) : false,
+                     seedValue ? args::get(seedValue) : 1u};
 }
 
 Ignores parseExpressionIgnores() {
@@ -500,13 +494,12 @@ std::optional<Value> toValue(const expression::Value& exprValue) {
             }
             return {Value{std::move(mbglValueMap)}};
         },
-        [](const auto& v) { return expression::fromExpressionValue<Value>(v); }
-    );
+        [](const auto& v) { return expression::fromExpressionValue<Value>(v); });
 }
 
-std::unique_ptr<style::expression::Expression> parseExpression(
-    const JSValue& value, std::optional<PropertySpec>& spec, TestResult& result
-) {
+std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& value,
+                                                               std::optional<PropertySpec>& spec,
+                                                               TestResult& result) {
     std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : std::nullopt;
     expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) : expression::ParsingContext();
     Convertible convertible(&value);
@@ -542,9 +535,9 @@ std::unique_ptr<style::expression::Expression> parseExpression(
     return nullptr;
 }
 
-std::unique_ptr<style::expression::Expression> parseExpression(
-    const std::optional<Value>& value, std::optional<PropertySpec>& spec, TestResult& result
-) {
+std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>& value,
+                                                               std::optional<PropertySpec>& spec,
+                                                               TestResult& result) {
     assert(value);
     auto document = toDocument(*value);
     assert(!document.HasParseError());

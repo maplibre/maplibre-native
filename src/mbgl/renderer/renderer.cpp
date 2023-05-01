@@ -33,21 +33,19 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     }
 }
 
-std::vector<Feature> Renderer::queryRenderedFeatures(
-    const ScreenLineString& geometry, const RenderedQueryOptions& options
-) const {
+std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenLineString& geometry,
+                                                     const RenderedQueryOptions& options) const {
     return impl->orchestrator.queryRenderedFeatures(geometry, options);
 }
 
-std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options)
-    const {
+std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenCoordinate& point,
+                                                     const RenderedQueryOptions& options) const {
     return impl->orchestrator.queryRenderedFeatures({point}, options);
 }
 
 std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options) const {
     return impl->orchestrator.queryRenderedFeatures(
-        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min}, options
-    );
+        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min}, options);
 }
 
 AnnotationIDs Renderer::queryPointAnnotations(const ScreenBox& box) const {
@@ -65,8 +63,7 @@ AnnotationIDs Renderer::queryShapeAnnotations(const ScreenBox& box) const {
         return {};
     }
     auto features = impl->orchestrator.queryShapeAnnotations(
-        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min}
-    );
+        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min});
     return getAnnotationIDs(features);
 }
 
@@ -86,45 +83,37 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     return ids;
 }
 
-std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options)
-    const {
+std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID,
+                                                   const SourceQueryOptions& options) const {
     return impl->orchestrator.querySourceFeatures(sourceID, options);
 }
 
-FeatureExtensionValue Renderer::queryFeatureExtensions(
-    const std::string& sourceID,
-    const Feature& feature,
-    const std::string& extension,
-    const std::string& extensionField,
-    const std::optional<std::map<std::string, Value>>& args
-) const {
+FeatureExtensionValue Renderer::queryFeatureExtensions(const std::string& sourceID,
+                                                       const Feature& feature,
+                                                       const std::string& extension,
+                                                       const std::string& extensionField,
+                                                       const std::optional<std::map<std::string, Value>>& args) const {
     return impl->orchestrator.queryFeatureExtensions(sourceID, feature, extension, extensionField, args);
 }
 
-void Renderer::setFeatureState(
-    const std::string& sourceID,
-    const std::optional<std::string>& sourceLayerID,
-    const std::string& featureID,
-    const FeatureState& state
-) {
+void Renderer::setFeatureState(const std::string& sourceID,
+                               const std::optional<std::string>& sourceLayerID,
+                               const std::string& featureID,
+                               const FeatureState& state) {
     impl->orchestrator.setFeatureState(sourceID, sourceLayerID, featureID, state);
 }
 
-void Renderer::getFeatureState(
-    FeatureState& state,
-    const std::string& sourceID,
-    const std::optional<std::string>& sourceLayerID,
-    const std::string& featureID
-) const {
+void Renderer::getFeatureState(FeatureState& state,
+                               const std::string& sourceID,
+                               const std::optional<std::string>& sourceLayerID,
+                               const std::string& featureID) const {
     impl->orchestrator.getFeatureState(state, sourceID, sourceLayerID, featureID);
 }
 
-void Renderer::removeFeatureState(
-    const std::string& sourceID,
-    const std::optional<std::string>& sourceLayerID,
-    const std::optional<std::string>& featureID,
-    const std::optional<std::string>& stateKey
-) {
+void Renderer::removeFeatureState(const std::string& sourceID,
+                                  const std::optional<std::string>& sourceLayerID,
+                                  const std::optional<std::string>& featureID,
+                                  const std::optional<std::string>& stateKey) {
     impl->orchestrator.removeFeatureState(sourceID, sourceLayerID, featureID, stateKey);
 }
 

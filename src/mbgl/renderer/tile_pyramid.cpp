@@ -48,17 +48,15 @@ const Tile* TilePyramid::getRenderedTile(const UnwrappedTileID& tileID) const {
     return it != renderedTiles.end() ? &it->second.get() : nullptr;
 }
 
-void TilePyramid::update(
-    const std::vector<Immutable<style::LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters,
-    const style::Source::Impl& sourceImpl,
-    const uint16_t tileSize,
-    const Range<uint8_t> zoomRange,
-    std::optional<LatLngBounds> bounds,
-    std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile
-) {
+void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& layers,
+                         const bool needsRendering,
+                         const bool needsRelayout,
+                         const TileParameters& parameters,
+                         const style::Source::Impl& sourceImpl,
+                         const uint16_t tileSize,
+                         const Range<uint8_t> zoomRange,
+                         std::optional<LatLngBounds> bounds,
+                         std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile) {
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -126,19 +124,18 @@ void TilePyramid::update(
         idealTiles = util::tileCover(parameters.transformState, idealZoom, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-            mbgl::Log::Warning(
-                mbgl::Event::General,
-                "Provided camera options returned " + std::to_string(idealTiles.size()) + " tiles, only " +
-                    util::toString(idealTiles[0]) + " is taken in Tile mode."
-            );
+            mbgl::Log::Warning(mbgl::Event::General,
+                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
+                                   " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
         }
     }
 
-    // Stores a list of all the tiles that we're definitely going to retain. There are two
-    // kinds of tiles we need: the ideal tiles determined by the tile cover. They may not yet be in
-    // use because they're still loading. In addition to that, we also need to retain all tiles that
-    // we're actively using, e.g. as a replacement for tile that aren't loaded yet.
+    // Stores a list of all the tiles that we're definitely going to retain.
+    // There are two kinds of tiles we need: the ideal tiles determined by the
+    // tile cover. They may not yet be in use because they're still loading. In
+    // addition to that, we also need to retain all tiles that we're actively
+    // using, e.g. as a replacement for tile that aren't loaded yet.
     std::set<OverscaledTileID> retain;
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
@@ -156,14 +153,13 @@ void TilePyramid::update(
         return it == tiles.end() ? nullptr : it->second.get();
     };
 
-    // The min and max zoom for TileRange are based on the updateRenderables algorithm.
-    // Tiles are created at the ideal tile zoom or at lower zoom levels. Child
-    // tiles are used from the cache, but not created.
+    // The min and max zoom for TileRange are based on the updateRenderables
+    // algorithm. Tiles are created at the ideal tile zoom or at lower zoom
+    // levels. Child tiles are used from the cache, but not created.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
         tileRange = util::TileRange::fromLatLngBounds(
-            *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max))
-        );
+            *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
         if (tileRange && !tileRange->contains(tileID.canonical)) {
@@ -198,13 +194,11 @@ void TilePyramid::update(
             [](const UnwrappedTileID&, Tile&) {},
             panTiles,
             zoomRange,
-            maxParentTileOverscaleFactor
-        );
+            maxParentTileOverscaleFactor);
     }
 
     algorithm::updateRenderables(
-        getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor
-    );
+        getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor);
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;
@@ -221,13 +215,13 @@ void TilePyramid::update(
         auto conservativeCacheSize = static_cast<size_t>(
             std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
             std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
-            (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5
-        );
+            (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
         cache.setSize(conservativeCacheSize);
     }
 
-    // Remove stale tiles. This goes through the (sorted!) tiles map and retain set in lockstep
-    // and removes items from tiles that don't have the corresponding key in the retain set.
+    // Remove stale tiles. This goes through the (sorted!) tiles map and retain
+    // set in lockstep and removes items from tiles that don't have the
+    // corresponding key in the retain set.
     {
         auto tilesIt = tiles.begin();
         auto retainIt = retain.begin();
@@ -314,8 +308,7 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const RenderedQueryOptions& options,
     const mat4& projMatrix,
-    const SourceFeatureState& featureState
-) const {
+    const SourceFeatureState& featureState) const {
     std::unordered_map<std::string, std::vector<Feature>> result;
     if (renderedTiles.empty() || geometry.empty()) {
         return result;
@@ -326,8 +319,7 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
 
     for (const auto& p : geometry) {
         queryGeometry.push_back(
-            TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p
-        );
+            TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p);
     }
 
     mapbox::geometry::box<double> box = mapbox::geometry::envelope(queryGeometry);
@@ -346,9 +338,9 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         const UnwrappedTileID& id = entry.first;
         Tile& tile = entry.second;
 
-        const auto scale = static_cast<float>(
-            transformState.getScale() / (1 << id.canonical.z)
-        ); // equivalent to std::pow(2, transformState.getZoom() - id.canonical.z);
+        const auto scale = static_cast<float>(transformState.getScale() /
+                                              (1 << id.canonical.z)); // equivalent to std::pow(2,
+                                                                      // transformState.getZoom() - id.canonical.z);
         auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize_D /
                             scale;
 
@@ -370,8 +362,7 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         }
 
         tile.queryRenderedFeatures(
-            result, tileSpaceQueryGeometry, transformState, layers, options, projMatrix, featureState
-        );
+            result, tileSpaceQueryGeometry, transformState, layers, options, projMatrix, featureState);
     }
 
     return result;

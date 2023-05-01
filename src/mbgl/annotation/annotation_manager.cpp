@@ -164,8 +164,7 @@ std::unique_ptr<AnnotationTileData> AnnotationManager::getTileData(const Canonic
 
     symbolTree.query(
         boost::geometry::index::intersects(tileBounds),
-        boost::make_function_output_iterator([&](const auto& val) { val->updateLayer(tileID, *pointLayer); })
-    );
+        boost::make_function_output_iterator([&](const auto& val) { val->updateLayer(tileID, *pointLayer); }));
 
     for (const auto& shape : shapeAnnotations) {
         shape.second->updateTileData(tileID, *tileData);
@@ -175,8 +174,9 @@ std::unique_ptr<AnnotationTileData> AnnotationManager::getTileData(const Canonic
 }
 
 void AnnotationManager::updateStyle() {
-    // Create annotation source, point layer, and point bucket. We do everything via Style::Impl
-    // because we don't want annotation mutations to trigger Style::Impl::styleMutated to be set.
+    // Create annotation source, point layer, and point bucket. We do everything
+    // via Style::Impl because we don't want annotation mutations to trigger
+    // Style::Impl::styleMutated to be set.
     if (!style.get().impl->getSource(SourceID)) {
         style.get().impl->addSource(std::make_unique<AnnotationSource>());
 
@@ -184,9 +184,8 @@ void AnnotationManager::updateStyle() {
 
         using namespace expression::dsl;
         layer->setSourceLayer(PointLayerID);
-        layer->setIconImage(
-            PropertyExpression<expression::Image>(image(concat(vec(literal(SourceID + "."), toString(get("sprite"))))))
-        );
+        layer->setIconImage(PropertyExpression<expression::Image>(
+            image(concat(vec(literal(SourceID + "."), toString(get("sprite")))))));
         layer->setIconAllowOverlap(true);
         layer->setIconIgnorePlacement(true);
 
@@ -200,11 +199,12 @@ void AnnotationManager::updateStyle() {
     }
 
     for (const auto& image : images) {
-        // Call addImage even for images we may have previously added, because we must support
-        // addAnnotationImage being used to update an existing image. Creating a new image is
-        // relatively cheap, as it copies only the Immutable reference. (We can't keep track
-        // of which images need to be added because we don't know if the style is the same
-        // instance as in the last updateStyle call. If it's a new style, we need to add all
+        // Call addImage even for images we may have previously added, because
+        // we must support addAnnotationImage being used to update an existing
+        // image. Creating a new image is relatively cheap, as it copies only
+        // the Immutable reference. (We can't keep track of which images need to
+        // be added because we don't know if the style is the same instance as
+        // in the last updateStyle call. If it's a new style, we need to add all
         // images.)
         style.get().impl->addImage(std::make_unique<style::Image>(image.second));
     }
@@ -245,9 +245,8 @@ void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
     std::lock_guard<std::mutex> lock(mutex);
     const std::string id = prefixedImageID(image->getID());
     images.erase(id);
-    auto inserted = images.emplace(
-        id, style::Image(id, image->getImage().clone(), image->getPixelRatio(), image->isSdf())
-    );
+    auto inserted = images.emplace(id,
+                                   style::Image(id, image->getImage().clone(), image->getPixelRatio(), image->isSdf()));
     style.get().impl->addImage(std::make_unique<style::Image>(inserted.first->second));
 }
 

@@ -17,8 +17,7 @@ namespace style {
 CustomGeometrySource::CustomGeometrySource(std::string id, const CustomGeometrySource::Options& options)
     : Source(makeMutable<CustomGeometrySource::Impl>(std::move(id), options)),
       loader(std::make_unique<Actor<CustomTileLoader>>(
-          Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction
-      )) {}
+          Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction)) {}
 
 CustomGeometrySource::~CustomGeometrySource() = default;
 

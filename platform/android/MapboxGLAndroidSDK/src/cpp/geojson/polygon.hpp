@@ -22,8 +22,8 @@ public:
 
     static mapbox::geojson::polygon convert(jni::JNIEnv &, const jni::Object<Polygon> &);
 
-    static mapbox::geojson::polygon
-    convert(jni::JNIEnv &, const jni::Object<java::util::List /*<java::util::List<Point>>*/> &);
+    static mapbox::geojson::polygon convert(jni::JNIEnv &,
+                                            const jni::Object<java::util::List /*<java::util::List<Point>>*/> &);
 
     static jni::Local<jni::Object<java::util::List>> coordinates(jni::JNIEnv &, const jni::Object<Polygon> &);
 

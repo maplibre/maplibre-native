@@ -92,12 +92,10 @@ TEST(Memory, Vector) {
     float ratio{2};
 
     HeadlessFrontend frontend{{256, 256}, ratio};
-    MapAdapter map(
-        frontend,
-        MapObserver::nullObserver(),
-        test.fileSource,
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio)
-    );
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   test.fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.jumpTo(CameraOptions().withZoom(16));
     map.getStyle().loadURL("maptiler://maps/streets");
 
@@ -109,12 +107,10 @@ TEST(Memory, Raster) {
     float ratio{2};
 
     HeadlessFrontend frontend{{256, 256}, ratio};
-    MapAdapter map(
-        frontend,
-        MapObserver::nullObserver(),
-        test.fileSource,
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio)
-    );
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   test.fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.getStyle().loadURL("maptiler://maps/hybrid");
 
     frontend.render(map);

@@ -20,8 +20,7 @@ TEST(GeoJSONOptions, ErrorHandling) {
         R"JSON({
         "maxzoom": "should not be a string"
     })JSON",
-        error
-    );
+        error);
     ASSERT_FALSE((bool)converted);
 }
 
@@ -61,8 +60,7 @@ TEST(GeoJSONOptions, FullConversion) {
             "has_island": ["any", ["==", ["get", "featureclass"], "island"]]
         }
     })JSON",
-        error
-    );
+        error);
 
     // GeoJSON-VT
     ASSERT_EQ(converted.minzoom, 0);

@@ -28,9 +28,8 @@ public:
 
 public:
     template <class Vertex>
-    VertexBuffer<Vertex> createVertexBuffer(
-        VertexVector<Vertex>&& v, const BufferUsageType usage = BufferUsageType::StaticDraw
-    ) {
+    VertexBuffer<Vertex> createVertexBuffer(VertexVector<Vertex>&& v,
+                                            const BufferUsageType usage = BufferUsageType::StaticDraw) {
         return {v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage)};
     }
 
@@ -41,9 +40,8 @@ public:
     }
 
     template <class DrawMode>
-    IndexBuffer createIndexBuffer(
-        IndexVector<DrawMode>&& v, const BufferUsageType usage = BufferUsageType::StaticDraw
-    ) {
+    IndexBuffer createIndexBuffer(IndexVector<DrawMode>&& v,
+                                  const BufferUsageType usage = BufferUsageType::StaticDraw) {
         return {v.elements(), createIndexBufferResource(v.data(), v.bytes(), usage)};
     }
 
@@ -54,14 +52,14 @@ public:
     }
 
 protected:
-    virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(
-        const void* data, std::size_t size, BufferUsageType
-    ) = 0;
+    virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,
+                                                                             std::size_t size,
+                                                                             BufferUsageType) = 0;
     virtual void updateVertexBufferResource(VertexBufferResource&, const void* data, std::size_t size) = 0;
 
-    virtual std::unique_ptr<IndexBufferResource> createIndexBufferResource(
-        const void* data, std::size_t size, BufferUsageType
-    ) = 0;
+    virtual std::unique_ptr<IndexBufferResource> createIndexBufferResource(const void* data,
+                                                                           std::size_t size,
+                                                                           BufferUsageType) = 0;
     virtual void updateIndexBufferResource(IndexBufferResource&, const void* data, std::size_t size) = 0;
 
 public:
@@ -73,22 +71,20 @@ public:
     }
 
     template <typename Image>
-    void updateTexture(
-        Texture& texture, const Image& image, TextureChannelDataType type = TextureChannelDataType::UnsignedByte
-    ) {
+    void updateTexture(Texture& texture,
+                       const Image& image,
+                       TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
         auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResource(texture.getResource(), image.size, image.data.get(), format, type);
         texture.size = image.size;
     }
 
     template <typename Image>
-    void updateTextureSub(
-        Texture& texture,
-        const Image& image,
-        const uint16_t offsetX,
-        const uint16_t offsetY,
-        TextureChannelDataType type = TextureChannelDataType::UnsignedByte
-    ) {
+    void updateTextureSub(Texture& texture,
+                          const Image& image,
+                          const uint16_t offsetX,
+                          const uint16_t offsetY,
+                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
         assert(image.size.width + offsetX <= texture.size.width);
         assert(image.size.height + offsetY <= texture.size.height);
         auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
@@ -96,21 +92,19 @@ public:
     }
 
 protected:
-    virtual std::unique_ptr<TextureResource> createTextureResource(
-        Size, const void* data, TexturePixelType, TextureChannelDataType
-    ) = 0;
+    virtual std::unique_ptr<TextureResource> createTextureResource(Size,
+                                                                   const void* data,
+                                                                   TexturePixelType,
+                                                                   TextureChannelDataType) = 0;
     virtual void updateTextureResource(
-        TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType
-    ) = 0;
-    virtual void updateTextureResourceSub(
-        TextureResource&,
-        uint16_t xOffset,
-        uint16_t yOffset,
-        Size,
-        const void* data,
-        TexturePixelType,
-        TextureChannelDataType
-    ) = 0;
+        TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
+    virtual void updateTextureResourceSub(TextureResource&,
+                                          uint16_t xOffset,
+                                          uint16_t yOffset,
+                                          Size,
+                                          const void* data,
+                                          TexturePixelType,
+                                          TextureChannelDataType) = 0;
 };
 
 } // namespace gfx

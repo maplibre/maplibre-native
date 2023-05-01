@@ -29,13 +29,11 @@ public:
         if (!offlineResponse) {
             offlineResponse.emplace();
             offlineResponse->noContent = true;
-            offlineResponse->error = std::make_unique<Response::Error>(
-                Response::Error::Reason::NotFound, "Not found in offline database"
-            );
+            offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                                       "Not found in offline database");
         } else if (!offlineResponse->isUsable()) {
-            offlineResponse->error = std::make_unique<Response::Error>(
-                Response::Error::Reason::NotFound, "Cached resource is unusable"
-            );
+            offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                                       "Cached resource is unusable");
         }
         req.invoke(&FileSourceRequest::setResponse, *offlineResponse);
     }
@@ -78,32 +76,25 @@ public:
         callback(db->listRegions());
     }
 
-    void createRegion(
-        const OfflineRegionDefinition& definition,
-        const OfflineRegionMetadata& metadata,
-        const std::function<void(expected<OfflineRegion, std::exception_ptr>)>& callback
-    ) {
+    void createRegion(const OfflineRegionDefinition& definition,
+                      const OfflineRegionMetadata& metadata,
+                      const std::function<void(expected<OfflineRegion, std::exception_ptr>)>& callback) {
         callback(db->createRegion(definition, metadata));
     }
 
-    void mergeOfflineRegions(
-        const std::string& sideDatabasePath,
-        const std::function<void(expected<OfflineRegions, std::exception_ptr>)>& callback
-    ) {
+    void mergeOfflineRegions(const std::string& sideDatabasePath,
+                             const std::function<void(expected<OfflineRegions, std::exception_ptr>)>& callback) {
         callback(db->mergeDatabase(sideDatabasePath));
     }
 
-    void updateMetadata(
-        const int64_t regionID,
-        const OfflineRegionMetadata& metadata,
-        const std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>& callback
-    ) {
+    void updateMetadata(const int64_t regionID,
+                        const OfflineRegionMetadata& metadata,
+                        const std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>& callback) {
         callback(db->updateMetadata(regionID, metadata));
     }
 
-    void getRegionStatus(
-        int64_t regionID, const std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>& callback
-    ) {
+    void getRegionStatus(int64_t regionID,
+                         const std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>& callback) {
         if (auto download = getDownload(regionID)) {
             callback(download.value()->getStatus());
         } else {
@@ -140,8 +131,7 @@ private:
     expected<OfflineDownload*, std::exception_ptr> getDownload(int64_t regionID) {
         if (!onlineFileSource) {
             return unexpected<std::exception_ptr>(
-                std::make_exception_ptr(std::runtime_error("Network file source unavailable."))
-            );
+                std::make_exception_ptr(std::runtime_error("Network file source unavailable.")));
         }
 
         auto it = downloads.find(regionID);
@@ -153,8 +143,7 @@ private:
             return unexpected<std::exception_ptr>(definition.error());
         }
         auto download = std::make_unique<OfflineDownload>(
-            regionID, std::move(definition.value()), *db, *onlineFileSource
-        );
+            regionID, std::move(definition.value()), *db, *onlineFileSource);
         return downloads.emplace(regionID, std::move(download)).first->second.get();
     }
 
@@ -165,17 +154,14 @@ private:
 
 class DatabaseFileSource::Impl {
 public:
-    Impl(
-        std::shared_ptr<FileSource> onlineFileSource,
-        const ResourceOptions& resourceOptions_,
-        const ClientOptions& clientOptions_
-    )
+    Impl(std::shared_ptr<FileSource> onlineFileSource,
+         const ResourceOptions& resourceOptions_,
+         const ClientOptions& clientOptions_)
         : thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              resourceOptions_.cachePath()
-          )),
+              resourceOptions_.cachePath())),
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
@@ -216,8 +202,7 @@ DatabaseFileSource::DatabaseFileSource(const ResourceOptions& resourceOptions, c
     : impl(std::make_unique<Impl>(
           FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
           resourceOptions,
-          clientOptions
-      )) {}
+          clientOptions)) {}
 
 DatabaseFileSource::~DatabaseFileSource() = default;
 
@@ -275,48 +260,42 @@ void DatabaseFileSource::setMaximumAmbientCacheSize(uint64_t size, std::function
     impl->actor().invoke(&DatabaseFileSourceThread::setMaximumAmbientCacheSize, size, std::move(callback));
 }
 
-void DatabaseFileSource::listOfflineRegions(std::function<void(expected<OfflineRegions, std::exception_ptr>)> callback
-) {
+void DatabaseFileSource::listOfflineRegions(
+    std::function<void(expected<OfflineRegions, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::listRegions, std::move(callback));
 }
 
 void DatabaseFileSource::createOfflineRegion(
     const OfflineRegionDefinition& definition,
     const OfflineRegionMetadata& metadata,
-    std::function<void(expected<OfflineRegion, std::exception_ptr>)> callback
-) {
+    std::function<void(expected<OfflineRegion, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::createRegion, definition, metadata, std::move(callback));
 }
 
 void DatabaseFileSource::mergeOfflineRegions(
-    const std::string& sideDatabasePath, std::function<void(expected<OfflineRegions, std::exception_ptr>)> callback
-) {
+    const std::string& sideDatabasePath, std::function<void(expected<OfflineRegions, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::mergeOfflineRegions, sideDatabasePath, std::move(callback));
 }
 
 void DatabaseFileSource::updateOfflineMetadata(
     const int64_t regionID,
     const OfflineRegionMetadata& metadata,
-    std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)> callback
-) {
+    std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::updateMetadata, regionID, metadata, std::move(callback));
 }
 
-void DatabaseFileSource::deleteOfflineRegion(
-    const OfflineRegion& region, std::function<void(std::exception_ptr)> callback
-) {
+void DatabaseFileSource::deleteOfflineRegion(const OfflineRegion& region,
+                                             std::function<void(std::exception_ptr)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::deleteRegion, region, std::move(callback));
 }
 
-void DatabaseFileSource::invalidateOfflineRegion(
-    const OfflineRegion& region, std::function<void(std::exception_ptr)> callback
-) {
+void DatabaseFileSource::invalidateOfflineRegion(const OfflineRegion& region,
+                                                 std::function<void(std::exception_ptr)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::invalidateRegion, region.getID(), std::move(callback));
 }
 
-void DatabaseFileSource::setOfflineRegionObserver(
-    const OfflineRegion& region, std::unique_ptr<OfflineRegionObserver> observer
-) {
+void DatabaseFileSource::setOfflineRegionObserver(const OfflineRegion& region,
+                                                  std::unique_ptr<OfflineRegionObserver> observer) {
     impl->actor().invoke(&DatabaseFileSourceThread::setRegionObserver, region.getID(), std::move(observer));
 }
 
@@ -325,8 +304,8 @@ void DatabaseFileSource::setOfflineRegionDownloadState(const OfflineRegion& regi
 }
 
 void DatabaseFileSource::getOfflineRegionStatus(
-    const OfflineRegion& region, std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)> callback
-) const {
+    const OfflineRegion& region,
+    std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)> callback) const {
     impl->actor().invoke(&DatabaseFileSourceThread::getRegionStatus, region.getID(), std::move(callback));
 }
 

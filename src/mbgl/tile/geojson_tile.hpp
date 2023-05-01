@@ -12,7 +12,10 @@ class TileParameters;
 
 class GeoJSONTile : public GeometryTile {
 public:
-    GeoJSONTile(const OverscaledTileID&, std::string sourceID, const TileParameters&, std::shared_ptr<style::GeoJSONData>);
+    GeoJSONTile(const OverscaledTileID&,
+                std::string sourceID,
+                const TileParameters&,
+                std::shared_ptr<style::GeoJSONData>);
 
     void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout = false);
 

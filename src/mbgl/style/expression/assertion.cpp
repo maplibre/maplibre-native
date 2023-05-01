@@ -90,9 +90,8 @@ EvaluationResult Assertion::evaluate(const EvaluationContext& params) const {
         if (!type::checkSubtype(getType(), typeOf(*value))) {
             return value;
         } else if (i == inputs.size() - 1) {
-            return EvaluationError{
-                "Expected value to be of type " + toString(getType()) + ", but found " + toString(typeOf(*value)) +
-                " instead."};
+            return EvaluationError{"Expected value to be of type " + toString(getType()) + ", but found " +
+                                   toString(typeOf(*value)) + " instead."};
         }
     }
 

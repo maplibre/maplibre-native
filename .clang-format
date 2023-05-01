@@ -1,7 +1,6 @@
 ---
 BasedOnStyle: Google
 AccessModifierOffset: -4
-AlignAfterOpenBracket: BlockIndent
 AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortLambdasOnASingleLine: Inline

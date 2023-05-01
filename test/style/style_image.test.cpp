@@ -110,14 +110,12 @@ TEST(StyleImage, InvalidContent) {
 }
 
 TEST(StyleImage, StretchContent) {
-    style::Image image(
-        "test",
-        PremultipliedImage({16, 16}),
-        1,
-        {{2.0f, 14.0f}},
-        {{0.0f, 4.0f}, {12.0f, 16.0f}},
-        style::ImageContent{2, 2, 14, 14}
-    );
+    style::Image image("test",
+                       PremultipliedImage({16, 16}),
+                       1,
+                       {{2.0f, 14.0f}},
+                       {{0.0f, 4.0f}, {12.0f, 16.0f}},
+                       style::ImageContent{2, 2, 14, 14});
     EXPECT_EQ(16u, image.getImage().size.width);
     EXPECT_EQ(16u, image.getImage().size.height);
     EXPECT_EQ(1.0, image.getPixelRatio());

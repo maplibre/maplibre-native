@@ -14,12 +14,10 @@
 namespace mbgl {
 namespace style {
 
-VectorSource::VectorSource(
-    std::string id,
-    variant<std::string, Tileset> urlOrTileset_,
-    std::optional<float> maxZoom_,
-    std::optional<float> minZoom_
-)
+VectorSource::VectorSource(std::string id,
+                           variant<std::string, Tileset> urlOrTileset_,
+                           std::optional<float> maxZoom_,
+                           std::optional<float> minZoom_)
     : Source(makeMutable<Impl>(std::move(id))),
       urlOrTileset(std::move(urlOrTileset_)),
       maxZoom(std::move(maxZoom_)),

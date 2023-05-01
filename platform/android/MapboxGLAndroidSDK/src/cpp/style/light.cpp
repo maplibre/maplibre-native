@@ -122,25 +122,23 @@ void Light::registerNative(jni::JNIEnv& env) {
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
     // Register the peer
-    jni::RegisterNativePeer<Light>(
-        env,
-        javaClass,
-        "nativePtr",
-        METHOD(&Light::getAnchor, "nativeGetAnchor"),
-        METHOD(&Light::setAnchor, "nativeSetAnchor"),
-        METHOD(&Light::getPositionTransition, "nativeGetPositionTransition"),
-        METHOD(&Light::setPositionTransition, "nativeSetPositionTransition"),
-        METHOD(&Light::getPosition, "nativeGetPosition"),
-        METHOD(&Light::setPosition, "nativeSetPosition"),
-        METHOD(&Light::getColorTransition, "nativeGetColorTransition"),
-        METHOD(&Light::setColorTransition, "nativeSetColorTransition"),
-        METHOD(&Light::getColor, "nativeGetColor"),
-        METHOD(&Light::setColor, "nativeSetColor"),
-        METHOD(&Light::getIntensityTransition, "nativeGetIntensityTransition"),
-        METHOD(&Light::setIntensityTransition, "nativeSetIntensityTransition"),
-        METHOD(&Light::getIntensity, "nativeGetIntensity"),
-        METHOD(&Light::setIntensity, "nativeSetIntensity")
-    );
+    jni::RegisterNativePeer<Light>(env,
+                                   javaClass,
+                                   "nativePtr",
+                                   METHOD(&Light::getAnchor, "nativeGetAnchor"),
+                                   METHOD(&Light::setAnchor, "nativeSetAnchor"),
+                                   METHOD(&Light::getPositionTransition, "nativeGetPositionTransition"),
+                                   METHOD(&Light::setPositionTransition, "nativeSetPositionTransition"),
+                                   METHOD(&Light::getPosition, "nativeGetPosition"),
+                                   METHOD(&Light::setPosition, "nativeSetPosition"),
+                                   METHOD(&Light::getColorTransition, "nativeGetColorTransition"),
+                                   METHOD(&Light::setColorTransition, "nativeSetColorTransition"),
+                                   METHOD(&Light::getColor, "nativeGetColor"),
+                                   METHOD(&Light::setColor, "nativeSetColor"),
+                                   METHOD(&Light::getIntensityTransition, "nativeGetIntensityTransition"),
+                                   METHOD(&Light::setIntensityTransition, "nativeSetIntensityTransition"),
+                                   METHOD(&Light::getIntensity, "nativeGetIntensity"),
+                                   METHOD(&Light::setIntensity, "nativeSetIntensity"));
 }
 
 } // namespace android

@@ -263,8 +263,7 @@ void MapWindow::keyPressEvent(QKeyEvent *ev) {
                 lineGeometry.push_back(collection);
 
                 QMapLibreGL::ShapeAnnotationGeometry annotationGeometry(
-                    QMapLibreGL::ShapeAnnotationGeometry::LineStringType, lineGeometry
-                );
+                    QMapLibreGL::ShapeAnnotationGeometry::LineStringType, lineGeometry);
 
                 QMapLibreGL::LineAnnotation line;
                 line.geometry = annotationGeometry;
@@ -292,8 +291,7 @@ void MapWindow::keyPressEvent(QKeyEvent *ev) {
                 fillGeometry.push_back(collection);
 
                 QMapLibreGL::ShapeAnnotationGeometry annotationGeometry(
-                    QMapLibreGL::ShapeAnnotationGeometry::PolygonType, fillGeometry
-                );
+                    QMapLibreGL::ShapeAnnotationGeometry::PolygonType, fillGeometry);
 
                 QMapLibreGL::FillAnnotation fill;
                 fill.geometry = annotationGeometry;
@@ -360,11 +358,10 @@ void MapWindow::keyPressEvent(QKeyEvent *ev) {
                 m_map->addLayer({{"id", "innerCirclesLayer"}, {"type", "circle"}, {"source", "innerCirclesSource"}});
 
                 // multiple features by QList<QMapLibreGL::Feature>
-                QList<QMapLibreGL::Feature> outer{
-                    makePoint(0.002, 0.002, "cyan"),
-                    makePoint(-0.002, 0.002, "magenta"),
-                    makePoint(0.002, -0.002, "yellow"),
-                    makePoint(-0.002, -0.002, "black")};
+                QList<QMapLibreGL::Feature> outer{makePoint(0.002, 0.002, "cyan"),
+                                                  makePoint(-0.002, 0.002, "magenta"),
+                                                  makePoint(0.002, -0.002, "yellow"),
+                                                  makePoint(-0.002, -0.002, "black")};
 
                 m_map->addSource("outerCirclesSource", {{"type", "geojson"}, {"data", QVariant::fromValue(outer)}});
                 m_map->addLayer({{"id", "outerCirclesLayer"}, {"type", "circle"}, {"source", "outerCirclesSource"}});

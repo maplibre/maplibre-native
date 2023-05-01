@@ -14,13 +14,11 @@
 
 namespace mbgl {
 
-CustomGeometryTile::CustomGeometryTile(
-    const OverscaledTileID& overscaledTileID,
-    std::string sourceID_,
-    const TileParameters& parameters,
-    Immutable<style::CustomGeometrySource::TileOptions> options_,
-    ActorRef<style::CustomTileLoader> loader_
-)
+CustomGeometryTile::CustomGeometryTile(const OverscaledTileID& overscaledTileID,
+                                       std::string sourceID_,
+                                       const TileParameters& parameters,
+                                       Immutable<style::CustomGeometrySource::TileOptions> options_,
+                                       ActorRef<style::CustomTileLoader> loader_)
     : GeometryTile(overscaledTileID, std::move(sourceID_), parameters),
       necessity(TileNecessity::Optional),
       options(std::move(options_)),
@@ -44,8 +42,7 @@ void CustomGeometryTile::setTileData(const GeoJSON& geoJSON) {
         vtOptions.tolerance = scale * options->tolerance;
         featureData =
             mapbox::geojsonvt::geoJSONToTile(
-                geoJSON, id.canonical.z, id.canonical.x, id.canonical.y, vtOptions, options->wrap, options->clip
-            )
+                geoJSON, id.canonical.z, id.canonical.x, id.canonical.y, vtOptions, options->wrap, options->clip)
                 .features;
     }
     setData(std::make_unique<GeoJSONTileData>(std::move(featureData)));

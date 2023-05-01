@@ -15,11 +15,9 @@ public:
     std::optional<Duration> delay;
     bool enablePlacementTransitions;
 
-    TransitionOptions(
-        std::optional<Duration> duration_ = std::nullopt,
-        std::optional<Duration> delay_ = std::nullopt,
-        bool enablePlacementTransitions_ = true
-    )
+    TransitionOptions(std::optional<Duration> duration_ = std::nullopt,
+                      std::optional<Duration> delay_ = std::nullopt,
+                      bool enablePlacementTransitions_ = true)
         : duration(std::move(duration_)),
           delay(std::move(delay_)),
           enablePlacementTransitions(enablePlacementTransitions_) {}

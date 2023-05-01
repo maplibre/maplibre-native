@@ -21,13 +21,11 @@ const std::optional<Tileset>& RenderRasterDEMSource::getTileset() const {
     return impl().tileset;
 }
 
-void RenderRasterDEMSource::updateInternal(
-    const Tileset& tileset,
-    const std::vector<Immutable<LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters
-) {
+void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
+                                           const std::vector<Immutable<LayerProperties>>& layers,
+                                           const bool needsRendering,
+                                           const bool needsRelayout,
+                                           const TileParameters& parameters) {
     tilePyramid.update(
         layers,
         needsRendering,
@@ -37,8 +35,7 @@ void RenderRasterDEMSource::updateInternal(
         impl().getTileSize(),
         tileset.zoomRange,
         tileset.bounds,
-        [&](const OverscaledTileID& tileID) { return std::make_unique<RasterDEMTile>(tileID, parameters, tileset); }
-    );
+        [&](const OverscaledTileID& tileID) { return std::make_unique<RasterDEMTile>(tileID, parameters, tileset); });
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
 }
 
@@ -95,8 +92,9 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
                     auto& borderTile = static_cast<RasterDEMTile&>(*renderableNeighbor);
                     demtile.backfillBorder(borderTile, mask);
 
-                    // if the border tile has not been backfilled by a previous instance of the main
-                    // tile, backfill its corresponding neighbor as well.
+                    // if the border tile has not been backfilled by a previous
+                    // instance of the main tile, backfill its corresponding
+                    // neighbor as well.
                     const DEMTileNeighbors& borderMask = opposites[mask];
                     if ((borderTile.neighboringTiles & borderMask) != borderMask) {
                         borderTile.backfillBorder(demtile, borderMask);
@@ -108,9 +106,12 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
     RenderTileSource::onTileChanged(tile);
 }
 
-std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::
-    queryRenderedFeatures(const ScreenLineString&, const TransformState&, const std::unordered_map<std::string, const RenderLayer*>&, const RenderedQueryOptions&, const mat4&)
-        const {
+std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::queryRenderedFeatures(
+    const ScreenLineString&,
+    const TransformState&,
+    const std::unordered_map<std::string, const RenderLayer*>&,
+    const RenderedQueryOptions&,
+    const mat4&) const {
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 

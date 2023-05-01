@@ -81,15 +81,15 @@ TEST(LocalFileSource, NonExistentFile) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req =
-        fs.request({Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
-            req.reset();
-            ASSERT_NE(nullptr, res.error);
-            EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
-            ASSERT_FALSE(res.data.get());
-            // Do not assert on platform-specific error message.
-            loop.stop();
-        });
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("does_not_exist")},
+                                                   [&](Response res) {
+                                                       req.reset();
+                                                       ASSERT_NE(nullptr, res.error);
+                                                       EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
+                                                       ASSERT_FALSE(res.data.get());
+                                                       // Do not assert on platform-specific error message.
+                                                       loop.stop();
+                                                   });
 
     loop.run();
 }
@@ -160,7 +160,8 @@ TEST(LocalFileSource, URLLimit) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
 #if defined(_MSC_VER) && !defined(__clang__)
-        // Microsoft Visual Studio defines PATH_MAX as 260, less than the limit to trigger an error with reason "Other"
+        // Microsoft Visual Studio defines PATH_MAX as 260, less than the
+        // limit to trigger an error with reason "Other"
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
 #else
         EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);

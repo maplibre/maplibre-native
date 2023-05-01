@@ -12,12 +12,10 @@ namespace style {
 
 class VectorSource final : public Source {
 public:
-    VectorSource(
-        std::string id,
-        variant<std::string, Tileset> urlOrTileset,
-        std::optional<float> maxZoom = std::nullopt,
-        std::optional<float> minZoom = std::nullopt
-    );
+    VectorSource(std::string id,
+                 variant<std::string, Tileset> urlOrTileset,
+                 std::optional<float> maxZoom = std::nullopt,
+                 std::optional<float> minZoom = std::nullopt);
     ~VectorSource() final;
 
     const variant<std::string, Tileset>& getURLOrTileset() const;

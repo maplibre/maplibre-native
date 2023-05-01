@@ -24,26 +24,24 @@ class Filter;
 
 class SymbolLayout final : public Layout {
 public:
-    SymbolLayout(
-        const BucketParameters&,
-        const std::vector<Immutable<style::LayerProperties>>&,
-        std::unique_ptr<GeometryTileLayer>,
-        const LayoutParameters& parameters
-    );
+    SymbolLayout(const BucketParameters&,
+                 const std::vector<Immutable<style::LayerProperties>>&,
+                 std::unique_ptr<GeometryTileLayer>,
+                 const LayoutParameters& parameters);
 
     ~SymbolLayout() final = default;
 
-    void prepareSymbols(const GlyphMap& glyphMap, const GlyphPositions&, const ImageMap&, const ImagePositions&)
-        override;
+    void prepareSymbols(const GlyphMap& glyphMap,
+                        const GlyphPositions&,
+                        const ImageMap&,
+                        const ImagePositions&) override;
 
-    void createBucket(
-        const ImagePositions&,
-        std::unique_ptr<FeatureIndex>&,
-        std::unordered_map<std::string, LayerRenderData>&,
-        bool firstLoad,
-        bool showCollisionBoxes,
-        const CanonicalTileID& canonical
-    ) override;
+    void createBucket(const ImagePositions&,
+                      std::unique_ptr<FeatureIndex>&,
+                      std::unordered_map<std::string, LayerRenderData>&,
+                      bool firstLoad,
+                      bool showCollisionBoxes,
+                      const CanonicalTileID& canonical) override;
 
     bool hasSymbolInstances() const override;
     bool hasDependencies() const override;
@@ -59,7 +57,8 @@ public:
      * @brief Calculates variable text offset.
      *
      * @param anchor text anchor
-     * @param textOffset Either `text-offset` or [ `text-radial-offset`, INVALID_OFFSET_VALUE ]
+     * @param textOffset Either `text-offset` or [ `text-radial-offset`,
+     * INVALID_OFFSET_VALUE ]
      * @return std::array<float, 2> offset along x- and y- axis correspondingly.
      */
     static std::array<float, 2> evaluateVariableOffset(style::SymbolAnchorType anchor, std::array<float, 2> textOffset);
@@ -67,17 +66,15 @@ public:
     static std::vector<float> calculateTileDistances(const GeometryCoordinates& line, const Anchor& anchor);
 
 private:
-    void addFeature(
-        size_t,
-        const SymbolFeature&,
-        const ShapedTextOrientations& shapedTextOrientations,
-        std::optional<PositionedIcon> shapedIcon,
-        const ImageMap&,
-        std::array<float, 2> textOffset,
-        float layoutTextSize,
-        float layoutIconSize,
-        SymbolContent iconType
-    );
+    void addFeature(size_t,
+                    const SymbolFeature&,
+                    const ShapedTextOrientations& shapedTextOrientations,
+                    std::optional<PositionedIcon> shapedIcon,
+                    const ImageMap&,
+                    std::array<float, 2> textOffset,
+                    float layoutTextSize,
+                    float layoutIconSize,
+                    SymbolContent iconType);
 
     bool anchorIsTooClose(const std::u16string& text, float repeatDistance, const Anchor&);
     std::map<std::u16string, std::vector<Anchor>> compareText;
@@ -85,42 +82,37 @@ private:
     void addToDebugBuffers(SymbolBucket&);
 
     // Adds placed items to the buffer.
-    size_t addSymbol(
-        SymbolBucket::Buffer&,
-        Range<float> sizeData,
-        const SymbolQuad&,
-        const Anchor& labelAnchor,
-        PlacedSymbol& placedSymbol,
-        float sortKey
-    );
-    size_t addSymbols(
-        SymbolBucket::Buffer&,
-        Range<float> sizeData,
-        const SymbolQuads&,
-        const Anchor& labelAnchor,
-        PlacedSymbol& placedSymbol,
-        float sortKey
-    );
+    size_t addSymbol(SymbolBucket::Buffer&,
+                     Range<float> sizeData,
+                     const SymbolQuad&,
+                     const Anchor& labelAnchor,
+                     PlacedSymbol& placedSymbol,
+                     float sortKey);
+    size_t addSymbols(SymbolBucket::Buffer&,
+                      Range<float> sizeData,
+                      const SymbolQuads&,
+                      const Anchor& labelAnchor,
+                      PlacedSymbol& placedSymbol,
+                      float sortKey);
 
     // Adds symbol quads to bucket and returns formatted section index of last
     // added quad.
-    std::size_t addSymbolGlyphQuads(
-        SymbolBucket&,
-        SymbolInstance&,
-        const SymbolFeature&,
-        WritingModeType,
-        std::optional<size_t>& placedIndex,
-        const SymbolQuads&,
-        const CanonicalTileID& canonical,
-        std::optional<std::size_t> lastAddedSection = std::nullopt
-    );
+    std::size_t addSymbolGlyphQuads(SymbolBucket&,
+                                    SymbolInstance&,
+                                    const SymbolFeature&,
+                                    WritingModeType,
+                                    std::optional<size_t>& placedIndex,
+                                    const SymbolQuads&,
+                                    const CanonicalTileID& canonical,
+                                    std::optional<std::size_t> lastAddedSection = std::nullopt);
 
-    void updatePaintPropertiesForSection(
-        SymbolBucket&, const SymbolFeature&, std::size_t sectionIndex, const CanonicalTileID& canonical
-    );
+    void updatePaintPropertiesForSection(SymbolBucket&,
+                                         const SymbolFeature&,
+                                         std::size_t sectionIndex,
+                                         const CanonicalTileID& canonical);
 
-    // Stores the layer so that we can hold on to GeometryTileFeature instances in SymbolFeature,
-    // which may reference data from this object.
+    // Stores the layer so that we can hold on to GeometryTileFeature instances
+    // in SymbolFeature, which may reference data from this object.
     const std::unique_ptr<GeometryTileLayer> sourceLayer;
     const float overscaling;
     const float zoom;
@@ -144,8 +136,9 @@ private:
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     std::vector<SymbolFeature> features;
 
-    BiDi bidi; // Consider moving this up to geometry tile worker to reduce reinstantiation costs; use of
-               // BiDi/ubiditransform object must be constrained to one thread
+    BiDi bidi; // Consider moving this up to geometry tile worker to reduce
+               // reinstantiation costs; use of BiDi/ubiditransform object must
+               // be constrained to one thread
 };
 
 } // namespace mbgl

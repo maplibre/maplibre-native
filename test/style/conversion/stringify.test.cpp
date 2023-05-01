@@ -84,44 +84,36 @@ TEST(Stringify, Filter) {
 
 TEST(Stringify, PropertyExpression) {
     using namespace mbgl::style::expression::dsl;
-    ASSERT_EQ(
-        stringify(PropertyExpression<float>(interpolate(linear(), zoom(), 0.0, literal(1.0), 1.0, literal(2.0)))),
-        "[\"interpolate\",[\"linear\"],[\"zoom\"],0.0,1.0,1.0,2.0]"
-    );
+    ASSERT_EQ(stringify(PropertyExpression<float>(interpolate(linear(), zoom(), 0.0, literal(1.0), 1.0, literal(2.0)))),
+              "[\"interpolate\",[\"linear\"],[\"zoom\"],0.0,1.0,1.0,2.0]");
 
-    ASSERT_EQ(
-        stringify(PropertyExpression<float>(
-            interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0))
-        )),
-        "[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\",\"property\"]],0.0,1.0,1.0,2.0]"
-    );
+    ASSERT_EQ(stringify(PropertyExpression<float>(
+                  interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0)))),
+              "[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\","
+              "\"property\"]],0.0,1.0,1.0,2.0]");
 
-    ASSERT_EQ(
-        stringify(PropertyExpression<float>(interpolate(
-            linear(),
-            zoom(),
-            0.0,
-            interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0)),
-            1.0,
-            interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0))
-        ))),
-        "[\"interpolate\","
-        "[\"linear\"],"
-        "[\"zoom\"],"
-        "0.0,[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\",\"property\"]],0.0,1.0,1.0,2.0],"
-        "1.0,[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\",\"property\"]],0.0,1.0,1.0,2.0]]"
-    );
+    ASSERT_EQ(stringify(PropertyExpression<float>(interpolate(
+                  linear(),
+                  zoom(),
+                  0.0,
+                  interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0)),
+                  1.0,
+                  interpolate(exponential(2.0), number(get("property")), 0.0, literal(1.0), 1.0, literal(2.0))))),
+              "[\"interpolate\","
+              "[\"linear\"],"
+              "[\"zoom\"],"
+              "0.0,[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\","
+              "\"property\"]],0.0,1.0,1.0,2.0],"
+              "1.0,[\"interpolate\",[\"exponential\",2.0],[\"number\",[\"get\","
+              "\"property\"]],0.0,1.0,1.0,2.0]]");
 }
 
 TEST(Stringify, PropertyValue) {
     using namespace mbgl::style::expression::dsl;
     ASSERT_EQ(stringify(PropertyValue<float>(1)), "1.0");
-    ASSERT_EQ(
-        stringify(PropertyValue<float>(
-            PropertyExpression<float>(interpolate(exponential(2.0), zoom(), 0.0, literal(1.0), 1.0, literal(2.0)))
-        )),
-        "[\"interpolate\",[\"exponential\",2.0],[\"zoom\"],0.0,1.0,1.0,2.0]"
-    );
+    ASSERT_EQ(stringify(PropertyValue<float>(PropertyExpression<float>(
+                  interpolate(exponential(2.0), zoom(), 0.0, literal(1.0), 1.0, literal(2.0))))),
+              "[\"interpolate\",[\"exponential\",2.0],[\"zoom\"],0.0,1.0,1.0,2.0]");
 }
 
 TEST(Stringify, Layout) {

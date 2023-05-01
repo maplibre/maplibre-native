@@ -54,34 +54,27 @@ TEST(Projection, MetersPerPixelAtLatitude) {
     double zoom = 0;
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom), 78271.516964020484);
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 6752.2284729446501);
-    EXPECT_DOUBLE_EQ(
-        Projection::getMetersPerPixelAtLatitude(util::LATITUDE_MAX, zoom),
-        Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom)
-    );
+    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(util::LATITUDE_MAX, zoom),
+                     Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom));
 
     zoom = 20;
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom), 0.074645535434742435);
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 0.0064394268731543065);
 
-    EXPECT_DOUBLE_EQ(
-        Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::lowest(), zoom),
-        Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::max(), zoom)
-    );
+    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::lowest(), zoom),
+                     Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::max(), zoom));
 
     zoom = std::numeric_limits<double>::min();
-    EXPECT_DOUBLE_EQ(
-        Projection::getMetersPerPixelAtLatitude(0, zoom), Projection::getMetersPerPixelAtLatitude(0, util::MIN_ZOOM)
-    );
+    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom),
+                     Projection::getMetersPerPixelAtLatitude(0, util::MIN_ZOOM));
 
     zoom = std::numeric_limits<double>::lowest();
-    EXPECT_DOUBLE_EQ(
-        Projection::getMetersPerPixelAtLatitude(0, zoom), Projection::getMetersPerPixelAtLatitude(0, util::MIN_ZOOM)
-    );
+    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom),
+                     Projection::getMetersPerPixelAtLatitude(0, util::MIN_ZOOM));
 
     zoom = std::numeric_limits<double>::max();
-    EXPECT_DOUBLE_EQ(
-        Projection::getMetersPerPixelAtLatitude(0, zoom), Projection::getMetersPerPixelAtLatitude(0, util::MAX_ZOOM)
-    );
+    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom),
+                     Projection::getMetersPerPixelAtLatitude(0, util::MAX_ZOOM));
 }
 
 TEST(Projection, ProjectedMeters) {

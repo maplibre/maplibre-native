@@ -34,9 +34,9 @@
 namespace mbgl {
 namespace android {
 
-static std::unique_ptr<Source> createSourcePeer(
-    jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend
-) {
+static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
+                                                mbgl::style::Source& coreSource,
+                                                AndroidRendererFrontend* frontend) {
     if (coreSource.is<mbgl::style::VectorSource>()) {
         return std::make_unique<VectorSource>(env, *coreSource.as<mbgl::style::VectorSource>(), frontend);
     } else if (coreSource.is<mbgl::style::RasterSource>()) {
@@ -50,9 +50,9 @@ static std::unique_ptr<Source> createSourcePeer(
     }
 }
 
-const jni::Object<Source>& Source::peerForCoreSource(
-    jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend& frontend
-) {
+const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env,
+                                                     mbgl::style::Source& coreSource,
+                                                     AndroidRendererFrontend& frontend) {
     if (!coreSource.peer.has_value()) {
         coreSource.peer = createSourcePeer(env, coreSource, &frontend);
     }
@@ -66,9 +66,10 @@ const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::sty
     return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
 }
 
-Source::Source(
-    jni::JNIEnv& env, mbgl::style::Source& coreSource, const jni::Object<Source>& obj, AndroidRendererFrontend* frontend
-)
+Source::Source(jni::JNIEnv& env,
+               mbgl::style::Source& coreSource,
+               const jni::Object<Source>& obj,
+               AndroidRendererFrontend* frontend)
     : source(coreSource),
       javaPeer(jni::NewGlobal(env, obj)),
       rendererFrontend(frontend) {}
@@ -84,11 +85,12 @@ Source::~Source() {
     }
     // Before being added to a map, the Java peer owns this C++ peer and cleans
     //  up after itself correctly through the jni native peer bindings.
-    // After being added to the map, the ownership is flipped and the C++ peer has a strong reference
+    // After being added to the map, the ownership is flipped and the C++ peer
+    // has a strong reference
     //  to it's Java peer, preventing the Java peer from being GC'ed.
-    //  In this case, the core source initiates the destruction, which requires releasing the Java peer,
-    //  while also resetting it's nativePtr to 0 to prevent the subsequent GC of the Java peer from
-    //  re-entering this dtor.
+    //  In this case, the core source initiates the destruction, which requires
+    //  releasing the Java peer, while also resetting it's nativePtr to 0 to
+    //  prevent the subsequent GC of the Java peer from re-entering this dtor.
     if (ownedSource.get() == nullptr && javaPeer.get() != nullptr) {
         // Manually clear the java peer
         android::UniqueEnv env = android::AttachEnv();
@@ -240,8 +242,7 @@ void Source::registerNative(jni::JNIEnv& env) {
         METHOD(&Source::isVolatile, "nativeIsVolatile"),
         METHOD(&Source::setVolatile, "nativeSetVolatile"),
         METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
-        METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval")
-    );
+        METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
 
     // Register subclasses
     GeoJSONSource::registerNative(env);

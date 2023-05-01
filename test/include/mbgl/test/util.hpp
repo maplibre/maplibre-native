@@ -68,9 +68,10 @@ private:
     std::thread serverThread;
 };
 
-void checkImage(
-    const std::string& base, const PremultipliedImage& actual, double imageThreshold = 0, double pixelThreshold = 0
-);
+void checkImage(const std::string& base,
+                const PremultipliedImage& actual,
+                double imageThreshold = 0,
+                double pixelThreshold = 0);
 
 } // namespace test
 } // namespace mbgl

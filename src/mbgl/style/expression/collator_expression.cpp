@@ -8,11 +8,9 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-CollatorExpression::CollatorExpression(
-    std::unique_ptr<Expression> caseSensitive_,
-    std::unique_ptr<Expression> diacriticSensitive_,
-    std::optional<std::unique_ptr<Expression>> locale_
-)
+CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
+                                       std::unique_ptr<Expression> diacriticSensitive_,
+                                       std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression, type::Collator),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
@@ -64,8 +62,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
     }
 
     return ParseResult(std::make_unique<CollatorExpression>(
-        std::move(*caseSensitive), std::move(*diacriticSensitive), std::move(locale)
-    ));
+        std::move(*caseSensitive), std::move(*diacriticSensitive), std::move(locale)));
 }
 
 void CollatorExpression::eachChild(const std::function<void(const Expression&)>& fn) const {
@@ -113,8 +110,7 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
             return localeResult.error();
         }
         return Collator(
-            caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), localeResult->get<std::string>()
-        );
+            caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), localeResult->get<std::string>());
     } else {
         return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>());
     }

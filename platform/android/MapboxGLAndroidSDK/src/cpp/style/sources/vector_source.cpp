@@ -21,12 +21,9 @@ namespace mbgl {
 namespace android {
 
 VectorSource::VectorSource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& urlOrTileSet)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::VectorSource>(
-              jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet))
-          )
-      ) {}
+    : Source(env,
+             std::make_unique<mbgl::style::VectorSource>(jni::Make<std::string>(env, sourceId),
+                                                         convertURLOrTileset(Value(env, urlOrTileSet)))) {}
 
 VectorSource::VectorSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
@@ -39,16 +36,14 @@ jni::Local<jni::String> VectorSource::getURL(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> VectorSource::querySourceFeatures(
-    jni::JNIEnv& env, const jni::Array<jni::String>& jSourceLayerIds, const jni::Array<jni::Object<>>& jfilter
-) {
+    jni::JNIEnv& env, const jni::Array<jni::String>& jSourceLayerIds, const jni::Array<jni::Object<>>& jfilter) {
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
     std::vector<mbgl::Feature> features;
     if (rendererFrontend) {
-        features = rendererFrontend->querySourceFeatures(
-            source.getID(), {toVector(env, jSourceLayerIds), toFilter(env, jfilter)}
-        );
+        features = rendererFrontend->querySourceFeatures(source.getID(),
+                                                         {toVector(env, jSourceLayerIds), toFilter(env, jfilter)});
     }
     return Feature::convert(env, features);
 }
@@ -66,16 +61,14 @@ void VectorSource::registerNative(jni::JNIEnv& env) {
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
     // Register the peer
-    jni::RegisterNativePeer<VectorSource>(
-        env,
-        javaClass,
-        "nativePtr",
-        jni::MakePeer<VectorSource, const jni::String&, const jni::Object<>&>,
-        "initialize",
-        "finalize",
-        METHOD(&VectorSource::querySourceFeatures, "querySourceFeatures"),
-        METHOD(&VectorSource::getURL, "nativeGetUrl")
-    );
+    jni::RegisterNativePeer<VectorSource>(env,
+                                          javaClass,
+                                          "nativePtr",
+                                          jni::MakePeer<VectorSource, const jni::String&, const jni::Object<>&>,
+                                          "initialize",
+                                          "finalize",
+                                          METHOD(&VectorSource::querySourceFeatures, "querySourceFeatures"),
+                                          METHOD(&VectorSource::getURL, "nativeGetUrl"));
 }
 
 } // namespace android

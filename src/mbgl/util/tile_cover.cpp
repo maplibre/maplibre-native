@@ -58,14 +58,12 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
 }
 
 // scan-line conversion
-void scanTriangle(
-    const Point<double>& a,
-    const Point<double>& b,
-    const Point<double>& c,
-    int32_t ymin,
-    int32_t ymax,
-    ScanLine& scanLine
-) {
+void scanTriangle(const Point<double>& a,
+                  const Point<double>& b,
+                  const Point<double>& c,
+                  int32_t ymin,
+                  int32_t ymax,
+                  ScanLine& scanLine) {
     edge ab = edge(a, b);
     edge bc = edge(b, c);
     edge ca = edge(c, a);
@@ -92,14 +90,12 @@ namespace util {
 
 namespace {
 
-std::vector<UnwrappedTileID> tileCover(
-    const Point<double>& tl,
-    const Point<double>& tr,
-    const Point<double>& br,
-    const Point<double>& bl,
-    const Point<double>& c,
-    uint8_t z
-) {
+std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
+                                       const Point<double>& tr,
+                                       const Point<double>& br,
+                                       const Point<double>& bl,
+                                       const Point<double>& c,
+                                       uint8_t z) {
     const int32_t tiles = 1 << z;
 
     struct ID {
@@ -133,9 +129,8 @@ std::vector<UnwrappedTileID> tileCover(
     });
 
     // Erase duplicate tile IDs (they typically occur at the common side of both triangles).
-    t.erase(
-        std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) { return a.x == b.x && a.y == b.y; }), t.end()
-    );
+    t.erase(std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) { return a.x == b.x && a.y == b.y; }),
+            t.end());
 
     std::vector<UnwrappedTileID> result;
     result.reserve(t.size());
@@ -156,9 +151,9 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) {
     }
 }
 
-std::vector<OverscaledTileID> tileCover(
-    const TransformState& state, uint8_t z, const std::optional<uint8_t>& overscaledZ
-) {
+std::vector<OverscaledTileID> tileCover(const TransformState& state,
+                                        uint8_t z,
+                                        const std::optional<uint8_t>& overscaledZ) {
     struct Node {
         AABB aabb;
         uint8_t zoom;
@@ -186,17 +181,17 @@ std::vector<OverscaledTileID> tileCover(
 
     const Frustum frustum = Frustum::fromInvProjMatrix(state.getInvProjectionMatrix(), worldSize, z, flippedY);
 
-    // There should always be a certain number of maximum zoom level tiles surrounding the center location
+    // There should always be a certain number of maximum zoom level tiles
+    // surrounding the center location
     const double radiusOfMaxLvlLodInTiles = 3;
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
-        return {
-            AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
-            uint8_t(0),
-            uint16_t(0),
-            uint16_t(0),
-            wrap,
-            false};
+        return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
+                uint8_t(0),
+                uint16_t(0),
+                uint16_t(0),
+                wrap,
+                false};
     };
 
     // Perform depth-first traversal on tile tree to find visible tiles
@@ -229,17 +224,19 @@ std::vector<OverscaledTileID> tileCover(
         const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
         assert(longestDim);
 
-        // We're using distance based heuristics to determine if a tile should be split into quadrants or not.
-        // radiusOfMaxLvlLodInTiles defines that there's always a certain number of maxLevel tiles next to the map
-        // center. Using the fact that a parent node in quadtree is twice the size of its children (per dimension) we
-        // can define distance thresholds for each relative level: f(k) = offset + 2 + 4 + 8 + 16 + ... + 2^k. This is
-        // the same as "offset+2^(k+1)-2"
+        // We're using distance based heuristics to determine if a tile should
+        // be split into quadrants or not. radiusOfMaxLvlLodInTiles defines that
+        // there's always a certain number of maxLevel tiles next to the map
+        // center. Using the fact that a parent node in quadtree is twice the
+        // size of its children (per dimension) we can define distance
+        // thresholds for each relative level: f(k) = offset + 2 + 4 + 8 + 16 +
+        // ... + 2^k. This is the same as "offset+2^(k+1)-2"
         const double distToSplit = radiusOfMaxLvlLodInTiles + (1 << (maxZoom - node.zoom)) - 2;
 
         // Have we reached the target depth or is the tile too far away to be any split further?
         if (node.zoom == maxZoom || (*longestDim > distToSplit && node.zoom >= minZoom)) {
-            // Perform precise intersection test between the frustum and aabb. This will cull < 1% false positives
-            // missed by the original test
+            // Perform precise intersection test between the frustum and aabb.
+            // This will cull < 1% false positives missed by the original test
             if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
@@ -268,9 +265,8 @@ std::vector<OverscaledTileID> tileCover(
     }
 
     // Sort results by distance
-    std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) {
-        return a.sqrDist < b.sqrDist;
-    });
+    std::sort(
+        result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
 
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());
@@ -287,19 +283,15 @@ std::vector<UnwrappedTileID> tileCover(const LatLngBounds& bounds_, uint8_t z) {
         return {};
     }
 
-    LatLngBounds bounds = LatLngBounds::hull(
-        {std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
-        {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()}
-    );
+    LatLngBounds bounds = LatLngBounds::hull({std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
+                                             {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()});
 
-    return tileCover(
-        Projection::project(bounds.northwest(), z),
-        Projection::project(bounds.northeast(), z),
-        Projection::project(bounds.southeast(), z),
-        Projection::project(bounds.southwest(), z),
-        Projection::project(bounds.center(), z),
-        z
-    );
+    return tileCover(Projection::project(bounds.northwest(), z),
+                     Projection::project(bounds.northeast(), z),
+                     Projection::project(bounds.southeast(), z),
+                     Projection::project(bounds.southwest(), z),
+                     Projection::project(bounds.center(), z),
+                     z);
 }
 
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>& geometry, uint8_t z) {
@@ -343,10 +335,8 @@ uint64_t tileCount(const Geometry<double>& geometry, uint8_t z) {
 }
 
 TileCover::TileCover(const LatLngBounds& bounds_, uint8_t z) {
-    LatLngBounds bounds = LatLngBounds::hull(
-        {std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
-        {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()}
-    );
+    LatLngBounds bounds = LatLngBounds::hull({std::max(bounds_.south(), -util::LATITUDE_MAX), bounds_.west()},
+                                             {std::min(bounds_.north(), util::LATITUDE_MAX), bounds_.east()});
 
     if (bounds.isEmpty() || bounds.south() > util::LATITUDE_MAX || bounds.north() < -util::LATITUDE_MAX) {
         bounds = LatLngBounds::world();

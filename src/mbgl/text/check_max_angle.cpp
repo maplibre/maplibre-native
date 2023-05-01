@@ -14,13 +14,11 @@ struct Corner {
     float angleDelta;
 };
 
-bool checkMaxAngle(
-    const GeometryCoordinates& line,
-    const Anchor& anchor,
-    const float labelLength,
-    const float windowSize,
-    const float maxAngle
-) {
+bool checkMaxAngle(const GeometryCoordinates& line,
+                   const Anchor& anchor,
+                   const float labelLength,
+                   const float windowSize,
+                   const float maxAngle) {
     // horizontal labels always pass
     if (!anchor.segment) return true;
 

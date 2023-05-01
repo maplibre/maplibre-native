@@ -8,18 +8,18 @@
 namespace mbgl {
 
 /*
-    Computes the longest common subsequence (LCS) of sequences A and B, represented
-    by pairs of random access iterators. The result is output to the provided output
-    iterator. Equality of elements is determined by the provided comparator, defaulting
-    to ==.
+    Computes the longest common subsequence (LCS) of sequences A and B,
+   represented by pairs of random access iterators. The result is output to the
+   provided output iterator. Equality of elements is determined by the provided
+   comparator, defaulting to ==.
 
     The algorithm used is the O(ND) time and space algorithm from:
 
-        Myers, Eugene W. An O(ND) Difference Algorithm and Its Variations. Algorithmica
-        (1986) 1: 251. http://xmailserver.org/diff2.pdf
+        Myers, Eugene W. An O(ND) Difference Algorithm and Its Variations.
+   Algorithmica (1986) 1: 251. http://xmailserver.org/diff2.pdf
 
-    For understanding this algorithm, http://simplygenius.net/Article/DiffTutorial1 is
-    also helpful.
+    For understanding this algorithm,
+   http://simplygenius.net/Article/DiffTutorial1 is also helpful.
 
     TODO: implement the O(N) space refinement presented in the paper.
 */
@@ -41,9 +41,9 @@ OutIt longest_common_subsequence(InIt a, InIt endA, InIt b, InIt endB, OutIt out
         v.resize(2 * D + 1);
         v[1] = 0;
 
-        // Core of the algorithm: greedily find farthest-reaching D-paths for increasing
-        // values of D. Store the farthest-reaching endpoints found in each iteration for
-        // later reconstructing the LCS.
+        // Core of the algorithm: greedily find farthest-reaching D-paths for
+        // increasing values of D. Store the farthest-reaching endpoints found
+        // in each iteration for later reconstructing the LCS.
         for (std::ptrdiff_t d = 0; d <= D; ++d) {
             for (std::ptrdiff_t k = -d; k <= d; k += 2) {
                 std::ptrdiff_t x = (k == -d || (k != d && v.at(k - 1 + D) < v.at(k + 1 + D)))

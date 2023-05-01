@@ -19,9 +19,8 @@ public:
         Response response;
         auto it = assets.find(resource.url);
         if (it == assets.end()) {
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::NotFound, std::string{"Not Found: "} + resource.url
-            );
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               std::string{"Not Found: "} + resource.url);
         } else {
             response.data = it->second;
         }

@@ -60,8 +60,7 @@ bool Value::toBool() const {
 
 Value Value::get(const char* key) const {
     jni::jobject* member = jni::CallMethod<jni::jobject*>(
-        env, value.get(), *java::Map::getMethodId, jni::Make<jni::String>(env, std::string(key)).get()
-    );
+        env, value.get(), *java::Map::getMethodId, jni::Make<jni::String>(env, std::string(key)).get());
     return Value(env, jni::Local<jni::Object<>>(env, member));
 }
 

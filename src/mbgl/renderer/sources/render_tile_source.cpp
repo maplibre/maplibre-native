@@ -126,8 +126,7 @@ std::unordered_map<std::string, std::vector<Feature>> RenderTileSource::queryRen
     const TransformState& transformState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const RenderedQueryOptions& options,
-    const mat4& projMatrix
-) const {
+    const mat4& projMatrix) const {
     return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, featureState);
 }
 
@@ -135,23 +134,21 @@ std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOpti
     return tilePyramid.querySourceFeatures(options);
 }
 
-void RenderTileSource::setFeatureState(
-    const std::optional<std::string>& sourceLayerID, const std::string& featureID, const FeatureState& state
-) {
+void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID,
+                                       const std::string& featureID,
+                                       const FeatureState& state) {
     featureState.updateState(sourceLayerID, featureID, state);
 }
 
-void RenderTileSource::getFeatureState(
-    FeatureState& state, const std::optional<std::string>& sourceLayerID, const std::string& featureID
-) const {
+void RenderTileSource::getFeatureState(FeatureState& state,
+                                       const std::optional<std::string>& sourceLayerID,
+                                       const std::string& featureID) const {
     featureState.getState(state, sourceLayerID, featureID);
 }
 
-void RenderTileSource::removeFeatureState(
-    const std::optional<std::string>& sourceLayerID,
-    const std::optional<std::string>& featureID,
-    const std::optional<std::string>& stateKey
-) {
+void RenderTileSource::removeFeatureState(const std::optional<std::string>& sourceLayerID,
+                                          const std::optional<std::string>& featureID,
+                                          const std::optional<std::string>& stateKey) {
     featureState.removeState(sourceLayerID, featureID, stateKey);
 }
 
@@ -174,22 +171,20 @@ uint8_t RenderTileSetSource::getMaxZoom() const {
     return cachedTileset ? cachedTileset->zoomRange.max : util::TERRAIN_RGB_MAXZOOM;
 }
 
-void RenderTileSetSource::update(
-    Immutable<style::Source::Impl> baseImpl_,
-    const std::vector<Immutable<style::LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters
-) {
+void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
+                                 const std::vector<Immutable<style::LayerProperties>>& layers,
+                                 const bool needsRendering,
+                                 const bool needsRelayout,
+                                 const TileParameters& parameters) {
     std::swap(baseImpl, baseImpl_);
 
     enabled = needsRendering;
 
     const auto& implTileset = getTileset();
-    // In Continuous mode, keep the existing tiles if the new cachedTileset is not
-    // yet available, thus providing smart style transitions without flickering.
-    // In other modes, allow clearing the tile pyramid first, before the early
-    // return in order to avoid render tests being flaky.
+    // In Continuous mode, keep the existing tiles if the new cachedTileset is
+    // not yet available, thus providing smart style transitions without
+    // flickering. In other modes, allow clearing the tile pyramid first, before
+    // the early return in order to avoid render tests being flaky.
     bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
     if (canUpdateTileset && cachedTileset != implTileset) {
         cachedTileset = implTileset;

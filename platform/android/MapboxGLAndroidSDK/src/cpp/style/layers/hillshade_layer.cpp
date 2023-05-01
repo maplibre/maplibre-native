@@ -20,9 +20,8 @@ inline mbgl::style::HillshadeLayer& toHillshadeLayer(mbgl::style::Layer& layer) 
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 HillshadeLayer::HillshadeLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::HillshadeLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::HillshadeLayer>(jni::Make<std::string>(env, layerId),
+                                                          jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -43,14 +42,13 @@ HillshadeLayer::~HillshadeLayer() = default;
 jni::Local<jni::Object<>> HillshadeLayer::getHillshadeIlluminationDirection(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(layer).getHillshadeIlluminationDirection())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(layer).getHillshadeIlluminationDirection()));
 }
 
 jni::Local<jni::Object<>> HillshadeLayer::getHillshadeIlluminationAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(layer).getHillshadeIlluminationAnchor())
-    );
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(layer).getHillshadeIlluminationAnchor()));
 }
 
 jni::Local<jni::Object<>> HillshadeLayer::getHillshadeExaggeration(jni::JNIEnv& env) {
@@ -137,23 +135,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> HillshadeJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> HillshadeJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                                  mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new HillshadeLayer(toHillshadeLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> HillshadeJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new HillshadeLayer(
-            std::unique_ptr<mbgl::style::HillshadeLayer>(static_cast<mbgl::style::HillshadeLayer*>(layer.release()))
-        )
-    );
+    return createJavaPeer(env,
+                          new HillshadeLayer(std::unique_ptr<mbgl::style::HillshadeLayer>(
+                              static_cast<mbgl::style::HillshadeLayer*>(layer.release()))));
 }
 
 void HillshadeJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -183,8 +176,7 @@ void HillshadeJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&HillshadeLayer::getHillshadeHighlightColor, "nativeGetHillshadeHighlightColor"),
         METHOD(&HillshadeLayer::getHillshadeAccentColorTransition, "nativeGetHillshadeAccentColorTransition"),
         METHOD(&HillshadeLayer::setHillshadeAccentColorTransition, "nativeSetHillshadeAccentColorTransition"),
-        METHOD(&HillshadeLayer::getHillshadeAccentColor, "nativeGetHillshadeAccentColor")
-    );
+        METHOD(&HillshadeLayer::getHillshadeAccentColor, "nativeGetHillshadeAccentColor"));
 }
 
 } // namespace android

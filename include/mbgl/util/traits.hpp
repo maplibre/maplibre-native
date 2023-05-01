@@ -24,13 +24,14 @@ template <>
 struct is_utf16char_like<uint16_t> : std::true_type {};
 
 template <typename T>
-using is_utf16char_like_pointer = std::
-    integral_constant<bool, std::is_pointer_v<T> && is_utf16char_like<typename std::remove_pointer<T>::type>::value>;
+using is_utf16char_like_pointer =
+    std::integral_constant<bool,
+                           std::is_pointer_v<T> && is_utf16char_like<typename std::remove_pointer<T>::type>::value>;
 
 template <class OutPointer, class InChar>
-typename std::enable_if<is_utf16char_like<InChar>::value && is_utf16char_like_pointer<OutPointer>::value, OutPointer>::
-    type
-    utf16char_cast(InChar *in) {
+typename std::enable_if<is_utf16char_like<InChar>::value && is_utf16char_like_pointer<OutPointer>::value,
+                        OutPointer>::type
+utf16char_cast(InChar *in) {
     return reinterpret_cast<OutPointer>(in);
 }
 

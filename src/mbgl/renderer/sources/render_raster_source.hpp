@@ -17,15 +17,16 @@ private:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
-        const mat4& projMatrix
-    ) const override;
+        const mat4& projMatrix) const override;
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
     // RenderTileSetSource overrides
-    void
-    updateInternal(const Tileset&, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&)
-        override;
+    void updateInternal(const Tileset&,
+                        const std::vector<Immutable<style::LayerProperties>>&,
+                        bool needsRendering,
+                        bool needsRelayout,
+                        const TileParameters&) override;
     const std::optional<Tileset>& getTileset() const override;
 
     const style::RasterSource::Impl& impl() const;

@@ -22,17 +22,16 @@ namespace expression {
 
 struct Value;
 
-using ValueBase = variant<
-    NullValue,
-    bool,
-    double,
-    std::string,
-    Color,
-    Collator,
-    Formatted,
-    Image,
-    mapbox::util::recursive_wrapper<std::vector<Value>>,
-    mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
+using ValueBase = variant<NullValue,
+                          bool,
+                          double,
+                          std::string,
+                          Color,
+                          Collator,
+                          Formatted,
+                          Image,
+                          mapbox::util::recursive_wrapper<std::vector<Value>>,
+                          mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {
     using ValueBase::ValueBase;
 

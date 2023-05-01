@@ -23,8 +23,9 @@ public:
     void setUpdateParameters(const TileUpdateParameters&);
 
 private:
-    // called when the tile is one of the ideal tiles that we want to show definitely. the tile source
-    // should try to make every effort (e.g. fetch from internet, or revalidate existing resources).
+    // called when the tile is one of the ideal tiles that we want to show
+    // definitely. the tile source should try to make every effort (e.g. fetch
+    // from internet, or revalidate existing resources).
     void makeRequired();
 
     // called when the zoom level no longer corresponds to the displayed one, but

@@ -35,9 +35,8 @@ TEST(SQLite, TEST_REQUIRES_WRITE(TryOpen)) {
 
     // Should return a CANTOPEN exception when the database doesn't exist,
     // make sure all the backends behave the same way.
-    auto result = mapbox::sqlite::Database::tryOpen(
-        "test/fixtures/offline_database/foobar123.db", mapbox::sqlite::ReadOnly
-    );
+    auto result = mapbox::sqlite::Database::tryOpen("test/fixtures/offline_database/foobar123.db",
+                                                    mapbox::sqlite::ReadOnly);
     ASSERT_TRUE(result.is<mapbox::sqlite::Exception>());
     ASSERT_EQ(result.get<mapbox::sqlite::Exception>().code, mapbox::sqlite::ResultCode::CantOpen);
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -45,15 +44,14 @@ TEST(SQLite, TEST_REQUIRES_WRITE(TryOpen)) {
 
 TEST(SQLite, CloseDatabaseWithPendingTransaction) {
     auto db = std::make_unique<mapbox::sqlite::Database>(
-        mapbox::sqlite::Database::open(":memory:", mapbox::sqlite::ReadWriteCreate)
-    );
+        mapbox::sqlite::Database::open(":memory:", mapbox::sqlite::ReadWriteCreate));
     mapbox::sqlite::Transaction transaction(*db);
     transaction.commit();
 }
 
 TEST(SQLite, CloseMovedDatabaseWithPendingTransaction) {
-    // Verifies that we can correctly commit a transaction even if we move the Database object to
-    // another address.
+    // Verifies that we can correctly commit a transaction even if we move the
+    // Database object to another address.
     auto db1 = mapbox::sqlite::Database::open(":memory:", mapbox::sqlite::ReadWriteCreate);
     std::unique_ptr<mapbox::sqlite::Database> db2;
     mapbox::sqlite::Transaction transaction(db1);

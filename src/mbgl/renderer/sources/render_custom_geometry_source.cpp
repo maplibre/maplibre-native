@@ -16,13 +16,11 @@ const style::CustomGeometrySource::Impl& RenderCustomGeometrySource::impl() cons
     return static_cast<const style::CustomGeometrySource::Impl&>(*baseImpl);
 }
 
-void RenderCustomGeometrySource::update(
-    Immutable<style::Source::Impl> baseImpl_,
-    const std::vector<Immutable<style::LayerProperties>>& layers,
-    const bool needsRendering,
-    const bool needsRelayout,
-    const TileParameters& parameters
-) {
+void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_,
+                                        const std::vector<Immutable<style::LayerProperties>>& layers,
+                                        const bool needsRendering,
+                                        const bool needsRelayout,
+                                        const TileParameters& parameters) {
     if (baseImpl != baseImpl_) {
         std::swap(baseImpl, baseImpl_);
 
@@ -42,21 +40,18 @@ void RenderCustomGeometrySource::update(
         return;
     }
 
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        util::tileSize_I,
-        impl().getZoomRange(),
-        {},
-        [&](const OverscaledTileID& tileID) {
-            return std::make_unique<CustomGeometryTile>(
-                tileID, impl().id, parameters, impl().getTileOptions(), *tileLoader
-            );
-        }
-    );
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       util::tileSize_I,
+                       impl().getZoomRange(),
+                       {},
+                       [&](const OverscaledTileID& tileID) {
+                           return std::make_unique<CustomGeometryTile>(
+                               tileID, impl().id, parameters, impl().getTileOptions(), *tileLoader);
+                       });
 }
 
 } // namespace mbgl

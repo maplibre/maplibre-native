@@ -64,8 +64,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto properties = mapbox::eternal::hash_map<mapbo
      {"anchor-transition", toUint8(Property::AnchorTransition)},
      {"color-transition", toUint8(Property::ColorTransition)},
      {"intensity-transition", toUint8(Property::IntensityTransition)},
-     {"position-transition", toUint8(Property::PositionTransition)}}
-);
+     {"position-transition", toUint8(Property::PositionTransition)}});
 
 } // namespace
 
@@ -80,8 +79,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     if (property == Property::Anchor) {
         Error error;
         std::optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(
-            value, error, false, false
-        );
+            value, error, false, false);
         if (!typedValue) {
             return error;
         }
@@ -115,8 +113,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     if (property == Property::Position) {
         Error error;
         std::optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(
-            value, error, false, false
-        );
+            value, error, false, false);
         if (!typedValue) {
             return error;
         }

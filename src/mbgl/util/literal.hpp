@@ -52,8 +52,7 @@ template <detail::string_fn... str>
 struct concat_literals {
     static constexpr auto value() {
         return detail::concat_literals<decltype(detail::to_string_literal<str>(
-            std::make_index_sequence<detail::string_length(str())>()
-        ))...>::value();
+            std::make_index_sequence<detail::string_length(str())>()))...>::value();
     }
 };
 

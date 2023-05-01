@@ -96,8 +96,8 @@ TEST(DEMData, BackfillNeighbor) {
 
     dem0.backfillBorder(dem1, -1, 0);
     for (int y = 0; y < 4; y++) {
-        // dx = -1, dy = 0, so the left edge of dem1 should equal the right edge of dem0
-        // backfills Left neighbor
+        // dx = -1, dy = 0, so the left edge of dem1 should equal the right edge
+        // of dem0 backfills Left neighbor
         EXPECT_TRUE(dem0.get(-1, y) == dem1.get(3, y));
     }
 

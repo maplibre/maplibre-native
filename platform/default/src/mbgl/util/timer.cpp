@@ -54,11 +54,9 @@ Timer::Timer()
 Timer::~Timer() = default;
 
 void Timer::start(Duration timeout, Duration repeat, std::function<void()>&& cb) {
-    impl->start(
-        static_cast<uint64_t>(std::chrono::duration_cast<Milliseconds>(timeout).count()),
-        static_cast<uint64_t>(std::chrono::duration_cast<Milliseconds>(repeat).count()),
-        std::move(cb)
-    );
+    impl->start(static_cast<uint64_t>(std::chrono::duration_cast<Milliseconds>(timeout).count()),
+                static_cast<uint64_t>(std::chrono::duration_cast<Milliseconds>(repeat).count()),
+                std::move(cb));
 }
 
 void Timer::stop() {

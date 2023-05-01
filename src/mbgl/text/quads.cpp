@@ -62,9 +62,10 @@ Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSiz
     return cuts;
 }
 
-SymbolQuads getIconQuads(
-    const PositionedIcon& shapedIcon, const float iconRotate, const SymbolContent iconType, const bool hasIconTextFit
-) {
+SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
+                         const float iconRotate,
+                         const SymbolContent iconType,
+                         const bool hasIconTextFit) {
     SymbolQuads quads;
 
     const ImagePosition& image = shapedIcon.image();
@@ -116,26 +117,21 @@ SymbolQuads getIconQuads(
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
         const float leftEm = getEmOffset(
-            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left()
-        );
+            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float leftPx = getPxOffset(left.fixed - fixedOffsetX, fixedContentWidth, left.stretch, stretchWidth);
 
         const float topEm = getEmOffset(
-            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top()
-        );
+            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
         const float topPx = getPxOffset(top.fixed - fixedOffsetY, fixedContentHeight, top.stretch, stretchHeight);
 
         const float rightEm = getEmOffset(
-            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left()
-        );
+            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float rightPx = getPxOffset(right.fixed - fixedOffsetX, fixedContentWidth, right.stretch, stretchWidth);
 
         const float bottomEm = getEmOffset(
-            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top()
-        );
+            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
         const float bottomPx = getPxOffset(
-            bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight
-        );
+            bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
 
         Point<float> tl(leftEm, topEm);
         Point<float> tr(rightEm, topEm);
@@ -157,29 +153,26 @@ SymbolQuads getIconQuads(
         const float y2 = bottom.stretch + bottom.fixed;
 
         // TODO: consider making texture coordinates float instead of uint16_t
-        const Rect<uint16_t> subRect{
-            static_cast<uint16_t>(image.paddedRect.x + border + x1),
-            static_cast<uint16_t>(image.paddedRect.y + border + y1),
-            static_cast<uint16_t>(x2 - x1),
-            static_cast<uint16_t>(y2 - y1)};
+        const Rect<uint16_t> subRect{static_cast<uint16_t>(image.paddedRect.x + border + x1),
+                                     static_cast<uint16_t>(image.paddedRect.y + border + y1),
+                                     static_cast<uint16_t>(x2 - x1),
+                                     static_cast<uint16_t>(y2 - y1)};
 
         const float minFontScaleX = fixedContentWidth / pixelRatio / iconWidth;
         const float minFontScaleY = fixedContentHeight / pixelRatio / iconHeight;
 
         // Icon quad is padded, so texture coordinates also need to be padded.
-        quads.emplace_back(
-            tl,
-            tr,
-            bl,
-            br,
-            subRect,
-            WritingModeType::None,
-            Point<float>{0.0f, 0.0f},
-            iconType == SymbolContent::IconSDF,
-            pixelOffsetTL,
-            pixelOffsetBR,
-            Point<float>{minFontScaleX, minFontScaleY}
-        );
+        quads.emplace_back(tl,
+                           tr,
+                           bl,
+                           br,
+                           subRect,
+                           WritingModeType::None,
+                           Point<float>{0.0f, 0.0f},
+                           iconType == SymbolContent::IconSDF,
+                           pixelOffsetTL,
+                           pixelOffsetBR,
+                           Point<float>{minFontScaleX, minFontScaleY});
     };
 
     if (!hasIconTextFit || (image.stretchX.empty() && image.stretchY.empty())) {
@@ -202,14 +195,12 @@ SymbolQuads getIconQuads(
     return quads;
 }
 
-SymbolQuads getGlyphQuads(
-    const Shaping& shapedText,
-    const std::array<float, 2> textOffset,
-    const SymbolLayoutProperties::Evaluated& layout,
-    const style::SymbolPlacementType placement,
-    const ImageMap& imageMap,
-    bool allowVerticalPlacement
-) {
+SymbolQuads getGlyphQuads(const Shaping& shapedText,
+                          const std::array<float, 2> textOffset,
+                          const SymbolLayoutProperties::Evaluated& layout,
+                          const style::SymbolPlacementType placement,
+                          const ImageMap& imageMap,
+                          bool allowVerticalPlacement) {
     const float textRotate = util::deg2radf(layout.get<TextRotate>());
     const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map &&
                            placement != SymbolPlacementType::Point;
@@ -252,15 +243,15 @@ SymbolQuads getGlyphQuads(
                                                  : Point<float>{0.0f, 0.0f};
 
             Point<float> builtInOffset = alongLine ? Point<float>{0.0f, 0.0f}
-                                                   : Point<float>{
-                                                         positionedGlyph.x + halfAdvance + textOffset[0],
-                                                         positionedGlyph.y + textOffset[1] - lineOffset};
+                                                   : Point<float>{positionedGlyph.x + halfAdvance + textOffset[0],
+                                                                  positionedGlyph.y + textOffset[1] - lineOffset};
 
             Point<float> verticalizedLabelOffset = {0.0f, 0.0f};
             if (rotateVerticalGlyph) {
-                // Vertical POI labels, that are rotated 90deg CW and whose glyphs must preserve upright orientation
-                // need to be rotated 90deg CCW. After quad is rotated, it is translated to the original built-in
-                // offset.
+                // Vertical POI labels, that are rotated 90deg CW and whose
+                // glyphs must preserve upright orientation need to be rotated
+                // 90deg CCW. After quad is rotated, it is translated to the
+                // original built-in offset.
                 verticalizedLabelOffset = builtInOffset;
                 builtInOffset = {0.0f, 0.0f};
             }
@@ -277,25 +268,28 @@ SymbolQuads getGlyphQuads(
             Point<float> br{x2, y2};
 
             if (rotateVerticalGlyph) {
-                // Vertical-supporting glyphs are laid out in 24x24 point boxes (1 square em)
-                // In horizontal orientation, the y values for glyphs are below the midline
-                // and we use a "yOffset" of -17 to pull them up to the middle.
-                // By rotating counter-clockwise around the point at the center of the left
-                // edge of a 24x24 layout box centered below the midline, we align the center
-                // of the glyphs with the horizontal midline, so the yOffset is no longer
-                // necessary, but we also pull the glyph to the left along the x axis.
-                // The y coordinate includes baseline yOffset, therefore, needs to be accounted
-                // for when glyph is rotated and translated.
+                // Vertical-supporting glyphs are laid out in 24x24 point boxes
+                // (1 square em) In horizontal orientation, the y values for
+                // glyphs are below the midline and we use a "yOffset" of -17 to
+                // pull them up to the middle. By rotating counter-clockwise
+                // around the point at the center of the left edge of a 24x24
+                // layout box centered below the midline, we align the center of
+                // the glyphs with the horizontal midline, so the yOffset is no
+                // longer necessary, but we also pull the glyph to the left
+                // along the x axis. The y coordinate includes baseline yOffset,
+                // therefore, needs to be accounted for when glyph is rotated
+                // and translated.
 
                 const Point<float> center{-halfAdvance, halfAdvance - Shaping::yOffset};
                 const float verticalRotation = static_cast<float>(-M_PI_2);
 
-                // xHalfWidhtOffsetcorrection is a difference between full-width and half-width
-                // advance, should be 0 for full-width glyphs and will pull up half-width glyphs.
+                // xHalfWidhtOffsetcorrection is a difference between full-width
+                // and half-width advance, should be 0 for full-width glyphs and
+                // will pull up half-width glyphs.
                 const float xHalfWidhtOffsetcorrection = util::ONE_EM / 2.f - halfAdvance;
                 const float yImageOffsetCorrection = positionedGlyph.imageID ? xHalfWidhtOffsetcorrection : 0.0f;
-                const Point<float> xOffsetCorrection{
-                    5.0f - Shaping::yOffset - xHalfWidhtOffsetcorrection, -yImageOffsetCorrection};
+                const Point<float> xOffsetCorrection{5.0f - Shaping::yOffset - xHalfWidhtOffsetcorrection,
+                                                     -yImageOffsetCorrection};
 
                 tl = util::rotate(tl - center, verticalRotation) + center + xOffsetCorrection + verticalizedLabelOffset;
                 tr = util::rotate(tr - center, verticalRotation) + center + xOffsetCorrection + verticalizedLabelOffset;
@@ -319,20 +313,18 @@ SymbolQuads getGlyphQuads(
             Point<float> pixelOffsetBR;
             Point<float> minFontScale;
 
-            quads.emplace_back(
-                tl,
-                tr,
-                bl,
-                br,
-                rect,
-                shapedText.writingMode,
-                glyphOffset,
-                isSDF,
-                pixelOffsetTL,
-                pixelOffsetBR,
-                minFontScale,
-                positionedGlyph.sectionIndex
-            );
+            quads.emplace_back(tl,
+                               tr,
+                               bl,
+                               br,
+                               rect,
+                               shapedText.writingMode,
+                               glyphOffset,
+                               isSDF,
+                               pixelOffsetTL,
+                               pixelOffsetBR,
+                               minFontScale,
+                               positionedGlyph.sectionIndex);
         }
     }
 

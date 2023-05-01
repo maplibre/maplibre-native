@@ -20,9 +20,8 @@ float evaluate(Transitioning<PropertyValue<float>>& property, Duration delta = D
     return property.evaluate(evaluator, parameters.now);
 }
 
-PossiblyEvaluatedPropertyValue<float> evaluateDataExpression(
-    Transitioning<PropertyValue<float>>& property, Duration delta = Duration::zero()
-) {
+PossiblyEvaluatedPropertyValue<float> evaluateDataExpression(Transitioning<PropertyValue<float>>& property,
+                                                             Duration delta = Duration::zero()) {
     ZoomHistory zoomHistory;
     zoomHistory.update(0, TimePoint::min() + delta);
 
@@ -91,6 +90,7 @@ TEST(TransitioningDataDrivenPropertyValue, Evaluate) {
 
     ASSERT_TRUE(evaluateDataExpression(t0, 0ms).isConstant());
     ASSERT_FALSE(evaluateDataExpression(t1, 0ms).isConstant())
-        << "A paint property transition to a data-driven evaluates immediately to the final value (see "
+        << "A paint property transition to a data-driven evaluates immediately "
+           "to the final value (see "
            "https://github.com/mapbox/mapbox-gl-native/issues/8237).";
 }

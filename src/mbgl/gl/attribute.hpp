@@ -41,12 +41,10 @@ public:
     static constexpr const char* getFirstAttribName() {
         // Static assert that attribute list starts with position: we bind it on location 0.
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        static_assert(
-            std::is_same<attributes::pos, TypeOfFirst>::value ||
-                std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
-                std::is_same<attributes::pos_normal, TypeOfFirst>::value,
-            "Program must start with position related attribute."
-        );
+        static_assert(std::is_same<attributes::pos, TypeOfFirst>::value ||
+                          std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
+                          std::is_same<attributes::pos_normal, TypeOfFirst>::value,
+                      "Program must start with position related attribute.");
         return concat_literals<&string_literal<'a', '_'>::value, TypeOfFirst::name>::value();
     }
 
@@ -59,12 +57,9 @@ public:
             }
         };
 
-        util::ignore(
-            {(maybeAddLocation(
-                  concat_literals<&string_literal<'a', '_'>::value, &As::name>::value(), locations.template get<As>()
-              ),
-              0)...}
-        );
+        util::ignore({(maybeAddLocation(concat_literals<&string_literal<'a', '_'>::value, &As::name>::value(),
+                                        locations.template get<As>()),
+                       0)...});
 
         return result;
     }
@@ -100,20 +95,19 @@ public:
 
     static uint32_t compute(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
         uint32_t value = 0;
-        util::ignore({(bindings.template get<As>() ? (void)(value |= 1 << TypeIndex<As, As...>::value) : (void)0, 0)...}
-        );
+        util::ignore(
+            {(bindings.template get<As>() ? (void)(value |= 1 << TypeIndex<As, As...>::value) : (void)0, 0)...});
         return value;
     }
 
     static std::string defines(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
         std::string result;
-        util::ignore({(
-            !bindings.template get<As>()
-                ? (void
-                  )(result += concat_literals<&attributeDefinePrefix, &As::name, &string_literal<'\n'>::value>::value())
-                : (void)0,
-            0
-        )...});
+        util::ignore(
+            {(!bindings.template get<As>()
+                  ? (void)(result +=
+                           concat_literals<&attributeDefinePrefix, &As::name, &string_literal<'\n'>::value>::value())
+                  : (void)0,
+              0)...});
         return result;
     }
 };

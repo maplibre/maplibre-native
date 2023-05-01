@@ -36,8 +36,7 @@ MapRenderer::MapRenderer(qreal pixelRatio, Settings::GLContextMode mode, const Q
       m_renderer(std::make_unique<mbgl::Renderer>(
           m_backend,
           pixelRatio,
-          localFontFamily.isEmpty() ? std::nullopt : std::optional<std::string>{localFontFamily.toStdString()}
-      )),
+          localFontFamily.isEmpty() ? std::nullopt : std::optional<std::string>{localFontFamily.toStdString()})),
       m_forceScheduler(needsToForceScheduler()) {
     // If we don't have a Scheduler on this thread, which
     // is usually the case for render threads, use a shared

@@ -9,11 +9,9 @@ namespace expression {
 FormatExpressionSection::FormatExpressionSection(std::unique_ptr<Expression> content_)
     : content(std::move(content_)) {}
 
-void FormatExpressionSection::setTextSectionOptions(
-    std::optional<std::unique_ptr<Expression>> fontScale_,
-    std::optional<std::unique_ptr<Expression>> textFont_,
-    std::optional<std::unique_ptr<Expression>> textColor_
-) {
+void FormatExpressionSection::setTextSectionOptions(std::optional<std::unique_ptr<Expression>> fontScale_,
+                                                    std::optional<std::unique_ptr<Expression>> textFont_,
+                                                    std::optional<std::unique_ptr<Expression>> textColor_) {
     if (fontScale_) {
         assert(*fontScale_);
         fontScale = std::shared_ptr<Expression>(std::move(*fontScale_));
@@ -182,7 +180,9 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
         } else {
             evaluatedText = toString(*contentResult);
             if (!evaluatedText) {
-                return EvaluationError({"Could not coerce format expression text input to string."});
+                return EvaluationError(
+                    {"Could not coerce format expression text input to "
+                     "string."});
             }
         }
 
@@ -203,7 +203,9 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
             }
             auto textFontValue = ValueConverter<std::vector<std::string>>::fromExpressionValue(*textFontResult);
             if (!textFontValue) {
-                return EvaluationError{"Format text-font option must evaluate to an array of strings"};
+                return EvaluationError{
+                    "Format text-font option must evaluate to an array of "
+                    "strings"};
             }
             evaluatedTextFont = *textFontValue;
         }

@@ -53,8 +53,7 @@ void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::Set(info.This(), Nan::New("kind").ToLocalChecked(), info[4]);
     v8::Local<v8::Value> argv[] = {info.This()};
     request->asyncResource->runInAsyncScope(
-        Nan::To<v8::Object>(target->handle()->GetInternalField(1)).ToLocalChecked(), "request", 1, argv
-    );
+        Nan::To<v8::Object>(target->handle()->GetInternalField(1)).ToLocalChecked(), "request", 1, argv);
     info.GetReturnValue().Set(info.This());
 }
 
@@ -79,13 +78,11 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
 
         if (Nan::Has(err, msg).FromJust()) {
             response.error = std::make_unique<mbgl::Response::Error>(
-                mbgl::Response::Error::Reason::Other, *Nan::Utf8String(Nan::Get(err, msg).ToLocalChecked())
-            );
+                mbgl::Response::Error::Reason::Other, *Nan::Utf8String(Nan::Get(err, msg).ToLocalChecked()));
         }
     } else if (info[0]->IsString()) {
-        response.error = std::make_unique<mbgl::Response::Error>(
-            mbgl::Response::Error::Reason::Other, *Nan::Utf8String(info[0])
-        );
+        response.error = std::make_unique<mbgl::Response::Error>(mbgl::Response::Error::Reason::Other,
+                                                                 *Nan::Utf8String(info[0]));
     } else if (info.Length() < 2 || !info[1]->IsObject()) {
         request->unrefRequest();
         return Nan::ThrowTypeError("Second argument must be a response object");

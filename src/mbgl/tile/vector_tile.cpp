@@ -6,9 +6,10 @@
 
 namespace mbgl {
 
-VectorTile::VectorTile(
-    const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters, const Tileset& tileset
-)
+VectorTile::VectorTile(const OverscaledTileID& id_,
+                       std::string sourceID_,
+                       const TileParameters& parameters,
+                       const Tileset& tileset)
     : GeometryTile(id_, std::move(sourceID_), parameters),
       loader(*this, id_, parameters, tileset) {}
 

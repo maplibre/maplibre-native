@@ -21,11 +21,10 @@ struct FormatSectionOverrides<TypeList<PaintProperty...>> {
     static void setOverride(const T& overrides, U& overridable) {
         if (hasOverride<Property>(overrides.template get<TextField>())) {
             auto override = std::make_unique<expression::FormatSectionOverride<typename Property::Type>>(
-                Property::expressionType(), std::move(overridable.template get<Property>()), Property::name()
-            );
+                Property::expressionType(), std::move(overridable.template get<Property>()), Property::name());
             PropertyExpression<typename Property::Type> expr(std::move(override));
-            overridable.template get<Property>(
-            ) = PossiblyEvaluatedPropertyValue<typename Property::Type>(std::move(expr));
+            overridable.template get<Property>() = PossiblyEvaluatedPropertyValue<typename Property::Type>(
+                std::move(expr));
         }
     }
 
@@ -42,8 +41,7 @@ struct FormatSectionOverrides<TypeList<PaintProperty...>> {
                 [](const style::PropertyExpression<typename Property::Type>& e) {
                     return e.getExpression().getKind() == expression::Kind::FormatSectionOverride;
                 },
-                [](const auto&) { return false; }
-            );
+                [](const auto&) { return false; });
             if (hasFormatSectionOverride) {
                 updated.template get<Property>() = std::move(property);
             }
@@ -78,8 +76,8 @@ struct FormatSectionOverrides<TypeList<PaintProperty...>> {
 
                         if (e.getKind() == expression::Kind::Literal && e.getType() == expression::type::Formatted) {
                             const auto* literalExpr = static_cast<const expression::Literal*>(&e);
-                            const auto formattedValue =
-                                expression::fromExpressionValue<expression::Formatted>(literalExpr->getValue());
+                            const auto formattedValue = expression::fromExpressionValue<expression::Formatted>(
+                                literalExpr->getValue());
                             if (formattedValue && checkLiteral(*formattedValue)) {
                                 expressionHasOverrides = true;
                             }
@@ -100,8 +98,7 @@ struct FormatSectionOverrides<TypeList<PaintProperty...>> {
                 checkExpression(property.getExpression());
                 return expressionHasOverrides;
             },
-            [](const auto&) { return false; }
-        );
+            [](const auto&) { return false; });
     }
 
     template <typename FormattedProperty>
@@ -114,12 +111,10 @@ struct FormatSectionOverrides<TypeList<PaintProperty...>> {
     template <typename PaintProperties>
     static bool hasPaintPropertyDifference(const PaintProperties& lhs, const PaintProperties& rhs) {
         bool result = false;
-        util::ignore(
-            {(result |= lhs.template get<PaintProperty>().value.isConstant() &&
-                        rhs.template get<PaintProperty>().value.isConstant() &&
-                        (lhs.template get<PaintProperty>().value.asConstant() !=
-                         rhs.template get<PaintProperty>().value.asConstant()))...}
-        );
+        util::ignore({(result |= lhs.template get<PaintProperty>().value.isConstant() &&
+                                 rhs.template get<PaintProperty>().value.isConstant() &&
+                                 (lhs.template get<PaintProperty>().value.asConstant() !=
+                                  rhs.template get<PaintProperty>().value.asConstant()))...});
         return result;
     }
 };

@@ -64,8 +64,8 @@ public:
 
     expected<OfflineRegions, std::exception_ptr> listRegions();
 
-    expected<OfflineRegion, std::exception_ptr>
-    createRegion(const OfflineRegionDefinition&, const OfflineRegionMetadata&);
+    expected<OfflineRegion, std::exception_ptr> createRegion(const OfflineRegionDefinition&,
+                                                             const OfflineRegionMetadata&);
 
     expected<OfflineRegions, std::exception_ptr> mergeDatabase(const std::string& sideDatabasePath);
 

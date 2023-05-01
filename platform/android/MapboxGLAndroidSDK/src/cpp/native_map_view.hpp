@@ -44,14 +44,12 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    NativeMapView(
-        jni::JNIEnv&,
-        const jni::Object<NativeMapView>&,
-        const jni::Object<FileSource>&,
-        const jni::Object<MapRenderer>&,
-        jni::jfloat,
-        jni::jboolean
-    );
+    NativeMapView(jni::JNIEnv&,
+                  const jni::Object<NativeMapView>&,
+                  const jni::Object<FileSource>&,
+                  const jni::Object<MapRenderer>&,
+                  jni::jfloat,
+                  jni::jboolean);
 
     virtual ~NativeMapView();
 
@@ -92,49 +90,54 @@ public:
 
     void moveBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jlong);
 
-    void
-    jumpTo(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, const jni::Array<jni::jdouble>&);
+    void jumpTo(jni::JNIEnv&,
+                jni::jdouble,
+                jni::jdouble,
+                jni::jdouble,
+                jni::jdouble,
+                jni::jdouble,
+                const jni::Array<jni::jdouble>&);
 
-    void easeTo(
-        jni::JNIEnv&,
-        jni::jdouble,
-        jni::jdouble,
-        jni::jdouble,
-        jni::jlong,
-        jni::jdouble,
-        jni::jdouble,
-        const jni::Array<jni::jdouble>&,
-        jni::jboolean
-    );
+    void easeTo(jni::JNIEnv&,
+                jni::jdouble,
+                jni::jdouble,
+                jni::jdouble,
+                jni::jlong,
+                jni::jdouble,
+                jni::jdouble,
+                const jni::Array<jni::jdouble>&,
+                jni::jboolean);
 
-    void
-    flyTo(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jlong, jni::jdouble, jni::jdouble, const jni::Array<jni::jdouble>&);
+    void flyTo(jni::JNIEnv&,
+               jni::jdouble,
+               jni::jdouble,
+               jni::jdouble,
+               jni::jlong,
+               jni::jdouble,
+               jni::jdouble,
+               const jni::Array<jni::jdouble>&);
 
     jni::Local<jni::Object<LatLng>> getLatLng(JNIEnv&);
 
     void setLatLng(jni::JNIEnv&, jni::jdouble, jni::jdouble, const jni::Array<jni::jdouble>&, jni::jlong);
 
-    jni::Local<jni::Object<CameraPosition>> getCameraForLatLngBounds(
-        jni::JNIEnv&,
-        const jni::Object<mbgl::android::LatLngBounds>&,
-        double top,
-        double left,
-        double bottom,
-        double right,
-        double bearing,
-        double tilt
-    );
+    jni::Local<jni::Object<CameraPosition>> getCameraForLatLngBounds(jni::JNIEnv&,
+                                                                     const jni::Object<mbgl::android::LatLngBounds>&,
+                                                                     double top,
+                                                                     double left,
+                                                                     double bottom,
+                                                                     double right,
+                                                                     double bearing,
+                                                                     double tilt);
 
-    jni::Local<jni::Object<CameraPosition>> getCameraForGeometry(
-        jni::JNIEnv&,
-        const jni::Object<geojson::Geometry>&,
-        double top,
-        double left,
-        double bottom,
-        double right,
-        double bearing,
-        double tilt
-    );
+    jni::Local<jni::Object<CameraPosition>> getCameraForGeometry(jni::JNIEnv&,
+                                                                 const jni::Object<geojson::Geometry>&,
+                                                                 double top,
+                                                                 double left,
+                                                                 double bottom,
+                                                                 double right,
+                                                                 double bearing,
+                                                                 double tilt);
 
     void setReachability(jni::JNIEnv&, jni::jboolean);
 
@@ -177,8 +180,7 @@ public:
     void resetNorth(jni::JNIEnv&);
 
     void setVisibleCoordinateBounds(
-        JNIEnv&, const jni::Array<jni::Object<LatLng>>&, const jni::Object<RectF>&, jni::jdouble, jni::jlong
-    );
+        JNIEnv&, const jni::Array<jni::Object<LatLng>>&, const jni::Object<RectF>&, jni::jdouble, jni::jlong);
 
     void getVisibleCoordinateBounds(JNIEnv& env, jni::Array<jdouble>& output);
 
@@ -237,8 +239,7 @@ public:
     jni::Local<jni::Array<jlong>> queryShapeAnnotations(JNIEnv&, const jni::Object<RectF>&);
 
     jni::Local<jni::Array<jni::Object<geojson::Feature>>> queryRenderedFeaturesForPoint(
-        JNIEnv&, jni::jfloat, jni::jfloat, const jni::Array<jni::String>&, const jni::Array<jni::Object<>>& jfilter
-    );
+        JNIEnv&, jni::jfloat, jni::jfloat, const jni::Array<jni::String>&, const jni::Array<jni::Object<>>& jfilter);
 
     jni::Local<jni::Array<jni::Object<geojson::Feature>>> queryRenderedFeaturesForBox(
         JNIEnv&,
@@ -247,8 +248,7 @@ public:
         jni::jfloat,
         jni::jfloat,
         const jni::Array<jni::String>&,
-        const jni::Array<jni::Object<>>& jfilter
-    );
+        const jni::Array<jni::Object<>>& jfilter);
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
 

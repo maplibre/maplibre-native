@@ -18,11 +18,11 @@ constexpr uint16_t tileSize_I = 512;
  * In practice, all features are converted to this extent before being added.
  *
  * Positions are stored as signed 16bit integers.
- * One bit is lost for signedness to support features extending past the left edge of the tile.
- * One bit is lost because the line vertex buffer used to pack 1 bit of other data into the int.
- * This is no longer the case but we're reserving this bit anyway.
- * One bit is lost to support features extending past the extent on the right edge of the tile.
- * This leaves us with 2^13 = 8192
+ * One bit is lost for signedness to support features extending past the left
+ * edge of the tile. One bit is lost because the line vertex buffer used to pack
+ * 1 bit of other data into the int. This is no longer the case but we're
+ * reserving this bit anyway. One bit is lost to support features extending past
+ * the extent on the right edge of the tile. This leaves us with 2^13 = 8192
  */
 constexpr int32_t EXTENT = 8192;
 

@@ -6,7 +6,8 @@ using namespace mbgl;
 using namespace mbgl::style;
 
 /**
- * An implementation of style::LayerObserver that forwards all methods to dynamically-settable lambas.
+ * An implementation of style::LayerObserver that forwards all methods to
+ * dynamically-settable lambas.
  */
 class StubLayerObserver : public style::LayerObserver {
 public:

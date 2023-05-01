@@ -10,8 +10,7 @@ namespace geojson {
 jni::Local<jni::Object<MultiPolygon>> MultiPolygon::New(JNIEnv& env, const mbgl::MultiPolygon<double>& multiPolygon) {
     static auto& javaClass = jni::Class<MultiPolygon>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<MultiPolygon>(jni::Object<java::util::List>)>(
-        env, "fromLngLats"
-    );
+        env, "fromLngLats");
 
     auto jarray = jni::Array<jni::Object<java::util::List>>::New(env, multiPolygon.size());
 
@@ -40,9 +39,8 @@ mapbox::geojson::multi_polygon MultiPolygon::convert(jni::JNIEnv& env, const jni
     return multiPolygon;
 }
 
-jni::Local<jni::Object<java::util::List>> MultiPolygon::coordinates(
-    jni::JNIEnv& env, const jni::Object<MultiPolygon>& jPolygon
-) {
+jni::Local<jni::Object<java::util::List>> MultiPolygon::coordinates(jni::JNIEnv& env,
+                                                                    const jni::Object<MultiPolygon>& jPolygon) {
     static auto& javaClass = jni::Class<MultiPolygon>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "coordinates");
     return jPolygon.Call(env, method);

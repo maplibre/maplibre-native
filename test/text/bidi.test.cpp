@@ -28,10 +28,9 @@ TEST(BiDi, Tashkeel) {
 }
 
 TEST(BiDi, MixedShaping) {
-    EXPECT_EQ(
-        applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
-        u"ﻣﻜﺘﺒﺔ ﺍﻹﺳﻜﻨﺪﺭﻳﺔ‎‎ Maktabat al-Iskandarīyah"
-    );
+    EXPECT_EQ(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
+              u"ﻣﻜﺘﺒﺔ ﺍﻹﺳﻜﻨﺪﺭﻳﺔ‎‎ Maktabat "
+              u"al-Iskandarīyah");
 }
 
 TEST(BiDi, ReverseArabic) {
@@ -41,10 +40,10 @@ TEST(BiDi, ReverseArabic) {
 
 TEST(BiDi, ReverseMixed) {
     BiDi bidi;
-    EXPECT_EQ(
-        bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"), {}),
-        std::vector<std::u16string>{u" Maktabat al-Iskandarīyahﺔﻳﺭﺪﻨﻜﺳﻹﺍ ﺔﺒﺘﻜﻣ"}
-    );
+    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat "
+                                                  u"al-Iskandarīyah"),
+                               {}),
+              std::vector<std::u16string>{u" Maktabat al-Iskandarīyahﺔﻳﺭﺪﻨﻜﺳﻹﺍ ﺔﺒﺘﻜﻣ"});
 }
 
 TEST(BiDi, WithLineBreaks) {
@@ -53,30 +52,25 @@ TEST(BiDi, WithLineBreaks) {
     expected.emplace_back(u" ﺔﻳﺭﺪﻨﻜﺳﻹﺍ ﺔﺒﺘﻜﻣ");
     expected.emplace_back(u"Maktabat al-");
     expected.emplace_back(u"Iskandarīyah");
-    EXPECT_EQ(
-        bidi.processText(
-            applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"), {18, 30}
-        ),
-        expected
-    );
+    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat "
+                                                  u"al-Iskandarīyah"),
+                               {18, 30}),
+              expected);
 }
 
 TEST(BiDi, StyledText) {
-    // This test uses line breaks that intentionally split/reorder/interleave styled blocks
-    // that are contiguous in the input
+    // This test uses line breaks that intentionally split/reorder/interleave
+    // styled blocks that are contiguous in the input
     BiDi bidi;
     std::vector<StyledText> expected;
-    StyledText input(
-        applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
-        std::vector<uint8_t>{0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
-                             3, 3, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7}
-    );
+    StyledText input(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
+                     std::vector<uint8_t>{0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
+                                          3, 3, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7});
 
     expected.emplace_back(StyledText(u"ﺔﺒﺘﻜﻣ", std::vector<uint8_t>{0, 0, 0, 0, 0}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());
-    expected.emplace_back(
-        StyledText(u" ‎‎ﺔﻳﺭﺪﻨﻜﺳﻹﺍ ", std::vector<uint8_t>{2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1})
-    );
+    expected.emplace_back(StyledText(u" ‎‎ﺔﻳﺭﺪﻨﻜﺳﻹﺍ ",
+                                     std::vector<uint8_t>{2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());
     expected.emplace_back(StyledText(u"Maktabat al-", std::vector<uint8_t>{2, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 6}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());

@@ -16,11 +16,9 @@ namespace expression {
 
 class Step : public Expression {
 public:
-    Step(
-        const type::Type& type_,
-        std::unique_ptr<Expression> input_,
-        std::map<double, std::unique_ptr<Expression>> stops_
-    );
+    Step(const type::Type& type_,
+         std::unique_ptr<Expression> input_,
+         std::map<double, std::unique_ptr<Expression>> stops_);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;

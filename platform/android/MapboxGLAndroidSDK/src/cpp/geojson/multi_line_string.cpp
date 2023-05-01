@@ -7,20 +7,17 @@ namespace mbgl {
 namespace android {
 namespace geojson {
 
-jni::Local<jni::Object<MultiLineString>> MultiLineString::New(
-    jni::JNIEnv& env, const mbgl::MultiLineString<double>& multiLineString
-) {
+jni::Local<jni::Object<MultiLineString>> MultiLineString::New(jni::JNIEnv& env,
+                                                              const mbgl::MultiLineString<double>& multiLineString) {
     static auto& javaClass = jni::Class<MultiLineString>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<MultiLineString>(jni::Object<java::util::List>)>(
-        env, "fromLngLats"
-    );
+        env, "fromLngLats");
 
     return javaClass.Call(env, method, asPointsListsList(env, multiLineString));
 }
 
-mapbox::geojson::multi_line_string MultiLineString::convert(
-    jni::JNIEnv& env, const jni::Object<MultiLineString>& jMultiLineString
-) {
+mapbox::geojson::multi_line_string MultiLineString::convert(jni::JNIEnv& env,
+                                                            const jni::Object<MultiLineString>& jMultiLineString) {
     mapbox::geojson::multi_line_string multiLineString;
 
     if (jMultiLineString) {
@@ -31,8 +28,7 @@ mapbox::geojson::multi_line_string MultiLineString::convert(
 }
 
 mapbox::geojson::multi_line_string MultiLineString::convert(
-    jni::JNIEnv& env, const jni::Object<java::util::List /*<java::util::List<Point>>*/>& jPointListsList
-) {
+    jni::JNIEnv& env, const jni::Object<java::util::List /*<java::util::List<Point>>*/>& jPointListsList) {
     mapbox::geojson::multi_line_string multiLineString;
 
     if (jPointListsList) {
@@ -50,8 +46,7 @@ mapbox::geojson::multi_line_string MultiLineString::convert(
 }
 
 jni::Local<jni::Object<java::util::List>> MultiLineString::coordinates(
-    jni::JNIEnv& env, const jni::Object<MultiLineString>& jLineString
-) {
+    jni::JNIEnv& env, const jni::Object<MultiLineString>& jLineString) {
     static auto& javaClass = jni::Class<MultiLineString>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "coordinates");
     return jLineString.Call(env, method);

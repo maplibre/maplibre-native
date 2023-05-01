@@ -208,16 +208,16 @@ TEST(GlyphManager, LoadingFail) {
         return response;
     };
 
-    test.observer.glyphsError = [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error
-                                ) {
-        EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-        EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+    test.observer.glyphsError =
+        [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
+            EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
 
-        EXPECT_TRUE(error != nullptr);
-        EXPECT_EQ(util::toString(error), "Failed by the test case");
+            EXPECT_TRUE(error != nullptr);
+            EXPECT_EQ(util::toString(error), "Failed by the test case");
 
-        test.end();
-    };
+            test.end();
+        };
 
     test.requestor.glyphsAvailable = [&](GlyphMap) {
         FAIL();
@@ -236,16 +236,16 @@ TEST(GlyphManager, LoadingCorrupted) {
         return response;
     };
 
-    test.observer.glyphsError = [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error
-                                ) {
-        EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-        EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+    test.observer.glyphsError =
+        [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
+            EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
 
-        EXPECT_TRUE(error != nullptr);
-        EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
+            EXPECT_TRUE(error != nullptr);
+            EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
 
-        test.end();
-    };
+            test.end();
+        };
 
     test.requestor.glyphsAvailable = [&](GlyphMap) {
         FAIL();
@@ -284,7 +284,8 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
     };
 
     test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
-        EXPECT_EQ(glyphResponses, 0); // Local generation should prevent requesting any glyphs
+        EXPECT_EQ(glyphResponses,
+                  0); // Local generation should prevent requesting any glyphs
 
         const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
 
@@ -318,8 +319,8 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
     test.fileSource.glyphsResponse = [&](const Resource&) {
         firstGlyphResponse = true;
         Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs-12244-12543.pbf")
-        );
+        response.data = std::make_shared<std::string>(
+            util::read_file("test/fixtures/resources/glyphs-12244-12543.pbf"));
         return response;
     };
 
@@ -334,13 +335,11 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             // Katakana letter te, should be locally rasterized
             //  instead of using the glyph recieved from the range
             //  for the ideagraphic mark
-            test.glyphManager.getGlyphs(
-                test.requestor,
-                GlyphDependencies{
-                    {{{"Test Stack"}}, {u'テ'}} // 0x30c6
-                },
-                test.fileSource
-            );
+            test.glyphManager.getGlyphs(test.requestor,
+                                        GlyphDependencies{
+                                            {{{"Test Stack"}}, {u'テ'}} // 0x30c6
+                                        },
+                                        test.fileSource);
         } else {
             ASSERT_EQ(testPositions.size(), 1u);
             ASSERT_EQ(testPositions.count(u'テ'), 1u);
@@ -358,12 +357,10 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
         }
     };
 
-    test.run(
-        "test/fixtures/resources/glyphs-12244-12543.pbf",
-        GlyphDependencies{
-            {{{"Test Stack"}}, {u'々'}} // 0x3005
-        }
-    );
+    test.run("test/fixtures/resources/glyphs-12244-12543.pbf",
+             GlyphDependencies{
+                 {{{"Test Stack"}}, {u'々'}} // 0x3005
+             });
 }
 
 TEST(GlyphManager, LoadingInvalid) {

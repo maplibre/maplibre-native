@@ -43,27 +43,23 @@ FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties&,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
     const float zoom,
-    const uint32_t
-) {
+    const uint32_t) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(getEvaluated<FillExtrusionLayerProperties>(pair.second), zoom)
-        );
+            std::forward_as_tuple(getEvaluated<FillExtrusionLayerProperties>(pair.second), zoom));
     }
 }
 
 FillExtrusionBucket::~FillExtrusionBucket() = default;
 
-void FillExtrusionBucket::addFeature(
-    const GeometryTileFeature& feature,
-    const GeometryCollection& geometry,
-    const ImagePositions& patternPositions,
-    const PatternLayerMap& patternDependencies,
-    std::size_t index,
-    const CanonicalTileID& canonical
-) {
+void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
+                                     const GeometryCollection& geometry,
+                                     const ImagePositions& patternPositions,
+                                     const PatternLayerMap& patternDependencies,
+                                     std::size_t index,
+                                     const CanonicalTileID& canonical) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -104,8 +100,7 @@ void FillExtrusionBucket::addFeature(
                 const auto& p1 = ring[i];
 
                 vertices.emplace_back(
-                    FillExtrusionProgram::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance))
-                );
+                    FillExtrusionProgram::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -122,20 +117,16 @@ void FillExtrusionBucket::addFeature(
                     }
 
                     vertices.emplace_back(FillExtrusionProgram::layoutVertex(
-                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)
-                    ));
+                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
                     vertices.emplace_back(FillExtrusionProgram::layoutVertex(
-                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)
-                    ));
+                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     edgeDistance += dist;
 
                     vertices.emplace_back(FillExtrusionProgram::layoutVertex(
-                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)
-                    ));
+                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
                     vertices.emplace_back(FillExtrusionProgram::layoutVertex(
-                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)
-                    ));
+                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     // ┌──────┐
                     // │ 0  1 │ Counter-Clockwise winding order.
@@ -169,8 +160,7 @@ void FillExtrusionBucket::addFeature(
         const auto it = patternDependencies.find(pair.first);
         if (it != patternDependencies.end()) {
             pair.second.populateVertexVectors(
-                feature, vertices.elements(), index, patternPositions, it->second, canonical
-            );
+                feature, vertices.elements(), index, patternPositions, it->second, canonical);
         } else {
             pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
         }
@@ -200,12 +190,10 @@ float FillExtrusionBucket::getQueryRadius(const RenderLayer& layer) const {
     return util::length(translate[0], translate[1]);
 }
 
-void FillExtrusionBucket::update(
-    const FeatureStates& states,
-    const GeometryTileLayer& layer,
-    const std::string& layerID,
-    const ImagePositions& imagePositions
-) {
+void FillExtrusionBucket::update(const FeatureStates& states,
+                                 const GeometryTileLayer& layer,
+                                 const std::string& layerID,
+                                 const ImagePositions& imagePositions) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);

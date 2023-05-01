@@ -30,8 +30,7 @@ GLFWGLBackend::GLFWGLBackend(GLFWwindow* window_, const bool capFrameRate)
               glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
               return mbgl::Size{static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight)};
           }(),
-          std::make_unique<GLFWGLRenderableResource>(*this)
-      ),
+          std::make_unique<GLFWGLRenderableResource>(*this)),
       window(window_) {
     glfwMakeContextCurrent(window);
     if (!capFrameRate) {

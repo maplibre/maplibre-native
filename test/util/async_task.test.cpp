@@ -73,8 +73,9 @@ TEST(AsyncTask, DestroyShouldNotRunQueue) {
 TEST(AsyncTask, DestroyAfterSignaling) {
     RunLoop loop;
 
-    // We're creating two tasks and signal both of them; the one that gets fired first destroys
-    // the other one. Make sure that the second one we destroyed doesn't fire.
+    // We're creating two tasks and signal both of them; the one that gets fired
+    // first destroys the other one. Make sure that the second one we destroyed
+    // doesn't fire.
 
     std::unique_ptr<AsyncTask> task1, task2;
 
@@ -207,9 +208,8 @@ TEST(AsyncTask, MultipleSequencedSchedulers) {
 
     for (int i = 0; i < 10; ++i) {
         std::shared_ptr<Scheduler> scheduler = Scheduler::GetSequenced();
-        EXPECT_TRUE(std::none_of(shedulers.begin(), shedulers.end(), [&scheduler](const auto &item) {
-            return item == scheduler;
-        }));
+        EXPECT_TRUE(std::none_of(
+            shedulers.begin(), shedulers.end(), [&scheduler](const auto &item) { return item == scheduler; }));
         shedulers.emplace_back(std::move(scheduler));
     }
     EXPECT_EQ(shedulers.front(), std::shared_ptr<Scheduler>(Scheduler::GetSequenced()));

@@ -30,13 +30,11 @@ using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
 
 class RenderTreeParameters {
 public:
-    explicit RenderTreeParameters(
-        const TransformState& state_,
-        MapMode mapMode_,
-        MapDebugOptions debugOptions_,
-        TimePoint timePoint_,
-        EvaluatedLight light_
-    )
+    explicit RenderTreeParameters(const TransformState& state_,
+                                  MapMode mapMode_,
+                                  MapDebugOptions debugOptions_,
+                                  TimePoint timePoint_,
+                                  EvaluatedLight light_)
         : transformParams(state_),
           mapMode(mapMode_),
           debugOptions(debugOptions_),

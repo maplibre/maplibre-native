@@ -32,9 +32,8 @@ TEST(Token, replaceTokens) {
                   if (token == "c") return "Fields";
                   return "";
               }));
-    EXPECT_EQ(" but still", mbgl::util::replaceTokens("{notset} but still", [](const std::string&) -> std::string {
-                  return "";
-              }));
+    EXPECT_EQ(" but still",
+              mbgl::util::replaceTokens("{notset} but still", [](const std::string&) -> std::string { return ""; }));
     EXPECT_EQ("dashed", mbgl::util::replaceTokens("{dashed-property}", [](const std::string& token) -> std::string {
                   if (token == "dashed-property") return "dashed";
                   return "";

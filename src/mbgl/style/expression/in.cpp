@@ -50,15 +50,17 @@ EvaluationResult In::evaluate(const EvaluationContext& params) const {
     type::Type evaluatedNeedleType = typeOf(*evaluatedNeedle);
     if (!isComparableRuntimeType(evaluatedNeedleType)) {
         return EvaluationError{
-            "Expected first argument to be of type boolean, string or number, but found " +
+            "Expected first argument to be of type boolean, string or number, "
+            "but found " +
             toString(evaluatedNeedleType) + " instead."};
     }
 
     type::Type evaluatedHaystackType = typeOf(*evaluatedHaystack);
     if (!isSearchableRuntimeType(evaluatedHaystackType)) {
         return EvaluationError{
-            "Expected second argument to be of type array or string, but found " + toString(evaluatedHaystackType) +
-            " instead."};
+            "Expected second argument to be of type array or string, but "
+            "found " +
+            toString(evaluatedHaystackType) + " instead."};
     }
 
     if (evaluatedNeedleType == type::Null || evaluatedHaystackType == type::Null) {
@@ -71,9 +73,8 @@ EvaluationResult In::evaluate(const EvaluationContext& params) const {
         return EvaluationResult(haystackString.find(needleString) != std::string::npos);
     } else {
         const auto haystackArray = evaluatedHaystack->get<std::vector<Value>>();
-        return EvaluationResult(
-            std::find(haystackArray.begin(), haystackArray.end(), *evaluatedNeedle) != haystackArray.end()
-        );
+        return EvaluationResult(std::find(haystackArray.begin(), haystackArray.end(), *evaluatedNeedle) !=
+                                haystackArray.end());
     }
 }
 
@@ -103,16 +104,17 @@ ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
 
     if (!isComparableType(needleType)) {
         ctx.error(
-            "Expected first argument to be of type boolean, string or number, but found " + toString(needleType) +
-            " instead."
-        );
+            "Expected first argument to be of type boolean, string or number, "
+            "but found " +
+            toString(needleType) + " instead.");
         return ParseResult();
     }
 
     if (!isSearchableType(haystackType)) {
         ctx.error(
-            "Expected second argument to be of type array or string, but found " + toString(haystackType) + " instead."
-        );
+            "Expected second argument to be of type array or string, but "
+            "found " +
+            toString(haystackType) + " instead.");
         return ParseResult();
     }
     return ParseResult(std::make_unique<In>(std::move(*needle), std::move(*haystack)));

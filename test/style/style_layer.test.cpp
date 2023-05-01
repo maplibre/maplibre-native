@@ -319,7 +319,8 @@ TEST(Layer, IncompatibleLayer) {
     // Try to add duplicate
     try {
         style.addLayer(std::make_unique<RasterLayer>("raster", "unusedsource"));
-        FAIL() << "Should not have been allowed to add an incompatible layer to the source";
+        FAIL() << "Should not have been allowed to add an incompatible layer "
+                  "to the source";
     } catch (const std::runtime_error& e) {
         // Expected
         ASSERT_STREQ("Layer 'raster' is not compatible with source 'unusedsource'", e.what());
@@ -364,11 +365,10 @@ void testHasOverrides(LayoutType& layout) {
     secondParagraph.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("blue")));
     std::vector<FormatExpressionSection> sections{{std::move(secondParagraph)}};
     auto formattedExpr2 = std::make_unique<FormatExpression>(std::move(sections));
-    std::unordered_map<std::string, std::shared_ptr<Expression>> branches{
-        {"1st", std::move(formattedExpr1)}, {"2nd", std::move(formattedExpr2)}};
+    std::unordered_map<std::string, std::shared_ptr<Expression>> branches{{"1st", std::move(formattedExpr1)},
+                                                                          {"2nd", std::move(formattedExpr2)}};
     auto match = std::make_unique<Match<std::string>>(
-        type::Formatted, literal("input"), std::move(branches), format("otherwise")
-    );
+        type::Formatted, literal("input"), std::move(branches), format("otherwise"));
     PropertyExpression<Formatted> nestedPropExpr(std::move(match));
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(nestedPropExpr));
     EXPECT_TRUE(MockOverrides::hasOverrides(layout.template get<TextField>()));

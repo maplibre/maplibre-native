@@ -6,9 +6,9 @@
 namespace mbgl {
 namespace gl {
 
-RenderPass::RenderPass(
-    gl::CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor
-)
+RenderPass::RenderPass(gl::CommandEncoder& commandEncoder_,
+                       const char* name,
+                       const gfx::RenderPassDescriptor& descriptor)
     : commandEncoder(commandEncoder_),
       debugGroup(commandEncoder.createDebugGroup(name)) {
     descriptor.renderable.getResource<gl::RenderableResource>().bind();

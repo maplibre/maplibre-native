@@ -19,23 +19,20 @@ int main(int argc, char* argv[]) {
 
     args::ValueFlag<std::string> urlValue(p, "URL", "Resource URL (required)", {'u'}, args::Options::Required);
     args::ValueFlag<std::string> cacheValue(
-        p, "cache", "Path to the cache database (required)", {'c'}, args::Options::Required
-    );
+        p, "cache", "Path to the cache database (required)", {'c'}, args::Options::Required);
     args::ValueFlag<std::string> dataValue(
-        p, "data", "Path to the resource data (required)", {'d'}, args::Options::Required
-    );
+        p, "data", "Path to the resource data (required)", {'d'}, args::Options::Required);
     args::ValueFlag<std::string> etagValue(p, "etag", "Cache eTag, none otherwise", {'t'});
     args::ValueFlag<unsigned long> expiresValue(p, "expires", "Expires date, will use 'now' otherwise", {'e'});
     args::ValueFlag<unsigned long> modifiedValue(p, "modified", "Modified date, will use 'now' otherwise", {'m'});
 
-    std::unordered_map<std::string, mbgl::Resource::Kind> typeMap{
-        {"glyphs", mbgl::Resource::Glyphs},
-        {"image", mbgl::Resource::Image},
-        {"source", mbgl::Resource::Source},
-        {"sprite-image", mbgl::Resource::SpriteImage},
-        {"sprite-json", mbgl::Resource::SpriteJSON},
-        {"style", mbgl::Resource::Style},
-        {"tile", mbgl::Resource::Tile}};
+    std::unordered_map<std::string, mbgl::Resource::Kind> typeMap{{"glyphs", mbgl::Resource::Glyphs},
+                                                                  {"image", mbgl::Resource::Image},
+                                                                  {"source", mbgl::Resource::Source},
+                                                                  {"sprite-image", mbgl::Resource::SpriteImage},
+                                                                  {"sprite-json", mbgl::Resource::SpriteJSON},
+                                                                  {"style", mbgl::Resource::Style},
+                                                                  {"tile", mbgl::Resource::Tile}};
 
     std::string typeHelp("One of the following (required):");
     for (auto key : typeMap) {
@@ -43,8 +40,7 @@ int main(int argc, char* argv[]) {
     }
 
     args::MapFlag<std::string, mbgl::Resource::Kind> typeFlag(
-        p, "type", typeHelp, {"type"}, typeMap, args::Options::Required
-    );
+        p, "type", typeHelp, {"type"}, typeMap, args::Options::Required);
 
     args::Group tileIdGroup(p, "Coordinates (required for 'tile')", args::Group::Validators::AllOrNone);
     args::ValueFlag<int32_t> xValueFlag(tileIdGroup, "x", "Tile x coordinate", {'x'});
@@ -86,18 +82,16 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
-        resource.tileData = {
-            {args::get(urlValue),
-             1,
-             args::get(xValueFlag),
-             args::get(yValueFlag),
-             static_cast<int8_t>(args::get(zValueFlag))}};
+        resource.tileData = {{args::get(urlValue),
+                              1,
+                              args::get(xValueFlag),
+                              args::get(yValueFlag),
+                              static_cast<int8_t>(args::get(zValueFlag))}};
     }
 
     mbgl::util::RunLoop loop;
     std::shared_ptr<mbgl::FileSource> dbfs = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::Database, mbgl::ResourceOptions().withCachePath(args::get(cacheValue))
-    );
+        mbgl::FileSourceType::Database, mbgl::ResourceOptions().withCachePath(args::get(cacheValue)));
     dbfs->forward(resource, response, [&loop] { loop.stop(); });
     loop.run();
     return 0;

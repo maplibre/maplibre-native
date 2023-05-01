@@ -90,12 +90,10 @@ TEST(GLContextMode, Shared) {
 
     HeadlessFrontend frontend{1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Shared};
 
-    Map map(
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-        ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets")
-    );
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
 

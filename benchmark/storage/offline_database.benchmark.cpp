@@ -31,8 +31,7 @@ public:
 
         for (unsigned i = 0; i < tileCount; ++i) {
             const Resource ambient = Resource::tile(
-                "mapbox://tile_ambient" + util::toString(i), 1, 0, 0, 0, Tileset::Scheme::XYZ
-            );
+                "mapbox://tile_ambient" + util::toString(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(ambient, response);
         }
     }
@@ -54,8 +53,7 @@ public:
 
         for (unsigned i = 0; i < tileCount; ++i) {
             const Resource offline = Resource::tile(
-                "mapbox://tile_offline_region" + util::toString(i), 1.0, 0, 0, 0, Tileset::Scheme::XYZ
-            );
+                "mapbox://tile_offline_region" + util::toString(i), 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
             db.putRegionResource(regionID, offline, response);
         }
     }
@@ -84,8 +82,7 @@ BENCHMARK_F(OfflineDatabase, InsertTileRegion)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         const Resource offline = Resource::tile(
-            "mapbox://InsertTileRegion" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ
-        );
+            "mapbox://InsertTileRegion" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.putRegionResource(regionID, offline, response);
     }
 }
@@ -106,8 +103,7 @@ BENCHMARK_F(OfflineDatabase, InsertTileCache)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         const Resource ambient = Resource::tile(
-            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ
-        );
+            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 }
@@ -120,8 +116,7 @@ BENCHMARK_F(OfflineDatabase, InsertBigTileCache)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         const Resource ambient = Resource::tile(
-            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ
-        );
+            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, big);
     }
 }
@@ -135,8 +130,7 @@ BENCHMARK_F(OfflineDatabase, GetTile)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         auto res = db.get(
-            Resource::tile("mapbox://tile_ambient" + util::toString(dis(gen)), 1, 0, 0, 0, Tileset::Scheme::XYZ)
-        );
+            Resource::tile("mapbox://tile_ambient" + util::toString(dis(gen)), 1, 0, 0, 0, Tileset::Scheme::XYZ));
         assert(res != std::nullopt);
     }
 }
@@ -149,15 +143,15 @@ BENCHMARK_F(OfflineDatabase, AddTilesToFullDatabase)(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         const Resource ambient = Resource::tile(
-            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ
-        );
+            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 
     Log::removeObserver();
 }
 
-BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)(benchmark::State& state) {
+BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)
+(benchmark::State& state) {
     using namespace mbgl;
 
     auto regions = db.listRegions().value();
@@ -170,13 +164,13 @@ BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)(benchmark::State& state
 
     while (state.KeepRunning()) {
         const Resource ambient = Resource::tile(
-            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ
-        );
+            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 }
 
-BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)(benchmark::State& state) {
+BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)
+(benchmark::State& state) {
     using namespace mbgl;
 
     auto regions = db.listRegions().value();

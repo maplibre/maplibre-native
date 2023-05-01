@@ -14,18 +14,14 @@
 namespace mbgl {
 namespace android {
 
-MapRenderer::MapRenderer(
-    jni::JNIEnv& _env,
-    const jni::Object<MapRenderer>& obj,
-    jni::jfloat pixelRatio_,
-    const jni::String& localIdeographFontFamily_
-)
+MapRenderer::MapRenderer(jni::JNIEnv& _env,
+                         const jni::Object<MapRenderer>& obj,
+                         jni::jfloat pixelRatio_,
+                         const jni::String& localIdeographFontFamily_)
     : javaPeer(_env, obj),
       pixelRatio(pixelRatio_),
-      localIdeographFontFamily(
-          localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
-                                    : std::optional<std::string>{}
-      ),
+      localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
+                                                         : std::optional<std::string>{}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
@@ -134,16 +130,14 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
         &MapRenderer::scheduleSnapshot,
         std::make_unique<SnapshotCallback>(
             [&, callback = std::move(callback), runloop = util::RunLoop::Get()](PremultipliedImage image) {
-                runloop->invoke([callback = std::move(callback), image = std::move(image), renderer = std::move(this)](
-                                ) mutable {
-                    if (renderer && !renderer->destroyed) {
-                        callback(std::move(image));
-                    }
-                });
+                runloop->invoke(
+                    [callback = std::move(callback), image = std::move(image), renderer = std::move(this)]() mutable {
+                        if (renderer && !renderer->destroyed) {
+                            callback(std::move(image));
+                        }
+                    });
                 snapshotCallback.reset();
-            }
-        )
-    );
+            }));
 }
 
 // Called on OpenGL thread //
@@ -262,8 +256,7 @@ void MapRenderer::registerNative(jni::JNIEnv& env) {
         METHOD(&MapRenderer::onRendererReset, "nativeReset"),
         METHOD(&MapRenderer::onSurfaceCreated, "nativeOnSurfaceCreated"),
         METHOD(&MapRenderer::onSurfaceChanged, "nativeOnSurfaceChanged"),
-        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed")
-    );
+        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"));
 }
 
 MapRenderer& MapRenderer::getNativePeer(JNIEnv& env, const jni::Object<MapRenderer>& jObject) {

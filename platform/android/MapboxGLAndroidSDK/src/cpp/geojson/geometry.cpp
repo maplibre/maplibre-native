@@ -75,9 +75,8 @@ mbgl::Geometry<double> Geometry::convert(jni::JNIEnv &env, const jni::Object<Geo
     } else if (type == MultiPolygon::Type()) {
         return {MultiPolygon::convert(env, jni::Cast(env, jni::Class<MultiPolygon>::Singleton(env), jGeometry))};
     } else if (type == GeometryCollection::Type()) {
-        return {GeometryCollection::convert(
-            env, jni::Cast(env, jni::Class<GeometryCollection>::Singleton(env), jGeometry)
-        )};
+        return {GeometryCollection::convert(env,
+                                            jni::Cast(env, jni::Class<GeometryCollection>::Singleton(env), jGeometry))};
     }
 
     throw std::runtime_error(std::string{"Unsupported GeoJSON type: "} + type);

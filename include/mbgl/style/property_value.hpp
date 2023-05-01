@@ -34,19 +34,15 @@ public:
     bool isExpression() const { return value.template is<PropertyExpression<T>>(); }
 
     bool isDataDriven() const {
-        return value.match(
-            [](const Undefined&) { return false; },
-            [](const T&) { return false; },
-            [](const PropertyExpression<T>& fn) { return !fn.isFeatureConstant(); }
-        );
+        return value.match([](const Undefined&) { return false; },
+                           [](const T&) { return false; },
+                           [](const PropertyExpression<T>& fn) { return !fn.isFeatureConstant(); });
     }
 
     bool isZoomConstant() const {
-        return value.match(
-            [](const Undefined&) { return true; },
-            [](const T&) { return true; },
-            [](const PropertyExpression<T>& fn) { return fn.isZoomConstant(); }
-        );
+        return value.match([](const Undefined&) { return true; },
+                           [](const T&) { return true; },
+                           [](const PropertyExpression<T>& fn) { return fn.isZoomConstant(); });
     }
 
     const T& asConstant() const { return value.template get<T>(); }

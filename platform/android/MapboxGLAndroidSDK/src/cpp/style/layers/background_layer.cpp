@@ -104,23 +104,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> BackgroundJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> BackgroundJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                                   mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new BackgroundLayer(toBackgroundLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> BackgroundJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new BackgroundLayer(
-            std::unique_ptr<mbgl::style::BackgroundLayer>(static_cast<mbgl::style::BackgroundLayer*>(layer.release()))
-        )
-    );
+    return createJavaPeer(env,
+                          new BackgroundLayer(std::unique_ptr<mbgl::style::BackgroundLayer>(
+                              static_cast<mbgl::style::BackgroundLayer*>(layer.release()))));
 }
 
 void BackgroundJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -145,8 +140,7 @@ void BackgroundJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&BackgroundLayer::getBackgroundPattern, "nativeGetBackgroundPattern"),
         METHOD(&BackgroundLayer::getBackgroundOpacityTransition, "nativeGetBackgroundOpacityTransition"),
         METHOD(&BackgroundLayer::setBackgroundOpacityTransition, "nativeSetBackgroundOpacityTransition"),
-        METHOD(&BackgroundLayer::getBackgroundOpacity, "nativeGetBackgroundOpacity")
-    );
+        METHOD(&BackgroundLayer::getBackgroundOpacity, "nativeGetBackgroundOpacity"));
 }
 
 } // namespace android

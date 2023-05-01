@@ -30,16 +30,15 @@ public:
     ImageManager imageManager;
     GlyphManager glyphManager;
 
-    TileParameters tileParameters{
-        1.0,
-        MapDebugOptions(),
-        transformState,
-        fileSource,
-        MapMode::Continuous,
-        annotationManager.makeWeakPtr(),
-        imageManager,
-        glyphManager,
-        0};
+    TileParameters tileParameters{1.0,
+                                  MapDebugOptions(),
+                                  transformState,
+                                  fileSource,
+                                  MapMode::Continuous,
+                                  annotationManager.makeWeakPtr(),
+                                  imageManager,
+                                  glyphManager,
+                                  0};
 };
 
 TEST(CustomGeometryTile, InvokeFetchTile) {
@@ -56,18 +55,15 @@ TEST(CustomGeometryTile, InvokeFetchTile) {
         },
         [&](const CanonicalTileID&) {
 
-        }
-    );
+        });
     auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
-    CustomGeometryTile tile(
-        OverscaledTileID(0, 0, 0),
-        "source",
-        test.tileParameters,
-        makeMutable<CustomGeometrySource::TileOptions>(),
-        loaderActor
-    );
+    CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
+                            "source",
+                            test.tileParameters,
+                            makeMutable<CustomGeometrySource::TileOptions>(),
+                            loaderActor);
 
     tile.setNecessity(TileNecessity::Required);
 
@@ -82,23 +78,19 @@ TEST(CustomGeometryTile, InvokeCancelTile) {
     mapbox::feature::feature_collection<double> features;
     features.push_back(mapbox::feature::feature<double>{mapbox::geometry::point<double>(0, 0)});
 
-    CustomTileLoader loader(
-        [&](const CanonicalTileID&) {},
-        [&](const CanonicalTileID& tileId) {
-            EXPECT_EQ(tileId, CanonicalTileID(0, 0, 0));
-            test.loop.stop();
-        }
-    );
+    CustomTileLoader loader([&](const CanonicalTileID&) {},
+                            [&](const CanonicalTileID& tileId) {
+                                EXPECT_EQ(tileId, CanonicalTileID(0, 0, 0));
+                                test.loop.stop();
+                            });
     auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
-    CustomGeometryTile tile(
-        OverscaledTileID(0, 0, 0),
-        "source",
-        test.tileParameters,
-        makeMutable<CustomGeometrySource::TileOptions>(),
-        loaderActor
-    );
+    CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
+                            "source",
+                            test.tileParameters,
+                            makeMutable<CustomGeometrySource::TileOptions>(),
+                            loaderActor);
 
     tile.setNecessity(TileNecessity::Required);
     tile.setNecessity(TileNecessity::Optional);
@@ -117,16 +109,14 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
-    CustomGeometryTile tile(
-        OverscaledTileID(0, 0, 0),
-        "source",
-        test.tileParameters,
-        makeMutable<CustomGeometrySource::TileOptions>(),
-        loaderActor
-    );
+    CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
+                            "source",
+                            test.tileParameters,
+                            makeMutable<CustomGeometrySource::TileOptions>(),
+                            loaderActor);
 
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     StubTileObserver observer;
     observer.tileChanged = [&](const Tile&) {
         // Once present, the bucket should never "disappear", which would cause

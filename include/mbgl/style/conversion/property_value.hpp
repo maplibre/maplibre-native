@@ -18,9 +18,10 @@ namespace conversion {
 
 template <class T>
 struct Converter<PropertyValue<T>> {
-    std::optional<PropertyValue<T>> operator()(
-        const Convertible& value, Error& error, bool allowDataExpressions, bool convertTokens
-    ) const;
+    std::optional<PropertyValue<T>> operator()(const Convertible& value,
+                                               Error& error,
+                                               bool allowDataExpressions,
+                                               bool convertTokens) const;
 
     template <class S>
     PropertyValue<T> maybeConvertTokens(const S& t) const {
@@ -38,10 +39,9 @@ struct Converter<PropertyValue<T>> {
         // Token conversion happens later than the initial string->Formatted conversion
         // General purpose `format` expressions with embedded tokens are not supported
         const std::string& firstUnformattedSection = t.sections[0].text;
-        return hasTokens(firstUnformattedSection)
-                   ? PropertyValue<T>(PropertyExpression<T>(convertTokenStringToFormatExpression(firstUnformattedSection
-                     )))
-                   : PropertyValue<T>(t);
+        return hasTokens(firstUnformattedSection) ? PropertyValue<T>(PropertyExpression<T>(
+                                                        convertTokenStringToFormatExpression(firstUnformattedSection)))
+                                                  : PropertyValue<T>(t);
     }
 
     PropertyValue<T> maybeConvertTokens(const expression::Image& image) const {
@@ -53,8 +53,10 @@ struct Converter<PropertyValue<T>> {
 
 template <>
 struct Converter<PropertyValue<std::array<double, 3>>, void> {
-    std::optional<PropertyValue<std::array<double, 3>>> operator()(const Convertible& value, Error& error, bool, bool)
-        const;
+    std::optional<PropertyValue<std::array<double, 3>>> operator()(const Convertible& value,
+                                                                   Error& error,
+                                                                   bool,
+                                                                   bool) const;
 };
 } // namespace conversion
 } // namespace style

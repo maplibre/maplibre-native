@@ -95,8 +95,8 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
     MBGL_CHECK_ERROR(host->render(parameters));
 
-    // Reset the view back to our original one, just in case the CustomLayer changed
-    // the viewport or Framebuffer.
+    // Reset the view back to our original one, just in case the CustomLayer
+    // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }

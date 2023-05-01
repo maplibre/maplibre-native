@@ -185,9 +185,9 @@ LanguageTag LanguageTag::fromBCP47(const std::string& bcp47Tag) {
     }
 }
 
-LanguageTag::LanguageTag(
-    std::optional<std::string> language_, std::optional<std::string> script_, std::optional<std::string> region_
-)
+LanguageTag::LanguageTag(std::optional<std::string> language_,
+                         std::optional<std::string> script_,
+                         std::optional<std::string> region_)
     : language(std::move(language_)),
       script(std::move(script_)),
       region(std::move(region_)) {}
@@ -195,8 +195,8 @@ LanguageTag::LanguageTag(
 std::string LanguageTag::toBCP47() const {
     std::stringstream bcp47;
     if (!language) {
-        // BCP 47 requires a language, but we're matching implementations that accept ""
-        // to mean something like "default"
+        // BCP 47 requires a language, but we're matching implementations that
+        // accept "" to mean something like "default"
         return bcp47.str();
     } else {
         bcp47 << *language;

@@ -45,13 +45,11 @@ protected:
 
 class TextureBinding {
 public:
-    TextureBinding(
-        TextureResource& resource_,
-        TextureFilterType filter_ = TextureFilterType::Nearest,
-        TextureMipMapType mipmap_ = TextureMipMapType::No,
-        TextureWrapType wrapX_ = TextureWrapType::Clamp,
-        TextureWrapType wrapY_ = TextureWrapType::Clamp
-    )
+    TextureBinding(TextureResource& resource_,
+                   TextureFilterType filter_ = TextureFilterType::Nearest,
+                   TextureMipMapType mipmap_ = TextureMipMapType::No,
+                   TextureWrapType wrapX_ = TextureWrapType::Clamp,
+                   TextureWrapType wrapY_ = TextureWrapType::Clamp)
         : resource(&resource_),
           filter(filter_),
           mipmap(mipmap_),

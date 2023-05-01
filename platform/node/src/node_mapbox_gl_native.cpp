@@ -25,8 +25,9 @@ void SetBackendType(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
 void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) {
     // This has the effect of:
-    //   a) Ensuring that the static local variable is initialized before any thread contention.
-    //   b) unreffing an async handle, which otherwise would keep the default loop running.
+    //   a) Ensuring that the static local variable is initialized before any
+    //   thread contention. b) unreffing an async handle, which otherwise would
+    //   keep the default loop running.
     static mbgl::util::RunLoop nodeRunLoop;
     nodeRunLoop.stop();
 

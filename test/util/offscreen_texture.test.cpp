@@ -104,8 +104,7 @@ precision mediump float;
 void main() {
     gl_FragColor = vec4(0, 0.8, 0, 0.8);
 }
-)MBGL_SHADER"
-    );
+)MBGL_SHADER");
 
     Shader compositeShader(
         R"MBGL_SHADER(
@@ -128,8 +127,7 @@ varying vec2 v_texcoord;
 void main() {
     gl_FragColor = texture2D(u_texture, v_texcoord);
 }
-)MBGL_SHADER"
-    );
+)MBGL_SHADER");
 
     GLuint u_texture = MBGL_CHECK_ERROR(glGetUniformLocation(compositeShader.program, "u_texture"));
 
@@ -141,8 +139,8 @@ void main() {
     // First, draw red to the bound FBO.
     context.clear(Color::red(), {}, {});
 
-    // Then, create a texture, bind it, and render yellow to that texture. This should not
-    // affect the originally bound FBO.
+    // Then, create a texture, bind it, and render yellow to that texture. This
+    // should not affect the originally bound FBO.
     gl::OffscreenTexture texture(context, {128, 128});
 
     // Scissor test shouldn't leak after OffscreenTexture::bind().
@@ -187,9 +185,8 @@ TEST(OffscreenTexture, ClearRenderPassColor) {
     auto& context = backend->getRendererBackend()->getContext();
     auto encoder = context.createCommandEncoder();
     auto offscreenTexture = context.createOffscreenTexture({128, 256}, gfx::TextureChannelDataType::UnsignedByte);
-    auto renderPass = encoder->createRenderPass(
-        "offscreen texture", {*offscreenTexture, Color{1.0f, 0.0f, 0.0f, 1.0f}, {}, {}}
-    );
+    auto renderPass = encoder->createRenderPass("offscreen texture",
+                                                {*offscreenTexture, Color{1.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
     renderPass.reset();
     encoder.reset();
 

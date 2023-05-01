@@ -45,31 +45,26 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
     }
 
     for (auto matrix : matrices) {
-        programInstance->draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::LineStrip{4.0f * parameters.pixelRatio},
-            gfx::DepthMode::disabled(),
-            gfx::StencilMode::disabled(),
-            gfx::ColorMode::unblended(),
-            gfx::CullFaceMode::disabled(),
-            *parameters.staticData.tileBorderIndexBuffer,
-            RenderStaticData::tileBorderSegments(),
-            DebugProgram::computeAllUniformValues(
-                DebugProgram::LayoutUniformValues{
-                    uniforms::matrix::Value(matrix),
-                    uniforms::color::Value(Color::red()),
-                    uniforms::overlay_scale::Value(1.0f)},
-                paintAttributeData,
-                properties,
-                static_cast<float>(parameters.state.getZoom())
-            ),
-            DebugProgram::computeAllAttributeBindings(
-                *parameters.staticData.tileVertexBuffer, paintAttributeData, properties
-            ),
-            DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
-            "image"
-        );
+        programInstance->draw(parameters.context,
+                              *parameters.renderPass,
+                              gfx::LineStrip{4.0f * parameters.pixelRatio},
+                              gfx::DepthMode::disabled(),
+                              gfx::StencilMode::disabled(),
+                              gfx::ColorMode::unblended(),
+                              gfx::CullFaceMode::disabled(),
+                              *parameters.staticData.tileBorderIndexBuffer,
+                              RenderStaticData::tileBorderSegments(),
+                              DebugProgram::computeAllUniformValues(
+                                  DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
+                                                                    uniforms::color::Value(Color::red()),
+                                                                    uniforms::overlay_scale::Value(1.0f)},
+                                  paintAttributeData,
+                                  properties,
+                                  static_cast<float>(parameters.state.getZoom())),
+                              DebugProgram::computeAllAttributeBindings(
+                                  *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
+                              DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
+                              "image");
     }
 }
 
@@ -109,9 +104,12 @@ void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
     renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
 }
 
-std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::
-    queryRenderedFeatures(const ScreenLineString&, const TransformState&, const std::unordered_map<std::string, const RenderLayer*>&, const RenderedQueryOptions&, const mat4&)
-        const {
+std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::queryRenderedFeatures(
+    const ScreenLineString&,
+    const TransformState&,
+    const std::unordered_map<std::string, const RenderLayer*>&,
+    const RenderedQueryOptions&,
+    const mat4&) const {
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
@@ -119,13 +117,11 @@ std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOpt
     return {};
 }
 
-void RenderImageSource::update(
-    Immutable<style::Source::Impl> baseImpl_,
-    const std::vector<Immutable<LayerProperties>>&,
-    const bool needsRendering,
-    const bool,
-    const TileParameters& parameters
-) {
+void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
+                               const std::vector<Immutable<LayerProperties>>&,
+                               const bool needsRendering,
+                               const bool,
+                               const TileParameters& parameters) {
     enabled = needsRendering;
     if (!needsRendering) {
         return;
@@ -220,8 +216,7 @@ void RenderImageSource::update(
     bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[1].x, geomCoords[1].y}, {util::EXTENT, 0}));
     bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[3].x, geomCoords[3].y}, {0, util::EXTENT}));
     bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT})
-    );
+        RasterProgram::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
 
     bucket->indices.emplace_back(0, 1, 2);
     bucket->indices.emplace_back(1, 2, 3);

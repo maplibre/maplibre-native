@@ -83,28 +83,22 @@ bool isConstant(const Expression& expression) {
 
 using namespace mbgl::style::conversion;
 
-ParseResult ParsingContext::parse(
-    const Convertible& value,
-    std::size_t index_,
-    std::optional<type::Type> expected_,
-    const std::optional<TypeAnnotationOption>& typeAnnotationOption
-) {
+ParseResult ParsingContext::parse(const Convertible& value,
+                                  std::size_t index_,
+                                  std::optional<type::Type> expected_,
+                                  const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     ParsingContext child(key + "[" + util::toString(index_) + "]", errors, std::move(expected_), scope);
     return child.parse(value, typeAnnotationOption);
 }
 
-ParseResult ParsingContext::parse(
-    const Convertible& value,
-    std::size_t index_,
-    std::optional<type::Type> expected_,
-    const std::map<std::string, std::shared_ptr<Expression>>& bindings
-) {
-    ParsingContext child(
-        key + "[" + util::toString(index_) + "]",
-        errors,
-        std::move(expected_),
-        std::make_shared<detail::Scope>(bindings, scope)
-    );
+ParseResult ParsingContext::parse(const Convertible& value,
+                                  std::size_t index_,
+                                  std::optional<type::Type> expected_,
+                                  const std::map<std::string, std::shared_ptr<Expression>>& bindings) {
+    ParsingContext child(key + "[" + util::toString(index_) + "]",
+                         errors,
+                         std::move(expected_),
+                         std::make_shared<detail::Scope>(bindings, scope));
     return child.parse(value);
 }
 
@@ -151,26 +145,23 @@ bool isExpression(const std::string& name) {
     return expressionRegistry.contains(name.c_str());
 }
 
-ParseResult ParsingContext::parse(
-    const Convertible& value, const std::optional<TypeAnnotationOption>& typeAnnotationOption
-) {
+ParseResult ParsingContext::parse(const Convertible& value,
+                                  const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     ParseResult parsed;
 
     if (isArray(value)) {
         const std::size_t length = arrayLength(value);
         if (length == 0) {
-            error(R"(Expected an array with at least one element. If you wanted a literal array, use ["literal", []].)"
-            );
+            error(
+                R"(Expected an array with at least one element. If you wanted a literal array, use ["literal", []].)");
             return ParseResult();
         }
 
         const std::optional<std::string> op = toString(arrayMember(value, 0));
         if (!op) {
-            error(
-                "Expression name must be a string, but found " + getJSONType(arrayMember(value, 0)) +
-                    R"( instead. If you wanted a literal array, use ["literal", [...]].)",
-                0
-            );
+            error("Expression name must be a string, but found " + getJSONType(arrayMember(value, 0)) +
+                      R"( instead. If you wanted a literal array, use ["literal", [...]].)",
+                  0);
             return ParseResult();
         }
 
@@ -213,7 +204,8 @@ ParseResult ParsingContext::parse(
             actual == type::Value) {
             parsed = {
                 annotate(std::move(*parsed), *expected, typeAnnotationOption.value_or(TypeAnnotationOption::assert))};
-        } else if ((*expected == type::Color || *expected == type::Formatted || *expected == type::Image) && (actual == type::Value || actual == type::String)) {
+        } else if ((*expected == type::Color || *expected == type::Formatted || *expected == type::Image) &&
+                   (actual == type::Value || actual == type::String)) {
             parsed = {
                 annotate(std::move(*parsed), *expected, typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {
@@ -240,8 +232,8 @@ ParseResult ParsingContext::parse(
         if (type.is<type::Array>()) {
             // keep the original expression's array type, even if the evaluated
             // type is more specific.
-            return ParseResult(std::make_unique<Literal>(type.get<type::Array>(), evaluated->get<std::vector<Value>>())
-            );
+            return ParseResult(
+                std::make_unique<Literal>(type.get<type::Array>(), evaluated->get<std::vector<Value>>()));
         } else {
             return ParseResult(std::make_unique<Literal>(*evaluated));
         }
@@ -250,9 +242,8 @@ ParseResult ParsingContext::parse(
     return parsed;
 }
 
-ParseResult ParsingContext::parseExpression(
-    const Convertible& value, const std::optional<TypeAnnotationOption>& typeAnnotationOption
-) {
+ParseResult ParsingContext::parseExpression(const Convertible& value,
+                                            const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     return parse(value, typeAnnotationOption);
 }
 

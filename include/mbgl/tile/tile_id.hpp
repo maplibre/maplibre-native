@@ -18,9 +18,9 @@ class CanonicalTileID;
 class UnwrappedTileID;
 
 // Has integer z/x/y coordinates
-// All tiles must be derived from 0/0/0 (=no tiles outside of the main tile pyramid)
-// Used for requesting data; represents data tiles that exist out there.
-// z is never larger than the source's maxzoom
+// All tiles must be derived from 0/0/0 (=no tiles outside of the main tile
+// pyramid) Used for requesting data; represents data tiles that exist out
+// there. z is never larger than the source's maxzoom
 class CanonicalTileID {
 public:
     CanonicalTileID(uint8_t z, uint32_t x, uint32_t y);
@@ -42,9 +42,9 @@ std::string toString(const CanonicalTileID&);
 } // namespace util
 
 // Has integer z/x/y coordinates
-// overscaledZ describes the zoom level this tile is intented to represent, e.g. when parsing data
-// z is never larger than the source's maxzoom
-// z/x/y describe the
+// overscaledZ describes the zoom level this tile is intented to represent, e.g.
+// when parsing data z is never larger than the source's maxzoom z/x/y describe
+// the
 class OverscaledTileID {
 public:
     OverscaledTileID(uint8_t overscaledZ, int16_t wrap, CanonicalTileID);
@@ -72,9 +72,9 @@ std::string toString(const OverscaledTileID&);
 } // namespace util
 
 // Has integer z/x/y coordinates
-// wrap describes tiles that are left/right of the main tile pyramid, e.g. when wrapping the world
-// Used for describing what position tiles are getting rendered at (= calc the matrix)
-// z is never larger than the source's maxzoom
+// wrap describes tiles that are left/right of the main tile pyramid, e.g. when
+// wrapping the world Used for describing what position tiles are getting
+// rendered at (= calc the matrix) z is never larger than the source's maxzoom
 class UnwrappedTileID {
 public:
     UnwrappedTileID(uint8_t z, int64_t x, int64_t y);
@@ -211,11 +211,9 @@ inline OverscaledTileID OverscaledTileID::unwrapTo(int16_t newWrap) const {
 
 inline UnwrappedTileID::UnwrappedTileID(uint8_t z_, int64_t x_, int64_t y_)
     : wrap(static_cast<int16_t>((x_ < 0 ? x_ - (1ll << z_) + 1 : x_) / (1ll << z_))),
-      canonical(
-          z_,
-          static_cast<uint32_t>(x_ - wrap * (1ll << z_)),
-          y_ < 0 ? 0 : std::min(static_cast<uint32_t>(y_), static_cast<uint32_t>(1ull << z_) - 1)
-      ) {}
+      canonical(z_,
+                static_cast<uint32_t>(x_ - wrap * (1ll << z_)),
+                y_ < 0 ? 0 : std::min(static_cast<uint32_t>(y_), static_cast<uint32_t>(1ull << z_) - 1)) {}
 
 inline UnwrappedTileID::UnwrappedTileID(int16_t wrap_, CanonicalTileID canonical_)
     : wrap(wrap_),

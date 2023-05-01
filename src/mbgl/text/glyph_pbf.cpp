@@ -60,10 +60,11 @@ std::vector<Glyph> parseGlyphPBF(const GlyphRange& glyphRange, const std::string
                 }
             }
 
-            // Only treat this glyph as a correct glyph if it has all required fields. It also
-            // needs to satisfy a few metrics conditions that ensure that the glyph isn't bogus.
-            // All other glyphs are malformed.  We're also discarding all glyphs that are outside
-            // the expected glyph range.
+            // Only treat this glyph as a correct glyph if it has all required
+            // fields. It also needs to satisfy a few metrics conditions that
+            // ensure that the glyph isn't bogus. All other glyphs are
+            // malformed.  We're also discarding all glyphs that are outside the
+            // expected glyph range.
             if (!hasID || !hasWidth || !hasHeight || !hasLeft || !hasTop || !hasAdvance || glyph.metrics.width >= 256 ||
                 glyph.metrics.height >= 256 || glyph.metrics.left < -128 || glyph.metrics.left >= 128 ||
                 glyph.metrics.top < -128 || glyph.metrics.top >= 128 || glyph.metrics.advance >= 256 ||
@@ -71,11 +72,12 @@ std::vector<Glyph> parseGlyphPBF(const GlyphRange& glyphRange, const std::string
                 continue;
             }
 
-            // If the area of width/height is non-zero, we need to adjust the expected size
-            // with the implicit border size, otherwise we expect there to be no bitmap at all.
+            // If the area of width/height is non-zero, we need to adjust the
+            // expected size with the implicit border size, otherwise we expect
+            // there to be no bitmap at all.
             if (glyph.metrics.width && glyph.metrics.height) {
-                const Size size{
-                    glyph.metrics.width + 2 * Glyph::borderSize, glyph.metrics.height + 2 * Glyph::borderSize};
+                const Size size{glyph.metrics.width + 2 * Glyph::borderSize,
+                                glyph.metrics.height + 2 * Glyph::borderSize};
 
                 if (size.area() != glyphData.size()) {
                     continue;

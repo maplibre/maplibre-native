@@ -81,93 +81,83 @@ public:
 class CollisionFeature {
 public:
     // for text
-    CollisionFeature(
-        const GeometryCoordinates& line,
-        const Anchor& anchor,
-        const Shaping& shapedText,
-        const float boxScale,
-        const float padding,
-        const style::SymbolPlacementType placement,
-        const IndexedSubfeature& indexedFeature_,
-        const float overscaling,
-        const float rotate
-    )
-        : CollisionFeature(
-              line,
-              anchor,
-              shapedText.top,
-              shapedText.bottom,
-              shapedText.left,
-              shapedText.right,
-              std::nullopt,
-              boxScale,
-              padding,
-              placement,
-              indexedFeature_,
-              overscaling,
-              rotate
-          ) {}
+    CollisionFeature(const GeometryCoordinates& line,
+                     const Anchor& anchor,
+                     const Shaping& shapedText,
+                     const float boxScale,
+                     const float padding,
+                     const style::SymbolPlacementType placement,
+                     const IndexedSubfeature& indexedFeature_,
+                     const float overscaling,
+                     const float rotate)
+        : CollisionFeature(line,
+                           anchor,
+                           shapedText.top,
+                           shapedText.bottom,
+                           shapedText.left,
+                           shapedText.right,
+                           std::nullopt,
+                           boxScale,
+                           padding,
+                           placement,
+                           indexedFeature_,
+                           overscaling,
+                           rotate) {}
 
     // for icons
-    // Icons collision features are always SymbolPlacementType::Point, which means the collision feature
-    // will be viewport-rotation-aligned even if the icon is map-rotation-aligned (e.g. `icon-rotation-alignment: map`
-    // _or_ `symbol-placement: line`). We're relying on most icons being "close enough" to square that having
-    // incorrect rotation alignment doesn't throw off collision detection too much.
-    // See: https://github.com/mapbox/mapbox-gl-js/issues/4861
-    CollisionFeature(
-        const GeometryCoordinates& line,
-        const Anchor& anchor,
-        std::optional<PositionedIcon> shapedIcon,
-        const float boxScale,
-        const float padding,
-        const IndexedSubfeature& indexedFeature_,
-        const float rotate
-    )
-        : CollisionFeature(
-              line,
-              anchor,
-              (shapedIcon ? shapedIcon->top() : 0),
-              (shapedIcon ? shapedIcon->bottom() : 0),
-              (shapedIcon ? shapedIcon->left() : 0),
-              (shapedIcon ? shapedIcon->right() : 0),
-              (shapedIcon ? shapedIcon->collisionPadding() : std::optional<Padding>{std::nullopt}),
-              boxScale,
-              padding,
-              style::SymbolPlacementType::Point,
-              indexedFeature_,
-              1,
-              rotate
-          ) {}
+    // Icons collision features are always SymbolPlacementType::Point, which
+    // means the collision feature will be viewport-rotation-aligned even if the
+    // icon is map-rotation-aligned (e.g. `icon-rotation-alignment: map` _or_
+    // `symbol-placement: line`). We're relying on most icons being "close
+    // enough" to square that having incorrect rotation alignment doesn't throw
+    // off collision detection too much. See:
+    // https://github.com/mapbox/mapbox-gl-js/issues/4861
+    CollisionFeature(const GeometryCoordinates& line,
+                     const Anchor& anchor,
+                     std::optional<PositionedIcon> shapedIcon,
+                     const float boxScale,
+                     const float padding,
+                     const IndexedSubfeature& indexedFeature_,
+                     const float rotate)
+        : CollisionFeature(line,
+                           anchor,
+                           (shapedIcon ? shapedIcon->top() : 0),
+                           (shapedIcon ? shapedIcon->bottom() : 0),
+                           (shapedIcon ? shapedIcon->left() : 0),
+                           (shapedIcon ? shapedIcon->right() : 0),
+                           (shapedIcon ? shapedIcon->collisionPadding() : std::optional<Padding>{std::nullopt}),
+                           boxScale,
+                           padding,
+                           style::SymbolPlacementType::Point,
+                           indexedFeature_,
+                           1,
+                           rotate) {}
 
-    CollisionFeature(
-        const GeometryCoordinates& line,
-        const Anchor&,
-        float top,
-        float bottom,
-        float left,
-        float right,
-        const std::optional<Padding>& collisionPadding,
-        float boxScale,
-        float padding,
-        style::SymbolPlacementType,
-        IndexedSubfeature,
-        float overscaling,
-        float rotate
-    );
+    CollisionFeature(const GeometryCoordinates& line,
+                     const Anchor&,
+                     float top,
+                     float bottom,
+                     float left,
+                     float right,
+                     const std::optional<Padding>& collisionPadding,
+                     float boxScale,
+                     float padding,
+                     style::SymbolPlacementType,
+                     IndexedSubfeature,
+                     float overscaling,
+                     float rotate);
 
     std::vector<CollisionBox> boxes;
     IndexedSubfeature indexedFeature;
     bool alongLine;
 
 private:
-    void bboxifyLabel(
-        const GeometryCoordinates& line,
-        GeometryCoordinate& anchorPoint,
-        std::size_t segment,
-        float length,
-        float boxSize,
-        float overscaling
-    );
+    void bboxifyLabel(const GeometryCoordinates& line,
+                      GeometryCoordinate& anchorPoint,
+                      std::size_t segment,
+                      float length,
+                      float boxSize,
+                      float overscaling);
 };
 
 } // namespace mbgl

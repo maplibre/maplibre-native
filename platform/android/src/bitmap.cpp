@@ -53,13 +53,13 @@ void Bitmap::registerNative(jni::JNIEnv& env) {
     jni::Class<Bitmap::Config>::Singleton(env);
 }
 
-jni::Local<jni::Object<Bitmap>> Bitmap::CreateBitmap(
-    jni::JNIEnv& env, jni::jint width, jni::jint height, const jni::Object<Config>& config
-) {
+jni::Local<jni::Object<Bitmap>> Bitmap::CreateBitmap(jni::JNIEnv& env,
+                                                     jni::jint width,
+                                                     jni::jint height,
+                                                     const jni::Object<Config>& config) {
     static auto& _class = jni::Class<Bitmap>::Singleton(env);
     static auto method = _class.GetStaticMethod<jni::Object<Bitmap>(jni::jint, jni::jint, jni::Object<Config>)>(
-        env, "createBitmap"
-    );
+        env, "createBitmap");
 
     return _class.Call(env, method, width, height, config);
 }
@@ -80,11 +80,9 @@ PremultipliedImage Bitmap::GetImage(jni::JNIEnv& env, const jni::Object<Bitmap>&
     auto pixels = std::make_unique<uint8_t[]>(info.width * info.height * PremultipliedImage::channels);
     for (uint32_t y = 0; y < info.height; y++) {
         auto begin = guard.get() + y * info.stride;
-        std::copy(
-            begin,
-            begin + info.width * PremultipliedImage::channels,
-            pixels.get() + y * info.width * PremultipliedImage::channels
-        );
+        std::copy(begin,
+                  begin + info.width * PremultipliedImage::channels,
+                  pixels.get() + y * info.width * PremultipliedImage::channels);
     }
 
     return {Size{info.width, info.height}, std::move(pixels)};

@@ -34,9 +34,9 @@ FileSourceManager::FileSourceManager()
 
 FileSourceManager::~FileSourceManager() = default;
 
-std::shared_ptr<FileSource> FileSourceManager::getFileSource(
-    FileSourceType type, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions
-) noexcept {
+std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type,
+                                                             const ResourceOptions& resourceOptions,
+                                                             const ClientOptions& clientOptions) noexcept {
     std::lock_guard<std::recursive_mutex> lock(impl->mutex);
 
     // Remove released file sources.

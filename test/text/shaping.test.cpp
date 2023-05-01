@@ -32,23 +32,21 @@ TEST(Shaping, ZWSP) {
     ImagePositions imagePositions;
 
     const auto testGetShaping = [&](const TaggedString& string, unsigned maxWidthInChars) {
-        return getShaping(
-            string,
-            maxWidthInChars * ONE_EM,
-            ONE_EM, // lineHeight
-            style::SymbolAnchorType::Center,
-            style::TextJustifyType::Center,
-            0,              // spacing
-            {{0.0f, 0.0f}}, // translate
-            WritingModeType::Horizontal,
-            bidi,
-            glyphs,
-            glyphPositions,
-            imagePositions,
-            layoutTextSize,
-            layoutTextSizeAtBucketZoomLevel,
-            /*allowVerticalPlacement*/ false
-        );
+        return getShaping(string,
+                          maxWidthInChars * ONE_EM,
+                          ONE_EM, // lineHeight
+                          style::SymbolAnchorType::Center,
+                          style::TextJustifyType::Center,
+                          0,              // spacing
+                          {{0.0f, 0.0f}}, // translate
+                          WritingModeType::Horizontal,
+                          bidi,
+                          glyphs,
+                          glyphPositions,
+                          imagePositions,
+                          layoutTextSize,
+                          layoutTextSizeAtBucketZoomLevel,
+                          /*allowVerticalPlacement*/ false);
     };
 
     // 3 lines

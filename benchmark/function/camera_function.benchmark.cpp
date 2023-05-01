@@ -28,8 +28,7 @@ static void Parse_CameraFunction(benchmark::State& state) {
         auto doc = createFunctionJSON(stopCount);
         state.ResumeTiming();
         std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(
-            doc, error, false, false
-        );
+            doc, error, false, false);
         if (!result) {
             state.SkipWithError(error.message.c_str());
         }
@@ -42,8 +41,7 @@ static void Evaluate_CameraFunction(benchmark::State& state) {
     auto doc = createFunctionJSON(stopCount);
     conversion::Error error;
     std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(
-        doc, error, false, false
-    );
+        doc, error, false, false);
     if (!function) {
         state.SkipWithError(error.message.c_str());
     }

@@ -11,13 +11,11 @@ const char currencyKey[] = "currency";
 const char minFractionDigitsKey[] = "min-fraction-digits";
 const char maxFractionDigitsKey[] = "max-fraction-digits";
 
-NumberFormat::NumberFormat(
-    std::unique_ptr<Expression> number_,
-    std::unique_ptr<Expression> locale_,
-    std::unique_ptr<Expression> currency_,
-    std::unique_ptr<Expression> minFractionDigits_,
-    std::unique_ptr<Expression> maxFractionDigits_
-)
+NumberFormat::NumberFormat(std::unique_ptr<Expression> number_,
+                           std::unique_ptr<Expression> locale_,
+                           std::unique_ptr<Expression> currency_,
+                           std::unique_ptr<Expression> minFractionDigits_,
+                           std::unique_ptr<Expression> maxFractionDigits_)
     : Expression(Kind::NumberFormat, type::String),
       number(std::move(number_)),
       locale(std::move(locale_)),
@@ -72,8 +70,7 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
 
     std::string output;
     output = platform::formatNumber(
-        evaluatedNumber, evaluatedLocale, evaluatedCurrency, evaluatedMinFractionDigits, evaluatedMaxFractionDigits
-    );
+        evaluatedNumber, evaluatedLocale, evaluatedCurrency, evaluatedMinFractionDigits, evaluatedMaxFractionDigits);
     return output;
 }
 
@@ -178,13 +175,12 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
         }
     }
 
-    return ParseResult(std::make_unique<NumberFormat>(
-        std::move(*numberResult),
-        localeResult ? std::move(*localeResult) : nullptr,
-        currencyResult ? std::move(*currencyResult) : nullptr,
-        minFractionDigitsResult ? std::move(*minFractionDigitsResult) : nullptr,
-        maxFractionDigitsResult ? std::move(*maxFractionDigitsResult) : nullptr
-    ));
+    return ParseResult(
+        std::make_unique<NumberFormat>(std::move(*numberResult),
+                                       localeResult ? std::move(*localeResult) : nullptr,
+                                       currencyResult ? std::move(*currencyResult) : nullptr,
+                                       minFractionDigitsResult ? std::move(*minFractionDigitsResult) : nullptr,
+                                       maxFractionDigitsResult ? std::move(*maxFractionDigitsResult) : nullptr));
 }
 
 mbgl::Value NumberFormat::serialize() const {

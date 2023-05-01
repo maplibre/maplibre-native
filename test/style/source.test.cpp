@@ -66,16 +66,15 @@ public:
     GlyphManager glyphManager;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
-        return {
-            1.0,
-            MapDebugOptions(),
-            transformState,
-            fileSource,
-            mapMode,
-            annotationManager.makeWeakPtr(),
-            imageManager,
-            glyphManager,
-            0};
+        return {1.0,
+                MapDebugOptions(),
+                transformState,
+                fileSource,
+                mapMode,
+                annotationManager.makeWeakPtr(),
+                imageManager,
+                glyphManager,
+                0};
     };
 
     SourceTest() {
@@ -149,8 +148,8 @@ TEST(Source, RasterTileEmpty) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -185,8 +184,8 @@ TEST(Source, RasterDEMTileEmpty) {
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -223,8 +222,8 @@ TEST(Source, VectorTileEmpty) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -259,8 +258,8 @@ TEST(Source, RasterTileFail) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -294,8 +293,8 @@ TEST(Source, RasterDEMTileFail) {
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -331,8 +330,8 @@ TEST(Source, VectorTileFail) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -366,8 +365,8 @@ TEST(Source, RasterTileCorrupt) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -402,8 +401,8 @@ TEST(Source, RasterDEMTileCorrupt) {
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
     ;
 
@@ -441,8 +440,8 @@ TEST(Source, VectorTileCorrupt) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -475,8 +474,8 @@ TEST(Source, RasterTileCancel) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -509,8 +508,8 @@ TEST(Source, RasterDEMTileCancel) {
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -545,8 +544,8 @@ TEST(Source, VectorTileCancel) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -574,13 +573,15 @@ TEST(Source, RasterTileAttribution) {
     SourceTest test;
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     std::string mapboxOSM =
-        ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox</a> "
-         "<a href='http://www.openstreetmap.org/about/' target='_blank'>©️ OpenStreetMap</a>");
+        ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; "
+         "Mapbox</a> "
+         "<a href='http://www.openstreetmap.org/about/' target='_blank'>©️ "
+         "OpenStreetMap</a>");
 
     test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
@@ -591,10 +592,8 @@ TEST(Source, RasterTileAttribution) {
     test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
-        response.data = std::make_unique<std::string>(
-            R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" + mapboxOSM +
-            R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON"
-        );
+        response.data = std::make_unique<std::string>(R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" +
+                                                      mapboxOSM + R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
         return response;
     };
 
@@ -618,11 +617,13 @@ TEST(Source, RasterDEMTileAttribution) {
     SourceTest test;
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
-    std::string mapbox = ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox</a> ");
+    std::string mapbox =
+        ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; "
+         "Mapbox</a> ");
 
     test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
@@ -633,10 +634,8 @@ TEST(Source, RasterDEMTileAttribution) {
     test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
-        response.data = std::make_unique<std::string>(
-            R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" + mapbox +
-            R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON"
-        );
+        response.data = std::make_unique<std::string>(R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" +
+                                                      mapbox + R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
         return response;
     };
 
@@ -662,8 +661,7 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
         EXPECT_EQ("url", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(
-            R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"
-        );
+            R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})");
         return response;
     };
 
@@ -730,8 +728,8 @@ TEST(Source, CustomGeometrySourceSetTileData) {
 
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     test.renderSourceObserver.tileChanged = [&](RenderSource& source_, const OverscaledTileID&) {
@@ -782,24 +780,20 @@ public:
 
     explicit FakeTileSource(Immutable<style::Source::Impl> impl_)
         : RenderTileSetSource(std::move(impl_)) {}
-    void updateInternal(
-        const Tileset& tileset,
-        const std::vector<Immutable<style::LayerProperties>>& layers,
-        const bool needsRendering,
-        const bool needsRelayout,
-        const TileParameters& parameters
-    ) override {
-        tilePyramid.update(
-            layers,
-            needsRendering,
-            needsRelayout,
-            parameters,
-            *baseImpl,
-            util::tileSize_I,
-            tileset.zoomRange,
-            tileset.bounds,
-            [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); }
-        );
+    void updateInternal(const Tileset& tileset,
+                        const std::vector<Immutable<style::LayerProperties>>& layers,
+                        const bool needsRendering,
+                        const bool needsRelayout,
+                        const TileParameters& parameters) override {
+        tilePyramid.update(layers,
+                           needsRendering,
+                           needsRelayout,
+                           parameters,
+                           *baseImpl,
+                           util::tileSize_I,
+                           tileset.zoomRange,
+                           tileset.bounds,
+                           [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });
     }
 
     const std::optional<Tileset>& getTileset() const override {
@@ -825,8 +819,8 @@ TEST(Source, InvisibleSourcesTileNecessity) {
     FakeTileSource renderTilesetSource{initialized.baseImpl};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
     EXPECT_CALL(renderTilesetSource, tileSetNecessity(TileNecessity::Required)).Times(1);
     renderSource->update(initialized.baseImpl, layers, true, true, test.tileParameters());
@@ -848,8 +842,8 @@ TEST(Source, SourceMinimumUpdateInterval) {
     FakeTileSource renderTilesetSource{initialized.baseImpl};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Duration minimumTileUpdateInterval = initialized.getMinimumTileUpdateInterval();
@@ -893,9 +887,11 @@ TEST(Source, RenderTileSetSourceUpdate) {
 
         MOCK_METHOD0(mockedUpdateInternal, void());
 
-        void
-        updateInternal(const Tileset&, const std::vector<Immutable<style::LayerProperties>>&, const bool, const bool, const TileParameters&)
-            override {
+        void updateInternal(const Tileset&,
+                            const std::vector<Immutable<style::LayerProperties>>&,
+                            const bool,
+                            const bool,
+                            const TileParameters&) override {
             mockedUpdateInternal();
         }
 
@@ -910,8 +906,8 @@ TEST(Source, RenderTileSetSourceUpdate) {
     FakeRenderTileSetSource renderTilesetSource{initialized.baseImpl};
 
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     // Check that `updateInternal()` is called even if the updated source has not yet loaded description.
@@ -927,18 +923,18 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     SourceTest test;
     GeoJSONSource source("source");
     auto geoJSONData = GeoJSONData::create(mapbox::geojson::parse(
-        R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"
-    ));
+        R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"));
     source.setGeoJSONData(geoJSONData);
     RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl)};
 
     CircleLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
-    EXPECT_FALSE(renderSource.isLoaded()); // loaded == false, means that the source contains pending tiles.
+    EXPECT_FALSE(renderSource.isLoaded()); // loaded == false, means that the
+                                           // source contains pending tiles.
 
     source.setGeoJSONData(nullptr);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
@@ -973,8 +969,8 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
@@ -999,8 +995,6 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     EXPECT_EQ(
         1u,
         log.count(
-            {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}
-        )
-    );
+            {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }

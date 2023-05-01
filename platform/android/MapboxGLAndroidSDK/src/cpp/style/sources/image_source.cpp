@@ -15,15 +15,12 @@
 namespace mbgl {
 namespace android {
 
-ImageSource::ImageSource(
-    jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<LatLngQuad>& coordinatesObject
-)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::ImageSource>(
-              jni::Make<std::string>(env, sourceId), LatLngQuad::getLatLngArray(env, coordinatesObject)
-          )
-      ) {}
+ImageSource::ImageSource(jni::JNIEnv& env,
+                         const jni::String& sourceId,
+                         const jni::Object<LatLngQuad>& coordinatesObject)
+    : Source(env,
+             std::make_unique<mbgl::style::ImageSource>(jni::Make<std::string>(env, sourceId),
+                                                        LatLngQuad::getLatLngArray(env, coordinatesObject))) {}
 
 ImageSource::ImageSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
@@ -61,18 +58,16 @@ void ImageSource::registerNative(jni::JNIEnv& env) {
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
     // Register the peer
-    jni::RegisterNativePeer<ImageSource>(
-        env,
-        javaClass,
-        "nativePtr",
-        jni::MakePeer<ImageSource, const jni::String&, const jni::Object<LatLngQuad>&>,
-        "initialize",
-        "finalize",
-        METHOD(&ImageSource::setURL, "nativeSetUrl"),
-        METHOD(&ImageSource::getURL, "nativeGetUrl"),
-        METHOD(&ImageSource::setImage, "nativeSetImage"),
-        METHOD(&ImageSource::setCoordinates, "nativeSetCoordinates")
-    );
+    jni::RegisterNativePeer<ImageSource>(env,
+                                         javaClass,
+                                         "nativePtr",
+                                         jni::MakePeer<ImageSource, const jni::String&, const jni::Object<LatLngQuad>&>,
+                                         "initialize",
+                                         "finalize",
+                                         METHOD(&ImageSource::setURL, "nativeSetUrl"),
+                                         METHOD(&ImageSource::getURL, "nativeGetUrl"),
+                                         METHOD(&ImageSource::setImage, "nativeSetImage"),
+                                         METHOD(&ImageSource::setCoordinates, "nativeSetCoordinates"));
 }
 
 } // namespace android

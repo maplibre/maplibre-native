@@ -64,8 +64,8 @@ public:
     }
 
     static LatLng latLngForProjectedMeters(const ProjectedMeters& projectedMeters) {
-        double latitude =
-            util::rad2deg(2 * std::atan(std::exp(projectedMeters.northing() / util::EARTH_RADIUS_M)) - (M_PI / 2.0));
+        double latitude = util::rad2deg(2 * std::atan(std::exp(projectedMeters.northing() / util::EARTH_RADIUS_M)) -
+                                        (M_PI / 2.0));
         double longitude = util::rad2deg(projectedMeters.easting()) / util::EARTH_RADIUS_M;
 
         latitude = util::clamp(latitude, -util::LATITUDE_MAX, util::LATITUDE_MAX);
@@ -81,19 +81,17 @@ public:
 
     static LatLng unproject(const Point<double>& p, double scale, LatLng::WrapMode wrapMode = LatLng::Unwrapped) {
         auto p2 = p * util::DEGREES_MAX / worldSize(scale);
-        return LatLng{
-            std::atan(std::exp(util::deg2rad(util::LONGITUDE_MAX - p2.y))) * util::DEGREES_MAX / M_PI - 90.0,
-            p2.x - util::LONGITUDE_MAX,
-            wrapMode};
+        return LatLng{std::atan(std::exp(util::deg2rad(util::LONGITUDE_MAX - p2.y))) * util::DEGREES_MAX / M_PI - 90.0,
+                      p2.x - util::LONGITUDE_MAX,
+                      wrapMode};
     }
 
 private:
     static Point<double> project_(const LatLng& latLng, double worldSize) {
         const double latitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
-        return Point<double>{
-                   util::LONGITUDE_MAX + latLng.longitude(),
-                   util::LONGITUDE_MAX -
-                       util::rad2deg(std::log(std::tan(M_PI / 4 + latitude * M_PI / util::DEGREES_MAX)))} *
+        return Point<double>{util::LONGITUDE_MAX + latLng.longitude(),
+                             util::LONGITUDE_MAX -
+                                 util::rad2deg(std::log(std::tan(M_PI / 4 + latitude * M_PI / util::DEGREES_MAX)))} *
                (worldSize / util::DEGREES_MAX);
     }
 };

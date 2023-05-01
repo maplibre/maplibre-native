@@ -19,10 +19,11 @@
 
 #include <string>
 
-// GeoJSONSource uses a "coalescing" model for high frequency asynchronous data update calls,
-// which in practice means, that any update that started processing is going to finish
-// and the last scheduled update is going to finish as well. Any updates scheduled during processing can be canceled.
-// Conversion from Java features to core ones is done on a worker thread and once finished,
+// GeoJSONSource uses a "coalescing" model for high frequency asynchronous data
+// update calls, which in practice means, that any update that started
+// processing is going to finish and the last scheduled update is going to
+// finish as well. Any updates scheduled during processing can be canceled. Conversion
+// from Java features to core ones is done on a worker thread and once finished,
 // the ownership of the converted features is returned to the calling thread.
 namespace mbgl {
 namespace android {
@@ -36,9 +37,8 @@ static Immutable<style::GeoJSONOptions> convertGeoJSONOptions(jni::JNIEnv& env, 
         return style::GeoJSONOptions::defaultOptions();
     }
     Error error;
-    std::optional<style::GeoJSONOptions> result = convert<style::GeoJSONOptions>(
-        mbgl::android::Value(env, options), error
-    );
+    std::optional<style::GeoJSONOptions> result = convert<style::GeoJSONOptions>(mbgl::android::Value(env, options),
+                                                                                 error);
     if (!result) {
         throw std::logic_error(error.message);
     }
@@ -46,21 +46,16 @@ static Immutable<style::GeoJSONOptions> convertGeoJSONOptions(jni::JNIEnv& env, 
 }
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& options)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::GeoJSONSource>(
-              jni::Make<std::string>(env, sourceId), convertGeoJSONOptions(env, options)
-          )
-      ),
-      converter(std::make_unique<Actor<FeatureConverter>>(
-          Scheduler::GetBackground(), source.as<style::GeoJSONSource>()->impl().getOptions()
-      )) {}
+    : Source(env,
+             std::make_unique<mbgl::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
+                                                          convertGeoJSONOptions(env, options))),
+      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
+                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend),
-      converter(std::make_unique<Actor<FeatureConverter>>(
-          Scheduler::GetBackground(), source.as<style::GeoJSONSource>()->impl().getOptions()
-      )) {}
+      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
+                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
@@ -97,8 +92,7 @@ jni::Local<jni::String> GeoJSONSource::getURL(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::querySourceFeatures(
-    jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
-) {
+    jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
@@ -110,8 +104,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::querySource
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterChildren(
-    jni::JNIEnv& env, const jni::Object<geojson::Feature>& feature
-) {
+    jni::JNIEnv& env, const jni::Object<geojson::Feature>& feature) {
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
@@ -119,8 +112,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterC
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         const auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            source.getID(), _feature, "supercluster", "children", {}
-        );
+            source.getID(), _feature, "supercluster", "children", {});
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -129,19 +121,17 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterC
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterLeaves(
-    jni::JNIEnv& env, const jni::Object<geojson::Feature>& feature, jni::jlong limit, jni::jlong offset
-) {
+    jni::JNIEnv& env, const jni::Object<geojson::Feature>& feature, jni::jlong limit, jni::jlong offset) {
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
     if (rendererFrontend) {
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
-        const std::map<std::string, mbgl::Value> options = {
-            {"limit", static_cast<uint64_t>(limit)}, {"offset", static_cast<uint64_t>(offset)}};
+        const std::map<std::string, mbgl::Value> options = {{"limit", static_cast<uint64_t>(limit)},
+                                                            {"offset", static_cast<uint64_t>(offset)}};
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            source.getID(), _feature, "supercluster", "leaves", options
-        );
+            source.getID(), _feature, "supercluster", "leaves", options);
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -158,8 +148,7 @@ jint GeoJSONSource::getClusterExpansionZoom(jni::JNIEnv& env, const jni::Object<
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            source.getID(), _feature, "supercluster", "expansion-zoom", {}
-        );
+            source.getID(), _feature, "supercluster", "expansion-zoom", {});
         if (featureExtension.is<mbgl::Value>()) {
             auto value = featureExtension.get<mbgl::Value>();
             if (value.is<uint64_t>()) {
@@ -192,8 +181,7 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
         std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(),
-            [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
+            *Scheduler::GetCurrent(), [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
                 // conversion from Java features to core ones finished
                 android::UniqueEnv _env = android::AttachEnv();
 
@@ -207,9 +195,7 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
                 } else {
                     update.reset();
                 }
-            }
-        )
-    );
+            }));
 
     // If another update is running, wait
     if (update) {
@@ -244,8 +230,7 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::querySourceFeatures, "querySourceFeatures"),
         METHOD(&GeoJSONSource::getClusterChildren, "nativeGetClusterChildren"),
         METHOD(&GeoJSONSource::getClusterLeaves, "nativeGetClusterLeaves"),
-        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom")
-    );
+        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"));
 }
 
 void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<GeoJSONDataCallback> callback) {
@@ -266,8 +251,7 @@ void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<G
 template <class JNIType>
 void FeatureConverter::convertObject(
     std::shared_ptr<jni::Global<jni::Object<JNIType>, jni::EnvAttachingDeleter>> jObject,
-    ActorRef<GeoJSONDataCallback> callback
-) {
+    ActorRef<GeoJSONDataCallback> callback) {
     using namespace mbgl::android::geojson;
 
     android::UniqueEnv _env = android::AttachEnv();

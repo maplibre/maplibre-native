@@ -4,8 +4,8 @@
 
 // Example: Allocate a reachability object
 // Reachability* reach = [Reachability reachabilityForInternetConnection];
-// reach.reachableBlock = ^(Reachability* reach) { NetworkStatus::Reachable(); };
-// [reach startNotifier];
+// reach.reachableBlock = ^(Reachability* reach) { NetworkStatus::Reachable();
+// }; [reach startNotifier];
 
 namespace mbgl {
 

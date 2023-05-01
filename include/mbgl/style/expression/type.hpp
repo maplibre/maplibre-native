@@ -94,19 +94,18 @@ constexpr ImageType Image;
 
 struct Array;
 
-using Type = variant<
-    NullType,
-    NumberType,
-    BooleanType,
-    StringType,
-    ColorType,
-    ObjectType,
-    ValueType,
-    mapbox::util::recursive_wrapper<Array>,
-    CollatorType,
-    FormattedType,
-    ErrorType,
-    ImageType>;
+using Type = variant<NullType,
+                     NumberType,
+                     BooleanType,
+                     StringType,
+                     ColorType,
+                     ObjectType,
+                     ValueType,
+                     mapbox::util::recursive_wrapper<Array>,
+                     CollatorType,
+                     FormattedType,
+                     ErrorType,
+                     ImageType>;
 
 struct Array {
     explicit Array(Type itemType_)

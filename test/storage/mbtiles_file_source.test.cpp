@@ -48,8 +48,8 @@ TEST(MBTilesFileSource, AbsolutePath) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req =
-        mbtiles.request({Resource::Unknown, "mbtiles://not_absolute"}, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, "mbtiles://not_absolute"}, [&](Response res) {
             req.reset();
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
@@ -67,8 +67,8 @@ TEST(MBTilesFileSource, NonExistentFile) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req =
-        mbtiles.request({Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
             req.reset();
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
@@ -86,8 +86,8 @@ TEST(MBTilesFileSource, TileJSON) {
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req =
-        mbtiles.request({Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_TRUE(res.data.get());
@@ -107,16 +107,14 @@ TEST(MBTilesFileSource, Tile) {
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(
-            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ
-        ),
+            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_TRUE(res.data.get());
             ASSERT_EQ(res.noContent, false);
             loop.stop();
-        }
-    );
+        });
 
     loop.run();
 }
@@ -129,16 +127,14 @@ TEST(MBTilesFileSource, NonExistentTile) {
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(
-            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ
-        ),
+            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_FALSE(res.data.get());
             ASSERT_EQ(res.noContent, true);
             loop.stop();
-        }
-    );
+        });
 
     loop.run();
 }

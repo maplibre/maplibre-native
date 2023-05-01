@@ -88,8 +88,8 @@ DEFINE_IS_IN_UNICODE_BLOCK(UnifiedCanadianAboriginalSyllabicsExtended, 0x18B0, 0
 // DEFINE_IS_IN_UNICODE_BLOCK(VedicExtensions, 0x1CD0, 0x1CFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(PhoneticExtensions, 0x1D00, 0x1D7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(PhoneticExtensionsSupplement, 0x1D80, 0x1DBF)
-// DEFINE_IS_IN_UNICODE_BLOCK(CombiningDiacriticalMarksSupplement, 0x1DC0, 0x1DFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(LatinExtendedAdditional, 0x1E00, 0x1EFF)
+// DEFINE_IS_IN_UNICODE_BLOCK(CombiningDiacriticalMarksSupplement, 0x1DC0,
+// 0x1DFF) DEFINE_IS_IN_UNICODE_BLOCK(LatinExtendedAdditional, 0x1E00, 0x1EFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(GreekExtended, 0x1F00, 0x1FFF)
 DEFINE_IS_IN_UNICODE_BLOCK(GeneralPunctuation, 0x2000, 0x206F)
 // DEFINE_IS_IN_UNICODE_BLOCK(SuperscriptsandSubscripts, 0x2070, 0x209F)
@@ -262,16 +262,16 @@ DEFINE_IS_IN_UNICODE_BLOCK(HalfwidthandFullwidthForms, 0xFF00, 0xFFEF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CuneiformNumbersandPunctuation, 0x12400, 0x1247F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EarlyDynasticCuneiform, 0x12480, 0x1254F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphs, 0x13000, 0x1342F)
-// DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphFormatControls, 0x13430, 0x1343F)
-// DEFINE_IS_IN_UNICODE_BLOCK(AnatolianHieroglyphs, 0x14400, 0x1467F)
+// DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphFormatControls, 0x13430,
+// 0x1343F) DEFINE_IS_IN_UNICODE_BLOCK(AnatolianHieroglyphs, 0x14400, 0x1467F)
 // DEFINE_IS_IN_UNICODE_BLOCK(BamumSupplement, 0x16800, 0x16A3F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Mro, 0x16A40, 0x16A6F)
 // DEFINE_IS_IN_UNICODE_BLOCK(BassaVah, 0x16AD0, 0x16AFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(PahawhHmong, 0x16B00, 0x16B8F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Medefaidrin, 0x16E40, 0x16E9F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Miao, 0x16F00, 0x16F9F)
-// DEFINE_IS_IN_UNICODE_BLOCK(IdeographicSymbolsandPunctuation, 0x16FE0, 0x16FFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tangut, 0x17000, 0x187FF)
+// DEFINE_IS_IN_UNICODE_BLOCK(IdeographicSymbolsandPunctuation, 0x16FE0,
+// 0x16FFF) DEFINE_IS_IN_UNICODE_BLOCK(Tangut, 0x17000, 0x187FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(TangutComponents, 0x18800, 0x18AFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(KanaSupplement, 0x1B000, 0x1B0FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(KanaExtendedA, 0x1B100, 0x1B12F)
@@ -294,29 +294,29 @@ DEFINE_IS_IN_UNICODE_BLOCK(HalfwidthandFullwidthForms, 0xFF00, 0xFFEF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Adlam, 0x1E900, 0x1E95F)
 // DEFINE_IS_IN_UNICODE_BLOCK(IndicSiyaqNumbers, 0x1EC70, 0x1ECBF)
 // DEFINE_IS_IN_UNICODE_BLOCK(OttomanSiyaqNumbers, 0x1ED00, 0x1ED4F)
-// DEFINE_IS_IN_UNICODE_BLOCK(ArabicMathematicalAlphabeticSymbols, 0x1EE00, 0x1EEFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(MahjongTiles, 0x1F000, 0x1F02F)
+// DEFINE_IS_IN_UNICODE_BLOCK(ArabicMathematicalAlphabeticSymbols, 0x1EE00,
+// 0x1EEFF) DEFINE_IS_IN_UNICODE_BLOCK(MahjongTiles, 0x1F000, 0x1F02F)
 // DEFINE_IS_IN_UNICODE_BLOCK(DominoTiles, 0x1F030, 0x1F09F)
 // DEFINE_IS_IN_UNICODE_BLOCK(PlayingCards, 0x1F0A0, 0x1F0FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(EnclosedAlphanumericSupplement, 0x1F100, 0x1F1FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(EnclosedIdeographicSupplement, 0x1F200, 0x1F2FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(MiscellaneousSymbolsandPictographs, 0x1F300, 0x1F5FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Emoticons, 0x1F600, 0x1F64F)
+// DEFINE_IS_IN_UNICODE_BLOCK(MiscellaneousSymbolsandPictographs, 0x1F300,
+// 0x1F5FF) DEFINE_IS_IN_UNICODE_BLOCK(Emoticons, 0x1F600, 0x1F64F)
 // DEFINE_IS_IN_UNICODE_BLOCK(OrnamentalDingbats, 0x1F650, 0x1F67F)
 // DEFINE_IS_IN_UNICODE_BLOCK(TransportandMapSymbols, 0x1F680, 0x1F6FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(AlchemicalSymbols, 0x1F700, 0x1F77F)
 // DEFINE_IS_IN_UNICODE_BLOCK(GeometricShapesExtended, 0x1F780, 0x1F7FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementalArrowsC, 0x1F800, 0x1F8FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(SupplementalSymbolsandPictographs, 0x1F900, 0x1F9FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(ChessSymbols, 0x1FA00, 0x1FA6F)
+// DEFINE_IS_IN_UNICODE_BLOCK(SupplementalSymbolsandPictographs, 0x1F900,
+// 0x1F9FF) DEFINE_IS_IN_UNICODE_BLOCK(ChessSymbols, 0x1FA00, 0x1FA6F)
 // DEFINE_IS_IN_UNICODE_BLOCK(SymbolsandPictographsExtendedA, 0x1FA70, 0x1FAFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionB, 0x20000, 0x2A6DF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionC, 0x2A700, 0x2B73F)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionD, 0x2B740, 0x2B81F)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionE, 0x2B820, 0x2CEAF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionF, 0x2CEB0, 0x2EBEF)
-// DEFINE_IS_IN_UNICODE_BLOCK(CJKCompatibilityIdeographsSupplement, 0x2F800, 0x2FA1F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tags, 0xE0000, 0xE007F)
+// DEFINE_IS_IN_UNICODE_BLOCK(CJKCompatibilityIdeographsSupplement, 0x2F800,
+// 0x2FA1F) DEFINE_IS_IN_UNICODE_BLOCK(Tags, 0xE0000, 0xE007F)
 // DEFINE_IS_IN_UNICODE_BLOCK(VariationSelectorsSupplement, 0xE0100, 0xE01EF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaA, 0xF0000, 0xFFFFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaB, 0x100000, 0x10FFFF)
@@ -343,28 +343,25 @@ namespace util {
 namespace i18n {
 
 bool allowsWordBreaking(char16_t chr) {
-    return (
-        chr == 0x0a      /* newline */
-        || chr == 0x20   /* space */
-        || chr == 0x26   /* ampersand */
-        || chr == 0x28   /* open parenthesis */
-        || chr == 0x29   /* close parenthesis */
-        || chr == 0x2b   /* plus sign */
-        || chr == 0x2d   /* hyphen-minus */
-        || chr == 0x2f   /* solidus */
-        || chr == 0xad   /* soft hyphen */
-        || chr == 0xb7   /* middle dot */
-        || chr == 0x200b /* zero-width space */
-        || chr == 0x2010 /* hyphen */
-        || chr == 0x2013 /* en dash */
+    return (chr == 0x0a      /* newline */
+            || chr == 0x20   /* space */
+            || chr == 0x26   /* ampersand */
+            || chr == 0x28   /* open parenthesis */
+            || chr == 0x29   /* close parenthesis */
+            || chr == 0x2b   /* plus sign */
+            || chr == 0x2d   /* hyphen-minus */
+            || chr == 0x2f   /* solidus */
+            || chr == 0xad   /* soft hyphen */
+            || chr == 0xb7   /* middle dot */
+            || chr == 0x200b /* zero-width space */
+            || chr == 0x2010 /* hyphen */
+            || chr == 0x2013 /* en dash */
     );
 }
 
 bool charAllowsLetterSpacing(char16_t chr) {
-    return !(
-        isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) || isInArabicPresentationFormsA(chr) ||
-        isInArabicPresentationFormsB(chr)
-    );
+    return !(isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) ||
+             isInArabicPresentationFormsA(chr) || isInArabicPresentationFormsB(chr));
 }
 
 bool allowsLetterSpacing(const std::u16string& string) {
@@ -387,14 +384,13 @@ bool allowsIdeographicBreaking(char16_t chr) {
     // Return early for characters outside all ideographic ranges.
     if (chr < 0x2E80) return false;
 
-    return (
-        isInBopomofo(chr) || isInBopomofoExtended(chr) || isInCJKCompatibility(chr) || isInCJKCompatibilityForms(chr) ||
-        isInCJKCompatibilityIdeographs(chr) || isInCJKRadicalsSupplement(chr) || isInCJKStrokes(chr) ||
-        isInCJKSymbolsandPunctuation(chr) || isInCJKUnifiedIdeographs(chr) || isInCJKUnifiedIdeographsExtensionA(chr) ||
-        isInEnclosedCJKLettersandMonths(chr) || isInHalfwidthandFullwidthForms(chr) || isInHiragana(chr) ||
-        isInIdeographicDescriptionCharacters(chr) || isInKangxiRadicals(chr) || isInKatakana(chr) ||
-        isInKatakanaPhoneticExtensions(chr) || isInVerticalForms(chr) || isInYiRadicals(chr) || isInYiSyllables(chr)
-    );
+    return (isInBopomofo(chr) || isInBopomofoExtended(chr) || isInCJKCompatibility(chr) ||
+            isInCJKCompatibilityForms(chr) || isInCJKCompatibilityIdeographs(chr) || isInCJKRadicalsSupplement(chr) ||
+            isInCJKStrokes(chr) || isInCJKSymbolsandPunctuation(chr) || isInCJKUnifiedIdeographs(chr) ||
+            isInCJKUnifiedIdeographsExtensionA(chr) || isInEnclosedCJKLettersandMonths(chr) ||
+            isInHalfwidthandFullwidthForms(chr) || isInHiragana(chr) || isInIdeographicDescriptionCharacters(chr) ||
+            isInKangxiRadicals(chr) || isInKatakana(chr) || isInKatakanaPhoneticExtensions(chr) ||
+            isInVerticalForms(chr) || isInYiRadicals(chr) || isInYiSyllables(chr));
 
     // The following blocks also allow ideographic breaking; however, for other
     // reasons, Mapbox GL lacks support for codepoints beyond U+FFFF.
@@ -571,11 +567,10 @@ std::u16string verticalizePunctuation(const std::u16string& input) {
         char16_t nextCharCode = i < input.size() - 1 ? input[i + 1] : 0;
         char16_t prevCharCode = i ? input[i - 1] : 0;
 
-        bool canReplacePunctuation =
-            ((!nextCharCode || !hasRotatedVerticalOrientation(nextCharCode) || verticalPunctuation.count(input[i + 1])
-             ) &&
-             (!prevCharCode || !hasRotatedVerticalOrientation(prevCharCode) || verticalPunctuation.count(input[i - 1]))
-            );
+        bool canReplacePunctuation = ((!nextCharCode || !hasRotatedVerticalOrientation(nextCharCode) ||
+                                       verticalPunctuation.count(input[i + 1])) &&
+                                      (!prevCharCode || !hasRotatedVerticalOrientation(prevCharCode) ||
+                                       verticalPunctuation.count(input[i - 1])));
 
         if (char16_t repl = canReplacePunctuation ? verticalizePunctuation(input[i]) : 0) {
             output += repl;
@@ -604,13 +599,11 @@ bool charInSupportedScript(char16_t chr) {
     // complex text shaping, based on unicode script metadata:
     // http://www.unicode.org/repos/cldr/trunk/common/properties/scriptMetadata.txt
     // where "Web Rank <= 32" "Shaping Required = YES"
-    return !(
-        (chr >= 0x0900 && chr <= 0x0DFF) ||
-        // Main blocks for Indic scripts and Sinhala
-        (chr >= 0x0F00 && chr <= 0x109F) ||
-        // Main blocks for Tibetan and Myanmar
-        isInKhmer(chr)
-    );
+    return !((chr >= 0x0900 && chr <= 0x0DFF) ||
+             // Main blocks for Indic scripts and Sinhala
+             (chr >= 0x0F00 && chr <= 0x109F) ||
+             // Main blocks for Tibetan and Myanmar
+             isInKhmer(chr));
 }
 
 bool isStringInSupportedScript(const std::string& input) {

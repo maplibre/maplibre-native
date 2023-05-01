@@ -13,14 +13,12 @@ Length::Length(std::unique_ptr<Expression> input_)
 EvaluationResult Length::evaluate(const EvaluationContext& params) const {
     EvaluationResult value = input->evaluate(params);
     if (!value) return value;
-    return value->match(
-        [](const std::string& s) { return EvaluationResult{static_cast<double>(s.size())}; },
-        [](const std::vector<Value>& v) { return EvaluationResult{static_cast<double>(v.size())}; },
-        [&](const auto&) -> EvaluationResult {
-            return EvaluationError{
-                "Expected value to be of type string or array, but found " + toString(typeOf(*value)) + " instead."};
-        }
-    );
+    return value->match([](const std::string& s) { return EvaluationResult{static_cast<double>(s.size())}; },
+                        [](const std::vector<Value>& v) { return EvaluationResult{static_cast<double>(v.size())}; },
+                        [&](const auto&) -> EvaluationResult {
+                            return EvaluationError{"Expected value to be of type string or array, but found " +
+                                                   toString(typeOf(*value)) + " instead."};
+                        });
 }
 
 void Length::eachChild(const std::function<void(const Expression&)>& visit) const {

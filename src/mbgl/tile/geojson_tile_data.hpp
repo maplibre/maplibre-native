@@ -3,8 +3,9 @@
 
 namespace mbgl {
 
-// Implements a simple in-memory Tile type that holds GeoJSON values. A GeoJSON tile can only have
-// one layer, and it is always returned regardless of which layer is requested.
+// Implements a simple in-memory Tile type that holds GeoJSON values. A GeoJSON
+// tile can only have one layer, and it is always returned regardless of which
+// layer is requested.
 
 class GeoJSONTileFeature : public GeometryTileFeature {
 public:

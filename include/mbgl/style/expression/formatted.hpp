@@ -18,12 +18,10 @@ extern const char* const kFormattedSectionTextFont;
 extern const char* const kFormattedSectionTextColor;
 
 struct FormattedSection {
-    explicit FormattedSection(
-        std::string text_,
-        std::optional<double> fontScale_,
-        std::optional<FontStack> fontStack_,
-        std::optional<Color> textColor_
-    )
+    explicit FormattedSection(std::string text_,
+                              std::optional<double> fontScale_,
+                              std::optional<FontStack> fontStack_,
+                              std::optional<Color> textColor_)
         : text(std::move(text_)),
           fontScale(std::move(fontScale_)),
           fontStack(std::move(fontStack_)),

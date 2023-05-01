@@ -17,8 +17,8 @@ using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::platform;
 
-// Note that custom layers need to draw geometry with a z value of 1 to take advantage of
-// depth-based fragment culling.
+// Note that custom layers need to draw geometry with a z value of 1 to take
+// advantage of depth-based fragment culling.
 static const GLchar* vertexShaderSource = R"MBGL_SHADER(
 attribute vec2 a_pos;
 void main() {
@@ -32,9 +32,9 @@ void main() {
 }
 )MBGL_SHADER";
 
-// Not using any mbgl-specific stuff (other than a basic error-checking macro) in the
-// layer implementation because it is intended to reflect how someone using custom layers
-// might actually write their own implementation.
+// Not using any mbgl-specific stuff (other than a basic error-checking macro)
+// in the layer implementation because it is intended to reflect how someone
+// using custom layers might actually write their own implementation.
 
 class TestLayer : public mbgl::style::CustomLayerHost {
 public:
@@ -94,12 +94,10 @@ TEST(CustomLayer, Basic) {
     util::RunLoop loop;
 
     HeadlessFrontend frontend{1};
-    Map map(
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-        ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets")
-    );
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
     map.getStyle().addLayer(std::make_unique<CustomLayer>("custom", std::make_unique<TestLayer>()));

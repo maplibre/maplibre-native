@@ -30,8 +30,7 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
-        const mat4& projMatrix
-    ) const override;
+        const mat4& projMatrix) const override;
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
@@ -39,9 +38,9 @@ public:
 
     void getFeatureState(FeatureState& state, const std::optional<std::string>&, const std::string&) const override;
 
-    void
-    removeFeatureState(const std::optional<std::string>&, const std::optional<std::string>&, const std::optional<std::string>&)
-        override;
+    void removeFeatureState(const std::optional<std::string>&,
+                            const std::optional<std::string>&,
+                            const std::optional<std::string>&) override;
 
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
@@ -66,16 +65,21 @@ protected:
     RenderTileSetSource(Immutable<style::Source::Impl>);
     ~RenderTileSetSource() override;
 
-    virtual void
-    updateInternal(const Tileset&, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&) = 0;
+    virtual void updateInternal(const Tileset&,
+                                const std::vector<Immutable<style::LayerProperties>>&,
+                                bool needsRendering,
+                                bool needsRelayout,
+                                const TileParameters&) = 0;
     // Returns tileset from the current impl.
     virtual const std::optional<Tileset>& getTileset() const = 0;
 
 private:
     uint8_t getMaxZoom() const final;
-    void
-    update(Immutable<style::Source::Impl>, const std::vector<Immutable<style::LayerProperties>>&, bool needsRendering, bool needsRelayout, const TileParameters&)
-        final;
+    void update(Immutable<style::Source::Impl>,
+                const std::vector<Immutable<style::LayerProperties>>&,
+                bool needsRendering,
+                bool needsRelayout,
+                const TileParameters&) final;
 
     std::optional<Tileset> cachedTileset;
 };

@@ -33,17 +33,15 @@ class Style;
 
 class Map : private util::noncopyable {
 public:
-    explicit Map(
-        RendererFrontend&,
-        MapObserver&,
-        const MapOptions&,
-        const ResourceOptions&,
-        const ClientOptions& = ClientOptions()
-    );
+    explicit Map(RendererFrontend&,
+                 MapObserver&,
+                 const MapOptions&,
+                 const ResourceOptions&,
+                 const ClientOptions& = ClientOptions());
     ~Map();
 
-    /// Register a callback that will get called (on the render thread) when all resources have
-    /// been loaded and a complete render occurs.
+    /// Register a callback that will get called (on the render thread) when all
+    /// resources have been loaded and a complete render occurs.
     using StillImageCallback = std::function<void(std::exception_ptr)>;
     void renderStill(StillImageCallback);
     void renderStill(const CameraOptions&, MapDebugOptions, StillImageCallback);
@@ -73,24 +71,18 @@ public:
     void scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation = {});
     void pitchBy(double pitch, const AnimationOptions& animation = {});
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
-    CameraOptions cameraForLatLngBounds(
-        const LatLngBounds&,
-        const EdgeInsets&,
-        const std::optional<double>& bearing = std::nullopt,
-        const std::optional<double>& pitch = std::nullopt
-    ) const;
-    CameraOptions cameraForLatLngs(
-        const std::vector<LatLng>&,
-        const EdgeInsets&,
-        const std::optional<double>& bearing = std::nullopt,
-        const std::optional<double>& pitch = std::nullopt
-    ) const;
-    CameraOptions cameraForGeometry(
-        const Geometry<double>&,
-        const EdgeInsets&,
-        const std::optional<double>& bearing = std::nullopt,
-        const std::optional<double>& pitch = std::nullopt
-    ) const;
+    CameraOptions cameraForLatLngBounds(const LatLngBounds&,
+                                        const EdgeInsets&,
+                                        const std::optional<double>& bearing = std::nullopt,
+                                        const std::optional<double>& pitch = std::nullopt) const;
+    CameraOptions cameraForLatLngs(const std::vector<LatLng>&,
+                                   const EdgeInsets&,
+                                   const std::optional<double>& bearing = std::nullopt,
+                                   const std::optional<double>& pitch = std::nullopt) const;
+    CameraOptions cameraForGeometry(const Geometry<double>&,
+                                    const EdgeInsets&,
+                                    const std::optional<double>& bearing = std::nullopt,
+                                    const std::optional<double>& pitch = std::nullopt) const;
     LatLngBounds latLngBoundsForCamera(const CameraOptions&) const;
     LatLngBounds latLngBoundsForCameraUnwrapped(const CameraOptions&) const;
 
@@ -135,10 +127,11 @@ public:
 
     // Tile prefetching
     //
-    /// When loading a map, if `PrefetchZoomDelta` is set to any number greater than 0, the map will
-    /// first request a tile for `zoom - delta` in a attempt to display a full map at lower
-    /// resolution as quick as possible. It will get clamped at the tile source minimum zoom. The
-    /// default `delta` is 4.
+    /// When loading a map, if `PrefetchZoomDelta` is set to any number greater
+    /// than 0, the map will first request a tile for `zoom - delta` in a
+    /// attempt to display a full map at lower resolution as quick as possible.
+    /// It will get clamped at the tile source minimum zoom. The default `delta`
+    /// is 4.
     void setPrefetchZoomDelta(uint8_t delta);
     uint8_t getPrefetchZoomDelta() const;
 
@@ -149,11 +142,13 @@ public:
     bool isFullyLoaded() const;
     void dumpDebugLogs() const;
 
-    /// FreeCameraOptions provides more direct access to the underlying camera entity.
-    /// For backwards compatibility the state set using this API must be representable with
-    /// `CameraOptions` as well. Parameters are clamped to a valid range or discarded as invalid
-    /// if the conversion to the pitch and bearing presentation is ambiguous. For example orientation
-    /// can be invalid if it leads to the camera being upside down or the quaternion has zero length.
+    /// FreeCameraOptions provides more direct access to the underlying camera
+    /// entity. For backwards compatibility the state set using this API must be
+    /// representable with `CameraOptions` as well. Parameters are clamped to a
+    /// valid range or discarded as invalid if the conversion to the pitch and
+    /// bearing presentation is ambiguous. For example orientation can be
+    /// invalid if it leads to the camera being upside down or the quaternion
+    /// has zero length.
     void setFreeCameraOptions(const FreeCameraOptions& camera);
     FreeCameraOptions getFreeCameraOptions() const;
 

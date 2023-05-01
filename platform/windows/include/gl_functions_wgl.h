@@ -83,7 +83,8 @@ PFNGLGETBOOLEANVPROC wgl_glGetBooleanv = NULL;
 PFNGLGETBUFFERPARAMETERIVPROC wgl_glGetBufferParameteriv = NULL;
 PFNGLGETERRORPROC wgl_glGetError = NULL;
 PFNGLGETFLOATVPROC wgl_glGetFloatv = NULL;
-PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC wgl_glGetFramebufferAttachmentParameteriv = NULL;
+PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC
+wgl_glGetFramebufferAttachmentParameteriv = NULL;
 PFNGLGETINTEGERVPROC wgl_glGetIntegerv = NULL;
 PFNGLGETPROGRAMINFOLOGPROC wgl_glGetProgramInfoLog = NULL;
 PFNGLGETPROGRAMIVPROC wgl_glGetProgramiv = NULL;
@@ -343,8 +344,8 @@ void loadWGL() {
     wgl_glDepthRangef = (PFNGLDEPTHRANGEFPROC)wgl_GetProcAddress("glDepthRangef");
     wgl_glDetachShader = (PFNGLDETACHSHADERPROC)wgl_GetProcAddress("glDetachShader");
     wgl_glDisable = (PFNGLDISABLEPROC)wgl_GetProcAddress("glDisable");
-    wgl_glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)wgl_GetProcAddress("glDisableVertexAttribArray"
-    );
+    wgl_glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)wgl_GetProcAddress(
+        "glDisableVertexAttribArray");
     wgl_glDrawArrays = (PFNGLDRAWARRAYSPROC)wgl_GetProcAddress("glDrawArrays");
     wgl_glDrawElements = (PFNGLDRAWELEMENTSPROC)wgl_GetProcAddress("glDrawElements");
     wgl_glEnable = (PFNGLENABLEPROC)wgl_GetProcAddress("glEnable");
@@ -367,17 +368,17 @@ void loadWGL() {
     wgl_glGetBufferParameteriv = (PFNGLGETBUFFERPARAMETERIVPROC)wgl_GetProcAddress("glGetBufferParameteriv");
     wgl_glGetError = (PFNGLGETERRORPROC)wgl_GetProcAddress("glGetError");
     wgl_glGetFloatv = (PFNGLGETFLOATVPROC)wgl_GetProcAddress("glGetFloatv");
-    wgl_glGetFramebufferAttachmentParameteriv = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC
-    )wgl_GetProcAddress("glGetFramebufferAttachmentParameteriv");
+    wgl_glGetFramebufferAttachmentParameteriv = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)wgl_GetProcAddress(
+        "glGetFramebufferAttachmentParameteriv");
     wgl_glGetIntegerv = (PFNGLGETINTEGERVPROC)wgl_GetProcAddress("glGetIntegerv");
     wgl_glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)wgl_GetProcAddress("glGetProgramInfoLog");
     wgl_glGetProgramiv = (PFNGLGETPROGRAMIVPROC)wgl_GetProcAddress("glGetProgramiv");
-    wgl_glGetRenderbufferParameteriv = (PFNGLGETRENDERBUFFERPARAMETERIVPROC
-    )wgl_GetProcAddress("glGetRenderbufferParameteriv");
+    wgl_glGetRenderbufferParameteriv = (PFNGLGETRENDERBUFFERPARAMETERIVPROC)wgl_GetProcAddress(
+        "glGetRenderbufferParameteriv");
     wgl_glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)wgl_GetProcAddress("glGetShaderInfoLog");
     wgl_glGetShaderiv = (PFNGLGETSHADERIVPROC)wgl_GetProcAddress("glGetShaderiv");
-    wgl_glGetShaderPrecisionFormat = (PFNGLGETSHADERPRECISIONFORMATPROC)wgl_GetProcAddress("glGetShaderPrecisionFormat"
-    );
+    wgl_glGetShaderPrecisionFormat = (PFNGLGETSHADERPRECISIONFORMATPROC)wgl_GetProcAddress(
+        "glGetShaderPrecisionFormat");
     wgl_glGetShaderSource = (PFNGLGETSHADERSOURCEPROC)wgl_GetProcAddress("glGetShaderSource");
     wgl_glGetString = (PFNGLGETSTRINGPROC)wgl_GetProcAddress("glGetString");
     wgl_glGetTexParameterfv = (PFNGLGETTEXPARAMETERFVPROC)wgl_GetProcAddress("glGetTexParameterfv");
@@ -477,8 +478,8 @@ void loadWGL() {
     wgl_glUniformMatrix3x4fv = (PFNGLUNIFORMMATRIX3X4FVPROC)wgl_GetProcAddress("glUniformMatrix3x4fv");
     wgl_glUniformMatrix4x3fv = (PFNGLUNIFORMMATRIX4X3FVPROC)wgl_GetProcAddress("glUniformMatrix4x3fv");
     wgl_glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)wgl_GetProcAddress("glBlitFramebuffer");
-    wgl_glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC
-    )wgl_GetProcAddress("glRenderbufferStorageMultisample");
+    wgl_glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)wgl_GetProcAddress(
+        "glRenderbufferStorageMultisample");
     wgl_glFramebufferTextureLayer = (PFNGLFRAMEBUFFERTEXTURELAYERPROC)wgl_GetProcAddress("glFramebufferTextureLayer");
     wgl_glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)wgl_GetProcAddress("glMapBufferRange");
     wgl_glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wgl_GetProcAddress("glFlushMappedBufferRange");
@@ -491,10 +492,10 @@ void loadWGL() {
     wgl_glEndTransformFeedback = (PFNGLENDTRANSFORMFEEDBACKPROC)wgl_GetProcAddress("glEndTransformFeedback");
     wgl_glBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)wgl_GetProcAddress("glBindBufferRange");
     wgl_glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)wgl_GetProcAddress("glBindBufferBase");
-    wgl_glTransformFeedbackVaryings = (PFNGLTRANSFORMFEEDBACKVARYINGSPROC
-    )wgl_GetProcAddress("glTransformFeedbackVaryings");
-    wgl_glGetTransformFeedbackVarying = (PFNGLGETTRANSFORMFEEDBACKVARYINGPROC
-    )wgl_GetProcAddress("glGetTransformFeedbackVarying");
+    wgl_glTransformFeedbackVaryings = (PFNGLTRANSFORMFEEDBACKVARYINGSPROC)wgl_GetProcAddress(
+        "glTransformFeedbackVaryings");
+    wgl_glGetTransformFeedbackVarying = (PFNGLGETTRANSFORMFEEDBACKVARYINGPROC)wgl_GetProcAddress(
+        "glGetTransformFeedbackVarying");
     wgl_glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)wgl_GetProcAddress("glVertexAttribIPointer");
     wgl_glGetVertexAttribIiv = (PFNGLGETVERTEXATTRIBIIVPROC)wgl_GetProcAddress("glGetVertexAttribIiv");
     wgl_glGetVertexAttribIuiv = (PFNGLGETVERTEXATTRIBIUIVPROC)wgl_GetProcAddress("glGetVertexAttribIuiv");
@@ -522,8 +523,8 @@ void loadWGL() {
     wgl_glGetActiveUniformsiv = (PFNGLGETACTIVEUNIFORMSIVPROC)wgl_GetProcAddress("glGetActiveUniformsiv");
     wgl_glGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)wgl_GetProcAddress("glGetUniformBlockIndex");
     wgl_glGetActiveUniformBlockiv = (PFNGLGETACTIVEUNIFORMBLOCKIVPROC)wgl_GetProcAddress("glGetActiveUniformBlockiv");
-    wgl_glGetActiveUniformBlockName = (PFNGLGETACTIVEUNIFORMBLOCKNAMEPROC
-    )wgl_GetProcAddress("glGetActiveUniformBlockName");
+    wgl_glGetActiveUniformBlockName = (PFNGLGETACTIVEUNIFORMBLOCKNAMEPROC)wgl_GetProcAddress(
+        "glGetActiveUniformBlockName");
     wgl_glUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)wgl_GetProcAddress("glUniformBlockBinding");
     wgl_glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)wgl_GetProcAddress("glDrawArraysInstanced");
     wgl_glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)wgl_GetProcAddress("glDrawElementsInstanced");
@@ -548,8 +549,8 @@ void loadWGL() {
     wgl_glGetSamplerParameterfv = (PFNGLGETSAMPLERPARAMETERFVPROC)wgl_GetProcAddress("glGetSamplerParameterfv");
     wgl_glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)wgl_GetProcAddress("glVertexAttribDivisor");
     wgl_glBindTransformFeedback = (PFNGLBINDTRANSFORMFEEDBACKPROC)wgl_GetProcAddress("glBindTransformFeedback");
-    wgl_glDeleteTransformFeedbacks = (PFNGLDELETETRANSFORMFEEDBACKSPROC)wgl_GetProcAddress("glDeleteTransformFeedbacks"
-    );
+    wgl_glDeleteTransformFeedbacks = (PFNGLDELETETRANSFORMFEEDBACKSPROC)wgl_GetProcAddress(
+        "glDeleteTransformFeedbacks");
     wgl_glGenTransformFeedbacks = (PFNGLGENTRANSFORMFEEDBACKSPROC)wgl_GetProcAddress("glGenTransformFeedbacks");
     wgl_glIsTransformFeedback = (PFNGLISTRANSFORMFEEDBACKPROC)wgl_GetProcAddress("glIsTransformFeedback");
     wgl_glPauseTransformFeedback = (PFNGLPAUSETRANSFORMFEEDBACKPROC)wgl_GetProcAddress("glPauseTransformFeedback");
@@ -558,8 +559,8 @@ void loadWGL() {
     wgl_glProgramBinary = (PFNGLPROGRAMBINARYPROC)wgl_GetProcAddress("glProgramBinary");
     wgl_glProgramParameteri = (PFNGLPROGRAMPARAMETERIPROC)wgl_GetProcAddress("glProgramParameteri");
     wgl_glInvalidateFramebuffer = (PFNGLINVALIDATEFRAMEBUFFERPROC)wgl_GetProcAddress("glInvalidateFramebuffer");
-    wgl_glInvalidateSubFramebuffer = (PFNGLINVALIDATESUBFRAMEBUFFERPROC)wgl_GetProcAddress("glInvalidateSubFramebuffer"
-    );
+    wgl_glInvalidateSubFramebuffer = (PFNGLINVALIDATESUBFRAMEBUFFERPROC)wgl_GetProcAddress(
+        "glInvalidateSubFramebuffer");
     wgl_glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)wgl_GetProcAddress("glTexStorage2D");
     wgl_glTexStorage3D = (PFNGLTEXSTORAGE3DPROC)wgl_GetProcAddress("glTexStorage3D");
     wgl_glGetInternalformativ = (PFNGLGETINTERNALFORMATIVPROC)wgl_GetProcAddress("glGetInternalformativ");
@@ -567,8 +568,8 @@ void loadWGL() {
     /* OpenGL Windows Extensions */
 
     wgl_wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wgl_GetProcAddress("wglChoosePixelFormatARB");
-    wgl_wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wgl_GetProcAddress("wglCreateContextAttribsARB"
-    );
+    wgl_wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wgl_GetProcAddress(
+        "wglCreateContextAttribsARB");
     wgl_wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wgl_GetProcAddress("wglGetExtensionsStringARB");
     wgl_wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wgl_GetProcAddress("wglGetExtensionsStringEXT");
 }
@@ -590,11 +591,11 @@ void (*const glAttachShader)(GLuint, GLuint) = [](GLuint program, GLuint shader)
     if (!opengl32) loadWGL();
     ::wgl_glAttachShader(program, shader);
 };
-void (*const glBindAttribLocation)(GLuint, GLuint, const GLchar*) = [](GLuint program, GLuint index, const GLchar* name
-                                                                    ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBindAttribLocation(program, index, name);
-};
+void (*const glBindAttribLocation)(GLuint, GLuint, const GLchar*) =
+    [](GLuint program, GLuint index, const GLchar* name) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBindAttribLocation(program, index, name);
+    };
 void (*const glBindBuffer)(GLenum, GLuint) = [](GLenum target, GLuint buffer) {
     if (!opengl32) loadWGL();
     ::wgl_glBindBuffer(target, buffer);
@@ -611,11 +612,11 @@ void (*const glBindTexture)(GLenum, GLuint) = [](GLenum target, GLuint texture) 
     if (!opengl32) loadWGL();
     ::wgl_glBindTexture(target, texture);
 };
-void (*const glBlendColor
-)(GLfloat, GLfloat, GLfloat, GLfloat) = [](GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBlendColor(red, green, blue, alpha);
-};
+void (*const glBlendColor)(GLfloat, GLfloat, GLfloat, GLfloat) =
+    [](GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBlendColor(red, green, blue, alpha);
+    };
 void (*const glBlendEquation)(GLenum) = [](GLenum mode) {
     if (!opengl32) loadWGL();
     ::wgl_glBlendEquation(mode);
@@ -628,21 +629,21 @@ void (*const glBlendFunc)(GLenum, GLenum) = [](GLenum sfactor, GLenum dfactor) {
     if (!opengl32) loadWGL();
     ::wgl_glBlendFunc(sfactor, dfactor);
 };
-void (*const glBlendFuncSeparate
-)(GLenum, GLenum, GLenum, GLenum) = [](GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
-};
-void (*const glBufferData
-)(GLenum, GLsizeiptr, const void*, GLenum) = [](GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBufferData(target, size, data, usage);
-};
-void (*const glBufferSubData
-)(GLenum, GLintptr, GLsizeiptr, const void*) = [](GLenum target, GLintptr offset, GLsizeiptr size, const void* data) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBufferSubData(target, offset, size, data);
-};
+void (*const glBlendFuncSeparate)(GLenum, GLenum, GLenum, GLenum) =
+    [](GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+    };
+void (*const glBufferData)(GLenum, GLsizeiptr, const void*, GLenum) =
+    [](GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBufferData(target, size, data, usage);
+    };
+void (*const glBufferSubData)(GLenum, GLintptr, GLsizeiptr, const void*) =
+    [](GLenum target, GLintptr offset, GLsizeiptr size, const void* data) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBufferSubData(target, offset, size, data);
+    };
 GLenum (*const glCheckFramebufferStatus)(GLenum) = [](GLenum target) {
     if (!opengl32) loadWGL();
     return ::wgl_glCheckFramebufferStatus(target);
@@ -651,11 +652,11 @@ void (*const glClear)(GLbitfield) = [](GLbitfield mask) {
     if (!opengl32) loadWGL();
     ::wgl_glClear(mask);
 };
-void (*const glClearColor
-)(GLfloat, GLfloat, GLfloat, GLfloat) = [](GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
-    if (!opengl32) loadWGL();
-    ::wgl_glClearColor(red, green, blue, alpha);
-};
+void (*const glClearColor)(GLfloat, GLfloat, GLfloat, GLfloat) =
+    [](GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
+        if (!opengl32) loadWGL();
+        ::wgl_glClearColor(red, green, blue, alpha);
+    };
 void (*const glClearDepthf)(GLfloat) = [](GLfloat d) {
     if (!opengl32) loadWGL();
     ::wgl_glClearDepthf(d);
@@ -664,46 +665,51 @@ void (*const glClearStencil)(GLint) = [](GLint s) {
     if (!opengl32) loadWGL();
     ::wgl_glClearStencil(s);
 };
-void (*const glColorMask
-)(GLboolean, GLboolean, GLboolean, GLboolean) = [](GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
-    if (!opengl32) loadWGL();
-    ::wgl_glColorMask(red, green, blue, alpha);
-};
+void (*const glColorMask)(GLboolean, GLboolean, GLboolean, GLboolean) =
+    [](GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
+        if (!opengl32) loadWGL();
+        ::wgl_glColorMask(red, green, blue, alpha);
+    };
 void (*const glCompileShader)(GLuint) = [](GLuint shader) {
     if (!opengl32) loadWGL();
     ::wgl_glCompileShader(shader);
 };
-void (*const glCompressedTexImage2D
-)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const void*) = [](GLenum target,
-                                                                             GLint level,
-                                                                             GLenum internalformat,
-                                                                             GLsizei width,
-                                                                             GLsizei height,
-                                                                             GLint border,
-                                                                             GLsizei imageSize,
-                                                                             const void* data) {
-    if (!opengl32) loadWGL();
-    ::wgl_glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
-};
-void (*const glCompressedTexSubImage2D
-)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, const void*) = [](GLenum target,
-                                                                                    GLint level,
-                                                                                    GLint xoffset,
-                                                                                    GLint yoffset,
-                                                                                    GLsizei width,
-                                                                                    GLsizei height,
-                                                                                    GLenum format,
-                                                                                    GLsizei imageSize,
-                                                                                    const void* data) {
-    if (!opengl32) loadWGL();
-    ::wgl_glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
-};
-void (*const glCopyTexImage2D)(GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint) =
-    [](GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border
-    ) {
+void (*const glCompressedTexImage2D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const void*) =
+    [](GLenum target,
+       GLint level,
+       GLenum internalformat,
+       GLsizei width,
+       GLsizei height,
+       GLint border,
+       GLsizei imageSize,
+       const void* data) {
         if (!opengl32) loadWGL();
-        ::wgl_glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+        ::wgl_glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
     };
+void (*const glCompressedTexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, const void*) =
+    [](GLenum target,
+       GLint level,
+       GLint xoffset,
+       GLint yoffset,
+       GLsizei width,
+       GLsizei height,
+       GLenum format,
+       GLsizei imageSize,
+       const void* data) {
+        if (!opengl32) loadWGL();
+        ::wgl_glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+    };
+void (*const glCopyTexImage2D)(GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint) = [](GLenum target,
+                                                                                                  GLint level,
+                                                                                                  GLenum internalformat,
+                                                                                                  GLint x,
+                                                                                                  GLint y,
+                                                                                                  GLsizei width,
+                                                                                                  GLsizei height,
+                                                                                                  GLint border) {
+    if (!opengl32) loadWGL();
+    ::wgl_glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+};
 void (*const glCopyTexSubImage2D)(GLenum, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei) =
     [](GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
         if (!opengl32) loadWGL();
@@ -773,11 +779,11 @@ void (*const glDrawArrays)(GLenum, GLint, GLsizei) = [](GLenum mode, GLint first
     if (!opengl32) loadWGL();
     ::wgl_glDrawArrays(mode, first, count);
 };
-void (*const glDrawElements
-)(GLenum, GLsizei, GLenum, const void*) = [](GLenum mode, GLsizei count, GLenum type, const void* indices) {
-    if (!opengl32) loadWGL();
-    ::wgl_glDrawElements(mode, count, type, indices);
-};
+void (*const glDrawElements)(GLenum, GLsizei, GLenum, const void*) =
+    [](GLenum mode, GLsizei count, GLenum type, const void* indices) {
+        if (!opengl32) loadWGL();
+        ::wgl_glDrawElements(mode, count, type, indices);
+    };
 void (*const glEnable)(GLenum) = [](GLenum cap) {
     if (!opengl32) loadWGL();
     ::wgl_glEnable(cap);
@@ -838,11 +844,11 @@ void (*const glGetActiveUniform)(GLuint, GLuint, GLsizei, GLsizei*, GLint*, GLen
         if (!opengl32) loadWGL();
         ::wgl_glGetActiveUniform(program, index, bufSize, length, size, type, name);
     };
-void (*const glGetAttachedShaders
-)(GLuint, GLsizei, GLsizei*, GLuint*) = [](GLuint program, GLsizei maxCount, GLsizei* count, GLuint* shaders) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetAttachedShaders(program, maxCount, count, shaders);
-};
+void (*const glGetAttachedShaders)(GLuint, GLsizei, GLsizei*, GLuint*) =
+    [](GLuint program, GLsizei maxCount, GLsizei* count, GLuint* shaders) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetAttachedShaders(program, maxCount, count, shaders);
+    };
 GLint (*const glGetAttribLocation)(GLuint, const GLchar*) = [](GLuint program, const GLchar* name) {
     if (!opengl32) loadWGL();
     return ::wgl_glGetAttribLocation(program, name);
@@ -863,20 +869,20 @@ void (*const glGetFloatv)(GLenum, GLfloat*) = [](GLenum pname, GLfloat* data) {
     if (!opengl32) loadWGL();
     ::wgl_glGetFloatv(pname, data);
 };
-void (*const glGetFramebufferAttachmentParameteriv
-)(GLenum, GLenum, GLenum, GLint*) = [](GLenum target, GLenum attachment, GLenum pname, GLint* params) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
-};
+void (*const glGetFramebufferAttachmentParameteriv)(GLenum, GLenum, GLenum, GLint*) =
+    [](GLenum target, GLenum attachment, GLenum pname, GLint* params) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+    };
 void (*const glGetIntegerv)(GLenum, GLint*) = [](GLenum pname, GLint* data) {
     if (!opengl32) loadWGL();
     ::wgl_glGetIntegerv(pname, data);
 };
-void (*const glGetProgramInfoLog
-)(GLuint, GLsizei, GLsizei*, GLchar*) = [](GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetProgramInfoLog(program, bufSize, length, infoLog);
-};
+void (*const glGetProgramInfoLog)(GLuint, GLsizei, GLsizei*, GLchar*) =
+    [](GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetProgramInfoLog(program, bufSize, length, infoLog);
+    };
 void (*const glGetProgramiv)(GLuint, GLenum, GLint*) = [](GLuint program, GLenum pname, GLint* params) {
     if (!opengl32) loadWGL();
     ::wgl_glGetProgramiv(program, pname, params);
@@ -885,25 +891,25 @@ void (*const glGetRenderbufferParameteriv)(GLenum, GLenum, GLint*) = [](GLenum t
     if (!opengl32) loadWGL();
     ::wgl_glGetRenderbufferParameteriv(target, pname, params);
 };
-void (*const glGetShaderInfoLog
-)(GLuint, GLsizei, GLsizei*, GLchar*) = [](GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetShaderInfoLog(shader, bufSize, length, infoLog);
-};
+void (*const glGetShaderInfoLog)(GLuint, GLsizei, GLsizei*, GLchar*) =
+    [](GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetShaderInfoLog(shader, bufSize, length, infoLog);
+    };
 void (*const glGetShaderiv)(GLuint, GLenum, GLint*) = [](GLuint shader, GLenum pname, GLint* params) {
     if (!opengl32) loadWGL();
     ::wgl_glGetShaderiv(shader, pname, params);
 };
-void (*const glGetShaderPrecisionFormat
-)(GLenum, GLenum, GLint*, GLint*) = [](GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
-};
-void (*const glGetShaderSource
-)(GLuint, GLsizei, GLsizei*, GLchar*) = [](GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* source) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetShaderSource(shader, bufSize, length, source);
-};
+void (*const glGetShaderPrecisionFormat)(GLenum, GLenum, GLint*, GLint*) =
+    [](GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+    };
+void (*const glGetShaderSource)(GLuint, GLsizei, GLsizei*, GLchar*) =
+    [](GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* source) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetShaderSource(shader, bufSize, length, source);
+    };
 const GLubyte* (*const glGetString)(GLenum) = [](GLenum name) {
     if (!opengl32) loadWGL();
     return ::wgl_glGetString(name);
@@ -997,11 +1003,11 @@ void (*const glReleaseShaderCompiler)() = []() {
     if (!opengl32) loadWGL();
     ::wgl_glReleaseShaderCompiler();
 };
-void (*const glRenderbufferStorage
-)(GLenum, GLenum, GLsizei, GLsizei) = [](GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
-    if (!opengl32) loadWGL();
-    ::wgl_glRenderbufferStorage(target, internalformat, width, height);
-};
+void (*const glRenderbufferStorage)(GLenum, GLenum, GLsizei, GLsizei) =
+    [](GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
+        if (!opengl32) loadWGL();
+        ::wgl_glRenderbufferStorage(target, internalformat, width, height);
+    };
 void (*const glSampleCoverage)(GLfloat, GLboolean) = [](GLfloat value, GLboolean invert) {
     if (!opengl32) loadWGL();
     ::wgl_glSampleCoverage(value, invert);
@@ -1024,11 +1030,11 @@ void (*const glStencilFunc)(GLenum, GLint, GLuint) = [](GLenum func, GLint ref, 
     if (!opengl32) loadWGL();
     ::wgl_glStencilFunc(func, ref, mask);
 };
-void (*const glStencilFuncSeparate)(GLenum, GLenum, GLint, GLuint) = [](GLenum face, GLenum func, GLint ref, GLuint mask
-                                                                     ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glStencilFuncSeparate(face, func, ref, mask);
-};
+void (*const glStencilFuncSeparate)(GLenum, GLenum, GLint, GLuint) =
+    [](GLenum face, GLenum func, GLint ref, GLuint mask) {
+        if (!opengl32) loadWGL();
+        ::wgl_glStencilFuncSeparate(face, func, ref, mask);
+    };
 void (*const glStencilMask)(GLuint) = [](GLuint mask) {
     if (!opengl32) loadWGL();
     ::wgl_glStencilMask(mask);
@@ -1041,33 +1047,33 @@ void (*const glStencilOp)(GLenum, GLenum, GLenum) = [](GLenum fail, GLenum zfail
     if (!opengl32) loadWGL();
     ::wgl_glStencilOp(fail, zfail, zpass);
 };
-void (*const glStencilOpSeparate
-)(GLenum, GLenum, GLenum, GLenum) = [](GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass) {
-    if (!opengl32) loadWGL();
-    ::wgl_glStencilOpSeparate(face, sfail, dpfail, dppass);
-};
-void (*const glTexImage2D
-)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*) = [](GLenum target,
-                                                                                   GLint level,
-                                                                                   GLint internalformat,
-                                                                                   GLsizei width,
-                                                                                   GLsizei height,
-                                                                                   GLint border,
-                                                                                   GLenum format,
-                                                                                   GLenum type,
-                                                                                   const void* pixels) {
-    if (!opengl32) loadWGL();
-    ::wgl_glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-};
+void (*const glStencilOpSeparate)(GLenum, GLenum, GLenum, GLenum) =
+    [](GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass) {
+        if (!opengl32) loadWGL();
+        ::wgl_glStencilOpSeparate(face, sfail, dpfail, dppass);
+    };
+void (*const glTexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*) =
+    [](GLenum target,
+       GLint level,
+       GLint internalformat,
+       GLsizei width,
+       GLsizei height,
+       GLint border,
+       GLenum format,
+       GLenum type,
+       const void* pixels) {
+        if (!opengl32) loadWGL();
+        ::wgl_glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    };
 void (*const glTexParameterf)(GLenum, GLenum, GLfloat) = [](GLenum target, GLenum pname, GLfloat param) {
     if (!opengl32) loadWGL();
     ::wgl_glTexParameterf(target, pname, param);
 };
-void (*const glTexParameterfv)(GLenum, GLenum, const GLfloat*) = [](GLenum target, GLenum pname, const GLfloat* params
-                                                                 ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glTexParameterfv(target, pname, params);
-};
+void (*const glTexParameterfv)(GLenum, GLenum, const GLfloat*) =
+    [](GLenum target, GLenum pname, const GLfloat* params) {
+        if (!opengl32) loadWGL();
+        ::wgl_glTexParameterfv(target, pname, params);
+    };
 void (*const glTexParameteri)(GLenum, GLenum, GLint) = [](GLenum target, GLenum pname, GLint param) {
     if (!opengl32) loadWGL();
     ::wgl_glTexParameteri(target, pname, param);
@@ -1076,19 +1082,19 @@ void (*const glTexParameteriv)(GLenum, GLenum, const GLint*) = [](GLenum target,
     if (!opengl32) loadWGL();
     ::wgl_glTexParameteriv(target, pname, params);
 };
-void (*const glTexSubImage2D
-)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = [](GLenum target,
-                                                                                   GLint level,
-                                                                                   GLint xoffset,
-                                                                                   GLint yoffset,
-                                                                                   GLsizei width,
-                                                                                   GLsizei height,
-                                                                                   GLenum format,
-                                                                                   GLenum type,
-                                                                                   const void* pixels) {
-    if (!opengl32) loadWGL();
-    ::wgl_glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
-};
+void (*const glTexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) =
+    [](GLenum target,
+       GLint level,
+       GLint xoffset,
+       GLint yoffset,
+       GLsizei width,
+       GLsizei height,
+       GLenum format,
+       GLenum type,
+       const void* pixels) {
+        if (!opengl32) loadWGL();
+        ::wgl_glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    };
 void (*const glUniform1f)(GLint, GLfloat) = [](GLint location, GLfloat v0) {
     if (!opengl32) loadWGL();
     ::wgl_glUniform1f(location, v0);
@@ -1137,20 +1143,20 @@ void (*const glUniform3iv)(GLint, GLsizei, const GLint*) = [](GLint location, GL
     if (!opengl32) loadWGL();
     ::wgl_glUniform3iv(location, count, value);
 };
-void (*const glUniform4f
-)(GLint, GLfloat, GLfloat, GLfloat, GLfloat) = [](GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
-    if (!opengl32) loadWGL();
-    ::wgl_glUniform4f(location, v0, v1, v2, v3);
-};
+void (*const glUniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat) =
+    [](GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
+        if (!opengl32) loadWGL();
+        ::wgl_glUniform4f(location, v0, v1, v2, v3);
+    };
 void (*const glUniform4fv)(GLint, GLsizei, const GLfloat*) = [](GLint location, GLsizei count, const GLfloat* value) {
     if (!opengl32) loadWGL();
     ::wgl_glUniform4fv(location, count, value);
 };
-void (*const glUniform4i)(GLint, GLint, GLint, GLint, GLint) = [](GLint location, GLint v0, GLint v1, GLint v2, GLint v3
-                                                               ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glUniform4i(location, v0, v1, v2, v3);
-};
+void (*const glUniform4i)(GLint, GLint, GLint, GLint, GLint) =
+    [](GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
+        if (!opengl32) loadWGL();
+        ::wgl_glUniform4i(location, v0, v1, v2, v3);
+    };
 void (*const glUniform4iv)(GLint, GLsizei, const GLint*) = [](GLint location, GLsizei count, const GLint* value) {
     if (!opengl32) loadWGL();
     ::wgl_glUniform4iv(location, count, value);
@@ -1202,11 +1208,11 @@ void (*const glVertexAttrib3fv)(GLuint, const GLfloat*) = [](GLuint index, const
     if (!opengl32) loadWGL();
     ::wgl_glVertexAttrib3fv(index, v);
 };
-void (*const glVertexAttrib4f
-)(GLuint, GLfloat, GLfloat, GLfloat, GLfloat) = [](GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-    if (!opengl32) loadWGL();
-    ::wgl_glVertexAttrib4f(index, x, y, z, w);
-};
+void (*const glVertexAttrib4f)(GLuint, GLfloat, GLfloat, GLfloat, GLfloat) =
+    [](GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+        if (!opengl32) loadWGL();
+        ::wgl_glVertexAttrib4f(index, x, y, z, w);
+    };
 void (*const glVertexAttrib4fv)(GLuint, const GLfloat*) = [](GLuint index, const GLfloat* v) {
     if (!opengl32) loadWGL();
     ::wgl_glVertexAttrib4fv(index, v);
@@ -1232,22 +1238,22 @@ void (*const glDrawRangeElements)(GLenum, GLuint, GLuint, GLsizei, GLenum, const
         if (!opengl32) loadWGL();
         ::wgl_glDrawRangeElements(mode, start, end, count, type, indices);
     };
-void (*const glTexImage3D
-)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*) = [](GLenum target,
-                                                                                              GLint level,
-                                                                                              GLint internalformat,
-                                                                                              GLsizei width,
-                                                                                              GLsizei height,
-                                                                                              GLsizei depth,
-                                                                                              GLint border,
-                                                                                              GLenum format,
-                                                                                              GLenum type,
-                                                                                              const GLvoid* pixels) {
-    if (!opengl32) loadWGL();
-    ::wgl_glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
-};
-void (*const glTexSubImage3D
-)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid*) =
+void (*const glTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*) =
+    [](GLenum target,
+       GLint level,
+       GLint internalformat,
+       GLsizei width,
+       GLsizei height,
+       GLsizei depth,
+       GLint border,
+       GLenum format,
+       GLenum type,
+       const GLvoid* pixels) {
+        if (!opengl32) loadWGL();
+        ::wgl_glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
+    };
+void (*const glTexSubImage3D)(
+    GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid*) =
     [](GLenum target,
        GLint level,
        GLint xoffset,
@@ -1262,50 +1268,49 @@ void (*const glTexSubImage3D
         if (!opengl32) loadWGL();
         ::wgl_glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
     };
-void (*const glCopyTexSubImage3D
-)(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei) = [](GLenum target,
-                                                                           GLint level,
-                                                                           GLint xoffset,
-                                                                           GLint yoffset,
-                                                                           GLint zoffset,
-                                                                           GLint x,
-                                                                           GLint y,
-                                                                           GLsizei width,
-                                                                           GLsizei height) {
-    if (!opengl32) loadWGL();
-    ::wgl_glCopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
-};
-void (*const glCompressedTexImage3D
-)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid*) = [](GLenum target,
-                                                                                        GLint level,
-                                                                                        GLenum internalformat,
-                                                                                        GLsizei width,
-                                                                                        GLsizei height,
-                                                                                        GLsizei depth,
-                                                                                        GLint border,
-                                                                                        GLsizei imageSize,
-                                                                                        const GLvoid* data) {
-    if (!opengl32) loadWGL();
-    ::wgl_glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
-};
-void (*const glCompressedTexSubImage3D
-)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid*) = [](GLenum target,
-                                                                                                      GLint level,
-                                                                                                      GLint xoffset,
-                                                                                                      GLint yoffset,
-                                                                                                      GLint zoffset,
-                                                                                                      GLsizei width,
-                                                                                                      GLsizei height,
-                                                                                                      GLsizei depth,
-                                                                                                      GLenum format,
-                                                                                                      GLsizei imageSize,
-                                                                                                      const GLvoid* data
-                                                                                                   ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glCompressedTexSubImage3D(
-        target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data
-    );
-};
+void (*const glCopyTexSubImage3D)(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei) =
+    [](GLenum target,
+       GLint level,
+       GLint xoffset,
+       GLint yoffset,
+       GLint zoffset,
+       GLint x,
+       GLint y,
+       GLsizei width,
+       GLsizei height) {
+        if (!opengl32) loadWGL();
+        ::wgl_glCopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
+    };
+void (*const glCompressedTexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid*) =
+    [](GLenum target,
+       GLint level,
+       GLenum internalformat,
+       GLsizei width,
+       GLsizei height,
+       GLsizei depth,
+       GLint border,
+       GLsizei imageSize,
+       const GLvoid* data) {
+        if (!opengl32) loadWGL();
+        ::wgl_glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+    };
+void (*const glCompressedTexSubImage3D)(
+    GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid*) =
+    [](GLenum target,
+       GLint level,
+       GLint xoffset,
+       GLint yoffset,
+       GLint zoffset,
+       GLsizei width,
+       GLsizei height,
+       GLsizei depth,
+       GLenum format,
+       GLsizei imageSize,
+       const GLvoid* data) {
+        if (!opengl32) loadWGL();
+        ::wgl_glCompressedTexSubImage3D(
+            target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
+    };
 void (*const glGenQueries)(GLsizei, GLuint*) = [](GLsizei n, GLuint* ids) {
     if (!opengl32) loadWGL();
     ::wgl_glGenQueries(n, ids);
@@ -1376,20 +1381,20 @@ void (*const glUniformMatrix4x3fv)(GLint, GLsizei, GLboolean, const GLfloat*) =
         if (!opengl32) loadWGL();
         ::wgl_glUniformMatrix4x3fv(location, count, transpose, value);
     };
-void (*const glBlitFramebuffer
-)(GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum) = [](GLint srcX0,
-                                                                                   GLint srcY0,
-                                                                                   GLint srcX1,
-                                                                                   GLint srcY1,
-                                                                                   GLint dstX0,
-                                                                                   GLint dstY0,
-                                                                                   GLint dstX1,
-                                                                                   GLint dstY1,
-                                                                                   GLbitfield mask,
-                                                                                   GLenum filter) {
-    if (!opengl32) loadWGL();
-    ::wgl_glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
-};
+void (*const glBlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum) =
+    [](GLint srcX0,
+       GLint srcY0,
+       GLint srcX1,
+       GLint srcY1,
+       GLint dstX0,
+       GLint dstY0,
+       GLint dstX1,
+       GLint dstY1,
+       GLbitfield mask,
+       GLenum filter) {
+        if (!opengl32) loadWGL();
+        ::wgl_glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    };
 void (*const glRenderbufferStorageMultisample)(GLenum, GLsizei, GLenum, GLsizei, GLsizei) =
     [](GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
         if (!opengl32) loadWGL();
@@ -1400,16 +1405,16 @@ void (*const glFramebufferTextureLayer)(GLenum, GLenum, GLuint, GLint, GLint) =
         if (!opengl32) loadWGL();
         ::wgl_glFramebufferTextureLayer(target, attachment, texture, level, layer);
     };
-GLvoid* (*const glMapBufferRange
-)(GLenum, GLintptr, GLsizeiptr, GLbitfield) = [](GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
-    if (!opengl32) loadWGL();
-    return ::wgl_glMapBufferRange(target, offset, length, access);
-};
-void (*const glFlushMappedBufferRange
-)(GLenum, GLintptr, GLsizeiptr) = [](GLenum target, GLintptr offset, GLsizeiptr length) {
-    if (!opengl32) loadWGL();
-    ::wgl_glFlushMappedBufferRange(target, offset, length);
-};
+GLvoid* (*const glMapBufferRange)(GLenum, GLintptr, GLsizeiptr, GLbitfield) =
+    [](GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
+        if (!opengl32) loadWGL();
+        return ::wgl_glMapBufferRange(target, offset, length, access);
+    };
+void (*const glFlushMappedBufferRange)(GLenum, GLintptr, GLsizeiptr) =
+    [](GLenum target, GLintptr offset, GLsizeiptr length) {
+        if (!opengl32) loadWGL();
+        ::wgl_glFlushMappedBufferRange(target, offset, length);
+    };
 void (*const glBindVertexArray)(GLuint) = [](GLuint array) {
     if (!opengl32) loadWGL();
     ::wgl_glBindVertexArray(array);
@@ -1470,16 +1475,16 @@ void (*const glGetVertexAttribIuiv)(GLuint, GLenum, GLuint*) = [](GLuint index, 
     if (!opengl32) loadWGL();
     ::wgl_glGetVertexAttribIuiv(index, pname, params);
 };
-void (*const glVertexAttribI4i
-)(GLuint, GLint, GLint, GLint, GLint) = [](GLuint index, GLint x, GLint y, GLint z, GLint w) {
-    if (!opengl32) loadWGL();
-    ::wgl_glVertexAttribI4i(index, x, y, z, w);
-};
-void (*const glVertexAttribI4ui
-)(GLuint, GLuint, GLuint, GLuint, GLuint) = [](GLuint index, GLuint x, GLuint y, GLuint z, GLuint w) {
-    if (!opengl32) loadWGL();
-    ::wgl_glVertexAttribI4ui(index, x, y, z, w);
-};
+void (*const glVertexAttribI4i)(GLuint, GLint, GLint, GLint, GLint) =
+    [](GLuint index, GLint x, GLint y, GLint z, GLint w) {
+        if (!opengl32) loadWGL();
+        ::wgl_glVertexAttribI4i(index, x, y, z, w);
+    };
+void (*const glVertexAttribI4ui)(GLuint, GLuint, GLuint, GLuint, GLuint) =
+    [](GLuint index, GLuint x, GLuint y, GLuint z, GLuint w) {
+        if (!opengl32) loadWGL();
+        ::wgl_glVertexAttribI4ui(index, x, y, z, w);
+    };
 void (*const glVertexAttribI4iv)(GLuint, const GLint*) = [](GLuint index, const GLint* v) {
     if (!opengl32) loadWGL();
     ::wgl_glVertexAttribI4iv(index, v);
@@ -1508,11 +1513,11 @@ void (*const glUniform3ui)(GLint, GLuint, GLuint, GLuint) = [](GLint location, G
     if (!opengl32) loadWGL();
     ::wgl_glUniform3ui(location, v0, v1, v2);
 };
-void (*const glUniform4ui
-)(GLint, GLuint, GLuint, GLuint, GLuint) = [](GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3) {
-    if (!opengl32) loadWGL();
-    ::wgl_glUniform4ui(location, v0, v1, v2, v3);
-};
+void (*const glUniform4ui)(GLint, GLuint, GLuint, GLuint, GLuint) =
+    [](GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3) {
+        if (!opengl32) loadWGL();
+        ::wgl_glUniform4ui(location, v0, v1, v2, v3);
+    };
 void (*const glUniform1uiv)(GLint, GLsizei, const GLuint*) = [](GLint location, GLsizei count, const GLuint* value) {
     if (!opengl32) loadWGL();
     ::wgl_glUniform1uiv(location, count, value);
@@ -1533,21 +1538,21 @@ void (*const glClearBufferiv)(GLenum, GLint, const GLint*) = [](GLenum buffer, G
     if (!opengl32) loadWGL();
     ::wgl_glClearBufferiv(buffer, drawbuffer, value);
 };
-void (*const glClearBufferuiv)(GLenum, GLint, const GLuint*) = [](GLenum buffer, GLint drawbuffer, const GLuint* value
-                                                               ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glClearBufferuiv(buffer, drawbuffer, value);
-};
-void (*const glClearBufferfv)(GLenum, GLint, const GLfloat*) = [](GLenum buffer, GLint drawbuffer, const GLfloat* value
-                                                               ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glClearBufferfv(buffer, drawbuffer, value);
-};
-void (*const glClearBufferfi
-)(GLenum, GLint, GLfloat, GLint) = [](GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
-    if (!opengl32) loadWGL();
-    ::wgl_glClearBufferfi(buffer, drawbuffer, depth, stencil);
-};
+void (*const glClearBufferuiv)(GLenum, GLint, const GLuint*) =
+    [](GLenum buffer, GLint drawbuffer, const GLuint* value) {
+        if (!opengl32) loadWGL();
+        ::wgl_glClearBufferuiv(buffer, drawbuffer, value);
+    };
+void (*const glClearBufferfv)(GLenum, GLint, const GLfloat*) =
+    [](GLenum buffer, GLint drawbuffer, const GLfloat* value) {
+        if (!opengl32) loadWGL();
+        ::wgl_glClearBufferfv(buffer, drawbuffer, value);
+    };
+void (*const glClearBufferfi)(GLenum, GLint, GLfloat, GLint) =
+    [](GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
+        if (!opengl32) loadWGL();
+        ::wgl_glClearBufferfi(buffer, drawbuffer, depth, stencil);
+    };
 const GLubyte* (*const glGetStringi)(GLenum, GLuint) = [](GLenum name, GLuint index) {
     if (!opengl32) loadWGL();
     return ::wgl_glGetStringi(name, index);
@@ -1571,26 +1576,26 @@ GLuint (*const glGetUniformBlockIndex)(GLuint, const GLchar*) = [](GLuint progra
     if (!opengl32) loadWGL();
     return ::wgl_glGetUniformBlockIndex(program, uniformBlockName);
 };
-void (*const glGetActiveUniformBlockiv
-)(GLuint, GLuint, GLenum, GLint*) = [](GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params) {
-    if (!opengl32) loadWGL();
-    ::wgl_glGetActiveUniformBlockiv(program, uniformBlockIndex, pname, params);
-};
+void (*const glGetActiveUniformBlockiv)(GLuint, GLuint, GLenum, GLint*) =
+    [](GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params) {
+        if (!opengl32) loadWGL();
+        ::wgl_glGetActiveUniformBlockiv(program, uniformBlockIndex, pname, params);
+    };
 void (*const glGetActiveUniformBlockName)(GLuint, GLuint, GLsizei, GLsizei*, GLchar*) =
     [](GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName) {
         if (!opengl32) loadWGL();
         ::wgl_glGetActiveUniformBlockName(program, uniformBlockIndex, bufSize, length, uniformBlockName);
     };
-void (*const glUniformBlockBinding
-)(GLuint, GLuint, GLuint) = [](GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) {
-    if (!opengl32) loadWGL();
-    ::wgl_glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding);
-};
-void (*const glDrawArraysInstanced
-)(GLenum, GLint, GLsizei, GLsizei) = [](GLenum mode, GLint first, GLsizei count, GLsizei instancecount) {
-    if (!opengl32) loadWGL();
-    ::wgl_glDrawArraysInstanced(mode, first, count, instancecount);
-};
+void (*const glUniformBlockBinding)(GLuint, GLuint, GLuint) =
+    [](GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) {
+        if (!opengl32) loadWGL();
+        ::wgl_glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding);
+    };
+void (*const glDrawArraysInstanced)(GLenum, GLint, GLsizei, GLsizei) =
+    [](GLenum mode, GLint first, GLsizei count, GLsizei instancecount) {
+        if (!opengl32) loadWGL();
+        ::wgl_glDrawArraysInstanced(mode, first, count, instancecount);
+    };
 void (*const glDrawElementsInstanced)(GLenum, GLsizei, GLenum, const GLvoid*, GLsizei) =
     [](GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount) {
         if (!opengl32) loadWGL();
@@ -1653,20 +1658,20 @@ void (*const glSamplerParameteri)(GLuint, GLenum, GLint) = [](GLuint sampler, GL
     if (!opengl32) loadWGL();
     ::wgl_glSamplerParameteri(sampler, pname, param);
 };
-void (*const glSamplerParameteriv)(GLuint, GLenum, const GLint*) = [](GLuint sampler, GLenum pname, const GLint* param
-                                                                   ) {
-    if (!opengl32) loadWGL();
-    ::wgl_glSamplerParameteriv(sampler, pname, param);
-};
+void (*const glSamplerParameteriv)(GLuint, GLenum, const GLint*) =
+    [](GLuint sampler, GLenum pname, const GLint* param) {
+        if (!opengl32) loadWGL();
+        ::wgl_glSamplerParameteriv(sampler, pname, param);
+    };
 void (*const glSamplerParameterf)(GLuint, GLenum, GLfloat) = [](GLuint sampler, GLenum pname, GLfloat param) {
     if (!opengl32) loadWGL();
     ::wgl_glSamplerParameterf(sampler, pname, param);
 };
-void (*const glSamplerParameterfv
-)(GLuint, GLenum, const GLfloat*) = [](GLuint sampler, GLenum pname, const GLfloat* param) {
-    if (!opengl32) loadWGL();
-    ::wgl_glSamplerParameterfv(sampler, pname, param);
-};
+void (*const glSamplerParameterfv)(GLuint, GLenum, const GLfloat*) =
+    [](GLuint sampler, GLenum pname, const GLfloat* param) {
+        if (!opengl32) loadWGL();
+        ::wgl_glSamplerParameterfv(sampler, pname, param);
+    };
 void (*const glGetSamplerParameteriv)(GLuint, GLenum, GLint*) = [](GLuint sampler, GLenum pname, GLint* params) {
     if (!opengl32) loadWGL();
     ::wgl_glGetSamplerParameteriv(sampler, pname, params);
@@ -1717,14 +1722,19 @@ void (*const glProgramParameteri)(GLuint, GLenum, GLint) = [](GLuint program, GL
     if (!opengl32) loadWGL();
     ::wgl_glProgramParameteri(program, pname, value);
 };
-void (*const glInvalidateFramebuffer
-)(GLenum, GLsizei, const GLenum*) = [](GLenum target, GLsizei numAttachments, const GLenum* attachments) {
-    if (!opengl32) loadWGL();
-    ::wgl_glInvalidateFramebuffer(target, numAttachments, attachments);
-};
+void (*const glInvalidateFramebuffer)(GLenum, GLsizei, const GLenum*) =
+    [](GLenum target, GLsizei numAttachments, const GLenum* attachments) {
+        if (!opengl32) loadWGL();
+        ::wgl_glInvalidateFramebuffer(target, numAttachments, attachments);
+    };
 void (*const glInvalidateSubFramebuffer)(GLenum, GLsizei, const GLenum*, GLint, GLint, GLsizei, GLsizei) =
-    [](GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height
-    ) {
+    [](GLenum target,
+       GLsizei numAttachments,
+       const GLenum* attachments,
+       GLint x,
+       GLint y,
+       GLsizei width,
+       GLsizei height) {
         if (!opengl32) loadWGL();
         ::wgl_glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
     };

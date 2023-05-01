@@ -24,10 +24,8 @@ TEST(ImageManager, Basic) {
     FixtureLog log;
     ImageManager imageManager;
 
-    auto images = parseSprite(
-        util::read_file("test/fixtures/annotations/emerald.png"),
-        util::read_file("test/fixtures/annotations/emerald.json")
-    );
+    auto images = parseSprite(util::read_file("test/fixtures/annotations/emerald.png"),
+                              util::read_file("test/fixtures/annotations/emerald.json"));
     for (auto& image : images) {
         imageManager.addImage(image);
         auto* stored = imageManager.getImage(image->id);
@@ -83,12 +81,10 @@ public:
     StubImageRequestor(ImageManager& imageManager_)
         : ImageRequestor(imageManager_) {}
 
-    void onImagesAvailable(
-        ImageMap icons,
-        ImageMap patterns,
-        std::unordered_map<std::string, uint32_t> versionMap,
-        uint64_t imageCorrelationID_
-    ) final {
+    void onImagesAvailable(ImageMap icons,
+                           ImageMap patterns,
+                           std::unordered_map<std::string, uint32_t> versionMap,
+                           uint64_t imageCorrelationID_) final {
         if (imagesAvailable && imageCorrelationID == imageCorrelationID_) imagesAvailable(icons, patterns, versionMap);
     }
 
@@ -331,14 +327,14 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     runLoop.runOnce();
     ASSERT_TRUE(imageManager.getImage("missing") == nullptr);
 
-    // Multiple requestors, check that image resource is not destroyed if there is at least 1 requestor that uses it.
+    // Multiple requestors, check that image resource is not destroyed if there
+    // is at least 1 requestor that uses it.
     std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
     {
         std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
         imageManager.getImages(
             *requestor,
-            std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull)
-        );
+            std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull));
         imageManager.getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 5);

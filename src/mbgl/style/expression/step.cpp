@@ -9,9 +9,9 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-Step::Step(
-    const type::Type& type_, std::unique_ptr<Expression> input_, std::map<double, std::unique_ptr<Expression>> stops_
-)
+Step::Step(const type::Type& type_,
+           std::unique_ptr<Expression> input_,
+           std::map<double, std::unique_ptr<Expression>> stops_)
     : Expression(Kind::Step, type_),
       input(std::move(input_)),
       stops(std::move(stops_)) {
@@ -107,8 +107,8 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
 
     double previous = -std::numeric_limits<double>::infinity();
 
-    // consume the first output value, which doesn't have a corresponding input value,
-    // before proceeding into the "stops" loop below.
+    // consume the first output value, which doesn't have a corresponding input
+    // value, before proceeding into the "stops" loop below.
     auto firstOutput = ctx.parse(arrayMember(value, 2), 2, outputType);
     if (!firstOutput) {
         return ParseResult();
@@ -144,22 +144,19 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
                         label = std::optional<double>{n};
                     }
                 },
-                [&](const auto&) {}
-            );
+                [&](const auto&) {});
         }
         if (!label) {
             ctx.error(
                 R"(Input/output pairs for "step" expressions must be defined using literal numeric values (not computed expressions) for the input values.)",
-                i
-            );
+                i);
             return ParseResult();
         }
 
         if (*label <= previous) {
             ctx.error(
                 R"(Input/output pairs for "step" expressions must be arranged with input values in strictly ascending order.)",
-                i
-            );
+                i);
             return ParseResult();
         }
         previous = *label;

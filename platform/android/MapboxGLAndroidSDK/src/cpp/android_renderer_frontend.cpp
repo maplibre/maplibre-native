@@ -80,16 +80,14 @@ void AndroidRendererFrontend::reduceMemoryUse() {
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
 }
 
-std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(
-    const std::string& sourceID, const SourceQueryOptions& options
-) const {
+std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
+                                                                  const SourceQueryOptions& options) const {
     // Waits for the result from the orchestration thread and returns
     return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options).get();
 }
 
-std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(
-    const ScreenBox& box, const RenderedQueryOptions& options
-) const {
+std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
+                                                                    const RenderedQueryOptions& options) const {
     // Select the right overloaded method
     std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
         const = &Renderer::queryRenderedFeatures;
@@ -98,9 +96,8 @@ std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(
     return mapRenderer.actor().ask(fn, box, options).get();
 }
 
-std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(
-    const ScreenCoordinate& point, const RenderedQueryOptions& options
-) const {
+std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenCoordinate& point,
+                                                                    const RenderedQueryOptions& options) const {
     // Select the right overloaded method
     std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
         const = &Renderer::queryRenderedFeatures;
@@ -124,8 +121,7 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
     const Feature& feature,
     const std::string& extension,
     const std::string& extensionField,
-    const std::optional<std::map<std::string, mbgl::Value>>& args
-) const {
+    const std::optional<std::map<std::string, mbgl::Value>>& args) const {
     return mapRenderer.actor()
         .ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args)
         .get();

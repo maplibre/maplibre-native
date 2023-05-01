@@ -24,44 +24,36 @@ bool neq(const Value& a, const Value& b) {
     return a != b;
 }
 bool lt(const Value& lhs, const Value& rhs) {
-    return lhs.match(
-        [&](const std::string& a) { return a < rhs.get<std::string>(); },
-        [&](double a) { return a < rhs.get<double>(); },
-        [&](const auto&) {
-            assert(false);
-            return false;
-        }
-    );
+    return lhs.match([&](const std::string& a) { return a < rhs.get<std::string>(); },
+                     [&](double a) { return a < rhs.get<double>(); },
+                     [&](const auto&) {
+                         assert(false);
+                         return false;
+                     });
 }
 bool gt(const Value& lhs, const Value& rhs) {
-    return lhs.match(
-        [&](const std::string& a) { return a > rhs.get<std::string>(); },
-        [&](double a) { return a > rhs.get<double>(); },
-        [&](const auto&) {
-            assert(false);
-            return false;
-        }
-    );
+    return lhs.match([&](const std::string& a) { return a > rhs.get<std::string>(); },
+                     [&](double a) { return a > rhs.get<double>(); },
+                     [&](const auto&) {
+                         assert(false);
+                         return false;
+                     });
 }
 bool lteq(const Value& lhs, const Value& rhs) {
-    return lhs.match(
-        [&](const std::string& a) { return a <= rhs.get<std::string>(); },
-        [&](double a) { return a <= rhs.get<double>(); },
-        [&](const auto&) {
-            assert(false);
-            return false;
-        }
-    );
+    return lhs.match([&](const std::string& a) { return a <= rhs.get<std::string>(); },
+                     [&](double a) { return a <= rhs.get<double>(); },
+                     [&](const auto&) {
+                         assert(false);
+                         return false;
+                     });
 }
 bool gteq(const Value& lhs, const Value& rhs) {
-    return lhs.match(
-        [&](const std::string& a) { return a >= rhs.get<std::string>(); },
-        [&](double a) { return a >= rhs.get<double>(); },
-        [&](const auto&) {
-            assert(false);
-            return false;
-        }
-    );
+    return lhs.match([&](const std::string& a) { return a >= rhs.get<std::string>(); },
+                     [&](double a) { return a >= rhs.get<double>(); },
+                     [&](const auto&) {
+                         assert(false);
+                         return false;
+                     });
 }
 
 bool eqCollate(const std::string& a, const std::string& b, const Collator& c) {
@@ -142,10 +134,9 @@ EvaluationResult BasicComparison::evaluate(const EvaluationContext& params) cons
         type::Type rhsType = typeOf(*rhsResult);
         // check that type is string or number, and equal
         if (lhsType != rhsType || !(lhsType == type::String || lhsType == type::Number)) {
-            return EvaluationError{
-                R"(Expected arguments for ")" + op + R"(")" +
-                " to be (string, string) or (number, number), but found (" + toString(lhsType) + ", " +
-                toString(rhsType) + ") instead."};
+            return EvaluationError{R"(Expected arguments for ")" + op + R"(")" +
+                                   " to be (string, string) or (number, number), but found (" + toString(lhsType) +
+                                   ", " + toString(rhsType) + ") instead."};
         }
     }
 
@@ -173,12 +164,10 @@ std::vector<std::optional<Value>> BasicComparison::possibleOutputs() const {
     return {{true}, {false}};
 }
 
-CollatorComparison::CollatorComparison(
-    std::string op_,
-    std::unique_ptr<Expression> lhs_,
-    std::unique_ptr<Expression> rhs_,
-    std::unique_ptr<Expression> collator_
-)
+CollatorComparison::CollatorComparison(std::string op_,
+                                       std::unique_ptr<Expression> lhs_,
+                                       std::unique_ptr<Expression> rhs_,
+                                       std::unique_ptr<Expression> collator_)
     : Expression(Kind::Comparison, type::Boolean),
       op(std::move(op_)),
       compare(getCollatorComparisonFunction(op)),
@@ -286,9 +275,8 @@ ParseResult parseComparison(const Convertible& value, ParsingContext& ctx) {
         }
         ParseResult collatorParseResult = ctx.parse(arrayMember(value, 3), 3, {type::Collator});
         if (!collatorParseResult) return ParseResult();
-        return ParseResult(
-            std::make_unique<CollatorComparison>(op, std::move(*lhs), std::move(*rhs), std::move(*collatorParseResult))
-        );
+        return ParseResult(std::make_unique<CollatorComparison>(
+            op, std::move(*lhs), std::move(*rhs), std::move(*collatorParseResult)));
     }
 
     return ParseResult(std::make_unique<BasicComparison>(op, std::move(*lhs), std::move(*rhs)));

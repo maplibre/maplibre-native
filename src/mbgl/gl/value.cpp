@@ -79,11 +79,10 @@ void ColorMask::Set(const Type& value) {
 ColorMask::Type ColorMask::Get() {
     GLboolean bools[4];
     MBGL_CHECK_ERROR(glGetBooleanv(GL_COLOR_WRITEMASK, bools));
-    return {
-        static_cast<bool>(bools[0]),
-        static_cast<bool>(bools[1]),
-        static_cast<bool>(bools[2]),
-        static_cast<bool>(bools[3])};
+    return {static_cast<bool>(bools[0]),
+            static_cast<bool>(bools[1]),
+            static_cast<bool>(bools[2]),
+            static_cast<bool>(bools[3])};
 }
 
 const constexpr StencilFunc::Type StencilFunc::Default;
@@ -117,11 +116,9 @@ StencilTest::Type StencilTest::Get() {
 const constexpr StencilOp::Type StencilOp::Default;
 
 void StencilOp::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glStencilOp(
-        Enum<gfx::StencilOpType>::to(value.sfail),
-        Enum<gfx::StencilOpType>::to(value.dpfail),
-        Enum<gfx::StencilOpType>::to(value.dppass)
-    ));
+    MBGL_CHECK_ERROR(glStencilOp(Enum<gfx::StencilOpType>::to(value.sfail),
+                                 Enum<gfx::StencilOpType>::to(value.dpfail),
+                                 Enum<gfx::StencilOpType>::to(value.dppass)));
 }
 
 StencilOp::Type StencilOp::Get() {
@@ -131,10 +128,9 @@ StencilOp::Type StencilOp::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_FAIL, &sfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &dpfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &dppass));
-    return {
-        Enum<gfx::StencilOpType>::from(sfail),
-        Enum<gfx::StencilOpType>::from(dpfail),
-        Enum<gfx::StencilOpType>::from(dppass)};
+    return {Enum<gfx::StencilOpType>::from(sfail),
+            Enum<gfx::StencilOpType>::from(dpfail),
+            Enum<gfx::StencilOpType>::from(dppass)};
 }
 
 const constexpr DepthRange::Type DepthRange::Default;
@@ -200,9 +196,8 @@ BlendEquation::Type BlendEquation::Get() {
 const constexpr BlendFunc::Type BlendFunc::Default;
 
 void BlendFunc::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glBlendFunc(
-        Enum<gfx::ColorBlendFactorType>::to(value.sfactor), Enum<gfx::ColorBlendFactorType>::to(value.dfactor)
-    ));
+    MBGL_CHECK_ERROR(glBlendFunc(Enum<gfx::ColorBlendFactorType>::to(value.sfactor),
+                                 Enum<gfx::ColorBlendFactorType>::to(value.dfactor)));
 }
 
 BlendFunc::Type BlendFunc::Get() {
@@ -270,10 +265,9 @@ void Viewport::Set(const Type& value) {
 Viewport::Type Viewport::Get() {
     GLint viewport[4];
     MBGL_CHECK_ERROR(glGetIntegerv(GL_VIEWPORT, viewport));
-    return {
-        static_cast<int32_t>(viewport[0]),
-        static_cast<int32_t>(viewport[1]),
-        {static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3])}};
+    return {static_cast<int32_t>(viewport[0]),
+            static_cast<int32_t>(viewport[1]),
+            {static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3])}};
 }
 
 const constexpr ScissorTest::Type ScissorTest::Default;
@@ -498,8 +492,7 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
             vertexType(binding->attribute.dataType),
             static_cast<GLboolean>(false),
             static_cast<GLsizei>(binding->vertexStride),
-            reinterpret_cast<GLvoid*>(binding->attribute.offset + (binding->vertexStride * binding->vertexOffset))
-        ));
+            reinterpret_cast<GLvoid*>(binding->attribute.offset + (binding->vertexStride * binding->vertexOffset))));
     } else {
         MBGL_CHECK_ERROR(glDisableVertexAttribArray(location));
     }

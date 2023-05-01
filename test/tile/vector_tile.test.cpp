@@ -23,9 +23,8 @@ using namespace mbgl;
 
 class VectorTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(
-        ResourceOptions::Default(), ClientOptions()
-    );
+    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default(),
+                                                                              ClientOptions());
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};
@@ -34,16 +33,15 @@ public:
     GlyphManager glyphManager;
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
-    TileParameters tileParameters{
-        1.0,
-        MapDebugOptions(),
-        transformState,
-        fileSource,
-        MapMode::Continuous,
-        annotationManager.makeWeakPtr(),
-        imageManager,
-        glyphManager,
-        0};
+    TileParameters tileParameters{1.0,
+                                  MapDebugOptions(),
+                                  transformState,
+                                  fileSource,
+                                  MapMode::Continuous,
+                                  annotationManager.makeWeakPtr(),
+                                  imageManager,
+                                  glyphManager,
+                                  0};
 };
 
 TEST(VectorTile, setError) {

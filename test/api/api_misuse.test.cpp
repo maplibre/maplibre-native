@@ -20,12 +20,10 @@ TEST(API, RenderWithoutCallback) {
 
     HeadlessFrontend frontend{1};
 
-    auto map = std::make_unique<MapAdapter>(
-        frontend,
-        MapObserver::nullObserver(),
-        std::make_shared<StubFileSource>(),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())
-    );
+    auto map = std::make_unique<MapAdapter>(frontend,
+                                            MapObserver::nullObserver(),
+                                            std::make_shared<StubFileSource>(),
+                                            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
     map->renderStill(nullptr);
 
     // Force Map thread to join.

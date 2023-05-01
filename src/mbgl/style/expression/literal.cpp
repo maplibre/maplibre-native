@@ -21,21 +21,19 @@ std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
     if (isObject(value)) {
         std::unordered_map<std::string, Value> result;
         bool error = false;
-        eachMember(
-            value,
-            [&](const std::string& k,
-                const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
-                if (!error) {
-                    std::optional<Value> memberValue = parseValue(v, ctx);
-                    if (memberValue) {
-                        result.emplace(k, *memberValue);
-                    } else {
-                        error = true;
-                    }
-                }
-                return {};
-            }
-        );
+        eachMember(value,
+                   [&](const std::string& k,
+                       const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
+                       if (!error) {
+                           std::optional<Value> memberValue = parseValue(v, ctx);
+                           if (memberValue) {
+                               result.emplace(k, *memberValue);
+                           } else {
+                               error = true;
+                           }
+                       }
+                       return {};
+                   });
         return error ? std::optional<Value>() : std::optional<Value>(result);
     }
 
@@ -58,12 +56,10 @@ std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
     // array, it must be convertible to mbgl::Value
     assert(v);
 
-    return v->match(
-        [&](uint64_t n) { return checkNumber(n); },
-        [&](int64_t n) { return checkNumber(n); },
-        [&](double n) { return checkNumber(n); },
-        [&](const auto&) { return std::optional<Value>(toExpressionValue(*v)); }
-    );
+    return v->match([&](uint64_t n) { return checkNumber(n); },
+                    [&](int64_t n) { return checkNumber(n); },
+                    [&](double n) { return checkNumber(n); },
+                    [&](const auto&) { return std::optional<Value>(toExpressionValue(*v)); });
 }
 
 ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
@@ -74,9 +70,9 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
         // object or array value, quoted with ["literal", value]
         if (arrayLength(value) != 2) {
             ctx.error(
-                "'literal' expression requires exactly one argument, but found " +
-                util::toString(arrayLength(value) - 1) + " instead."
-            );
+                "'literal' expression requires exactly one argument, but "
+                "found " +
+                util::toString(arrayLength(value) - 1) + " instead.");
             return ParseResult();
         }
         const std::optional<Value> parsedValue = parseValue(arrayMember(value, 1), ctx);
@@ -90,8 +86,8 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
             auto type = typeOf(*parsedValue).template get<type::Array>();
             auto expected = ctx.getExpected()->template get<type::Array>();
             if (type.N && (*type.N == 0) && (!expected.N || (*expected.N == 0))) {
-                return ParseResult(std::make_unique<Literal>(expected, parsedValue->template get<std::vector<Value>>())
-                );
+                return ParseResult(
+                    std::make_unique<Literal>(expected, parsedValue->template get<std::vector<Value>>()));
             }
         }
 

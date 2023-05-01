@@ -13,12 +13,14 @@
 namespace mbgl {
 
 /*
-   FakeFileSource is similar to StubFileSource, but it follows a post hoc, "push" model rather than
-   a pre hoc, "pull" model. You pass it to code that makes requests, it records what requests are
-   made, then you can examine them, make assertions about them, and respond as desired.
+   FakeFileSource is similar to StubFileSource, but it follows a post hoc,
+   "push" model rather than a pre hoc, "pull" model. You pass it to code that
+   makes requests, it records what requests are made, then you can examine them,
+   make assertions about them, and respond as desired.
 
-   This is particularly useful if you want to simulate multiple responses, e.g. as part of a resource
-   revalidation flow. StubFileSource allows only a single response.
+   This is particularly useful if you want to simulate multiple responses, e.g.
+   as part of a resource revalidation flow. StubFileSource allows only a single
+   response.
 */
 class FakeFileSource : public FileSource {
 public:
@@ -97,9 +99,8 @@ public:
         return onlineFs->getProperty(property);
     }
 
-    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(
-        ResourceOptions::Default(), ClientOptions()
-    );
+    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                              ClientOptions());
 };
 
 } // namespace mbgl

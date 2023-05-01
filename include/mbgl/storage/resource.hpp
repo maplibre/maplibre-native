@@ -56,12 +56,10 @@ public:
         All = Cache | Network,
     };
 
-    Resource(
-        Kind kind_,
-        std::string url_,
-        std::optional<TileData> tileData_ = std::nullopt,
-        LoadingMethod loadingMethod_ = LoadingMethod::All
-    )
+    Resource(Kind kind_,
+             std::string url_,
+             std::optional<TileData> tileData_ = std::nullopt,
+             LoadingMethod loadingMethod_ = LoadingMethod::All)
         : kind(kind_),
           loadingMethod(loadingMethod_),
           url(std::move(url_)),
@@ -74,18 +72,16 @@ public:
 
     static Resource style(const std::string& url);
     static Resource source(const std::string& url);
-    static Resource tile(
-        const std::string& urlTemplate,
-        float pixelRatio,
-        int32_t x,
-        int32_t y,
-        int8_t z,
-        Tileset::Scheme scheme,
-        LoadingMethod = LoadingMethod::All
-    );
-    static Resource glyphs(
-        const std::string& urlTemplate, const FontStack& fontStack, const std::pair<uint16_t, uint16_t>& glyphRange
-    );
+    static Resource tile(const std::string& urlTemplate,
+                         float pixelRatio,
+                         int32_t x,
+                         int32_t y,
+                         int8_t z,
+                         Tileset::Scheme scheme,
+                         LoadingMethod = LoadingMethod::All);
+    static Resource glyphs(const std::string& urlTemplate,
+                           const FontStack& fontStack,
+                           const std::pair<uint16_t, uint16_t>& glyphRange);
     static Resource spriteImage(const std::string& base, float pixelRatio);
     static Resource spriteJSON(const std::string& base, float pixelRatio);
     static Resource image(const std::string& url);

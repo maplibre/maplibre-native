@@ -52,8 +52,7 @@ void Style::Impl::loadJSON(const std::string& json_) {
 void Style::Impl::loadURL(const std::string& url_) {
     if (!fileSource) {
         observer->onStyleError(
-            std::make_exception_ptr(util::StyleLoadException("Unable to find resource provider for style url."))
-        );
+            std::make_exception_ptr(util::StyleLoadException("Unable to find resource provider for style url.")));
         return;
     }
 
@@ -276,8 +275,8 @@ bool Style::Impl::isLoaded() const {
 
 void Style::Impl::addImage(std::unique_ptr<style::Image> image) {
     auto newImages = makeMutable<ImageImpls>(*images);
-    auto it =
-        std::lower_bound(newImages->begin(), newImages->end(), image->getID(), [](const auto& a, const std::string& b) {
+    auto it = std::lower_bound(
+        newImages->begin(), newImages->end(), image->getID(), [](const auto& a, const std::string& b) {
             return a->id < b;
         });
     if (it != newImages->end() && (*it)->id == image->getID()) {
@@ -292,9 +291,8 @@ void Style::Impl::addImage(std::unique_ptr<style::Image> image) {
 
 void Style::Impl::removeImage(const std::string& id) {
     auto newImages = makeMutable<ImageImpls>(*images);
-    auto found = std::find_if(newImages->begin(), newImages->end(), [&id](const auto& image) {
-        return image->id == id;
-    });
+    auto found = std::find_if(
+        newImages->begin(), newImages->end(), [&id](const auto& image) { return image->id == id; });
     if (found == newImages->end()) {
         Log::Warning(Event::General, "Image '" + id + "' is not present in style, cannot remove");
         return;
@@ -357,8 +355,7 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
     }
 
     newImages->insert(
-        newImages->end(), std::make_move_iterator(images_.begin()), std::make_move_iterator(images_.end())
-    );
+        newImages->end(), std::make_move_iterator(images_.begin()), std::make_move_iterator(images_.end()));
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
     spriteLoaded = true;

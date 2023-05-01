@@ -86,9 +86,9 @@ public:
 /// being enforced by the expression type system.)
 template <>
 struct Interpolator<std::vector<style::expression::Value>> {
-    std::vector<style::expression::Value> operator()(
-        const std::vector<style::expression::Value>& a, const std::vector<style::expression::Value>& b, const double t
-    ) const {
+    std::vector<style::expression::Value> operator()(const std::vector<style::expression::Value>& a,
+                                                     const std::vector<style::expression::Value>& b,
+                                                     const double t) const {
         assert(a.size() == b.size());
         if (a.empty()) return {};
         std::vector<style::expression::Value> result;

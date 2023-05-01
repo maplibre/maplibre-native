@@ -16,14 +16,12 @@ namespace mbgl {
 
 // OfflineTilePyramidRegionDefinition
 
-OfflineTilePyramidRegionDefinition::OfflineTilePyramidRegionDefinition(
-    std::string styleURL_,
-    LatLngBounds bounds_,
-    double minZoom_,
-    double maxZoom_,
-    float pixelRatio_,
-    bool includeIdeographs_
-)
+OfflineTilePyramidRegionDefinition::OfflineTilePyramidRegionDefinition(std::string styleURL_,
+                                                                       LatLngBounds bounds_,
+                                                                       double minZoom_,
+                                                                       double maxZoom_,
+                                                                       float pixelRatio_,
+                                                                       bool includeIdeographs_)
     : styleURL(std::move(styleURL_)),
       bounds(bounds_),
       minZoom(minZoom_),
@@ -38,14 +36,12 @@ OfflineTilePyramidRegionDefinition::OfflineTilePyramidRegionDefinition(
 
 // OfflineGeometryRegionDefinition
 
-OfflineGeometryRegionDefinition::OfflineGeometryRegionDefinition(
-    std::string styleURL_,
-    Geometry<double> geometry_,
-    double minZoom_,
-    double maxZoom_,
-    float pixelRatio_,
-    bool includeIdeographs_
-)
+OfflineGeometryRegionDefinition::OfflineGeometryRegionDefinition(std::string styleURL_,
+                                                                 Geometry<double> geometry_,
+                                                                 double minZoom_,
+                                                                 double maxZoom_,
+                                                                 float pixelRatio_,
+                                                                 bool includeIdeographs_)
     : styleURL(std::move(styleURL_)),
       geometry(std::move(geometry_)),
       minZoom(minZoom_),
@@ -93,22 +89,19 @@ OfflineRegionDefinition decodeOfflineRegionDefinition(const std::string& region)
     if (doc.HasMember("bounds")) {
         return OfflineTilePyramidRegionDefinition{
             styleURL,
-            LatLngBounds::hull(
-                LatLng(doc["bounds"][0].GetDouble(), doc["bounds"][1].GetDouble()),
-                LatLng(doc["bounds"][2].GetDouble(), doc["bounds"][3].GetDouble())
-            ),
+            LatLngBounds::hull(LatLng(doc["bounds"][0].GetDouble(), doc["bounds"][1].GetDouble()),
+                               LatLng(doc["bounds"][2].GetDouble(), doc["bounds"][3].GetDouble())),
             minZoom,
             maxZoom,
             pixelRatio,
             includeIdeographs};
     } else {
-        return OfflineGeometryRegionDefinition{
-            styleURL,
-            mapbox::geojson::convert<Geometry<double>>(doc["geometry"].GetObject()),
-            minZoom,
-            maxZoom,
-            pixelRatio,
-            includeIdeographs};
+        return OfflineGeometryRegionDefinition{styleURL,
+                                               mapbox::geojson::convert<Geometry<double>>(doc["geometry"].GetObject()),
+                                               minZoom,
+                                               maxZoom,
+                                               pixelRatio,
+                                               includeIdeographs};
     };
 }
 
@@ -119,8 +112,7 @@ std::string encodeOfflineRegionDefinition(const OfflineRegionDefinition& region)
     // Encode common properties
     region.match([&](auto& _region) {
         doc.AddMember(
-            "style_url", rapidjson::StringRef(_region.styleURL.data(), _region.styleURL.length()), doc.GetAllocator()
-        );
+            "style_url", rapidjson::StringRef(_region.styleURL.data(), _region.styleURL.length()), doc.GetAllocator());
         doc.AddMember("min_zoom", _region.minZoom, doc.GetAllocator());
         if (std::isfinite(_region.maxZoom)) {
             doc.AddMember("max_zoom", _region.maxZoom, doc.GetAllocator());
@@ -142,10 +134,8 @@ std::string encodeOfflineRegionDefinition(const OfflineRegionDefinition& region)
         },
         [&](const OfflineGeometryRegionDefinition& _region) {
             doc.AddMember(
-                "geometry", mapbox::geojson::convert(_region.geometry, doc.GetAllocator()), doc.GetAllocator()
-            );
-        }
-    );
+                "geometry", mapbox::geojson::convert(_region.geometry, doc.GetAllocator()), doc.GetAllocator());
+        });
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);

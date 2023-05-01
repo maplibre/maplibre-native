@@ -5,9 +5,9 @@
 
 namespace mbgl {
 
-void SourceFeatureState::updateState(
-    const std::optional<std::string>& sourceLayerID, const std::string& featureID, const FeatureState& newState
-) {
+void SourceFeatureState::updateState(const std::optional<std::string>& sourceLayerID,
+                                     const std::string& featureID,
+                                     const FeatureState& newState) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
     for (const auto& state : newState) {
         auto& layerStates = stateChanges[sourceLayer];
@@ -16,9 +16,9 @@ void SourceFeatureState::updateState(
     }
 }
 
-void SourceFeatureState::getState(
-    FeatureState& result, const std::optional<std::string>& sourceLayerID, const std::string& featureID
-) const {
+void SourceFeatureState::getState(FeatureState& result,
+                                  const std::optional<std::string>& sourceLayerID,
+                                  const std::string& featureID) const {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
     FeatureState current;
     FeatureState changes;
@@ -103,11 +103,9 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
     }
 }
 
-void SourceFeatureState::removeState(
-    const std::optional<std::string>& sourceLayerID,
-    const std::optional<std::string>& featureID,
-    const std::optional<std::string>& stateKey
-) {
+void SourceFeatureState::removeState(const std::optional<std::string>& sourceLayerID,
+                                     const std::optional<std::string>& featureID,
+                                     const std::optional<std::string>& stateKey) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
 
     bool sourceLayerDeleted = (deletedStates.count(sourceLayer) > 0) && deletedStates[sourceLayer].empty();

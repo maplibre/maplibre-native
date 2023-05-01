@@ -25,14 +25,15 @@ std::optional<std::string> LayerFactory::getSource(const style::conversion::Conv
     return source;
 }
 
-std::unique_ptr<Bucket>
-LayerFactory::createBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&) noexcept {
+std::unique_ptr<Bucket> LayerFactory::createBucket(const BucketParameters&,
+                                                   const std::vector<Immutable<style::LayerProperties>>&) noexcept {
     assert(false);
     return nullptr;
 }
 
-std::unique_ptr<Layout> LayerFactory::
-    createLayout(const LayoutParameters&, std::unique_ptr<GeometryTileLayer>, const std::vector<Immutable<style::LayerProperties>>&) noexcept {
+std::unique_ptr<Layout> LayerFactory::createLayout(const LayoutParameters&,
+                                                   std::unique_ptr<GeometryTileLayer>,
+                                                   const std::vector<Immutable<style::LayerProperties>>&) noexcept {
     assert(false);
     return nullptr;
 }

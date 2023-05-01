@@ -59,8 +59,8 @@ bool initRuntime(int argc, char* argv[]) {
     assert(runtimeHandle != nullptr);
 
     using RegisterNativesFn = jint (*)(JNIEnv * env);
-    RegisterNativesFn registerNativesFn =
-        reinterpret_cast<RegisterNativesFn>(dlsym(runtimeHandle, "registerFrameworkNatives"));
+    RegisterNativesFn registerNativesFn = reinterpret_cast<RegisterNativesFn>(
+        dlsym(runtimeHandle, "registerFrameworkNatives"));
     assert(registerNativesFn != nullptr);
 
     if (registerNativesFn(env) != JNI_OK) {

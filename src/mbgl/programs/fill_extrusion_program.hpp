@@ -31,36 +31,33 @@ MBGL_DEFINE_UNIFORM_SCALAR(float, height_factor);
 
 using FillExtrusionLayoutAttributes = TypeList<attributes::pos, attributes::normal_ed>;
 
-using FillExtrusionUniforms = TypeList<
-    uniforms::matrix,
-    uniforms::opacity,
-    uniforms::lightcolor,
-    uniforms::lightpos,
-    uniforms::lightintensity,
-    uniforms::vertical_gradient>;
+using FillExtrusionUniforms = TypeList<uniforms::matrix,
+                                       uniforms::opacity,
+                                       uniforms::lightcolor,
+                                       uniforms::lightpos,
+                                       uniforms::lightintensity,
+                                       uniforms::vertical_gradient>;
 
-using FillExtrusionPatternUniforms = TypeList<
-    uniforms::matrix,
-    uniforms::opacity,
-    uniforms::scale,
-    uniforms::texsize,
-    uniforms::fade,
-    uniforms::pixel_coord_upper,
-    uniforms::pixel_coord_lower,
-    uniforms::height_factor,
-    uniforms::lightcolor,
-    uniforms::lightpos,
-    uniforms::lightintensity,
-    uniforms::vertical_gradient>;
+using FillExtrusionPatternUniforms = TypeList<uniforms::matrix,
+                                              uniforms::opacity,
+                                              uniforms::scale,
+                                              uniforms::texsize,
+                                              uniforms::fade,
+                                              uniforms::pixel_coord_upper,
+                                              uniforms::pixel_coord_lower,
+                                              uniforms::height_factor,
+                                              uniforms::lightcolor,
+                                              uniforms::lightpos,
+                                              uniforms::lightintensity,
+                                              uniforms::vertical_gradient>;
 
-class FillExtrusionProgram final : public Program<
-                                       FillExtrusionProgram,
-                                       shaders::BuiltIn::FillExtrusionProgram,
-                                       gfx::PrimitiveType::Triangle,
-                                       FillExtrusionLayoutAttributes,
-                                       FillExtrusionUniforms,
-                                       TypeList<>,
-                                       style::FillExtrusionPaintProperties> {
+class FillExtrusionProgram final : public Program<FillExtrusionProgram,
+                                                  shaders::BuiltIn::FillExtrusionProgram,
+                                                  gfx::PrimitiveType::Triangle,
+                                                  FillExtrusionLayoutAttributes,
+                                                  FillExtrusionUniforms,
+                                                  TypeList<>,
+                                                  style::FillExtrusionPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillExtrusionProgram"};
     const std::string_view typeName() const noexcept override { return Name; }
@@ -70,48 +67,44 @@ public:
     static LayoutVertex layoutVertex(Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
         const auto factor = pow(2, 13);
 
-        return LayoutVertex{
-            {{p.x, p.y}},
-            {{// Multiply normal vector components by 2^14 to pack them into integers
-              // We pack a bool (`t`) into the x component indicating whether it is an upper or lower vertex
-              static_cast<int16_t>(floor(nx * factor) * 2 + t),
-              static_cast<int16_t>(ny * factor * 2),
-              static_cast<int16_t>(nz * factor * 2),
-              // The edgedistance attribute is used for wrapping fill_extrusion patterns
-              static_cast<int16_t>(e)}}};
+        return LayoutVertex{{{p.x, p.y}},
+                            {{// Multiply normal vector components by 2^14 to pack them into
+                              // integers We pack a bool (`t`) into the x component indicating
+                              // whether it is an upper or lower vertex
+                              static_cast<int16_t>(floor(nx * factor) * 2 + t),
+                              static_cast<int16_t>(ny * factor * 2),
+                              static_cast<int16_t>(nz * factor * 2),
+                              // The edgedistance attribute is used for wrapping fill_extrusion patterns
+                              static_cast<int16_t>(e)}}};
     }
 
     static LayoutUniformValues layoutUniformValues(
-        mat4, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient
-    );
+        mat4, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient);
 };
 
-class FillExtrusionPatternProgram final : public Program<
-                                              FillExtrusionPatternProgram,
-                                              shaders::BuiltIn::FillExtrusionPatternProgram,
-                                              gfx::PrimitiveType::Triangle,
-                                              FillExtrusionLayoutAttributes,
-                                              FillExtrusionPatternUniforms,
-                                              TypeList<textures::image>,
-                                              style::FillExtrusionPaintProperties> {
+class FillExtrusionPatternProgram final : public Program<FillExtrusionPatternProgram,
+                                                         shaders::BuiltIn::FillExtrusionPatternProgram,
+                                                         gfx::PrimitiveType::Triangle,
+                                                         FillExtrusionLayoutAttributes,
+                                                         FillExtrusionPatternUniforms,
+                                                         TypeList<textures::image>,
+                                                         style::FillExtrusionPaintProperties> {
 public:
     static constexpr std::string_view Name{"FillExtrusionPatternProgram"};
     const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
-    static LayoutUniformValues layoutUniformValues(
-        mat4,
-        Size atlasSize,
-        const CrossfadeParameters&,
-        const UnwrappedTileID&,
-        const TransformState&,
-        float opacity,
-        float heightFactor,
-        float pixelRatio,
-        const EvaluatedLight&,
-        float verticalGradient
-    );
+    static LayoutUniformValues layoutUniformValues(mat4,
+                                                   Size atlasSize,
+                                                   const CrossfadeParameters&,
+                                                   const UnwrappedTileID&,
+                                                   const TransformState&,
+                                                   float opacity,
+                                                   float heightFactor,
+                                                   float pixelRatio,
+                                                   const EvaluatedLight&,
+                                                   float verticalGradient);
 };
 
 using FillExtrusionLayoutVertex = FillExtrusionProgram::LayoutVertex;

@@ -54,8 +54,9 @@ public:
 
 private:
     mbgl::HeadlessFrontend::RenderResult runTest(TestMetadata& metadata, TestContext& ctx);
-    void
-    checkQueryTestResults(mbgl::PremultipliedImage&& actualImage, std::vector<mbgl::Feature>&& features, TestMetadata&);
+    void checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
+                               std::vector<mbgl::Feature>&& features,
+                               TestMetadata&);
     void checkRenderTestResults(mbgl::PremultipliedImage&& image, TestMetadata&);
     void checkProbingResults(TestMetadata&);
     void appendLabelCutOffResults(TestMetadata&, const std::string&, const std::string&);

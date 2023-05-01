@@ -21,10 +21,11 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::DEMEncoding _encodin
         source += dim;
     }
 
-    // in order to avoid flashing seams between tiles, here we are initially populating a 1px border of
-    // pixels around the image with the data of the nearest pixel from the image. this data is eventually
-    // replaced when the tile's neighboring tiles are loaded and the accurate data can be backfilled using
-    // DEMData#backfillBorder
+    // in order to avoid flashing seams between tiles, here we are initially
+    // populating a 1px border of pixels around the image with the data of the
+    // nearest pixel from the image. this data is eventually replaced when the
+    // tile's neighboring tiles are loaded and the accurate data can be
+    // backfilled using DEMData#backfillBorder
 
     auto* data = reinterpret_cast<uint32_t*>(image.data.get());
     for (int32_t x = 0; x < dim; x++) {
@@ -42,21 +43,22 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::DEMEncoding _encodin
     memcpy(data + (dim + 1) * stride, data + dim * stride, stride * 4);
 }
 
-// This function takes the DEMData from a neighboring tile and backfills the edge/corner
-// data in order to create a one pixel "buffer" of image data around the tile. This is
-// necessary because the hillshade formula calculates the dx/dz, dy/dz derivatives at each
-// pixel of the tile by querying the 8 surrounding pixels, and if we don't have the pixel
-// buffer we get seams at tile boundaries.
+// This function takes the DEMData from a neighboring tile and backfills the
+// edge/corner data in order to create a one pixel "buffer" of image data around
+// the tile. This is necessary because the hillshade formula calculates the
+// dx/dz, dy/dz derivatives at each pixel of the tile by querying the 8
+// surrounding pixels, and if we don't have the pixel buffer we get seams at
+// tile boundaries.
 void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy) {
     auto& o = borderTileData;
 
     // Tiles from the same source should always be of the same dimensions.
     assert(dim == o.dim);
 
-    // We determine the pixel range to backfill based which corner/edge `borderTileData`
-    // represents. For example, dx = -1, dy = -1 represents the upper left corner of the
-    // base tile, so we only need to backfill one pixel at coordinates (-1, -1) of the tile
-    // image.
+    // We determine the pixel range to backfill based which corner/edge
+    // `borderTileData` represents. For example, dx = -1, dy = -1 represents the
+    // upper left corner of the base tile, so we only need to backfill one pixel
+    // at coordinates (-1, -1) of the tile image.
     int32_t xMin = dx * dim;
     int32_t xMax = dx * dim + dim;
     int32_t yMin = dy * dim;

@@ -40,7 +40,8 @@ private:
 template <class T>
 struct ToCoordinatesOrGeometries {
 public:
-    // Handles line_string, polygon, multi_point, multi_line_string, multi_polygon, and geometry_collection.
+    // Handles line_string, polygon, multi_point, multi_line_string,
+    // multi_polygon, and geometry_collection.
     template <class E>
     v8::Local<v8::Object> operator()(const std::vector<E>& vector) {
         Nan::EscapableHandleScope scope;
@@ -106,11 +107,9 @@ v8::Local<v8::Object> toJS(const Geometry& geometry) {
 
     Nan::Set(result, Nan::New("type").ToLocalChecked(), Geometry::visit(geometry, ToType<double>()));
 
-    Nan::Set(
-        result,
-        Nan::New(geometry.is<GeometryCollection>() ? "geometries" : "coordinates").ToLocalChecked(),
-        Geometry::visit(geometry, ToCoordinatesOrGeometries<double>())
-    );
+    Nan::Set(result,
+             Nan::New(geometry.is<GeometryCollection>() ? "geometries" : "coordinates").ToLocalChecked(),
+             Geometry::visit(geometry, ToCoordinatesOrGeometries<double>()));
 
     return scope.Escape(result);
 }

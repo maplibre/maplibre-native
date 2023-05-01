@@ -54,11 +54,10 @@ void prepare_map2(Map& map, std::optional<std::string> json = std::nullopt) {
 static void API_renderStill_reuse_map(::benchmark::State& state) {
     RenderBenchmark bench;
     HeadlessFrontend frontend{size, pixelRatio};
-    Map map{
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-        ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
     prepare(map);
 
     for (auto _ : state) {
@@ -69,11 +68,10 @@ static void API_renderStill_reuse_map(::benchmark::State& state) {
 static void API_renderStill_reuse_map_formatted_labels(::benchmark::State& state) {
     RenderBenchmark bench;
     HeadlessFrontend frontend{size, pixelRatio};
-    Map map{
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-        ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
     prepare(map, util::read_file("benchmark/fixtures/api/style_formatted_labels.json"));
 
     for (auto _ : state) {
@@ -84,11 +82,10 @@ static void API_renderStill_reuse_map_formatted_labels(::benchmark::State& state
 static void API_renderStill_reuse_map_switch_styles(::benchmark::State& state) {
     RenderBenchmark bench;
     HeadlessFrontend frontend{size, pixelRatio};
-    Map map{
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-        ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
 
     for (auto _ : state) {
         prepare(map, {"{}"});
@@ -103,11 +100,10 @@ static void API_renderStill_recreate_map(::benchmark::State& state) {
 
     for (auto _ : state) {
         HeadlessFrontend frontend{size, pixelRatio};
-        Map map{
-            frontend,
-            MapObserver::nullObserver(),
-            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+        Map map{frontend,
+                MapObserver::nullObserver(),
+                MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+                ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
         prepare(map);
         frontend.render(map);
     }
@@ -118,11 +114,10 @@ static void API_renderStill_recreate_map_2(::benchmark::State& state) {
 
     for (auto _ : state) {
         HeadlessFrontend frontend{size, pixelRatio};
-        Map map{
-            frontend,
-            MapObserver::nullObserver(),
-            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+        Map map{frontend,
+                MapObserver::nullObserver(),
+                MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+                ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
         prepare_map2(map);
         frontend.render(map);
     }
@@ -132,11 +127,10 @@ static void API_renderStill_multiple_sources(::benchmark::State& state) {
     using namespace mbgl::style;
     RenderBenchmark bench;
     HeadlessFrontend frontend{size, pixelRatio};
-    Map map{
-        frontend,
-        MapObserver::nullObserver(),
-        MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
-        ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+            ResourceOptions().withCachePath(cachePath).withApiKey("foobar")};
     prepare(map);
     auto& style = map.getStyle();
     const int kSourcesCount = 50;

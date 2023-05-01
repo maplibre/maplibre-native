@@ -34,9 +34,10 @@ using namespace style;
 // Generic functions
 
 template <class RegionDefinition>
-Range<uint8_t> coveringZoomRange(
-    const RegionDefinition& definition, style::SourceType type, uint16_t tileSize, const Range<uint8_t>& zoomRange
-) {
+Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
+                                 style::SourceType type,
+                                 uint16_t tileSize,
+                                 const Range<uint8_t>& zoomRange) {
     double minZ = std::max<double>(util::coveringZoomLevel(definition.minZoom, type, tileSize), zoomRange.min);
     double maxZ = std::min<double>(util::coveringZoomLevel(definition.maxZoom, type, tileSize), zoomRange.max);
 
@@ -56,41 +57,32 @@ void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
 }
 
 template <class Fn>
-void tileCover(
-    const OfflineRegionDefinition& definition,
-    style::SourceType type,
-    uint16_t tileSize,
-    const Range<uint8_t>& zoomRange,
-    Fn&& fn
-) {
-    const Range<uint8_t> clampedZoomRange = definition.match([&](auto& reg) {
-        return coveringZoomRange(reg, type, tileSize, zoomRange);
-    });
+void tileCover(const OfflineRegionDefinition& definition,
+               style::SourceType type,
+               uint16_t tileSize,
+               const Range<uint8_t>& zoomRange,
+               Fn&& fn) {
+    const Range<uint8_t> clampedZoomRange = definition.match(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
 
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        definition.match(
-            [&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
-            [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); }
-        );
+        definition.match([&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
+                         [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); });
     }
 }
 
-uint64_t tileCount(
-    const OfflineRegionDefinition& definition,
-    style::SourceType type,
-    uint16_t tileSize,
-    const Range<uint8_t>& zoomRange
-) {
-    const Range<uint8_t> clampedZoomRange = definition.match([&](auto& reg) {
-        return coveringZoomRange(reg, type, tileSize, zoomRange);
-    });
+uint64_t tileCount(const OfflineRegionDefinition& definition,
+                   style::SourceType type,
+                   uint16_t tileSize,
+                   const Range<uint8_t>& zoomRange) {
+    const Range<uint8_t> clampedZoomRange = definition.match(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
 
     uint64_t result{};
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
         result += definition.match(
             [&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
-            [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); }
-        );
+            [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); });
     }
 
     return result;
@@ -98,9 +90,10 @@ uint64_t tileCount(
 
 // OfflineDownload
 
-OfflineDownload::OfflineDownload(
-    int64_t id_, OfflineRegionDefinition definition_, OfflineDatabase& offlineDatabase_, FileSource& onlineFileSource_
-)
+OfflineDownload::OfflineDownload(int64_t id_,
+                                 OfflineRegionDefinition definition_,
+                                 OfflineDatabase& offlineDatabase_,
+                                 FileSource& onlineFileSource_)
     : id(id_),
       definition(std::move(definition_)),
       offlineDatabase(offlineDatabase_),
@@ -137,14 +130,14 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     auto result = offlineDatabase.getRegionCompletedStatus(id);
     if (!result) {
-        // We can't find this offline region because the database is unavailable, or the download
-        // does not exist.
+        // We can't find this offline region because the database is
+        // unavailable, or the download does not exist.
         return {};
     }
 
     result->requiredResourceCount++;
-    std::optional<Response> styleResponse =
-        offlineDatabase.get(Resource::style(definition.match([](auto& reg) { return reg.styleURL; })));
+    std::optional<Response> styleResponse = offlineDatabase.get(
+        Resource::style(definition.match([](auto& reg) { return reg.styleURL; })));
     if (!styleResponse) {
         return *result;
     }
@@ -168,9 +161,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
                 std::optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
                 if (sourceResponse) {
                     style::conversion::Error error;
-                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(
-                        *sourceResponse->data, error
-                    );
+                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data,
+                                                                                             error);
                     if (tileset) {
                         uint64_t tileSourceCount = tileCount(definition, type, tileSize, (*tileset).zoomRange);
                         result->requiredTileCount += tileSourceCount;
@@ -277,14 +269,12 @@ void OfflineDownload::activateDownload() {
 
                     ensureResource(std::move(sourceResource), [=](const Response& sourceResponse) {
                         style::conversion::Error error;
-                        std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(
-                            *sourceResponse.data, error
-                        );
+                        std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data,
+                                                                                                 error);
                         if (tileset) {
                             auto resourceOptions = onlineFileSource.getResourceOptions();
                             util::mapbox::canonicalizeTileset(
-                                resourceOptions.tileServerOptions(), *tileset, url, type, tileSize
-                            );
+                                resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
                             queueTiles(type, tileSize, *tileset);
 
                             requiredSourceURLs.erase(url);
@@ -343,12 +333,11 @@ void OfflineDownload::activateDownload() {
             const bool includeIdeographs = definition.match([](auto& reg) { return reg.includeIdeographs; });
             for (const auto& fontStack : parser.fontStacks()) {
                 for (char16_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; i++) {
-                    // Assumes that if a glyph range starts with fixed width/ideographic characters, the entire
-                    // range will be fixed width.
+                    // Assumes that if a glyph range starts with fixed width/ideographic
+                    // characters, the entire range will be fixed width.
                     if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
                         queueResource(
-                            Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE))
-                        );
+                            Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE)));
                     }
                 }
             }
@@ -367,21 +356,23 @@ void OfflineDownload::activateDownload() {
 }
 
 /*
-   Fill up our own request queue by requesting the next few resources. This is called
-   when activating the download, or when a request completes successfully.
+   Fill up our own request queue by requesting the next few resources. This is
+   called when activating the download, or when a request completes
+   successfully.
 
-   Note "successfully"; it's not called when a requests receives an error. A request
-   that errors will be retried after some delay. So in that sense it's still "active"
-   and consuming resources, notably the request object, its timer, and network resources
-   when the timer fires.
+   Note "successfully"; it's not called when a requests receives an error. A
+   request that errors will be retried after some delay. So in that sense it's
+   still "active" and consuming resources, notably the request object, its
+   timer, and network resources when the timer fires.
 
-   We could try to squeeze in subsequent requests while we wait for the errored request
-   to retry. But that risks overloading the upstream request queue -- defeating our own
-   metering -- if there are a lot of errored requests that all come up for retry at the
-   same time. And many times, the cause of a request error will apply to many requests
-   of the same type. For instance if a server is unreachable, all the requests to that
-   host are going to error. In that case, continuing to try subsequent resources after
-   the first few errors is fruitless anyway.
+   We could try to squeeze in subsequent requests while we wait for the errored
+   request to retry. But that risks overloading the upstream request queue --
+   defeating our own metering -- if there are a lot of errored requests that all
+   come up for retry at the same time. And many times, the cause of a request
+   error will apply to many requests of the same type. For instance if a server
+   is unreachable, all the requests to that host are going to error. In that
+   case, continuing to try subsequent resources after the first few errors is
+   fruitless anyway.
 */
 void OfflineDownload::continueDownload() {
     if (resourcesRemaining.empty()) {
@@ -443,14 +434,12 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
         status.requiredResourceCount++;
         status.requiredTileCount++;
 
-        auto tileResource = Resource::tile(
-            tileset.tiles[0],
-            definition.match([](auto& def) { return def.pixelRatio; }),
-            tile.x,
-            tile.y,
-            tile.z,
-            tileset.scheme
-        );
+        auto tileResource = Resource::tile(tileset.tiles[0],
+                                           definition.match([](auto& def) { return def.pixelRatio; }),
+                                           tile.x,
+                                           tile.y,
+                                           tile.z,
+                                           tileset.scheme);
 
         tileResource.setPriority(Resource::Priority::Low);
         tileResource.setUsage(Resource::Usage::Offline);
@@ -532,7 +521,8 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             buffer.emplace_back(resource, onlineResponse);
 
             // Flush buffer periodically.
-            // Have to keep `resourcesRemaining.empty()` as the following condition would fail otherwise.
+            // Have to keep `resourcesRemaining.empty()` as the following
+            // condition would fail otherwise.
             // TODO: Simplify the tile count limit check code path!
             if ((buffer.size() == kResourcesBatchSize || resourcesRemaining.empty()) && !flushResourcesBuffer()) return;
 

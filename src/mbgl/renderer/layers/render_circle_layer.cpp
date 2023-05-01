@@ -19,12 +19,10 @@ using namespace style;
 namespace {
 
 struct RenderableSegment {
-    RenderableSegment(
-        const Segment<CircleAttributes>& segment_,
-        const RenderTile& tile_,
-        const LayerRenderData* renderData_,
-        float sortKey_
-    )
+    RenderableSegment(const Segment<CircleAttributes>& segment_,
+                      const RenderTile& tile_,
+                      const LayerRenderData* renderData_,
+                      float sortKey_)
         : segment(segment_),
           tile(tile_),
           renderData(renderData_),
@@ -57,9 +55,8 @@ void RenderCircleLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<CircleLayerProperties>(
-        staticImmutableCast<CircleLayer::Impl>(baseImpl), unevaluated.evaluate(parameters)
-    );
+    auto properties = makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(baseImpl),
+                                                         unevaluated.evaluate(parameters));
     const auto& evaluated = properties->evaluated;
 
     passes = ((evaluated.get<style::CircleRadius>().constantOr(1) > 0 ||
@@ -117,26 +114,23 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
             evaluated,
             static_cast<float>(parameters.state.getZoom()));
         const auto& allAttributeBindings = CircleProgram::computeAllAttributeBindings(
-            *circleBucket.vertexBuffer, paintPropertyBinders, evaluated
-        );
+            *circleBucket.vertexBuffer, paintPropertyBinders, evaluated);
 
         checkRenderability(parameters, CircleProgram::activeBindingCount(allAttributeBindings));
 
-        circleProgram->draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::Triangles(),
-            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-            gfx::StencilMode::disabled(),
-            parameters.colorModeForRenderPass(),
-            gfx::CullFaceMode::disabled(),
-            *circleBucket.indexBuffer,
-            segments,
-            allUniformValues,
-            allAttributeBindings,
-            CircleProgram::TextureBindings{},
-            getID()
-        );
+        circleProgram->draw(parameters.context,
+                            *parameters.renderPass,
+                            gfx::Triangles(),
+                            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                            gfx::StencilMode::disabled(),
+                            parameters.colorModeForRenderPass(),
+                            gfx::CullFaceMode::disabled(),
+                            *circleBucket.indexBuffer,
+                            segments,
+                            allUniformValues,
+                            allAttributeBindings,
+                            CircleProgram::TextureBindings{},
+                            getID());
     };
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<CircleSortKey>().isUndefined();
@@ -167,14 +161,13 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
 GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
     vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
     matrix::transformMat4(pos, pos, posMatrix);
-    return {
-        static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
-        static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
+    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
+            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
 }
 
-GeometryCoordinates projectQueryGeometry(
-    const GeometryCoordinates& queryGeometry, const mat4& posMatrix, const Size& size
-) {
+GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
+                                         const mat4& posMatrix,
+                                         const Size& size) {
     GeometryCoordinates projectedGeometry;
     for (auto& p : queryGeometry) {
         projectedGeometry.push_back(projectPoint(p, posMatrix, size));
@@ -182,15 +175,13 @@ GeometryCoordinates projectQueryGeometry(
     return projectedGeometry;
 }
 
-bool RenderCircleLayer::queryIntersectsFeature(
-    const GeometryCoordinates& queryGeometry,
-    const GeometryTileFeature& feature,
-    const float zoom,
-    const TransformState& transformState,
-    const float pixelsToTileUnits,
-    const mat4& posMatrix,
-    const FeatureState& featureState
-) const {
+bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
+                                               const GeometryTileFeature& feature,
+                                               const float zoom,
+                                               const TransformState& transformState,
+                                               const float pixelsToTileUnits,
+                                               const mat4& posMatrix,
+                                               const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry
     const GeometryCoordinates& translatedQueryGeometry = FeatureIndex::translateQueryGeometry(
@@ -198,8 +189,7 @@ bool RenderCircleLayer::queryIntersectsFeature(
                                                              evaluated.get<style::CircleTranslate>(),
                                                              evaluated.get<style::CircleTranslateAnchor>(),
                                                              static_cast<float>(transformState.getBearing()),
-                                                             pixelsToTileUnits
-    )
+                                                             pixelsToTileUnits)
                                                              .value_or(queryGeometry);
 
     // Evaluate functions
@@ -207,14 +197,17 @@ bool RenderCircleLayer::queryIntersectsFeature(
     auto stroke = evaluated.evaluate<style::CircleStrokeWidth>(zoom, feature, featureState);
     auto size = radius + stroke;
 
-    // For pitch-alignment: map, compare feature geometry to query geometry in the plane of the tile
-    // Otherwise, compare geometry in the plane of the viewport
-    // A circle with fixed scaling relative to the viewport gets larger in tile space as it moves into the distance
-    // A circle with fixed scaling relative to the map gets smaller in viewport space as it moves into the distance
+    // For pitch-alignment: map, compare feature geometry to query geometry in
+    // the plane of the tile Otherwise, compare geometry in the plane of the
+    // viewport A circle with fixed scaling relative to the viewport gets larger
+    // in tile space as it moves into the distance A circle with fixed scaling
+    // relative to the map gets smaller in viewport space as it moves into the
+    // distance
     bool alignWithMap = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature) == AlignmentType::Map;
-    const GeometryCoordinates& transformedQueryGeometry =
-        alignWithMap ? translatedQueryGeometry
-                     : projectQueryGeometry(translatedQueryGeometry, posMatrix, transformState.getSize());
+    const GeometryCoordinates& transformedQueryGeometry = alignWithMap ? translatedQueryGeometry
+                                                                       : projectQueryGeometry(translatedQueryGeometry,
+                                                                                              posMatrix,
+                                                                                              transformState.getSize());
     auto transformedSize = alignWithMap ? size * pixelsToTileUnits : size;
 
     const auto& geometry = feature.getGeometries();

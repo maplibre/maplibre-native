@@ -11,9 +11,8 @@ const style::LayerTypeInfo* HeatmapLayerFactory::getTypeInfo() const noexcept {
     return style::HeatmapLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> HeatmapLayerFactory::createLayer(
-    const std::string& id, const style::conversion::Convertible& value
-) noexcept {
+std::unique_ptr<style::Layer> HeatmapLayerFactory::createLayer(const std::string& id,
+                                                               const style::conversion::Convertible& value) noexcept {
     auto const source = getSource(value);
     if (!source) {
         return nullptr;
@@ -23,8 +22,7 @@ std::unique_ptr<style::Layer> HeatmapLayerFactory::createLayer(
 }
 
 std::unique_ptr<Bucket> HeatmapLayerFactory::createBucket(
-    const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers
-) noexcept {
+    const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
     return std::make_unique<HeatmapBucket>(parameters, layers);
 }
 

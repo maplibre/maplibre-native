@@ -67,12 +67,10 @@ struct TaggedString {
 
     const StyledText& getStyledText() const { return styledText; }
 
-    void addTextSection(
-        const std::u16string& text,
-        double scale,
-        const FontStack& fontStack,
-        std::optional<Color> textColor_ = std::nullopt
-    );
+    void addTextSection(const std::u16string& text,
+                        double scale,
+                        const FontStack& fontStack,
+                        std::optional<Color> textColor_ = std::nullopt);
 
     void addImageSection(const std::string& imageID);
 

@@ -38,8 +38,8 @@ inline bool operator==(const GlyphMetrics& lhs, const GlyphMetrics& rhs) {
 
 class Glyph {
 public:
-    // We're using this value throughout the Mapbox GL ecosystem. If this is different, the glyphs
-    // also need to be reencoded.
+    // We're using this value throughout the Mapbox GL ecosystem. If this is
+    // different, the glyphs also need to be reencoded.
     static constexpr const uint8_t borderSize = 3;
 
     GlyphID id = 0;
@@ -56,18 +56,16 @@ using GlyphMap = std::map<FontStackHash, Glyphs>;
 
 class PositionedGlyph {
 public:
-    explicit PositionedGlyph(
-        GlyphID glyph_,
-        float x_,
-        float y_,
-        bool vertical_,
-        FontStackHash font_,
-        float scale_,
-        Rect<uint16_t> rect_,
-        GlyphMetrics metrics_,
-        std::optional<std::string> imageID_,
-        std::size_t sectionIndex_ = 0
-    )
+    explicit PositionedGlyph(GlyphID glyph_,
+                             float x_,
+                             float y_,
+                             bool vertical_,
+                             FontStackHash font_,
+                             float scale_,
+                             Rect<uint16_t> rect_,
+                             GlyphMetrics metrics_,
+                             std::optional<std::string> imageID_,
+                             std::size_t sectionIndex_ = 0)
         : glyph(glyph_),
           x(x_),
           y(y_),

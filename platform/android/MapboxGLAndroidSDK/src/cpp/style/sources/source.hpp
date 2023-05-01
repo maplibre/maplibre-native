@@ -27,7 +27,8 @@ public:
     Source(jni::JNIEnv&, mbgl::style::Source&, const jni::Object<Source>&, AndroidRendererFrontend*);
 
     /*
-     * Called when a Java object is created for a new core source that does not belong to a map.
+     * Called when a Java object is created for a new core source that does not
+     * belong to a map.
      */
     Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source>);
 

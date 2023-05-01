@@ -81,8 +81,8 @@ public:
 };
 
 // Forward declaration of this method is required for the MapProjection class
-CameraOptions cameraForLatLngs(
-    const std::vector<LatLng>& latLngs, const Transform& transform, const EdgeInsets& padding
-);
+CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
+                               const Transform& transform,
+                               const EdgeInsets& padding);
 
 } // namespace mbgl

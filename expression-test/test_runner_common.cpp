@@ -5,8 +5,8 @@
 
 using namespace mbgl;
 
-// Strip precision for numbers, so that we can compare evaluated results with fixtures.
-// Copied from JS expression harness.
+// Strip precision for numbers, so that we can compare evaluated results with
+// fixtures. Copied from JS expression harness.
 Value stripPrecision(const Value& value) {
     const double decimalSigFigs = 6;
     if (auto num = numericValue<double>(value)) {
@@ -47,11 +47,9 @@ Value stripPrecision(const Value& value) {
 std::vector<std::string> tokenize(std::string str) {
     std::vector<std::string> tokens;
     std::regex re("\n");
-    std::copy(
-        std::regex_token_iterator<std::string::iterator>(str.begin(), str.end(), re, -1),
-        std::regex_token_iterator<std::string::iterator>(),
-        std::back_inserter(tokens)
-    );
+    std::copy(std::regex_token_iterator<std::string::iterator>(str.begin(), str.end(), re, -1),
+              std::regex_token_iterator<std::string::iterator>(),
+              std::back_inserter(tokens));
     return tokens;
 }
 

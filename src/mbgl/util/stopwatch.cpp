@@ -33,8 +33,8 @@ void stopwatch::report(const std::string &name_) {
     Duration duration = Clock::now() - start;
 
     const auto logMsg = name_ + ": " +
-                        std::to_string(std::chrono::duration<float, std::chrono::milliseconds::period>(duration).count()
-                        );
+                        std::to_string(
+                            std::chrono::duration<float, std::chrono::milliseconds::period>(duration).count());
 
     Log::Record(severity, event, logMsg);
     start += duration;

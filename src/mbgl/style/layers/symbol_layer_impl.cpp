@@ -35,17 +35,16 @@ void SymbolLayer::Impl::populateFontStack(std::set<FontStack>& fontStack) const 
                 if (value) {
                     fontStack.insert(*value);
                 } else {
-                    Log::Warning(
-                        Event::ParseStyle,
-                        "Layer '" + id +
-                            "' has an invalid value for text-font and will not render text. Output values "
-                            "must be contained as literals within the expression."
-                    );
+                    Log::Warning(Event::ParseStyle,
+                                 "Layer '" + id +
+                                     "' has an invalid value for text-font and will not "
+                                     "render text. Output values "
+                                     "must be contained as literals within the "
+                                     "expression.");
                     break;
                 }
             }
-        }
-    );
+        });
 }
 
 } // namespace style

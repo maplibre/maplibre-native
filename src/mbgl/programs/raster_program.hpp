@@ -21,25 +21,23 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 3, spin_weights);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 2, tl_parent);
 } // namespace uniforms
 
-class RasterProgram final : public Program<
-                                RasterProgram,
-                                shaders::BuiltIn::RasterProgram,
-                                gfx::PrimitiveType::Triangle,
-                                TypeList<attributes::pos, attributes::texture_pos>,
-                                TypeList<
-                                    uniforms::matrix,
-                                    uniforms::opacity,
-                                    uniforms::fade_t,
-                                    uniforms::brightness_low,
-                                    uniforms::brightness_high,
-                                    uniforms::saturation_factor,
-                                    uniforms::contrast_factor,
-                                    uniforms::spin_weights,
-                                    uniforms::buffer_scale,
-                                    uniforms::scale_parent,
-                                    uniforms::tl_parent>,
-                                TypeList<textures::image0, textures::image1>,
-                                style::RasterPaintProperties> {
+class RasterProgram final : public Program<RasterProgram,
+                                           shaders::BuiltIn::RasterProgram,
+                                           gfx::PrimitiveType::Triangle,
+                                           TypeList<attributes::pos, attributes::texture_pos>,
+                                           TypeList<uniforms::matrix,
+                                                    uniforms::opacity,
+                                                    uniforms::fade_t,
+                                                    uniforms::brightness_low,
+                                                    uniforms::brightness_high,
+                                                    uniforms::saturation_factor,
+                                                    uniforms::contrast_factor,
+                                                    uniforms::spin_weights,
+                                                    uniforms::buffer_scale,
+                                                    uniforms::scale_parent,
+                                                    uniforms::tl_parent>,
+                                           TypeList<textures::image0, textures::image1>,
+                                           style::RasterPaintProperties> {
 public:
     static constexpr std::string_view Name{"RasterProgram"};
     const std::string_view typeName() const noexcept override { return Name; }

@@ -153,26 +153,21 @@ void printStats(const TestStats& stats) {
         printf(ANSI_COLOR_GREEN "%zu passed (%.1lf%%)" ANSI_COLOR_RESET "\n", passedTests, 100.0 * passedTests / count);
     }
     if (std::size_t ignorePassedTests = stats.ignorePassed.size()) {
-        printf(
-            ANSI_COLOR_YELLOW "%zu passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
-            ignorePassedTests,
-            100.0 * ignorePassedTests / count
-        );
+        printf(ANSI_COLOR_YELLOW "%zu passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
+               ignorePassedTests,
+               100.0 * ignorePassedTests / count);
     }
     if (std::size_t ignoreFailedTests = stats.ignoreFailed.size()) {
-        printf(
-            ANSI_COLOR_LIGHT_GRAY "%zu ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
-            ignoreFailedTests,
-            100.0 * ignoreFailedTests / count
-        );
+        printf(ANSI_COLOR_LIGHT_GRAY "%zu ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
+               ignoreFailedTests,
+               100.0 * ignoreFailedTests / count);
     }
     if (std::size_t failedTests = stats.failed.size()) {
         printf(ANSI_COLOR_RED "%zu failed (%.1lf%%)" ANSI_COLOR_RESET "\n", failedTests, 100.0 * failedTests / count);
     }
     if (std::size_t erroredTests = stats.errored.size()) {
         printf(
-            ANSI_COLOR_RED "%zu errored (%.1lf%%)" ANSI_COLOR_RESET "\n", erroredTests, 100.0 * erroredTests / count
-        );
+            ANSI_COLOR_RED "%zu errored (%.1lf%%)" ANSI_COLOR_RESET "\n", erroredTests, 100.0 * erroredTests / count);
     }
 }
 

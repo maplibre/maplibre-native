@@ -116,24 +116,20 @@ TEST(TileID, Canonical) {
     EXPECT_EQ(CanonicalTileID(31, 671088640, 1744830464), scaleBase.scaledTo(31));
     EXPECT_EQ(CanonicalTileID(32, 1342177280, 3489660928), scaleBase.scaledTo(32));
 
-    EXPECT_EQ(
-        (std::array<CanonicalTileID, 4>{{
-            {5, 4, 6},
-            {5, 4, 7},
-            {5, 5, 6},
-            {5, 5, 7},
-        }}),
-        CanonicalTileID(4, 2, 3).children()
-    );
-    EXPECT_EQ(
-        (std::array<CanonicalTileID, 4>{{
-            {1, 0, 0},
-            {1, 0, 1},
-            {1, 1, 0},
-            {1, 1, 1},
-        }}),
-        CanonicalTileID(0, 0, 0).children()
-    );
+    EXPECT_EQ((std::array<CanonicalTileID, 4>{{
+                  {5, 4, 6},
+                  {5, 4, 7},
+                  {5, 5, 6},
+                  {5, 5, 7},
+              }}),
+              CanonicalTileID(4, 2, 3).children());
+    EXPECT_EQ((std::array<CanonicalTileID, 4>{{
+                  {1, 0, 0},
+                  {1, 0, 1},
+                  {1, 1, 0},
+                  {1, 1, 1},
+              }}),
+              CanonicalTileID(0, 0, 0).children());
 }
 
 TEST(TileID, Overscaled) {
@@ -299,22 +295,18 @@ TEST(TileID, Unwrapped) {
     EXPECT_EQ(UnwrappedTileID(-1, {1, 1, 1}), UnwrappedTileID(1, -1, 1));
     EXPECT_EQ(UnwrappedTileID(-1, {0, 0, 0}), UnwrappedTileID(0, -1, 0));
 
-    EXPECT_EQ(
-        (std::array<UnwrappedTileID, 4>{{
-            {1, 0, 0},
-            {1, 0, 1},
-            {1, 1, 0},
-            {1, 1, 1},
-        }}),
-        UnwrappedTileID(0, 0, 0).children()
-    );
-    EXPECT_EQ(
-        (std::array<UnwrappedTileID, 4>{{
-            {1, -2, 0},
-            {1, -2, 1},
-            {1, -1, 0},
-            {1, -1, 1},
-        }}),
-        UnwrappedTileID(0, -1, 0).children()
-    );
+    EXPECT_EQ((std::array<UnwrappedTileID, 4>{{
+                  {1, 0, 0},
+                  {1, 0, 1},
+                  {1, 1, 0},
+                  {1, 1, 1},
+              }}),
+              UnwrappedTileID(0, 0, 0).children());
+    EXPECT_EQ((std::array<UnwrappedTileID, 4>{{
+                  {1, -2, 0},
+                  {1, -2, 1},
+                  {1, -1, 0},
+                  {1, -1, 1},
+              }}),
+              UnwrappedTileID(0, -1, 0).children());
 }

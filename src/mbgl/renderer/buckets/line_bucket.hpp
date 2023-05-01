@@ -19,17 +19,18 @@ class LineBucket final : public Bucket {
 public:
     using PossiblyEvaluatedLayoutProperties = style::LineLayoutProperties::PossiblyEvaluated;
 
-    LineBucket(
-        PossiblyEvaluatedLayoutProperties layout,
-        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-        float zoom,
-        uint32_t overscaling
-    );
+    LineBucket(PossiblyEvaluatedLayoutProperties layout,
+               const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
+               float zoom,
+               uint32_t overscaling);
     ~LineBucket() override;
 
-    void
-    addFeature(const GeometryTileFeature&, const GeometryCollection&, const mbgl::ImagePositions& patternPositions, const PatternLayerMap&, std::size_t, const CanonicalTileID&)
-        override;
+    void addFeature(const GeometryTileFeature&,
+                    const GeometryCollection&,
+                    const mbgl::ImagePositions& patternPositions,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override;
 
     bool hasData() const override;
 
@@ -62,27 +63,23 @@ private:
     };
 
     class Distances;
-    void addCurrentVertex(
-        const GeometryCoordinate& currentCoordinate,
-        double& distance,
-        const Point<double>& normal,
-        double endLeft,
-        double endRight,
-        bool round,
-        std::size_t startVertex,
-        std::vector<LineBucket::TriangleElement>& triangleStore,
-        std::optional<Distances> distances
-    );
+    void addCurrentVertex(const GeometryCoordinate& currentCoordinate,
+                          double& distance,
+                          const Point<double>& normal,
+                          double endLeft,
+                          double endRight,
+                          bool round,
+                          std::size_t startVertex,
+                          std::vector<LineBucket::TriangleElement>& triangleStore,
+                          std::optional<Distances> distances);
 
-    void addPieSliceVertex(
-        const GeometryCoordinate& currentVertex,
-        double distance,
-        const Point<double>& extrude,
-        bool lineTurnsLeft,
-        std::size_t startVertex,
-        std::vector<TriangleElement>& triangleStore,
-        std::optional<Distances> distances
-    );
+    void addPieSliceVertex(const GeometryCoordinate& currentVertex,
+                           double distance,
+                           const Point<double>& extrude,
+                           bool lineTurnsLeft,
+                           std::size_t startVertex,
+                           std::vector<TriangleElement>& triangleStore,
+                           std::optional<Distances> distances);
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;

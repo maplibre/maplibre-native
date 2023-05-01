@@ -9,7 +9,8 @@ namespace util {
 /// Useful for providing a context for parameter pack expansion where a legal
 /// expansion context is not otherwise available.
 ///
-/// See https://github.com/mapbox/cpp/blob/1bb519ef25edd6169f1d6d8a65414044616590a9/docs/structural-metaprogramming.md
+/// See
+/// https://github.com/mapbox/cpp/blob/1bb519ef25edd6169f1d6d8a65414044616590a9/docs/structural-metaprogramming.md
 /// for more details.
 template <class... Ts>
 void ignore(Ts&&...) {}

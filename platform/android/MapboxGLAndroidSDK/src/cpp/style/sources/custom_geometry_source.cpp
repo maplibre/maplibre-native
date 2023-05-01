@@ -18,20 +18,21 @@
 namespace mbgl {
 namespace android {
 
-// This conversion is expected not to fail because it's used only in contexts where
-// the value was originally a CustomGeometrySourceOptions object on the Java side. If it fails
-// to convert, it's a bug in our serialization or Java-side static typing.
-static style::CustomGeometrySource::Options convertCustomGeometrySourceOptions(
-    jni::JNIEnv& env, const jni::Object<>& options, style::TileFunction fetchFn, style::TileFunction cancelFn
-) {
+// This conversion is expected not to fail because it's used only in contexts
+// where the value was originally a CustomGeometrySourceOptions object on the
+// Java side. If it fails to convert, it's a bug in our serialization or
+// Java-side static typing.
+static style::CustomGeometrySource::Options convertCustomGeometrySourceOptions(jni::JNIEnv& env,
+                                                                               const jni::Object<>& options,
+                                                                               style::TileFunction fetchFn,
+                                                                               style::TileFunction cancelFn) {
     using namespace mbgl::style::conversion;
     if (!options) {
         return style::CustomGeometrySource::Options();
     }
     Error error;
     std::optional<style::CustomGeometrySource::Options> result = convert<style::CustomGeometrySource::Options>(
-        Value(env, options), error
-    );
+        Value(env, options), error);
     if (!result) {
         throw std::logic_error(error.message);
     }
@@ -41,22 +42,18 @@ static style::CustomGeometrySource::Options convertCustomGeometrySourceOptions(
 }
 
 CustomGeometrySource::CustomGeometrySource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& options)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::CustomGeometrySource>(
-              jni::Make<std::string>(env, sourceId),
-              convertCustomGeometrySourceOptions(
-                  env,
-                  options,
-                  std::bind(&CustomGeometrySource::fetchTile, this, std::placeholders::_1),
-                  std::bind(&CustomGeometrySource::cancelTile, this, std::placeholders::_1)
-              )
-          )
-      ) {}
+    : Source(env,
+             std::make_unique<mbgl::style::CustomGeometrySource>(
+                 jni::Make<std::string>(env, sourceId),
+                 convertCustomGeometrySourceOptions(
+                     env,
+                     options,
+                     std::bind(&CustomGeometrySource::fetchTile, this, std::placeholders::_1),
+                     std::bind(&CustomGeometrySource::cancelTile, this, std::placeholders::_1)))) {}
 
-CustomGeometrySource::CustomGeometrySource(
-    jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend
-)
+CustomGeometrySource::CustomGeometrySource(jni::JNIEnv& env,
+                                           mbgl::style::Source& coreSource,
+                                           AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
 
 CustomGeometrySource::~CustomGeometrySource() {
@@ -69,8 +66,9 @@ void CustomGeometrySource::fetchTile(const mbgl::CanonicalTileID& tileID) {
     static auto& javaClass = jni::Class<CustomGeometrySource>::Singleton(*_env);
     static auto fetchTile = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint)>(*_env, "fetchTile");
 
-    // The source is removed on the main thread, but it still exists on the Render thread until the frame is complete.
-    // This might cause fetchTile/cancelTile invocations when the Java thread is shutting down and the peer has already
+    // The source is removed on the main thread, but it still exists on the Render
+    // thread until the frame is complete. This might cause fetchTile/cancelTile
+    // invocations when the Java thread is shutting down and the peer has already
     // been released. See https://github.com/mapbox/mapbox-gl-native/issues/12551.
     if (!javaPeer) {
         return;
@@ -86,8 +84,9 @@ void CustomGeometrySource::cancelTile(const mbgl::CanonicalTileID& tileID) {
     static auto& javaClass = jni::Class<CustomGeometrySource>::Singleton(*_env);
     static auto cancelTile = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint)>(*_env, "cancelTile");
 
-    // The source is removed on the main thread, but it still exists on the Render thread until the frame is complete.
-    // This might cause fetchTile/cancelTile invocations when the Java thread is shutting down and the peer has already
+    // The source is removed on the main thread, but it still exists on the Render
+    // thread until the frame is complete. This might cause fetchTile/cancelTile
+    // invocations when the Java thread is shutting down and the peer has already
     // been released. See https://github.com/mapbox/mapbox-gl-native/issues/12551.
     if (!javaPeer) {
         return;
@@ -134,8 +133,7 @@ bool CustomGeometrySource::isCancelled(jni::jint z, jni::jint x, jni::jint y) {
 };
 
 void CustomGeometrySource::setTileData(
-    jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Object<geojson::FeatureCollection>& jFeatures
-) {
+    jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Object<geojson::FeatureCollection>& jFeatures) {
     using namespace mbgl::android::geojson;
 
     // Convert the jni object
@@ -143,9 +141,8 @@ void CustomGeometrySource::setTileData(
 
     // Update the core source if not cancelled
     if (!isCancelled(z, x, y)) {
-        source.as<mbgl::style::CustomGeometrySource>()->CustomGeometrySource::setTileData(
-            CanonicalTileID(z, x, y), GeoJSON(geometry)
-        );
+        source.as<mbgl::style::CustomGeometrySource>()->CustomGeometrySource::setTileData(CanonicalTileID(z, x, y),
+                                                                                          GeoJSON(geometry));
     }
 }
 
@@ -159,8 +156,7 @@ void CustomGeometrySource::invalidateBounds(jni::JNIEnv& env, const jni::Object<
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> CustomGeometrySource::querySourceFeatures(
-    jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
-) {
+    jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
     using namespace mbgl::android::conversion;
     using namespace mbgl::android::geojson;
 
@@ -177,9 +173,10 @@ jni::Local<jni::Object<Source>> CustomGeometrySource::createJavaPeer(jni::JNIEnv
     return javaClass.New(env, constructor, reinterpret_cast<jni::jlong>(this));
 }
 
-void CustomGeometrySource::addToMap(
-    JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& map, AndroidRendererFrontend& frontend
-) {
+void CustomGeometrySource::addToMap(JNIEnv& env,
+                                    const jni::Object<Source>& obj,
+                                    mbgl::Map& map,
+                                    AndroidRendererFrontend& frontend) {
     Source::addToMap(env, obj, map, frontend);
     startThreads();
 }
@@ -209,8 +206,7 @@ void CustomGeometrySource::registerNative(jni::JNIEnv& env) {
         METHOD(&CustomGeometrySource::querySourceFeatures, "querySourceFeatures"),
         METHOD(&CustomGeometrySource::setTileData, "nativeSetTileData"),
         METHOD(&CustomGeometrySource::invalidateTile, "nativeInvalidateTile"),
-        METHOD(&CustomGeometrySource::invalidateBounds, "nativeInvalidateBounds")
-    );
+        METHOD(&CustomGeometrySource::invalidateBounds, "nativeInvalidateBounds"));
 }
 
 } // namespace android

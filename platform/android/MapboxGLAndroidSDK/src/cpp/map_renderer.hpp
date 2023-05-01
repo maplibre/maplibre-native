@@ -40,12 +40,10 @@ public:
 
     static MapRenderer& getNativePeer(JNIEnv&, const jni::Object<MapRenderer>&);
 
-    MapRenderer(
-        jni::JNIEnv& _env,
-        const jni::Object<MapRenderer>&,
-        jni::jfloat pixelRatio,
-        const jni::String& localIdeographFontFamily
-    );
+    MapRenderer(jni::JNIEnv& _env,
+                const jni::Object<MapRenderer>&,
+                jni::jfloat pixelRatio,
+                const jni::String& localIdeographFontFamily);
 
     ~MapRenderer() override;
 

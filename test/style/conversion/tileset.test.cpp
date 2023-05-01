@@ -20,8 +20,7 @@ TEST(Tileset, ErrorHandling) {
         R"JSON({
         "tiles": "should not be a string"
     })JSON",
-        error
-    );
+        error);
     EXPECT_FALSE((bool)converted);
 }
 
@@ -33,8 +32,7 @@ TEST(Tileset, InvalidBounds) {
             "tiles": ["http://mytiles"],
             "bounds": [73, -180, -73, -120]
         })JSON",
-            error
-        );
+            error);
 
         EXPECT_FALSE((bool)converted);
     }
@@ -45,8 +43,7 @@ TEST(Tileset, InvalidBounds) {
             "tiles": ["http://mytiles"],
             "bounds": [-120]
         })JSON",
-            error
-        );
+            error);
 
         EXPECT_FALSE((bool)converted);
     }
@@ -57,8 +54,7 @@ TEST(Tileset, InvalidBounds) {
             "tiles": ["http://mytiles"],
             "bounds": "should not be a string"
         })JSON",
-            error
-        );
+            error);
 
         EXPECT_FALSE((bool)converted);
     }
@@ -71,8 +67,7 @@ TEST(Tileset, ValidWorldBounds) {
         "tiles": ["http://mytiles"],
         "bounds": [-180, -90, 180, 90]
     })JSON",
-        error
-    );
+        error);
     EXPECT_TRUE((bool)converted);
     EXPECT_EQ(converted->bounds, LatLngBounds::hull({90, -180}, {-90, 180}));
 }
@@ -84,8 +79,7 @@ TEST(Tileset, PointBounds) {
         "tiles": ["http://mytiles"],
         "bounds": [0, 0, 0, 0]
     })JSON",
-        error
-    );
+        error);
     EXPECT_TRUE((bool)converted);
     EXPECT_EQ(converted->bounds, LatLngBounds::hull({0, 0}, {0, 0}));
 }
@@ -97,8 +91,7 @@ TEST(Tileset, BoundsAreClamped) {
         "tiles": ["http://mytiles"],
         "bounds": [-181.0000005,-90.000000006,180.00000000000006,91]
     })JSON",
-        error
-    );
+        error);
     EXPECT_TRUE((bool)converted);
     EXPECT_EQ(converted->bounds, LatLngBounds::hull({90, -180}, {-90, 180}));
 }
@@ -114,8 +107,7 @@ TEST(Tileset, FullConversion) {
         "attribution": "mapbox",
         "bounds": [-180, -73, -120, 73]
     })JSON",
-        error
-    );
+        error);
 
     EXPECT_EQ(converted.tiles[0], "http://mytiles");
     EXPECT_EQ(converted.scheme, Tileset::Scheme::XYZ);

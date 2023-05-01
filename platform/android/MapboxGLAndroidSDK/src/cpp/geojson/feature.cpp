@@ -20,10 +20,9 @@ mbgl::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Featur
 
     using mbid = mapbox::feature::identifier;
 
-    return mbgl::GeoJSONFeature{
-        Geometry::convert(env, jFeature.Call(env, geometry)),
-        JsonObject::convert(env, jFeature.Call(env, properties)),
-        jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
+    return mbgl::GeoJSONFeature{Geometry::convert(env, jFeature.Call(env, geometry)),
+                                JsonObject::convert(env, jFeature.Call(env, properties)),
+                                jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
 }
 
 /**
@@ -47,21 +46,19 @@ jni::Local<jni::Object<Feature>> convertFeature(jni::JNIEnv& env, const mbgl::Ge
     static auto& javaClass = jni::Class<Feature>::Singleton(env);
     static auto method =
         javaClass.GetStaticMethod<jni::Object<Feature>(jni::Object<Geometry>, jni::Object<JsonObject>, jni::String)>(
-            env, "fromGeometry"
-        );
+            env, "fromGeometry");
 
     return javaClass.Call(
         env,
         method,
         Geometry::New(env, value.geometry),
         JsonObject::New(env, value.properties),
-        jni::Make<jni::String>(env, value.id.is<mbgl::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor()))
-    );
+        jni::Make<jni::String>(env,
+                               value.id.is<mbgl::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor())));
 }
 
-jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(
-    jni::JNIEnv& env, const std::vector<mbgl::Feature>& value
-) {
+jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(jni::JNIEnv& env,
+                                                              const std::vector<mbgl::Feature>& value) {
     auto features = jni::Array<jni::Object<Feature>>::New(env, value.size());
 
     for (size_t i = 0; i < value.size(); ++i) {
@@ -71,9 +68,8 @@ jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(
     return features;
 }
 
-jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(
-    jni::JNIEnv& env, const std::vector<mbgl::GeoJSONFeature>& value
-) {
+jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(jni::JNIEnv& env,
+                                                              const std::vector<mbgl::GeoJSONFeature>& value) {
     auto features = jni::Array<jni::Object<Feature>>::New(env, value.size());
 
     for (size_t i = 0; i < value.size(); ++i) {

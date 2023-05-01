@@ -8,13 +8,11 @@ namespace util {
 // Map of key -> index into features
 using Index = std::unordered_map<size_t, size_t>;
 
-size_t mergeFromRight(
-    std::vector<SymbolFeature>& features,
-    Index& rightIndex,
-    Index::iterator left,
-    size_t rightKey,
-    GeometryCollection& geom
-) {
+size_t mergeFromRight(std::vector<SymbolFeature>& features,
+                      Index& rightIndex,
+                      Index::iterator left,
+                      size_t rightKey,
+                      GeometryCollection& geom) {
     const size_t index = left->second;
     rightIndex.erase(left);
     rightIndex[rightKey] = index;
@@ -24,13 +22,11 @@ size_t mergeFromRight(
     return index;
 }
 
-size_t mergeFromLeft(
-    std::vector<SymbolFeature>& features,
-    Index& leftIndex,
-    Index::iterator right,
-    size_t leftKey,
-    GeometryCollection& geom
-) {
+size_t mergeFromLeft(std::vector<SymbolFeature>& features,
+                     Index& leftIndex,
+                     Index::iterator right,
+                     size_t leftKey,
+                     GeometryCollection& geom) {
     const size_t index = right->second;
     leftIndex.erase(right);
     leftIndex[leftKey] = index;
@@ -57,7 +53,8 @@ void mergeLines(std::vector<SymbolFeature>& features) {
             continue;
         }
 
-        // TODO: Key should include formatting options (see https://github.com/mapbox/mapbox-gl-js/issues/3645)
+        // TODO: Key should include formatting options (see
+        // https://github.com/mapbox/mapbox-gl-js/issues/3645)
 
         const size_t leftKey = getKey(feature.formattedText->rawText(), geometry[0].front());
         const size_t rightKey = getKey(feature.formattedText->rawText(), geometry[0].back());
@@ -66,8 +63,8 @@ void mergeLines(std::vector<SymbolFeature>& features) {
         const auto right = leftIndex.find(rightKey);
 
         if (left != rightIndex.end() && right != leftIndex.end() && left->second != right->second) {
-            // found lines with the same text adjacent to both ends of the current line, merge all
-            // three
+            // found lines with the same text adjacent to both ends of the
+            // current line, merge all three
             size_t j = mergeFromLeft(features, leftIndex, right, leftKey, geometry);
             size_t i = mergeFromRight(features, rightIndex, left, rightKey, features[j].geometry);
 

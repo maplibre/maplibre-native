@@ -5,21 +5,19 @@
 
 namespace mbgl {
 
-CollisionFeature::CollisionFeature(
-    const GeometryCoordinates& line,
-    const Anchor& anchor,
-    const float top,
-    const float bottom,
-    const float left,
-    const float right,
-    const std::optional<Padding>& collisionPadding,
-    const float boxScale,
-    const float padding,
-    const style::SymbolPlacementType placement,
-    IndexedSubfeature indexedFeature_,
-    const float overscaling,
-    const float rotate
-)
+CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
+                                   const Anchor& anchor,
+                                   const float top,
+                                   const float bottom,
+                                   const float left,
+                                   const float right,
+                                   const std::optional<Padding>& collisionPadding,
+                                   const float boxScale,
+                                   const float padding,
+                                   const style::SymbolPlacementType placement,
+                                   IndexedSubfeature indexedFeature_,
+                                   const float overscaling,
+                                   const float rotate)
     : indexedFeature(std::move(indexedFeature_)),
       alongLine(placement != style::SymbolPlacementType::Point) {
     if (top == 0 && bottom == 0 && left == 0 && right == 0) return;
@@ -72,25 +70,22 @@ CollisionFeature::CollisionFeature(
     }
 }
 
-void CollisionFeature::bboxifyLabel(
-    const GeometryCoordinates& line,
-    GeometryCoordinate& anchorPoint,
-    std::size_t segment,
-    const float labelLength,
-    const float boxSize,
-    const float overscaling
-) {
+void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
+                                    GeometryCoordinate& anchorPoint,
+                                    std::size_t segment,
+                                    const float labelLength,
+                                    const float boxSize,
+                                    const float overscaling) {
     const float step = boxSize / 2;
     const int nBoxes = std::max(static_cast<int>(std::floor(labelLength / step)), 1);
 
-    // We calculate line collision circles out to 300% of what would normally be our
-    // max size, to allow collision detection to work on labels that expand as
-    // they move into the distance
-    // Vertically oriented labels in the distant field can extend past this padding
-    // This is a noticeable problem in overscaled tiles where the pitch 0-based
-    // symbol spacing will put labels very close together in a pitched map.
-    // To reduce the cost of adding extra collision circles, we slowly increase
-    // them for overscaled tiles.
+    // We calculate line collision circles out to 300% of what would normally be
+    // our max size, to allow collision detection to work on labels that expand
+    // as they move into the distance Vertically oriented labels in the distant
+    // field can extend past this padding This is a noticeable problem in
+    // overscaled tiles where the pitch 0-based symbol spacing will put labels
+    // very close together in a pitched map. To reduce the cost of adding extra
+    // collision circles, we slowly increase them for overscaled tiles.
     const double overscalingPaddingFactor = 1 + .4 * util::log2(static_cast<double>(overscaling));
     const int nPitchPaddingBoxes = static_cast<int>(std::floor(nBoxes * overscalingPaddingFactor / 2));
 
@@ -108,8 +103,8 @@ void CollisionFeature::bboxifyLabel(
     do {
         if (index == 0u) {
             if (anchorDistance > labelStartDistance) {
-                // there isn't enough room for the label after the beginning of the line
-                // checkMaxAngle should have already caught this
+                // there isn't enough room for the label after the beginning of
+                // the line checkMaxAngle should have already caught this
                 return;
             } else {
                 // The line doesn't extend far enough back for all of our padding,
@@ -158,9 +153,8 @@ void CollisionFeature::bboxifyLabel(
         const auto& p0 = line[index];
         const auto& p1 = line[index + 1];
 
-        Point<float> boxAnchor = {
-            p0.x + segmentBoxDistance / segmentLength * (p1.x - p0.x),
-            p0.y + segmentBoxDistance / segmentLength * (p1.y - p0.y)};
+        Point<float> boxAnchor = {p0.x + segmentBoxDistance / segmentLength * (p1.x - p0.x),
+                                  p0.y + segmentBoxDistance / segmentLength * (p1.y - p0.y)};
 
         // If the box is within boxSize of the anchor, force the box to be used
         // (so even 0-width labels use at least one box)

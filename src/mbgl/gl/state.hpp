@@ -5,8 +5,8 @@
 namespace mbgl {
 namespace gl {
 
-// Wraps a piece of OpenGL state and remember its value to avoid redundant state calls.
-// Wrapped types need to implement to the Value class interface:
+// Wraps a piece of OpenGL state and remember its value to avoid redundant state
+// calls. Wrapped types need to implement to the Value class interface:
 //
 // class Value {
 //     using Type = ...;

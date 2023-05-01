@@ -37,9 +37,8 @@ public:
     void render();
     void setFramebufferObject(quint32 fbo, const QSize& size);
 
-    using PropertySetter = std::optional<
-        mbgl::style::conversion::Error> (mbgl::style::
-                                             Layer::*)(const std::string&, const mbgl::style::conversion::Convertible&);
+    using PropertySetter = std::optional<mbgl::style::conversion::Error> (mbgl::style::Layer::*)(
+        const std::string&, const mbgl::style::conversion::Convertible&);
     bool setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value);
 
     mbgl::EdgeInsets margins;

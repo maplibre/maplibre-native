@@ -8,8 +8,7 @@ using SourceType = mbgl::style::SourceType;
 
 TEST(OfflineTilePyramidRegionDefinition, EncodeDecode) {
     OfflineTilePyramidRegionDefinition region(
-        "maptiler://style", LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204}), 0, 20, 1.0, true
-    );
+        "maptiler://style", LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204}), 0, 20, 1.0, true);
 
     auto encoded = encodeOfflineRegionDefinition(region);
     auto decoded = decodeOfflineRegionDefinition(encoded).get<OfflineTilePyramidRegionDefinition>();

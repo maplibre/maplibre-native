@@ -8,84 +8,78 @@ namespace style {
 namespace expression {
 
 type::Type typeOf(const Value& value) {
-    return value.match(
-        [&](bool) -> type::Type { return type::Boolean; },
-        [&](double) -> type::Type { return type::Number; },
-        [&](const std::string&) -> type::Type { return type::String; },
-        [&](const Color&) -> type::Type { return type::Color; },
-        [&](const Collator&) -> type::Type { return type::Collator; },
-        [&](const Formatted&) -> type::Type { return type::Formatted; },
-        [&](const Image&) -> type::Type { return type::Image; },
-        [&](const NullValue&) -> type::Type { return type::Null; },
-        [&](const std::unordered_map<std::string, Value>&) -> type::Type { return type::Object; },
-        [&](const std::vector<Value>& arr) -> type::Type {
-            std::optional<type::Type> itemType;
-            for (const auto& item : arr) {
-                const type::Type t = typeOf(item);
-                if (!itemType) {
-                    itemType = {t};
-                } else if (*itemType == t) {
-                    continue;
-                } else {
-                    itemType = {type::Value};
-                    break;
-                }
-            }
+    return value.match([&](bool) -> type::Type { return type::Boolean; },
+                       [&](double) -> type::Type { return type::Number; },
+                       [&](const std::string&) -> type::Type { return type::String; },
+                       [&](const Color&) -> type::Type { return type::Color; },
+                       [&](const Collator&) -> type::Type { return type::Collator; },
+                       [&](const Formatted&) -> type::Type { return type::Formatted; },
+                       [&](const Image&) -> type::Type { return type::Image; },
+                       [&](const NullValue&) -> type::Type { return type::Null; },
+                       [&](const std::unordered_map<std::string, Value>&) -> type::Type { return type::Object; },
+                       [&](const std::vector<Value>& arr) -> type::Type {
+                           std::optional<type::Type> itemType;
+                           for (const auto& item : arr) {
+                               const type::Type t = typeOf(item);
+                               if (!itemType) {
+                                   itemType = {t};
+                               } else if (*itemType == t) {
+                                   continue;
+                               } else {
+                                   itemType = {type::Value};
+                                   break;
+                               }
+                           }
 
-            return type::Array(itemType.value_or(type::Value), arr.size());
-        }
-    );
+                           return type::Array(itemType.value_or(type::Value), arr.size());
+                       });
 }
 
 std::string toString(const Value& value) {
-    return value.match(
-        [](const NullValue&) { return std::string(); },
-        [](const Color& c) { return c.stringify(); }, // avoid quoting
-        [](const Formatted& f) { return f.toString(); },
-        [](const Image& i) { return i.id(); },
-        [](const std::string& s) { return s; }, // avoid quoting
-        [](const auto& v_) { return stringify(v_); }
-    );
+    return value.match([](const NullValue&) { return std::string(); },
+                       [](const Color& c) { return c.stringify(); }, // avoid quoting
+                       [](const Formatted& f) { return f.toString(); },
+                       [](const Image& i) { return i.id(); },
+                       [](const std::string& s) { return s; }, // avoid quoting
+                       [](const auto& v_) { return stringify(v_); });
 }
 
 void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match(
-        [&](const NullValue&) { writer.Null(); },
-        [&](bool b) { writer.Bool(b); },
-        [&](double f) {
-            // make sure integer values are stringified without trailing ".0".
-            f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
-        },
-        [&](const std::string& s) { writer.String(s); },
-        [&](const Color& c) { writer.String(c.stringify()); },
-        [&](const Collator&) {
-            // Collators are excluded from constant folding and there's no Literal parser
-            // for them so there shouldn't be any way to serialize this value.
-            assert(false);
-        },
-        [&](const Formatted& f) {
-            // `stringify` in turns calls ValueConverter::fromExpressionValue below
-            // Serialization strategy for Formatted objects is to return the constant
-            // expression that would generate them.
-            mbgl::style::conversion::stringify(writer, f);
-        },
-        [&](const Image& i) { mbgl::style::conversion::stringify(writer, i); },
-        [&](const std::vector<Value>& arr) {
-            writer.StartArray();
-            for (const auto& item : arr) {
-                writeJSON(writer, item);
-            }
-            writer.EndArray();
-        },
-        [&](const std::unordered_map<std::string, Value>& obj) {
-            writer.StartObject();
-            for (const auto& entry : obj) {
-                writer.Key(entry.first.c_str());
-                writeJSON(writer, entry.second);
-            }
-            writer.EndObject();
-        }
-    );
+    value.match([&](const NullValue&) { writer.Null(); },
+                [&](bool b) { writer.Bool(b); },
+                [&](double f) {
+                    // make sure integer values are stringified without trailing ".0".
+                    f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
+                },
+                [&](const std::string& s) { writer.String(s); },
+                [&](const Color& c) { writer.String(c.stringify()); },
+                [&](const Collator&) {
+                    // Collators are excluded from constant folding and there's no Literal parser
+                    // for them so there shouldn't be any way to serialize this value.
+                    assert(false);
+                },
+                [&](const Formatted& f) {
+                    // `stringify` in turns calls ValueConverter::fromExpressionValue
+                    // below Serialization strategy for Formatted objects is to return
+                    // the constant expression that would generate them.
+                    mbgl::style::conversion::stringify(writer, f);
+                },
+                [&](const Image& i) { mbgl::style::conversion::stringify(writer, i); },
+                [&](const std::vector<Value>& arr) {
+                    writer.StartArray();
+                    for (const auto& item : arr) {
+                        writeJSON(writer, item);
+                    }
+                    writer.EndArray();
+                },
+                [&](const std::unordered_map<std::string, Value>& obj) {
+                    writer.StartObject();
+                    for (const auto& entry : obj) {
+                        writer.Key(entry.first.c_str());
+                        writeJSON(writer, entry.second);
+                    }
+                    writer.EndObject();
+                });
 }
 
 std::string stringify(const Value& value) {
@@ -136,8 +130,8 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
             return mbgl::Value();
         },
         [&](const Formatted& formatted) -> mbgl::Value {
-            // Serialization strategy for Formatted objects is to return the constant
-            // expression that would generate them.
+            // Serialization strategy for Formatted objects is to return the
+            // constant expression that would generate them.
             std::vector<mbgl::Value> serialized;
             static std::string formatOperator("format");
             serialized.emplace_back(formatOperator);
@@ -187,8 +181,7 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
             }
             return converted;
         },
-        [&](const auto& a) -> mbgl::Value { return a; }
-    );
+        [&](const auto& a) -> mbgl::Value { return a; });
 }
 
 Value ValueConverter<float>::toExpressionValue(const float value) {
@@ -231,8 +224,7 @@ std::optional<std::array<T, N>> ValueConverter<std::array<T, N>>::fromExpression
             }
             return result;
         },
-        [&](const auto&) { return std::optional<std::array<T, N>>(); }
-    );
+        [&](const auto&) { return std::optional<std::array<T, N>>(); });
 }
 
 template <typename T>
@@ -255,8 +247,7 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
             }
             return result;
         },
-        [&](const auto&) { return std::optional<std::vector<T>>(); }
-    );
+        [&](const auto&) { return std::optional<std::vector<T>>(); });
 }
 
 Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
@@ -284,9 +275,8 @@ Value ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>>::toExpressionValue(
 
 template <typename T>
 std::optional<T> ValueConverter<T, std::enable_if_t<std::is_enum_v<T>>>::fromExpressionValue(const Value& value) {
-    return value.match(
-        [&](const std::string& v) { return Enum<T>::toEnum(v); }, [&](const auto&) { return std::optional<T>(); }
-    );
+    return value.match([&](const std::string& v) { return Enum<T>::toEnum(v); },
+                       [&](const auto&) { return std::optional<T>(); });
 }
 
 template <typename T>

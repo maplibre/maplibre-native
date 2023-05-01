@@ -14,8 +14,9 @@ public:
     virtual ~VertexBufferResource() = default;
 };
 
-// This class has a template argument that we use to specify the vertex type. It is not used by
-// the implementation, but serves type checking purposes during build time.
+// This class has a template argument that we use to specify the vertex type. It
+// is not used by the implementation, but serves type checking purposes during
+// build time.
 template <class>
 class VertexBuffer {
 public:

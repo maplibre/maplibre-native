@@ -10,16 +10,16 @@ const style::LayerTypeInfo* LocationIndicatorLayerFactory::getTypeInfo() const n
     return style::LocationIndicatorLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer>
-LocationIndicatorLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible&) noexcept {
+std::unique_ptr<style::Layer> LocationIndicatorLayerFactory::createLayer(
+    const std::string& id, const style::conversion::Convertible&) noexcept {
     return std::unique_ptr<style::Layer>(new style::LocationIndicatorLayer(id));
 }
 
-std::unique_ptr<RenderLayer> LocationIndicatorLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl
-) noexcept {
+std::unique_ptr<RenderLayer> LocationIndicatorLayerFactory::createRenderLayer(
+    Immutable<style::Layer::Impl> impl) noexcept {
     assert(impl->getTypeInfo() == getTypeInfo());
-    return std::make_unique<RenderLocationIndicatorLayer>(staticImmutableCast<style::LocationIndicatorLayer::Impl>(impl)
-    );
+    return std::make_unique<RenderLocationIndicatorLayer>(
+        staticImmutableCast<style::LocationIndicatorLayer::Impl>(impl));
 }
 
 } // namespace mbgl

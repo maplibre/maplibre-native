@@ -25,9 +25,10 @@ void Collator::setStrength(jni::JNIEnv& env, const jni::Object<Collator>& collat
     collator.Call(env, method, strength);
 }
 
-jni::jint Collator::compare(
-    jni::JNIEnv& env, const jni::Object<Collator>& collator, const jni::String& lhs, const jni::String& rhs
-) {
+jni::jint Collator::compare(jni::JNIEnv& env,
+                            const jni::Object<Collator>& collator,
+                            const jni::String& lhs,
+                            const jni::String& rhs) {
     static auto& javaClass = jni::Class<Collator>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::jint(jni::String, jni::String)>(env, "compare");
     return collator.Call(env, method, lhs, rhs);
@@ -107,18 +108,13 @@ public:
         if (!languageTag.language) {
             locale = jni::NewGlobal(*env, android::Locale::getDefault(*env));
         } else if (!languageTag.region) {
-            locale = jni::NewGlobal(
-                *env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language))
-            );
+            locale = jni::NewGlobal(*env,
+                                    android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
         } else {
-            locale = jni::NewGlobal(
-                *env,
-                android::Locale::New(
-                    *env,
-                    jni::Make<jni::String>(*env, *languageTag.language),
-                    jni::Make<jni::String>(*env, *languageTag.region)
-                )
-            );
+            locale = jni::NewGlobal(*env,
+                                    android::Locale::New(*env,
+                                                         jni::Make<jni::String>(*env, *languageTag.language),
+                                                         jni::Make<jni::String>(*env, *languageTag.region)));
         }
         collator = jni::NewGlobal(*env, android::Collator::getInstance(*env, locale));
         if (!diacriticSensitive && !caseSensitive) {
@@ -126,8 +122,9 @@ public:
         } else if (diacriticSensitive && !caseSensitive) {
             android::Collator::setStrength(*env, collator, 1 /*SECONDARY*/);
         } else if (caseSensitive) {
-            // If we're case-sensitive and diacritic-sensitive, we use a case-sensitive collator
-            // and a fallback implementation of diacritic-insensitivity.
+            // If we're case-sensitive and diacritic-sensitive, we use a
+            // case-sensitive collator and a fallback implementation of
+            // diacritic-insensitivity.
             android::Collator::setStrength(*env, collator, 2 /*TERTIARY*/);
         }
     }
@@ -139,12 +136,13 @@ public:
 
     int compare(const std::string& lhs, const std::string& rhs) const {
         bool useUnaccent = !diacriticSensitive && caseSensitive;
-        // java.text.Collator doesn't support a diacritic-insensitive/case-sensitive collation
-        // order, so we have to compromise here. We use Android's case-sensitive Collator
-        // against strings that have been "unaccented" using non-locale-aware nunicode logic.
-        // Because of the difference in locale-awareness, this means turning on case-sensitivity
-        // can _potentially_ change compare results for strings that don't actually have any case
-        // differences.
+        // java.text.Collator doesn't support a
+        // diacritic-insensitive/case-sensitive collation order, so we have to
+        // compromise here. We use Android's case-sensitive Collator against
+        // strings that have been "unaccented" using non-locale-aware nunicode
+        // logic. Because of the difference in locale-awareness, this means
+        // turning on case-sensitivity can _potentially_ change compare results
+        // for strings that don't actually have any case differences.
         jni::Local<jni::String> jlhs = useUnaccent
                                            ? android::StringUtils::unaccent(*env, jni::Make<jni::String>(*env, lhs))
                                            : jni::Make<jni::String>(*env, lhs);

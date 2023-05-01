@@ -16,13 +16,11 @@ class CustomTileLoader;
 
 class CustomGeometryTile : public GeometryTile {
 public:
-    CustomGeometryTile(
-        const OverscaledTileID&,
-        std::string sourceID,
-        const TileParameters&,
-        Immutable<style::CustomGeometrySource::TileOptions>,
-        ActorRef<style::CustomTileLoader> loader
-    );
+    CustomGeometryTile(const OverscaledTileID&,
+                       std::string sourceID,
+                       const TileParameters&,
+                       Immutable<style::CustomGeometrySource::TileOptions>,
+                       ActorRef<style::CustomTileLoader> loader);
     ~CustomGeometryTile() override;
 
     void setTileData(const GeoJSON& geoJSON);

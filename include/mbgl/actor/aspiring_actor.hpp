@@ -18,18 +18,20 @@ template <class Object>
 class Actor;
 
 /**
-    An `AspiringActor<O>` is one half of the pair of types that comprise an actor (see `Actor<O>`),
-    the other half being `EstablishedActor<O>`.  It is responsible for:
+    An `AspiringActor<O>` is one half of the pair of types that comprise an
+   actor (see `Actor<O>`), the other half being `EstablishedActor<O>`.  It is
+   responsible for:
      - ownership of the actor's `Mailbox`
      - allocating the memory for (but *not* constructing) the target object `O`
 
-    Using these two pieces--the mailbox and a stable address for `O`--an `AspiringActor<O>` can
-    accept messages for the target object, or provide `ActorRef<O>`s that do so, before the object
-    has actually been constructed by the corresponding `EstablishedActor<O>`.  (Such messages are
-    queued in the mailbox until after the object is constructed.)
+    Using these two pieces--the mailbox and a stable address for `O`--an
+   `AspiringActor<O>` can accept messages for the target object, or provide
+   `ActorRef<O>`s that do so, before the object has actually been constructed by
+   the corresponding `EstablishedActor<O>`.  (Such messages are queued in the
+   mailbox until after the object is constructed.)
 
-    This allows for an `AspiringActor<O>` to be created and safely used by a thread other than the
-    one on which the target object will (eventually) live.
+    This allows for an `AspiringActor<O>` to be created and safely used by a
+   thread other than the one on which the target object will (eventually) live.
 */
 template <class Object>
 class AspiringActor {

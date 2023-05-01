@@ -38,31 +38,25 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
-FillBucket::FillBucket(
-    const FillBucket::PossiblyEvaluatedLayoutProperties&,
-    const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-    const float zoom,
-    const uint32_t
-) {
+FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
+                       const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
+                       const float zoom,
+                       const uint32_t) {
     for (const auto& pair : layerPaintProperties) {
-        paintPropertyBinders.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom)
-        );
+        paintPropertyBinders.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(pair.first),
+                                     std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom));
     }
 }
 
 FillBucket::~FillBucket() = default;
 
-void FillBucket::addFeature(
-    const GeometryTileFeature& feature,
-    const GeometryCollection& geometry,
-    const ImagePositions& patternPositions,
-    const PatternLayerMap& patternDependencies,
-    std::size_t index,
-    const CanonicalTileID& canonical
-) {
+void FillBucket::addFeature(const GeometryTileFeature& feature,
+                            const GeometryCollection& geometry,
+                            const ImagePositions& patternPositions,
+                            const PatternLayerMap& patternDependencies,
+                            std::size_t index,
+                            const CanonicalTileID& canonical) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -118,8 +112,7 @@ void FillBucket::addFeature(
 
         for (std::size_t i = 0; i < nIndicies; i += 3) {
             triangles.emplace_back(
-                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]
-            );
+                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
         }
 
         triangleSegment.vertexLength += totalVertices;
@@ -130,8 +123,7 @@ void FillBucket::addFeature(
         const auto it = patternDependencies.find(pair.first);
         if (it != patternDependencies.end()) {
             pair.second.populateVertexVectors(
-                feature, vertices.elements(), index, patternPositions, it->second, canonical
-            );
+                feature, vertices.elements(), index, patternPositions, it->second, canonical);
         } else {
             pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
         }
@@ -163,12 +155,10 @@ float FillBucket::getQueryRadius(const RenderLayer& layer) const {
     return util::length(translate[0], translate[1]);
 }
 
-void FillBucket::update(
-    const FeatureStates& states,
-    const GeometryTileLayer& layer,
-    const std::string& layerID,
-    const ImagePositions& imagePositions
-) {
+void FillBucket::update(const FeatureStates& states,
+                        const GeometryTileLayer& layer,
+                        const std::string& layerID,
+                        const ImagePositions& imagePositions) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);

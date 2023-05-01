@@ -10,10 +10,11 @@ namespace mbgl {
 namespace style {
 
 /*
-    Manages an ordered collection of elements and their `Immutable<Impl>`s. The latter is
-    itself stored in an Immutable container. Using immutability at the collection level
-    allows us to short-circuit significant portions of the RenderStyle update logic via
-    a simple pointer equality check, greatly improving performance.
+    Manages an ordered collection of elements and their `Immutable<Impl>`s. The
+   latter is itself stored in an Immutable container. Using immutability at the
+   collection level allows us to short-circuit significant portions of the
+   RenderStyle update logic via a simple pointer equality check, greatly
+   improving performance.
 
     Element types are required to have:
 
@@ -45,9 +46,9 @@ protected:
     std::size_t index(const std::string&) const;
     T* add(std::size_t wrapperIndex, std::size_t implIndex, std::unique_ptr<T> wrapper);
     std::unique_ptr<T> remove(std::size_t wrapperIndex, std::size_t implIndex);
-    // Must be called whenever an element of the collection is internally mutated.
-    // Typically, each element permits registration of an observer, and the observer
-    // should call this method.
+    // Must be called whenever an element of the collection is internally
+    // mutated. Typically, each element permits registration of an observer, and
+    // the observer should call this method.
     void update(std::size_t implIndex, const T&);
 
     WrapperVector wrappers;
@@ -90,9 +91,8 @@ public:
 private:
     std::size_t implsIndex(const std::string& id) const {
         const auto& impls_ = *Base::impls;
-        auto it = std::lower_bound(impls_.begin(), impls_.end(), id, [](const auto& a, const std::string& b) {
-            return a->id < b;
-        });
+        auto it = std::lower_bound(
+            impls_.begin(), impls_.end(), id, [](const auto& a, const std::string& b) { return a->id < b; });
         return it - impls_.begin();
     }
 };

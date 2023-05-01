@@ -23,12 +23,10 @@ TEST(TileCover, Antarctic) {
 }
 
 TEST(TileCover, WorldZ0) {
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {0, 0, 0},
-        }),
-        util::tileCover(LatLngBounds::world(), 0)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{
+                  {0, 0, 0},
+              }),
+              util::tileCover(LatLngBounds::world(), 0));
 }
 
 TEST(TileCover, Pitch) {
@@ -45,10 +43,8 @@ TEST(TileCover, Pitch) {
                          .withBearing(5.0)
                          .withPitch(40.0));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
-        util::tileCover(transform.getState(), 2)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
+              util::tileCover(transform.getState(), 2));
 }
 
 TEST(TileCover, PitchIssue15442) {
@@ -64,11 +60,9 @@ TEST(TileCover, PitchIssue15442) {
                          .withBearing(util::rad2deg(0.74963938256567264))
                          .withPitch(util::rad2deg(1.0471975511965976)));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{2, 3, 1}, {2, 2, 1}, {2, 3, 0}, {2, 2, 0}, {2, 1, {2, 0, 0}}, {2, 1, {2, 1, 0}}}
-        ),
-        util::tileCover(transform.getState(), 2)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {2, 3, 1}, {2, 2, 1}, {2, 3, 0}, {2, 2, 0}, {2, 1, {2, 0, 0}}, {2, 1, {2, 1, 0}}}),
+              util::tileCover(transform.getState(), 2));
 }
 
 TEST(TileCover, PitchOverAllowedByContentInsets) {
@@ -86,8 +80,7 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),
-        util::tileCover(transform.getState(), 3)
-    );
+        util::tileCover(transform.getState(), 3));
 }
 
 TEST(TileCover, PitchWithLargerResultSet) {
@@ -106,38 +99,33 @@ TEST(TileCover, PitchWithLargerResultSet) {
     auto cover = util::tileCover(transform.getState(), 5);
     // Returned vector has above 100 elements, we check first 16 as there is a
     // plan to return lower LOD for distant tiles.
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{
-            {5, 15, 16},
-            {5, 15, 17},
-            {5, 14, 16},
-            {5, 14, 17},
-            {5, 16, 16},
-            {5, 16, 17},
-            {5, 15, 15},
-            {5, 14, 15},
-            {5, 15, 18},
-            {5, 14, 18},
-            {5, 16, 15},
-            {5, 13, 16},
-            {5, 13, 17},
-            {5, 16, 18},
-            {5, 13, 18},
-            {5, 15, 19}}),
-        (std::vector<OverscaledTileID>{cover.begin(), cover.begin() + 16})
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{5, 15, 16},
+                                             {5, 15, 17},
+                                             {5, 14, 16},
+                                             {5, 14, 17},
+                                             {5, 16, 16},
+                                             {5, 16, 17},
+                                             {5, 15, 15},
+                                             {5, 14, 15},
+                                             {5, 15, 18},
+                                             {5, 14, 18},
+                                             {5, 16, 15},
+                                             {5, 13, 16},
+                                             {5, 13, 17},
+                                             {5, 16, 18},
+                                             {5, 13, 18},
+                                             {5, 15, 19}}),
+              (std::vector<OverscaledTileID>{cover.begin(), cover.begin() + 16}));
 }
 
 TEST(TileCover, WorldZ1) {
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {1, 0, 0},
-            {1, 0, 1},
-            {1, 1, 0},
-            {1, 1, 1},
-        }),
-        util::tileCover(LatLngBounds::world(), 1)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{
+                  {1, 0, 0},
+                  {1, 0, 1},
+                  {1, 1, 0},
+                  {1, 1, 1},
+              }),
+              util::tileCover(LatLngBounds::world(), 1));
 }
 
 TEST(TileCover, SingletonZ0) {
@@ -160,8 +148,7 @@ TEST(TileCover, CoordinatesAreUnwrapped) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{1, 0, {1, 1, 0}}, {1, 1, {1, 0, 0}}, {1, 0, {1, 1, 1}}, {1, 1, {1, 0, 1}}}),
-        util::tileCover(transform.getState(), 1)
-    );
+        util::tileCover(transform.getState(), 1));
 }
 
 TEST(TileCover, DifferentOverscaledZ) {
@@ -178,8 +165,7 @@ TEST(TileCover, DifferentOverscaledZ) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 0, {2, 1, 1}}, {3, 0, {2, 2, 1}}, {3, 0, {2, 1, 2}}, {3, 0, {2, 2, 2}}}),
-        util::tileCover(transform.getState(), 2, 3)
-    );
+        util::tileCover(transform.getState(), 2, 3));
 }
 
 TEST(TileCover, DifferentOverscaledZWithPitch) {
@@ -193,17 +179,14 @@ TEST(TileCover, DifferentOverscaledZWithPitch) {
                          .withZoom(3.5)
                          .withPitch(60));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{
-            {5, 0, {3, 3, 3}},
-            {5, 0, {3, 4, 3}},
-            {5, 0, {3, 3, 2}},
-            {5, 0, {3, 4, 2}},
-            {5, 0, {3, 3, 1}},
-            {5, 0, {3, 4, 1}},
-            {5, 0, {3, 2, 1}}}),
-        util::tileCover(transform.getState(), 3, 5)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{5, 0, {3, 3, 3}},
+                                             {5, 0, {3, 4, 3}},
+                                             {5, 0, {3, 3, 2}},
+                                             {5, 0, {3, 4, 2}},
+                                             {5, 0, {3, 3, 1}},
+                                             {5, 0, {3, 4, 1}},
+                                             {5, 0, {3, 2, 1}}}),
+              util::tileCover(transform.getState(), 3, 5));
 }
 
 TEST(TileCover, DifferentOverscaledZWrapped) {
@@ -218,8 +201,7 @@ TEST(TileCover, DifferentOverscaledZWrapped) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{2, 0, {1, 1, 0}}, {2, 1, {1, 0, 0}}, {2, 0, {1, 1, 1}}, {2, 1, {1, 0, 1}}}),
-        util::tileCover(transform.getState(), 1, 2)
-    );
+        util::tileCover(transform.getState(), 1, 2));
 }
 
 TEST(TileCover, FlippedY) {
@@ -233,10 +215,8 @@ TEST(TileCover, FlippedY) {
                          })
                          .withZoom(1.0));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {1, 1, 1}}),
-        util::tileCover(transform.getState(), 1)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {1, 1, 1}}),
+              util::tileCover(transform.getState(), 1));
 }
 
 TEST(TileCover, FlippedYPitch) {
@@ -252,10 +232,8 @@ TEST(TileCover, FlippedYPitch) {
                          .withBearing(5.0)
                          .withPitch(40.0));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
-        util::tileCover(transform.getState(), 2)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
+              util::tileCover(transform.getState(), 2));
 }
 
 TEST(TileCover, FlippedYHelsinki) {
@@ -269,10 +247,8 @@ TEST(TileCover, FlippedYHelsinki) {
                          })
                          .withZoom(11.447425));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{11, 1165, 592}, {11, 1166, 592}, {11, 1165, 593}, {11, 1166, 593}}),
-        util::tileCover(transform.getState(), 11)
-    );
+    EXPECT_EQ((std::vector<OverscaledTileID>{{11, 1165, 592}, {11, 1166, 592}, {11, 1165, 593}, {11, 1166, 593}}),
+              util::tileCover(transform.getState(), 11));
 }
 
 TEST(TileCoverStream, Arctic) {
@@ -294,38 +270,32 @@ TEST(TileCoverStream, WorldZ1) {
     while (tc.hasNext()) {
         t.push_back(*tc.next());
     };
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {1, 0, 0},
-            {1, 1, 0},
-            {1, 0, 1},
-            {1, 1, 1},
-        }),
-        t
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{
+                  {1, 0, 0},
+                  {1, 1, 0},
+                  {1, 0, 1},
+                  {1, 1, 1},
+              }),
+              t);
 }
 
 static const LatLngBounds sanFrancisco = LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204});
 
 TEST(TileCover, SanFranciscoZ0) {
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {0, 0, 0},
-        }),
-        util::tileCover(sanFrancisco, 0)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{
+                  {0, 0, 0},
+              }),
+              util::tileCover(sanFrancisco, 0));
 }
 
 TEST(TileCover, SanFranciscoZ10) {
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {10, 163, 395},
-            {10, 163, 396},
-            {10, 164, 395},
-            {10, 164, 396},
-        }),
-        util::tileCover(sanFrancisco, 10)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{
+                  {10, 163, 395},
+                  {10, 163, 396},
+                  {10, 164, 395},
+                  {10, 164, 396},
+              }),
+              util::tileCover(sanFrancisco, 10));
 }
 
 static const LatLngBounds sanFranciscoWrapped = LatLngBounds::hull({37.6609, 238.5744}, {37.8271, 238.3204});
@@ -348,19 +318,15 @@ TEST(TileCover, GeomMultiPoint) {
 
 TEST(TileCover, GeomLineZ10) {
     auto lineCover = util::tileCover(
-        LineString<double>{{-121.49368286132812, 38.57903714667459}, {-122.4422836303711, 37.773157169570695}}, 10
-    );
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {10, 166, 392},
-            {10, 165, 393},
-            {10, 166, 393},
-            {10, 164, 394},
-            {10, 165, 394},
-            {10, 163, 395},
-            {10, 164, 395}}),
-        lineCover
-    );
+        LineString<double>{{-121.49368286132812, 38.57903714667459}, {-122.4422836303711, 37.773157169570695}}, 10);
+    EXPECT_EQ((std::vector<UnwrappedTileID>{{10, 166, 392},
+                                            {10, 165, 393},
+                                            {10, 166, 393},
+                                            {10, 164, 394},
+                                            {10, 165, 394},
+                                            {10, 163, 395},
+                                            {10, 164, 395}}),
+              lineCover);
 }
 
 TEST(TileCover, GeomLineRegression11870) {
@@ -370,63 +336,56 @@ TEST(TileCover, GeomLineRegression11870) {
             {-121.5065300000001, 40.470369999999946},
             {-121.5065900000001, 40.470519999999944},
         },
-        14
-    );
+        14);
     EXPECT_EQ((std::vector<UnwrappedTileID>{{14, 2662, 6174}}), lineCover);
 }
 
 TEST(TileCover, WrappedGeomLineZ10) {
     auto lineCover = util::tileCover(
-        LineString<double>{{-179.93342914581299, 38.892101707724315}, {-180.02394485473633, 38.89203490311832}}, 10
-    );
+        LineString<double>{{-179.93342914581299, 38.892101707724315}, {-180.02394485473633, 38.89203490311832}}, 10);
     EXPECT_EQ((std::vector<UnwrappedTileID>{{10, -1, 391}, {10, 0, 391}}), lineCover);
 
     lineCover = util::tileCover(
-        LineString<double>{{179.93342914581299, 38.892101707724315}, {180.02394485473633, 38.89203490311832}}, 10
-    );
+        LineString<double>{{179.93342914581299, 38.892101707724315}, {180.02394485473633, 38.89203490311832}}, 10);
     EXPECT_EQ((std::vector<UnwrappedTileID>{{10, 1023, 391}, {10, 1024, 391}}), lineCover);
 }
 
 TEST(TileCover, GeomMultiLineString) {
     auto geom = MultiLineString<double>{{{-122.5, 37.76}, {-122.4, 37.76}}, {{-122.5, 37.72}, {-122.4, 37.72}}};
 
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{
-            {14, 2616, 6333},
-            {14, 2617, 6333},
-            {14, 2618, 6333},
-            {14, 2619, 6333},
-            {14, 2620, 6333},
-            {14, 2621, 6333},
-            {14, 2616, 6335},
-            {14, 2617, 6335},
-            {14, 2618, 6335},
-            {14, 2619, 6335},
-            {14, 2620, 6335},
-            {14, 2621, 6335}}),
-        util::tileCover(geom, 14)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{{14, 2616, 6333},
+                                            {14, 2617, 6333},
+                                            {14, 2618, 6333},
+                                            {14, 2619, 6333},
+                                            {14, 2620, 6333},
+                                            {14, 2621, 6333},
+                                            {14, 2616, 6335},
+                                            {14, 2617, 6335},
+                                            {14, 2618, 6335},
+                                            {14, 2619, 6335},
+                                            {14, 2620, 6335},
+                                            {14, 2621, 6335}}),
+              util::tileCover(geom, 14));
 }
 
 TEST(TileCover, GeomPolygon) {
-    auto polygon = Polygon<double>{
-        {
-            {5.09765625, 53.067626642387374},
-            {2.373046875, 43.389081939117496},
-            {-4.74609375, 48.45835188280866},
-            {-1.494140625, 37.09023980307208},
-            {22.587890625, 36.24427318493909},
-            {31.640625, 46.13417004624326},
-            {17.841796875, 54.7246201949245},
-            {5.09765625, 53.067626642387374},
-        },
-        {{19.6875, 49.66762782262194},
-         {22.8515625, 43.51668853502906},
-         {13.623046875, 45.089035564831036},
-         {16.34765625, 39.095962936305476},
-         {5.185546875, 41.244772343082076},
-         {8.701171874999998, 50.233151832472245},
-         {19.6875, 49.66762782262194}}};
+    auto polygon = Polygon<double>{{
+                                       {5.09765625, 53.067626642387374},
+                                       {2.373046875, 43.389081939117496},
+                                       {-4.74609375, 48.45835188280866},
+                                       {-1.494140625, 37.09023980307208},
+                                       {22.587890625, 36.24427318493909},
+                                       {31.640625, 46.13417004624326},
+                                       {17.841796875, 54.7246201949245},
+                                       {5.09765625, 53.067626642387374},
+                                   },
+                                   {{19.6875, 49.66762782262194},
+                                    {22.8515625, 43.51668853502906},
+                                    {13.623046875, 45.089035564831036},
+                                    {16.34765625, 39.095962936305476},
+                                    {5.185546875, 41.244772343082076},
+                                    {8.701171874999998, 50.233151832472245},
+                                    {19.6875, 49.66762782262194}}};
 
     auto results = util::tileCover(polygon, 8);
 
@@ -437,22 +396,21 @@ TEST(TileCover, GeomPolygon) {
 }
 
 TEST(TileCover, GeomMultiPolygon) {
-    auto multiPolygon = MultiPolygon<double>{
-        {{
-            {5.09765625, 53.067626642387374},
-            {2.373046875, 43.389081939117496},
-            {-4.74609375, 48.45835188280866},
-            {-1.494140625, 37.09023980307208},
-            {22.587890625, 36.24427318493909},
-            {31.640625, 46.13417004624326},
-            {17.841796875, 54.7246201949245},
-            {5.09765625, 53.067626642387374},
-        }},
-        {{{59.150390625, 45.460130637921004},
-          {65.126953125, 41.11246878918088},
-          {69.169921875, 47.45780853075031},
-          {63.896484375, 50.064191736659104},
-          {59.150390625, 45.460130637921004}}}};
+    auto multiPolygon = MultiPolygon<double>{{{
+                                                 {5.09765625, 53.067626642387374},
+                                                 {2.373046875, 43.389081939117496},
+                                                 {-4.74609375, 48.45835188280866},
+                                                 {-1.494140625, 37.09023980307208},
+                                                 {22.587890625, 36.24427318493909},
+                                                 {31.640625, 46.13417004624326},
+                                                 {17.841796875, 54.7246201949245},
+                                                 {5.09765625, 53.067626642387374},
+                                             }},
+                                             {{{59.150390625, 45.460130637921004},
+                                               {65.126953125, 41.11246878918088},
+                                               {69.169921875, 47.45780853075031},
+                                               {63.896484375, 50.064191736659104},
+                                               {59.150390625, 45.460130637921004}}}};
     auto results = util::tileCover(multiPolygon, 8);
 
     EXPECT_EQ(424u, results.size());
@@ -479,8 +437,7 @@ TEST(TileCover, GeomSanFranciscoPoly) {
     EXPECT_EQ(
         (std::vector<UnwrappedTileID>{
             {12, 654, 1582}, {12, 655, 1582}, {12, 654, 1583}, {12, 655, 1583}, {12, 654, 1584}, {12, 655, 1584}}),
-        util::tileCover(sanFranciscoGeom, 12)
-    );
+        util::tileCover(sanFranciscoGeom, 12));
 }
 
 TEST(TileCover, GeomInvalid) {
@@ -495,10 +452,8 @@ TEST(TileCover, GeomInvalid) {
 
     // Should handle open polygons.
     badPoly = Polygon<double>{{{1.0, 34.2}, {1.0, 34.4}, {0.5, 34.3}}};
-    EXPECT_EQ(
-        (std::vector<UnwrappedTileID>{{10, 513, 407}, {10, 514, 407}, {10, 513, 408}, {10, 514, 408}}),
-        util::tileCover(badPoly, 10)
-    );
+    EXPECT_EQ((std::vector<UnwrappedTileID>{{10, 513, 407}, {10, 514, 407}, {10, 513, 408}, {10, 514, 408}}),
+              util::tileCover(badPoly, 10));
 }
 
 TEST(TileCount, World) {

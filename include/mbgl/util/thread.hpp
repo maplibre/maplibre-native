@@ -22,12 +22,13 @@ namespace util {
 
 /// @brief Manages a thread with `Object`.
 ///
-/// Upon creation of this object, it launches a thread and creates an object of type `Object`
-/// in that thread. When the `Thread<>` object is destructed, the destructor waits
-/// for thread termination. The `Thread<>` constructor blocks until the thread and
-/// the `Object` are fully created, so after the object creation, it's safe to obtain the
-/// `Object` stored in this thread. The thread created will always have low priority on
-/// the platforms that support setting thread priority.
+/// Upon creation of this object, it launches a thread and creates an object of
+/// type `Object` in that thread. When the `Thread<>` object is destructed, the
+/// destructor waits for thread termination. The `Thread<>` constructor blocks
+/// until the thread and the `Object` are fully created, so after the object
+/// creation, it's safe to obtain the `Object` stored in this thread. The thread
+/// created will always have low priority on the platforms that support setting
+/// thread priority.
 ///
 /// The following properties make this class different from `ThreadPool`:
 ///
@@ -35,7 +36,8 @@ namespace util {
 /// - `Object` will live in a single thread, providing thread affinity.
 /// - It is safe to use `ThreadLocal` in an `Object` managed by `Thread<>`
 /// - A `RunLoop` is created for the `Object` thread.
-/// - `Object` can use `Timer` and do asynchronous I/O, like wait for sockets events.
+/// - `Object` can use `Timer` and do asynchronous I/O, like wait for sockets
+/// events.
 template <typename Object>
 class Thread {
 public:

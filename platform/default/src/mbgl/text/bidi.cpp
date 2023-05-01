@@ -28,8 +28,9 @@ BiDi::BiDi()
     : impl(std::make_unique<BiDiImpl>()) {}
 BiDi::~BiDi() = default;
 
-// Takes UTF16 input in logical order and applies Arabic shaping to the input while maintaining
-// logical order. Output won't be intelligible until the bidirectional algorithm is applied
+// Takes UTF16 input in logical order and applies Arabic shaping to the input
+// while maintaining logical order. Output won't be intelligible until the
+// bidirectional algorithm is applied
 std::u16string applyArabicShaping(const std::u16string& input) {
     UErrorCode errorCode = U_ZERO_ERROR;
 
@@ -39,8 +40,7 @@ std::u16string applyArabicShaping(const std::u16string& input) {
         nullptr,
         0,
         (U_SHAPE_LETTERS_SHAPE & U_SHAPE_LETTERS_MASK) | (U_SHAPE_TEXT_DIRECTION_LOGICAL & U_SHAPE_TEXT_DIRECTION_MASK),
-        &errorCode
-    );
+        &errorCode);
 
     // Pre-flighting will always set U_BUFFER_OVERFLOW_ERROR
     errorCode = U_ZERO_ERROR;
@@ -53,8 +53,7 @@ std::u16string applyArabicShaping(const std::u16string& input) {
         mbgl::utf16char_cast<UChar*>(outputText.data()),
         outputLength,
         (U_SHAPE_LETTERS_SHAPE & U_SHAPE_LETTERS_MASK) | (U_SHAPE_TEXT_DIRECTION_LOGICAL & U_SHAPE_TEXT_DIRECTION_MASK),
-        &errorCode
-    );
+        &errorCode);
 
     // If the algorithm fails for any reason, fall back to non-transformed text
     if (U_FAILURE(errorCode)) return input;
@@ -70,9 +69,8 @@ void BiDi::mergeParagraphLineBreaks(std::set<size_t>& lineBreakPoints) {
         ubidi_getParagraphByIndex(impl->bidiText, i, nullptr, &paragraphEndIndex, nullptr, &errorCode);
 
         if (U_FAILURE(errorCode)) {
-            throw std::runtime_error(
-                std::string("ProcessedBiDiText::mergeParagraphLineBreaks: ") + u_errorName(errorCode)
-            );
+            throw std::runtime_error(std::string("ProcessedBiDiText::mergeParagraphLineBreaks: ") +
+                                     u_errorName(errorCode));
         }
 
         lineBreakPoints.insert(static_cast<std::size_t>(paragraphEndIndex));
@@ -80,9 +78,10 @@ void BiDi::mergeParagraphLineBreaks(std::set<size_t>& lineBreakPoints) {
 }
 
 std::vector<std::u16string> BiDi::applyLineBreaking(std::set<std::size_t> lineBreakPoints) {
-    // BiDi::getLine will error if called across a paragraph boundary, so we need to ensure that all
-    // paragraph boundaries are included in the set of line break points. The calling code might not
-    // include the line break because it didn't need to wrap at that point, or because the text was
+    // BiDi::getLine will error if called across a paragraph boundary, so we
+    // need to ensure that all paragraph boundaries are included in the set of
+    // line break points. The calling code might not include the line break
+    // because it didn't need to wrap at that point, or because the text was
     // separated with a more exotic code point such as (U+001C)
     mergeParagraphLineBreaks(lineBreakPoints);
 
@@ -101,14 +100,12 @@ std::vector<std::u16string> BiDi::applyLineBreaking(std::set<std::size_t> lineBr
 std::vector<std::u16string> BiDi::processText(const std::u16string& input, std::set<std::size_t> lineBreakPoints) {
     UErrorCode errorCode = U_ZERO_ERROR;
 
-    ubidi_setPara(
-        impl->bidiText,
-        mbgl::utf16char_cast<const UChar*>(input.c_str()),
-        static_cast<int32_t>(input.size()),
-        UBIDI_DEFAULT_LTR,
-        nullptr,
-        &errorCode
-    );
+    ubidi_setPara(impl->bidiText,
+                  mbgl::utf16char_cast<const UChar*>(input.c_str()),
+                  static_cast<int32_t>(input.size()),
+                  UBIDI_DEFAULT_LTR,
+                  nullptr,
+                  &errorCode);
 
     if (U_FAILURE(errorCode)) {
         throw std::runtime_error(std::string("BiDi::processText: ") + u_errorName(errorCode));
@@ -124,14 +121,12 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
 
     UErrorCode errorCode = U_ZERO_ERROR;
 
-    ubidi_setPara(
-        impl->bidiText,
-        mbgl::utf16char_cast<const UChar*>(inputText.c_str()),
-        static_cast<int32_t>(inputText.size()),
-        UBIDI_DEFAULT_LTR,
-        nullptr,
-        &errorCode
-    );
+    ubidi_setPara(impl->bidiText,
+                  mbgl::utf16char_cast<const UChar*>(inputText.c_str()),
+                  static_cast<int32_t>(inputText.size()),
+                  UBIDI_DEFAULT_LTR,
+                  nullptr,
+                  &errorCode);
 
     if (U_FAILURE(errorCode)) {
         throw std::runtime_error(std::string("BiDi::processStyledText: ") + u_errorName(errorCode));
@@ -146,13 +141,11 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
         line.second.reserve(lineBreakPoint - lineStartIndex);
 
         errorCode = U_ZERO_ERROR;
-        ubidi_setLine(
-            impl->bidiText,
-            static_cast<int32_t>(lineStartIndex),
-            static_cast<int32_t>(lineBreakPoint),
-            impl->bidiLine,
-            &errorCode
-        );
+        ubidi_setLine(impl->bidiText,
+                      static_cast<int32_t>(lineStartIndex),
+                      static_cast<int32_t>(lineBreakPoint),
+                      impl->bidiLine,
+                      &errorCode);
         if (U_FAILURE(errorCode)) {
             throw std::runtime_error(std::string("BiDi::processStyledText (setLine): ") + u_errorName(errorCode));
         }
@@ -195,11 +188,9 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
 
             } else {
                 line.first += input.first.substr(logicalStart, runLength);
-                line.second.insert(
-                    line.second.end(),
-                    styleIndices.begin() + logicalStart,
-                    styleIndices.begin() + logicalStart + runLength
-                );
+                line.second.insert(line.second.end(),
+                                   styleIndices.begin() + logicalStart,
+                                   styleIndices.begin() + logicalStart + runLength);
             }
         }
 
@@ -215,17 +206,17 @@ std::u16string BiDi::writeReverse(const std::u16string& input, std::size_t logic
     auto logicalLength = static_cast<int32_t>(logicalEnd - logicalStart);
     std::u16string outputText(logicalLength + 1, 0);
 
-    // UBIDI_DO_MIRRORING: Apply unicode mirroring of characters like parentheses
-    // UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set, remove control characters so that
-    // they don't show up on screen (some fonts have glyphs representing them)
-    int32_t outputLength = ubidi_writeReverse(
-        mbgl::utf16char_cast<const UChar*>(&input[logicalStart]),
-        logicalLength,
-        mbgl::utf16char_cast<UChar*>(outputText.data()),
-        logicalLength + 1, // Extra room for null terminator, although we don't really need to have ICU write it for us
-        UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
-        &errorCode
-    );
+    // UBIDI_DO_MIRRORING: Apply unicode mirroring of characters like
+    // parentheses UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set,
+    // remove control characters so that they don't show up on screen (some
+    // fonts have glyphs representing them)
+    int32_t outputLength = ubidi_writeReverse(mbgl::utf16char_cast<const UChar*>(&input[logicalStart]),
+                                              logicalLength,
+                                              mbgl::utf16char_cast<UChar*>(outputText.data()),
+                                              logicalLength + 1, // Extra room for null terminator, although we don't
+                                                                 // really need to have ICU write it for us
+                                              UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
+                                              &errorCode);
 
     if (U_FAILURE(errorCode)) {
         throw std::runtime_error(std::string("BiDi::writeReverse: ") + u_errorName(errorCode));
@@ -244,22 +235,22 @@ std::u16string BiDi::getLine(std::size_t start, std::size_t end) {
         throw std::runtime_error(std::string("BiDi::getLine (setLine): ") + u_errorName(errorCode));
     }
 
-    // Because we set UBIDI_REMOVE_BIDI_CONTROLS, the output may be smaller than what we reserve
+    // Because we set UBIDI_REMOVE_BIDI_CONTROLS, the output may be smaller than
+    // what we reserve
     //  Setting UBIDI_INSERT_LRM_FOR_NUMERIC would require
     //  ubidi_getLength(pBiDi)+2*ubidi_countRuns(pBiDi)
     const int32_t outputLength = ubidi_getProcessedLength(impl->bidiLine);
     std::u16string outputText(outputLength, 0);
 
-    // UBIDI_DO_MIRRORING: Apply unicode mirroring of characters like parentheses
-    // UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set, remove control characters so that
-    // they don't show up on screen (some fonts have glyphs representing them)
-    int32_t finalLength = ubidi_writeReordered(
-        impl->bidiLine,
-        mbgl::utf16char_cast<UChar*>(outputText.data()),
-        outputLength,
-        UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
-        &errorCode
-    );
+    // UBIDI_DO_MIRRORING: Apply unicode mirroring of characters like
+    // parentheses UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set,
+    // remove control characters so that they don't show up on screen (some
+    // fonts have glyphs representing them)
+    int32_t finalLength = ubidi_writeReordered(impl->bidiLine,
+                                               mbgl::utf16char_cast<UChar*>(outputText.data()),
+                                               outputLength,
+                                               UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
+                                               &errorCode);
 
     outputText.resize(finalLength); // REMOVE_BIDI_CONTROLS may have shrunk the string
 

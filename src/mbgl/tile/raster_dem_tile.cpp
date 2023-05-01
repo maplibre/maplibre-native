@@ -81,8 +81,8 @@ HillshadeBucket* RasterDEMTile::getBucket() const {
 
 void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTileNeighbors mask) {
     int32_t dx = static_cast<int32_t>(borderTile.id.canonical.x) - static_cast<int32_t>(id.canonical.x);
-    const auto dy =
-        static_cast<int8_t>(static_cast<int32_t>(borderTile.id.canonical.y) - static_cast<int32_t>(id.canonical.y));
+    const auto dy = static_cast<int8_t>(static_cast<int32_t>(borderTile.id.canonical.y) -
+                                        static_cast<int32_t>(id.canonical.y));
     const auto dim = static_cast<uint32_t>(pow(2, id.canonical.z));
     if (dx == 0 && dy == 0) return;
     if (std::abs(dy) > 1) return;
@@ -102,8 +102,8 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         tileDEM.backfillBorder(borderDEM, dx, dy);
         // update the bitmask to indicate that this tiles have been backfilled by flipping the relevant bit
         this->neighboringTiles = this->neighboringTiles | mask;
-        // mark HillshadeBucket.prepared as false so it runs through the prepare render pass
-        // with the new texture data we just backfilled
+        // mark HillshadeBucket.prepared as false so it runs through the prepare
+        // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
     }
 }

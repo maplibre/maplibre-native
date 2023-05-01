@@ -42,23 +42,20 @@ StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std:
     return result;
 }
 
-ImageDifference diffImages(
-    const Immutable<std::vector<ImmutableImage>>& a, const Immutable<std::vector<ImmutableImage>>& b
-) {
+ImageDifference diffImages(const Immutable<std::vector<ImmutableImage>>& a,
+                           const Immutable<std::vector<ImmutableImage>>& b) {
     return diff(a, b, [](const ImmutableImage& lhs, const ImmutableImage& rhs) { return lhs->id == rhs->id; });
 }
 
-SourceDifference diffSources(
-    const Immutable<std::vector<ImmutableSource>>& a, const Immutable<std::vector<ImmutableSource>>& b
-) {
+SourceDifference diffSources(const Immutable<std::vector<ImmutableSource>>& a,
+                             const Immutable<std::vector<ImmutableSource>>& b) {
     return diff(a, b, [](const ImmutableSource& lhs, const ImmutableSource& rhs) {
         return std::tie(lhs->id, lhs->type) == std::tie(rhs->id, rhs->type);
     });
 }
 
-LayerDifference diffLayers(
-    const Immutable<std::vector<ImmutableLayer>>& a, const Immutable<std::vector<ImmutableLayer>>& b
-) {
+LayerDifference diffLayers(const Immutable<std::vector<ImmutableLayer>>& a,
+                           const Immutable<std::vector<ImmutableLayer>>& b) {
     return diff(a, b, [](const ImmutableLayer& lhs, const ImmutableLayer& rhs) {
         return (lhs->id == rhs->id) && (lhs->getTypeInfo() == rhs->getTypeInfo());
     });

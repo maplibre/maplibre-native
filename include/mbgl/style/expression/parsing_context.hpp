@@ -53,17 +53,20 @@ public:
 } // namespace detail
 
 /**
-    Controls the annotation behavior of the parser when encountering an expression
-    whose type is not a subtype of the expected type. The default behavior, used
-    when optional<TypeAnnotationOption> is a nullopt, is as follows:
+    Controls the annotation behavior of the parser when encountering an
+   expression whose type is not a subtype of the expected type. The default
+   behavior, used when optional<TypeAnnotationOption> is a nullopt, is as
+   follows:
 
-    When we expect a number, string, boolean, or array but have a value, wrap it in an assertion.
-    When we expect a color or formatted string, but have a string or value, wrap it in a coercion.
-    Otherwise, we do static type-checking.
+    When we expect a number, string, boolean, or array but have a value, wrap it
+   in an assertion. When we expect a color or formatted string, but have a
+   string or value, wrap it in a coercion. Otherwise, we do static
+   type-checking.
 
     These behaviors are overridable for:
       * The "coalesce" operator, which needs to omit type annotations.
-      * String-valued properties (e.g. `text-field`), where coercion is more convenient than assertion.
+      * String-valued properties (e.g. `text-field`), where coercion is more
+   convenient than assertion.
 */
 enum class TypeAnnotationOption {
     coerce,
@@ -94,32 +97,31 @@ public:
     /**
         Parse the given style-spec JSON value as an expression.
     */
-    ParseResult parseExpression(
-        const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = std::nullopt
-    );
+    ParseResult parseExpression(const mbgl::style::conversion::Convertible& value,
+                                const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
-        Parse the given style-spec JSON value as an expression intended to be used
-        in a layout or paint property.  This entails checking additional constraints
-        that exist in that context but not, e.g., for filters.
+        Parse the given style-spec JSON value as an expression intended to be
+       used in a layout or paint property.  This entails checking additional
+       constraints that exist in that context but not, e.g., for filters.
     */
     ParseResult parseLayerPropertyExpression(const mbgl::style::conversion::Convertible& value);
 
     /**
         Parse a child expression. For use by individual Expression::parse() methods.
     */
-    ParseResult parse(
-        const mbgl::style::conversion::Convertible&,
-        std::size_t,
-        std::optional<type::Type> = std::nullopt,
-        const std::optional<TypeAnnotationOption>& = std::nullopt
-    );
+    ParseResult parse(const mbgl::style::conversion::Convertible&,
+                      std::size_t,
+                      std::optional<type::Type> = std::nullopt,
+                      const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
         Parse a child expression.  For use by individual Expression::parse() methods.
     */
-    ParseResult
-    parse(const mbgl::style::conversion::Convertible&, std::size_t index, std::optional<type::Type>, const std::map<std::string, std::shared_ptr<Expression>>&);
+    ParseResult parse(const mbgl::style::conversion::Convertible&,
+                      std::size_t index,
+                      std::optional<type::Type>,
+                      const std::map<std::string, std::shared_ptr<Expression>>&);
 
     /**
         Check whether `t` is a subtype of `expected`, collecting an error if not.
@@ -139,8 +141,7 @@ public:
 
     void error(std::string message, std::size_t child, std::size_t grandchild) {
         errors->push_back(
-            {std::move(message), key + "[" + util::toString(child) + "][" + util::toString(grandchild) + "]"}
-        );
+            {std::move(message), key + "[" + util::toString(child) + "][" + util::toString(grandchild) + "]"});
     }
 
     void appendErrors(ParsingContext&& ctx) {
@@ -152,12 +153,10 @@ public:
     void clearErrors() { errors->clear(); }
 
 private:
-    ParsingContext(
-        std::string key_,
-        std::shared_ptr<std::vector<ParsingError>> errors_,
-        std::optional<type::Type> expected_,
-        std::shared_ptr<detail::Scope> scope_
-    )
+    ParsingContext(std::string key_,
+                   std::shared_ptr<std::vector<ParsingError>> errors_,
+                   std::optional<type::Type> expected_,
+                   std::shared_ptr<detail::Scope> scope_)
         : key(std::move(key_)),
           expected(std::move(expected_)),
           scope(std::move(scope_)),
@@ -169,9 +168,8 @@ private:
         type (either Literal, or the one named in value[0]) and dispatching to the
         appropriate ParseXxxx::parse(const V&, ParsingContext) method.
     */
-    ParseResult parse(
-        const mbgl::style::conversion::Convertible& value, const std::optional<TypeAnnotationOption>& = std::nullopt
-    );
+    ParseResult parse(const mbgl::style::conversion::Convertible& value,
+                      const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     std::string key;
     std::optional<type::Type> expected;

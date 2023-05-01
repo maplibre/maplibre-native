@@ -35,9 +35,8 @@ public:
     static std::optional<Error> eachMember(const JSValue* value, Fn&& fn) {
         assert(value->IsObject());
         for (const auto& property : value->GetObject()) {
-            std::optional<Error> result = fn(
-                {property.name.GetString(), property.name.GetStringLength()}, &property.value
-            );
+            std::optional<Error> result = fn({property.name.GetString(), property.name.GetStringLength()},
+                                             &property.value);
             if (result) {
                 return result;
             }

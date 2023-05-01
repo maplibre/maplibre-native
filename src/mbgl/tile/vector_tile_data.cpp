@@ -79,8 +79,9 @@ std::unique_ptr<GeometryTileData> VectorTileData::clone() const {
 
 std::unique_ptr<GeometryTileLayer> VectorTileData::getLayer(const std::string& name) const {
     if (!parsed) {
-        // We're parsing this lazily so that we can construct VectorTileData objects on the main
-        // thread without incurring the overhead of parsing immediately.
+        // We're parsing this lazily so that we can construct VectorTileData
+        // objects on the main thread without incurring the overhead of parsing
+        // immediately.
         layers = mapbox::vector_tile::buffer(*data).getLayers();
         parsed = true;
     }

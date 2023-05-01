@@ -11,15 +11,13 @@
 namespace mbgl {
 namespace android {
 
-RasterSource::RasterSource(
-    jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& urlOrTileSet, jni::jint tileSize
-)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::RasterSource>(
-              jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet)), tileSize
-          )
-      ) {}
+RasterSource::RasterSource(jni::JNIEnv& env,
+                           const jni::String& sourceId,
+                           const jni::Object<>& urlOrTileSet,
+                           jni::jint tileSize)
+    : Source(env,
+             std::make_unique<mbgl::style::RasterSource>(
+                 jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet)), tileSize)) {}
 
 RasterSource::RasterSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
@@ -51,8 +49,7 @@ void RasterSource::registerNative(jni::JNIEnv& env) {
         jni::MakePeer<RasterSource, const jni::String&, const jni::Object<>&, jni::jint>,
         "initialize",
         "finalize",
-        METHOD(&RasterSource::getURL, "nativeGetUrl")
-    );
+        METHOD(&RasterSource::getURL, "nativeGetUrl"));
 }
 
 } // namespace android

@@ -56,8 +56,7 @@ std::shared_ptr<WorkTask> WorkTask::make(Fn&& fn, Args&&... args) {
 
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_shared<WorkTaskImpl<std::decay_t<Fn>, decltype(tuple)>>(
-        std::forward<Fn>(fn), std::move(tuple), flag
-    );
+        std::forward<Fn>(fn), std::move(tuple), flag);
 }
 
 } // namespace mbgl

@@ -48,8 +48,7 @@ std::vector<DashRange> getDashRanges(const std::vector<float>& dasharray, float 
 }
 
 void addRoundDash(
-    const std::vector<DashRange>& ranges, uint32_t yOffset, float stretch, const int n, AlphaImage& image
-) {
+    const std::vector<DashRange>& ranges, uint32_t yOffset, float stretch, const int n, AlphaImage& image) {
     const float halfStretch = stretch * 0.5f;
 
     if (ranges.empty()) return;
@@ -137,9 +136,10 @@ void addRegularDash(std::vector<DashRange>& ranges, uint32_t yOffset, AlphaImage
     }
 }
 
-LinePatternPos addDashPattern(
-    AlphaImage& image, uint32_t yOffset, const std::vector<float>& dasharray, const LinePatternCap patternCap
-) {
+LinePatternPos addDashPattern(AlphaImage& image,
+                              uint32_t yOffset,
+                              const std::vector<float>& dasharray,
+                              const LinePatternCap patternCap) {
     const uint8_t n = patternCap == LinePatternCap::Round ? 7 : 0;
 
     if (dasharray.size() < 2) {
@@ -171,28 +171,31 @@ LinePatternPos addDashPattern(
 
 } // namespace
 
-DashPatternTexture::DashPatternTexture(
-    const std::vector<float>& from_, const std::vector<float>& to_, const LinePatternCap cap
-) {
+DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
+                                       const std::vector<float>& to_,
+                                       const LinePatternCap cap) {
     const bool patternsIdentical = from_ == to_;
     const uint32_t patternHeight = cap == LinePatternCap::Round ? 15 : 1;
     const uint32_t height = (patternsIdentical ? 1 : 2) * patternHeight;
 
     // The OpenGL ES 2.0 spec, section 3.8.2 states:
     //
-    //     Calling a sampler from a fragment shader will return (R,G,B,A) = (0,0,0,1) if any of the
-    //     following conditions are true:
-    //     […]
-    //     - A two-dimensional sampler is called, the corresponding texture image is a
-    //       non-power-of-two image […], and either the texture wrap mode is not CLAMP_TO_EDGE, or
-    //       the minification filter is neither NEAREST nor LINEAR.
+    //     Calling a sampler from a fragment shader will return (R,G,B,A) =
+    //     (0,0,0,1) if any of the following conditions are true: […]
+    //     - A two-dimensional sampler is called, the corresponding texture
+    //     image is a
+    //       non-power-of-two image […], and either the texture wrap mode is not
+    //       CLAMP_TO_EDGE, or the minification filter is neither NEAREST nor
+    //       LINEAR.
     //     […]
     //
-    // This means that texture lookups won't work for NPOT textures unless they use GL_CLAMP_TO_EDGE.
-    // We're using GL_CLAMP_TO_EDGE for the vertical direction, but GL_REPEAT for the horizontal
-    // direction, which means that we need a power-of-two texture for our line dash patterns to work
-    // on OpenGL ES 2.0 conforming implementations. Fortunately, this just means changing the height
-    // from 15 to 16, and from 30 to 32, so we don't waste many pixels.
+    // This means that texture lookups won't work for NPOT textures unless they
+    // use GL_CLAMP_TO_EDGE. We're using GL_CLAMP_TO_EDGE for the vertical
+    // direction, but GL_REPEAT for the horizontal direction, which means that
+    // we need a power-of-two texture for our line dash patterns to work on
+    // OpenGL ES 2.0 conforming implementations. Fortunately, this just means
+    // changing the height from 15 to 16, and from 30 to 32, so we don't waste
+    // many pixels.
     const uint32_t textureHeight = 1 << util::ceil_log2(height);
     AlphaImage image({256, textureHeight});
 
@@ -211,12 +214,11 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
     assert(texture.is<gfx::Texture>());
-    return {
-        texture.get<gfx::Texture>().getResource(),
-        gfx::TextureFilterType::Linear,
-        gfx::TextureMipMapType::No,
-        gfx::TextureWrapType::Repeat,
-        gfx::TextureWrapType::Clamp};
+    return {texture.get<gfx::Texture>().getResource(),
+            gfx::TextureFilterType::Linear,
+            gfx::TextureMipMapType::No,
+            gfx::TextureWrapType::Repeat,
+            gfx::TextureWrapType::Clamp};
 }
 
 Size DashPatternTexture::getSize() const {
@@ -227,17 +229,16 @@ LineAtlas::LineAtlas() = default;
 
 LineAtlas::~LineAtlas() = default;
 
-DashPatternTexture& LineAtlas::getDashPatternTexture(
-    const std::vector<float>& from, const std::vector<float>& to, const LinePatternCap cap
-) {
+DashPatternTexture& LineAtlas::getDashPatternTexture(const std::vector<float>& from,
+                                                     const std::vector<float>& to,
+                                                     const LinePatternCap cap) {
     const size_t hash = util::hash(getDashPatternHash(from, cap), getDashPatternHash(to, cap));
 
     // Note: We're not handling hash collisions here.
     const auto it = textures.find(hash);
     if (it == textures.end()) {
         auto inserted = textures.emplace(
-            std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(from, to, cap)
-        );
+            std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(from, to, cap));
         assert(inserted.second);
         needsUpload.emplace_back(hash);
         return inserted.first->second;

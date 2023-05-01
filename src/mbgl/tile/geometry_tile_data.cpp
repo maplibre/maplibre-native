@@ -100,11 +100,9 @@ std::vector<GeometryCollection> classifyRings(const GeometryCollection& rings) {
 void limitHoles(GeometryCollection& polygon, uint32_t maxHoles) {
     if (polygon.size() > 1 + maxHoles) {
         std::nth_element(
-            polygon.begin() + 1,
-            polygon.begin() + 1 + maxHoles,
-            polygon.end(),
-            [](const auto& a, const auto& b) { return std::fabs(signedArea(a)) > std::fabs(signedArea(b)); }
-        );
+            polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
+                return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
+            });
         polygon.resize(1 + maxHoles);
     }
 }
@@ -190,13 +188,11 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
 
         auto x = (c.x + 180.0) * size / 360.0 - x0;
         p.x = int16_t(util::clamp<int64_t>(
-            static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()
-        ));
+            static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         auto y = (180 - (std::log(std::tan((c.y + 90) * M_PI / 360.0)) * 180 / M_PI)) * size / 360 - y0;
         p.y = int16_t(util::clamp<int64_t>(
-            static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()
-        ));
+            static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         return p;
     };
@@ -260,8 +256,7 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
             }
             return result;
         },
-        [](const auto&) -> GeometryCollection { return GeometryCollection(); }
-    );
+        [](const auto&) -> GeometryCollection { return GeometryCollection(); });
 }
 
 Feature convertFeature(const GeometryTileFeature& geometryTileFeature, const CanonicalTileID& tileID) {

@@ -70,8 +70,7 @@ LocalFileSource::LocalFileSource(const ResourceOptions& resourceOptions, const C
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "LocalFileSource",
           resourceOptions.clone(),
-          clientOptions.clone()
-      )) {}
+          clientOptions.clone())) {}
 
 LocalFileSource::~LocalFileSource() = default;
 

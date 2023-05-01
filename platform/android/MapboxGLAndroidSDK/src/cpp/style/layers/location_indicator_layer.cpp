@@ -56,15 +56,13 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getShadowImage(jni::JNIEnv& en
 jni::Local<jni::Object<>> LocationIndicatorLayer::getPerspectiveCompensation(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getPerspectiveCompensation())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getPerspectiveCompensation()));
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getImageTiltDisplacement(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getImageTiltDisplacement())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getImageTiltDisplacement()));
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getBearing(jni::JNIEnv& env) {
@@ -164,8 +162,8 @@ void LocationIndicatorLayer::setShadowImageSizeTransition(jni::JNIEnv&, jlong du
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getAccuracyRadiusColor())
-    );
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getAccuracyRadiusColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getAccuracyRadiusColorTransition(jni::JNIEnv& env) {
@@ -184,13 +182,11 @@ void LocationIndicatorLayer::setAccuracyRadiusColorTransition(jni::JNIEnv&, jlon
 jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusBorderColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getAccuracyRadiusBorderColor())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getAccuracyRadiusBorderColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getAccuracyRadiusBorderColorTransition(
-    jni::JNIEnv& env
-) {
+    jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     mbgl::style::TransitionOptions options = toLocationIndicatorLayer(layer).getAccuracyRadiusBorderColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
@@ -215,23 +211,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> LocationIndicatorJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> LocationIndicatorJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                                          mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new LocationIndicatorLayer(toLocationIndicatorLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> LocationIndicatorJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new LocationIndicatorLayer(std::unique_ptr<mbgl::style::LocationIndicatorLayer>(
-            static_cast<mbgl::style::LocationIndicatorLayer*>(layer.release())
-        ))
-    );
+    return createJavaPeer(env,
+                          new LocationIndicatorLayer(std::unique_ptr<mbgl::style::LocationIndicatorLayer>(
+                              static_cast<mbgl::style::LocationIndicatorLayer*>(layer.release()))));
 }
 
 void LocationIndicatorJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -272,16 +263,11 @@ void LocationIndicatorJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&LocationIndicatorLayer::getAccuracyRadiusColorTransition, "nativeGetAccuracyRadiusColorTransition"),
         METHOD(&LocationIndicatorLayer::setAccuracyRadiusColorTransition, "nativeSetAccuracyRadiusColorTransition"),
         METHOD(&LocationIndicatorLayer::getAccuracyRadiusColor, "nativeGetAccuracyRadiusColor"),
-        METHOD(
-            &LocationIndicatorLayer::getAccuracyRadiusBorderColorTransition,
-            "nativeGetAccuracyRadiusBorderColorTransition"
-        ),
-        METHOD(
-            &LocationIndicatorLayer::setAccuracyRadiusBorderColorTransition,
-            "nativeSetAccuracyRadiusBorderColorTransition"
-        ),
-        METHOD(&LocationIndicatorLayer::getAccuracyRadiusBorderColor, "nativeGetAccuracyRadiusBorderColor")
-    );
+        METHOD(&LocationIndicatorLayer::getAccuracyRadiusBorderColorTransition,
+               "nativeGetAccuracyRadiusBorderColorTransition"),
+        METHOD(&LocationIndicatorLayer::setAccuracyRadiusBorderColorTransition,
+               "nativeSetAccuracyRadiusBorderColorTransition"),
+        METHOD(&LocationIndicatorLayer::getAccuracyRadiusBorderColor, "nativeGetAccuracyRadiusBorderColor"));
 }
 
 } // namespace android

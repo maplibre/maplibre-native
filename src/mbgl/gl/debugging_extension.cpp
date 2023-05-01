@@ -5,14 +5,13 @@ namespace mbgl {
 namespace gl {
 namespace extension {
 
-void Debugging::DebugCallback(
-    GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    GLsizei /* length */,
-    const GLchar* message,
-    const void* /* userParam */
+void Debugging::DebugCallback(GLenum source,
+                              GLenum type,
+                              GLuint id,
+                              GLenum severity,
+                              GLsizei /* length */,
+                              const GLchar* message,
+                              const void* /* userParam */
 ) {
     std::string strSource;
     switch (source) {

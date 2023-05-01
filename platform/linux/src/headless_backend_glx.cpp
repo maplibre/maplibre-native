@@ -9,8 +9,8 @@
 namespace mbgl {
 namespace gl {
 
-// This class provides a singleton that contains information about the configuration used for
-// instantiating new headless rendering contexts.
+// This class provides a singleton that contains information about the
+// configuration used for instantiating new headless rendering contexts.
 class GLXDisplayConfig {
 private:
     // Key for singleton construction.
@@ -29,8 +29,8 @@ public:
             throw std::runtime_error("Failed to open X display.");
         }
 
-        const auto* extensions =
-            reinterpret_cast<const char*>(glXQueryServerString(xDisplay, DefaultScreen(xDisplay), GLX_EXTENSIONS));
+        const auto* extensions = reinterpret_cast<const char*>(
+            glXQueryServerString(xDisplay, DefaultScreen(xDisplay), GLX_EXTENSIONS));
         if (!extensions) {
             throw std::runtime_error("Cannot read GLX extensions.");
         }
@@ -87,8 +87,8 @@ public:
             throw std::runtime_error("Error creating GL context object.");
         }
 
-        // Create a dummy pbuffer. We will render to framebuffers anyway, but we need a pbuffer to
-        // activate the context.
+        // Create a dummy pbuffer. We will render to framebuffers anyway, but we
+        // need a pbuffer to activate the context.
         int pbufferAttributes[] = {GLX_PBUFFER_WIDTH, 8, GLX_PBUFFER_HEIGHT, 8, None};
         glxPbuffer = glXCreatePbuffer(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], pbufferAttributes);
     }

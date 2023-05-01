@@ -384,9 +384,8 @@ platform::GLenum Enum<gfx::TexturePixelType>::to(const gfx::TexturePixelType val
 
 template <>
 template <>
-platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(
-    const gfx::TexturePixelType value, gfx::TextureChannelDataType type
-) {
+platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixelType value,
+                                                         gfx::TextureChannelDataType type) {
     switch (type) {
         case gfx::TextureChannelDataType::UnsignedByte: {
             return Enum<gfx::TexturePixelType>::to(value);

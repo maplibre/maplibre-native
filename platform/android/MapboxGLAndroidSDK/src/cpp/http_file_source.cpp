@@ -43,17 +43,15 @@ public:
     ~HTTPRequest();
 
     void onFailure(jni::JNIEnv&, int type, const jni::String& message);
-    void onResponse(
-        jni::JNIEnv&,
-        int code,
-        const jni::String& etag,
-        const jni::String& modified,
-        const jni::String& cacheControl,
-        const jni::String& expires,
-        const jni::String& retryAfter,
-        const jni::String& xRateLimitReset,
-        const jni::Array<jni::jbyte>& body
-    );
+    void onResponse(jni::JNIEnv&,
+                    int code,
+                    const jni::String& etag,
+                    const jni::String& modified,
+                    const jni::String& cacheControl,
+                    const jni::String& expires,
+                    const jni::String& retryAfter,
+                    const jni::String& xRateLimitReset,
+                    const jni::Array<jni::jbyte>& body);
 
     jni::Global<jni::Object<HTTPRequest>> javaRequest;
 
@@ -81,13 +79,11 @@ void RegisterNativeHTTPRequest(jni::JNIEnv& env) {
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
-    jni::RegisterNativePeer<HTTPRequest>(
-        env,
-        javaClass,
-        "nativePtr",
-        METHOD(&HTTPRequest::onFailure, "nativeOnFailure"),
-        METHOD(&HTTPRequest::onResponse, "nativeOnResponse")
-    );
+    jni::RegisterNativePeer<HTTPRequest>(env,
+                                         javaClass,
+                                         "nativePtr",
+                                         METHOD(&HTTPRequest::onFailure, "nativeOnFailure"),
+                                         METHOD(&HTTPRequest::onResponse, "nativeOnResponse"));
 }
 
 } // namespace android
@@ -110,18 +106,14 @@ HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource
     static auto constructor =
         javaClass.GetConstructor<jni::jlong, jni::String, jni::String, jni::String, jni::jboolean>(env);
 
-    javaRequest = jni::NewGlobal(
-        env,
-        javaClass.New(
-            env,
-            constructor,
-            reinterpret_cast<jlong>(this),
-            jni::Make<jni::String>(env, resource.url),
-            jni::Make<jni::String>(env, etagStr),
-            jni::Make<jni::String>(env, modifiedStr),
-            (jboolean)(resource_.usage == Resource::Usage::Offline)
-        )
-    );
+    javaRequest = jni::NewGlobal(env,
+                                 javaClass.New(env,
+                                               constructor,
+                                               reinterpret_cast<jlong>(this),
+                                               jni::Make<jni::String>(env, resource.url),
+                                               jni::Make<jni::String>(env, etagStr),
+                                               jni::Make<jni::String>(env, modifiedStr),
+                                               (jboolean)(resource_.usage == Resource::Usage::Offline)));
 }
 
 HTTPRequest::~HTTPRequest() {
@@ -133,17 +125,15 @@ HTTPRequest::~HTTPRequest() {
     javaRequest.Call(*env, cancel);
 }
 
-void HTTPRequest::onResponse(
-    jni::JNIEnv& env,
-    int code,
-    const jni::String& etag,
-    const jni::String& modified,
-    const jni::String& cacheControl,
-    const jni::String& expires,
-    const jni::String& jRetryAfter,
-    const jni::String& jXRateLimitReset,
-    const jni::Array<jni::jbyte>& body
-) {
+void HTTPRequest::onResponse(jni::JNIEnv& env,
+                             int code,
+                             const jni::String& etag,
+                             const jni::String& modified,
+                             const jni::String& cacheControl,
+                             const jni::String& expires,
+                             const jni::String& jRetryAfter,
+                             const jni::String& jXRateLimitReset,
+                             const jni::Array<jni::jbyte>& body) {
     using Error = Response::Error;
 
     if (etag) {
@@ -188,16 +178,13 @@ void HTTPRequest::onResponse(
             xRateLimitReset = jni::Make<std::string>(env, jXRateLimitReset);
         }
         response.error = std::make_unique<Error>(
-            Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset)
-        );
+            Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset));
     } else if (code >= 500 && code < 600) {
-        response.error = std::make_unique<Error>(
-            Error::Reason::Server, std::string{"HTTP status code "} + util::toString(code)
-        );
+        response.error = std::make_unique<Error>(Error::Reason::Server,
+                                                 std::string{"HTTP status code "} + util::toString(code));
     } else {
-        response.error = std::make_unique<Error>(
-            Error::Reason::Other, std::string{"HTTP status code "} + util::toString(code)
-        );
+        response.error = std::make_unique<Error>(Error::Reason::Other,
+                                                 std::string{"HTTP status code "} + util::toString(code));
     }
 
     async.send();

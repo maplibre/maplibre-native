@@ -26,8 +26,7 @@ TEST(API, RecycleMapUpdateImages) {
         frontend,
         MapObserver::nullObserver(),
         std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions()),
-        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())
-    );
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
 
     EXPECT_TRUE(map);
 
@@ -42,8 +41,7 @@ TEST(API, RecycleMapUpdateImages) {
         map->getStyle().addSource(std::move(source));
         map->getStyle().addLayer(std::move(layer));
         map->getStyle().addImage(
-            std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0f)
-        );
+            std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0f));
     };
 
     // default marker

@@ -45,7 +45,8 @@ public:
     static size_t getAllocationsCount();
 
     /**
-     * @brief Returns the maximum size (in bytes) of the allocated data in the index, since last `reset()` call.
+     * @brief Returns the maximum size (in bytes) of the allocated data in the
+     * index, since last `reset()` call.
      *
      * @return size_t
      */

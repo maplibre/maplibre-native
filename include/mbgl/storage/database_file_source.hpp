@@ -26,17 +26,17 @@ public:
     // Methods common to Ambient cache and Offline functionality
 
     /**
-     * Sets path of a database to be used by DatabaseFileSource and invokes provided
-     * callback when a database path is set.
+     * Sets path of a database to be used by DatabaseFileSource and invokes
+     * provided callback when a database path is set.
      */
     virtual void setDatabasePath(const std::string&, std::function<void()> callback);
 
     /**
      * Delete existing database and re-initialize.
      *
-     * When the operation is complete or encounters an error, the given callback will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
-     * to re-execute a user-provided callback on the main thread.
+     * When the operation is complete or encounters an error, the given callback
+     * will be executed on the database thread; it is the responsibility of the
+     * SDK bindings to re-execute a user-provided callback on the main thread.
      */
     virtual void resetDatabase(std::function<void(std::exception_ptr)>);
 
@@ -46,16 +46,16 @@ public:
      * This operation has a performance impact as it will vacuum the database,
      * forcing it to move pages on the filesystem.
      *
-     * When the operation is complete or encounters an error, the given callback will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
-     * to re-execute a user-provided callback on the main thread.
+     * When the operation is complete or encounters an error, the given callback
+     * will be executed on the database thread; it is the responsibility of the
+     * SDK bindings to re-execute a user-provided callback on the main thread.
      */
     virtual void packDatabase(std::function<void(std::exception_ptr)> callback);
 
     /**
-     * Sets whether packing the database file occurs automatically after an offline
-     * region is deleted (deleteOfflineRegion()) or the ambient cache is cleared
-     * (clearAmbientCache()).
+     * Sets whether packing the database file occurs automatically after an
+     * offline region is deleted (deleteOfflineRegion()) or the ambient cache is
+     * cleared (clearAmbientCache()).
      *
      * By default, packing is enabled. If disabled, disk space will not be freed
      * after resources are removed unless packDatabase() is explicitly called.
@@ -129,30 +129,34 @@ public:
     /**
      * Retrieve all regions in the offline database.
      *
-     * The query will be executed asynchronously and the results passed to the given
-     * callback, which will be executed on the database thread; it is the responsibility
-     * of the SDK bindings to re-execute a user-provided callback on the main thread.
+     * The query will be executed asynchronously and the results passed to the
+     * given callback, which will be executed on the database thread; it is the
+     * responsibility of the SDK bindings to re-execute a user-provided callback
+     * on the main thread.
      */
     virtual void listOfflineRegions(std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
 
     /**
      * Create an offline region in the database.
      *
-     * When the initial database queries have completed, the provided callback will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
-     * to re-execute a user-provided callback on the main thread.
+     * When the initial database queries have completed, the provided callback
+     * will be executed on the database thread; it is the responsibility of the
+     * SDK bindings to re-execute a user-provided callback on the main thread.
      *
-     * Note that the resulting region will be in an inactive download state; to begin
-     * downloading resources, call `setOfflineRegionDownloadState(OfflineRegionDownloadState::Active)`,
+     * Note that the resulting region will be in an inactive download state; to
+     * begin downloading resources, call
+     * `setOfflineRegionDownloadState(OfflineRegionDownloadState::Active)`,
      * optionally registering an `OfflineRegionObserver` beforehand.
      */
-    virtual void
-    createOfflineRegion(const OfflineRegionDefinition& definition, const OfflineRegionMetadata& metadata, std::function<void(expected<OfflineRegion, std::exception_ptr>)>);
+    virtual void createOfflineRegion(const OfflineRegionDefinition& definition,
+                                     const OfflineRegionMetadata& metadata,
+                                     std::function<void(expected<OfflineRegion, std::exception_ptr>)>);
     /**
      * Update an offline region metadata in the database.
      */
-    virtual void
-    updateOfflineMetadata(int64_t regionID, const OfflineRegionMetadata& metadata, std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>);
+    virtual void updateOfflineMetadata(int64_t regionID,
+                                       const OfflineRegionMetadata& metadata,
+                                       std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>);
 
     /**
      * Register an observer to be notified when the state of the region changes.
@@ -166,13 +170,12 @@ public:
 
     /**
      * Retrieve the current status of the region. The query will be executed
-     * asynchronously and the results passed to the given callback, which will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
-     * to re-execute a user-provided callback on the main thread.
+     * asynchronously and the results passed to the given callback, which will
+     * be executed on the database thread; it is the responsibility of the SDK
+     * bindings to re-execute a user-provided callback on the main thread.
      */
-    virtual void
-    getOfflineRegionStatus(const OfflineRegion&, std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>)
-        const;
+    virtual void getOfflineRegionStatus(const OfflineRegion&,
+                                        std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>) const;
 
     /**
      * Merge offline regions from a secondary database into the main offline database.
@@ -194,40 +197,42 @@ public:
      * Merged regions may not be in a completed status if the secondary database
      * does not contain all the tiles or resources required by the region definition.
      */
-    virtual void
-    mergeOfflineRegions(const std::string& sideDatabasePath, std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
+    virtual void mergeOfflineRegions(const std::string& sideDatabasePath,
+                                     std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
 
     /**
-     * Remove an offline region from the database and perform any resources evictions
-     * necessary as a result.
+     * Remove an offline region from the database and perform any resources
+     * evictions necessary as a result.
      *
-     * Eviction works by removing the least-recently requested resources not also required
-     * by other regions, until the database shrinks below a certain size.
+     * Eviction works by removing the least-recently requested resources not
+     * also required by other regions, until the database shrinks below a
+     * certain size.
      *
-     * Note that this method takes ownership of the input, reflecting the fact that once
-     * region deletion is initiated, it is not legal to perform further actions with the
-     * region.
+     * Note that this method takes ownership of the input, reflecting the fact
+     * that once region deletion is initiated, it is not legal to perform
+     * further actions with the region.
      *
-     * Note that this operation can be potentially slow if packing the database occurs
-     * automatically (see runPackDatabaseAutomatically() and packDatabase()).
+     * Note that this operation can be potentially slow if packing the database
+     * occurs automatically (see runPackDatabaseAutomatically() and
+     * packDatabase()).
      *
-     * When the operation is complete or encounters an error, the given callback will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
-     * to re-execute a user-provided callback on the main thread.
+     * When the operation is complete or encounters an error, the given callback
+     * will be executed on the database thread; it is the responsibility of the
+     * SDK bindings to re-execute a user-provided callback on the main thread.
      */
     virtual void deleteOfflineRegion(const OfflineRegion&, std::function<void(std::exception_ptr)>);
 
     /**
-     * Invalidate all the tiles from an offline region forcing Mapbox GL to revalidate
-     * the tiles with the server before using. This is more efficient than deleting the
-     * offline region and downloading it again because if the data on the cache matches
-     * the server, no new data gets transmitted.
+     * Invalidate all the tiles from an offline region forcing Mapbox GL to
+     * revalidate the tiles with the server before using. This is more efficient
+     * than deleting the offline region and downloading it again because if the
+     * data on the cache matches the server, no new data gets transmitted.
      */
     virtual void invalidateOfflineRegion(const OfflineRegion&, std::function<void(std::exception_ptr)>);
 
     /**
-     * Changing or bypassing this limit without permission from Mapbox is prohibited
-     * by the Mapbox Terms of Service.
+     * Changing or bypassing this limit without permission from Mapbox is
+     * prohibited by the Mapbox Terms of Service.
      */
     virtual void setOfflineMapboxTileCountLimit(uint64_t) const;
 

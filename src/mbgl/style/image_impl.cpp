@@ -32,15 +32,13 @@ bool validateContent(const ImageContent& content, const Size& size) {
 
 } // namespace
 
-Image::Impl::Impl(
-    std::string id_,
-    PremultipliedImage&& image_,
-    const float pixelRatio_,
-    bool sdf_,
-    ImageStretches stretchX_,
-    ImageStretches stretchY_,
-    std::optional<ImageContent> content_
-)
+Image::Impl::Impl(std::string id_,
+                  PremultipliedImage&& image_,
+                  const float pixelRatio_,
+                  bool sdf_,
+                  ImageStretches stretchX_,
+                  ImageStretches stretchY_,
+                  std::optional<ImageContent> content_)
     : id(std::move(id_)),
       image(std::move(image_)),
       pixelRatio(pixelRatio_),

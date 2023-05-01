@@ -76,8 +76,7 @@ TEST(TileCoordinate, FromLatLng) {
             ASSERT_NEAR(fromLatLng.p.y, tilePoint.y * maxTilesPerAxis, 1.0e-7);
 
             const auto fromScreenCoordinate = TileCoordinate::fromScreenCoordinate(
-                transform.getState(), static_cast<uint8_t>(zoom), screenCoordinate
-            );
+                transform.getState(), static_cast<uint8_t>(zoom), screenCoordinate);
             ASSERT_DOUBLE_EQ(fromScreenCoordinate.z, fromLatLng.z);
             ASSERT_NEAR(fromScreenCoordinate.p.x, fromLatLng.p.x, 0.99);
             ASSERT_NEAR(fromScreenCoordinate.p.y, fromLatLng.p.y, 0.99);

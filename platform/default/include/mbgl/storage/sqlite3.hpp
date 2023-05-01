@@ -110,16 +110,18 @@ private:
     std::unique_ptr<StatementImpl> impl;
 
 #ifndef NDEBUG
-    // This flag stores whether there exists a Query object that uses this prepared statement.
-    // There may only be one Query object at a time. Statement objects must outlive Query objects.
-    // While a Query object exists, a Statement object may not be moved or deleted.
+    // This flag stores whether there exists a Query object that uses this
+    // prepared statement. There may only be one Query object at a time.
+    // Statement objects must outlive Query objects. While a Query object
+    // exists, a Statement object may not be moved or deleted.
     bool used = false;
 #endif
 };
 
-// A Query object is used to run a database query with a prepared statement (stored in a Statement
-// object). There may only exist one Query object per Statement object. Query objects are designed
-// to be constructed and destroyed frequently.
+// A Query object is used to run a database query with a prepared statement
+// (stored in a Statement object). There may only exist one Query object per
+// Statement object. Query objects are designed to be constructed and destroyed
+// frequently.
 class Query {
 public:
     Query(Statement&);

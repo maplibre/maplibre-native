@@ -39,8 +39,8 @@ Timestamp parseTimestamp(int32_t timestamp);
 // C++17 polyfill
 #if defined(_MSC_VER) && !defined(__clang__)
 template <class _Rep, class _Period, std::enable_if_t<std::numeric_limits<_Rep>::is_signed, int> = 0>
-_NODISCARD constexpr std::chrono::duration<_Rep, _Period> abs(const std::chrono::duration<_Rep, _Period> _Dur
-) noexcept(std::is_arithmetic_v<_Rep>) /* strengthened */ {
+_NODISCARD constexpr std::chrono::duration<_Rep, _Period> abs(const std::chrono::duration<_Rep, _Period> _Dur) noexcept(
+    std::is_arithmetic_v<_Rep>) /* strengthened */ {
     // create a duration with count() the absolute value of _Dur.count()
     return _Dur < std::chrono::duration<_Rep, _Period>::zero() ? std::chrono::duration<_Rep, _Period>::zero() - _Dur
                                                                : _Dur;

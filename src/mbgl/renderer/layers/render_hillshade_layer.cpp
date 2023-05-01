@@ -53,9 +53,8 @@ void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<HillshadeLayerProperties>(
-        staticImmutableCast<HillshadeLayer::Impl>(baseImpl), unevaluated.evaluate(parameters)
-    );
+    auto properties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
+                                                            unevaluated.evaluate(parameters));
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
                  : RenderPass::None;
@@ -103,29 +102,25 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
             },
             paintAttributeData,
             evaluated,
-            static_cast<float>(parameters.state.getZoom())
-        );
+            static_cast<float>(parameters.state.getZoom()));
         const auto allAttributeBindings = HillshadeProgram::computeAllAttributeBindings(
-            vertexBuffer, paintAttributeData, evaluated
-        );
+            vertexBuffer, paintAttributeData, evaluated);
 
         checkRenderability(parameters, HillshadeProgram::activeBindingCount(allAttributeBindings));
 
-        hillshadeProgram->draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::Triangles(),
-            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-            gfx::StencilMode::disabled(),
-            parameters.colorModeForRenderPass(),
-            gfx::CullFaceMode::disabled(),
-            indexBuffer,
-            segments,
-            allUniformValues,
-            allAttributeBindings,
-            textureBindings,
-            getID()
-        );
+        hillshadeProgram->draw(parameters.context,
+                               *parameters.renderPass,
+                               gfx::Triangles(),
+                               parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                               gfx::StencilMode::disabled(),
+                               parameters.colorModeForRenderPass(),
+                               gfx::CullFaceMode::disabled(),
+                               indexBuffer,
+                               segments,
+                               allUniformValues,
+                               allAttributeBindings,
+                               textureBindings,
+                               getID());
     };
 
     mat4 mat;
@@ -147,13 +142,11 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
             assert(bucket.dem);
             const uint16_t stride = bucket.getDEMData().stride;
             const uint16_t tilesize = bucket.getDEMData().dim;
-            auto view = parameters.context.createOffscreenTexture(
-                {tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte
-            );
+            auto view = parameters.context.createOffscreenTexture({tilesize, tilesize},
+                                                                  gfx::TextureChannelDataType::UnsignedByte);
 
-            auto renderPass = parameters.encoder->createRenderPass(
-                "hillshade prepare", {*view, Color{0.0f, 0.0f, 0.0f, 0.0f}, {}, {}}
-            );
+            auto renderPass = parameters.encoder->createRenderPass("hillshade prepare",
+                                                                   {*view, Color{0.0f, 0.0f, 0.0f, 0.0f}, {}, {}});
 
             const Properties<>::PossiblyEvaluated properties;
             const HillshadePrepareProgram::Binders paintAttributeData{properties, 0};
@@ -168,34 +161,30 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
                 },
                 paintAttributeData,
                 properties,
-                static_cast<float>(parameters.state.getZoom())
-            );
+                static_cast<float>(parameters.state.getZoom()));
             const auto allAttributeBindings = HillshadePrepareProgram::computeAllAttributeBindings(
-                *parameters.staticData.rasterVertexBuffer, paintAttributeData, properties
-            );
+                *parameters.staticData.rasterVertexBuffer, paintAttributeData, properties);
 
             checkRenderability(parameters, HillshadePrepareProgram::activeBindingCount(allAttributeBindings));
 
-            // Copy over the segments so that we can create our own DrawScopes that get destroyed
-            // after this draw call.
+            // Copy over the segments so that we can create our own DrawScopes
+            // that get destroyed after this draw call.
             auto segments = RenderStaticData::rasterSegments();
-            hillshadePrepareProgram->draw(
-                parameters.context,
-                *renderPass,
-                gfx::Triangles(),
-                parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-                gfx::StencilMode::disabled(),
-                parameters.colorModeForRenderPass(),
-                gfx::CullFaceMode::disabled(),
-                *parameters.staticData.quadTriangleIndexBuffer,
-                segments,
-                allUniformValues,
-                allAttributeBindings,
-                HillshadePrepareProgram::TextureBindings{
-                    textures::image::Value{bucket.dem->getResource()},
-                },
-                "prepare"
-            );
+            hillshadePrepareProgram->draw(parameters.context,
+                                          *renderPass,
+                                          gfx::Triangles(),
+                                          parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                                          gfx::StencilMode::disabled(),
+                                          parameters.colorModeForRenderPass(),
+                                          gfx::CullFaceMode::disabled(),
+                                          *parameters.staticData.quadTriangleIndexBuffer,
+                                          segments,
+                                          allUniformValues,
+                                          allAttributeBindings,
+                                          HillshadePrepareProgram::TextureBindings{
+                                              textures::image::Value{bucket.dem->getResource()},
+                                          },
+                                          "prepare");
             bucket.texture = std::move(view->getTexture());
             bucket.setPrepared(true);
         } else if (parameters.pass == RenderPass::Translucent) {
@@ -203,32 +192,28 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
 
             if (bucket.vertexBuffer && bucket.indexBuffer) {
                 // Draw only the parts of the tile that aren't drawn by another tile in the layer.
-                draw(
-                    parameters.matrixForTile(tile.id, true),
-                    *bucket.vertexBuffer,
-                    *bucket.indexBuffer,
-                    bucket.segments,
-                    tile.id,
-                    HillshadeProgram::TextureBindings{
-                        textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
-                    }
-                );
+                draw(parameters.matrixForTile(tile.id, true),
+                     *bucket.vertexBuffer,
+                     *bucket.indexBuffer,
+                     bucket.segments,
+                     tile.id,
+                     HillshadeProgram::TextureBindings{
+                         textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
+                     });
             } else {
                 // Draw the full tile.
                 if (bucket.segments.empty()) {
                     // Copy over the segments so that we can create our own DrawScopes.
                     bucket.segments = RenderStaticData::rasterSegments();
                 }
-                draw(
-                    parameters.matrixForTile(tile.id, true),
-                    *parameters.staticData.rasterVertexBuffer,
-                    *parameters.staticData.quadTriangleIndexBuffer,
-                    bucket.segments,
-                    tile.id,
-                    HillshadeProgram::TextureBindings{
-                        textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
-                    }
-                );
+                draw(parameters.matrixForTile(tile.id, true),
+                     *parameters.staticData.rasterVertexBuffer,
+                     *parameters.staticData.quadTriangleIndexBuffer,
+                     bucket.segments,
+                     tile.id,
+                     HillshadeProgram::TextureBindings{
+                         textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
+                     });
             }
         }
     }

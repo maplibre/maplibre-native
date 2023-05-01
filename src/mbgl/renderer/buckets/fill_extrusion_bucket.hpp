@@ -19,16 +19,17 @@ public:
     using PossiblyEvaluatedPaintProperties = style::FillExtrusionPaintProperties::PossiblyEvaluated;
     using PossiblyEvaluatedLayoutProperties = style::Properties<>::PossiblyEvaluated;
 
-    FillExtrusionBucket(
-        const PossiblyEvaluatedLayoutProperties&,
-        const std::map<std::string, Immutable<style::LayerProperties>>&,
-        float,
-        uint32_t
-    );
+    FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties&,
+                        const std::map<std::string, Immutable<style::LayerProperties>>&,
+                        float,
+                        uint32_t);
 
-    void
-    addFeature(const GeometryTileFeature&, const GeometryCollection&, const mbgl::ImagePositions&, const PatternLayerMap&, std::size_t, const CanonicalTileID&)
-        override;
+    void addFeature(const GeometryTileFeature&,
+                    const GeometryCollection&,
+                    const mbgl::ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override;
 
     bool hasData() const override;
 

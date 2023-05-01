@@ -17,8 +17,12 @@ class Layout {
 public:
     virtual ~Layout() = default;
 
-    virtual void
-    createBucket(const ImagePositions&, std::unique_ptr<FeatureIndex>&, std::unordered_map<std::string, LayerRenderData>&, bool, bool, const CanonicalTileID&) = 0;
+    virtual void createBucket(const ImagePositions&,
+                              std::unique_ptr<FeatureIndex>&,
+                              std::unordered_map<std::string, LayerRenderData>&,
+                              bool,
+                              bool,
+                              const CanonicalTileID&) = 0;
 
     virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&){};
 

@@ -15,7 +15,8 @@ namespace mbgl {
 namespace android {
 
 /**
- * @brief A singleton class forwarding calls to the corresponding  \c JavaLayerPeerFactory instance.
+ * @brief A singleton class forwarding calls to the corresponding  \c
+ * JavaLayerPeerFactory instance.
  */
 class LayerManagerAndroid final : public mbgl::LayerManager {
 public:

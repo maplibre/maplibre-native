@@ -28,23 +28,19 @@ public:
 
 class Image {
 public:
-    Image(
-        std::string id,
-        PremultipliedImage&&,
-        float pixelRatio,
-        bool sdf,
-        ImageStretches stretchX = {},
-        ImageStretches stretchY = {},
-        const std::optional<ImageContent>& content = std::nullopt
-    );
-    Image(
-        std::string id,
-        PremultipliedImage&& image,
-        float pixelRatio,
-        ImageStretches stretchX = {},
-        ImageStretches stretchY = {},
-        const std::optional<ImageContent>& content = std::nullopt
-    )
+    Image(std::string id,
+          PremultipliedImage&&,
+          float pixelRatio,
+          bool sdf,
+          ImageStretches stretchX = {},
+          ImageStretches stretchY = {},
+          const std::optional<ImageContent>& content = std::nullopt);
+    Image(std::string id,
+          PremultipliedImage&& image,
+          float pixelRatio,
+          ImageStretches stretchX = {},
+          ImageStretches stretchY = {},
+          const std::optional<ImageContent>& content = std::nullopt)
         : Image(std::move(id), std::move(image), pixelRatio, false, std::move(stretchX), std::move(stretchY), content) {
     }
     Image(const Image&);

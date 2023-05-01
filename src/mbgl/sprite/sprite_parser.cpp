@@ -16,19 +16,17 @@
 
 namespace mbgl {
 
-std::unique_ptr<style::Image> createStyleImage(
-    const std::string& id,
-    const PremultipliedImage& image,
-    const int32_t srcX,
-    const int32_t srcY,
-    const int32_t width,
-    const int32_t height,
-    const double ratio,
-    const bool sdf,
-    style::ImageStretches&& stretchX,
-    style::ImageStretches&& stretchY,
-    const std::optional<style::ImageContent>& content
-) {
+std::unique_ptr<style::Image> createStyleImage(const std::string& id,
+                                               const PremultipliedImage& image,
+                                               const int32_t srcX,
+                                               const int32_t srcY,
+                                               const int32_t width,
+                                               const int32_t height,
+                                               const double ratio,
+                                               const bool sdf,
+                                               style::ImageStretches&& stretchX,
+                                               style::ImageStretches&& stretchY,
+                                               const std::optional<style::ImageContent>& content) {
     // Disallow invalid parameter configurations.
     if (width <= 0 || height <= 0 || width > 1024 || height > 1024 || ratio <= 0 || ratio > 10 || srcX < 0 ||
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
@@ -50,8 +48,7 @@ std::unique_ptr<style::Image> createStyleImage(
 
     try {
         return std::make_unique<style::Image>(
-            id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content
-        );
+            id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content);
     } catch (const util::StyleImageException& ex) {
         Log::Error(Event::Sprite, std::string("Can't create image with invalid metadata: ") + ex.what());
         return nullptr;
@@ -66,11 +63,9 @@ uint16_t getUInt16(const JSValue& value, const char* property, const char* name,
         if (v.IsUint() && v.GetUint() <= std::numeric_limits<uint16_t>::max()) {
             return v.GetUint();
         } else {
-            Log::Warning(
-                Event::Sprite,
-                std::string("Invalid sprite image '") + name + "': value of '" + property +
-                    "' must be an integer between 0 and 65535"
-            );
+            Log::Warning(Event::Sprite,
+                         std::string("Invalid sprite image '") + name + "': value of '" + property +
+                             "' must be an integer between 0 and 65535");
         }
     }
 
@@ -85,8 +80,7 @@ double getDouble(const JSValue& value, const char* property, const char* name, c
         } else {
             Log::Warning(
                 Event::Sprite,
-                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a number"
-            );
+                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a number");
         }
     }
 
@@ -101,8 +95,7 @@ bool getBoolean(const JSValue& value, const char* property, const char* name, co
         } else {
             Log::Warning(
                 Event::Sprite,
-                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a boolean"
-            );
+                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a boolean");
         }
     }
 
@@ -119,21 +112,18 @@ style::ImageStretches getStretches(const JSValue& value, const char* property, c
                 const JSValue& stretch = v[i];
                 if (stretch.IsArray() && stretch.Size() == 2 && stretch[rapidjson::SizeType(0)].IsNumber() &&
                     stretch[rapidjson::SizeType(1)].IsNumber()) {
-                    stretches.emplace_back(style::ImageStretch{
-                        stretch[rapidjson::SizeType(0)].GetFloat(), stretch[rapidjson::SizeType(1)].GetFloat()});
+                    stretches.emplace_back(style::ImageStretch{stretch[rapidjson::SizeType(0)].GetFloat(),
+                                                               stretch[rapidjson::SizeType(1)].GetFloat()});
                 } else {
-                    Log::Warning(
-                        Event::Sprite,
-                        "Invalid sprite image '" + std::string(name) + "': members of '" + property +
-                            "' must be an array of two numbers"
-                    );
+                    Log::Warning(Event::Sprite,
+                                 "Invalid sprite image '" + std::string(name) + "': members of '" + property +
+                                     "' must be an array of two numbers");
                 }
             }
         } else {
             Log::Warning(
                 Event::Sprite,
-                "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array"
-            );
+                "Invalid sprite image '" + std::string(name) + "': value of '" + property + "' must be an array");
         }
     }
 
@@ -146,17 +136,14 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
         if (content.IsArray() && content.Size() == 4 && content[rapidjson::SizeType(0)].IsNumber() &&
             content[rapidjson::SizeType(1)].IsNumber() && content[rapidjson::SizeType(2)].IsNumber() &&
             content[rapidjson::SizeType(3)].IsNumber()) {
-            return style::ImageContent{
-                content[rapidjson::SizeType(0)].GetFloat(),
-                content[rapidjson::SizeType(1)].GetFloat(),
-                content[rapidjson::SizeType(2)].GetFloat(),
-                content[rapidjson::SizeType(3)].GetFloat()};
+            return style::ImageContent{content[rapidjson::SizeType(0)].GetFloat(),
+                                       content[rapidjson::SizeType(1)].GetFloat(),
+                                       content[rapidjson::SizeType(2)].GetFloat(),
+                                       content[rapidjson::SizeType(3)].GetFloat()};
         } else {
-            Log::Warning(
-                Event::Sprite,
-                "Invalid sprite image '" + std::string(name) + "': value of '" + property +
-                    "' must be an array of four numbers"
-            );
+            Log::Warning(Event::Sprite,
+                         "Invalid sprite image '" + std::string(name) + "': value of '" + property +
+                             "' must be an array of four numbers");
         }
     }
 
@@ -197,8 +184,7 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encode
             std::optional<style::ImageContent> content = getContent(value, "content", name.c_str());
 
             auto image = createStyleImage(
-                name, raster, x, y, width, height, pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content
-            );
+                name, raster, x, y, width, height, pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content);
             if (image) {
                 images.push_back(std::move(image->baseImpl));
             }

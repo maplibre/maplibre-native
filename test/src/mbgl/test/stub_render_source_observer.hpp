@@ -5,7 +5,8 @@
 using namespace mbgl;
 
 /**
- * An implementation of style::Observer that forwards all methods to dynamically-settable lambdas.
+ * An implementation of style::Observer that forwards all methods to
+ * dynamically-settable lambdas.
  */
 class StubRenderSourceObserver : public RenderSourceObserver {
 public:

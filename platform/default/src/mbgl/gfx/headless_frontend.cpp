@@ -11,38 +11,34 @@
 
 namespace mbgl {
 
-HeadlessFrontend::HeadlessFrontend(
-    float pixelRatio_,
-    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
-    const gfx::ContextMode contextMode,
-    const std::optional<std::string>& localFontFamily
-)
+HeadlessFrontend::HeadlessFrontend(float pixelRatio_,
+                                   gfx::HeadlessBackend::SwapBehaviour swapBehavior,
+                                   const gfx::ContextMode contextMode,
+                                   const std::optional<std::string>& localFontFamily)
     : HeadlessFrontend({256, 256}, pixelRatio_, swapBehavior, contextMode, localFontFamily) {}
 
-HeadlessFrontend::HeadlessFrontend(
-    Size size_,
-    float pixelRatio_,
-    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
-    const gfx::ContextMode contextMode,
-    const std::optional<std::string>& localFontFamily
-)
+HeadlessFrontend::HeadlessFrontend(Size size_,
+                                   float pixelRatio_,
+                                   gfx::HeadlessBackend::SwapBehaviour swapBehavior,
+                                   const gfx::ContextMode contextMode,
+                                   const std::optional<std::string>& localFontFamily)
     : size(size_),
       pixelRatio(pixelRatio_),
       frameTime(0),
       backend(gfx::HeadlessBackend::Create(
           {static_cast<uint32_t>(size.width * pixelRatio), static_cast<uint32_t>(size.height * pixelRatio)},
           swapBehavior,
-          contextMode
-      )),
+          contextMode)),
       asyncInvalidate([this] {
           if (renderer && updateParameters) {
               auto startTime = mbgl::util::MonotonicTimer::now();
               gfx::BackendScope guard{*getBackend()};
 
-              // onStyleImageMissing might be called during a render. The user implemented method
-              // could trigger a call to MLNRenderFrontend#update which overwrites `updateParameters`.
-              // Copy the shared pointer here so that the parameters aren't destroyed while `render(...)` is
-              // still using them.
+              // onStyleImageMissing might be called during a render. The user
+              // implemented method could trigger a call to
+              // MLNRenderFrontend#update which overwrites `updateParameters`.
+              // Copy the shared pointer here so that the parameters aren't
+              // destroyed while `render(...)` is still using them.
               auto updateParameters_ = updateParameters;
               renderer->render(updateParameters_);
 
@@ -136,8 +132,7 @@ void HeadlessFrontend::setSize(Size size_) {
     if (size != size_) {
         size = size_;
         backend->setSize(
-            {static_cast<uint32_t>(size_.width * pixelRatio), static_cast<uint32_t>(size_.height * pixelRatio)}
-        );
+            {static_cast<uint32_t>(size_.width * pixelRatio), static_cast<uint32_t>(size_.height * pixelRatio)});
     }
 }
 

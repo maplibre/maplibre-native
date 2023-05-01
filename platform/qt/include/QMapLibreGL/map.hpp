@@ -148,9 +148,9 @@ public:
     void addImage(const QString &name, const QImage &sprite);
     void removeImage(const QString &name);
 
-    void addCustomLayer(
-        const QString &id, std::unique_ptr<CustomLayerHostInterface> host, const QString &before = QString()
-    );
+    void addCustomLayer(const QString &id,
+                        std::unique_ptr<CustomLayerHostInterface> host,
+                        const QString &before = QString());
     void addLayer(const QVariantMap &params, const QString &before = QString());
     bool layerExists(const QString &id);
     void removeLayer(const QString &id);

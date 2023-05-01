@@ -4,9 +4,9 @@
 namespace mbgl {
 namespace android {
 
-jni::Local<jni::Object<CameraPosition>> CameraPosition::New(
-    jni::JNIEnv& env, mbgl::CameraOptions options, float pixelRatio
-) {
+jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
+                                                            mbgl::CameraOptions options,
+                                                            float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto constructor =
         javaClass.GetConstructor<jni::Object<LatLng>, double, double, double, jni::Array<jni::jdouble>>(env);
@@ -38,13 +38,12 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(
     padding.SetRegion<std::vector<jni::jdouble>>(env, 0, paddingVect);
 
     return javaClass.New(
-        env, constructor, LatLng::New(env, center), options.zoom.value_or(0), tilt_degrees, bearing_degrees, padding
-    );
+        env, constructor, LatLng::New(env, center), options.zoom.value_or(0), tilt_degrees, bearing_degrees, padding);
 }
 
-mbgl::CameraOptions CameraPosition::getCameraOptions(
-    jni::JNIEnv& env, const jni::Object<CameraPosition>& position, float pixelRatio
-) {
+mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
+                                                     const jni::Object<CameraPosition>& position,
+                                                     float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto bearing = javaClass.GetField<jni::jdouble>(env, "bearing");
     static auto target = javaClass.GetField<jni::Object<LatLng>>(env, "target");
@@ -55,15 +54,16 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(
     auto padding = position.Get(env, paddingField);
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
-    return mbgl::CameraOptions{
-        center,
-        padding && padding.Length(env) == 4
-            ? EdgeInsets{padding.Get(env, 1) * pixelRatio, padding.Get(env, 0) * pixelRatio, padding.Get(env, 3) * pixelRatio, padding.Get(env, 2) * pixelRatio}
-            : (EdgeInsets){},
-        {},
-        position.Get(env, zoom),
-        position.Get(env, bearing),
-        position.Get(env, tilt)};
+    return mbgl::CameraOptions{center,
+                               padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
+                                                                                padding.Get(env, 0) * pixelRatio,
+                                                                                padding.Get(env, 3) * pixelRatio,
+                                                                                padding.Get(env, 2) * pixelRatio}
+                                                                   : (EdgeInsets){},
+                               {},
+                               position.Get(env, zoom),
+                               position.Get(env, bearing),
+                               position.Get(env, tilt)};
 }
 
 void CameraPosition::registerNative(jni::JNIEnv& env) {

@@ -20,25 +20,23 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
     const double size = util::EXTENT * std::pow(2, canonical.z);
 
     auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
-    auto y = (util::LONGITUDE_MAX - util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))
-             ) *
+    auto y = (util::LONGITUDE_MAX -
+              util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
              size / util::DEGREES_MAX;
 
     Point<int64_t> p;
     p.x = (util::clamp<int64_t>(
-        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()
-    ));
+        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
     p.y = (util::clamp<int64_t>(
-        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()
-    ));
+        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
 
     return p;
 };
 
 using WithinBBox = GeometryBBox<int64_t>;
-Polygon<int64_t> getTilePolygon(
-    const Polygon<double>& polygon, const mbgl::CanonicalTileID& canonical, WithinBBox& bbox
-) {
+Polygon<int64_t> getTilePolygon(const Polygon<double>& polygon,
+                                const mbgl::CanonicalTileID& canonical,
+                                WithinBBox& bbox) {
     Polygon<int64_t> result;
     result.reserve(polygon.size());
     for (const auto& ring : polygon) {
@@ -54,9 +52,9 @@ Polygon<int64_t> getTilePolygon(
     return result;
 }
 
-MultiPolygon<int64_t> getTilePolygons(
-    const Feature::geometry_type& polygonGeoSet, const mbgl::CanonicalTileID& canonical, WithinBBox& bbox
-) {
+MultiPolygon<int64_t> getTilePolygons(const Feature::geometry_type& polygonGeoSet,
+                                      const mbgl::CanonicalTileID& canonical,
+                                      WithinBBox& bbox) {
     return polygonGeoSet.match(
         [&canonical, &bbox](const mapbox::geometry::multi_polygon<double>& polygons) {
             MultiPolygon<int64_t> result;
@@ -71,8 +69,7 @@ MultiPolygon<int64_t> getTilePolygons(
             result.push_back(getTilePolygon(polygon, canonical, bbox));
             return result;
         },
-        [](const auto&) { return MultiPolygon<int64_t>(); }
-    );
+        [](const auto&) { return MultiPolygon<int64_t>(); });
 }
 
 void updatePoint(Point<int64_t>& p, WithinBBox& bbox, const WithinBBox& polyBBox, const int64_t worldSize) {
@@ -94,12 +91,10 @@ void updatePoint(Point<int64_t>& p, WithinBBox& bbox, const WithinBBox& polyBBox
     updateBBox(bbox, p);
 }
 
-MultiPoint<int64_t> getTilePoints(
-    const GeometryCoordinates& points,
-    const mbgl::CanonicalTileID& canonical,
-    WithinBBox& bbox,
-    const WithinBBox& polyBBox
-) {
+MultiPoint<int64_t> getTilePoints(const GeometryCoordinates& points,
+                                  const mbgl::CanonicalTileID& canonical,
+                                  WithinBBox& bbox,
+                                  const WithinBBox& polyBBox) {
     const int64_t xShift = util::EXTENT * canonical.x;
     const int64_t yShift = util::EXTENT * canonical.y;
     const auto worldSize = static_cast<int64_t>(util::EXTENT * std::pow(2, canonical.z));
@@ -114,12 +109,10 @@ MultiPoint<int64_t> getTilePoints(
     return results;
 }
 
-MultiLineString<int64_t> getTileLines(
-    const GeometryCollection& lines,
-    const mbgl::CanonicalTileID& canonical,
-    WithinBBox& bbox,
-    const WithinBBox& polyBBox
-) {
+MultiLineString<int64_t> getTileLines(const GeometryCollection& lines,
+                                      const mbgl::CanonicalTileID& canonical,
+                                      WithinBBox& bbox,
+                                      const WithinBBox& polyBBox) {
     const int64_t xShift = util::EXTENT * canonical.x;
     const int64_t yShift = util::EXTENT * canonical.y;
     MultiLineString<int64_t> results;
@@ -147,9 +140,9 @@ MultiLineString<int64_t> getTileLines(
     return results;
 }
 
-bool featureWithinPolygons(
-    const GeometryTileFeature& feature, const CanonicalTileID& canonical, const Feature::geometry_type& polygonGeoSet
-) {
+bool featureWithinPolygons(const GeometryTileFeature& feature,
+                           const CanonicalTileID& canonical,
+                           const Feature::geometry_type& polygonGeoSet) {
     WithinBBox polyBBox = DefaultWithinBBox;
     const auto polygons = getTilePolygons(polygonGeoSet, canonical, polyBBox);
     assert(!polygons.empty());
@@ -179,9 +172,8 @@ bool featureWithinPolygons(
     };
 }
 
-std::optional<mbgl::GeoJSON> parseValue(
-    const mbgl::style::conversion::Convertible& value_, mbgl::style::expression::ParsingContext& ctx
-) {
+std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
+                                        mbgl::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
         mbgl::style::conversion::Error error;
         auto geojson = toGeoJSON(value_, error);
@@ -191,18 +183,21 @@ std::optional<mbgl::GeoJSON> parseValue(
         ctx.error(error.message);
     }
 
-    ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+    ctx.error(
+        "'within' expression requires valid geojson source that contains "
+        "polygon geometry type.");
     return std::nullopt;
 }
 
-std::optional<Feature::geometry_type> getPolygonInfo(
-    const Feature& polyFeature, mbgl::style::expression::ParsingContext& ctx
-) {
+std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
+                                                     mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;
     }
-    ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+    ctx.error(
+        "'within' expression requires valid geojson source that contains "
+        "polygon geometry type.");
     return std::nullopt;
 }
 } // namespace
@@ -228,9 +223,9 @@ EvaluationResult Within::evaluate(const EvaluationContext& params) const {
     if (geometryType == FeatureType::Point || geometryType == FeatureType::LineString) {
         return featureWithinPolygons(*params.feature, *params.canonical, geometries);
     }
-    mbgl::Log::Warning(
-        mbgl::Event::General, "within expression currently only support Point/LineString geometry type."
-    );
+    mbgl::Log::Warning(mbgl::Event::General,
+                       "within expression currently only support Point/LineString geometry "
+                       "type.");
 
     return false;
 }
@@ -240,9 +235,9 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
         // object value, quoted with ["within", value]
         if (arrayLength(value) != 2) {
             ctx.error(
-                "'within' expression requires exactly one argument, but found " +
-                util::toString(arrayLength(value) - 1) + " instead."
-            );
+                "'within' expression requires exactly one argument, but "
+                "found " +
+                util::toString(arrayLength(value) - 1) + " instead.");
             return ParseResult();
         }
 
@@ -273,10 +268,11 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
                 return ParseResult();
             },
             [&ctx](const auto&) {
-                ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+                ctx.error(
+                    "'within' expression requires valid geojson source that "
+                    "contains polygon geometry type.");
                 return ParseResult();
-            }
-        );
+            });
     }
     ctx.error("'within' expression needs to be an array with exactly one argument.");
     return ParseResult();
@@ -322,9 +318,9 @@ mbgl::Value Within::serialize() const {
             serialized.emplace(m.name.GetString(), valueConverter(m.value));
         }
     } else {
-        mbgl::Log::Error(
-            mbgl::Event::General, "Failed to serialize 'within' expression, converted rapidJSON is not an object"
-        );
+        mbgl::Log::Error(mbgl::Event::General,
+                         "Failed to serialize 'within' expression, converted rapidJSON is "
+                         "not an object");
     }
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }

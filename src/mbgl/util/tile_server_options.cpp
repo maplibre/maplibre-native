@@ -69,9 +69,9 @@ const std::string& TileServerOptions::uriSchemeAlias() const {
     return impl_->uriSchemeAlias;
 }
 
-TileServerOptions& TileServerOptions::withSourceTemplate(
-    std::string sourceTemplate, std::string domainName, std::optional<std::string> versionPrefix
-) {
+TileServerOptions& TileServerOptions::withSourceTemplate(std::string sourceTemplate,
+                                                         std::string domainName,
+                                                         std::optional<std::string> versionPrefix) {
     impl_->sourceTemplate = std::move(sourceTemplate);
     impl_->sourceVersionPrefix = std::move(versionPrefix);
     impl_->sourceDomainName = std::move(domainName);
@@ -90,9 +90,9 @@ const std::optional<std::string>& TileServerOptions::sourceVersionPrefix() const
     return impl_->sourceVersionPrefix;
 }
 
-TileServerOptions& TileServerOptions::withStyleTemplate(
-    std::string styleTemplate, std::string domainName, std::optional<std::string> versionPrefix
-) {
+TileServerOptions& TileServerOptions::withStyleTemplate(std::string styleTemplate,
+                                                        std::string domainName,
+                                                        std::optional<std::string> versionPrefix) {
     impl_->styleTemplate = std::move(styleTemplate);
     impl_->styleDomainName = std::move(domainName);
     impl_->styleVersionPrefix = std::move(versionPrefix);
@@ -111,9 +111,9 @@ const std::optional<std::string>& TileServerOptions::styleVersionPrefix() const 
     return impl_->styleVersionPrefix;
 }
 
-TileServerOptions& TileServerOptions::withSpritesTemplate(
-    std::string spritesTemplate, std::string domainName, std::optional<std::string> versionPrefix
-) {
+TileServerOptions& TileServerOptions::withSpritesTemplate(std::string spritesTemplate,
+                                                          std::string domainName,
+                                                          std::optional<std::string> versionPrefix) {
     impl_->spritesTemplate = std::move(spritesTemplate);
     impl_->spritesDomainName = std::move(domainName);
     impl_->spritesVersionPrefix = std::move(versionPrefix);
@@ -132,9 +132,9 @@ const std::optional<std::string>& TileServerOptions::spritesVersionPrefix() cons
     return impl_->spritesVersionPrefix;
 }
 
-TileServerOptions& TileServerOptions::withGlyphsTemplate(
-    std::string glyphsTemplate, std::string domainName, std::optional<std::string> versionPrefix
-) {
+TileServerOptions& TileServerOptions::withGlyphsTemplate(std::string glyphsTemplate,
+                                                         std::string domainName,
+                                                         std::optional<std::string> versionPrefix) {
     impl_->glyphsTemplate = std::move(glyphsTemplate);
     impl_->glyphsDomainName = std::move(domainName);
     impl_->glyphsVersionPrefix = std::move(versionPrefix);
@@ -153,9 +153,9 @@ const std::optional<std::string>& TileServerOptions::glyphsVersionPrefix() const
     return impl_->glyphsVersionPrefix;
 }
 
-TileServerOptions& TileServerOptions::withTileTemplate(
-    std::string tileTemplate, std::string domainName, std::optional<std::string> versionPrefix
-) {
+TileServerOptions& TileServerOptions::withTileTemplate(std::string tileTemplate,
+                                                       std::string domainName,
+                                                       std::optional<std::string> versionPrefix) {
     impl_->tileTemplate = std::move(tileTemplate);
     impl_->tileDomainName = std::move(domainName);
     impl_->tileVersionPrefix = std::move(versionPrefix);
@@ -251,8 +251,7 @@ TileServerOptions TileServerOptions::MapboxConfiguration() {
                                     .withSourceTemplate("/{domain}.json", "", {"/v4"})
                                     .withStyleTemplate("/styles/v1{path}", "styles", {})
                                     .withSpritesTemplate(
-                                        "/styles/v1{directory}{filename}/sprite{extension}", "sprites", {}
-                                    )
+                                        "/styles/v1{directory}{filename}/sprite{extension}", "sprites", {})
                                     .withGlyphsTemplate("/fonts/v1{path}", "fonts", {})
                                     .withTileTemplate("{path}", "tiles", {"/v4"})
                                     .withDefaultStyles(styles)

@@ -13,13 +13,11 @@
 using namespace mbgl;
 
 struct Input {
-    Input(
-        std::optional<float> zoom_,
-        std::optional<double> heatmapDensity_,
-        std::optional<CanonicalTileID> canonical_,
-        std::set<std::string> availableImages_,
-        Feature feature_
-    )
+    Input(std::optional<float> zoom_,
+          std::optional<double> heatmapDensity_,
+          std::optional<CanonicalTileID> canonical_,
+          std::set<std::string> availableImages_,
+          Feature feature_)
         : zoom(std::move(zoom_)),
           heatmapDensity(std::move(heatmapDensity_)),
           canonical(std::move(canonical_)),
@@ -93,7 +91,9 @@ JSDocument toDocument(const Value&);
 Value toValue(const Compiled&);
 std::optional<Value> toValue(const style::expression::Value&);
 
-std::unique_ptr<style::expression::Expression>
-parseExpression(const JSValue&, std::optional<PropertySpec>&, TestResult&);
-std::unique_ptr<style::expression::Expression>
-parseExpression(const std::optional<Value>&, std::optional<PropertySpec>&, TestResult&);
+std::unique_ptr<style::expression::Expression> parseExpression(const JSValue&,
+                                                               std::optional<PropertySpec>&,
+                                                               TestResult&);
+std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>&,
+                                                               std::optional<PropertySpec>&,
+                                                               TestResult&);

@@ -15,14 +15,12 @@ class OverscaledTileID;
 
 class DebugBucket : private util::noncopyable {
 public:
-    DebugBucket(
-        const OverscaledTileID& id,
-        bool renderable,
-        bool complete,
-        std::optional<Timestamp> modified,
-        std::optional<Timestamp> expires,
-        MapDebugOptions
-    );
+    DebugBucket(const OverscaledTileID& id,
+                bool renderable,
+                bool complete,
+                std::optional<Timestamp> modified,
+                std::optional<Timestamp> expires,
+                MapDebugOptions);
 
     void upload(gfx::UploadPass&);
 

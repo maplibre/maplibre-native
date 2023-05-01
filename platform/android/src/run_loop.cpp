@@ -116,13 +116,11 @@ RunLoop::Impl::Impl(RunLoop* runLoop_, RunLoop::Type type)
     switch (type) {
         case Type::New:
             ret = ALooper_addFd(
-                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackNew, this
-            );
+                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackNew, this);
             break;
         case Type::Default:
             ret = ALooper_addFd(
-                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackDefault, this
-            );
+                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackDefault, this);
             alarm = std::make_unique<Thread<Alarm>>("Alarm", this);
             running = true;
             break;
@@ -269,8 +267,7 @@ void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& cb
 
         ALooper* looper = ALooper_forThread();
         ALooper_addFd(
-            looper, fd, ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackReadEvent, this->impl.get()
-        );
+            looper, fd, ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackReadEvent, this->impl.get());
     }
 }
 

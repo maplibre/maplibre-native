@@ -29,12 +29,10 @@ using ShapeAnnotationGeometry =
 
 class LineAnnotation {
 public:
-    LineAnnotation(
-        ShapeAnnotationGeometry geometry_,
-        style::PropertyValue<float> opacity_ = 1.0f,
-        style::PropertyValue<float> width_ = 1.0f,
-        style::PropertyValue<Color> color_ = Color::black()
-    )
+    LineAnnotation(ShapeAnnotationGeometry geometry_,
+                   style::PropertyValue<float> opacity_ = 1.0f,
+                   style::PropertyValue<float> width_ = 1.0f,
+                   style::PropertyValue<Color> color_ = Color::black())
         : geometry(std::move(geometry_)),
           opacity(std::move(opacity_)),
           width(std::move(width_)),
@@ -48,12 +46,10 @@ public:
 
 class FillAnnotation {
 public:
-    FillAnnotation(
-        ShapeAnnotationGeometry geometry_,
-        style::PropertyValue<float> opacity_ = 1.0f,
-        style::PropertyValue<Color> color_ = Color::black(),
-        style::PropertyValue<Color> outlineColor_ = {}
-    )
+    FillAnnotation(ShapeAnnotationGeometry geometry_,
+                   style::PropertyValue<float> opacity_ = 1.0f,
+                   style::PropertyValue<Color> color_ = Color::black(),
+                   style::PropertyValue<Color> outlineColor_ = {})
         : geometry(std::move(geometry_)),
           opacity(std::move(opacity_)),
           color(std::move(color_)),

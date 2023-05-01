@@ -19,14 +19,12 @@
 using namespace mbgl;
 using namespace mbgl::style;
 
-bool filter(
-    const char* json,
-    const PropertyMap& featureProperties = {{}},
-    FeatureIdentifier featureId = {},
-    FeatureType featureType = FeatureType::Point,
-    GeometryCollection featureGeometry = {},
-    float zoom = 0.0f
-) {
+bool filter(const char* json,
+            const PropertyMap& featureProperties = {{}},
+            FeatureIdentifier featureId = {},
+            FeatureType featureType = FeatureType::Point,
+            GeometryCollection featureGeometry = {},
+            float zoom = 0.0f) {
     conversion::Error error;
     std::optional<Filter> filter = conversion::convertJSON<Filter>(json, error);
     EXPECT_TRUE(bool(filter));
@@ -46,25 +44,23 @@ void invalidFilter(const char* json) {
 }
 
 void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match(
-        [&](const NullValue&) { writer.Null(); },
-        [&](bool b) { writer.Bool(b); },
-        [&](uint64_t t) { writer.Uint64(t); },
-        [&](int64_t t) { writer.Int64(t); },
-        [&](double f) {
-            // make sure integer values are stringified without trailing ".0".
-            f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
-        },
-        [&](const std::string& s) { writer.String(s); },
-        [&](const std::vector<Value>& arr) {
-            writer.StartArray();
-            for (const auto& item : arr) {
-                writeJSON(writer, item);
-            }
-            writer.EndArray();
-        },
-        [](const auto&) {}
-    );
+    value.match([&](const NullValue&) { writer.Null(); },
+                [&](bool b) { writer.Bool(b); },
+                [&](uint64_t t) { writer.Uint64(t); },
+                [&](int64_t t) { writer.Int64(t); },
+                [&](double f) {
+                    // make sure integer values are stringified without trailing ".0".
+                    f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
+                },
+                [&](const std::string& s) { writer.String(s); },
+                [&](const std::vector<Value>& arr) {
+                    writer.StartArray();
+                    for (const auto& item : arr) {
+                        writeJSON(writer, item);
+                    }
+                    writer.EndArray();
+                },
+                [](const auto&) {});
 }
 
 std::string stringifyFilter(const char* json) {
@@ -151,10 +147,10 @@ TEST(Filter, AnyExpression) {
     ASSERT_FALSE(filter("[\"any\"]"));
     ASSERT_TRUE(filter("[\"any\", [\"==\", [\"get\", \"foo\"], 1]]", {{std::string("foo"), int64_t(1)}}));
     ASSERT_FALSE(filter("[\"any\", [\"==\", [\"get\", \"foo\"], 0]]", {{std::string("foo"), int64_t(1)}}));
-    ASSERT_TRUE(filter(
-        "[\"any\", [\"==\", [\"get\", \"foo\"], 0], [\"==\", [\"get\", \"foo\"], 1]]",
-        {{std::string("foo"), int64_t(1)}}
-    ));
+    ASSERT_TRUE(
+        filter("[\"any\", [\"==\", [\"get\", \"foo\"], 0], [\"==\", [\"get\", "
+               "\"foo\"], 1]]",
+               {{std::string("foo"), int64_t(1)}}));
 }
 
 TEST(Filter, All) {
@@ -167,10 +163,10 @@ TEST(Filter, All) {
 TEST(Filter, AllExpression) {
     ASSERT_TRUE(filter("[\"all\", [\"==\", [\"get\", \"foo\"], 1]]", {{std::string("foo"), int64_t(1)}}));
     ASSERT_FALSE(filter("[\"all\", [\"==\", [\"get\", \"foo\"], 0]]", {{std::string("foo"), int64_t(1)}}));
-    ASSERT_FALSE(filter(
-        "[\"all\", [\"==\", [\"get\", \"foo\"], 0], [\"==\", [\"get\", \"foo\"], 1]]",
-        {{std::string("foo"), int64_t(1)}}
-    ));
+    ASSERT_FALSE(
+        filter("[\"all\", [\"==\", [\"get\", \"foo\"], 0], [\"==\", [\"get\", "
+               "\"foo\"], 1]]",
+               {{std::string("foo"), int64_t(1)}}));
 }
 
 TEST(Filter, None) {
@@ -247,17 +243,15 @@ TEST(Filter, Serialize) {
 TEST(Filter, ExpressionLegacyMix) {
     conversion::Error error;
     std::optional<Filter> filter = conversion::convertJSON<Filter>(
-        R"(["any", ["all", ["==", ["geometry-type"], "LineString"]], ["==", "x", 1]])", error
-    );
+        R"(["any", ["all", ["==", ["geometry-type"], "LineString"]], ["==", "x", 1]])", error);
     EXPECT_FALSE(bool(filter));
     EXPECT_TRUE(error.message.size() > 0);
 }
 
 TEST(Filter, ZoomExpressionNested) {
     ASSERT_TRUE(filter(R"(["==", ["get", "two"], ["zoom"]])", {{"two", int64_t(2)}}, {}, FeatureType::Point, {}, 2.0f));
-    ASSERT_FALSE(
-        filter(R"(["==", ["get", "two"], ["+", ["zoom"], 1]])", {{"two", int64_t(2)}}, {}, FeatureType::Point, {}, 2.0f)
-    );
+    ASSERT_FALSE(filter(
+        R"(["==", ["get", "two"], ["+", ["zoom"], 1]])", {{"two", int64_t(2)}}, {}, FeatureType::Point, {}, 2.0f));
 }
 
 TEST(Filter, Internal) {

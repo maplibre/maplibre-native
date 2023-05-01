@@ -42,9 +42,8 @@ public:
     }
 
     void stop() {
-        uv_close(reinterpret_cast<uv_handle_t *>(&async), [](uv_handle_t *handle) {
-            delete reinterpret_cast<AsyncQueue *>(handle->data);
-        });
+        uv_close(reinterpret_cast<uv_handle_t *>(&async),
+                 [](uv_handle_t *handle) { delete reinterpret_cast<AsyncQueue *>(handle->data); });
     }
 
     void ref() { uv_ref(reinterpret_cast<uv_handle_t *>(&async)); }

@@ -73,13 +73,11 @@ private:
 
     static void record(EventSeverity severity, Event event, const std::string& msg);
     static void record(EventSeverity severity, Event event, int64_t code, const std::string& msg);
-    static void record(
-        EventSeverity severity,
-        Event event,
-        int64_t code,
-        const std::string& msg,
-        const std::optional<std::string>& threadName
-    );
+    static void record(EventSeverity severity,
+                       Event event,
+                       int64_t code,
+                       const std::string& msg,
+                       const std::optional<std::string>& threadName);
 
     // This method is the data sink that must be implemented by each platform we
     // support. It should ideally output the error message in a human readable

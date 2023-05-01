@@ -34,11 +34,9 @@ struct TestStatistics {
 
 struct TestPaths {
     TestPaths() = default;
-    TestPaths(
-        mbgl::filesystem::path stylePath_,
-        std::vector<mbgl::filesystem::path> expectations_,
-        std::vector<mbgl::filesystem::path> expectedMetrics_
-    )
+    TestPaths(mbgl::filesystem::path stylePath_,
+              std::vector<mbgl::filesystem::path> expectations_,
+              std::vector<mbgl::filesystem::path> expectedMetrics_)
         : stylePath(std::move(stylePath_)),
           expectations(std::move(expectations_)),
           expectedMetrics(std::move(expectedMetrics_)) {}
@@ -88,8 +86,7 @@ struct MemoryProbe {
 
     static std::tuple<bool, float> checkAllocations(const MemoryProbe& expected, const MemoryProbe& actual) {
         return checkValue(
-            static_cast<float>(expected.allocations), static_cast<float>(actual.allocations), actual.tolerance
-        );
+            static_cast<float>(expected.allocations), static_cast<float>(actual.allocations), actual.tolerance);
     }
 };
 

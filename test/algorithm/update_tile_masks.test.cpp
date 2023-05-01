@@ -71,13 +71,12 @@ TEST(UpdateTileMasks, OneChild) {
 TEST(UpdateTileMasks, Complex) {
     validate({
         {UnwrappedTileID{0, 0, 0},
-         TileMask{
-             CanonicalTileID{1, 0, 1},
-             CanonicalTileID{1, 1, 0},
-             CanonicalTileID{2, 2, 3},
-             CanonicalTileID{2, 3, 2},
-             CanonicalTileID{3, 6, 7},
-             CanonicalTileID{3, 7, 6}}},
+         TileMask{CanonicalTileID{1, 0, 1},
+                  CanonicalTileID{1, 1, 0},
+                  CanonicalTileID{2, 2, 3},
+                  CanonicalTileID{2, 3, 2},
+                  CanonicalTileID{3, 6, 7},
+                  CanonicalTileID{3, 7, 6}}},
         {UnwrappedTileID{0, {1, 0, 0}}, TileMask{CanonicalTileID{0, 0, 0}}},
         {UnwrappedTileID{0, {2, 2, 2}}, TileMask{CanonicalTileID{0, 0, 0}}},
         {UnwrappedTileID{0, {3, 7, 7}}, TileMask{CanonicalTileID{0, 0, 0}}},
@@ -86,19 +85,18 @@ TEST(UpdateTileMasks, Complex) {
 
     validate({
         {UnwrappedTileID{0, 0, 0},
-         TileMask{
-             CanonicalTileID{1, 0, 1},
-             CanonicalTileID{1, 1, 0},
-             CanonicalTileID{1, 1, 1},
-             CanonicalTileID{2, 0, 0},
-             CanonicalTileID{2, 0, 1},
-             CanonicalTileID{2, 1, 0},
-             CanonicalTileID{3, 2, 3},
-             CanonicalTileID{3, 3, 2},
-             CanonicalTileID{3, 3, 3},
-             CanonicalTileID{4, 4, 5},
-             CanonicalTileID{4, 5, 4},
-             CanonicalTileID{4, 5, 5}}},
+         TileMask{CanonicalTileID{1, 0, 1},
+                  CanonicalTileID{1, 1, 0},
+                  CanonicalTileID{1, 1, 1},
+                  CanonicalTileID{2, 0, 0},
+                  CanonicalTileID{2, 0, 1},
+                  CanonicalTileID{2, 1, 0},
+                  CanonicalTileID{3, 2, 3},
+                  CanonicalTileID{3, 3, 2},
+                  CanonicalTileID{3, 3, 3},
+                  CanonicalTileID{4, 4, 5},
+                  CanonicalTileID{4, 5, 4},
+                  CanonicalTileID{4, 5, 5}}},
         {UnwrappedTileID{4, 4, 4}, TileMask{CanonicalTileID{0, 0, 0}}},
     });
 

@@ -23,20 +23,18 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    MapSnapshotter(
-        jni::JNIEnv&,
-        const jni::Object<MapSnapshotter>&,
-        const jni::Object<FileSource>&,
-        jni::jfloat pixelRatio,
-        jni::jint width,
-        jni::jint height,
-        const jni::String& styleURL,
-        const jni::String& styleJSON,
-        const jni::Object<LatLngBounds>& region,
-        const jni::Object<CameraPosition>& position,
-        jni::jboolean showLogo,
-        const jni::String& localIdeographFontFamily
-    );
+    MapSnapshotter(jni::JNIEnv&,
+                   const jni::Object<MapSnapshotter>&,
+                   const jni::Object<FileSource>&,
+                   jni::jfloat pixelRatio,
+                   jni::jint width,
+                   jni::jint height,
+                   const jni::String& styleURL,
+                   const jni::String& styleJSON,
+                   const jni::Object<LatLngBounds>& region,
+                   const jni::Object<CameraPosition>& position,
+                   jni::jboolean showLogo,
+                   const jni::String& localIdeographFontFamily);
 
     virtual ~MapSnapshotter() override;
 

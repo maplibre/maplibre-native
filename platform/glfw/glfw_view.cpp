@@ -104,16 +104,14 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
     extrusionLayer->setSourceLayer("building");
     extrusionLayer->setMinZoom(15.0f);
     extrusionLayer->setFilter(Filter(eq(get("extrude"), literal("true"))));
-    extrusionLayer->setFillExtrusionColor(PropertyExpression<mbgl::Color>(interpolate(
-        linear(),
-        number(get("height")),
-        0.f,
-        toColor(literal("#160e23")),
-        50.f,
-        toColor(literal("#00615f")),
-        100.f,
-        toColor(literal("#55e9ff"))
-    )));
+    extrusionLayer->setFillExtrusionColor(PropertyExpression<mbgl::Color>(interpolate(linear(),
+                                                                                      number(get("height")),
+                                                                                      0.f,
+                                                                                      toColor(literal("#160e23")),
+                                                                                      50.f,
+                                                                                      toColor(literal("#00615f")),
+                                                                                      100.f,
+                                                                                      toColor(literal("#55e9ff")))));
     extrusionLayer->setFillExtrusionOpacity(0.6f);
     extrusionLayer->setFillExtrusionHeight(PropertyExpression<float>(get("height")));
     extrusionLayer->setFillExtrusionBase(PropertyExpression<float>(get("min_height")));
@@ -125,12 +123,10 @@ void glfwError(int error, const char *description) {
     mbgl::Log::Error(mbgl::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
-GLFWView::GLFWView(
-    bool fullscreen_,
-    bool benchmark_,
-    const mbgl::ResourceOptions &resourceOptions,
-    const mbgl::ClientOptions &clientOptions
-)
+GLFWView::GLFWView(bool fullscreen_,
+                   bool benchmark_,
+                   const mbgl::ResourceOptions &resourceOptions,
+                   const mbgl::ClientOptions &clientOptions)
     : fullscreen(fullscreen_),
       benchmark(benchmark_),
       snapshotterObserver(std::make_unique<SnapshotObserver>()),
@@ -205,7 +201,9 @@ GLFWView::GLFWView(
     glfwMakeContextCurrent(nullptr);
 
     printf("\n");
-    printf("================================================================================\n");
+    printf(
+        "======================================================================"
+        "==========\n");
     printf("\n");
     printf("- Press `S` to cycle through bundled styles\n");
     printf("- Press `X` to reset the transform\n");
@@ -216,21 +214,29 @@ GLFWView::GLFWView(
     printf("- Press `Z` to cycle through north orientations\n");
     printf("- Press `X` to cycle through the viewport modes\n");
     printf("- Press `I` to delete existing database and re-initialize\n");
-    printf("- Press `A` to cycle through Mapbox offices in the world + dateline monument\n");
+    printf(
+        "- Press `A` to cycle through Mapbox offices in the world + dateline "
+        "monument\n");
     printf("- Press `B` to cycle through the color, stencil, and depth buffer\n");
     printf(
-        "- Press `D` to cycle through camera bounds: inside, crossing IDL at left, crossing IDL at right, and "
-        "disabled\n"
-    );
+        "- Press `D` to cycle through camera bounds: inside, crossing IDL at "
+        "left, crossing IDL at right, and "
+        "disabled\n");
     printf("- Press `T` to add custom geometry source\n");
     printf("- Press `F` to enable feature-state demo\n");
     printf("- Press `U` to toggle pitch bounds\n");
     printf("- Press `H` to take a snapshot of a current map.\n");
-    printf("- Press `J` to take a snapshot of a current map with an extrusions overlay.\n");
+    printf(
+        "- Press `J` to take a snapshot of a current map with an extrusions "
+        "overlay.\n");
     printf("- Press `Y` to start a camera fly-by demo\n");
     printf("\n");
-    printf("- Press `1` through `6` to add increasing numbers of point annotations for testing\n");
-    printf("- Press `7` through `0` to add increasing numbers of shape annotations for testing\n");
+    printf(
+        "- Press `1` through `6` to add increasing numbers of point "
+        "annotations for testing\n");
+    printf(
+        "- Press `7` through `0` to add increasing numbers of shape "
+        "annotations for testing\n");
     printf("\n");
     printf("- Press `Q` to query annotations\n");
     printf("- Press `C` to remove annotations\n");
@@ -247,7 +253,9 @@ GLFWView::GLFWView(
     printf("- Press `Tab` to cycle through the map debug options\n");
     printf("- Press `Esc` to quit\n");
     printf("\n");
-    printf("================================================================================\n");
+    printf(
+        "======================================================================"
+        "==========\n");
     printf("\n");
 }
 
@@ -285,8 +293,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             case GLFW_KEY_X:
                 if (!mods)
                     view->map->jumpTo(
-                        mbgl::CameraOptions().withCenter(mbgl::LatLng{}).withZoom(0.0).withBearing(0.0).withPitch(0.0)
-                    );
+                        mbgl::CameraOptions().withCenter(mbgl::LatLng{}).withZoom(0.0).withBearing(0.0).withPitch(0.0));
                 break;
             case GLFW_KEY_O:
                 view->onlineStatusCallback();
@@ -296,24 +303,20 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_N:
                 if (!mods)
-                    view->map->easeTo(
-                        mbgl::CameraOptions().withBearing(0.0), mbgl::AnimationOptions{{mbgl::Milliseconds(500)}}
-                    );
+                    view->map->easeTo(mbgl::CameraOptions().withBearing(0.0),
+                                      mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
                 break;
             case GLFW_KEY_Z:
                 view->nextOrientation();
                 break;
             case GLFW_KEY_Q: {
                 auto result = view->rendererFrontend->getRenderer()->queryPointAnnotations(
-                    {{}, {static_cast<double>(view->getSize().width), static_cast<double>(view->getSize().height)}}
-                );
+                    {{}, {static_cast<double>(view->getSize().width), static_cast<double>(view->getSize().height)}});
                 printf("visible point annotations: %zu\n", result.size());
                 auto features = view->rendererFrontend->getRenderer()->queryRenderedFeatures(
-                    mbgl::ScreenBox{
-                        {view->getSize().width * 0.5, view->getSize().height * 0.5},
-                        {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
-                    {}
-                );
+                    mbgl::ScreenBox{{view->getSize().width * 0.5, view->getSize().height * 0.5},
+                                    {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
+                    {});
                 printf("Rendered features at the center of the screen: %zu\n", features.size());
             } break;
             case GLFW_KEY_P:
@@ -378,8 +381,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                     easing += easing > 180.0 ? -360.0 : easing < -180 ? 360.0 : 0;
                     bearing = *camera.bearing + (easing / 20);
                     routeMap->jumpTo(
-                        mbgl::CameraOptions().withCenter(center).withZoom(18.0).withBearing(bearing).withPitch(60.0)
-                    );
+                        mbgl::CameraOptions().withCenter(center).withZoom(18.0).withBearing(bearing).withPitch(60.0));
                 };
                 view->animateRouteCallback(view->map);
             } break;
@@ -432,7 +434,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
 
                 auto &style = view->map->getStyle();
                 if (!style.getSource("states")) {
-                    std::string url = "https://maplibre.org/maplibre-gl-js-docs/assets/us_states.geojson";
+                    std::string url =
+                        "https://maplibre.org/maplibre-gl-js-docs/assets/"
+                        "us_states.geojson";
                     auto source = std::make_unique<GeoJSONSource>("states");
                     source->setURL(url);
                     style.addSource(std::move(source));
@@ -450,15 +454,12 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                     auto fillLayer = std::make_unique<FillLayer>("state-fills", "states");
                     fillLayer->setFillColor(mbgl::Color{0.0, 0.0, 1.0, 0.5});
                     fillLayer->setFillOpacity(PropertyExpression<float>(
-                        createExpression(R"(["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5])")
-                    ));
+                        createExpression(R"(["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5])")));
                     style.addLayer(std::move(fillLayer));
                 } else {
-                    layer->setVisibility(
-                        layer->getVisibility() == mbgl::style::VisibilityType::Visible
-                            ? mbgl::style::VisibilityType::None
-                            : mbgl::style::VisibilityType::Visible
-                    );
+                    layer->setVisibility(layer->getVisibility() == mbgl::style::VisibilityType::Visible
+                                             ? mbgl::style::VisibilityType::None
+                                             : mbgl::style::VisibilityType::Visible);
                 }
 
                 layer = style.getLayer("state-borders");
@@ -466,15 +467,12 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                     auto borderLayer = std::make_unique<LineLayer>("state-borders", "states");
                     borderLayer->setLineColor(mbgl::Color{0.0, 0.0, 1.0, 1.0});
                     borderLayer->setLineWidth(PropertyExpression<float>(
-                        createExpression(R"(["case", ["boolean", ["feature-state", "hover"], false], 2, 1])")
-                    ));
+                        createExpression(R"(["case", ["boolean", ["feature-state", "hover"], false], 2, 1])")));
                     style.addLayer(std::move(borderLayer));
                 } else {
-                    layer->setVisibility(
-                        layer->getVisibility() == mbgl::style::VisibilityType::Visible
-                            ? mbgl::style::VisibilityType::None
-                            : mbgl::style::VisibilityType::Visible
-                    );
+                    layer->setVisibility(layer->getVisibility() == mbgl::style::VisibilityType::Visible
+                                             ? mbgl::style::VisibilityType::None
+                                             : mbgl::style::VisibilityType::Visible);
                 }
             } break;
             case GLFW_KEY_F1: {
@@ -487,10 +485,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 if (success) {
                     mbgl::Log::Info(mbgl::Event::General, "Render test created!");
                 } else {
-                    mbgl::Log::Error(
-                        mbgl::Event::General,
-                        "Fail to create render test! Base directory does not exist or permission denied."
-                    );
+                    mbgl::Log::Error(mbgl::Event::General,
+                                     "Fail to create render test! Base directory does not "
+                                     "exist or permission denied.");
                 }
             } break;
             case GLFW_KEY_U: {
@@ -624,9 +621,10 @@ mbgl::Point<double> GLFWView::makeRandomPoint() const {
     return {latLng.longitude(), latLng.latitude()};
 }
 
-std::unique_ptr<mbgl::style::Image> GLFWView::makeImage(
-    const std::string &id, int width, int height, float pixelRatio
-) {
+std::unique_ptr<mbgl::style::Image> GLFWView::makeImage(const std::string &id,
+                                                        int width,
+                                                        int height,
+                                                        float pixelRatio) {
     const int r = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
     const int g = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
     const int b = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
@@ -701,8 +699,8 @@ void GLFWView::addRandomShapeAnnotations(int count) {
     for (int i = 0; i < count; ++i) {
         mbgl::Polygon<double> triangle;
         triangle.push_back({makeRandomPoint(), makeRandomPoint(), makeRandomPoint()});
-        annotationIDs.push_back(map->addAnnotation(mbgl::FillAnnotation{
-            triangle, 0.5f, {makeRandomColor()}, {makeRandomColor()}}));
+        annotationIDs.push_back(
+            map->addAnnotation(mbgl::FillAnnotation{triangle, 0.5f, {makeRandomColor()}, {makeRandomColor()}}));
     }
 }
 
@@ -768,13 +766,11 @@ void GLFWView::popAnnotation() {
 
 void GLFWView::makeSnapshot(bool withOverlay) {
     if (!snapshotter || snapshotter->getStyleURL() != map->getStyle().getURL()) {
-        snapshotter = std::make_unique<mbgl::MapSnapshotter>(
-            map->getMapOptions().size(),
-            map->getMapOptions().pixelRatio(),
-            mapResourceOptions,
-            mapClientOptions,
-            *snapshotterObserver
-        );
+        snapshotter = std::make_unique<mbgl::MapSnapshotter>(map->getMapOptions().size(),
+                                                             map->getMapOptions().pixelRatio(),
+                                                             mapResourceOptions,
+                                                             mapClientOptions,
+                                                             *snapshotterObserver);
         snapshotter->setStyleURL(map->getStyle().getURL());
     }
 
@@ -847,10 +843,10 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
     view->backend->setSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
-    // This is only triggered when the framebuffer is resized, but not the window. It can
-    // happen when you move the window between screens with a different pixel ratio.
-    // We are forcing a repaint my invalidating the view, which triggers a rerender with the
-    // new framebuffer dimensions.
+    // This is only triggered when the framebuffer is resized, but not the
+    // window. It can happen when you move the window between screens with a
+    // different pixel ratio. We are forcing a repaint my invalidating the view,
+    // which triggers a rerender with the new framebuffer dimensions.
     view->invalidate();
 }
 
@@ -871,17 +867,13 @@ void GLFWView::onMouseClick(GLFWwindow *window, int button, int action, int modi
             double now = glfwGetTime();
             if (now - view->lastClick < 0.4 /* ms */) {
                 if (modifiers & GLFW_MOD_SHIFT) {
-                    view->map->scaleBy(
-                        0.5,
-                        mbgl::ScreenCoordinate{view->lastX, view->lastY},
-                        mbgl::AnimationOptions{{mbgl::Milliseconds(500)}}
-                    );
+                    view->map->scaleBy(0.5,
+                                       mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                       mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
                 } else {
-                    view->map->scaleBy(
-                        2.0,
-                        mbgl::ScreenCoordinate{view->lastX, view->lastY},
-                        mbgl::AnimationOptions{{mbgl::Milliseconds(500)}}
-                    );
+                    view->map->scaleBy(2.0,
+                                       mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                       mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
                 }
             }
             view->lastClick = now;
@@ -1100,10 +1092,9 @@ void GLFWView::toggleCustomSource() {
         lineLayer->setLineColor(mbgl::Color{1.0, 0.0, 0.0, 1.0});
         map->getStyle().addLayer(std::move(lineLayer));
     } else {
-        layer->setVisibility(
-            layer->getVisibility() == mbgl::style::VisibilityType::Visible ? mbgl::style::VisibilityType::None
-                                                                           : mbgl::style::VisibilityType::Visible
-        );
+        layer->setVisibility(layer->getVisibility() == mbgl::style::VisibilityType::Visible
+                                 ? mbgl::style::VisibilityType::None
+                                 : mbgl::style::VisibilityType::Visible);
     }
 }
 
@@ -1114,14 +1105,15 @@ void GLFWView::toggleLocationIndicatorLayer() {
     if (puck == nullptr) {
         auto puckLayer = std::make_unique<mbgl::style::LocationIndicatorLayer>("puck");
 
-        puckLayer->setLocationTransition(mbgl::style::TransitionOptions(mbgl::Duration::zero(), mbgl::Duration::zero())
-        ); // Note: This is used here for demo purpose.
-           // SDKs should not use this, or else the location
-           // will "jump" to positions.
+        puckLayer->setLocationTransition(
+            mbgl::style::TransitionOptions(mbgl::Duration::zero(),
+                                           mbgl::Duration::zero())); // Note: This is used here for demo purpose.
+                                                                     // SDKs should not use this, or else the location
+                                                                     // will "jump" to positions.
         puckLayer->setLocation(toArray(puckLocation));
         puckLayer->setAccuracyRadius(50);
-        puckLayer->setAccuracyRadiusColor(premultiply(mbgl::Color{0.0f, 1.0f, 0.0f, 0.2f})
-        ); // Note: these must be fed premultiplied
+        puckLayer->setAccuracyRadiusColor(
+            premultiply(mbgl::Color{0.0f, 1.0f, 0.0f, 0.2f})); // Note: these must be fed premultiplied
 
         puckLayer->setBearingTransition(mbgl::style::TransitionOptions(mbgl::Duration::zero(), mbgl::Duration::zero()));
         puckLayer->setBearing(mbgl::style::Rotation(0.0));
@@ -1133,16 +1125,13 @@ void GLFWView::toggleLocationIndicatorLayer() {
         puckLayer->setPerspectiveCompensation(0.9f);
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0f
-        ));
+            "puck.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0f));
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_shadow.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0f
-        ));
+            "puck_shadow.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0f));
 
         map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_hat.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0f
-        ));
+            "puck_hat.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0f));
 
         puckLayer->setBearingImage(mbgl::style::expression::Image("puck.png"));
         puckLayer->setShadowImage(mbgl::style::expression::Image("puck_shadow.png"));

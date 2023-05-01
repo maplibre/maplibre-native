@@ -36,12 +36,10 @@ public:
 
 template <class T>
 std::optional<T> numericValue(const Value& value) {
-    return value.match(
-        [](uint64_t t) { return std::optional<T>(static_cast<T>(t)); },
-        [](int64_t t) { return std::optional<T>(static_cast<T>(t)); },
-        [](double t) { return std::optional<T>(static_cast<T>(t)); },
-        [](const auto&) { return std::optional<T>(); }
-    );
+    return value.match([](uint64_t t) { return std::optional<T>(static_cast<T>(t)); },
+                       [](int64_t t) { return std::optional<T>(static_cast<T>(t)); },
+                       [](double t) { return std::optional<T>(static_cast<T>(t)); },
+                       [](const auto&) { return std::optional<T>(); });
 }
 
 inline std::optional<std::string> featureIDtoString(const FeatureIdentifier& id) {
@@ -49,13 +47,11 @@ inline std::optional<std::string> featureIDtoString(const FeatureIdentifier& id)
         return std::nullopt;
     }
 
-    return id.match(
-        [](const std::string& value_) { return value_; },
-        [](uint64_t value_) { return util::toString(value_); },
-        [](int64_t value_) { return util::toString(value_); },
-        [](double value_) { return util::toString(value_); },
-        [](const auto&) -> std::optional<std::string> { return std::nullopt; }
-    );
+    return id.match([](const std::string& value_) { return value_; },
+                    [](uint64_t value_) { return util::toString(value_); },
+                    [](int64_t value_) { return util::toString(value_); },
+                    [](double value_) { return util::toString(value_); },
+                    [](const auto&) -> std::optional<std::string> { return std::nullopt; });
 }
 
 } // namespace mbgl

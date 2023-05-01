@@ -7,7 +7,6 @@ namespace mbgl {
 class Anchor;
 
 bool checkMaxAngle(
-    const GeometryCoordinates& line, const Anchor& anchor, float labelLength, float windowSize, float maxAngle
-);
+    const GeometryCoordinates& line, const Anchor& anchor, float labelLength, float windowSize, float maxAngle);
 
 } // namespace mbgl

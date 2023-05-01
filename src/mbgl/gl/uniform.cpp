@@ -118,10 +118,8 @@ ActiveUniforms activeUniforms(ProgramID id) {
     GLenum type;
     for (GLint index = 0; index < count; index++) {
         MBGL_CHECK_ERROR(glGetActiveUniform(id, index, maxLength, &length, &size, &type, name.get()));
-        active.emplace(
-            std::string{name.get(), static_cast<size_t>(length)},
-            ActiveUniform{static_cast<size_t>(size), static_cast<UniformDataType>(type)}
-        );
+        active.emplace(std::string{name.get(), static_cast<size_t>(length)},
+                       ActiveUniform{static_cast<size_t>(size), static_cast<UniformDataType>(type)});
     }
 
     return active;
@@ -159,19 +157,15 @@ bool verifyUniform<std::array<double, 16>>(const ActiveUniform& uniform) {
 
 template <>
 bool verifyUniform<bool>(const ActiveUniform& uniform) {
-    assert(
-        uniform.size == 1 && (uniform.type == UniformDataType::Bool || uniform.type == UniformDataType::Int ||
-                              uniform.type == UniformDataType::Float)
-    );
+    assert(uniform.size == 1 && (uniform.type == UniformDataType::Bool || uniform.type == UniformDataType::Int ||
+                                 uniform.type == UniformDataType::Float));
     return true;
 }
 
 template <>
 bool verifyUniform<uint32_t>(const ActiveUniform& uniform) {
-    assert(
-        uniform.size == 1 && (uniform.type == UniformDataType::Int || uniform.type == UniformDataType::Float ||
-                              uniform.type == UniformDataType::Sampler2D)
-    );
+    assert(uniform.size == 1 && (uniform.type == UniformDataType::Int || uniform.type == UniformDataType::Float ||
+                                 uniform.type == UniformDataType::Sampler2D));
     return true;
 }
 
@@ -189,17 +183,15 @@ bool verifyUniform<Size>(const ActiveUniform& uniform) {
 
 template <>
 bool verifyUniform<std::array<uint16_t, 2>>(const ActiveUniform& uniform) {
-    assert(
-        uniform.size == 1 && (uniform.type == UniformDataType::IntVec2 || uniform.type == UniformDataType::FloatVec2)
-    );
+    assert(uniform.size == 1 &&
+           (uniform.type == UniformDataType::IntVec2 || uniform.type == UniformDataType::FloatVec2));
     return true;
 }
 
 template <>
 bool verifyUniform<std::array<uint16_t, 4>>(const ActiveUniform& uniform) {
-    assert(
-        uniform.size == 1 && (uniform.type == UniformDataType::IntVec4 || uniform.type == UniformDataType::FloatVec4)
-    );
+    assert(uniform.size == 1 &&
+           (uniform.type == UniformDataType::IntVec4 || uniform.type == UniformDataType::FloatVec4));
     return true;
 }
 

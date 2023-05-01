@@ -19,12 +19,10 @@ ParseResult parseInterpolate(const mbgl::style::conversion::Convertible& value, 
 
 class Interpolate : public Expression {
 public:
-    Interpolate(
-        const type::Type& type_,
-        Interpolator interpolator_,
-        std::unique_ptr<Expression> input_,
-        std::map<double, std::unique_ptr<Expression>> stops_
-    );
+    Interpolate(const type::Type& type_,
+                Interpolator interpolator_,
+                std::unique_ptr<Expression> input_,
+                std::map<double, std::unique_ptr<Expression>> stops_);
 
     const std::unique_ptr<Expression>& getInput() const { return input; }
     const Interpolator& getInterpolator() const { return interpolator; }
@@ -48,9 +46,8 @@ public:
     }
 
     double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const {
-        return interpolator.match([&](const auto& interp) {
-            return interp.interpolationFactor(inputLevels, inputValue);
-        });
+        return interpolator.match(
+            [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); });
     }
 
     bool operator==(const Expression& e) const override {
@@ -75,13 +72,11 @@ protected:
     const std::map<double, std::unique_ptr<Expression>> stops;
 };
 
-ParseResult createInterpolate(
-    type::Type type,
-    Interpolator interpolator,
-    std::unique_ptr<Expression> input,
-    std::map<double, std::unique_ptr<Expression>> stops,
-    ParsingContext& ctx
-);
+ParseResult createInterpolate(type::Type type,
+                              Interpolator interpolator,
+                              std::unique_ptr<Expression> input,
+                              std::map<double, std::unique_ptr<Expression>> stops,
+                              ParsingContext& ctx);
 
 } // namespace expression
 } // namespace style

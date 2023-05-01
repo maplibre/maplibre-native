@@ -12,15 +12,13 @@
 namespace mbgl {
 namespace android {
 
-RasterDEMSource::RasterDEMSource(
-    jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& urlOrTileSet, jni::jint tileSize
-)
-    : Source(
-          env,
-          std::make_unique<mbgl::style::RasterDEMSource>(
-              jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet)), tileSize
-          )
-      ) {}
+RasterDEMSource::RasterDEMSource(jni::JNIEnv& env,
+                                 const jni::String& sourceId,
+                                 const jni::Object<>& urlOrTileSet,
+                                 jni::jint tileSize)
+    : Source(env,
+             std::make_unique<mbgl::style::RasterDEMSource>(
+                 jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet)), tileSize)) {}
 
 RasterDEMSource::RasterDEMSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
@@ -52,8 +50,7 @@ void RasterDEMSource::registerNative(jni::JNIEnv& env) {
         jni::MakePeer<RasterDEMSource, const jni::String&, const jni::Object<>&, jni::jint>,
         "initialize",
         "finalize",
-        METHOD(&RasterDEMSource::getURL, "nativeGetUrl")
-    );
+        METHOD(&RasterDEMSource::getURL, "nativeGetUrl"));
 }
 
 } // namespace android

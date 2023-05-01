@@ -11,9 +11,8 @@ const style::LayerTypeInfo* SymbolLayerFactory::getTypeInfo() const noexcept {
     return style::SymbolLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(
-    const std::string& id, const style::conversion::Convertible& value
-) noexcept {
+std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(const std::string& id,
+                                                              const style::conversion::Convertible& value) noexcept {
     std::optional<std::string> source = getSource(value);
     if (!source) {
         return nullptr;
@@ -24,8 +23,7 @@ std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(
 std::unique_ptr<Layout> SymbolLayerFactory::createLayout(
     const LayoutParameters& parameters,
     std::unique_ptr<GeometryTileLayer> tileLayer,
-    const std::vector<Immutable<style::LayerProperties>>& group
-) noexcept {
+    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
     return std::make_unique<SymbolLayout>(parameters.bucketParameters, group, std::move(tileLayer), parameters);
 }
 

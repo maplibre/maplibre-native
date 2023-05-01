@@ -74,14 +74,14 @@ public:
         // Verify active uniform types match the enum
         const auto active = gl::activeUniforms(id);
 
-        util::ignore({// Some shader programs have uniforms declared, but not used, so they're not active.
-                      // Therefore, we'll only verify them when they are indeed active.
-                      (active.find(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()) !=
-                               active.end()
-                           ? verifyUniform<typename Us::Value>(
-                                 active.at(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value())
-                             )
-                           : false)...});
+        util::ignore(
+            {// Some shader programs have uniforms declared, but not used, so
+             // they're not active. Therefore, we'll only verify them when they
+             // are indeed active.
+             (active.find(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()) != active.end()
+                  ? verifyUniform<typename Us::Value>(
+                        active.at(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()))
+                  : false)...});
 #endif
 
         state = State{
@@ -89,9 +89,8 @@ public:
     }
 
     NamedUniformLocations getNamedLocations() const {
-        return NamedUniformLocations{
-            {concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value(),
-             state.template get<Us>().location}...};
+        return NamedUniformLocations{{concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value(),
+                                      state.template get<Us>().location}...};
     }
 
     void bind(const gfx::UniformValues<TypeList<Us...>>& values) {

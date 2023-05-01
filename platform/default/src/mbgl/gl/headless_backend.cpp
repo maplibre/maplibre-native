@@ -36,9 +36,9 @@ public:
     gl::Framebuffer framebuffer;
 };
 
-HeadlessBackend::HeadlessBackend(
-    const Size size_, gfx::HeadlessBackend::SwapBehaviour swapBehaviour_, const gfx::ContextMode contextMode_
-)
+HeadlessBackend::HeadlessBackend(const Size size_,
+                                 gfx::HeadlessBackend::SwapBehaviour swapBehaviour_,
+                                 const gfx::ContextMode contextMode_)
     : mbgl::gl::RendererBackend(contextMode_),
       mbgl::gfx::HeadlessBackend(size_),
       swapBehaviour(swapBehaviour_) {}
@@ -46,8 +46,8 @@ HeadlessBackend::HeadlessBackend(
 HeadlessBackend::~HeadlessBackend() {
     gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
     resource.reset();
-    // Explicitly reset the context so that it is destructed and cleaned up before we destruct
-    // the impl object.
+    // Explicitly reset the context so that it is destructed and cleaned up
+    // before we destruct the impl object.
     context.reset();
 }
 
@@ -102,8 +102,7 @@ namespace gfx {
 
 template <>
 std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::OpenGL>(
-    const Size size, gfx::HeadlessBackend::SwapBehaviour swapBehavior, const gfx::ContextMode contextMode
-) {
+    const Size size, gfx::HeadlessBackend::SwapBehaviour swapBehavior, const gfx::ContextMode contextMode) {
     return std::make_unique<gl::HeadlessBackend>(size, swapBehavior, contextMode);
 }
 

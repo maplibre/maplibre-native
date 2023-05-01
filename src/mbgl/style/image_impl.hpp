@@ -12,15 +12,13 @@ namespace style {
 
 class Image::Impl {
 public:
-    Impl(
-        std::string id,
-        PremultipliedImage&&,
-        float pixelRatio,
-        bool sdf = false,
-        ImageStretches stretchX = {},
-        ImageStretches stretchY = {},
-        std::optional<ImageContent> content = std::nullopt
-    );
+    Impl(std::string id,
+         PremultipliedImage&&,
+         float pixelRatio,
+         bool sdf = false,
+         ImageStretches stretchX = {},
+         ImageStretches stretchY = {},
+         std::optional<ImageContent> content = std::nullopt);
 
     const std::string id;
 

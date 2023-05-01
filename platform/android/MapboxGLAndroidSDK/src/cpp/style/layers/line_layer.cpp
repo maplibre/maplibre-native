@@ -20,9 +20,8 @@ inline mbgl::style::LineLayer& toLineLayer(mbgl::style::Layer& layer) {
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 LineLayer::LineLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::LineLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::LineLayer>(jni::Make<std::string>(env, layerId),
+                                                     jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -249,21 +248,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                             mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new LineLayer(toLineLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(
         env,
-        new LineLayer(std::unique_ptr<mbgl::style::LineLayer>(static_cast<mbgl::style::LineLayer*>(layer.release())))
-    );
+        new LineLayer(std::unique_ptr<mbgl::style::LineLayer>(static_cast<mbgl::style::LineLayer*>(layer.release()))));
 }
 
 void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -313,8 +309,7 @@ void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&LineLayer::getLinePatternTransition, "nativeGetLinePatternTransition"),
         METHOD(&LineLayer::setLinePatternTransition, "nativeSetLinePatternTransition"),
         METHOD(&LineLayer::getLinePattern, "nativeGetLinePattern"),
-        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient")
-    );
+        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"));
 }
 
 } // namespace android

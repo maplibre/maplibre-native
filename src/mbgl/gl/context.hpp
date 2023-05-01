@@ -55,18 +55,17 @@ public:
     void linkProgram(ProgramID);
     UniqueTexture createUniqueTexture();
 
-    Framebuffer
-    createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
+    Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
-    Framebuffer
-    createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
+    Framebuffer createFramebuffer(const gfx::Texture&,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Texture&);
     Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
 
-    template <
-        typename Image,
-        gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
-                                                            : gfx::TexturePixelType::Alpha>
+    template <typename Image,
+              gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
+                                                                  : gfx::TexturePixelType::Alpha>
     Image readFramebuffer(const Size size, bool flip = true) {
         static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
         return {size, readFramebuffer(size, format, flip)};
@@ -152,12 +151,12 @@ private:
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::TextureResource> createTextureResource(
-        Size, gfx::TexturePixelType, gfx::TextureChannelDataType
-    ) override;
+    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
+                                                                gfx::TexturePixelType,
+                                                                gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size size)
-        override;
+    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
+                                                                          Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 

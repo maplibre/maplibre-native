@@ -44,9 +44,10 @@ public:
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t i) const override;
     std::string getName() const override;
 
-    void addFeature(
-        AnnotationID, FeatureType, GeometryCollection, std::unordered_map<std::string, std::string> properties = {{}}
-    );
+    void addFeature(AnnotationID,
+                    FeatureType,
+                    GeometryCollection,
+                    std::unordered_map<std::string, std::string> properties = {{}});
 
 private:
     std::shared_ptr<AnnotationTileLayerData> layer;

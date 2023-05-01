@@ -16,19 +16,16 @@ std::atomic_size_t transferredSize{0};
 std::atomic_bool active{false};
 std::atomic_bool offline{true};
 
-ProxyFileSource::ProxyFileSource(
-    std::shared_ptr<FileSource> defaultResourceLoader_,
-    const ResourceOptions& resourceOptions_,
-    const ClientOptions& clientOptions_
-)
+ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_,
+                                 const ResourceOptions& resourceOptions_,
+                                 const ClientOptions& clientOptions_)
     : defaultResourceLoader(std::move(defaultResourceLoader_)),
       resourceOptions(resourceOptions_.clone()),
       clientOptions(clientOptions_.clone()) {
     assert(defaultResourceLoader);
     if (offline) {
         std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
-            FileSourceType::Database, resourceOptions_, clientOptions_
-        );
+            FileSourceType::Database, resourceOptions_, clientOptions_);
         dbfs->setProperty(READ_ONLY_MODE_KEY, true);
     }
 }
@@ -68,8 +65,7 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
             if (transformed.kind == Resource::Kind::Tile && transformed.tileData) {
                 mbgl::Log::Info(
                     mbgl::Event::Database,
-                    "Resource not found in cache: " + transformed.url + "(" + transformed.tileData->urlTemplate + ")"
-                );
+                    "Resource not found in cache: " + transformed.url + "(" + transformed.tileData->urlTemplate + ")");
             } else {
                 mbgl::Log::Info(mbgl::Event::Database, "Resource not found in cache: " + transformed.url);
             }

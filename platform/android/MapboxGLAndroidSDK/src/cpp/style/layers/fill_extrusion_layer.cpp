@@ -20,9 +20,8 @@ inline mbgl::style::FillExtrusionLayer& toFillExtrusionLayer(mbgl::style::Layer&
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 FillExtrusionLayer::FillExtrusionLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::FillExtrusionLayer>(
-          jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId)
-      )) {}
+    : Layer(std::make_unique<mbgl::style::FillExtrusionLayer>(jni::Make<std::string>(env, layerId),
+                                                              jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -97,8 +96,7 @@ void FillExtrusionLayer::setFillExtrusionTranslateTransition(jni::JNIEnv&, jlong
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionTranslateAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionTranslateAnchor())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionTranslateAnchor()));
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionPattern(jni::JNIEnv& env) {
@@ -158,8 +156,7 @@ void FillExtrusionLayer::setFillExtrusionBaseTransition(jni::JNIEnv&, jlong dura
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionVerticalGradient(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionVerticalGradient())
-    );
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionVerticalGradient()));
 }
 
 // FillExtrusionJavaLayerPeerFactory
@@ -174,23 +171,18 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 }
 } // namespace
 
-jni::Local<jni::Object<Layer>> FillExtrusionJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, mbgl::style::Layer& layer
-) {
+jni::Local<jni::Object<Layer>> FillExtrusionJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                                      mbgl::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new FillExtrusionLayer(toFillExtrusionLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> FillExtrusionJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer
-) {
+    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new FillExtrusionLayer(std::unique_ptr<mbgl::style::FillExtrusionLayer>(
-            static_cast<mbgl::style::FillExtrusionLayer*>(layer.release())
-        ))
-    );
+    return createJavaPeer(env,
+                          new FillExtrusionLayer(std::unique_ptr<mbgl::style::FillExtrusionLayer>(
+                              static_cast<mbgl::style::FillExtrusionLayer*>(layer.release()))));
 }
 
 void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -226,8 +218,7 @@ void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillExtrusionLayer::getFillExtrusionBaseTransition, "nativeGetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::setFillExtrusionBaseTransition, "nativeSetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::getFillExtrusionBase, "nativeGetFillExtrusionBase"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient")
-    );
+        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient"));
 }
 
 } // namespace android
