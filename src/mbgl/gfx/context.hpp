@@ -24,6 +24,7 @@ class DrawableBuilder;
 class DrawableTweaker;
 class OffscreenTexture;
 class ShaderProgramBase;
+class ShaderRegistry;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
@@ -106,6 +107,9 @@ public:
     
     /// Create a new drawable tweaker
     virtual DrawableTweakerPtr createDrawableTweaker() = 0;
+    
+    /// Get the generic shader with the specified name
+    virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 };
 
 } // namespace gfx

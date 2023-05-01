@@ -1,4 +1,6 @@
 #include <mbgl/gl/context.hpp>
+
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
@@ -485,6 +487,10 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 
 gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
     return std::make_shared<gl::DrawableGLTweaker>();
+}
+
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+    return shaders.get<gl::ShaderProgramGL>(name);
 }
 
 void Context::clear(std::optional<mbgl::Color> color,
