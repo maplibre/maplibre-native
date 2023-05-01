@@ -40,7 +40,7 @@ MapLibre Native is being actively developed. Our big goal for 2023 is to modular
 Your help in preparing the codebase for the latest graphics backends is more than welcome. Feel free to reach out if you are interested in joining the effort!
 
 - Check out the [news](https://maplibre.org/news/) on MapLibre's website.
-- See the [Design Proposals](https://github.com/louwers/maplibre-gl-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent ones being the [Rendering Modularization Design Proposal](design-proposals/2022-10-27-rendering-modularization.md) and the [Metal Port Design Proposal](design-proposals/2022-11-29-metal-port.md).
+- See the [Design Proposals](https://github.com/maplibre/maplibre-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent ones being the [Rendering Modularization Design Proposal](design-proposals/2022-10-27-rendering-modularization.md) and the [Metal Port Design Proposal](design-proposals/2022-11-29-metal-port.md).
 
 ## Contributing
 
