@@ -18,7 +18,7 @@ else
     PUBLISH_STYLE=""
 fi
 
-GITHUB_REPO=${GITHUB_REPO:-'maplibre-gl-native'}
+GITHUB_REPO=${GITHUB_REPO:-'maplibre-native'}
 
 #
 # zip

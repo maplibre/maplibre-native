@@ -29,7 +29,7 @@ A minimal set of commands to build and install is
 
 ```shell
 mkdir build && cd build
-cmake ../maplibre-gl-native/ \
+cmake ../maplibre-native/ \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=<installation_prefix> \
