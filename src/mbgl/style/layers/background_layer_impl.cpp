@@ -31,25 +31,15 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 
 constexpr auto shaderName = "background_generic";
 
-struct ShaderHack final : public gfx::ShaderProgramBase {
-    static constexpr std::string_view Name{"GenericGLShader"};
-    const std::string_view typeName() const noexcept override { return Name; }
-    const gfx::VertexAttributeArray& getUniforms() const override { return *dummy; }
-    const gfx::VertexAttributeArray& getVertexAttributes() const override { return *dummy; }
-    gfx::VertexAttributeArray& mutableUniforms() override { return *dummy; }
-    gfx::VertexAttributeArray& mutableVertexAttributes() override { return *dummy; }
-    gfx::VertexAttributeArray* dummy = nullptr;
-};
-
 void BackgroundLayer::Impl::layerAdded(gfx::ShaderRegistry& shaders,
-                                       gfx::Context&,
+                                       gfx::Context& context,
                                        const TransformState&,
                                        const PropertyEvaluationParameters&,
                                        UniqueChangeRequestVec&) const {
     {
         std::unique_lock<std::mutex> guard(mutex);
         if (!shader) {
-            shader = shaders.get<ShaderHack>(shaderName);
+            shader = context.getGenericShader(shaders, shaderName);
         }
     }
 }

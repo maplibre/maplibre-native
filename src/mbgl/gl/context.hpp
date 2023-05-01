@@ -107,6 +107,8 @@ public:
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::DrawableTweakerPtr createDrawableTweaker() override;
 
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
