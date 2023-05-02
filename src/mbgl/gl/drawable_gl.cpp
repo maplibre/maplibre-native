@@ -5,19 +5,17 @@
 namespace mbgl {
 namespace gl {
 
-DrawableGL::DrawableGL(std::string name_) :
-    Drawable(std::move(name_)),
-    impl(std::make_unique<Impl>()) {
-}
+DrawableGL::DrawableGL(std::string name_)
+    : Drawable(std::move(name_)),
+      impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
-    impl->vertexArray =  { { nullptr, false } };
-    impl->indexBuffer = { 0, nullptr };
+    impl->vertexArray = {{nullptr, false}};
+    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffer.reset();
 }
 
-void DrawableGL::draw(const PaintParameters &parameters) const
-{
+void DrawableGL::draw(const PaintParameters& parameters) const {
     impl->draw(parameters);
 }
 

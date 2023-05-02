@@ -31,7 +31,6 @@ using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
-
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
@@ -96,18 +95,17 @@ public:
 #endif
 
     virtual void clearStencilBuffer(int32_t) = 0;
-    
-    
+
 public:
     /// Activate the shader, vertex attributes, etc., specified by the drawable
     virtual bool setupDraw(const PaintParameters&, const gfx::Drawable&) = 0;
 
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
-    
+
     /// Create a new drawable tweaker
     virtual DrawableTweakerPtr createDrawableTweaker() = 0;
-    
+
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 };

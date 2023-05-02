@@ -5,8 +5,8 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-//#include <mbgl/shaders/gl/shader_program_gl.hpp>
-//#include <mbgl/shaders/gl/shader_program_gl.hpp>
+// #include <mbgl/shaders/gl/shader_program_gl.hpp>
+// #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/logging.hpp>
@@ -17,13 +17,11 @@
 namespace mbgl {
 namespace style {
 
-BackgroundLayer::Impl::Impl(const Impl& other) :
-    Layer::Impl(other),
-    tileDrawables(other.tileDrawables),
-    lastColor(other.lastColor),
-    paint(other.paint)
-{
-}
+BackgroundLayer::Impl::Impl(const Impl& other)
+    : Layer::Impl(other),
+      tileDrawables(other.tileDrawables),
+      lastColor(other.lastColor),
+      paint(other.paint) {}
 
 bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
     return false;
@@ -55,8 +53,7 @@ void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const 
     }
 
     removeDrawables<decltype(localDrawables)::const_iterator>(
-        localDrawables.cbegin(), localDrawables.cend(), changes,
-        [](auto& ii) { return ii->second->getId(); });
+        localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
 void BackgroundLayer::Impl::update(gfx::Context& context,
@@ -71,7 +68,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     const auto evaluated = unevaluated->evaluate(evalParameters);
 
     // TODO: If background is solid, we can skip drawables and rely on the clear color
-    //const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
+    // const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
     //    ? RenderPass::None
     //    : (!uneval.get<style::BackgroundPattern>().isUndefined()
     //       || eval.get<style::BackgroundOpacity>() < 1.0f
@@ -79,8 +76,8 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     //    ? RenderPass::Translucent
     //    : RenderPass::Opaque | RenderPass::Translucent;   // evaluated based on opaquePassCutoff in render()
 
-    //unevaluated.hasTransition();
-    //getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
+    // unevaluated.hasTransition();
+    // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 
     std::optional<Color> color;
     if (evaluated.get<BackgroundPattern>().from.empty()) {
@@ -93,8 +90,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (!color) {
         removeDrawables<decltype(tileDrawables)::const_iterator>(
-            tileDrawables.cbegin(), tileDrawables.cend(), changes,
-            [](auto& ii) { return ii->second->getId(); });
+            tileDrawables.cbegin(), tileDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
         tileDrawables.clear();
         return;
     }
@@ -106,7 +102,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     const auto tileCover = util::tileCover(state, zoom);
 
     // Drawables per overscaled or canonical tile?
-    //const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
+    // const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
 
     // Put the tile cover into a searchable form.
     // TODO: Likely better to sort and `std::binary_search` the vector.
@@ -114,14 +110,15 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     const std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
 
     // For each existing tile drawable...
-    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end(); ) {
+    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
         const auto& drawable = iter->second;
 
         // Has this tile dropped out of the cover set?
         if (newTileIDs.find(iter->first) == newTileIDs.end()) {
             // remove it
             changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
-            //Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " + std::to_string(stats.tileDrawablesRemoved+1));
+            // Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " +
+            // std::to_string(stats.tileDrawablesRemoved+1));
             iter = tileDrawables.erase(iter);
             ++stats.tileDrawablesRemoved;
             continue;
@@ -158,7 +155,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
 
         // Tile coordinates are fixed...
         builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
-        
+
         // ... they're placed with the matrix in the uniforms, which changes with the view
         builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
 
@@ -171,7 +168,8 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
             result.first->second = drawable;
             changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
             ++stats.tileDrawablesAdded;
-            //Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " + std::to_string(stats.tileDrawablesAdded+1));
+            // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+            // std::to_string(stats.tileDrawablesAdded+1));
         }
     }
 }

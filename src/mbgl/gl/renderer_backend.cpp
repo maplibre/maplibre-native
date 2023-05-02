@@ -98,7 +98,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
             shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
             if (shader) {
                 // Set default values
-                //shader->setAttribute("a_color", gfx::VertexAttribute::matf4{ 1.0f, 1.0f, 1.0f, 1.0f });
+                // shader->setAttribute("a_color", gfx::VertexAttribute::matf4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
                 // Add to the registry
                 if (!shaders.registerShader(shader, shaderName)) {
@@ -109,7 +109,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
                 Log::Warning(Event::General, "Shader create failed - " + std::string(shaderName));
                 return;
             }
-    } catch (const std::runtime_error& ex) {
+        } catch (const std::runtime_error& ex) {
             Log::Warning(Event::General, "Shader create exception - " + std::string(ex.what()));
             return;
         }

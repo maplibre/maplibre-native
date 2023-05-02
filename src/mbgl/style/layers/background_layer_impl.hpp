@@ -49,7 +49,9 @@ public:
 private:
     // Add a deletion change request for each drawable in a collection
     template <typename T>
-    static void removeDrawables(T beg, const T end, UniqueChangeRequestVec& changes,
+    static void removeDrawables(T beg,
+                                const T end,
+                                UniqueChangeRequestVec& changes,
                                 std::function<util::SimpleIdentity(const T&)> f) {
         for (; beg != end; ++beg) {
             changes.emplace_back(std::make_unique<RemoveDrawableRequest>(f(beg)));

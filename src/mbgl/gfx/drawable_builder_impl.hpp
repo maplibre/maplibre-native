@@ -10,7 +10,7 @@ namespace mbgl {
 namespace gfx {
 
 struct DrawableBuilder::Impl {
-    using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t,2>>;
+    using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     gfx::VertexVector<VT> vertices;
     gfx::IndexVector<gfx::Triangles> indexes;
     SegmentVector<TypeList<void>> segments;
@@ -20,4 +20,3 @@ struct DrawableBuilder::Impl {
 
 } // namespace gfx
 } // namespace mbgl
-

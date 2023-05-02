@@ -104,7 +104,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
-        
+
         for (const auto& pair : orchestrator.getDrawables()) {
             auto& drawable = *pair.second;
 
@@ -117,35 +117,30 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             auto& shader = drawable.getShader();
 
             // Generate a vertex array object for the drawable state, if necessary
-            if (shader && (!drawableGL.getVertexArray().isValid() ||
-                            drawableGL.getVertexAttributes().isDirty())) {
+            if (shader && (!drawableGL.getVertexArray().isValid() || drawableGL.getVertexAttributes().isDirty())) {
                 const auto usage = gfx::BufferUsageType::StaticDraw;
 
                 // Build index buffer
                 const auto& indexData = drawable.getIndexData();
-                auto indexBuffer = gfx::IndexBuffer {
+                auto indexBuffer = gfx::IndexBuffer{
                     indexData.size(),
                     uploadPass->createIndexBufferResource(
-                        indexData.data(),
-                        indexData.size() * sizeof(indexData[0]),
-                        usage)
-                };
+                        indexData.data(), indexData.size() * sizeof(indexData[0]), usage)};
 
                 // Apply drawable values to shader defaults
                 const auto& defaults = shader->getVertexAttributes();
                 const auto& overrides = drawable.getVertexAttributes();
                 const auto vertexCount = drawable.getVertexCount();
                 std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
-                auto bindings = uploadPass->buildAttributeBindings(vertexCount, defaults, overrides, usage, vertexBuffer);
+                auto bindings = uploadPass->buildAttributeBindings(
+                    vertexCount, defaults, overrides, usage, vertexBuffer);
 
                 auto& glContext = static_cast<gl::Context&>(context);
                 auto vertexArray = glContext.createVertexArray();
                 vertexArray.bind(glContext, indexBuffer, bindings);
                 glContext.bindVertexArray = gl::value::BindVertexArray::Default;
 
-                drawableGL.setVertexArray(std::move(vertexArray),
-                                          std::move(vertexBuffer),
-                                          std::move(indexBuffer));
+                drawableGL.setVertexArray(std::move(vertexArray), std::move(vertexBuffer), std::move(indexBuffer));
             }
         }
     }
@@ -203,7 +198,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
 
-        for (const auto &pair : orchestrator.getDrawables()) {
+        for (const auto& pair : orchestrator.getDrawables()) {
             const auto& drawable = *pair.second;
 
             if (!context.setupDraw(parameters, drawable)) {
@@ -234,7 +229,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {
-            
         parameters.pass = RenderPass::Opaque;
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
 

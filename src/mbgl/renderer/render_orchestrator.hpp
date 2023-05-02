@@ -35,11 +35,11 @@ class CrossTileSymbolIndex;
 class RenderTree;
 
 namespace gfx {
-    class Drawable;
-    class ShaderRegistry;
+class Drawable;
+class ShaderRegistry;
 
-    using DrawablePtr = std::shared_ptr<Drawable>;
-}   // namespace gfx
+using DrawablePtr = std::shared_ptr<Drawable>;
+} // namespace gfx
 
 namespace style {
 class LayerProperties;

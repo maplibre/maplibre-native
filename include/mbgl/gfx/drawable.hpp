@@ -35,7 +35,7 @@ public:
     const util::SimpleIdentity& getId() const { return uniqueID; }
 
     /// Draw the drawable
-    virtual void draw(const PaintParameters &) const = 0;
+    virtual void draw(const PaintParameters&) const = 0;
 
     /// Drawable name is used for debugging and troubleshooting
     const std::string& getName() const { return name; }
@@ -57,7 +57,7 @@ public:
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
-    
+
     /// Get the number of vertexes
     std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
 
@@ -71,7 +71,9 @@ public:
     /// Attach a tweaker to be run on this drawable for each frame
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
     template <typename TIter>
-    void addTweakers(TIter beg, TIter end) { tweakers.insert(tweakers.end(), beg, end); }
+    void addTweakers(TIter beg, TIter end) {
+        tweakers.insert(tweakers.end(), beg, end);
+    }
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
@@ -86,7 +88,7 @@ protected:
     mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
-    DepthMaskType depthType;// = DepthMaskType::ReadOnly;
+    DepthMaskType depthType; // = DepthMaskType::ReadOnly;
 
     std::vector<DrawableTweakerPtr> tweakers;
 };

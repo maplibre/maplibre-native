@@ -453,7 +453,7 @@ void Context::setDirtyState() {
 }
 
 bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& drawable) {
-    if (const auto &shader = drawable.getShader()) {
+    if (const auto& shader = drawable.getShader()) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         if (shaderGL.getGLProgramID() != program.getCurrentValue()) {
             program = shaderGL.getGLProgramID();
@@ -473,7 +473,7 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
     auto& drawableGL = static_cast<const DrawableGL&>(drawable);
     auto& vao = drawableGL.getVertexArray();
     if (vao.isValid()) {
-        bindVertexArray = vao.getID();  // glBindVertexArray
+        bindVertexArray = vao.getID(); // glBindVertexArray
         return true;
     } else {
         bindVertexArray = value::BindVertexArray::Default;

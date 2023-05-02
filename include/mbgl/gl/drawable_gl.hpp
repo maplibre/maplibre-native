@@ -25,11 +25,9 @@ public:
     DrawableGL(std::string name);
     ~DrawableGL() override;
 
-    void draw(const PaintParameters &) const override;
+    void draw(const PaintParameters&) const override;
 
-    void setIndexData(std::vector<uint16_t> indexes,
-                      std::size_t indexOffset = 0,
-                      std::size_t indexLength = 0);
+    void setIndexData(std::vector<uint16_t> indexes, std::size_t indexOffset = 0, std::size_t indexLength = 0);
     std::vector<std::uint16_t>& getIndexData() const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override;
@@ -49,18 +47,19 @@ public:
 
     static gfx::VertexAttribute::float4 colorAttrValue(const Color& color) {
         const auto components = color.toArray();
-        return { static_cast<float>(components[0]/255.0),
-                 static_cast<float>(components[1]/255.0),
-                 static_cast<float>(components[2]/255.0),
-                 static_cast<float>(components[3]) };
+        return {static_cast<float>(components[0] / 255.0),
+                static_cast<float>(components[1] / 255.0),
+                static_cast<float>(components[2] / 255.0),
+                static_cast<float>(components[3])};
     }
+
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;
 
     // For testing only.
     DrawableGL(std::unique_ptr<Impl>);
-    
+
 private:
 };
 

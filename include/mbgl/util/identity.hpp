@@ -12,7 +12,9 @@ namespace util {
  */
 class SimpleIdentity final {
 private:
-    constexpr SimpleIdentity(std::int64_t id) : uniqueID(id) { }
+    constexpr SimpleIdentity(std::int64_t id)
+        : uniqueID(id) {}
+
 public:
     SimpleIdentity();
     SimpleIdentity(const SimpleIdentity&) = default;
@@ -35,7 +37,6 @@ private:
     std::int64_t uniqueID;
 };
 
-
 /**
     Base class for objects that inherit an automatically-assigned unique identity
  */
@@ -46,13 +47,13 @@ protected:
     virtual ~SimpleIdentifiable() = default;
 
     const util::SimpleIdentity& getId() const { return uniqueID; }
-    
+
 protected:
     util::SimpleIdentity uniqueID;
 };
 
 inline std::string toString(const util::SimpleIdentity& ident) {
-    return "{"+std::to_string(ident.id())+"}";
+    return "{" + std::to_string(ident.id()) + "}";
 }
 
 } // namespace util

@@ -27,7 +27,7 @@ public:
 
     /// Coalescing updates is up to the implementer
     virtual void update(std::shared_ptr<UpdateParameters>) = 0;
-    
+
 protected:
 };
 

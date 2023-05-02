@@ -8,21 +8,19 @@ namespace mbgl {
 namespace gfx {
 
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
-    : attrs(initCapacity) {
-}
+    : attrs(initCapacity) {}
 
-VertexAttributeArray::VertexAttributeArray(VertexAttributeArray &&other)
-    : attrs(std::move(other.attrs)) {
-}
+VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
+    : attrs(std::move(other.attrs)) {}
 
-VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray &&other) {
+VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray&& other) {
     attrs = std::move(other.attrs);
     return *this;
 }
 
 VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray& other) {
     attrs.clear();
-    for (const auto &kv : other.attrs) {
+    for (const auto& kv : other.attrs) {
         add(kv.first, copy(*kv.second));
     }
     return *this;
@@ -33,8 +31,8 @@ VertexAttribute* VertexAttributeArray::get(const std::string& name) const {
     return (result != attrs.end()) ? result->second.get() : nullptr;
 }
 
-VertexAttribute* VertexAttributeArray::add(std::string name, int index,
-                                           AttributeDataType dataType, int size, std::size_t count) {
+VertexAttribute* VertexAttributeArray::add(
+    std::string name, int index, AttributeDataType dataType, int size, std::size_t count) {
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, size, count);
@@ -44,15 +42,14 @@ VertexAttribute* VertexAttributeArray::add(std::string name, int index,
     }
 }
 
-VertexAttribute* VertexAttributeArray::getOrAdd(std::string name, int index,
-                                                AttributeDataType dataType, int size, std::size_t count) {
-    //attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
+VertexAttribute* VertexAttributeArray::getOrAdd(
+    std::string name, int index, AttributeDataType dataType, int size, std::size_t count) {
+    // attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, size, count);
     } else if (result.first->second->getDataType() != dataType ||
-               result.first->second->getSize() != (std::size_t)size ||
-               result.first->second->getCount() != count) {
+               result.first->second->getSize() != (std::size_t)size || result.first->second->getCount() != count) {
         return nullptr;
     }
     return result.first->second.get();
@@ -65,14 +62,12 @@ std::size_t VertexAttributeArray::getTotalSize() const {
 }
 
 std::size_t VertexAttributeArray::getMaxCount() const {
-    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0),
-        [](const auto acc, const auto& kv) {
-            return std::max(acc, kv.second->getCount());
-        });
+    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& kv) {
+        return std::max(acc, kv.second->getCount());
+    });
 }
 
-void VertexAttributeArray::resolve(const VertexAttributeArray& overrides,
-                                   ResolveDelegate delegate) const {
+void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, ResolveDelegate delegate) const {
     for (auto& kv : attrs) {
         delegate(kv.first, *kv.second, overrides.get(kv.first));
     }

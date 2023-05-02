@@ -12,7 +12,7 @@ void RemoveDrawableRequest::execute(RenderOrchestrator &orchestrator) {
 }
 
 void ResetColorRequest::execute(RenderOrchestrator &orchestrator) {
-    if (auto& drawable = orchestrator.getDrawable(drawableID)) {
+    if (auto &drawable = orchestrator.getDrawable(drawableID)) {
         drawable->resetColor(newColor);
     }
 }

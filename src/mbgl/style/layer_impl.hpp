@@ -66,14 +66,14 @@ public:
     virtual void update(gfx::Context&,
                         const TransformState&,
                         const PropertyEvaluationParameters&,
-                        UniqueChangeRequestVec&) const { }
+                        UniqueChangeRequestVec&) const {}
 
     virtual void layerAdded(gfx::ShaderRegistry&,
                             gfx::Context&,
                             const TransformState&,
                             const PropertyEvaluationParameters&,
-                            UniqueChangeRequestVec&) const { }
-    virtual void layerRemoved(UniqueChangeRequestVec&) const { }
+                            UniqueChangeRequestVec&) const {}
+    virtual void layerRemoved(UniqueChangeRequestVec&) const {}
 
     std::string id;
     std::string source;
