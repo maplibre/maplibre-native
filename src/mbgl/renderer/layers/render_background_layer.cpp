@@ -165,7 +165,7 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     }
 
     return std::nullopt;
-    //return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    // return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
 }
 
 namespace {

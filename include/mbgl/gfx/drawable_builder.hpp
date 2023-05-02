@@ -60,7 +60,10 @@ public:
     const Color& getColor() const;
     void setColor(const Color& value);
 
-    enum class ColorMode { PerDrawable, PerVertex };
+    enum class ColorMode {
+        PerDrawable,
+        PerVertex
+    };
     /// Set how the color value is used
     /// This should not be changed while a build is in progress
     void setColorMode(ColorMode mode) { colorMode = mode; }

@@ -4,10 +4,9 @@
 namespace mbgl {
 namespace gfx {
 
-DrawableBuilder::DrawableBuilder(std::string name_) :
-    name(std::move(name_)),
-    impl(std::make_unique<Impl>()) {
-}
+DrawableBuilder::DrawableBuilder(std::string name_)
+    : name(std::move(name_)),
+      impl(std::make_unique<Impl>()) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
 
@@ -59,17 +58,17 @@ void DrawableBuilder::setDrawPriority(DrawPriority value) {
 
 void DrawableBuilder::resetDrawPriority(DrawPriority value) {
     setDrawPriority(value);
-    for (auto &drawble : drawables) {
+    for (auto& drawble : drawables) {
         drawble->setDrawPriority(value);
     }
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
     const auto n = (uint16_t)impl->vertices.elements();
-    impl->vertices.emplace_back(Impl::VT({{{ x0, y0 }}}));
-    impl->vertices.emplace_back(Impl::VT({{{ x1, y1 }}}));
-    impl->vertices.emplace_back(Impl::VT({{{ x2, y2 }}}));
-    impl->indexes.emplace_back(n, n+1, n+2);
+    impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
+    impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
+    impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
+    impl->indexes.emplace_back(n, n + 1, n + 2);
     if (colorMode == ColorMode::PerVertex) {
         impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
     }
@@ -77,8 +76,8 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
-    impl->vertices.emplace_back(Impl::VT({{{ x0, y0 }}}));
-    impl->indexes.emplace_back(n-2, n-1, n);
+    impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
+    impl->indexes.emplace_back(n - 2, n - 1, n);
     if (colorMode == ColorMode::PerVertex) {
         impl->colors.emplace_back(impl->currentColor);
     }

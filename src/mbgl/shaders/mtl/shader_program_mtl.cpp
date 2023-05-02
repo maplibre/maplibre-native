@@ -3,9 +3,9 @@
 namespace mbgl {
 namespace mtl {
 
-//bool ShaderProgramMTL::compile(std::string_view vert, std::string_view frag) {
-//    return false;
-//}
+// bool ShaderProgramMTL::compile(std::string_view vert, std::string_view frag) {
+//     return false;
+// }
 
 } // namespace mtl
 } // namespace mbgl

@@ -12,9 +12,9 @@
 namespace mbgl {
 
 namespace gfx {
-    class Drawable;
-    using DrawablePtr = std::shared_ptr<Drawable>;
-}   // namespace gfc
+class Drawable;
+using DrawablePtr = std::shared_ptr<Drawable>;
+} // namespace gfx
 
 class ChangeRequest;
 

@@ -22,7 +22,6 @@ namespace gl {
 using namespace platform;
 
 class DrawableGL::Impl final {
-
 public:
     Impl() = default;
     ~Impl() = default;
@@ -33,19 +32,19 @@ public:
     }
 
     const gfx::Triangles drawMode;
-    //const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
+    // const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
 
-    //ShaderID shaderId;
-    //RenderbufferID renderTarget;
+    // ShaderID shaderId;
+    // RenderbufferID renderTarget;
     std::vector<TextureID> textures;
 
-    //std::vector<std::uint8_t> vertData;
+    // std::vector<std::uint8_t> vertData;
     std::vector<std::uint16_t> indexes;
 
     VertexAttributeArrayGL vertexAttributes;
 
-    VertexArray vertexArray = { { nullptr, false } };
-    gfx::IndexBuffer indexBuffer = { 0, nullptr };
+    VertexArray vertexArray = {{nullptr, false}};
+    gfx::IndexBuffer indexBuffer = {0, nullptr};
     gfx::UniqueVertexBufferResource attributeBuffer;
 
     std::size_t indexOffset = 0;
@@ -55,10 +54,10 @@ public:
     gfx::StencilMode stencilMode;
     gfx::ColorMode colorMode;
     gfx::CullFaceMode cullFaceMode;
-    //gfx::UniformValues<typename Program<>::UniformList> uniformValues;
-    //Segment<Program<>::AttributeList> segment;
-    //gfx::AttributeBindings<Program<>::AttributeList> attributeBindings;
-    //gfx::TextureBindings<Program<>::TextureList> textureBindings;
+    // gfx::UniformValues<typename Program<>::UniformList> uniformValues;
+    // Segment<Program<>::AttributeList> segment;
+    // gfx::AttributeBindings<Program<>::AttributeList> attributeBindings;
+    // gfx::TextureBindings<Program<>::TextureList> textureBindings;
     GLfloat pointSize = 0.0f;
 };
 
