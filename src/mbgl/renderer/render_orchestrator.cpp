@@ -798,8 +798,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     }
 
     // Layer index, similar but not identical to `layerRenderItems` index in render_impl
-    //int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
-    //for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
+    // int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+    // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
     auto index = static_cast<int32_t>(layerImpls->size()) - 1;
 
     for (auto& impl : *layerImpls) {
