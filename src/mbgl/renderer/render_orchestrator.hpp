@@ -104,7 +104,7 @@ public:
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
                       const TransformState&,
-                      const PropertyEvaluationParameters&);
+                      const std::shared_ptr<UpdateParameters>&);
 
     void processChanges();
 
