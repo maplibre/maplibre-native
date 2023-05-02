@@ -33,23 +33,13 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
 
-        const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
-        const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions : style::TransitionOptions();
-        //const TransitionParameters transitionParameters{updateParameters->timePoint, transitionOptions};
-        const auto defDuration = isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero();
-        const PropertyEvaluationParameters evalParameters {
-            impl->orchestrator.getZoomHistory(),
-            updateParameters->timePoint,
-            transitionOptions.duration.value_or(defDuration),
-        };
-
         const auto& renderTreeParameters = renderTree->getParameters();
         const auto& state = renderTreeParameters.transformParams.state;
 
         if (impl->staticData && impl->staticData->shaders) {
             auto& context = impl->backend.getContext();
             auto& shaders = *impl->staticData->shaders;
-            impl->orchestrator.updateLayers(shaders, context, state, evalParameters);
+            impl->orchestrator.updateLayers(shaders, context, state, updateParameters);
         }
 
         impl->render(*renderTree);

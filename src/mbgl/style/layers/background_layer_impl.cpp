@@ -70,6 +70,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     }
     const auto evaluated = unevaluated->evaluate(evalParameters);
 
+    // TODO: If background is solid, we can skip drawables and rely on the clear color
     //const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
     //    ? RenderPass::None
     //    : (!uneval.get<style::BackgroundPattern>().isUndefined()
@@ -127,10 +128,9 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
         }
         ++iter;
 
-        // If the color evaluated to a new value, emit a change request updating all vertexes of
-        // the existing drawable to the new color.
+        // If the color evaluated to a new value, update all vertexes of the drawable to the new color
         if (colorChange) {
-            changes.emplace_back(std::make_unique<ResetColorRequest>(drawable->getId(), *color));
+            drawable->resetColor(*color);
         }
     }
 
