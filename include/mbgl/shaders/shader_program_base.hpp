@@ -11,13 +11,13 @@ namespace gfx {
 
 class ShaderProgramBase : public gfx::Shader {
 protected:
-    ShaderProgramBase() { }
-    ShaderProgramBase(ShaderProgramBase&&) { }
+    ShaderProgramBase() {}
+    ShaderProgramBase(ShaderProgramBase&&) {}
     ~ShaderProgramBase() noexcept override = default;
 
     template <typename T>
     bool set(gfx::VertexAttributeArray& attrs, const std::string& name, std::size_t i, T value) {
-        auto *item = attrs.get(name);
+        auto* item = attrs.get(name);
         if (item && i < item->getCount()) {
             item->set(i, value);
             return true;

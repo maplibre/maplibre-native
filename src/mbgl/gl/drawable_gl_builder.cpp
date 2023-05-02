@@ -50,4 +50,3 @@ void DrawableGLBuilder::init() {
 
 } // namespace gl
 } // namespace mbgl
-

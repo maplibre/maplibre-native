@@ -138,7 +138,6 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
-    
     layersAdded.clear();
     layersRemoved.clear();
 
@@ -723,8 +722,8 @@ bool RenderOrchestrator::isLoaded() const {
     if (!imageManager->isLoaded()) {
         return false;
     }
-    
-    for (const auto& entry: renderSources) {
+
+    for (const auto& entry : renderSources) {
         if (!entry.second->isLoaded()) {
             return false;
         }
@@ -751,9 +750,8 @@ void RenderOrchestrator::clearData() {
 }
 
 void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
-    pendingChanges.insert(pendingChanges.end(),
-                          std::make_move_iterator(changes.begin()),
-                          std::make_move_iterator(changes.end()));
+    pendingChanges.insert(
+        pendingChanges.end(), std::make_move_iterator(changes.begin()), std::make_move_iterator(changes.end()));
     changes.clear();
 }
 
@@ -780,25 +778,25 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters) {
-    
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
-    const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions : style::TransitionOptions();
+    const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
+                                                       : style::TransitionOptions();
     const auto defDuration = isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero();
-    const PropertyEvaluationParameters evalParameters {
+    const PropertyEvaluationParameters evalParameters{
         getZoomHistory(),
         updateParameters->timePoint,
         transitionOptions.duration.value_or(defDuration),
     };
 
     std::vector<std::unique_ptr<ChangeRequest>> changes;
-    
+
     for (auto& kv : layersRemoved) {
         kv.second->layerRemoved(changes);
     }
     for (auto& kv : layersAdded) {
         kv.second->layerAdded(shaders, context, state, evalParameters, changes);
     }
-    
+
     for (auto& impl : *layerImpls) {
         impl->update(context, state, evalParameters, changes);
     }
@@ -808,7 +806,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
 void RenderOrchestrator::processChanges() {
     auto localChanges = std::move(pendingChanges);
-    for (auto &change : localChanges) {
+    for (auto& change : localChanges) {
         change->execute(*this);
     }
 }

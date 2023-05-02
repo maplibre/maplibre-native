@@ -5,7 +5,7 @@
 namespace mbgl {
 
 namespace gfx {
-    class Drawable;
+class Drawable;
 }
 
 namespace gl {
