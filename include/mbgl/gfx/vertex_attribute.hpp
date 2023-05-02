@@ -14,9 +14,9 @@
 
 namespace mbgl {
 
-using mat2 = std::array<double, 2*2>;
-using mat3 = std::array<double, 3*3>;
-using mat4 = std::array<double, 4*4>;
+using mat2 = std::array<double, 2 * 2>;
+using mat3 = std::array<double, 3 * 3>;
+using mat4 = std::array<double, 4 * 4>;
 
 namespace gfx {
 
@@ -27,34 +27,29 @@ public:
     using float2 = std::array<float, 2>;
     using float3 = std::array<float, 3>;
     using float4 = std::array<float, 4>;
-    using matf2 = std::array<float, 2*2>;
-    using matf3 = std::array<float, 3*3>;
-    using matf4 = std::array<float, 4*4>;
+    using matf2 = std::array<float, 2 * 2>;
+    using matf3 = std::array<float, 3 * 3>;
+    using matf4 = std::array<float, 4 * 4>;
     using int2 = std::array<std::int32_t, 2>;
     using int3 = std::array<std::int32_t, 3>;
     using int4 = std::array<std::int32_t, 4>;
 
-    using ElementType = std::variant<std::int32_t, int2, int3, int4,
-                                     float, float2, float3, float4,
-                                     matf3, matf4>;
+    using ElementType = std::variant<std::int32_t, int2, int3, int4, float, float2, float3, float4, matf3, matf4>;
 
     // Can only be created by VertexAttributeArray implementations
 protected:
-    VertexAttribute(int index_, AttributeDataType dataType_,
-                    int size_, std::size_t count_, std::size_t stride_)
+    VertexAttribute(int index_, AttributeDataType dataType_, int size_, std::size_t count_, std::size_t stride_)
         : index(index_),
           size(size_),
           stride((int)stride_),
           dataType(dataType_),
-          items(count_) {
-    }
-    VertexAttribute(const VertexAttribute &) = default;
+          items(count_) {}
+    VertexAttribute(const VertexAttribute&) = default;
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
           size(other.size),
           dataType(other.dataType),
-          items(std::move(other.items)) {
-    }
+          items(std::move(other.items)) {}
 
 public:
     ~VertexAttribute() = default;
@@ -77,7 +72,7 @@ public:
     const ElementType& set(std::size_t i, T value) {
         if (items.size() < i + 1) {
             items.resize(std::max(items.size(), i + 1));
-            setDirty();   // need to rebuild the raw data next time
+            setDirty(); // need to rebuild the raw data next time
         }
         if (!isDirty()) {
             if (std::holds_alternative<T>(items[i])) {
@@ -135,7 +130,7 @@ public:
     using AttributeMap = std::unordered_map<std::string, std::unique_ptr<VertexAttribute>>;
 
     VertexAttributeArray(int initCapacity = 10);
-    VertexAttributeArray(VertexAttributeArray &&);
+    VertexAttributeArray(VertexAttributeArray&&);
     // Would need to use the virtual assignment operator
     VertexAttributeArray(const VertexAttributeArray&) = delete;
     virtual ~VertexAttributeArray() = default;
@@ -175,7 +170,7 @@ public:
     // Set a value if the element is present
     template <typename T>
     bool set(const std::string& name, std::size_t i, T value) {
-        if (auto *item = get(name)) {
+        if (auto* item = get(name)) {
             return item->set(i, value);
         }
         return false;
@@ -183,8 +178,8 @@ public:
 
     /// Indicates whether any values have changed
     bool isDirty() const {
-        return std::any_of(attrs.begin(), attrs.end(),
-                           [](const auto& kv){ return kv.second && kv.second->isDirty(); });
+        return std::any_of(
+            attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
 
     using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const VertexAttribute*)>;
@@ -193,8 +188,8 @@ public:
 
     /// Apply to the active program
     virtual void applyUniforms(const ShaderProgramBase&) = 0;
-    
-    VertexAttributeArray& operator=(VertexAttributeArray &&);
+
+    VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);
 
 protected:
@@ -208,8 +203,10 @@ protected:
         }
     }
 
-    virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType,
-                                                    int size, std::size_t count) = 0;
+    virtual std::unique_ptr<VertexAttribute> create(int index,
+                                                    AttributeDataType dataType,
+                                                    int size,
+                                                    std::size_t count) = 0;
     virtual std::unique_ptr<VertexAttribute> copy(const VertexAttribute& attr) = 0;
 
 protected:

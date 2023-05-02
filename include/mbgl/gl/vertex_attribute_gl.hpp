@@ -14,17 +14,14 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, int size_, std::size_t count_)
-        : VertexAttribute(index_, dataType_, size_, count_, /*stride_=*/0) {
-    }
+        : VertexAttribute(index_, dataType_, size_, count_, /*stride_=*/0) {}
     VertexAttributeGL(const VertexAttributeGL& other)
         : VertexAttribute(other),
-          glType(other.glType) {
-    }
+          glType(other.glType) {}
     VertexAttributeGL(VertexAttributeGL&& other)
         : VertexAttribute(std::move(other)),
-          glType(other.glType) {
-    }
-    
+          glType(other.glType) {}
+
 public:
     platform::GLenum getGLType() const { return glType; }
     void setGLType(platform::GLenum value);
@@ -50,11 +47,13 @@ private:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArrayGL final : public gfx::VertexAttributeArray {
 public:
-    VertexAttributeArrayGL(int initCapacity = 10) : VertexAttributeArray(initCapacity) { }
-    VertexAttributeArrayGL(VertexAttributeArrayGL &&other) : VertexAttributeArray(std::move(other)) { }
+    VertexAttributeArrayGL(int initCapacity = 10)
+        : VertexAttributeArray(initCapacity) {}
+    VertexAttributeArrayGL(VertexAttributeArrayGL&& other)
+        : VertexAttributeArray(std::move(other)) {}
     VertexAttributeArrayGL(const VertexAttributeArrayGL&) = delete;
-    
-    VertexAttributeArrayGL& operator=(VertexAttributeArrayGL &&other) {
+
+    VertexAttributeArrayGL& operator=(VertexAttributeArrayGL&& other) {
         VertexAttributeArray::operator=(std::move(other));
         return *this;
     }
@@ -62,18 +61,21 @@ public:
         VertexAttributeArray::operator=(other);
         return *this;
     }
-    
+
     void applyUniforms(const gfx::ShaderProgramBase&) override;
 
 private:
-    std::unique_ptr<gfx::VertexAttribute> create(int index, gfx::AttributeDataType dataType,
-                                                 int size, std::size_t count) override {
+    std::unique_ptr<gfx::VertexAttribute> create(int index,
+                                                 gfx::AttributeDataType dataType,
+                                                 int size,
+                                                 std::size_t count) override {
         return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, size, count));
     }
     std::unique_ptr<gfx::VertexAttribute> copy(const gfx::VertexAttribute& attr) override {
-        return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
+        return std::unique_ptr<gfx::VertexAttribute>(
+            new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
     }
 };
 
-} // namespace gfx
+} // namespace gl
 } // namespace mbgl

@@ -62,4 +62,3 @@ enum class AttributeDataType : uint8_t {
 
 } // namespace gfx
 } // namespace mbgl
-

@@ -21,8 +21,8 @@ inline constexpr bool is_shader_v = std::is_base_of_v<gfx::Shader, T> &&
 /// @brief A shader is used as the base class for all programs across any supported
 /// backend API. Shaders are registered with a `gfx::ShaderRegistry` instance.
 class Shader {
-    public:
-        virtual ~Shader() noexcept = default;
+public:
+    virtual ~Shader() noexcept = default;
 
     /// @brief Get the type name of this shader
     /// @return Shader type name
