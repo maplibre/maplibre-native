@@ -56,7 +56,8 @@ void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const 
         localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
-void BackgroundLayer::Impl::update(gfx::Context& context,
+void BackgroundLayer::Impl::update(const int32_t layerIndex,
+                                   gfx::Context& context,
                                    const TransformState& state,
                                    const PropertyEvaluationParameters& evalParameters,
                                    UniqueChangeRequestVec& changes) const {
@@ -96,7 +97,9 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
     }
 
     const bool colorChange = (color != lastColor);
+    const bool layerChange = (layerIndex != lastLayerIndex);
     lastColor = color;
+    lastLayerIndex = layerIndex;
 
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
@@ -129,6 +132,9 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
         if (colorChange) {
             drawable->resetColor(*color);
         }
+        if (layerChange) {
+            drawable->setLayerIndex(layerIndex);
+        }
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
@@ -151,6 +157,7 @@ void BackgroundLayer::Impl::update(gfx::Context& context,
             builder->setColor(*color);
             builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+            builder->setLayerIndex(layerIndex);
         }
 
         // Tile coordinates are fixed...

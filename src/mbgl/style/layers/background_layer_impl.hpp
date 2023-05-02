@@ -41,7 +41,8 @@ public:
     void layerRemoved(UniqueChangeRequestVec&) const override;
 
     /// Generate any changes needed by the layer
-    void update(gfx::Context&,
+    void update(int32_t layerIndex,
+                gfx::Context&,
                 const TransformState&,
                 const PropertyEvaluationParameters&,
                 UniqueChangeRequestVec&) const override;
@@ -62,6 +63,7 @@ private:
     mutable gfx::ShaderProgramBasePtr shader;
     mutable std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
     mutable std::optional<Color> lastColor;
+    mutable int32_t lastLayerIndex = -1;
 
     mutable struct Stats {
         size_t tileDrawablesAdded = 0;
