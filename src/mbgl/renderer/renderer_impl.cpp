@@ -89,6 +89,23 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Run changes
     orchestrator.processChanges();
 
+    // Collect drawables
+    std::vector<gfx::DrawablePtr> drawables(orchestrator.getDrawables().size());
+    std::transform(orchestrator.getDrawables().begin(),
+                   orchestrator.getDrawables().end(),
+                   drawables.begin(),
+                   std::bind(&RenderOrchestrator::DrawableMap::value_type::second));
+
+    // Run tweakers to update any dynamic elements
+    for (auto& drawable : drawables) {
+        for (auto& tweaker : drawable->getTweakers()) {
+            tweaker->execute(*drawable, parameters);
+        }
+    }
+
+    // Sort the drawables
+    std::sort(drawables.begin(), drawables.end(), gfx::DrawablePtrLessByLayer(/*descending=*/true));
+
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
@@ -105,13 +122,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
 
-        for (const auto& pair : orchestrator.getDrawables()) {
-            auto& drawable = *pair.second;
-
-            // Run tweakers to update any dynamic elements
-            for (auto& tweaker : drawable.getTweakers()) {
-                tweaker->execute(drawable, parameters);
-            }
+        for (const auto& drawPtr : drawables) {
+            auto& drawable = *drawPtr;
 
             auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
             auto& shader = drawable.getShader();
@@ -198,8 +210,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
 
-        for (const auto& pair : orchestrator.getDrawables()) {
-            const auto& drawable = *pair.second;
+        for (const auto& drawPtr : drawables) {
+            auto& drawable = *drawPtr;
 
             if (!context.setupDraw(parameters, drawable)) {
                 continue;
