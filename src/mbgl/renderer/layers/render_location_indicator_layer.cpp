@@ -673,17 +673,11 @@ protected:
         texturedShader.detach();
     }
 
-    void drawShadow() {
-        drawQuad(shadowBuffer, shadowGeometry, texShadow);
-    }
+    void drawShadow() { drawQuad(shadowBuffer, shadowGeometry, texShadow); }
 
-    void drawPuck() {
-        drawQuad(puckBuffer, puckGeometry, texPuck);
-    }
+    void drawPuck() { drawQuad(puckBuffer, puckGeometry, texPuck); }
 
-    void drawHat() {
-        drawQuad(hatBuffer, hatGeometry, texPuckHat);
-    }
+    void drawHat() { drawQuad(hatBuffer, hatGeometry, texPuckHat); }
 
     static LatLng screenCoordinateToLatLng(const ScreenCoordinate& p,
                                            const TransformState& s,
