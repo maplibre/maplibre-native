@@ -157,10 +157,6 @@ ios-lint: ios-pod-lint
 ios-pod-lint:
 	./platform/ios/scripts/lint-podspecs.js
 
-#  make ios-sizetest
-.PHONY: ios-sizetest
-ios-sizetest:
-	./scripts/size-check.sh ${DEV_TEAM}
 
 #  make ios-uitest
 .PHONY: ios-uitest

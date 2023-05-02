@@ -38,6 +38,8 @@ test/fixtures/storage/assets.zip
 buck-out
 .buckd
 
+.size-test-result
+
 # Visual Studio Code
 .vscode
 mapbox-gl-native.code-workspace

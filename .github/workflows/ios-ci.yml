@@ -57,6 +57,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
+      APPLE_DEVELOPER_TEAM_ID: TC45MCF93C
     defaults:
       run:
         working-directory: platform/ios
@@ -140,3 +141,22 @@ jobs:
 
       - name: Build and run SDK unit tests with the static analyzer
         run: make ios-static-analyzer
+
+      - name: Run iOS size test
+        run: scripts/size-check.sh $APPLE_DEVELOPER_TEAM_ID
+        continue-on-error: true
+
+      - name: Save PR number
+        if: github.event_name == 'pull_request'
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo $PR_NUMBER > ./pr_number
+
+      - name: Upload size test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-test-result
+          path: |
+            platform/ios/.size-test-result
+            platform/ios/pr_number
