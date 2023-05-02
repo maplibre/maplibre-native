@@ -779,7 +779,17 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
-                                      const PropertyEvaluationParameters& evalParameters) {
+                                      const std::shared_ptr<UpdateParameters>& updateParameters) {
+    
+    const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
+    const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions : style::TransitionOptions();
+    const auto defDuration = isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero();
+    const PropertyEvaluationParameters evalParameters {
+        getZoomHistory(),
+        updateParameters->timePoint,
+        transitionOptions.duration.value_or(defDuration),
+    };
+
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     
     for (auto& kv : layersRemoved) {
