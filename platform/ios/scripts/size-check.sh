@@ -1,12 +1,12 @@
 #!/bin/bash
 
 echoerr() {
-	echo "$@" 1>&2
+  echo "$@" 1>&2
 }
 
 if [ $# -eq 0 ]; then
-	echoerr "Give development team as argument, eg. '484D8S5C7M'"
-	exit 1
+  echoerr "Give development team as argument, eg. '484D8S5C7M'"
+  exit 1
 fi
 
 result=".size-test-result"
@@ -36,22 +36,22 @@ SCHEME_NAME="iosapp"
 ARCHIVE_NAME="${SCHEME_NAME}.xcarchive"
 
 if [[ ! -d $XCODE_WORKSPACE_PATH ]]; then
-	echoerr "${RED}iOS workspace not found: $XCODE_WORKSPACE_PATH${NORMAL}"
-	exit 2
+  echoerr "${RED}iOS workspace not found: $XCODE_WORKSPACE_PATH${NORMAL}"
+  exit 2
 fi
 
 # Clean up any old builds
 make clean
 if [ ! $? -eq 0 ]; then
-	echoerr "${RED}Failed cleaning up the build folder${NORMAL}"
-	exit 3
+  echoerr "${RED}Failed cleaning up the build folder${NORMAL}"
+  exit 3
 fi
 
 # Set up the Xcode workspace
 make iproj CI=1
 if [ ! $? -eq 0 ]; then
-	echoerr "${RED}Failed setting up the Xcode workspace${NORMAL}"
-	exit 4
+  echoerr "${RED}Failed setting up the Xcode workspace${NORMAL}"
+  exit 4
 fi
 
 TOTAL_TESTS=${#BUILD_CONFIGURATIONS[@]}
@@ -59,50 +59,50 @@ PASSED_TESTS=0
 FAILED_TESTS=0
 
 for ((i = 0; i < ${TOTAL_TESTS}; i++)); do
-	BUILD_CONFIGURATION=${BUILD_CONFIGURATIONS[i]}
-	INITIAL_LIB_SIZE=${INITIAL_LIB_SIZES[i]}
+  BUILD_CONFIGURATION=${BUILD_CONFIGURATIONS[i]}
+  INITIAL_LIB_SIZE=${INITIAL_LIB_SIZES[i]}
 
-	echoerr -e "\n** ${BOLD}Building size test $((i + 1)) on configuration: ${BUILD_CONFIGURATION}, initial size was ${INITIAL_LIB_SIZE} bytes${NORMAL} **\n"
+  echoerr -e "\n** ${BOLD}Building size test $((i + 1)) on configuration: ${BUILD_CONFIGURATION}, initial size was ${INITIAL_LIB_SIZE} bytes${NORMAL} **\n"
 
-	# The output directory for the archive
-	OUTPUT_DIR="build/ios/archive/${BUILD_CONFIGURATION}"
+  # The output directory for the archive
+  OUTPUT_DIR="build/ios/archive/${BUILD_CONFIGURATION}"
 
-	# Build the app
-	xcodebuild archive -quiet -workspace "${XCODE_WORKSPACE_PATH}" -scheme "${SCHEME_NAME}" -configuration "${BUILD_CONFIGURATION}" -archivePath "${OUTPUT_DIR}/${ARCHIVE_NAME}" DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}"
+  # Build the app
+  xcodebuild archive -quiet -workspace "${XCODE_WORKSPACE_PATH}" -scheme "${SCHEME_NAME}" -configuration "${BUILD_CONFIGURATION}" -archivePath "${OUTPUT_DIR}/${ARCHIVE_NAME}" DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}"
 
-	if [ ! $? -eq 0 ]; then
-		echoerr "${RED}Failed to compile the scheme: ${SCHEME_NAME}${NORMAL}"
-		exit 5
-	fi
+  if [ ! $? -eq 0 ]; then
+    echoerr "${RED}Failed to compile the scheme: ${SCHEME_NAME}${NORMAL}"
+    exit 5
+  fi
 
-	# The path to the maplibre dynamic lib
-	LIB_PATH="${OUTPUT_DIR}/${ARCHIVE_NAME}/Products/Applications/MapLibre GL.app/Frameworks/Mapbox.framework/Mapbox"
-	if [[ ! -f "$LIB_PATH" ]]; then
-		echoerr "${RED}MapLibre dynamic lib not found: $LIB_PATH${NORMAL}"
-		exit 6
-	fi
+  # The path to the maplibre dynamic lib
+  LIB_PATH="${OUTPUT_DIR}/${ARCHIVE_NAME}/Products/Applications/MapLibre GL.app/Frameworks/Mapbox.framework/Mapbox"
+  if [[ ! -f "$LIB_PATH" ]]; then
+    echoerr "${RED}MapLibre dynamic lib not found: $LIB_PATH${NORMAL}"
+    exit 6
+  fi
 
-	# Current lib size in bytes
-	CURRENT_LIB_SIZE=$(wc -c "${LIB_PATH}" | awk '{print $1}')
-	if [ -z $CURRENT_LIB_SIZE ]; then
-		echoerr "${RED}Failed to compute the size of MapLibre: ${LIB_PATH}${NORMAL}"
-		exit 7
-	fi
+  # Current lib size in bytes
+  CURRENT_LIB_SIZE=$(wc -c "${LIB_PATH}" | awk '{print $1}')
+  if [ -z $CURRENT_LIB_SIZE ]; then
+    echoerr "${RED}Failed to compute the size of MapLibre: ${LIB_PATH}${NORMAL}"
+    exit 7
+  fi
 
-	echo "BASELINE_$BUILD_CONFIGURATION=$INITIAL_LIB_SIZE" >>$result
-	echo "CURRENT_$BUILD_CONFIGURATION=$CURRENT_LIB_SIZE" >>$result
+  echo "BASELINE_$BUILD_CONFIGURATION=$INITIAL_LIB_SIZE" >>$result
+  echo "CURRENT_$BUILD_CONFIGURATION=$CURRENT_LIB_SIZE" >>$result
 
-	if (($CURRENT_LIB_SIZE > $INITIAL_LIB_SIZE)); then
-		FAILED_TESTS=$((FAILED_TESTS + 1))
-		echoerr -e "${RED}\n[FAILED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is larger than the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
-	else
-		PASSED_TESTS=$((PASSED_TESTS + 1))
-		if (($CURRENT_LIB_SIZE == $INITIAL_LIB_SIZE)); then
-			echoerr -e "${GREEN}\n[PASSED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is equal with the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
-		else
-			echoerr -e "${GREEN}\n[PASSED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is smaller than the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
-		fi
-	fi
+  if (($CURRENT_LIB_SIZE > $INITIAL_LIB_SIZE)); then
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+    echoerr -e "${RED}\n[FAILED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is larger than the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
+  else
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+    if (($CURRENT_LIB_SIZE == $INITIAL_LIB_SIZE)); then
+      echoerr -e "${GREEN}\n[PASSED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is equal with the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
+    else
+      echoerr -e "${GREEN}\n[PASSED] MapLibre size is ${CURRENT_LIB_SIZE} bytes. This is smaller than the initial size of ${INITIAL_LIB_SIZE} bytes.\n${NORMAL}"
+    fi
+  fi
 done
 
 echoerr -e "${GREEN}PASSED TESTS: ${PASSED_TESTS} of ${TOTAL_TESTS}${NORMAL}"
